@@ -106,6 +106,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | C13 | When the supplier receives milestone money: buyer screens and the acceptance email say all money is held until the buyer accepts the delivery; the supplier's Awaiting payment screen (811:12584) says "each part 2 working days after the buyer pays it" | You | Stage 10 (Batch 6, on hold) | Hold everything until acceptance (matches the buyer screens, ledger and playbook Section 4) | Parked | Batch 6 on hold. |
 | C14 | Cancellation rules by moment: the Doc 4 table could not be located in the project, Drive or searchable chats. The Figma screens define part of the flow (330:27379, 700:519, 715:8, 807:14435, 697:8) | You | Stage 10 (Batch 6, on hold) | Build only what the screens show; anything else goes to Operations | Parked | Founder, 11 Nov 2026: parked. Attach the Doc 4 PDF when Batch 6 starts. |
 | C15 | Sign-in panel copy and logo strip. In Figma 200:1205 the Supplier and Admin variants still carry the buyer copy ("For buyers / The simplest way to buy hydrogen equipment"). The logo strips name companies (Hydrotek Systems, Pranava H2, Kinetic H2, Polar Composites; Greenfield Hydrogen, Deccan Ammonia, Konkan Steel). | You | Stage 3 (sign-in pages) | Strip hidden until you confirm the names are real users who agreed to be shown; supplier and admin copy needed | Open | A strip of company names reads as endorsement, so it must not show sample names. |
+| A1 | Sign-in with an email that has no account | You | Step 3.2 | Send a code; the account is created when the code is entered, then the person goes on to Join (step 3.3) | Answered | Founder, 11 Nov 2026: send the code and create the account. Does not reveal which emails are registered. |
+| A2 | Sign-in limits (the design fixes only the 15-minute pause and the 10-minute code) | You | Step 3.2 | 5 wrong codes pause that email for 15 minutes; 5 codes per email per hour; Resend code after 30 seconds; signed in for 7 days, extended while in use | Answered | Founder, 11 Nov 2026: use these numbers. |
+| A3 | Expired code: Figma has a wrong-code frame (524:1930) but no expired-code frame | You | Step 3.2 | Same layout as wrong code, message "That code has expired. Resend a new one." with Resend code active | Answered | Founder, 11 Nov 2026: reuse the wrong-code layout. |
+| A4 | Passkey offer after the first code sign-in. Join step 3 (525:207) says "After your first sign-in we'll offer to set up a passkey", but no frame shows the offer | You | Step 3.2 | After a code sign-in with no passkey on the account: a card "Set up a passkey" with the copy and button of Create a new passkey (528:217) and "Not now" (not asked again on that device for 30 days) | Open | Needed so a new user can add a passkey, as step 3.2's "Done when" asks. |
 
 ## Design-system notes (Stage 2)
 
@@ -120,6 +124,7 @@ Small calls made while building the design system. None changes a Figma value; e
 | D-UI4 | Semantic colours are classes named after the Figma token: text/primary is `text-primary`, bg/accent is `bg-accent`, border/focus is `border-focus`, icon/link is `text-icon-link`. Primitives keep Figma's code-syntax names (`bg-fresh-50`, `text-ink-500`). | Claude | Done | See `docs/design-tokens.md`. |
 | D-UI6 | The Site header component has a "Scrolled" (shrunk) variant, but the Home motion spec (781:7247) says the header stays at the top and does not shrink. Code follows the motion spec: sticky, full height, with the Header shadow once the page scrolls. | Designer | Default in use | Say if the shrinking header is wanted instead. |
 | D-UI7 | The announcement bar text is Inter 600 at 15/20 in Figma, which is not one of the 15 text styles. Code uses exactly that size. | Designer | Default in use | A text style for it would remove the one-off size. |
+| D-UI8 | The Enter code screens (524:1840, 524:1930) use six plain Input boxes (64 x 46, Body/Default, 12 apart) instead of the OTP input component (18:142: 48 x 56, Heading/H2). Code follows the screens with `OtpInput size="field"`. | Designer | Default in use | Using the OTP input in the screens, or retiring it, would remove the second style. |
 
 ## Change log
 
@@ -129,3 +134,5 @@ Small calls made while building the design system. None changes a Figma value; e
 - 11 Nov 2026: You decided F5 (Wide hero not built), M15 (English only, selector hidden) and M17 (breakpoints 768 and 1024).
 - 11 Nov 2026: Added C15 (sign-in panel copy for supplier and admin, and the company-name strip).
 - 11 Nov 2026: Added D-UI6 (header does not shrink, per the motion spec) and D-UI7 (announcement text size).
+- 11 Nov 2026: Step 3.2 spike approved (Better Auth). You decided A1 (new emails get a code and an account), A2 (sign-in limits) and A3 (expired-code message).
+- 11 Nov 2026: Step 3.2 built. Added A4 (passkey offer, open) and D-UI8 (code boxes on the sign-in screens).

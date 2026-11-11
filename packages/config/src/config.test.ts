@@ -25,6 +25,13 @@ describe("server settings", () => {
     const env = parseServerEnv(valid);
     expect(env.SMTP_PORT).toBe(1025);
     expect(env.NODE_ENV).toBe("development");
+    expect(env.AUTH_IP_HEADER).toBe("x-forwarded-for");
+  });
+
+  it("treats an empty optional setting as not set", () => {
+    const env = parseServerEnv({ ...valid, GOOGLE_CLIENT_ID: "", SMTP_USER: "" });
+    expect(env.GOOGLE_CLIENT_ID).toBeUndefined();
+    expect(env.SMTP_USER).toBeUndefined();
   });
 
   it("names every missing or malformed setting, without printing values", () => {

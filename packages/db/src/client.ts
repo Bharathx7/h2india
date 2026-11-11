@@ -11,11 +11,13 @@ export interface DbHandle {
   pool: pg.Pool;
 }
 
-/** Opens a pool. Times are read and written as UTC. */
+/** Opens a pool. Times are read and written as UTC (a connection setting, so no query races the first one). */
 export function createDb(url: string, options: { max?: number } = {}): DbHandle {
-  const pool = new pg.Pool({ connectionString: url, max: options.max ?? 10, application_name: "h2india" });
-  pool.on("connect", (client) => {
-    void client.query("SET TIME ZONE 'UTC'");
+  const pool = new pg.Pool({
+    connectionString: url,
+    max: options.max ?? 10,
+    application_name: "h2india",
+    options: "-c TimeZone=UTC",
   });
   return { db: drizzle(pool, { schema, casing: "snake_case" }), pool };
 }

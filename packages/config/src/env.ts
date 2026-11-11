@@ -5,11 +5,19 @@ import { z } from "zod";
 
 const url = z.url();
 const secret = (min: number) => z.string().min(min, `must be at least ${min} characters`);
+/** A setting that may be left empty in .env files ("NAME=" counts as not set). */
+const optionalText = () => z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional());
 
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   APP_URL: url,
   AUTH_SECRET: secret(32),
+  // Google sign-in (step 3.2). Without both values the Google button reports that it is not set up yet.
+  GOOGLE_CLIENT_ID: optionalText(),
+  GOOGLE_CLIENT_SECRET: optionalText(),
+  // The header holding the visitor's IP. Behind the production proxy, set it to the header the proxy writes
+  // (ADR 0003 and 0006); only the proxy may reach the app, or the header could be faked.
+  AUTH_IP_HEADER: z.string().min(1).default("x-forwarded-for"),
   DATABASE_URL: z.string().startsWith("postgres", "must be a postgres:// or postgresql:// URL"),
   REDIS_URL: z.string().startsWith("redis", "must be a redis:// URL"),
   MEILI_HOST: url,
@@ -22,7 +30,11 @@ export const serverEnvSchema = z.object({
   S3_BUCKET_PUBLIC: z.string().min(3),
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
+  SMTP_USER: optionalText(),
+  SMTP_PASSWORD: optionalText(),
   EMAIL_FROM: z.string().min(3),
+  // Sender for sign-in and security emails (Figma 671:428 uses security@). Falls back to EMAIL_FROM.
+  EMAIL_FROM_SECURITY: optionalText(),
 });
 
 export const clientEnvSchema = z.object({

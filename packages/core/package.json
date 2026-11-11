@@ -4,15 +4,21 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./auth": "./src/sign-in/auth.ts",
+    "./sign-in": "./src/sign-in/rules.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@better-auth/passkey": "1.7.20",
     "@h2india/config": "workspace:*",
     "@h2india/db": "workspace:*",
+    "@h2india/emails": "workspace:*",
+    "better-auth": "1.7.20",
     "drizzle-orm": "0.45.4",
+    "nodemailer": "10.5.0",
     "uuidv7": "1.2.1"
   }
 }

@@ -6,6 +6,8 @@ import { useField } from "./Field";
 
 // Figma "OTP input" (18:142): six 48 x 56 boxes for two-step verification and email codes.
 // Pasting fills every box. Digits use Heading/H2. Error: every box gets the 2 px error border.
+// size="field": the sign-in Enter code screens (524:1840) use 64 x 46 Input boxes, 12 apart, in Body/Default
+// (design-fidelity note D-UI8).
 
 export interface OtpInputProps {
   value: string;
@@ -18,6 +20,7 @@ export interface OtpInputProps {
   /** Accessible name of the group, for example "Code from your email". */
   label?: string;
   autoFocus?: boolean;
+  size?: "lg" | "field";
 }
 
 export function OtpInput({
@@ -29,6 +32,7 @@ export function OtpInput({
   disabled,
   label = "One-time code",
   autoFocus,
+  size = "lg",
 }: OtpInputProps) {
   const field = useField();
   const isInvalid = invalid ?? field?.invalid ?? false;
@@ -61,7 +65,12 @@ export function OtpInput({
   };
 
   return (
-    <div role="group" aria-label={label} aria-describedby={field?.describedBy} className="flex gap-2">
+    <div
+      role="group"
+      aria-label={label}
+      aria-describedby={field?.describedBy}
+      className={cx("flex", size === "field" ? "gap-3" : "gap-2")}
+    >
       {digits.map((digit, index) => (
         <input
           key={index}
@@ -96,7 +105,8 @@ export function OtpInput({
             event.target.select();
           }}
           className={cx(
-            "h-14 w-12 rounded-control border border-input bg-page text-center type-h2 text-primary",
+            "rounded-control border border-input bg-page text-center text-primary",
+            size === "field" ? "h-11.5 w-16 min-w-0 shrink type-body" : "h-14 w-12 type-h2",
             "transition-[border-color,box-shadow] duration-(--motion-duration-fast) ease-standard",
             "focus-visible:outline-none focus:field-focus disabled:border-default disabled:bg-subtle disabled:text-secondary",
             isInvalid && "field-error focus:field-error-focus",

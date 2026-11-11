@@ -21,6 +21,21 @@ content system. Only `packages/core` imports `packages/db` (enforced by ESLint).
 Reference types: ORD (order), RFQ (quote request), Q (quote), R (return), PO (purchase order),
 GRV (grievance), DRR (delivery receipt), EV (event).
 
+## Sign-in tables (step 3.2)
+
+Better Auth (ADR 0003) reads and writes these through its Drizzle adapter, so their property names are Better
+Auth's; the columns follow our conventions. Never write to them except through `packages/core/src/sign-in`.
+
+| Table              | Holds                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `users`            | One row per person (email, name). Companies and roles come in steps 3.3 and 3.4                            |
+| `sessions`         | Signed-in browsers: token, expiry (7 days, extended daily while used), IP and browser                      |
+| `accounts`         | Google links and Better Auth's email-code marker                                                           |
+| `passkeys`         | Public keys only; the private key never leaves the person's device                                         |
+| `verifications`    | Sign-in codes (hashed, 10 minutes) and Google sign-in state                                                |
+| `rate_limits`      | Better Auth's per-IP counters                                                                              |
+| `sign_in_throttle` | Our per-email counters: codes sent, wrong codes, pauses (decision A2). Runbook: `docs/runbooks/sign-in.md` |
+
 ## Migrations
 
 | Command            | What it does                                                                        |

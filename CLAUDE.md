@@ -59,6 +59,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Green fills (`bg-accent`) take ink text, never white.
 - Every list or panel that loads data shows loading, empty and error states (step 2.5).
 
+## Sign-in (step 3.2)
+
+- The one Better Auth setup is `packages/core/src/sign-in/auth.ts`; the web app adds only its cookie plugin (`apps/web/src/server/auth.ts`). Our extra rules (pause, per-email limits, tries left) are hooks in `hooks.ts`.
+- Numbers live in `SIGN_IN` (`@h2india/core/sign-in`, decision A2). Never repeat them in pages.
+- After sign-in, send people only to `safeReturnPath(next)`.
+- Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
+
 ## Data rules (playbook Section 8)
 
 - Money is whole **paise** in `bigint`, with a currency column. No floats. One formatting helper (₹48,79,400; lakh and crore).

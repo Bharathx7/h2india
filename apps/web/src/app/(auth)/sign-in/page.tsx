@@ -1,11 +1,41 @@
-import { PRODUCT_NAME } from "@h2india/core";
+import { safeReturnPath } from "@h2india/core/sign-in";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { getSession } from "@/server/auth";
+import { SignInFlow } from "./SignInFlow";
 
-export default function Page() {
-  return (
-    <main className="mx-auto max-w-3xl p-10">
-      <p className="type-eyebrow text-secondary">{PRODUCT_NAME}</p>
-      <h1 className="type-h1 mt-2">Sign in, join and recovery</h1>
-      <p className="type-body mt-4">Placeholder. Figma page 12. Built in Stage 3.</p>
-    </main>
-  );
+// Step 3.2: Sign in (Figma 524:1773, 390: 526:508), Enter code (524:1840), wrong code (524:1930),
+// locked (524:2036). "You'll come back to the page you were on": ?next= when a page sends people here,
+// otherwise the page they clicked Sign in on (same site only).
+
+export const metadata: Metadata = { title: "Sign in · H2 India", robots: { index: false } };
+
+async function returnPath(next: string | undefined): Promise<string> {
+  if (next) return safeReturnPath(next);
+  const h = await headers();
+  const referer = h.get("referer");
+  const host = h.get("host");
+  if (!referer || !host) return "/";
+  try {
+    const url = new URL(referer);
+    return url.host === host ? safeReturnPath(`${url.pathname}${url.search}`) : "/";
+  } catch {
+    return "/";
+  }
+}
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  const { next: raw, error } = await searchParams;
+  const next = await returnPath(raw);
+  if (await getSession()) redirect(next);
+  const initialError =
+    error === "google"
+      ? { title: "Google sign-in didn't finish", body: "Try again, or use a passkey or an email code." }
+      : undefined;
+  return <SignInFlow next={next} initialError={initialError} />;
 }
