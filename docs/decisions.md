@@ -27,7 +27,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | F2 | Two old supplier modals (Add a product video 299:5163, Sent for review 272:4480): update or archive? | You | Stage 8 (Batch 4) | Do not build them | Open |  |
 | F3 | Member sidebar: add a Job applications item? | You | Stage 7 (Batch 3) | No item; page reachable from Home feed | Open |  |
 | F4 | Application landing: only Refuelling and mobility is designed. Design all 7 or reuse one template? | You | Stage 6 (Batch 3) | One template driven by data | Open |  |
-| F5 | Delete the unused Wide hero variants? | You | Stage 2 (Batch 1) | Do not build them | Open |  |
+| F5 | Delete the unused Wide hero variants? | You | Stage 2 (Batch 1) | Do not build them | Decided 11 Nov 2026 | Not built; the Figma variants stay untouched. |
 | F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Open |  |
 | F7 | Featured-event price and the organiser's payment step (Flow G) | You | Stage 5 (Batch 2) | Submission goes straight to review, no payment | Open |  |
 | F8 | EV-2026-0412: who organises it? | You | Stage 13 (Batch 5) | Sample data only; fixed when sample data is replaced | Open |  |
@@ -83,9 +83,9 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | M12 | Order tiers A to D: the value thresholds and what each tier changes. The screens name Tier D (letter of credit, two-person payout) but not the thresholds | You | Stage 10 (Batch 6, on hold) | — | Parked | Batch 6 on hold. |
 | M13 | Non-functional targets: expected visitors and orders, uptime target, acceptable data-loss and recovery time, monthly hosting budget | You | Stage 0 (Batch 0) | — | Open |  |
 | M14 | Access to the existing repository and its hosting; whether live data must be migrated | You | Stage 0 (Batch 0) | — | Open |  |
-| M15 | Languages: English only is designed; the language selector is a placeholder. Confirm Hindi stays out of scope | You | Stage 2 (Batch 1) | — | Open |  |
+| M15 | Languages: English only is designed; the language selector is a placeholder. Confirm Hindi stays out of scope | You | Stage 2 (Batch 1) | — | Decided 11 Nov 2026 | English only at launch; the language selector is hidden until a second language is ready. |
 | M16 | Supplier plan purchase: the Pricing page has "Start Growth" but no plan checkout, renewal, upgrade or cancellation screens exist | You | Stage 8 (Batch 4) | — | Open |  |
-| M17 | Tablet behaviour: frames exist at 1440 and 390 only. The breakpoints and what happens between them need a rule | You | Stage 2 (Batch 1) | — | Open |  |
+| M17 | Tablet behaviour: frames exist at 1440 and 390 only. The breakpoints and what happens between them need a rule | You | Stage 2 (Batch 1) | — | Decided 11 Nov 2026 | Breakpoints 768 and 1024: phone layout below 768, two-column tablet layout 768 to 1023 (workspace sidebar collapses to icons), desktop from 1024. |
 | M18 | Working-day calendar: which holidays count, and who maintains the list (clocks and payout dates depend on it) | You | Stage 3 (Batch 1) | — | Open |  |
 | M19 | Credit partner for pay later, and who operates the letter-of-credit process | You | After Launch 2 (Batch 6, on hold) | — | Parked | Batch 6 on hold. |
 | M20 | Launch content: who writes and approves it; the source of the pre-seeded company profiles | You and content team | Stage 13 (Batch 5) | — | Open |  |
@@ -123,3 +123,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 11 Nov 2026: register created from playbook v1.0 Section 6 (57 items). Founder decisions recorded for C8, M23 and C10. G13 corrected (answered by design). Added C10 to C14. Batch 6 (orders and payments) put on hold by the founder; dependent items marked Parked.
 - 11 Nov 2026: **Gate 0 approved** by the founder. ADRs 0001 to 0005 and 0007 Accepted; ADR 0006 amended (existing server, not AWS). Domain (M1) deferred: build and test locally first. GitHub repository: `Bharathx7/h2india`.
 - 11 Nov 2026: Stage 2 started. Added design-system notes D-UI1 to D-UI4.
+- 11 Nov 2026: You decided F5 (Wide hero not built), M15 (English only, selector hidden) and M17 (breakpoints 768 and 1024).
