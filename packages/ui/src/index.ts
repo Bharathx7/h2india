@@ -84,3 +84,5 @@ export type {
   WorkspaceShellProps,
   WorkspaceUser,
 } from "./components/WorkspaceShell";
+export { AuthPanel } from "./components/AuthPanel";
+export type { AuthPanelProps, AuthRole } from "./components/AuthPanel";

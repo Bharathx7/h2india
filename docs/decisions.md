@@ -105,6 +105,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | C12 | Category name: "Compression systems" (mega menu, class page, popular categories) vs "Hydrogen compression systems" (Add product 612:8, admin Taxonomy 636:596) | You | Stage 6 (Batch 3) | One record with one name; until decided use "Hydrogen compression systems" as the full name and "Compression systems" as the short label | Open |  |
 | C13 | When the supplier receives milestone money: buyer screens and the acceptance email say all money is held until the buyer accepts the delivery; the supplier's Awaiting payment screen (811:12584) says "each part 2 working days after the buyer pays it" | You | Stage 10 (Batch 6, on hold) | Hold everything until acceptance (matches the buyer screens, ledger and playbook Section 4) | Parked | Batch 6 on hold. |
 | C14 | Cancellation rules by moment: the Doc 4 table could not be located in the project, Drive or searchable chats. The Figma screens define part of the flow (330:27379, 700:519, 715:8, 807:14435, 697:8) | You | Stage 10 (Batch 6, on hold) | Build only what the screens show; anything else goes to Operations | Parked | Founder, 11 Nov 2026: parked. Attach the Doc 4 PDF when Batch 6 starts. |
+| C15 | Sign-in panel copy and logo strip. In Figma 200:1205 the Supplier and Admin variants still carry the buyer copy ("For buyers / The simplest way to buy hydrogen equipment"). The logo strips name companies (Hydrotek Systems, Pranava H2, Kinetic H2, Polar Composites; Greenfield Hydrogen, Deccan Ammonia, Konkan Steel). | You | Stage 3 (sign-in pages) | Strip hidden until you confirm the names are real users who agreed to be shown; supplier and admin copy needed | Open | A strip of company names reads as endorsement, so it must not show sample names. |
 
 ## Design-system notes (Stage 2)
 
@@ -124,3 +125,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 11 Nov 2026: **Gate 0 approved** by the founder. ADRs 0001 to 0005 and 0007 Accepted; ADR 0006 amended (existing server, not AWS). Domain (M1) deferred: build and test locally first. GitHub repository: `Bharathx7/h2india`.
 - 11 Nov 2026: Stage 2 started. Added design-system notes D-UI1 to D-UI4.
 - 11 Nov 2026: You decided F5 (Wide hero not built), M15 (English only, selector hidden) and M17 (breakpoints 768 and 1024).
+- 11 Nov 2026: Added C15 (sign-in panel copy for supplier and admin, and the company-name strip).
