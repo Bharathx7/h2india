@@ -19,3 +19,6 @@ Thumbs.db
 
 # Fresh Figma token export, compared with tokens.json by pnpm tokens:diff
 packages/ui/tokens.figma.json
+
+# Git bundle used to hand the repository over without GitHub access
+*.bundle
