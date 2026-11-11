@@ -1,0 +1,144 @@
+import { sql } from "drizzle-orm";
+import { bigint, index, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { id, softDelete, timestamps, utc } from "../columns";
+import { users } from "./auth";
+import { core } from "./core";
+
+// Companies (step 3.3): organisations, their GSTINs, memberships, join requests and invitations.
+// Duplicates are stopped on GSTIN and PAN, never on the name (playbook step 3.3).
+
+/** A buyer company, a supplier company, or both. Status words follow the badges. */
+export const organisations = core.table(
+  "organisations",
+  {
+    id: id(),
+    kind: text("kind").notNull(), // buyer | supplier | both
+    legalName: text("legal_name").notNull(),
+    /** From the GSTIN; null for a company without a GSTIN yet. One company per PAN. */
+    pan: text("pan"),
+    state: text("state"),
+    registeredAddress: text("registered_address"),
+    /** Verified · Unverified · Pending (a GSTIN check is still running) */
+    verification: text("verification").notNull().default("Unverified"),
+    createdBy: uuid("created_by").references(() => users.id),
+    ...timestamps,
+    ...softDelete,
+  },
+  (t) => [
+    uniqueIndex("organisations_pan_unique")
+      .on(t.pan)
+      .where(sql`${t.pan} IS NOT NULL AND ${t.deletedAt} IS NULL`),
+    index("organisations_legal_name_idx").on(sql`lower(${t.legalName})`),
+  ],
+);
+
+/** A GSTIN of a company and the result of its check on the GST portal. */
+export const organisationGstins = core.table(
+  "organisation_gstins",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    gstin: text("gstin").notNull().unique(),
+    stateCode: text("state_code").notNull(),
+    /** Place shown next to the GSTIN, for example "Pune, Maharashtra". */
+    place: text("place"),
+    /** Active · Inactive · Cancelled · Pending (not checked yet) */
+    portalStatus: text("portal_status").notNull().default("Pending"),
+    legalName: text("legal_name"),
+    checkedAt: utc("checked_at"),
+    ...timestamps,
+  },
+  (t) => [index("organisation_gstins_organisation_idx").on(t.organisationId)],
+);
+
+/** A person in a company. Roles and order limits are refined in step 3.4. */
+export const memberships = core.table(
+  "memberships",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull(), // owner | admin | member (step 3.4)
+    orderLimitPaise: bigint("order_limit_paise", { mode: "bigint" }),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("memberships_org_user_unique").on(t.organisationId, t.userId),
+    index("memberships_user_idx").on(t.userId),
+  ],
+);
+
+/** A request to join an existing company: Pending · Approved · Rejected · Expired · Cancelled (365:27779). */
+export const joinRequests = core.table(
+  "join_requests",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("Pending"),
+    expiresAt: utc("expires_at").notNull(),
+    lastReminderAt: utc("last_reminder_at"),
+    decidedBy: uuid("decided_by").references(() => users.id),
+    decidedAt: utc("decided_at"),
+    reason: text("reason"),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("join_requests_one_pending")
+      .on(t.organisationId, t.userId)
+      .where(sql`${t.status} = 'Pending'`),
+    index("join_requests_user_idx").on(t.userId),
+  ],
+);
+
+/** An invitation to join a company by email. The token is stored hashed. Screens come with company settings. */
+export const invitations = core.table(
+  "invitations",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: text("role").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    invitedBy: uuid("invited_by").references(() => users.id),
+    expiresAt: utc("expires_at").notNull(),
+    acceptedAt: utc("accepted_at"),
+    revokedAt: utc("revoked_at"),
+    ...timestamps,
+  },
+  (t) => [index("invitations_org_idx").on(t.organisationId)],
+);
+
+/**
+ * What a person has entered in the Join flow before their email is confirmed. Identified by a random token in an
+ * http-only cookie (stored here hashed). Copied to the account only once that email is confirmed.
+ */
+export const joinDrafts = core.table(
+  "join_drafts",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    path: text("path"), // buyer | supplier | member
+    organisationId: uuid("organisation_id").references(() => organisations.id, { onDelete: "set null" }),
+    email: text("email"),
+    mobile: text("mobile"),
+    mobileVerifiedAt: utc("mobile_verified_at"),
+    fullName: text("full_name"),
+    jobRole: text("job_role"),
+    termsAcceptedAt: utc("terms_accepted_at"),
+    expiresAt: utc("expires_at").notNull(),
+    ...timestamps,
+  },
+  (t) => [index("join_drafts_expires_at_idx").on(t.expiresAt)],
+);

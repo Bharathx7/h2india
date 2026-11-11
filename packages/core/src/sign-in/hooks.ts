@@ -10,6 +10,9 @@ import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throt
 
 const SEND = "/email-otp/send-verification-otp";
 const VERIFY = "/sign-in/email-otp";
+/** The Verify email link of the Join flow: one a minute, 5 an hour per email. */
+const LINK = "/sign-in/magic-link";
+const LINK_GAP_SECONDS = 60;
 
 type Ctx = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
 
@@ -34,6 +37,10 @@ function pausedError(until: Date): APIError {
 }
 
 export const beforeSignIn = createAuthMiddleware(async (ctx) => {
+  if (ctx.path === LINK) {
+    await limitLinks(emailOf(ctx));
+    return;
+  }
   if (ctx.path !== SEND && ctx.path !== VERIFY) return;
   const email = emailOf(ctx);
   if (!email) return;
@@ -59,6 +66,27 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
     });
   }
 });
+
+async function limitLinks(email: string) {
+  if (!email) return;
+  const db = getDb();
+  const gap = await hitThrottle(db, `join:link-gap:${email}`, LINK_GAP_SECONDS);
+  if (gap.count > 1) {
+    throw new APIError("TOO_MANY_REQUESTS", {
+      code: SIGN_IN_ERROR.resendTooSoon,
+      message: "Wait a little before asking for another link",
+      retryAt: gap.expiresAt.toISOString(),
+    });
+  }
+  const sends = await hitThrottle(db, `join:link-sends:${email}`, 60 * 60);
+  if (sends.count > SIGN_IN.codesPerEmailPerHour) {
+    throw new APIError("TOO_MANY_REQUESTS", {
+      code: SIGN_IN_ERROR.tooManyCodes,
+      message: "Too many links for this email",
+      retryAt: sends.expiresAt.toISOString(),
+    });
+  }
+}
 
 export const afterSignIn = createAuthMiddleware(async (ctx) => {
   if (ctx.path !== VERIFY) return;

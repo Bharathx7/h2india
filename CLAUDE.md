@@ -66,6 +66,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - After sign-in, send people only to `safeReturnPath(next)`.
 - Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
 
+## Companies and Join (step 3.3)
+
+- GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
+- Duplicates are found on GSTIN and PAN, never on the company name.
+- Join details are copied to an account only after its email is proved (link or sign-in code).
+- The worker must run for background GSTIN checks (`pnpm dev:worker`); browser tests in CI start it.
+
 ## Data rules (playbook Section 8)
 
 - Money is whole **paise** in `bigint`, with a currency column. No floats. One formatting helper (₹48,79,400; lakh and crore).

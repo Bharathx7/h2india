@@ -3,9 +3,11 @@ import { parseServerEnv } from "@h2india/config";
 import { schema } from "@h2india/db";
 import { betterAuth, type BetterAuthPlugin } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, magicLink } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
+import { sendVerifyEmail } from "../companies/notify";
+import { JOIN } from "../companies/rules";
 import { getDb } from "../db";
 import { afterSignIn, beforeSignIn } from "./hooks";
 import { sendSignInCode } from "./mail";
@@ -84,6 +86,14 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
             .where(eq(schema.users.email, to));
           const first = user?.name.trim().split(/\s+/)[0];
           await sendSignInCode({ to, code: otp, name: first || undefined });
+        },
+      }),
+      // The Verify email link of the Join flow (365:27778, decision A7). Confirms the email and signs the person in.
+      magicLink({
+        expiresIn: JOIN.linkHours * 60 * 60,
+        storeToken: "hashed",
+        sendMagicLink: async ({ email, url }) => {
+          await sendVerifyEmail(normaliseEmail(email), url);
         },
       }),
       passkey({

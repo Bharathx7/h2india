@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth";
+import { whereNext } from "./actions";
 import { SignInFlow } from "./SignInFlow";
 
 // Step 3.2: Sign in (Figma 524:1773, 390: 526:508), Enter code (524:1840), wrong code (524:1930),
@@ -32,7 +33,7 @@ export default async function SignInPage({
 }) {
   const { next: raw, error } = await searchParams;
   const next = await returnPath(raw);
-  if (await getSession()) redirect(next);
+  if (await getSession()) redirect(await whereNext(next));
   const initialError =
     error === "google"
       ? { title: "Google sign-in didn't finish", body: "Try again, or use a passkey or an email code." }

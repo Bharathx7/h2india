@@ -36,6 +36,20 @@ Auth's; the columns follow our conventions. Never write to them except through `
 | `rate_limits`      | Better Auth's per-IP counters                                                                              |
 | `sign_in_throttle` | Our per-email counters: codes sent, wrong codes, pauses (decision A2). Runbook: `docs/runbooks/sign-in.md` |
 
+## Company tables (step 3.3)
+
+| Table                 | Holds                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `organisations`       | A buyer or supplier company: legal name, PAN (one company per PAN), state, address, verification (Verified, Unverified, Pending) |
+| `organisation_gstins` | Each GSTIN of a company (unique) and its status on the GST portal (Active, Inactive, Cancelled, Pending)                         |
+| `memberships`         | Who belongs to which company and their role (owner, admin, member; refined in step 3.4)                                          |
+| `join_requests`       | Pending, Approved, Rejected, Expired (14 days) or Cancelled; one pending request per person and company                          |
+| `invitations`         | Invitations by email (token stored hashed); their screens come with company settings                                             |
+| `join_drafts`         | What a person typed in Join before their email is confirmed; keyed by a hashed cookie token, 7 days                              |
+
+People (`users`) also hold the Join details: mobile and when it was verified, job role, path (buyer, supplier,
+member) and when they accepted the terms.
+
 ## Migrations
 
 | Command            | What it does                                                                        |

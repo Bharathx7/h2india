@@ -45,7 +45,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 |---|---|---|
 | 3.1 | Database conventions and first migration | Done 11 Nov 2026: core and cms schemas, money, reference numbers, changeStatus with history, append-only audit log, migration safety check, integration tests on PostgreSQL. You: confirm reference formats (calendar year vs financial year) |
 | 3.2 | Sign-in: passkey, email code, Google | Done 12 Nov 2026: Better Auth on our PostgreSQL; Sign in, Enter code, wrong, expired, paused and passkey offer at 1440 and 390; sign-in code email. Decisions A1 to A4 and C6 answered. You: Google credentials (`docs/runbooks/google-sign-in.md`), test a passkey on your laptop (and phone once the domain M1 is set) |
-| 3.3 | Join flow, companies and the GSTIN check | Not started |
+| 3.3 | Join flow, companies and the GSTIN check | Built 12 Nov 2026 on branch step/3.3-join, waiting for your check. Join steps 1 to 5, Verify email, Join request states, the 8 GSTIN states with a fake provider (M4 open), SMS into Mailpit (M5 open), background GSTIN check in the worker. Decisions A5 to A8. You: choose the GSTIN provider (M4), try the 8 states (`docs/runbooks/test-gstins.md`) |
 | 3.4 | Roles, permissions and company scoping | Not started |
 | 3.5 | Account recovery | Not started |
 | 3.6 | Audit log | Not started |

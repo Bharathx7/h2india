@@ -1,22 +1,50 @@
-import { Button } from "@h2india/ui";
+import { getDb } from "@h2india/core";
+import { joinProfile, latestJoinRequest, membershipsOf, readDraft } from "@h2india/core/companies";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { AUTH_LINKS } from "@/lib/auth-links";
-import { AuthCard } from "../AuthCard";
+import { redirect } from "next/navigation";
+import { getSession } from "@/server/auth";
+import { draftToken, workspaceFor } from "@/server/join";
+import { JoinFlow, type JoinStep } from "./JoinFlow";
 
-// Placeholder until step 3.3 builds the join flow (Figma 525:8). Linked from "Join free" on the sign-in page.
+// Step 3.3: Join steps 1 to 4 (Figma 525:8; 390: 526:560). Done, Verify email and Join request have their own pages.
+
 export const metadata: Metadata = { title: "Join · H2 India", robots: { index: false } };
 
-export default function JoinPage() {
+export default async function JoinPage({ searchParams }: { searchParams: Promise<{ step?: string }> }) {
+  const { step: wanted } = await searchParams;
+  const session = await getSession();
+  const draft = await readDraft(await draftToken());
+
+  let step: JoinStep = "path";
+  let kind: "buyer" | "supplier" | null = null;
+  if (session) {
+    const companies = await membershipsOf(getDb(), session.user.id);
+    if (companies[0]) redirect(workspaceFor(companies[0].kind));
+    const profile = await joinProfile(session.user.id);
+    if (profile?.profileType === "member") redirect("/member");
+    if (wanted !== "company") {
+      const request = await latestJoinRequest(session.user.id);
+      if (request && request.status !== "Approved") redirect("/join/request");
+    }
+    if (profile?.profileType === "buyer" || profile?.profileType === "supplier") {
+      kind = profile.profileType;
+      step = "company";
+    }
+  }
+
   return (
-    <AuthCard>
-      <h1 className="type-h2 text-primary">Join H2 India</h1>
-      <p className="type-body text-body">
-        Joining opens soon. For now, sign in with an email code to create your account.
-      </p>
-      <Button asChild variant="outline" size="lg" className="w-full">
-        <Link href={AUTH_LINKS.signIn}>Back to sign in</Link>
-      </Button>
-    </AuthCard>
+    <JoinFlow
+      initialStep={step}
+      kind={kind}
+      signedInEmail={session?.user.email ?? null}
+      draft={{
+        path: draft?.path ?? null,
+        mobile: draft?.mobile ?? null,
+        mobileVerified: draft?.mobileVerified ?? false,
+        fullName: draft?.fullName ?? (session?.user.name || null),
+        jobRole: draft?.jobRole ?? null,
+        email: draft?.email ?? null,
+      }}
+    />
   );
 }

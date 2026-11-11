@@ -31,22 +31,23 @@ test("a new user signs in with an email code, adds a passkey, signs out and sign
   await addAuthenticator(page);
   const email = newEmail("new-buyer");
 
-  // Decision A1: an email with no account still gets a code; the account is made when the code is entered.
+  // Decision A1: an email with no account still gets a code; the account is made when the code is entered,
+  // and the new person goes on to Join (step 3.3).
   await page.goto("/sign-in?next=/buyer");
   await enterCode(page, await requestCode(page, email));
 
   await expect(page.getByRole("heading", { name: "Set up a passkey" })).toBeVisible();
   await page.getByRole("button", { name: "Create passkey" }).click();
-  await expect(page).toHaveURL(/\/buyer$/);
+  await expect(page).toHaveURL(/\/join$/);
 
   const cookies = await page.context().cookies();
   const session = cookies.find((c) => c.name === "h2.session_token");
   expect(session?.httpOnly).toBe(true);
   expect(session?.sameSite).toBe("Lax");
 
-  // Signed in people who open the sign-in page go straight on.
+  // Signed-in people who open the sign-in page go straight on (to Join, until they have joined).
   await page.goto("/sign-in?next=/buyer");
-  await expect(page).toHaveURL(/\/buyer$/);
+  await expect(page).toHaveURL(/\/join$/);
 
   await page.goto("/sign-out");
   await expect(page).toHaveURL(/\/$/);
@@ -55,9 +56,7 @@ test("a new user signs in with an email code, adds a passkey, signs out and sign
   // Back with only the passkey: no email needed.
   await page.goto("/sign-in?next=/buyer");
   await page.getByRole("button", { name: "Continue with passkey" }).click();
-  await expect(page).toHaveURL(/\/buyer$/);
-  await page.goto("/sign-in?next=/buyer");
-  await expect(page).toHaveURL(/\/buyer$/);
+  await expect(page).toHaveURL(/\/join$/);
 });
 
 test("Not now skips the passkey offer, and it is not offered again on this device", async ({ page, isMobile }) => {
@@ -68,13 +67,13 @@ test("Not now skips the passkey offer, and it is not offered again on this devic
   await page.goto("/sign-in?next=/member");
   await enterCode(page, await requestCode(page, email));
   await page.getByRole("button", { name: "Not now" }).click();
-  await expect(page).toHaveURL(/\/member$/);
+  await expect(page).toHaveURL(/\/join$/);
 
   await page.goto("/sign-out");
   await withDb((db) => db.query("DELETE FROM core.sign_in_throttle WHERE key = $1", [`sign-in:gap:${email}`]));
   await page.goto("/sign-in?next=/member");
   await enterCode(page, await requestCode(page, email));
-  await expect(page).toHaveURL(/\/member$/);
+  await expect(page).toHaveURL(/\/join$/);
 });
 
 test("a wrong code says how many tries are left; five pause sign-in for 15 minutes", async ({ page }) => {
@@ -154,11 +153,27 @@ test("after signing in you come back to the page you were on, but never to anoth
   isMobile,
 }) => {
   test.skip(isMobile, "desktop only");
-  await page.goto("/sign-in?next=https://evil.example/steal");
+  test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL to mark the person as joined");
   const email = newEmail("return");
+  await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
   await page.getByRole("button", { name: "Not now" }).click();
+  await expect(page).toHaveURL(/\/join$/);
+  // A person who has finished Join (here a member) returns to where they started.
+  await withDb(async (db) => {
+    await db.query("UPDATE core.users SET profile_type = 'member' WHERE email = $1", [email]);
+    await db.query("DELETE FROM core.sign_in_throttle WHERE key = $1", [`sign-in:gap:${email}`]);
+  });
+  await page.goto("/sign-out");
+  await page.goto("/sign-in?next=https://evil.example/steal");
+  await enterCode(page, await requestCode(page, email));
   await expect(page).toHaveURL("http://localhost:3000/");
+
+  await page.goto("/sign-out");
+  await withDb((db) => db.query("DELETE FROM core.sign_in_throttle WHERE key = $1", [`sign-in:gap:${email}`]));
+  await page.goto("/sign-in?next=/member%3Ftab%3Dsaved");
+  await enterCode(page, await requestCode(page, email));
+  await expect(page).toHaveURL(/\/member\?tab=saved$/);
 });
 
 test("Google sends you to Google, or explains when it is not set up here", async ({ page, isMobile }) => {

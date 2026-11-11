@@ -27,13 +27,22 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
     },
   ],
-  // Locally, start the app yourself (pnpm dev). In CI the workflow starts the built app.
+  // Locally, start the app yourself (pnpm dev and pnpm dev:worker). In CI the workflow starts the built app and
+  // the worker, which finishes background GSTIN checks (step 3.3).
   webServer: process.env.E2E_START_SERVER
-    ? {
-        command: "pnpm --filter @h2india/web start",
-        url: `${baseURL}/api/health`,
-        reuseExistingServer: false,
-        timeout: 120_000,
-      }
+    ? [
+        {
+          command: "pnpm --filter @h2india/web start",
+          url: `${baseURL}/api/health`,
+          reuseExistingServer: false,
+          timeout: 120_000,
+        },
+        {
+          command: "pnpm --filter @h2india/worker start",
+          wait: { stdout: /worker ready/ },
+          reuseExistingServer: false,
+          timeout: 60_000,
+        },
+      ]
     : undefined,
 });

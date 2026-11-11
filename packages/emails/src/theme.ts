@@ -11,6 +11,7 @@ export const colour = {
   body: c["text/body"],
   secondary: c["text/secondary"],
   link: c["text/link"],
+  accent: c["bg/accent"],
 } as const;
 
 const inter = "Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";

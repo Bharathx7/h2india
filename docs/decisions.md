@@ -15,7 +15,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | M14 | Whether any live hy-gen data must be migrated | Data model choices (step 3.1) |
 | M15 | Confirm English only (Hindi out of scope) | Design system and text handling (Stage 2) |
 | M17 | Tablet behaviour between 390 and 1440 (default: breakpoints at 768 and 1024) | Shells and layouts (step 2.4) |
-| M4, M5, M6, M18, C6 | Verification provider, SMS/WhatsApp, email, working-day calendar, role of the mobile number | Platform core (Stage 3). Fakes are used until answered |
+| M4, M5, M6, M18 | Verification provider, SMS/WhatsApp, email, working-day calendar | Platform core (Stage 3). Fakes are used until answered |
 | F5 | Delete the unused Wide hero variants? (default: do not build them) | Stage 2 |
 
 
@@ -110,6 +110,11 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A2 | Sign-in limits (the design fixes only the 15-minute pause and the 10-minute code) | You | Step 3.2 | 5 wrong codes pause that email for 15 minutes; 5 codes per email per hour; Resend code after 30 seconds; signed in for 7 days, extended while in use | Answered | Founder, 11 Nov 2026: use these numbers. |
 | A3 | Expired code: Figma has a wrong-code frame (524:1930) but no expired-code frame | You | Step 3.2 | Same layout as wrong code, message "That code has expired. Resend a new one." with Resend code active | Answered | Founder, 11 Nov 2026: reuse the wrong-code layout. |
 | A4 | Passkey offer after the first code sign-in. Join step 3 (525:207) says "After your first sign-in we'll offer to set up a passkey", but no frame shows the offer | You | Step 3.2 | After a code sign-in with no passkey on the account: a card "Set up a passkey" with the copy and button of Create a new passkey (528:217) and "Not now" (not asked again on that device for 30 days) | Answered | Founder, 12 Nov 2026 ("fix this remaining and go ahead"): keep the offer as built. |
+| A5 | Join path for an individual member (only the company path is drawn) | You | Step 3.3 | Choose path → Your details → Done; no company or GSTIN steps | Answered | Founder, 12 Nov 2026. |
+| A6 | "Your role" options in Join step 3 (only "Procurement manager" is drawn) | You | Step 3.3 | Procurement or purchase · Engineering · Project management · Operations or plant · Management or founder · Sales or business development · Research or academia · Consultant · Other | Answered | Founder, 12 Nov 2026. |
+| A7 | Confirming the email during Join: link (Verify email 365:27778) or 6-digit code (note on the sign-in code email 671:428) | You | Step 3.3 | A link that works for 24 hours, as the screens show | Answered | Founder, 12 Nov 2026. People who arrive from an email-code sign-in have already proved their email and skip it. |
+| A8 | Join Done screen for a supplier company (only the buyer version is drawn) | You | Step 3.3 | "You're in" and Go to your workspace, without the buyer checklist; the supplier's onboarding checklist is on the supplier dashboard (Stage 8) | Answered | Founder, 12 Nov 2026. |
+| A9 | Wording of Join emails page 16 does not draw: Confirm your email, join request to the admin (and reminder), request approved or rejected (M21) | You | Step 3.3 | Plain messages in the sign-in email's frame, reusing the screens' copy; listed in `packages/emails/src/join/messages.ts` | Open | Change the wording any time; nothing else depends on it. |
 
 ## Design-system notes (Stage 2)
 
@@ -125,6 +130,8 @@ Small calls made while building the design system. None changes a Figma value; e
 | D-UI6 | The Site header component has a "Scrolled" (shrunk) variant, but the Home motion spec (781:7247) says the header stays at the top and does not shrink. Code follows the motion spec: sticky, full height, with the Header shadow once the page scrolls. | Designer | Default in use | Say if the shrinking header is wanted instead. |
 | D-UI7 | The announcement bar text is Inter 600 at 15/20 in Figma, which is not one of the 15 text styles. Code uses exactly that size. | Designer | Default in use | A text style for it would remove the one-off size. |
 | D-UI8 | The Enter code screens (524:1840, 524:1930) use six plain Input boxes (64 x 46, Body/Default, 12 apart) instead of the OTP input component (18:142: 48 x 56, Heading/H2). Code follows the screens with `OtpInput size="field"`. | Designer | Default in use | Using the OTP input in the screens, or retiring it, would remove the second style. |
+| D-UI9 | The sample GSTINs on the board (526:8) fail the GSTIN check character, including the example in the format message ("like 27AAKCG5521M1Z3"). Code keeps Figma's wording; the fake provider uses valid numbers (`docs/runbooks/test-gstins.md`). | Designer | Default in use | A valid example would be 27AAKCG5521M1Z9. |
+| D-UI10 | Join step 4 needs a "Company name" field when the portal cannot give the legal name (no GSTIN, not found, pending, unverified buyer). No frame draws it; code uses the standard form field. | Designer | Default in use | Drawing it on the board would settle its place. |
 
 ## Change log
 
@@ -137,3 +144,5 @@ Small calls made while building the design system. None changes a Figma value; e
 - 11 Nov 2026: Step 3.2 spike approved (Better Auth). You decided A1 (new emails get a code and an account), A2 (sign-in limits) and A3 (expired-code message).
 - 11 Nov 2026: Step 3.2 built. Added A4 (passkey offer, open) and D-UI8 (code boxes on the sign-in screens).
 - 12 Nov 2026: You accepted A4 (passkey offer as built) and the C6 default (mobile for verification and recovery only). Step 3.2 merged.
+- 12 Nov 2026: Step 3.3 planned. You decided A5 (member path), A6 (role list), A7 (verify email by link) and A8 (supplier Done screen).
+- 12 Nov 2026: Step 3.3 built. Added A9 (join email wording, open), D-UI9 (sample GSTINs) and D-UI10 (company name field).

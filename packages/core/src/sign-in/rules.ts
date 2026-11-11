@@ -24,7 +24,7 @@ export function normaliseEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-const NO_RETURN = ["/sign-in", "/api/"];
+const NO_RETURN = ["/sign-in", "/sign-out", "/api/"];
 
 /**
  * Where to send someone after signing in: a path on this site only, never another site, never back to sign-in.

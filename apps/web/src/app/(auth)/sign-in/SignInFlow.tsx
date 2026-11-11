@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type SyntheticEvent, type ReactNode } from
 import { AUTH_LINKS } from "@/lib/auth-links";
 import { authClient, type SignInErrorDetail } from "@/lib/auth-client";
 import { AuthCard } from "../AuthCard";
+import { whereNext } from "./actions";
 
 // The sign-in screens of Figma section 524:1772, as one flow so nothing has to travel in the address bar.
 // Copy is the frames'. Messages the design does not show (rate limits, passkey failures, Google not set up) are
@@ -102,8 +103,10 @@ export function SignInFlow({ next, initialError }: { next: string; initialError?
   }, [resendAt, now]);
 
   const finish = () => {
-    router.replace(next);
-    router.refresh();
+    void whereNext(next).then((to) => {
+      router.replace(to);
+      router.refresh();
+    });
   };
 
   const pause = (until: string | undefined) => {

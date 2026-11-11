@@ -12,6 +12,13 @@ export const users = core.table("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  // Join step 3 (525:207). Mobile is for verification and recovery only (decision C6).
+  mobile: text("mobile"),
+  mobileVerifiedAt: utc("mobile_verified_at"),
+  jobRole: text("job_role"),
+  /** buyer | supplier | member: the path chosen in Join step 1. Null until the person has joined. */
+  profileType: text("profile_type"),
+  termsAcceptedAt: utc("terms_accepted_at"),
   ...timestamps,
 });
 

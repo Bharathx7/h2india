@@ -6,7 +6,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/sign-in/auth.ts",
-    "./sign-in": "./src/sign-in/rules.ts"
+    "./sign-in": "./src/sign-in/rules.ts",
+    "./companies": "./src/companies/index.ts",
+    "./companies/client": "./src/companies/client.ts",
+    "./jobs": "./src/jobs.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
@@ -17,6 +20,7 @@
     "@h2india/db": "workspace:*",
     "@h2india/emails": "workspace:*",
     "better-auth": "1.7.20",
+    "bullmq": "6.7.4",
     "drizzle-orm": "0.45.4",
     "nodemailer": "10.5.0",
     "uuidv7": "1.2.1"

@@ -1,6 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
-import { statusHistory, type Database } from "@h2india/db";
+import { statusHistory, type Database, type Executor } from "@h2india/db";
 import { audit, type RequestContext } from "./audit";
 
 // Status changes (playbook Section 8). changeStatus() moves a record from one status to another, refuses the
@@ -33,6 +33,8 @@ export interface ChangeStatus<T extends StatusTable> {
   transitions?: Transitions;
   metadata?: Record<string, unknown>;
   context?: RequestContext;
+  /** More writes that must happen in the same transaction, for example adding a membership on approval. */
+  also?: (tx: Executor) => Promise<void>;
 }
 
 export async function changeStatus<T extends StatusTable>(db: Database, change: ChangeStatus<T>): Promise<void> {
@@ -80,5 +82,6 @@ export async function changeStatus<T extends StatusTable>(db: Database, change: 
       reason: change.reason ?? null,
       context: change.context,
     });
+    if (change.also) await change.also(tx);
   });
 }

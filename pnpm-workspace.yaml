@@ -7,3 +7,4 @@ allowBuilds:
   simple-git-hooks: true
 minimumReleaseAgeExclude:
   - prettier@3.10.0
+  - bullmq@6.7.4
