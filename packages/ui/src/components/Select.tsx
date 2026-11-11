@@ -3,7 +3,7 @@
 import type { SelectHTMLAttributes } from "react";
 import { Icon } from "../icons/Icon";
 import { cx } from "../lib/cx";
-import { FIELD_BOX, useField } from "./Field";
+import { boxWidth, FIELD_BOX, useField } from "./Field";
 
 // Figma "Select" (14:90): the closed trigger, 46 px with a chevron. This first version uses the browser's own
 // list, which is accessible and native on phones. The searchable combobox and multi-select, which open the
@@ -30,7 +30,7 @@ export function Select({
   const isInvalid = invalid ?? field?.invalid ?? false;
   return (
     <div
-      className={cx(FIELD_BOX, "h-11.5 items-center", boxClassName)}
+      className={cx(FIELD_BOX, "h-11.5 items-center", boxWidth(boxClassName), boxClassName)}
       data-invalid={isInvalid || undefined}
       data-disabled={disabled || undefined}
     >

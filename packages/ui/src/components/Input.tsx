@@ -3,7 +3,7 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "../icons/Icon";
 import { cx } from "../lib/cx";
-import { FIELD_BOX, FIELD_CONTROL, useField } from "./Field";
+import { boxWidth, FIELD_BOX, FIELD_CONTROL, useField } from "./Field";
 
 // Figma "Input" (14:73): 46 px. Covers text, search (leading icon), units (suffix kW, bar, Nm³/h),
 // INR (prefix ₹), phone (prefix +91), GSTIN and PIN.
@@ -38,7 +38,7 @@ export function Input({
   const isInvalid = invalid ?? field?.invalid ?? false;
   return (
     <div
-      className={cx(FIELD_BOX, "h-11.5 items-center gap-2 px-4", boxClassName)}
+      className={cx(FIELD_BOX, "h-11.5 items-center gap-2 px-4", boxWidth(boxClassName), boxClassName)}
       data-invalid={isInvalid || undefined}
       data-disabled={disabled || undefined}
     >

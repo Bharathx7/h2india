@@ -43,6 +43,13 @@
     font-variant-numeric: tabular-nums lining-nums;
   }
 
+  /* The browser's own clear button in search fields uses an off-palette colour. */
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
   }

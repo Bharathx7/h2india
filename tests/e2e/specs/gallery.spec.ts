@@ -60,6 +60,46 @@ test("data sections show loading, error and empty states", async ({ page }) => {
   await expectStates(page, "/dev/ui");
 });
 
+test("confirm dialog closes on Esc and returns focus to its trigger", async ({ page }) => {
+  await page.goto("/dev/ui#overlays");
+  const trigger = page.getByRole("button", { name: "Accept quote…" });
+  await trigger.click();
+  await expect(page.getByRole("alertdialog", { name: "Accept this quote?" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("alertdialog")).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+test("selecting table rows swaps the toolbar for the bulk bar", async ({ page, isMobile }) => {
+  test.skip(isMobile, "rows are cards on phones; selection is checked on desktop");
+  await page.goto("/dev/ui#tables");
+  const table = page.getByRole("region", { name: "Products awaiting review" });
+  await table.getByRole("checkbox", { name: "Select all rows" }).click();
+  await expect(table.getByText("4 selected")).toBeVisible();
+  await table.getByRole("button", { name: "Clear" }).click();
+  await expect(table.getByPlaceholder("Search products or suppliers")).toBeVisible();
+});
+
+test("search suggestions work by keyboard", async ({ page }) => {
+  await page.goto("/dev/ui#search");
+  const box = page.getByRole("combobox", { name: "Search" });
+  await box.focus();
+  await expect(box).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("ArrowDown");
+  const list = page.getByRole("listbox", { name: "Search suggestions" });
+  await expect(list.getByRole("option", { name: /PEM electrolysers/ })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Escape");
+  await expect(box).toHaveAttribute("aria-expanded", "false");
+});
+
+test("date picker accepts a typed date", async ({ page }) => {
+  await page.goto("/dev/ui#search");
+  const field = page.getByLabel("Quotes due by");
+  await field.fill("12/11/2099");
+  await page.getByRole("button", { name: "Choose a date" }).click();
+  await expect(page.getByRole("button", { name: /12 November 2099/ })).toBeFocused();
+});
+
 // Screenshot comparison per gallery section. Baselines must come from the CI browser, so this runs only when
 // E2E_VISUAL=1 (see docs/design-fidelity.md for creating and approving baselines).
 test.describe("visual", () => {

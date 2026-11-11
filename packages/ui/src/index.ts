@@ -61,3 +61,14 @@ export {
   Tabs,
 } from "./components/Navigation";
 export type { PaginationProps, StepItem, StepStatus } from "./components/Navigation";
+
+// Overlays, tables and panels, search and dates
+export { ConfirmDialog, Drawer } from "./components/Overlays";
+export type { ConfirmDialogProps, DrawerProps } from "./components/Overlays";
+export { DataTable } from "./components/DataTable";
+export type { Column, DataTableProps, SortDirection } from "./components/DataTable";
+export { FilterGroup, FilterPanel, NotificationCentre, RangeFilter, ReviewPanel } from "./components/Panels";
+export type { NotificationItem, ReviewCheck, ReviewPanelProps } from "./components/Panels";
+export { DatePicker, formatDate, parseDate } from "./components/DatePicker";
+export { SearchSuggest } from "./components/SearchSuggest";
+export type { Suggestion, SuggestionGroup } from "./components/SearchSuggest";

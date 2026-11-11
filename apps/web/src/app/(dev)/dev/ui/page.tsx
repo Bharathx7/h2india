@@ -29,6 +29,7 @@ import {
 import { forcedState } from "@/lib/dev-state";
 import { AsyncDemo, FilterChipsDemo, OtpDemo } from "./Demos";
 import { NavigationDemo, OverlayHintsDemo, UploadDemo } from "./Demos2";
+import { OverlaysDemo, PanelsDemo, SearchDatesDemo, TableDemo } from "./Demos3";
 import { GallerySection, Row } from "./Section";
 
 // Component gallery (playbook steps 2.3 and 2.6). One section per Figma component section on page 02 (node 8:3).
@@ -70,6 +71,15 @@ export default async function GalleryPage({
         </TextLink>
         <TextLink href="#navigation" showIcon={false}>
           Navigation
+        </TextLink>
+        <TextLink href="#overlays" showIcon={false}>
+          Overlays
+        </TextLink>
+        <TextLink href="#tables" showIcon={false}>
+          Tables and panels
+        </TextLink>
+        <TextLink href="#search" showIcon={false}>
+          Search and dates
         </TextLink>
         <TextLink href="#states" showIcon={false}>
           Required states
@@ -328,6 +338,19 @@ export default async function GalleryPage({
         node="21:161 · 21:186 · 21:212 · 21:224 · 21:285 · 21:314 · 21:372 · 21:431 · 21:444"
       >
         <NavigationDemo />
+      </GallerySection>
+
+      <GallerySection id="overlays" title="Overlays" node="22:340 · 22:341">
+        <OverlaysDemo />
+      </GallerySection>
+
+      <GallerySection id="tables" title="Tables and panels" node="27:1466 · 27:1467 · 27:1623 · 27:1692">
+        <TableDemo />
+        <PanelsDemo />
+      </GallerySection>
+
+      <GallerySection id="search" title="Search and dates" node="29:1197 · 29:1270">
+        <SearchDatesDemo />
       </GallerySection>
 
       <GallerySection id="states" title="Required states" node="step 2.5 · state boards 381:12972, 381:13116, 127:6804">

@@ -129,7 +129,7 @@ export function Pagination({
     extra?: { rel?: string; aria?: string; disabled?: boolean; current?: boolean },
   ) =>
     extra?.disabled ? (
-      <span aria-disabled="true" aria-label={extra.aria} className={cx(PAGE_ITEM, "text-secondary")}>
+      <span role="link" aria-disabled="true" aria-label={extra.aria} className={cx(PAGE_ITEM, "text-secondary")}>
         {label}
       </span>
     ) : (

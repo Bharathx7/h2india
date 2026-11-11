@@ -2,7 +2,7 @@
 
 import { useState, type TextareaHTMLAttributes } from "react";
 import { cx } from "../lib/cx";
-import { FIELD_BOX, FIELD_CONTROL, useField } from "./Field";
+import { boxWidth, FIELD_BOX, FIELD_CONTROL, useField } from "./Field";
 
 // Figma "Textarea" (14:103): 128 px tall, padding 12/16, with an optional character counter.
 
@@ -35,7 +35,7 @@ export function Textarea({
   const shown = value !== undefined ? String(value).length : count;
   return (
     <div
-      className={cx(FIELD_BOX, "min-h-32 flex-col gap-2 px-4 py-3", boxClassName)}
+      className={cx(FIELD_BOX, "min-h-32 flex-col gap-2 px-4 py-3", boxWidth(boxClassName), boxClassName)}
       data-invalid={isInvalid || undefined}
       data-disabled={disabled || undefined}
     >

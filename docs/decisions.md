@@ -115,6 +115,7 @@ Small calls made while building the design system. None changes a Figma value; e
 | D-UI1 | Text selection colour is not in Figma. Code uses bg/marker (fresh/300 #A8EBBC) with text/primary. | Designer | Default in use | Change in `packages/ui/src/styles/base.css` if the designer picks another token. |
 | D-UI2 | Google Fonts' own subsets leave out ₹ (latin subset) and ₂ and → (every Manrope subset), so "H₂" in a Manrope heading would fall back to another font. The fonts are subset from the complete upstream files instead (`scripts/fonts/build_fonts.py`). | Claude | Done | All five required glyphs present in all three fonts; checked by `design-tokens.spec.ts`. |
 | D-UI3 | Figma background blur "Glass 16/20" becomes CSS `backdrop-filter: blur(8px/10px)`: CSS takes half of Figma's blur radius, as Figma's own CSS export does. | Designer | To confirm visually | Compare a glass panel side by side when the first one is built (header after scroll). |
+| D-UI5 | Toasts sit at the bottom right on desktop (24 px in) and across the bottom on phones. Figma shows the toast but not its position. | Designer | Default in use | Change in `packages/ui/src/components/Toast.tsx`. |
 | D-UI4 | Semantic colours are classes named after the Figma token: text/primary is `text-primary`, bg/accent is `bg-accent`, border/focus is `border-focus`, icon/link is `text-icon-link`. Primitives keep Figma's code-syntax names (`bg-fresh-50`, `text-ink-500`). | Claude | Done | See `docs/design-tokens.md`. |
 
 ## Change log

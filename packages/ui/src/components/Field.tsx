@@ -70,12 +70,17 @@ export function FormField({ label, helper, error, required = false, id, classNam
 
 /** Wrapper classes shared by Input, Select and Textarea. */
 export const FIELD_BOX = cx(
-  "relative flex w-full rounded-control border border-input bg-page",
+  "relative flex min-w-0 rounded-control border border-input bg-page",
   "transition-[border-color,box-shadow] duration-(--motion-duration-fast) ease-standard",
   "hover:border-focus focus-within:field-focus",
   "data-invalid:field-error data-invalid:focus-within:field-error-focus",
   "data-disabled:border-default data-disabled:bg-subtle data-disabled:hover:border-default",
 );
+
+/** Full width unless the caller sets a width on the box. */
+export function boxWidth(boxClassName: string | undefined): string {
+  return boxClassName && /(^|\s)(w|max-w|basis)-/.test(boxClassName) ? "" : "w-full";
+}
 
 /** Classes for the bare control inside the box. */
 export const FIELD_CONTROL =

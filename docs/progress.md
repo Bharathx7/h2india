@@ -34,7 +34,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 |---|---|---|
 | 2.1 | Generate tokens from the Figma variables | Done 11 Nov 2026: 86 variables, 15 text styles, 8 effects; matched to Figma token by token |
 | 2.2 | Fonts and base styles | Done 11 Nov 2026: self-hosted, ₹ ₂ → × • checked; phone check by you pending |
-| 2.3 | Core components | In progress: icons (61), buttons and links, form controls, selection (checkbox, radio, switch, OTP), feedback (status and verified badges, chips, alert, skeleton, empty state) done. Next: file upload and row, tooltip, toast, order banner, navigation, overlays, tables and panels, search and dates |
+| 2.3 | Core components | Done 11 Nov 2026 for the sections in this step: icons, buttons and links, form controls, selection and upload, feedback and status, navigation, overlays, tables and panels, search and dates. Order banner comes with the order pages (Batch 6); Search overlay and the v2 header, footer and workspace pieces come with the shells (2.4) |
 | 2.4 | Shells: site, workspace and auth | Not started |
 | 2.5 | The required-states rule | Done 11 Nov 2026: AsyncSection, ?state= in development, expectStates() test helper |
 | 2.6 | Component gallery and visual checks | In progress: /dev/ui gallery with axe and keyboard checks at 1440 and 390; screenshot baselines wait for a CI run and your approval |
