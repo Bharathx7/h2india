@@ -1,6 +1,6 @@
 # ADR 0003: Sign-in
 
-Status: **Accepted** at Gate 0 (founder, 11 Nov 2026). Spike done and **approved by the founder on 11 Nov 2026** (step 3.2). Built in step 3.2; see "As built".
+Status: **Accepted** at Gate 0 (founder, 11 Nov 2026). Spike done and **approved by the founder on 11 Nov 2026** (step 3.2). Built in step 3.2 and merged 12 Nov 2026; see "As built".
 
 ## Context
 
@@ -66,7 +66,7 @@ Better Auth does not do these out of the box. Each was proven in the spike throu
 - Tables in `core` (migration 0002): `users`, `sessions`, `accounts`, `verifications`, `passkeys`, `rate_limits`, `sign_in_throttle`.
 - `apps/web`: `/api/auth/*` (Better Auth), `/sign-in`, `/sign-out` (only from our own pages), placeholders `/join` (3.3) and `/forgot-access` (3.5).
 - Email: Figma 671:428 in `packages/emails`, sent through Mailpit locally and in CI until the provider (M6) is chosen.
-- Decisions: A1 (an email with no account gets a code; the account is made when the code is entered), A2 (limits), A3 (expired-code message), A4 (passkey offer after the first code sign-in; default built, open).
+- Decisions: A1 (an email with no account gets a code; the account is made when the code is entered), A2 (limits), A3 (expired-code message), A4 (passkey offer after the first code sign-in, accepted 12 Nov 2026).
 - Scheduled clean-up of old `verifications` and `sign_in_throttle` rows (`pruneThrottle`) is wired in step 3.8.
 
 ## Consequences

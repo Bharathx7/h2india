@@ -44,7 +44,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | Step | What it delivers | Status |
 |---|---|---|
 | 3.1 | Database conventions and first migration | Done 11 Nov 2026: core and cms schemas, money, reference numbers, changeStatus with history, append-only audit log, migration safety check, integration tests on PostgreSQL. You: confirm reference formats (calendar year vs financial year) |
-| 3.2 | Sign-in: passkey, email code, Google | Built 11 Nov 2026 on branch step/3.2-sign-in, waiting for your check before it goes to main. Spike approved; decisions A1 to A3 answered, A4 open (passkey offer). You: Google credentials, test a passkey on your laptop and phone, C6 |
+| 3.2 | Sign-in: passkey, email code, Google | Done 12 Nov 2026: Better Auth on our PostgreSQL; Sign in, Enter code, wrong, expired, paused and passkey offer at 1440 and 390; sign-in code email. Decisions A1 to A4 and C6 answered. You: Google credentials (`docs/runbooks/google-sign-in.md`), test a passkey on your laptop (and phone once the domain M1 is set) |
 | 3.3 | Join flow, companies and the GSTIN check | Not started |
 | 3.4 | Roles, permissions and company scoping | Not started |
 | 3.5 | Account recovery | Not started |
