@@ -43,6 +43,8 @@ jobs:
         env:
           E2E_START_SERVER: "1"
           CI: "true"
+          # The /dev pages (tokens, component gallery) are checked in CI, as on staging.
+          FLAG_DEV_PAGES: "true"
       - name: Upload test report and screenshots
         if: always()
         uses: actions/upload-artifact@v7

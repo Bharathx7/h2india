@@ -10,7 +10,7 @@
     "dev:worker": "pnpm --filter @h2india/worker dev",
     "build": "pnpm -r --filter=!@h2india/e2e build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-design-tokens.mjs && pnpm --filter @h2india/ui tokens:check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check",
@@ -21,7 +21,9 @@
     "dev:reset": "docker compose --env-file .env.local down -v && docker compose --env-file .env.local up -d --wait && docker compose --env-file .env.local run --rm minio-init",
     "health": "node scripts/health.mjs",
     "check-env": "node scripts/check-env.mjs",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "tokens:build": "pnpm --filter @h2india/ui tokens:build",
+    "tokens:diff": "pnpm --filter @h2india/ui tokens:diff"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"

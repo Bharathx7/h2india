@@ -1,0 +1,60 @@
+/* Base rules for H2 India (playbook step 2.2). Values come from the tokens; nothing here adds a colour. */
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--text-color-body);
+    background-color: var(--background-color-page);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--text-color-primary);
+    text-wrap: balance;
+  }
+
+  /* Focus/Ring: a 3 px ink-900 ring with a 3 px gap. Keyboard focus only. */
+  :focus-visible {
+    outline: 3px solid var(--border-color-focus);
+    outline-offset: 3px;
+  }
+
+  /* On dark surfaces (workspace sidebar, inverse bands) the ring turns white. */
+  [data-surface="inverse"] :focus-visible {
+    outline-color: var(--color-neutral-0);
+  }
+
+  /* Not specified in Figma: uses bg/marker, the design's highlight colour. Decision D-UI1. */
+  ::selection {
+    background-color: var(--background-color-marker);
+    color: var(--text-color-primary);
+  }
+
+  /* Prices, quantities and reference numbers line up in tables and summaries. */
+  [data-numeric],
+  table {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

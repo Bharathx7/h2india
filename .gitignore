@@ -16,3 +16,6 @@ playwright-report/
 Thumbs.db
 .vscode/*
 !.vscode/extensions.json
+
+# Fresh Figma token export, compared with tokens.json by pnpm tokens:diff
+packages/ui/tokens.figma.json

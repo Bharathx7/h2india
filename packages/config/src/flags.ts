@@ -8,6 +8,7 @@ export const FLAG_DEFAULTS = {
   letterOfCredit: false, // M19, M12
   comingSoon: false, // switched on before Launch 1 if wanted (step 5.1)
   maintenance: false, // planned maintenance page (step 5.10)
+  devPages: false, // /dev pages (tokens, component gallery). Always on in development; on for staging only (step 2.6)
 } as const;
 
 export type FlagName = keyof typeof FLAG_DEFAULTS;
@@ -18,6 +19,7 @@ const ENV_NAMES: Record<FlagName, string> = {
   letterOfCredit: "FLAG_LETTER_OF_CREDIT",
   comingSoon: "FLAG_COMING_SOON",
   maintenance: "FLAG_MAINTENANCE",
+  devPages: "FLAG_DEV_PAGES",
 };
 
 export function readFlags(source: Record<string, string | undefined> = process.env): Record<FlagName, boolean> {

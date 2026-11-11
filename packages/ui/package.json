@@ -4,9 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles/index.css",
+    "./tokens.json": "./tokens.json"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "tokens:build": "node scripts/tokens.mjs build",
+    "tokens:check": "node scripts/tokens.mjs check",
+    "tokens:diff": "node scripts/tokens.mjs diff tokens.figma.json"
   }
 }

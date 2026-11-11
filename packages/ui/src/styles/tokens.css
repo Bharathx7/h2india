@@ -1,0 +1,265 @@
+/* Generated from packages/ui/tokens.json by `pnpm tokens:build`. Do not edit by hand. */
+
+@theme {
+  /* Only Figma values exist. Tailwind's default palette, type scale, radii, shadows,
+     easings and fonts are removed, so an off-design value has no class to use. */
+  --color-*: initial;
+  --text-*: initial;
+  --tracking-*: initial;
+  --leading-*: initial;
+  --font-weight-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+  --ease-*: initial;
+  --font-*: initial;
+
+  /* Font weights present in the self-hosted font files (Inter 400-600, Manrope 700-800, Plex Mono 500). */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Primitives (Figma collection Primitives, named by its code syntax) */
+  --color-fresh-50: #eef8f1; /* fresh/50 */
+  --color-fresh-100: #e4ece7; /* fresh/100 */
+  --color-fresh-200: #d9f3e3; /* fresh/200 */
+  --color-fresh-300: #a8ebbc; /* fresh/300 */
+  --color-fresh-500: #30d060; /* fresh/500 */
+  --color-fresh-600: #157a3a; /* fresh/600 */
+  --color-fresh-700: #0f5e2c; /* fresh/700 */
+  --color-neutral-0: #ffffff; /* ink/0 */
+  --color-ink-50: #f2f4f5; /* ink/50 */
+  --color-ink-200: #d4d4d4; /* ink/200 */
+  --color-ink-300: #cccccc; /* ink/300 */
+  --color-ink-400: #9aa4aa; /* ink/400 */
+  --color-ink-500: #5f6b73; /* ink/500 */
+  --color-ink-700: #3a444c; /* ink/700 */
+  --color-ink-900: #1b2126; /* ink/900 */
+  --color-success: #1a7f4b; /* success/default */
+  --color-success-subtle: #e3f5eb; /* success/subtle */
+  --color-warning: #9a4a07; /* warning/default */
+  --color-warning-subtle: #fdf1dc; /* warning/subtle */
+  --color-error: #c62828; /* error/default */
+  --color-error-subtle: #fde8e8; /* error/subtle */
+
+  /* Semantic colours (Figma collection Color) */
+  --text-color-primary: var(--color-ink-900); /* text/primary */
+  --text-color-body: var(--color-ink-700); /* text/body */
+  --text-color-secondary: var(--color-ink-500); /* text/secondary */
+  --text-color-link: var(--color-fresh-600); /* text/link */
+  --text-color-link-hover: var(--color-fresh-700); /* text/link-hover */
+  --text-color-inverse: var(--color-neutral-0); /* text/inverse */
+  --text-color-success: var(--color-success); /* text/success */
+  --text-color-warning: var(--color-warning); /* text/warning */
+  --text-color-error: var(--color-error); /* text/error */
+  --background-color-page: var(--color-neutral-0); /* bg/page */
+  --background-color-subtle: var(--color-ink-50); /* bg/subtle */
+  --background-color-mint: var(--color-fresh-50); /* bg/mint */
+  --background-color-poster: var(--color-fresh-100); /* bg/poster */
+  --background-color-tint: var(--color-fresh-200); /* bg/tint */
+  --background-color-marker: var(--color-fresh-300); /* bg/marker */
+  --background-color-accent: var(--color-fresh-500); /* bg/accent */
+  --background-color-inverse: var(--color-ink-900); /* bg/inverse */
+  --background-color-success: var(--color-success-subtle); /* bg/success */
+  --background-color-warning: var(--color-warning-subtle); /* bg/warning */
+  --background-color-error: var(--color-error-subtle); /* bg/error */
+  --background-color-error-strong: var(--color-error); /* bg/error-strong */
+  --border-color-default: var(--color-ink-200); /* border/default */
+  --border-color-control: var(--color-ink-300); /* border/control */
+  --border-color-hover: var(--color-ink-400); /* border/hover */
+  --border-color-input: var(--color-ink-500); /* border/input */
+  --border-color-focus: var(--color-ink-900); /* border/focus */
+  --border-color-selected: var(--color-fresh-600); /* border/selected */
+  --border-color-error: var(--color-error); /* border/error */
+  --border-color-accent: var(--color-fresh-500); /* border/accent */
+  --color-icon-primary: var(--color-ink-900); /* icon/primary */
+  --color-icon-secondary: var(--color-ink-500); /* icon/secondary */
+  --color-icon-accent: var(--color-fresh-500); /* icon/accent */
+  --color-icon-link: var(--color-fresh-600); /* icon/link */
+  --color-icon-inverse: var(--color-neutral-0); /* icon/inverse */
+  --color-icon-success: var(--color-success); /* icon/success */
+  --color-icon-warning: var(--color-warning); /* icon/warning */
+  --color-icon-error: var(--color-error); /* icon/error */
+
+  /* Spacing: Figma code syntax is calc(var(--spacing) * n), so p-4 = space/16. Text styles are type-* utilities below. */
+  --spacing: 0.25rem;
+
+  /* Radius (rounded-control, rounded-card, rounded-modal, rounded-feature, rounded-pill) */
+  --radius-control: 8px; /* radius/control */
+  --radius-card: 12px; /* radius/card */
+  --radius-modal: 16px; /* radius/modal */
+  --radius-pill: 9999px; /* radius/pill */
+  --radius-feature: 20px; /* radius/feature */
+
+  /* Motion easing (ease-standard, ease-enter, ease-exit) */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* motion/easing/standard */
+  --ease-enter: cubic-bezier(0, 0, 0, 1); /* motion/easing/enter */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* motion/easing/exit */
+
+  /* Shadows (Figma effect styles; names are the code tokens in each style's description) */
+  --shadow-soft: 0px 2px 8px 0px #1b21260f, 0px 1px 2px 0px #1b21260f; /* Shadow/Soft */
+  --shadow-ink-lift: 0px 18px 32px -24px #1b212673; /* Shadow/Lift */
+  --shadow-ink-float-sm: 0px 18px 36px -26px #1b212666; /* Shadow/Float small */
+  --shadow-ink-float: 0px 28px 48px -28px #1b212659; /* Shadow/Float */
+  --shadow-ink-header: 0px 8px 24px -16px #1b212673; /* Shadow/Header */
+  --shadow-focus-ring: 0px 0px 0px 3px #ffffffff, 0px 0px 0px 6px #1b2126ff; /* Focus/Ring */
+
+  /* Background blur (backdrop-blur-glass-16, backdrop-blur-glass-20).
+     CSS blur() takes half of Figma's blur radius, as Figma's own CSS export does. */
+  --blur-glass-16: 8px; /* Blur/Glass 16 */
+  --blur-glass-20: 10px; /* Blur/Glass 20 */
+
+  /* Fonts: the font files are loaded by the app (next/font) and set these three variables. */
+  --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+:root {
+  --space-4: 0.25rem; /* space/4 */
+  --space-8: 0.5rem; /* space/8 */
+  --space-12: 0.75rem; /* space/12 */
+  --space-16: 1rem; /* space/16 */
+  --space-24: 1.5rem; /* space/24 */
+  --space-32: 2rem; /* space/32 */
+  --space-48: 3rem; /* space/48 */
+  --space-64: 4rem; /* space/64 */
+  --space-96: 6rem; /* space/96 */
+  --size-control-small: 32px; /* size/control/small */
+  --size-control-medium: 40px; /* size/control/medium */
+  --size-control-large: 48px; /* size/control/large */
+  --motion-duration-instant: 100ms; /* motion/duration/instant */
+  --motion-duration-fast: 150ms; /* motion/duration/fast */
+  --motion-duration-base: 200ms; /* motion/duration/base */
+  --motion-duration-slow: 300ms; /* motion/duration/slow */
+  --motion-duration-slower: 400ms; /* motion/duration/slower */
+  --motion-distance-nudge: 4px; /* motion/distance/nudge */
+  --motion-distance-lift: 4px; /* motion/distance/lift */
+  --motion-distance-reveal: 16px; /* motion/distance/reveal */
+}
+
+/* Display · Manrope 800 · 56. Home hero only */
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3.5rem;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+/* Heading/H1 · Manrope 800 · 36. Page titles in every area (code token h1) */
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+/* Heading/H2 · Manrope 800 · 28. Section heads (code token h2) */
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+}
+/* Heading/H3 · Manrope 700 · 20. Card groups, form sections, panel titles (code token h3) */
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+/* Heading/H4 · Inter 600 · 18. Card titles */
+@utility type-h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.625rem;
+  letter-spacing: 0;
+}
+/* Body/Large · Inter 400 · 17. Hero and section leads */
+@utility type-body-lg {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 1.0625rem;
+  line-height: 1.75rem;
+  letter-spacing: 0;
+}
+/* Body/Default · Inter 400 · 16. Paragraphs and form inputs */
+@utility type-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.625rem;
+  letter-spacing: 0;
+}
+/* Body/Small · Inter 400 · 14. Table cells and dense app text */
+@utility type-body-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  letter-spacing: 0;
+}
+/* Label/Default · Inter 600 · 14. Field labels, small buttons */
+@utility type-label {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  letter-spacing: 0;
+}
+/* Label/Large · Inter 600 · 16. Default and large buttons */
+@utility type-label-lg {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  letter-spacing: 0;
+}
+/* Caption · Inter 400 · 12. Helper text, timestamps */
+@utility type-caption {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  letter-spacing: 0;
+}
+/* Spec/Default · IBM Plex Mono 500 · 13. Spec values, SKUs, order and quote numbers, GSTIN */
+@utility type-spec {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  letter-spacing: 0;
+}
+/* Spec/Eyebrow · IBM Plex Mono 500 · 12. Eyebrows above section headings */
+@utility type-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+/* Label/Small · Inter 600 · 12. Badges, chips, table tags */
+@utility type-label-sm {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0;
+}
+/* Label/Nav · Inter 500 · 16. Header and footer navigation links (Inter 500, as on the home page) */
+@utility type-label-nav {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  letter-spacing: 0;
+}

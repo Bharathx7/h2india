@@ -46,6 +46,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - `tests/e2e`: Playwright flows A to J at 1440 and 390.
 - `docs/`: playbook, decisions, progress, ADRs, runbooks.
 
+## Design rules (Stage 2)
+
+- Colours, type, radius, shadows only from the Figma tokens: classes like `text-primary`, `bg-accent`, `type-h1`. No hex codes; `pnpm lint` fails on them. See `docs/design-tokens.md`.
+- Never change a token value in code. If a value looks wrong (contrast, size), raise it; the designer changes Figma.
+- Green fills (`bg-accent`) take ink text, never white.
+- Every list or panel that loads data shows loading, empty and error states (step 2.5).
+
 ## Data rules (playbook Section 8)
 
 - Money is whole **paise** in `bigint`, with a currency column. No floats. One formatting helper (₹48,79,400; lakh and crore).

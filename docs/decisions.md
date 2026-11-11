@@ -106,7 +106,19 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | C13 | When the supplier receives milestone money: buyer screens and the acceptance email say all money is held until the buyer accepts the delivery; the supplier's Awaiting payment screen (811:12584) says "each part 2 working days after the buyer pays it" | You | Stage 10 (Batch 6, on hold) | Hold everything until acceptance (matches the buyer screens, ledger and playbook Section 4) | Parked | Batch 6 on hold. |
 | C14 | Cancellation rules by moment: the Doc 4 table could not be located in the project, Drive or searchable chats. The Figma screens define part of the flow (330:27379, 700:519, 715:8, 807:14435, 697:8) | You | Stage 10 (Batch 6, on hold) | Build only what the screens show; anything else goes to Operations | Parked | Founder, 11 Nov 2026: parked. Attach the Doc 4 PDF when Batch 6 starts. |
 
+## Design-system notes (Stage 2)
+
+Small calls made while building the design system. None changes a Figma value; each is reversible.
+
+| ID | Note | Owner | Status | Detail |
+|---|---|---|---|---|
+| D-UI1 | Text selection colour is not in Figma. Code uses bg/marker (fresh/300 #A8EBBC) with text/primary. | Designer | Default in use | Change in `packages/ui/src/styles/base.css` if the designer picks another token. |
+| D-UI2 | Google Fonts' own subsets leave out ₹ (latin subset) and ₂ and → (every Manrope subset), so "H₂" in a Manrope heading would fall back to another font. The fonts are subset from the complete upstream files instead (`scripts/fonts/build_fonts.py`). | Claude | Done | All five required glyphs present in all three fonts; checked by `design-tokens.spec.ts`. |
+| D-UI3 | Figma background blur "Glass 16/20" becomes CSS `backdrop-filter: blur(8px/10px)`: CSS takes half of Figma's blur radius, as Figma's own CSS export does. | Designer | To confirm visually | Compare a glass panel side by side when the first one is built (header after scroll). |
+| D-UI4 | Semantic colours are classes named after the Figma token: text/primary is `text-primary`, bg/accent is `bg-accent`, border/focus is `border-focus`, icon/link is `text-icon-link`. Primitives keep Figma's code-syntax names (`bg-fresh-50`, `text-ink-500`). | Claude | Done | See `docs/design-tokens.md`. |
+
 ## Change log
 
 - 11 Nov 2026: register created from playbook v1.0 Section 6 (57 items). Founder decisions recorded for C8, M23 and C10. G13 corrected (answered by design). Added C10 to C14. Batch 6 (orders and payments) put on hold by the founder; dependent items marked Parked.
 - 11 Nov 2026: **Gate 0 approved** by the founder. ADRs 0001 to 0005 and 0007 Accepted; ADR 0006 amended (existing server, not AWS). Domain (M1) deferred: build and test locally first. GitHub repository: `Bharathx7/h2india`.
+- 11 Nov 2026: Stage 2 started. Added design-system notes D-UI1 to D-UI4.

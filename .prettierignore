@@ -8,3 +8,11 @@ dist
 coverage
 playwright-report
 test-results
+
+# Generated design tokens (pnpm tokens:build) and the Figma export
+packages/ui/tokens.json
+packages/ui/tokens.figma.json
+packages/ui/src/tokens.ts
+packages/ui/src/styles/tokens.css
+# Font licences are upstream text
+apps/web/src/fonts/

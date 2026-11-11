@@ -32,8 +32,8 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 2.1 | Generate tokens from the Figma variables | Not started |
-| 2.2 | Fonts and base styles | Not started |
+| 2.1 | Generate tokens from the Figma variables | Done 11 Nov 2026: 86 variables, 15 text styles, 8 effects; matched to Figma token by token |
+| 2.2 | Fonts and base styles | Done 11 Nov 2026: self-hosted, ₹ ₂ → × • checked; phone check by you pending |
 | 2.3 | Core components | Not started |
 | 2.4 | Shells: site, workspace and auth | Not started |
 | 2.5 | The required-states rule | Not started |
