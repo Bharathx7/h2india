@@ -72,3 +72,15 @@ export type { NotificationItem, ReviewCheck, ReviewPanelProps } from "./componen
 export { DatePicker, formatDate, parseDate } from "./components/DatePicker";
 export { SearchSuggest } from "./components/SearchSuggest";
 export type { Suggestion, SuggestionGroup } from "./components/SearchSuggest";
+
+// Brand
+export { Logo } from "./brand/Logo";
+export type { LogoVersion } from "./brand/Logo";
+export { WorkspaceShell } from "./components/WorkspaceShell";
+export type {
+  WorkspaceArea,
+  WorkspaceNavGroup,
+  WorkspaceNavItem,
+  WorkspaceShellProps,
+  WorkspaceUser,
+} from "./components/WorkspaceShell";

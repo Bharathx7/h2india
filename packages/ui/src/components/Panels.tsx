@@ -232,10 +232,13 @@ export function NotificationCentre({
   items,
   onMarkAllRead,
   allHref,
+  variant = "outline",
 }: {
   items: NotificationItem[];
   onMarkAllRead: () => void;
   allHref: string;
+  /** "topbar": the plain bell with a red count from Workspace top bar v2. */
+  variant?: "outline" | "topbar";
 }) {
   const [tab, setTab] = useState("all");
   const unread = items.filter((i) => i.unread);
@@ -244,17 +247,36 @@ export function NotificationCentre({
     <RPopover.Root>
       <span className="relative inline-flex">
         <RPopover.Trigger asChild>
-          <IconButton
-            icon="bell"
-            look="outline"
-            label={unread.length > 0 ? `Notifications, ${String(unread.length)} unread` : "Notifications"}
-          />
+          {variant === "topbar" ? (
+            <button
+              type="button"
+              aria-label={unread.length > 0 ? `Notifications, ${String(unread.length)} unread` : "Notifications"}
+              className="flex size-10 items-center justify-center rounded-pill text-icon-secondary hover:bg-subtle"
+            >
+              <Icon name="bell" size={22} />
+            </button>
+          ) : (
+            <IconButton
+              icon="bell"
+              look="outline"
+              label={unread.length > 0 ? `Notifications, ${String(unread.length)} unread` : "Notifications"}
+            />
+          )}
         </RPopover.Trigger>
         {unread.length > 0 ? (
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1 right-1 size-2 rounded-pill bg-accent"
-          />
+          variant === "topbar" ? (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-pill border-2 border-page bg-error-strong type-label-sm text-inverse"
+            >
+              {unread.length > 9 ? "9+" : unread.length}
+            </span>
+          ) : (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1 right-1 size-2 rounded-pill bg-accent"
+            />
+          )
         ) : null}
       </span>
       <RPopover.Portal>

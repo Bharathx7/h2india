@@ -17,6 +17,7 @@ const ALLOW = [
   "packages/ui/src/tokens.ts", // generated
   "packages/ui/scripts/", // the token tools themselves
   "packages/emails/", // email clients need literal colours; checked against tokens in step 3.9
+  "packages/ui/src/brand/", // the approved logo artwork (Figma 873:199282) carries its own fixed colours
 ];
 
 const PALETTE =
