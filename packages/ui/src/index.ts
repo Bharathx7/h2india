@@ -86,3 +86,22 @@ export type {
 } from "./components/WorkspaceShell";
 export { AuthPanel } from "./components/AuthPanel";
 export type { AuthPanelProps, AuthRole } from "./components/AuthPanel";
+
+// Site chrome
+export { SiteHeader } from "./components/site/SiteHeader";
+export type { SiteHeaderProps } from "./components/site/SiteHeader";
+export { MegaMenuPanel } from "./components/site/MegaMenu";
+export { SiteFooter } from "./components/site/SiteFooter";
+export type { FooterColumn, SiteFooterProps } from "./components/site/SiteFooter";
+export { AnnouncementBar, CookieBanner, readConsent } from "./components/site/Banners";
+export type { ConsentChoice } from "./components/site/Banners";
+export type {
+  MegaClass,
+  MegaLink,
+  MegaPrimaryLink,
+  MegaPromo,
+  MegaSection,
+  MegaSponsor,
+  SiteLinks,
+  SiteUser,
+} from "./components/site/types";

@@ -37,3 +37,77 @@ test("on a phone the menu drawer traps focus and returns it on close", async ({ 
   await expect(dialog).toBeHidden();
   await expect(open).toBeFocused();
 });
+
+// Site chrome (Site header 25:635, Mega menu 369:7387, Footer v2 153:179, Cookie banner 53:1455).
+
+test("site chrome has no accessibility violations, logged out and logged in", async ({ page }) => {
+  for (const u of ["0", "1"]) {
+    await page.goto(`/dev/shells/site?user=${u}`);
+    const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.length} × ${v.help}`)).toEqual([]);
+  }
+});
+
+test("mega menus work by keyboard only and close on Escape and on focus leaving", async ({ page, isMobile }) => {
+  test.skip(isMobile, "desktop header");
+  await page.goto("/dev/shells/site");
+  const news = page.getByRole("button", { name: "News", exact: true });
+  await news.focus();
+  await page.keyboard.press("Enter");
+  await expect(news).toHaveAttribute("aria-expanded", "true");
+  const panel = page.getByRole("region", { name: "News menu" });
+  await expect(panel).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(news).toBeFocused();
+
+  // Focus leaving the menu closes it (the earlier build kept it open).
+  await page.keyboard.press("Enter");
+  await expect(panel).toBeVisible();
+  // The promo button is the last link in the News menu; tabbing past it leaves the menu.
+  await panel.getByRole("link", { name: "Subscribe" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(panel).toBeHidden();
+});
+
+test("all header links stay visible between 1024 and 1279 wide", async ({ page, isMobile }) => {
+  test.skip(isMobile, "desktop widths");
+  for (const width of [1024, 1100, 1279]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const u of ["0", "1"]) {
+      await page.goto(`/dev/shells/site?user=${u}`);
+      const nav = page.getByRole("navigation", { name: "Main" });
+      for (const name of ["Marketplace", "Directory", "News", "Opportunities", "Knowledge", "Events"]) {
+        await expect(nav.getByRole("button", { name, exact: true })).toBeInViewport();
+      }
+      await expect(page.getByRole("link", { name: "Request a quote" }).first()).toBeInViewport();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+      expect(overflow, `no sideways scroll at ${String(width)}`).toBe(false);
+    }
+  }
+});
+
+test("on a phone the site menu traps focus and restores it on close", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "phone only");
+  await page.goto("/dev/shells/site");
+  const open = page.getByRole("button", { name: "Menu" });
+  await open.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  for (let i = 0; i < 40; i++) await page.keyboard.press("Tab");
+  expect(await dialog.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(open).toBeFocused();
+});
+
+test("the cookie choice is remembered and both choices carry equal weight", async ({ page }) => {
+  await page.goto("/dev/shells/site");
+  const reject = page.getByRole("button", { name: "Reject optional" });
+  const accept = page.getByRole("button", { name: "Accept all" });
+  const [r, a] = await Promise.all([reject.getAttribute("class"), accept.getAttribute("class")]);
+  expect(r).toBe(a);
+  await reject.click();
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Cookies" })).toBeHidden();
+});

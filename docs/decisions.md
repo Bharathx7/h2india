@@ -118,6 +118,8 @@ Small calls made while building the design system. None changes a Figma value; e
 | D-UI3 | Figma background blur "Glass 16/20" becomes CSS `backdrop-filter: blur(8px/10px)`: CSS takes half of Figma's blur radius, as Figma's own CSS export does. | Designer | To confirm visually | Compare a glass panel side by side when the first one is built (header after scroll). |
 | D-UI5 | Toasts sit at the bottom right on desktop (24 px in) and across the bottom on phones. Figma shows the toast but not its position. | Designer | Default in use | Change in `packages/ui/src/components/Toast.tsx`. |
 | D-UI4 | Semantic colours are classes named after the Figma token: text/primary is `text-primary`, bg/accent is `bg-accent`, border/focus is `border-focus`, icon/link is `text-icon-link`. Primitives keep Figma's code-syntax names (`bg-fresh-50`, `text-ink-500`). | Claude | Done | See `docs/design-tokens.md`. |
+| D-UI6 | The Site header component has a "Scrolled" (shrunk) variant, but the Home motion spec (781:7247) says the header stays at the top and does not shrink. Code follows the motion spec: sticky, full height, with the Header shadow once the page scrolls. | Designer | Default in use | Say if the shrinking header is wanted instead. |
+| D-UI7 | The announcement bar text is Inter 600 at 15/20 in Figma, which is not one of the 15 text styles. Code uses exactly that size. | Designer | Default in use | A text style for it would remove the one-off size. |
 
 ## Change log
 
@@ -126,3 +128,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 11 Nov 2026: Stage 2 started. Added design-system notes D-UI1 to D-UI4.
 - 11 Nov 2026: You decided F5 (Wide hero not built), M15 (English only, selector hidden) and M17 (breakpoints 768 and 1024).
 - 11 Nov 2026: Added C15 (sign-in panel copy for supplier and admin, and the company-name strip).
+- 11 Nov 2026: Added D-UI6 (header does not shrink, per the motion spec) and D-UI7 (announcement text size).
