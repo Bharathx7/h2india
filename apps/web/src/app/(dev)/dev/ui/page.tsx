@@ -28,6 +28,7 @@ import {
 } from "@h2india/ui";
 import { forcedState } from "@/lib/dev-state";
 import { AsyncDemo, FilterChipsDemo, OtpDemo } from "./Demos";
+import { NavigationDemo, OverlayHintsDemo, UploadDemo } from "./Demos2";
 import { GallerySection, Row } from "./Section";
 
 // Component gallery (playbook steps 2.3 and 2.6). One section per Figma component section on page 02 (node 8:3).
@@ -66,6 +67,9 @@ export default async function GalleryPage({
         </TextLink>
         <TextLink href="#feedback" showIcon={false}>
           Feedback and status
+        </TextLink>
+        <TextLink href="#navigation" showIcon={false}>
+          Navigation
         </TextLink>
         <TextLink href="#states" showIcon={false}>
           Required states
@@ -187,7 +191,11 @@ export default async function GalleryPage({
         </div>
       </GallerySection>
 
-      <GallerySection id="selection" title="Selection and upload" node="18:69 · 18:91 · 18:108 · 18:142">
+      <GallerySection
+        id="selection"
+        title="Selection and upload"
+        node="18:69 · 18:91 · 18:108 · 18:142 · 18:164 · 18:215"
+      >
         <Row label="Checkbox">
           <Checkbox label="ISO 22734 certified" />
           <Checkbox label="ISO 22734 certified" defaultChecked />
@@ -208,12 +216,13 @@ export default async function GalleryPage({
           <Switch label="Disabled" disabled />
         </Row>
         <OtpDemo />
+        <UploadDemo />
       </GallerySection>
 
       <GallerySection
         id="feedback"
         title="Feedback and status"
-        node="20:96 · 20:115 · 20:127 · 20:150 · 20:245 · 20:338"
+        node="20:96 · 20:115 · 20:127 · 20:136 · 20:150 · 20:245 · 20:281 · 20:338"
       >
         <Row label="Status badge · every status word in the database">
           {Object.keys(STATUS_TONE).map((s) => (
@@ -310,6 +319,15 @@ export default async function GalleryPage({
             We could not load this page. Check your connection and try again.
           </EmptyState>
         </div>
+        <OverlayHintsDemo />
+      </GallerySection>
+
+      <GallerySection
+        id="navigation"
+        title="Navigation"
+        node="21:161 · 21:186 · 21:212 · 21:224 · 21:285 · 21:314 · 21:372 · 21:431 · 21:444"
+      >
+        <NavigationDemo />
       </GallerySection>
 
       <GallerySection id="states" title="Required states" node="step 2.5 · state boards 381:12972, 381:13116, 127:6804">

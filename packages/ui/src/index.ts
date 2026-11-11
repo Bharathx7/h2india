@@ -32,3 +32,32 @@ export { Alert, EmptyState, Skeleton } from "./components/Feedback";
 export type { AlertTone, EmptyKind } from "./components/Feedback";
 export { AsyncSection } from "./components/AsyncSection";
 export type { AsyncState } from "./components/AsyncSection";
+export { FileRow, FileUpload } from "./components/Upload";
+export type { FileRowStatus } from "./components/Upload";
+export { Tooltip } from "./components/Tooltip";
+export { Toaster, useToast } from "./components/Toast";
+export type { ToastOptions, ToastTone } from "./components/Toast";
+
+// Navigation
+export { Breadcrumbs } from "./components/Breadcrumbs";
+export type { Crumb } from "./components/Breadcrumbs";
+export {
+  Menu,
+  MenuChoice,
+  MenuChoices,
+  MenuContent,
+  MenuDivider,
+  MenuItem,
+  MenuTrigger,
+  NavLink,
+  NavLinkStyle,
+  Pagination,
+  SegmentedControl,
+  SideNavItem,
+  Stepper,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+} from "./components/Navigation";
+export type { PaginationProps, StepItem, StepStatus } from "./components/Navigation";
