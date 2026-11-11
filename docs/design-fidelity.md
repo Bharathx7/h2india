@@ -39,8 +39,11 @@ For each screen in a pull request:
 
 ## Known differences
 
-| Where             | Difference                                                                                                  | Why                                                                 |
-| ----------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Chip (unselected) | 32 px tall in code; Figma draws it 35 px because its 1.5 px stroke is counted in layout                     | Selected and unselected chips line up in a row                      |
-| Select            | Closed trigger matches Figma; the open list is the browser's own until the Menu component (21:372) is built | Accessible and native on phones; replaced in the Navigation section |
-| Glass blur        | CSS blur is half the Figma radius                                                                           | Decision D-UI3, to confirm visually                                 |
+| Where                | Difference                                                                                                  | Why                                                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Chip (unselected)    | 32 px tall in code; Figma draws it 35 px because its 1.5 px stroke is counted in layout                     | Selected and unselected chips line up in a row                                                          |
+| Select               | Closed trigger matches Figma; the open list is the browser's own until the Menu component (21:372) is built | Accessible and native on phones; replaced in the Navigation section                                     |
+| Glass blur           | CSS blur is half the Figma radius                                                                           | Decision D-UI3, to confirm visually                                                                     |
+| Date picker          | Single date only for now; the range mode (span in fresh-200) is added with the reports screens              | Not needed before reports                                                                               |
+| Toast placement      | Bottom right on desktop, bottom on phones                                                                   | Figma shows the toast, not where it sits; decision D-UI5                                                |
+| Data table on phones | Rows become cards with label and value pairs                                                                | Figma says "Rows become cards below 768 px" without a card frame; check against the mobile list screens |
