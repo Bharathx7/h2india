@@ -1,0 +1,52 @@
+/* Shared field states from Figma page 02 (Input 14:73, Select 14:90, Textarea 14:103).
+   Rest: 1 px border/input. Hover: border/focus. Focus: 2 px border/focus plus Focus/Ring.
+   Error: 2 px border/error. The second pixel is an inset shadow so the content never moves. */
+
+@utility field-focus {
+  border-color: var(--border-color-focus);
+  box-shadow:
+    inset 0 0 0 1px var(--border-color-focus),
+    var(--shadow-focus-ring);
+}
+
+@utility field-error {
+  border-color: var(--border-color-error);
+  box-shadow: inset 0 0 0 1px var(--border-color-error);
+}
+
+@utility field-error-focus {
+  border-color: var(--border-color-error);
+  box-shadow:
+    inset 0 0 0 1px var(--border-color-error),
+    var(--shadow-focus-ring);
+}
+
+/* Skeleton shimmer (Figma "Skeleton" 20:150: placeholders drawn in the final layout, shimmer in code).
+   Reduced motion keeps the still grey bars. */
+@utility shimmer {
+  background-color: var(--background-color-subtle);
+  background-image: linear-gradient(
+    90deg,
+    var(--background-color-subtle) 0%,
+    var(--background-color-page) 50%,
+    var(--background-color-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: h2-shimmer 1.4s var(--ease-standard) infinite;
+}
+
+@keyframes h2-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-image: none;
+  }
+}

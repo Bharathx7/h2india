@@ -13,5 +13,21 @@
     "tokens:build": "node scripts/tokens.mjs build",
     "tokens:check": "node scripts/tokens.mjs check",
     "tokens:diff": "node scripts/tokens.mjs diff tokens.figma.json"
+  },
+  "dependencies": {
+    "radix-ui": "1.8.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.9",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "jsdom": "31.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }
