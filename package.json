@@ -10,7 +10,7 @@
     "dev:worker": "pnpm --filter @h2india/worker dev",
     "build": "pnpm -r --filter=!@h2india/e2e build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint . && node scripts/check-design-tokens.mjs && pnpm --filter @h2india/ui tokens:check",
+    "lint": "eslint . && node scripts/check-design-tokens.mjs && node scripts/check-migrations.mjs && pnpm --filter @h2india/ui tokens:check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check",
@@ -23,7 +23,11 @@
     "check-env": "node scripts/check-env.mjs",
     "prepare": "simple-git-hooks",
     "tokens:build": "pnpm --filter @h2india/ui tokens:build",
-    "tokens:diff": "pnpm --filter @h2india/ui tokens:diff"
+    "tokens:diff": "pnpm --filter @h2india/ui tokens:diff",
+    "db:generate": "pnpm --filter @h2india/db generate",
+    "db:migrate": "pnpm --filter @h2india/db migrate",
+    "db:seed": "pnpm --filter @h2india/db seed",
+    "db:reset": "pnpm --filter @h2india/db reset"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"
@@ -41,6 +45,7 @@
     "pg": "8.23.1",
     "prettier": "3.10.0",
     "simple-git-hooks": "2.14.0",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.2",
     "vitest": "5.1.0"

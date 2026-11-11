@@ -46,6 +46,12 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - `tests/e2e`: Playwright flows A to J at 1440 and 390.
 - `docs/`: playbook, decisions, progress, ADRs, runbooks.
 
+## Database (Stage 3)
+
+- `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:reset` (local only), `pnpm db:generate`. Conventions in `docs/database.md`.
+- Money is bigint paise and goes through `Money`; status changes go through `changeStatus()`; important actions call `audit()`.
+- Never edit an applied migration. Destructive SQL needs `-- destructive-ok: <reason>`.
+
 ## Design rules (Stage 2)
 
 - Colours, type, radius, shadows only from the Figma tokens: classes like `text-primary`, `bg-accent`, `type-h1`. No hex codes; `pnpm lint` fails on them. See `docs/design-tokens.md`.

@@ -43,7 +43,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 3.1 | Database conventions and first migration | Not started |
+| 3.1 | Database conventions and first migration | Done 11 Nov 2026: core and cms schemas, money, reference numbers, changeStatus with history, append-only audit log, migration safety check, integration tests on PostgreSQL. You: confirm reference formats (calendar year vs financial year) |
 | 3.2 | Sign-in: passkey, email code, Google | Not started |
 | 3.3 | Join flow, companies and the GSTIN check | Not started |
 | 3.4 | Roles, permissions and company scoping | Not started |

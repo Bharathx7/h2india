@@ -18,6 +18,26 @@ jobs:
     name: Check, test, build, smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Real PostgreSQL and Redis for integration tests (step 3.1). Throwaway credentials, CI only.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: h2india
+          POSTGRES_PASSWORD: change-me-postgres
+          POSTGRES_DB: h2india
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U h2india" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india
+      TEST_DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india_test
+      REDIS_URL: redis://localhost:6379
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -30,7 +50,9 @@ jobs:
       - run: cp .env.example .env.local
       - name: Types, lint and format
         run: pnpm check
-      - name: Unit tests
+      - name: Migrations apply cleanly
+        run: pnpm db:migrate
+      - name: Unit and integration tests
         run: pnpm test
       - name: Build
         run: pnpm build
