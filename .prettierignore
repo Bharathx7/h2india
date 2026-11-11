@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+docs/playbook.pdf
+docs/figma-index.md
+docs/decisions.md
+docs/progress.md
+.next
+dist
+coverage
+playwright-report
+test-results

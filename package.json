@@ -1,0 +1,46 @@
+{
+  "name": "h2india",
+  "private": true,
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @h2india/web dev",
+    "dev:worker": "pnpm --filter @h2india/worker dev",
+    "build": "pnpm -r --filter=!@h2india/e2e build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "test": "vitest run",
+    "e2e": "pnpm --filter @h2india/e2e test",
+    "dev:up": "docker compose --env-file .env.local up -d --wait && docker compose --env-file .env.local run --rm minio-init",
+    "dev:down": "docker compose --env-file .env.local down",
+    "dev:reset": "docker compose --env-file .env.local down -v && docker compose --env-file .env.local up -d --wait && docker compose --env-file .env.local run --rm minio-init",
+    "health": "node scripts/health.mjs",
+    "check-env": "node scripts/check-env.mjs",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.4.6",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.14.0",
+    "ioredis": "6.0.0",
+    "lint-staged": "17.6.0",
+    "pg": "8.23.1",
+    "prettier": "3.10.0",
+    "simple-git-hooks": "2.14.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vitest": "5.1.0"
+  }
+}

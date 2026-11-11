@@ -1,0 +1,25 @@
+# Weekly, grouped dependency updates (playbook step 1.5). Upgrades are merged in their own pull requests.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Asia/Kolkata
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Major lines are chosen on purpose (docs/versions.md).
+      - dependency-name: payload
+        update-types: [version-update:semver-major]
+      - dependency-name: "@payloadcms/*"
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
