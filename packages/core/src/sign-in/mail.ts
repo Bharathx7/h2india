@@ -1,6 +1,6 @@
 import { parseServerEnv } from "@h2india/config";
 import { renderSignInCode } from "@h2india/emails";
-import { mailTransport } from "../mail/transport";
+import { deliverEmail } from "../notify/channels";
 import { formatIstTime } from "../time";
 import { SIGN_IN } from "./rules";
 
@@ -14,11 +14,11 @@ export async function sendSignInCode(input: { to: string; code: string; name?: s
     expiresIn: `${String(SIGN_IN.codeMinutes)} minutes`,
     expiresAt: `${formatIstTime(expires)} IST`,
   });
-  await mailTransport(env).sendMail({
-    from: env.EMAIL_FROM_SECURITY ?? env.EMAIL_FROM,
+  await deliverEmail({
+    template: "email.sign_in_code",
+    event: "account.sign_in_code",
     to: input.to,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text,
+    mail,
+    security: true,
   });
 }

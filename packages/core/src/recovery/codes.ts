@@ -3,10 +3,9 @@ import { schema } from "@h2india/db";
 import { renderSignInCode } from "@h2india/emails";
 import { randomInt, timingSafeEqual } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { smsSender, verificationSms } from "../companies/adapters/sms";
 import { hashToken } from "../companies/drafts";
 import { getDb } from "../db";
-import { mailTransport } from "../mail/transport";
+import { deliverEmail, deliverSms } from "../notify/channels";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "../sign-in/throttle";
 import { SIGN_IN } from "../sign-in/rules";
 import { formatIstTime } from "../time";
@@ -53,7 +52,7 @@ export async function sendCode(input: {
     expiresAt: sql`now() + make_interval(mins => ${SIGN_IN.codeMinutes})`,
   });
   if (input.channel === "sms") {
-    await smsSender().send({ to: input.to, text: verificationSms(code) });
+    await deliverSms({ template: "sms.otp_sign_in", event: "account.recovery_code", to: input.to, data: { code } });
     return;
   }
   const env = parseServerEnv();
@@ -65,12 +64,12 @@ export async function sendCode(input: {
     expiresIn: `${String(SIGN_IN.codeMinutes)} minutes`,
     expiresAt: `${formatIstTime(new Date(Date.now() + SIGN_IN.codeMinutes * 60_000))} IST`,
   });
-  await mailTransport(env).sendMail({
-    from: env.EMAIL_FROM_SECURITY ?? env.EMAIL_FROM,
+  await deliverEmail({
+    template: "email.recovery_code",
+    event: "account.recovery_code",
     to: input.to,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text,
+    mail,
+    security: true,
   });
 }
 

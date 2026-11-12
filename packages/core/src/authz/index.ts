@@ -7,3 +7,5 @@ export type { Resource } from "./can";
 export { inScope, scopeFor } from "./scope";
 export type { Scope } from "./scope";
 export { grantOperatorRole, OperatorRoleError, revokeOperatorRole, SUPER_ADMIN } from "./grants";
+export { identityOf } from "./identity";
+export type { WorkspaceKind } from "./identity";

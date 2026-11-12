@@ -10,7 +10,7 @@ import { can } from "../authz/can";
 import { hashToken } from "../companies/drafts";
 import { getDb } from "../db";
 import { attachFile, scheduleFileDeletion } from "../files/files";
-import { mailTransport } from "../mail/transport";
+import { deliverEmail } from "../notify/channels";
 import { nextReference } from "../reference";
 import { hitThrottle } from "../sign-in/throttle";
 import { RecoveryError } from "./recovery";
@@ -112,13 +112,12 @@ export async function submitSupportRequest(input: SupportRequestInput): Promise<
     url: `${env.APP_URL}/account/recovery/${result.id}`,
   });
   // The contact address is not proven, so nothing is sent to it automatically; support replies after checking (A23).
-  await mailTransport(env).sendMail({
-    from: env.EMAIL_FROM_SECURITY ?? env.EMAIL_FROM,
+  await deliverEmail({
+    template: "email.support_request",
+    event: "recovery.support_request",
     to: env.SUPPORT_EMAIL,
     replyTo: contactEmail,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text,
+    mail,
   });
   return result;
 }

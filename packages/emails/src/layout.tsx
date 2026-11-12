@@ -30,7 +30,7 @@ export function EmailLayout({ appUrl, preview, reason, children }: EmailLayoutPr
           <Section style={{ padding: "24px 32px", backgroundColor: colour.subtle }}>
             <Text style={{ ...type.caption, color: colour.body, margin: "0 0 8px" }}>{reason}</Text>
             <Text style={{ ...type.caption, margin: 0 }}>
-              <Link href={`${appUrl}/account/notifications`} style={{ color: colour.link }}>
+              <Link href={`${appUrl}/notifications?tab=email`} style={{ color: colour.link }}>
                 Email preferences
               </Link>
             </Text>

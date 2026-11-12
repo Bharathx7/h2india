@@ -1,0 +1,389 @@
+// Every message template (step 3.9): the 34 designed on Figma page 16 (playbook Appendix C) and the undrawn ones the
+// flows need (M21, wording A9). Each template is built in the step that first sends it. SMS and WhatsApp wording must
+// match the approved template exactly, so it lives here and nowhere else. Safe to import anywhere.
+
+export type Channel = "email" | "sms" | "whatsapp";
+
+export interface TemplateEntry {
+  channel: Channel;
+  /** The provider-facing key shown in System settings (707:793), for example otp_sign_in. */
+  key: string;
+  name: string;
+  /** Figma frame, or null when not drawn (M21). */
+  frame: string | null;
+  /** The playbook step that first sends it. */
+  step: string;
+  /** Built and sendable now. */
+  built: boolean;
+}
+
+export const TEMPLATES = {
+  // Email · page 16
+  "email.quote_received_buyer": {
+    channel: "email",
+    key: "quote_received_buyer",
+    name: "Quote received",
+    frame: "665:9",
+    step: "9.5",
+    built: false,
+  },
+  "email.order_confirmed_pay_now": {
+    channel: "email",
+    key: "order_confirmed_pay_now",
+    name: "Order confirmed · pay now",
+    frame: "665:82",
+    step: "10.7",
+    built: false,
+  },
+  "email.payment_instructions": {
+    channel: "email",
+    key: "payment_instructions",
+    name: "Payment instructions",
+    frame: "665:151",
+    step: "10.5",
+    built: false,
+  },
+  "email.payout_sent": {
+    channel: "email",
+    key: "payout_sent",
+    name: "Payout sent",
+    frame: "665:239",
+    step: "10.11",
+    built: false,
+  },
+  "email.tender_alert_digest": {
+    channel: "email",
+    key: "tender_alert_digest",
+    name: "Tender alert digest",
+    frame: "665:307",
+    step: "7.3",
+    built: false,
+  },
+  "email.sign_in_code": {
+    channel: "email",
+    key: "sign_in_code",
+    name: "Sign-in code",
+    frame: "671:428",
+    step: "3.2",
+    built: true,
+  },
+  "email.rfq_received_supplier": {
+    channel: "email",
+    key: "rfq_received_supplier",
+    name: "RFQ received",
+    frame: "671:482",
+    step: "9.4",
+    built: false,
+  },
+  "email.rfq_returned": {
+    channel: "email",
+    key: "rfq_returned",
+    name: "RFQ returned",
+    frame: "671:554",
+    step: "9.4",
+    built: false,
+  },
+  "email.payment_received": {
+    channel: "email",
+    key: "payment_received",
+    name: "Payment received",
+    frame: "671:620",
+    step: "10.5",
+    built: false,
+  },
+  "email.order_dispatched": {
+    channel: "email",
+    key: "order_dispatched",
+    name: "Order dispatched",
+    frame: "671:685",
+    step: "10.9",
+    built: false,
+  },
+  "email.acceptance_reminder": {
+    channel: "email",
+    key: "acceptance_reminder",
+    name: "Acceptance reminder",
+    frame: "671:756",
+    step: "10.10",
+    built: false,
+  },
+  "email.dispute_opened": {
+    channel: "email",
+    key: "dispute_opened",
+    name: "Dispute opened",
+    frame: "673:8",
+    step: "10.10",
+    built: false,
+  },
+  "email.approval_needed": {
+    channel: "email",
+    key: "approval_needed",
+    name: "Approval needed",
+    frame: "673:86",
+    step: "10.3",
+    built: false,
+  },
+  "email.invitation": {
+    channel: "email",
+    key: "invitation",
+    name: "Invitation",
+    frame: "673:155",
+    step: "8.7, 9.1",
+    built: false,
+  },
+  "email.verification_status": {
+    channel: "email",
+    key: "verification_status",
+    name: "Verification status · document expiring",
+    frame: "673:221",
+    step: "8.2",
+    built: false,
+  },
+  "email.listing_needs_changes": {
+    channel: "email",
+    key: "listing_needs_changes",
+    name: "Listing needs changes",
+    frame: "673:287",
+    step: "8.3",
+    built: false,
+  },
+  "email.submission_received": {
+    channel: "email",
+    key: "submission_received",
+    name: "Submission received",
+    frame: "673:352",
+    step: "5.7",
+    built: false,
+  },
+  "email.newsletter_confirmation": {
+    channel: "email",
+    key: "newsletter_confirmation",
+    name: "Newsletter confirmation",
+    frame: "676:8",
+    step: "5.9",
+    built: false,
+  },
+  "email.webinar_registration": {
+    channel: "email",
+    key: "webinar_registration",
+    name: "Webinar registration",
+    frame: "676:83",
+    step: "5.7",
+    built: false,
+  },
+  "email.grievance_acknowledgement": {
+    channel: "email",
+    key: "grievance_acknowledgement",
+    name: "Grievance acknowledgement",
+    frame: "676:154",
+    step: "5.8",
+    built: false,
+  },
+  "email.listing_approved": {
+    channel: "email",
+    key: "listing_approved",
+    name: "Listing approved",
+    frame: "831:1006",
+    step: "8.3",
+    built: false,
+  },
+  "email.event_live": {
+    channel: "email",
+    key: "event_live",
+    name: "Your event is live",
+    frame: "831:1080",
+    step: "11.2",
+    built: false,
+  },
+  "email.passkey_reset_admin": {
+    channel: "email",
+    key: "passkey_reset_admin",
+    name: "Passkey reset · admin notified",
+    frame: "831:1148",
+    step: "3.5",
+    built: true,
+  },
+  // WhatsApp · page 16
+  "whatsapp.rfq_received_supplier": {
+    channel: "whatsapp",
+    key: "rfq_received_supplier",
+    name: "RFQ received",
+    frame: "668:44",
+    step: "9.4",
+    built: false,
+  },
+  "whatsapp.payment_reminder_buyer": {
+    channel: "whatsapp",
+    key: "payment_reminder_buyer",
+    name: "Payment reminder",
+    frame: "668:98",
+    step: "10.5",
+    built: false,
+  },
+  "whatsapp.tender_alert_instant": {
+    channel: "whatsapp",
+    key: "tender_alert_instant",
+    name: "Tender alert",
+    frame: "668:152",
+    step: "7.3",
+    built: false,
+  },
+  "whatsapp.order_confirmed": {
+    channel: "whatsapp",
+    key: "order_confirmed",
+    name: "Order confirmed",
+    frame: "676:243",
+    step: "10.7",
+    built: false,
+  },
+  "whatsapp.payment_instructions": {
+    channel: "whatsapp",
+    key: "payment_instructions",
+    name: "Payment instructions",
+    frame: "676:297",
+    step: "10.5",
+    built: false,
+  },
+  "whatsapp.scheme_alert": {
+    channel: "whatsapp",
+    key: "scheme_alert",
+    name: "Scheme alert",
+    frame: "676:351",
+    step: "7.3",
+    built: false,
+  },
+  "whatsapp.webinar_registration": {
+    channel: "whatsapp",
+    key: "webinar_registration",
+    name: "Webinar registration",
+    frame: "676:405",
+    step: "5.7",
+    built: false,
+  },
+  "whatsapp.webinar_reminder": {
+    channel: "whatsapp",
+    key: "webinar_reminder",
+    name: "Webinar reminder",
+    frame: "676:459",
+    step: "5.7",
+    built: false,
+  },
+  // SMS · page 16
+  "sms.otp_sign_in": {
+    channel: "sms",
+    key: "otp_sign_in",
+    name: "Sign-in OTP",
+    frame: "668:194",
+    step: "3.2",
+    built: true,
+  },
+  "sms.otp_delivery_receiving_contact": {
+    channel: "sms",
+    key: "otp_delivery_receiving_contact",
+    name: "Delivery OTP",
+    frame: "668:232",
+    step: "10.9",
+    built: false,
+  },
+  "sms.order_dispatched_receiving_contact": {
+    channel: "sms",
+    key: "order_dispatched_receiving_contact",
+    name: "Order dispatched",
+    frame: "668:270",
+    step: "10.9",
+    built: false,
+  },
+  // Not drawn (M21; wording A9): built from the screens' own copy in the steps that needed them.
+  "email.verify_email": {
+    channel: "email",
+    key: "verify_email",
+    name: "Confirm your email (Join)",
+    frame: null,
+    step: "3.3",
+    built: true,
+  },
+  "email.join_request_admin": {
+    channel: "email",
+    key: "join_request_admin",
+    name: "Join request to the admin (and reminder)",
+    frame: null,
+    step: "3.3",
+    built: true,
+  },
+  "email.join_request_answered": {
+    channel: "email",
+    key: "join_request_answered",
+    name: "Join request approved or rejected",
+    frame: null,
+    step: "3.3",
+    built: true,
+  },
+  "email.recovery_code": {
+    channel: "email",
+    key: "recovery_code",
+    name: "Account recovery code",
+    frame: null,
+    step: "3.5",
+    built: true,
+  },
+  "email.recovery_approval": {
+    channel: "email",
+    key: "recovery_approval",
+    name: "Approve a recovery (admin)",
+    frame: null,
+    step: "3.5",
+    built: true,
+  },
+  "email.support_request": {
+    channel: "email",
+    key: "support_request",
+    name: "Support request (to support)",
+    frame: null,
+    step: "3.5, 3.7",
+    built: true,
+  },
+  "email.new_email_confirm": {
+    channel: "email",
+    key: "new_email_confirm",
+    name: "Confirm a new work email",
+    frame: null,
+    step: "3.5",
+    built: true,
+  },
+  "email.mobile_changed": {
+    channel: "email",
+    key: "mobile_changed",
+    name: "Mobile number changed",
+    frame: null,
+    step: "3.5",
+    built: true,
+  },
+  "email.test": {
+    channel: "email",
+    key: "test",
+    name: "Test message (/dev/messages)",
+    frame: null,
+    step: "3.9",
+    built: true,
+  },
+  "sms.mobile_changed": {
+    channel: "sms",
+    key: "mobile_changed",
+    name: "New mobile confirmed",
+    frame: null,
+    step: "3.5",
+    built: true,
+  },
+} as const satisfies Record<string, TemplateEntry>;
+
+export type TemplateId = keyof typeof TEMPLATES;
+
+/** Exact approved wording for SMS (DLT) and WhatsApp templates. Never edit without re-registering the template. */
+export const APPROVED_TEXT = {
+  /** 668:194 */
+  "sms.otp_sign_in": (input: { code: string }) =>
+    `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
+  "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+} satisfies Partial<Record<TemplateId, (input: never) => string>>;
+
+export type TextTemplateId = keyof typeof APPROVED_TEXT;

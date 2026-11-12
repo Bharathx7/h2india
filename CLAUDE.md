@@ -95,6 +95,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - React to a deadline with `onDeadline(type, handler)`; the handler runs inside the claim's transaction, so anything it sends must be idempotent (queue a job with a stable job ID).
 - New background work goes on a queue from `QUEUES` through `enqueue()`; job data never holds secrets (it is kept, masked, in the dead-letter list). Housekeeping goes in `queue/schedule.ts`.
 
+## Notifications (step 3.9)
+
+- Send every message through `packages/core/src/notify`: `notify()` for a person (checks their choices, quiet hours and unsubscribe; email, WhatsApp, in-app), `deliverEmail` and `deliverSms` for codes and links. Never call the mail transport directly.
+- Register each template in `packages/emails/src/registry.ts` with its frame and key before using it; SMS and WhatsApp wording lives only in `APPROVED_TEXT` and must match the approved template exactly.
+- Mark codes, sign-in links and confirmation links `security: true` (security sender, never stored, never retried).
+- A new kind of notification picks a topic in `notify/topics.ts`; add one only with the defaults from its design.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
