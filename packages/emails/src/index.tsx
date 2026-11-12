@@ -2,6 +2,13 @@
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
 import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
+import {
+  submissionReceivedMessage,
+  webinarRegisteredMessage,
+  webinarReminderMessage,
+  webinarReplayMessage,
+  type WebinarDetails,
+} from "./events/messages";
 import { reportDownloadMessage } from "./knowledge/messages";
 import {
   NewsletterConfirm,
@@ -81,6 +88,20 @@ export function renderNewsletterManage(props: NewsletterManageProps) {
 export { ISSUE_CONTENTS, ISSUE_SCHEDULE } from "./newsletter/Newsletter";
 
 /** The emailed copy of a gated report (step 4.4). */
+export function renderWebinarRegistered(appUrl: string, input: Parameters<typeof webinarRegisteredMessage>[0]) {
+  return renderNotice(appUrl, webinarRegisteredMessage(input));
+}
+export function renderWebinarReminder(appUrl: string, input: WebinarDetails, which: "day" | "hour") {
+  return renderNotice(appUrl, webinarReminderMessage(input, which));
+}
+export function renderWebinarReplay(appUrl: string, input: Parameters<typeof webinarReplayMessage>[0]) {
+  return renderNotice(appUrl, webinarReplayMessage(input));
+}
+export function renderSubmissionReceived(appUrl: string, input: Parameters<typeof submissionReceivedMessage>[0]) {
+  return renderNotice(appUrl, submissionReceivedMessage(input));
+}
+export type { SubmissionKind, WebinarDetails } from "./events/messages";
+
 export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {
   return renderNotice(appUrl, reportDownloadMessage(input));
 }

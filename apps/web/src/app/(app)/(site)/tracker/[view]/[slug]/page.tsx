@@ -116,7 +116,7 @@ export default async function TrackerRecordPage({ params }: { params: Params }) 
             <p className="type-body text-body">{subtitle}</p>
           </div>
           <Link
-            href={`/contact?about=${encodeURIComponent(`tracker:${view.path}/${r.slug}`)}`}
+            href={`/legal/corrections/suggest?page=${encodeURIComponent(`/tracker/${view.path}/${r.slug}`)}`}
             className={buttonClasses({ variant: "outline" })}
           >
             Report a correction

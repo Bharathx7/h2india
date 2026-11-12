@@ -556,6 +556,16 @@ export const Jobs: CollectionConfig = recordCollection({
   ],
 });
 
+/** Event types and attendance as on the events filters (729:10714) and Submit an event (501:8485). */
+export const EVENT_TYPES = [
+  "Conference and expo",
+  "Webinar",
+  "Workshop and training",
+  "Roundtable",
+  "Site visit",
+] as const;
+export const ATTENDANCE = ["In person", "Online", "Hybrid"] as const;
+
 export const Events: CollectionConfig = recordCollection({
   slug: "events",
   labels: { singular: "Event", plural: "Events" },
@@ -569,30 +579,242 @@ export const Events: CollectionConfig = recordCollection({
       fields: [
         { name: "organiser", type: "text", required: true },
         {
-          name: "format",
+          name: "eventType",
+          label: "Type",
           type: "select",
           required: true,
-          options: ["Conference · in person", "Workshop · in person", "Expo · in person", "Webinar · online", "Hybrid"],
+          defaultValue: "Conference and expo",
+          options: [...EVENT_TYPES],
         },
+        { name: "attendance", type: "select", required: true, defaultValue: "In person", options: [...ATTENDANCE] },
       ],
     },
     {
       type: "row",
       fields: [istDate("startsAt", "Starts", true), istDate("endsAt", "Ends")],
     },
-    { name: "venue", type: "text", admin: { description: "Leave empty for online events." } },
+    {
+      type: "row",
+      fields: [
+        { name: "venue", type: "text", admin: { description: "Leave empty for online events." } },
+        { name: "city", type: "text", admin: { description: "For example New Delhi. Used by the City filter." } },
+      ],
+    },
     statesField,
+    {
+      name: "summaryLine",
+      label: "Card line",
+      type: "text",
+      admin: { description: "For example 140 exhibitors · free trade visitor pass." },
+    },
     {
       type: "row",
       fields: [
         { name: "tickets", type: "select", options: ["Free", "Paid"], defaultValue: "Free" },
-        { name: "priceText", label: "Price", type: "text", admin: { description: "For example ₹3,500 to ₹6,000." } },
+        { name: "priceText", label: "Tickets", type: "text", admin: { description: "As the organiser sells them." } },
       ],
     },
     { name: "registrationUrl", label: "Registration link", type: "text" },
-    { name: "description", type: "textarea" },
+    { name: "description", label: "About this event", type: "textarea" },
+    {
+      name: "listedBy",
+      label: "Listed by",
+      type: "text",
+      admin: { description: "For example The organiser · checked by H2 India." },
+    },
+    {
+      name: "featured",
+      type: "checkbox",
+      admin: { position: "sidebar", description: "Editors only (F7): shown first with a Featured label." },
+    },
     { name: "sponsoredPlacement", label: "Sponsored placement (shown with a “Sponsored” label)", type: "checkbox" },
     { name: "inNewsletter", label: "Show in the weekly newsletter", type: "checkbox" },
+    {
+      name: "agenda",
+      label: "Agenda highlights",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "day",
+              type: "date",
+              admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
+            },
+            { name: "time", type: "text", required: true, admin: { description: "10:30 AM" } },
+            { name: "title", type: "text", required: true },
+          ],
+        },
+      ],
+    },
+    {
+      name: "speakers",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "name", type: "text", required: true },
+            { name: "role", type: "text" },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        { name: "exhibitorCount", label: "Exhibitors in total", type: "number", min: 0 },
+        {
+          name: "host",
+          label: "Host",
+          type: "text",
+          admin: { description: "Webinars, for example H2 India editorial team." },
+        },
+      ],
+    },
+    {
+      name: "exhibitors",
+      label: "Exhibitors on H2 India",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "name", type: "text", required: true },
+            { name: "stall", type: "text" },
+            { name: "about", type: "text", admin: { description: "For example Electrolysers." } },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "webinar",
+      type: "group",
+      admin: {
+        condition: (d) => (d as { eventType?: string }).eventType === "Webinar",
+        description: "Registration on H2 India (732:521). The join link is sent only to people who registered.",
+      },
+      fields: [
+        list("learn", "What you'll learn", "point"),
+        {
+          type: "row",
+          fields: [
+            { name: "capacity", label: "Seats", type: "number", min: 1, admin: { description: "Empty: no limit." } },
+            { name: "closed", label: "Registration closed", type: "checkbox" },
+          ],
+        },
+        {
+          name: "joinUrl",
+          label: "Join link (private)",
+          type: "text",
+          admin: { description: "The meeting link. Shown to registered people from 15 minutes before." },
+        },
+        {
+          name: "sponsor",
+          type: "group",
+          fields: [
+            { name: "name", type: "text", admin: { description: "Leave empty when nobody paid for it." } },
+            { name: "disclosure", type: "textarea" },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+        {
+          name: "replay",
+          type: "group",
+          admin: { description: "After the webinar: the replay page (733:22), for registered people only." },
+          fields: [
+            { name: "url", label: "Recording address", type: "text" },
+            { name: "minutes", type: "number", min: 1 },
+            { name: "slidesUrl", label: "Slides link", type: "text" },
+            {
+              name: "slidesNote",
+              label: "Slides file",
+              type: "text",
+              admin: { description: "For example PDF · 2.4 MB" },
+            },
+            {
+              name: "chapters",
+              type: "array",
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    { name: "at", type: "text", required: true },
+                    { name: "title", type: "text", required: true },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "qa",
+              label: "Q&A summary",
+              type: "array",
+              fields: [
+                { name: "question", type: "text", required: true },
+                { name: "answer", type: "textarea", required: true },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "live",
+      label: "Live coverage",
+      type: "group",
+      admin: { description: "During the event (733:493): the page shows these while “Live now” is ticked." },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "on", label: "Live now", type: "checkbox" },
+            { name: "dayLabel", label: "Day", type: "text", admin: { description: "For example Day 2 of 3." } },
+          ],
+        },
+        {
+          name: "announcements",
+          label: "Key announcements",
+          type: "array",
+          fields: [
+            {
+              type: "row",
+              fields: [
+                { name: "day", type: "text", required: true, admin: { description: "Day 2" } },
+                { name: "company", type: "text", required: true },
+                { name: "text", type: "text", required: true },
+              ],
+            },
+          ],
+        },
+        {
+          name: "updates",
+          label: "Live updates",
+          type: "array",
+          fields: [
+            {
+              name: "at",
+              type: "date",
+              required: true,
+              admin: { date: { pickerAppearance: "dayAndTime", displayFormat: "d MMM, h:mm a" } },
+            },
+            { name: "title", type: "text", required: true },
+            { name: "text", type: "textarea" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "coverage",
+      label: "H2 India coverage",
+      type: "group",
+      fields: [
+        { name: "note", type: "textarea" },
+        { name: "articles", type: "relationship", relationTo: "articles", hasMany: true },
+      ],
+    },
     ...sourceFields("Organiser's page"),
     topicsField,
   ],

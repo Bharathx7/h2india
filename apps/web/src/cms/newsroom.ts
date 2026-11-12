@@ -25,7 +25,7 @@ export function levelField(condition?: (data: Record<string, unknown>) => boolea
 }
 
 /** /news/<name> words that are pages of their own, never an article. */
-export const RESERVED_NEWS_SLUGS = ["press-releases", "latest", "page"];
+export const RESERVED_NEWS_SLUGS = ["press-releases", "latest", "page", "submit"];
 
 /** The cache tag every public newsroom read carries; changes to these collections refresh it. */
 export const NEWS_TAG = "newsroom";

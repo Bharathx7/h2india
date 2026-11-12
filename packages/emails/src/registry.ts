@@ -153,7 +153,7 @@ export const TEMPLATES = {
     name: "Submission received",
     frame: "673:352",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "email.newsletter_confirmation": {
     channel: "email",
@@ -177,7 +177,7 @@ export const TEMPLATES = {
     name: "Webinar registration",
     frame: "676:83",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "email.grievance_acknowledgement": {
     channel: "email",
@@ -266,7 +266,7 @@ export const TEMPLATES = {
     name: "Webinar registration",
     frame: "676:405",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "whatsapp.webinar_reminder": {
     channel: "whatsapp",
@@ -274,7 +274,7 @@ export const TEMPLATES = {
     name: "Webinar reminder",
     frame: "676:459",
     step: "5.7",
-    built: false,
+    built: true,
   },
   // SMS · page 16
   "sms.otp_sign_in": {
@@ -408,6 +408,12 @@ export const APPROVED_TEXT = {
   "sms.otp_sign_in": (input: { code: string }) =>
     `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
   "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+  /** 676:405, template webinar_registered: header "You're registered", footer "H2 India webinars". */
+  "whatsapp.webinar_registration": (input: { name: string; title: string; date: string; time: string }) =>
+    `Hi ${input.name}, you're registered for ${input.title}. ${input.date}, ${input.time} IST, online. We'll send the join link 1 hour before, and the replay afterwards.`,
+  /** 676:459, template webinar_reminder: header "Starts in {{1}}", footer "H2 India webinars". */
+  "whatsapp.webinar_reminder": (input: { name: string; title: string; time: string }) =>
+    `Hi ${input.name}, ${input.title} starts at ${input.time} IST today. Join from your phone or laptop with the link below.`,
 } satisfies Partial<Record<TemplateId, (input: never) => string>>;
 
 export type TextTemplateId = keyof typeof APPROVED_TEXT;

@@ -136,7 +136,10 @@ export default async function TermPage({ params }: { params: Params }) {
           ) : null}
           <p className="type-caption text-secondary">
             Spotted an error?{" "}
-            <Link href={`/contact?about=${encodeURIComponent(`glossary:${t.slug}`)}`} className="text-link underline">
+            <Link
+              href={`/legal/corrections/suggest?page=${encodeURIComponent(`/knowledge/glossary/${t.slug}`)}`}
+              className="text-link underline"
+            >
               Suggest a correction
             </Link>
           </p>

@@ -15,6 +15,9 @@ export const REFERENCE_TYPES = {
   EV: "Event",
   SUP: "Support request",
   JOB: "Job post",
+  PR: "Press release",
+  COR: "Correction",
+  WFU: "Write for us pitch",
 } as const;
 
 /** Digits after the year. Support requests use five, as drawn (528:664, "SUP-2026-01942"). */

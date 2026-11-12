@@ -44,6 +44,15 @@ export const FILE_KINDS = {
     visibility: "public",
     sensitive: false,
   },
+  /** Images with a press release (504:8): "JPG or PNG, up to 10 MB each, up to 5 images". */
+  press_image: {
+    label: "Image",
+    types: ["image/jpeg", "image/png"],
+    maxMb: 10,
+    maxCount: 5,
+    visibility: "public",
+    sensitive: false,
+  },
   delivery_photo: {
     label: "Photo",
     types: ["image/jpeg", "image/png"],

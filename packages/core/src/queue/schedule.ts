@@ -2,6 +2,8 @@ import { schema } from "@h2india/db";
 import { sql } from "drizzle-orm";
 import { pruneAuditLog } from "../audit";
 import { runDeadlines } from "../clocks/clocks";
+// Registers the webinar reminder handler in the worker (step 5.7).
+import "../events/reminders";
 import { expireJoinRequests } from "../companies/join-requests";
 import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";

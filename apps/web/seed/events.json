@@ -3,10 +3,50 @@
     "slug": "specifying-pem-electrolysers-webinar",
     "name": "Specifying PEM electrolysers for Indian sites",
     "organiser": "H2 India",
-    "format": "Webinar · online",
-    "startsAt": "+8d 16:00",
-    "endsAt": "+8d 17:00",
+    "eventType": "Webinar",
+    "attendance": "Online",
+    "startsAt": "+6d 16:00",
+    "endsAt": "+6d 17:00",
     "tickets": "Free",
+    "host": "H2 India editorial team",
+    "description": "How to write a specification for a PEM electrolyser that suppliers can quote against. Sample event: replace before launch.",
+    "webinar": {
+      "learn": [
+        {
+          "point": "Which numbers to put in your specification"
+        },
+        {
+          "point": "How to compare quotes on the same basis"
+        }
+      ],
+      "capacity": 300,
+      "joinUrl": "https://example.org/sample/meeting/pem-spec",
+      "sponsor": {
+        "name": "Konkan Hydrogen Tech",
+        "disclosure": "Konkan Hydrogen Tech paid for this webinar. H2 India hosts it and moderates the questions.",
+        "profileSlug": "konkan-hydrogen-tech"
+      }
+    },
+    "agenda": [
+      {
+        "time": "4:00 PM",
+        "title": "Welcome and how questions work · H2 India editorial team"
+      },
+      {
+        "time": "4:05 PM",
+        "title": "What goes in a specification"
+      },
+      {
+        "time": "4:40 PM",
+        "title": "Your questions, moderated by H2 India"
+      }
+    ],
+    "speakers": [
+      {
+        "name": "Anand Deshpande",
+        "role": "CTO, Hydrotek Systems · 14 years designing electrolyser plants"
+      }
+    ],
     "sourceUrl": "https://example.org/sample/pem-webinar",
     "publish": "yes"
   },
@@ -14,35 +54,281 @@
     "slug": "green-hydrogen-india-summit-2026",
     "name": "Green Hydrogen India Summit 2026",
     "organiser": "Sample organiser",
-    "format": "Conference · in person",
-    "venue": "Bharat Mandapam, New Delhi",
-    "startsAt": "+24d 09:30",
-    "endsAt": "+25d 18:00",
+    "eventType": "Conference and expo",
+    "attendance": "In person",
+    "city": "Greater Noida",
+    "venue": "India Expo Centre, Greater Noida",
+    "startsAt": "+4d 09:30",
+    "endsAt": "+5d 18:00",
     "tickets": "Paid",
+    "summaryLine": "tickets on the organiser's site",
+    "registrationUrl": "https://example.org/sample/summit-tickets",
+    "description": "Two days of talks on India's hydrogen mission and its supply chain. Sample event: replace before launch.",
     "sourceUrl": "https://example.org/sample/summit",
     "publish": "yes"
   },
   {
-    "slug": "hydrogen-safety-basics-training",
-    "name": "Hydrogen safety basics for plant teams",
-    "organiser": "Sample organiser",
-    "format": "Webinar · online",
-    "startsAt": "+32d 10:00",
-    "endsAt": "+32d 13:00",
-    "tickets": "Paid",
-    "sourceUrl": "https://example.org/sample/safety-training",
+    "slug": "electrolyser-buying-in-india-webinar",
+    "name": "Electrolyser buying in India: what to check before you order",
+    "organiser": "H2 India",
+    "eventType": "Webinar",
+    "attendance": "Online",
+    "startsAt": "+13d 16:00",
+    "endsAt": "+13d 17:00",
+    "tickets": "Free",
+    "host": "H2 India editorial team",
+    "description": "What 62 buyers told us about choosing an electrolyser supplier. Sample event: replace before launch.",
+    "webinar": {
+      "learn": [
+        {
+          "point": "What buyers check first"
+        },
+        {
+          "point": "Guarantees worth asking for"
+        }
+      ],
+      "capacity": 500,
+      "joinUrl": "https://example.org/sample/meeting/buying"
+    },
+    "sourceUrl": "https://example.org/sample/buying-webinar",
     "publish": "yes"
   },
   {
-    "slug": "inside-an-indian-electrolyser-factory",
-    "name": "Inside an Indian electrolyser factory",
+    "slug": "india-green-hydrogen-expo-2026",
+    "name": "India Green Hydrogen Expo 2026",
     "organiser": "Sample organiser",
-    "format": "Workshop · in person",
-    "venue": "Chakan, Pune",
-    "startsAt": "+66d 10:00",
-    "endsAt": "+66d 13:00",
+    "eventType": "Conference and expo",
+    "attendance": "In person",
+    "city": "New Delhi",
+    "venue": "Halls 5 and 6, Bharat Mandapam, Pragati Maidan, New Delhi 110001",
+    "startsAt": "+13d 10:00",
+    "endsAt": "+15d 18:00",
+    "tickets": "Paid",
+    "featured": "yes",
+    "summaryLine": "140 exhibitors · free trade visitor pass",
+    "priceText": "Free trade visitor pass. Conference pass sold by the organiser.",
+    "registrationUrl": "https://example.org/sample/expo-register",
+    "listedBy": "The organiser · checked by H2 India",
+    "description": "Three days of exhibits and talks on electrolysers, storage, compression and fuel cells. Day 3 has a closed buyer-supplier roundtable on procuring electrolysers. Sample event: replace before launch.",
+    "agenda": [
+      {
+        "day": "+13d",
+        "time": "10:30 AM",
+        "title": "Opening plenary: India's hydrogen mission in year three"
+      },
+      {
+        "day": "+13d",
+        "time": "2:00 PM",
+        "title": "Panel: making electrolysers in India"
+      },
+      {
+        "day": "+14d",
+        "time": "11:00 AM",
+        "title": "Storage and compression: what PESO approvals need"
+      },
+      {
+        "day": "+15d",
+        "time": "11:00 AM",
+        "title": "Buyer-supplier roundtable (closed, by invitation)"
+      }
+    ],
+    "speakers": [
+      {
+        "name": "Anand Deshpande",
+        "role": "CTO, Hydrotek Systems"
+      },
+      {
+        "name": "Arjun Raghavan",
+        "role": "Owner, Pranava H2"
+      },
+      {
+        "name": "Meera Pillai",
+        "role": "Procurement, Greenfield Hydrogen"
+      }
+    ],
+    "exhibitorCount": 140,
+    "exhibitors": [
+      {
+        "name": "Hydrotek Systems",
+        "stall": "H2-14",
+        "about": "Electrolysers",
+        "profileSlug": "hydrotek-systems"
+      },
+      {
+        "name": "Pranava H2",
+        "stall": "H2-22",
+        "about": "Electrolysers",
+        "profileSlug": "pranava-h2"
+      },
+      {
+        "name": "Polar Composites",
+        "stall": "H3-05",
+        "about": "Cylinders",
+        "profileSlug": "polar-composites"
+      },
+      {
+        "name": "Konkan Hydrogen Tech",
+        "stall": "H2-30",
+        "about": "Electrolysers",
+        "profileSlug": "konkan-hydrogen-tech"
+      }
+    ],
+    "coverage": {
+      "note": "Live updates, interviews and an exhibitor directory from the first day. Before then, read our preview."
+    },
+    "sourceUrl": "https://example.org/sample/expo",
+    "publish": "yes"
+  },
+  {
+    "slug": "sizing-pem-electrolyser-fertiliser-plant",
+    "name": "Sizing a PEM electrolyser for a fertiliser plant",
+    "organiser": "H2 India",
+    "eventType": "Webinar",
+    "attendance": "Online",
+    "startsAt": "+26d 15:00",
+    "endsAt": "+26d 16:00",
     "tickets": "Free",
-    "sourceUrl": "https://example.org/sample/factory-visit",
+    "host": "H2 India editorial team",
+    "webinar": {
+      "learn": [
+        {
+          "point": "How to go from an ammonia target in tonnes a day to electrolyser megawatts"
+        },
+        {
+          "point": "What balance of plant, water treatment and power supply add to the stack"
+        },
+        {
+          "point": "Worked numbers from a 10 MW unit at an Indian fertiliser site"
+        }
+      ],
+      "capacity": 2,
+      "joinUrl": "https://example.org/sample/meeting/sizing",
+      "sponsor": {
+        "name": "Hydrotek Systems",
+        "disclosure": "Hydrotek Systems paid for this webinar. H2 India hosts it and moderates the questions.",
+        "profileSlug": "hydrotek-systems"
+      }
+    },
+    "agenda": [
+      {
+        "time": "3:00 PM",
+        "title": "Welcome and how questions work · H2 India editorial team"
+      },
+      {
+        "time": "3:05 PM",
+        "title": "From ammonia target to electrolyser size · Anand Deshpande"
+      },
+      {
+        "time": "3:25 PM",
+        "title": "Balance of plant, water and power supply · Anand Deshpande"
+      },
+      {
+        "time": "3:45 PM",
+        "title": "Your questions, moderated by H2 India"
+      }
+    ],
+    "speakers": [
+      {
+        "name": "Anand Deshpande",
+        "role": "CTO, Hydrotek Systems · 14 years designing electrolyser plants"
+      }
+    ],
+    "sourceUrl": "https://example.org/sample/sizing-webinar",
+    "publish": "yes"
+  },
+  {
+    "slug": "safe-hydrogen-storage-workshop-2026",
+    "name": "Safe hydrogen storage workshop 2026",
+    "organiser": "Konkan Hydrogen Tech",
+    "eventType": "Workshop and training",
+    "attendance": "In person",
+    "city": "Ratnagiri",
+    "venue": "Konkan Hydrogen Tech test facility, Ratnagiri",
+    "startsAt": "+27d 09:30",
+    "endsAt": "+27d 17:00",
+    "tickets": "Free",
+    "summaryLine": "Full day · by Konkan Hydrogen Tech",
+    "registrationUrl": "https://example.org/sample/storage-workshop",
+    "sourceUrl": "https://example.org/sample/storage-workshop",
+    "publish": "yes"
+  },
+  {
+    "slug": "hydrogen-technology-show-2027",
+    "name": "Hydrogen Technology Show 2027",
+    "organiser": "Sample organiser",
+    "eventType": "Conference and expo",
+    "attendance": "In person",
+    "city": "New Delhi",
+    "venue": "New Delhi",
+    "startsAt": "+160d 10:00",
+    "endsAt": "+162d 18:00",
+    "tickets": "Paid",
+    "summaryLine": "dates to be confirmed by the organiser",
+    "sourceUrl": "https://example.org/sample/tech-show",
+    "publish": "yes"
+  },
+  {
+    "slug": "peso-approvals-hydrogen-cylinders-webinar",
+    "name": "PESO approvals for hydrogen cylinders, step by step",
+    "organiser": "H2 India",
+    "eventType": "Webinar",
+    "attendance": "Online",
+    "startsAt": "-28d 15:00",
+    "endsAt": "-28d 15:48",
+    "tickets": "Free",
+    "host": "H2 India expert session",
+    "webinar": {
+      "capacity": 500,
+      "replay": {
+        "url": "https://example.org/sample/replays/peso.mp4",
+        "minutes": 48,
+        "slidesUrl": "https://example.org/sample/replays/peso-slides.pdf",
+        "slidesNote": "PDF · 2.4 MB",
+        "chapters": [
+          {
+            "at": "00:00",
+            "title": "Who needs PESO approval, and for what"
+          },
+          {
+            "at": "05:30",
+            "title": "Type III and Type IV cylinders: what changes"
+          },
+          {
+            "at": "14:10",
+            "title": "Documents and test certificates to prepare"
+          },
+          {
+            "at": "27:45",
+            "title": "Timelines and the most common rejections"
+          },
+          {
+            "at": "38:20",
+            "title": "Questions from the audience"
+          }
+        ],
+        "qa": [
+          {
+            "question": "Does a cylinder approved abroad still need PESO approval?",
+            "answer": "Yes. Imported cylinders need PESO approval before they can be filled or used in India."
+          },
+          {
+            "question": "Who applies: the maker or the importer?",
+            "answer": "The maker or its authorised importer applies, not the buyer."
+          }
+        ]
+      }
+    },
+    "speakers": [
+      {
+        "name": "H2 India editorial team",
+        "role": "Host"
+      },
+      {
+        "name": "Polar Composites",
+        "role": "Cylinder maker · guest speaker"
+      }
+    ],
+    "sourceUrl": "https://example.org/sample/peso-webinar",
     "publish": "yes"
   }
 ]

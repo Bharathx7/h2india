@@ -54,6 +54,14 @@ work<{ fileId: string }>(
 // Search (step 5.2): a save nudges this queue; the web app applies the waiting outbox rows to the index.
 work(QUEUES.index, () => callWeb("/api/internal/search-sync"), 1);
 
+// Messages that live in the web app (email templates render there): webinar reminders (step 5.7). Each job carries
+// only ids; the web app reads the rest and sends at most once.
+work<Record<string, string>>(
+  QUEUES.notify,
+  (job) => callWeb(`/api/internal/notify-job?${new URLSearchParams({ job: job.name, ...job.data }).toString()}`),
+  2,
+);
+
 // One at a time, so two ticks never race; each job reads its work from the database.
 work(QUEUES.clocks, (job) => runScheduled(job.name), 1);
 

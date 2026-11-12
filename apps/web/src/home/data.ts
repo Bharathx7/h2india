@@ -335,8 +335,8 @@ export async function loadEvents(now = new Date(), limit = 4): Promise<EventView
     depth: 0,
   });
   return res.docs.map((e: Event) => {
-    const online = e.format.toLowerCase().includes("online");
-    const city = e.venue?.split(",").pop()?.trim() ?? "";
+    const online = e.attendance === "Online";
+    const city = e.city ?? e.venue?.split(",").pop()?.trim() ?? "";
     const where = online ? "Online" : city || "In person";
     const startDay = ist(e.startsAt, { year: "numeric", month: "2-digit", day: "2-digit" });
     const endDay = e.endsAt ? ist(e.endsAt, { year: "numeric", month: "2-digit", day: "2-digit" }) : startDay;
@@ -349,7 +349,7 @@ export async function loadEvents(now = new Date(), limit = 4): Promise<EventView
     return {
       day: ist(e.startsAt, { day: "numeric" }),
       month: ist(e.startsAt, { month: "short" }).toUpperCase(),
-      kind: `${e.format.split("·")[0]?.trim() ?? e.format} · ${where}`,
+      kind: `${e.eventType.split(" and ")[0] ?? e.eventType} · ${where}`,
       title: e.name,
       meta,
       href: `/events/${e.slug}`,

@@ -10,6 +10,8 @@ import * as migration_20261112_151557_newsroom_variants from './20261112_151557_
 import * as migration_20261112_155725_schemes from './20261112_155725_schemes';
 import * as migration_20261112_164411_opportunities from './20261112_164411_opportunities';
 import * as migration_20261112_175006_knowledge_pages from './20261112_175006_knowledge_pages';
+import * as migration_20261112_183145_events_submissions from './20261112_183145_events_submissions';
+import * as migration_20261112_183156_events_drop_format from './20261112_183156_events_drop_format';
 
 export const migrations = [
   {
@@ -70,6 +72,16 @@ export const migrations = [
   {
     up: migration_20261112_175006_knowledge_pages.up,
     down: migration_20261112_175006_knowledge_pages.down,
-    name: '20261112_175006_knowledge_pages'
+    name: '20261112_175006_knowledge_pages',
+  },
+  {
+    up: migration_20261112_183145_events_submissions.up,
+    down: migration_20261112_183145_events_submissions.down,
+    name: '20261112_183145_events_submissions',
+  },
+  {
+    up: migration_20261112_183156_events_drop_format.up,
+    down: migration_20261112_183156_events_drop_format.down,
+    name: '20261112_183156_events_drop_format'
   },
 ];

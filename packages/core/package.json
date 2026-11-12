@@ -23,7 +23,9 @@
     "./schemes": "./src/schemes/eligibility.ts",
     "./opportunities": "./src/opportunities/index.ts",
     "./opportunities/rules": "./src/opportunities/jobs.ts",
-    "./media": "./src/media/index.ts"
+    "./media": "./src/media/index.ts",
+    "./events": "./src/events/index.ts",
+    "./events/rules": "./src/events/submissions.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

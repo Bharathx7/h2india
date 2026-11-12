@@ -108,10 +108,13 @@ export default async function MethodologyPage() {
             <p className="type-body-sm text-body">
               Tell us the record, what&apos;s wrong and your source. We reply within 1 working day.
             </p>
-            <Link href="/contact?about=tracker" className={cx(buttonClasses({ size: "sm" }), "self-start")}>
+            <Link
+              href="/legal/corrections/suggest?page=/tracker"
+              className={cx(buttonClasses({ size: "sm" }), "self-start")}
+            >
               Report a correction
             </Link>
-            <Link href="/corrections" className="type-label-sm text-link hover:underline">
+            <Link href="/legal/corrections" className="type-label-sm text-link hover:underline">
               Corrections policy
             </Link>
           </section>

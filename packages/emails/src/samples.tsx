@@ -7,6 +7,8 @@ import {
   renderJoinRequestToAdmin,
   renderRecovery,
   renderReportDownload,
+  renderSubmissionReceived,
+  renderWebinarRegistered,
   renderSignInCode,
   renderVerifyEmail,
 } from "./index";
@@ -125,6 +127,53 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           days: 7,
         }),
       );
+    case "email.webinar_registration":
+      return email(
+        renderWebinarRegistered(appUrl, {
+          name: "Ravi Kulkarni",
+          title: "Electrolyser buying in India: what to check before you order",
+          date: "Thursday 26 Nov 2026",
+          time: "4:00 to 5:00 PM IST",
+          short: "26 Nov at 4 PM IST",
+          joinUrl: `${appUrl}/events/electrolyser-buying/join`,
+          host: "H2 India editorial team",
+          calendar: { google: appUrl, outlook: appUrl, ics: `${appUrl}/events/electrolyser-buying/ics` },
+        }),
+      );
+    case "email.submission_received":
+      return email(
+        renderSubmissionReceived(appUrl, {
+          kind: "event",
+          name: "Rohan Mehta",
+          reference: "EV-2026-0412",
+          title: "Safe hydrogen storage workshop 2026",
+          rows: [
+            { label: "Event", value: "Safe hydrogen storage workshop 2026" },
+            { label: "Type and date", value: "Workshop · 10 Dec 2026" },
+            { label: "Place", value: "Ratnagiri, Maharashtra" },
+          ],
+          url: `${appUrl}/events/submit`,
+        }),
+      );
+    case "whatsapp.webinar_registration":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.webinar_registration"]({
+          name: "Ravi",
+          title: "Electrolyser buying in India: what to check before you order",
+          date: "Thursday 26 Nov 2026",
+          time: "4:00 to 5:00 PM",
+        }),
+      };
+    case "whatsapp.webinar_reminder":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.webinar_reminder"]({
+          name: "Ravi",
+          title: "Electrolyser buying in India: what to check before you order",
+          time: "4:00 PM",
+        }),
+      };
     case "email.test": {
       const element = (
         <Notice

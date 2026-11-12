@@ -75,6 +75,7 @@ export interface Config {
     jobs: Job;
     events: Event;
     'source-changes': SourceChange;
+    submissions: Submission;
     chapters: Chapter;
     guides: Guide;
     glossary: Glossary;
@@ -113,6 +114,7 @@ export interface Config {
     jobs: JobsSelect<false> | JobsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'source-changes': SourceChangesSelect<false> | SourceChangesSelect<true>;
+    submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
     chapters: ChaptersSelect<false> | ChaptersSelect<true>;
     guides: GuidesSelect<false> | GuidesSelect<true>;
     glossary: GlossarySelect<false> | GlossarySelect<true>;
@@ -1357,7 +1359,8 @@ export interface Event {
    */
   slug: string;
   organiser: string;
-  format: 'Conference · in person' | 'Workshop · in person' | 'Expo · in person' | 'Webinar · online' | 'Hybrid';
+  eventType: 'Conference and expo' | 'Webinar' | 'Workshop and training' | 'Roundtable' | 'Site visit';
+  attendance: 'In person' | 'Online' | 'Hybrid';
   /**
    * India time (IST).
    */
@@ -1370,6 +1373,10 @@ export interface Event {
    * Leave empty for online events.
    */
   venue?: string | null;
+  /**
+   * For example New Delhi. Used by the City filter.
+   */
+  city?: string | null;
   states?:
     | (
         | 'all-india'
@@ -1411,15 +1418,150 @@ export interface Event {
         | 'west-bengal'
       )[]
     | null;
+  /**
+   * For example 140 exhibitors · free trade visitor pass.
+   */
+  summaryLine?: string | null;
   tickets?: ('Free' | 'Paid') | null;
   /**
-   * For example ₹3,500 to ₹6,000.
+   * As the organiser sells them.
    */
   priceText?: string | null;
   registrationUrl?: string | null;
   description?: string | null;
+  /**
+   * For example The organiser · checked by H2 India.
+   */
+  listedBy?: string | null;
+  /**
+   * Editors only (F7): shown first with a Featured label.
+   */
+  featured?: boolean | null;
   sponsoredPlacement?: boolean | null;
   inNewsletter?: boolean | null;
+  agenda?:
+    | {
+        day?: string | null;
+        /**
+         * 10:30 AM
+         */
+        time: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  speakers?:
+    | {
+        name: string;
+        role?: string | null;
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  exhibitorCount?: number | null;
+  /**
+   * Webinars, for example H2 India editorial team.
+   */
+  host?: string | null;
+  exhibitors?:
+    | {
+        name: string;
+        stall?: string | null;
+        /**
+         * For example Electrolysers.
+         */
+        about?: string | null;
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Registration on H2 India (732:521). The join link is sent only to people who registered.
+   */
+  webinar?: {
+    learn?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Empty: no limit.
+     */
+    capacity?: number | null;
+    closed?: boolean | null;
+    /**
+     * The meeting link. Shown to registered people from 15 minutes before.
+     */
+    joinUrl?: string | null;
+    sponsor?: {
+      /**
+       * Leave empty when nobody paid for it.
+       */
+      name?: string | null;
+      disclosure?: string | null;
+      profileSlug?: string | null;
+    };
+    /**
+     * After the webinar: the replay page (733:22), for registered people only.
+     */
+    replay?: {
+      url?: string | null;
+      minutes?: number | null;
+      slidesUrl?: string | null;
+      /**
+       * For example PDF · 2.4 MB
+       */
+      slidesNote?: string | null;
+      chapters?:
+        | {
+            at: string;
+            title: string;
+            id?: string | null;
+          }[]
+        | null;
+      qa?:
+        | {
+            question: string;
+            answer: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  /**
+   * During the event (733:493): the page shows these while “Live now” is ticked.
+   */
+  live?: {
+    on?: boolean | null;
+    /**
+     * For example Day 2 of 3.
+     */
+    dayLabel?: string | null;
+    announcements?:
+      | {
+          /**
+           * Day 2
+           */
+          day: string;
+          company: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    updates?:
+      | {
+          at: string;
+          title: string;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  coverage?: {
+    note?: string | null;
+    articles?: (number | Article)[] | null;
+  };
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
    */
@@ -1489,6 +1631,43 @@ export interface SourceChange {
   detectedAt: string;
   status: 'Open' | 'Dismissed' | 'Confirmed';
   decidedBy?: (number | null) | Editor;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Events, press releases, corrections and pitches from the public forms, newest first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions".
+ */
+export interface Submission {
+  id: number;
+  reference: string;
+  kind: 'event' | 'press_release' | 'correction' | 'pitch';
+  status: 'Under review' | 'Published' | 'Needs changes' | 'Declined';
+  title: string;
+  /**
+   * Everything the form asked, as sent.
+   */
+  details:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  /**
+   * File ids (logo, images), opened through the files service.
+   */
+  files?: string[] | null;
+  submittedBy?: string | null;
+  organisationId?: string | null;
+  reviewNote?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3003,6 +3182,10 @@ export interface PayloadLockedDocument {
         value: number | SourceChange;
       } | null)
     | ({
+        relationTo: 'submissions';
+        value: number | Submission;
+      } | null)
+    | ({
         relationTo: 'chapters';
         value: number | Chapter;
       } | null)
@@ -3613,17 +3796,119 @@ export interface EventsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   organiser?: T;
-  format?: T;
+  eventType?: T;
+  attendance?: T;
   startsAt?: T;
   endsAt?: T;
   venue?: T;
+  city?: T;
   states?: T;
+  summaryLine?: T;
   tickets?: T;
   priceText?: T;
   registrationUrl?: T;
   description?: T;
+  listedBy?: T;
+  featured?: T;
   sponsoredPlacement?: T;
   inNewsletter?: T;
+  agenda?:
+    | T
+    | {
+        day?: T;
+        time?: T;
+        title?: T;
+        id?: T;
+      };
+  speakers?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  exhibitorCount?: T;
+  host?: T;
+  exhibitors?:
+    | T
+    | {
+        name?: T;
+        stall?: T;
+        about?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  webinar?:
+    | T
+    | {
+        learn?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        capacity?: T;
+        closed?: T;
+        joinUrl?: T;
+        sponsor?:
+          | T
+          | {
+              name?: T;
+              disclosure?: T;
+              profileSlug?: T;
+            };
+        replay?:
+          | T
+          | {
+              url?: T;
+              minutes?: T;
+              slidesUrl?: T;
+              slidesNote?: T;
+              chapters?:
+                | T
+                | {
+                    at?: T;
+                    title?: T;
+                    id?: T;
+                  };
+              qa?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+            };
+      };
+  live?:
+    | T
+    | {
+        on?: T;
+        dayLabel?: T;
+        announcements?:
+          | T
+          | {
+              day?: T;
+              company?: T;
+              text?: T;
+              id?: T;
+            };
+        updates?:
+          | T
+          | {
+              at?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
+  coverage?:
+    | T
+    | {
+        note?: T;
+        articles?: T;
+      };
   sourceUrl?: T;
   documents?:
     | T
@@ -3662,6 +3947,26 @@ export interface SourceChangesSelect<T extends boolean = true> {
   detectedAt?: T;
   status?: T;
   decidedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions_select".
+ */
+export interface SubmissionsSelect<T extends boolean = true> {
+  reference?: T;
+  kind?: T;
+  status?: T;
+  title?: T;
+  details?: T;
+  contactName?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  files?: T;
+  submittedBy?: T;
+  organisationId?: T;
+  reviewNote?: T;
   updatedAt?: T;
   createdAt?: T;
 }

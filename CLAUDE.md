@@ -155,6 +155,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A guide with product categories is a buyer's guide (`/knowledge/guides/<slug>`); the Insights page redirects it there.
 - Links inside a sentence are underlined (axe "link-in-text-block"); colour alone isn't enough.
 
+## Events, webinars and submissions (step 5.7)
+
+- Webinar registrations live in `core.webinar_registrations`; register only through `registerForWebinar()` (`@h2india/core/events`): it counts seats under a lock, stores the consent words and version, and starts the reminder deadline.
+- Reminders: the deadline engine fires (`events/reminders.ts`, registered by the schedule), the handler only queues a notify job with a stable id, the worker calls `/api/internal/notify-job`, and `claimReminder()` makes each reminder go at most once. Don't send reminders any other way.
+- Join and replay links in emails are signed with `registrationToken()`; a replay shows only to a registered, signed-in person or through that link.
+- Public forms post through `submitContent()` (`apps/web/src/submissions/actions.ts`): checks in `@h2india/core/events/rules`, a reference (EV-, PR-, COR-, WFU-), the Submissions queue, the audit log and Submission received. Events and press releases need an account.
+- Messages whose templates live in `@h2india/emails` are sent from core (`notify/events.ts`); the web app doesn't import the emails package.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
