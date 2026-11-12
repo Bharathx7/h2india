@@ -1,0 +1,183 @@
+[
+  {
+    "slug": "green-ammonia-at-mundra",
+    "name": "Green ammonia at Mundra",
+    "company": "Kutch Ammonia Works",
+    "product": "Green ammonia",
+    "location": "Mundra, Kutch, Gujarat",
+    "state": "gujarat",
+    "latitude": 22.84,
+    "longitude": 69.72,
+    "capacityTpa": 25000,
+    "productCapacityTpa": 140000,
+    "electrolyserMw": 220,
+    "technology": "Alkaline",
+    "renewablePower": "Solar and wind hybrid, 600 MW",
+    "scheme": "SIGHT Mode 2A, Tranche I",
+    "underSight": "yes",
+    "expectedStartYear": 2028,
+    "estimates": ["Product capacity", "Expected start-up"],
+    "stage": "Under construction",
+    "statusDate": "2026-11-10",
+    "statusHistory": [
+      {
+        "status": "Announced",
+        "date": "2025-03-01",
+        "source": "Company announcement"
+      },
+      {
+        "status": "Awarded",
+        "date": "2025-08-01",
+        "source": "SECI result notice"
+      },
+      {
+        "status": "Contracted",
+        "date": "2026-01-01",
+        "source": "Offtake agreement in company filing"
+      },
+      {
+        "status": "Under construction",
+        "date": "2026-11-10",
+        "source": "Company update with site photos"
+      }
+    ],
+    "linkedCompanies": [
+      {
+        "name": "Kutch Ammonia Works",
+        "role": "Developer · Gujarat"
+      },
+      {
+        "name": "Konkan Hydrogen Tech",
+        "role": "Electrolyser supply, per company announcement"
+      }
+    ],
+    "source": {
+      "name": "Company update with site photos",
+      "tier": "company",
+      "asOf": "2026-11-10"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-ammonia-unit-paradip",
+    "name": "Green ammonia unit, Paradip",
+    "company": "Deccan Ammonia Works",
+    "product": "Green ammonia",
+    "location": "Paradip, Odisha",
+    "state": "odisha",
+    "latitude": 20.27,
+    "longitude": 86.67,
+    "capacityTpa": 18000,
+    "technology": "Alkaline",
+    "underSight": "yes",
+    "stage": "Contracted",
+    "statusDate": "2026-10-30",
+    "source": {
+      "name": "Offtake contract in company filing",
+      "tier": "filing",
+      "asOf": "2026-10-30"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "hydrogen-for-refinery-hydrotreating",
+    "name": "Hydrogen for refinery hydrotreating",
+    "company": "Public sector refinery",
+    "product": "Green hydrogen",
+    "location": "Haryana",
+    "state": "haryana",
+    "latitude": 29.39,
+    "longitude": 76.97,
+    "capacityTpa": 10000,
+    "technology": "PEM",
+    "stage": "Awarded",
+    "statusDate": "2026-07-01",
+    "source": {
+      "name": "MNRE notice",
+      "tier": "official",
+      "asOf": "2026-07-15"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-hydrogen-for-a-urea-plant",
+    "name": "Green hydrogen for a urea plant",
+    "company": "Fertiliser cooperative",
+    "product": "Green hydrogen",
+    "location": "Uttar Pradesh",
+    "state": "uttar-pradesh",
+    "latitude": 25.55,
+    "longitude": 82.09,
+    "capacityTpa": 6000,
+    "technology": "PEM",
+    "underSight": "yes",
+    "stage": "Awarded",
+    "statusDate": "2026-07-01",
+    "source": {
+      "name": "SECI result",
+      "tier": "official",
+      "asOf": "2026-11-07"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "port-hydrogen-hub-kandla",
+    "name": "Port hydrogen hub, Kandla",
+    "company": "Private developer",
+    "product": "Green hydrogen",
+    "location": "Kandla, Gujarat",
+    "state": "gujarat",
+    "latitude": 23.03,
+    "longitude": 70.22,
+    "capacityTpa": 50000,
+    "technology": "Alkaline",
+    "stage": "Announced",
+    "statusDate": "2026-06-01",
+    "source": {
+      "name": "Port notice",
+      "tier": "official",
+      "asOf": "2026-11-05"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "hydrogen-storage-pilot-himachal",
+    "name": "Hydrogen storage pilot",
+    "company": "State power utility",
+    "product": "Green hydrogen",
+    "location": "Himachal Pradesh",
+    "state": "himachal-pradesh",
+    "latitude": 31.1,
+    "longitude": 77.17,
+    "capacityTpa": 300,
+    "technology": "PEM",
+    "stage": "Under construction",
+    "statusDate": "2026-09-01",
+    "source": {
+      "name": "Utility notice",
+      "tier": "official",
+      "asOf": "2026-09-15"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "talegaon-demonstration-plant",
+    "name": "Talegaon demonstration plant",
+    "company": "Greenfield Hydrogen",
+    "product": "Green hydrogen",
+    "location": "Talegaon, Pune, Maharashtra",
+    "state": "maharashtra",
+    "latitude": 18.73,
+    "longitude": 73.68,
+    "capacityTpa": 20,
+    "technology": "PEM",
+    "stage": "Commissioned",
+    "statusDate": "2026-11-03",
+    "source": {
+      "name": "Company announcement",
+      "tier": "company",
+      "asOf": "2026-11-03"
+    },
+    "publish": "yes"
+  }
+]

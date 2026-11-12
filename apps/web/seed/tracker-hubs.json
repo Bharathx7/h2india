@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "deendayal-port",
+    "name": "Deendayal Port",
+    "kind": "Hub",
+    "state": "gujarat",
+    "location": "Kandla, Gujarat",
+    "latitude": 23.0,
+    "longitude": 70.2,
+    "source": {
+      "name": "Port notice",
+      "tier": "official",
+      "asOf": "2026-11-05"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "pune-valley",
+    "name": "Pune valley",
+    "kind": "Valley",
+    "state": "maharashtra",
+    "location": "Pune, Maharashtra",
+    "latitude": 18.52,
+    "longitude": 73.86,
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-01"
+    },
+    "publish": "yes"
+  }
+]

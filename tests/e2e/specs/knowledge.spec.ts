@@ -120,7 +120,8 @@ test("downloading a gated report records consent and sends the file", async ({ p
   const title = `Electrolyser buying in India 2026 ${unique()}`;
   const created = await cms(page.request, "POST", "reports", {
     title,
-    kicker: "SURVEY · 2026",
+    kicker: "Survey",
+    publishedOn: "2026-11-04T00:00:00.000Z",
     subtitle: "what 62 buyers told us",
     summary: "We asked 62 people who buy or specify electrolysers in India.",
     gated: true,

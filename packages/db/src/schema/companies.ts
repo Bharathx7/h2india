@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, index, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { id, softDelete, timestamps, utc } from "../columns";
 import { users } from "./auth";
 import { core } from "./core";
@@ -30,6 +30,43 @@ export const organisations = core.table(
       .where(sql`${t.pan} IS NOT NULL AND ${t.deletedAt} IS NULL`),
     index("organisations_legal_name_idx").on(sql`lower(${t.legalName})`),
   ],
+);
+
+/**
+ * A company's public profile basics (step 4.6, A38; frame 481:8). Pre-seeded profiles come from the importer as
+ * Unclaimed until the company claims them (step 6.7). `import_key` is the stable key from the import file, so running
+ * the same import again updates instead of duplicating.
+ */
+export const companyProfiles = core.table(
+  "company_profiles",
+  {
+    organisationId: uuid("organisation_id")
+      .primaryKey()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull().unique(),
+    importKey: text("import_key").unique(),
+    tradeName: text("trade_name").notNull(),
+    /** The chips on 481:8, for example Manufacturer, Services. */
+    types: text("types")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    city: text("city"),
+    website: text("website"),
+    categories: text("categories")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    summary: text("summary"),
+    foundedYear: integer("founded_year"),
+    /** For example 51–200 (481:8 "51–200 employees"). */
+    employees: text("employees"),
+    /** Unclaimed · Claimed (step 6.7 adds the claim states). */
+    claimStatus: text("claim_status").notNull().default("Claimed"),
+    sample: boolean("sample").notNull().default(false),
+    ...timestamps,
+  },
+  (t) => [index("company_profiles_claim_idx").on(t.claimStatus)],
 );
 
 /** A GSTIN of a company and the result of its check on the GST portal. */

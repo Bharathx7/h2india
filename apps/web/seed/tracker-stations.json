@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "highway-corridor-mumbai-pune",
+    "name": "Highway corridor, Mumbai–Pune",
+    "operator": "Oil marketing company",
+    "pressures": [350, 700],
+    "capacityKgPerDay": 1000,
+    "vehiclesServed": "Trucks, buses",
+    "closingDate": "2026-12-04",
+    "state": "maharashtra",
+    "latitude": 18.75,
+    "longitude": 73.4,
+    "stage": "Tender open",
+    "statusDate": "2026-11-10",
+    "source": {
+      "name": "Tender portal",
+      "tier": "official",
+      "asOf": "2026-11-10"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "bus-depot-bengaluru",
+    "name": "Bus depot, Bengaluru",
+    "operator": "City bus operator",
+    "pressures": [350],
+    "capacityKgPerDay": 300,
+    "vehiclesServed": "Buses",
+    "state": "karnataka",
+    "latitude": 12.97,
+    "longitude": 77.59,
+    "stage": "Operating",
+    "statusDate": "2026-10-01",
+    "source": {
+      "name": "Company update",
+      "tier": "company",
+      "asOf": "2026-10-01"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "rd-centre-haryana",
+    "name": "R&D centre, Haryana",
+    "operator": "Oil company R&D",
+    "pressures": [350, 700],
+    "capacityKgPerDay": 100,
+    "vehiclesServed": "Cars, buses",
+    "state": "haryana",
+    "latitude": 28.41,
+    "longitude": 77.31,
+    "stage": "Operating",
+    "statusDate": "2026-09-01",
+    "source": {
+      "name": "Company update",
+      "tier": "company",
+      "asOf": "2026-09-01"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "talegaon-pune-station",
+    "name": "Talegaon, Pune",
+    "operator": "Greenfield Hydrogen",
+    "pressures": [350],
+    "capacityKgPerDay": 50,
+    "vehiclesServed": "Demo vehicles",
+    "state": "maharashtra",
+    "latitude": 18.73,
+    "longitude": 73.68,
+    "stage": "Under construction",
+    "statusDate": "2026-11-06",
+    "source": {
+      "name": "Company update",
+      "tier": "company",
+      "asOf": "2026-11-06"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "kandla-port-gujarat-station",
+    "name": "Kandla port, Gujarat",
+    "operator": "Port authority",
+    "pressures": [350],
+    "capacityKgPerDay": 200,
+    "vehiclesServed": "Tug, port trucks",
+    "state": "gujarat",
+    "latitude": 23.03,
+    "longitude": 70.22,
+    "stage": "Planned",
+    "statusDate": "2026-10-30",
+    "source": {
+      "name": "Port notice",
+      "tier": "official",
+      "asOf": "2026-10-30"
+    },
+    "publish": "yes"
+  }
+]

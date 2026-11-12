@@ -1,0 +1,117 @@
+[
+  {
+    "slug": "bengaluru-city-bus-pilot",
+    "name": "Bengaluru city bus pilot",
+    "sector": "Mobility",
+    "leadPartner": "City bus operator",
+    "routeOrSite": "Bengaluru city routes, Karnataka",
+    "units": "10 buses",
+    "vehicles": 10,
+    "funding": "NGHM pilot scheme",
+    "state": "karnataka",
+    "latitude": 12.97,
+    "longitude": 77.59,
+    "stage": "Running",
+    "statusDate": "2026-10-01",
+    "source": {
+      "name": "MNRE pilot scheme notice",
+      "tier": "official",
+      "asOf": "2026-10-01"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "mumbai-pune-truck-pilot",
+    "name": "Mumbai–Pune truck pilot",
+    "sector": "Mobility",
+    "leadPartner": "Oil marketing company",
+    "routeOrSite": "Highway corridor, Mumbai–Pune",
+    "units": "5 trucks",
+    "vehicles": 5,
+    "funding": "NGHM pilot scheme",
+    "state": "maharashtra",
+    "route": [
+      {
+        "latitude": 19.08,
+        "longitude": 72.88
+      },
+      {
+        "latitude": 18.75,
+        "longitude": 73.4
+      },
+      {
+        "latitude": 18.52,
+        "longitude": 73.86
+      }
+    ],
+    "stage": "Planned",
+    "statusDate": "2026-11-01",
+    "source": {
+      "name": "MNRE pilot scheme notice",
+      "tier": "official",
+      "asOf": "2026-11-01"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "odisha-dri-steel-pilot",
+    "name": "DRI steel pilot, Odisha",
+    "sector": "Steel",
+    "leadPartner": "Private steel maker",
+    "routeOrSite": "DRI plant, Odisha",
+    "units": "2 MW electrolyser",
+    "funding": "NGHM pilot scheme",
+    "state": "odisha",
+    "latitude": 21.5,
+    "longitude": 84.9,
+    "stage": "Planned",
+    "statusDate": "2026-10-01",
+    "source": {
+      "name": "MNRE pilot scheme notice",
+      "tier": "official",
+      "asOf": "2026-10-01"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "harbour-tug-kandla",
+    "name": "Harbour tug, Kandla",
+    "sector": "Shipping",
+    "leadPartner": "Port authority",
+    "routeOrSite": "Harbour tug, Kandla, Gujarat",
+    "units": "1 tug",
+    "vehicles": 1,
+    "funding": "Port funds",
+    "state": "gujarat",
+    "latitude": 23.03,
+    "longitude": 70.22,
+    "stage": "Under construction",
+    "statusDate": "2026-11-08",
+    "source": {
+      "name": "Port notice",
+      "tier": "official",
+      "asOf": "2026-11-08"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "madhya-pradesh-gas-blending",
+    "name": "Gas network blending, Madhya Pradesh",
+    "sector": "Other",
+    "leadPartner": "City gas distributor",
+    "routeOrSite": "Gas network blending, Madhya Pradesh",
+    "units": "5% blend",
+    "funding": "Company funded",
+    "state": "madhya-pradesh",
+    "latitude": 23.26,
+    "longitude": 77.41,
+    "stage": "Running",
+    "statusDate": "2026-08-01",
+    "source": {
+      "name": "Company announcement",
+      "tier": "company",
+      "asOf": "2026-08-01"
+    },
+    "publish": "yes"
+  }
+]

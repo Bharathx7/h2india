@@ -1292,9 +1292,13 @@ export interface Report {
   title: string;
   slug: string;
   /**
-   * On the cover, for example SURVEY · 2026.
+   * On the cover, for example Survey, Data note or Analysis.
    */
   kicker?: string | null;
+  /**
+   * Shown on the listing (736:8).
+   */
+  publishedOn: string;
   /**
    * For example what 62 buyers told us.
    */
@@ -3023,6 +3027,7 @@ export interface ReportsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   kicker?: T;
+  publishedOn?: T;
   subtitle?: T;
   summary?: T;
   findings?:

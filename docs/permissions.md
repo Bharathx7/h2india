@@ -66,6 +66,11 @@ Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as th
 - Content editors draft everything; the Editor-in-chief (or a Super admin) publishes articles, Hydrogen 101 chapters,
   buyer's guides, reports, videos and podcasts. Records, glossary terms and standards are published by any editor
   (A30).
+- Imports (step 4.6) run from the command line with database access, so only people who can run the app's commands
+  can import. Imported content lands as drafts, except records, glossary, standards and tracker rows marked
+  publish=yes (A39); articles always go through the Editor-in-chief.
+- Pre-seeded companies (A38) have no members and are Unclaimed: nobody can act for them or ask to join them until the
+  company claims its profile (step 6.7).
 - Tracker records (step 4.5) are published by any editor, like records (A30); Recent changes are written by the system
   and only Content delete can remove a wrong entry.
 - Sample content (F9, A37): with FLAG_SAMPLE_CONTENT off, nobody can publish a sample-flagged item and readers never

@@ -10,7 +10,7 @@ import { enqueueGstinCheck } from "./jobs";
 
 // Companies (step 3.3): find one to join, or create one. One company per GSTIN and per PAN.
 
-const { organisations: o, organisationGstins: g, memberships: m } = schema;
+const { organisations: o, organisationGstins: g, memberships: m, companyProfiles: cp } = schema;
 
 export class CompanyError extends Error {
   constructor(
@@ -55,7 +55,14 @@ export async function searchCompanies(ex: Executor, query: string): Promise<Comp
     })
     .from(o)
     .leftJoin(g, eq(g.organisationId, o.id))
-    .where(and(isNull(o.deletedAt), or(ilike(o.legalName, `%${likeEscape(q)}%`), ilike(g.gstin, `${likeEscape(gq)}%`))))
+    .where(
+      and(
+        isNull(o.deletedAt),
+        // Pre-seeded profiles nobody has claimed have no admin to approve a join request (step 6.7 claims them).
+        sql`not exists (select 1 from ${cp} where ${cp.organisationId} = ${o.id} and ${cp.claimStatus} = 'Unclaimed')`,
+        or(ilike(o.legalName, `%${likeEscape(q)}%`), ilike(g.gstin, `${likeEscape(gq)}%`)),
+      ),
+    )
     .groupBy(o.id)
     .orderBy(o.legalName)
     .limit(5);
