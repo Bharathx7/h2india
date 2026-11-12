@@ -24,6 +24,8 @@ export interface RenderedEmail {
   subject: string;
   html: string;
   text: string;
+  /** Extra headers, for example List-Unsubscribe and List-Unsubscribe-Post on newsletter mail (RFC 8058). */
+  headers?: Record<string, string>;
 }
 
 const channelOf = (template: TemplateId): Channel => (TEMPLATES[template] as TemplateEntry).channel;
@@ -122,7 +124,14 @@ export async function deliverEmail(
     recipient: input.to,
     status: "Sending",
     provider: "smtp",
-    payload: input.security ? null : { subject: input.mail.subject, html: input.mail.html, text: input.mail.text },
+    payload: input.security
+      ? null
+      : {
+          subject: input.mail.subject,
+          html: input.mail.html,
+          text: input.mail.text,
+          ...(input.mail.headers ? { headers: input.mail.headers } : {}),
+        },
     attempts: 1,
   });
   await sendEmailNow(id, {
@@ -146,6 +155,7 @@ async function sendEmailNow(
       subject: m.mail.subject,
       html: m.mail.html,
       text: m.mail.text,
+      headers: m.mail.headers,
     })) as { messageId?: string; response?: string };
     await mark(id, {
       status: "Sent",

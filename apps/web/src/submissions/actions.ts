@@ -1,7 +1,7 @@
 "use server";
 
 import config from "@payload-config";
-import { audit, getDb, nextReference, underLimit } from "@h2india/core";
+import { audit, checkForm, getDb, nextReference, underLimit, type FormGuard } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
 import { CHECKS, NEEDS_ACCOUNT, SUBMISSION_PREFIX, type SubmissionKind } from "@h2india/core/events";
 import { sendSubmissionReceived } from "@h2india/core/notify";
@@ -58,7 +58,11 @@ const RETURN_PATH: Record<SubmissionKind, string> = {
   advertising: "advertise",
 };
 
-export async function submitContent(kind: SubmissionKind, input: Record<string, unknown>): Promise<SubmitResult> {
+export async function submitContent(
+  kind: SubmissionKind,
+  input: Record<string, unknown>,
+  guard?: FormGuard,
+): Promise<SubmitResult> {
   const ctx = await requestContext();
   if (!(await underLimit(`submission:${kind}:${ctx.ip ?? "unknown"}`, 3600, 10)))
     return { ok: false, reason: "limited" };
@@ -76,6 +80,10 @@ export async function submitContent(kind: SubmissionKind, input: Record<string, 
   // The press release's company is the sender's own (504:8 "Verified company, from your profile").
   const checked = CHECKS[kind](kind === "press_release" ? { ...input, company: company ?? "" } : input);
   if (!checked.ok) return { ok: false, errors: checked.errors };
+  // Form protection (step 5.9): honeypot, timing, burst and hourly limits, checked only for a submission that would be
+  // saved, so people always see their mistakes first.
+  if (!(await checkForm({ form: `submission:${kind}`, ip: ctx.ip ?? null, guard })).ok)
+    return { ok: false, reason: "limited" };
   const v = checked.value;
   const contact = {
     name: v.contact.name ?? session?.user.name ?? null,

@@ -33,3 +33,22 @@ export const newsletterSubscribers = core.table(
     index("newsletter_subscribers_status_idx").on(t.status),
   ],
 );
+
+/**
+ * Cookie consent records (step 5.9, banner 53:1455): one row per choice, so we can show what a browser agreed to and
+ * when. No personal data: a random browser id, the consent version and the optional categories chosen (M10 decides
+ * categories beyond Necessary; Analytics is the only one today).
+ */
+export const cookieConsents = core.table(
+  "cookie_consents",
+  {
+    id: id(),
+    browserId: text("browser_id").notNull(),
+    version: text("version").notNull(),
+    analytics: boolean("analytics").notNull(),
+    /** banner · preferences */
+    source: text("source").notNull(),
+    createdAt: utc("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("cookie_consents_browser_idx").on(t.browserId, t.createdAt)],
+);

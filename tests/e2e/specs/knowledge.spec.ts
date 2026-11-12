@@ -135,7 +135,11 @@ test("downloading a gated report records consent and sends the file", async ({ p
   const origin = new URL(baseURL ?? "http://localhost:3000").origin;
   const ip = `10.44.${String(Math.floor(Math.random() * 250))}.${String(Date.now() % 250)}`;
   const gate = (data: object, req = request) =>
-    req.post(`/api/v1/reports/${slug}/download`, { data, headers: { origin, "x-forwarded-for": ip } });
+    // A browser sends the form guard with the form (step 5.9); a request without it is refused as automated.
+    req.post(`/api/v1/reports/${slug}/download`, {
+      data: { guard: { website: "", elapsedMs: 5000 }, ...data },
+      headers: { origin, "x-forwarded-for": ip },
+    });
 
   // The form's checks.
   const missing = await gate({ email: "ravi@example.com", company: "Greenfield H2" });

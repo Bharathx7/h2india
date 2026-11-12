@@ -1,7 +1,13 @@
 "use server";
 
-import { getDb, underLimit } from "@h2india/core";
-import { findGrievance, grievanceSteps, raiseGrievance, type GrievanceInput } from "@h2india/core/grievances";
+import { checkForm, getDb, underLimit, type FormGuard } from "@h2india/core";
+import {
+  checkGrievance,
+  findGrievance,
+  grievanceSteps,
+  raiseGrievance,
+  type GrievanceInput,
+} from "@h2india/core/grievances";
 import { sendGrievance } from "@h2india/core/notify";
 import { parseServerEnv } from "@h2india/config";
 import { getSession } from "@/server/auth";
@@ -16,8 +22,12 @@ import { istDay, istDayTime } from "./views";
 export type RaiseResult =
   { ok: true; reference: string } | { ok: false; errors?: Record<string, string>; reason?: "limited" | "failed" };
 
-export async function raiseComplaint(input: GrievanceInput): Promise<RaiseResult> {
+export async function raiseComplaint(input: GrievanceInput, guard?: FormGuard): Promise<RaiseResult> {
   const ctx = await requestContext();
+  const checked = checkGrievance(input);
+  if (!checked.ok) return { ok: false, errors: checked.errors };
+  // Form protection (step 5.9) only for a complaint that would be saved.
+  if (!(await checkForm({ form: "grievance", ip: ctx.ip ?? null, guard })).ok) return { ok: false, reason: "limited" };
   if (!(await underLimit(`grievance:${ctx.ip ?? "unknown"}`, 3600, 5))) return { ok: false, reason: "limited" };
   const session = await getSession().catch(() => null);
   try {

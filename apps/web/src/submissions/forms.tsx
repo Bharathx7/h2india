@@ -19,6 +19,7 @@ import {
 } from "@h2india/ui";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
+import { useFormGuard } from "@/lib/form-guard";
 import { checkFile, uploadHint, useUploads } from "@/lib/uploads";
 import { submitContent, type SubmitResult } from "./actions";
 import { ErrorSummary, FormCard, NetworkError, Success } from "./parts";
@@ -42,6 +43,7 @@ export function useSubmission(kind: Kind, initial: Values) {
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [network, setNetwork] = useState(false);
   const [pending, start] = useTransition();
+  const { trap, guard } = useFormGuard();
   const set = (k: string, value: unknown) => {
     setV((x) => ({ ...x, [k]: value }));
     if (k in errors) setErrors((e) => Object.fromEntries(Object.entries(e).filter(([key]) => key !== k)));
@@ -51,7 +53,7 @@ export function useSubmission(kind: Kind, initial: Values) {
     start(async () => {
       let r: SubmitResult;
       try {
-        r = await submitContent(kind, { ...v, ...extra });
+        r = await submitContent(kind, { ...v, ...extra }, guard());
       } catch {
         setNetwork(true);
         return;
@@ -66,7 +68,7 @@ export function useSubmission(kind: Kind, initial: Values) {
     });
   };
   const text = (k: string) => (typeof v[k] === "string" ? v[k] : "");
-  return { v, set, text, errors, result, network, pending, submit };
+  return { v, set, text, errors, result, network, pending, submit, trap };
 }
 
 function Actions({ pending, label, cancel }: { pending: boolean; label: string; cancel: string }) {
@@ -141,6 +143,7 @@ export function EventForm({ organiser }: { organiser: string }) {
   };
   return (
     <Shell onSubmit={send}>
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <FormCard title="About the event">
@@ -324,6 +327,7 @@ export function PressReleaseForm({ company, contact }: { company: string; contac
   const bad = uploads.items.find((i) => i.state === "error");
   return (
     <Shell onSubmit={send}>
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <FormCard title="Press release">
@@ -495,6 +499,7 @@ export function CorrectionForm({ page }: { page: string }) {
         f.submit();
       }}
     >
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <FormCard title="What needs correcting">
@@ -595,6 +600,7 @@ export function PitchForm() {
         f.submit();
       }}
     >
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <FormCard title="About you">

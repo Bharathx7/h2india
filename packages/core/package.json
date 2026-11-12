@@ -27,7 +27,9 @@
     "./events": "./src/events/index.ts",
     "./events/rules": "./src/events/submissions.ts",
     "./grievances": "./src/grievances/index.ts",
-    "./grievances/rules": "./src/grievances/rules.ts"
+    "./grievances/rules": "./src/grievances/rules.ts",
+    "./consent": "./src/consent/index.ts",
+    "./consent/cookies": "./src/consent/cookies.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

@@ -1,7 +1,7 @@
 "use server";
 
-import { getDb, underLimit } from "@h2india/core";
-import { registerForWebinar, type RegistrationField } from "@h2india/core/events";
+import { checkForm, getDb, underLimit, type FormGuard } from "@h2india/core";
+import { checkRegistration, registerForWebinar, type RegistrationField } from "@h2india/core/events";
 import { getEvent, sendRegistration, sendReplayLink, webinarFacts } from "@/events/data";
 import { isWebinar } from "@/events/views";
 import { getSession } from "@/server/auth";
@@ -22,6 +22,7 @@ export async function registerWebinar(
   slug: string,
   input: { name: string; email: string; organisation: string; role: string; mobile: string; sponsorConsent: boolean },
   wantReplay = false,
+  guard?: FormGuard,
 ): Promise<RegisterResult> {
   const e = await getEvent(slug);
   if (!e || !isWebinar(e)) return { ok: false, reason: "not-found" };
@@ -37,6 +38,11 @@ export async function registerWebinar(
         userId: session.user.id,
       }
     : input;
+  // Form protection (step 5.9) only once the form is complete, so people see their mistakes first.
+  const form = checkRegistration(values, { member, replayOnly: wantReplay });
+  if (form.ok && !(await checkForm({ form: "webinar", ip: ctx.ip ?? null, guard })).ok) {
+    return { ok: false, reason: "limited" };
+  }
   const result = await registerForWebinar(getDb(), webinarFacts(e), values, { member, wantReplay });
   if (!result.ok) return result;
   if (!result.already) {

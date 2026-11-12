@@ -21,6 +21,7 @@ import {
 } from "@h2india/ui";
 import Link from "next/link";
 import { useState, useTransition, type ReactNode } from "react";
+import { useFormGuard } from "@/lib/form-guard";
 import { checkFile, uploadHint, useUploads } from "@/lib/uploads";
 import { Limited, useSubmission } from "@/submissions/forms";
 import { ErrorSummary, NetworkError, Success } from "@/submissions/parts";
@@ -112,6 +113,7 @@ export function ContactForm({ topic }: { topic: string }) {
         f.submit();
       }}
     >
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <Chips
@@ -272,6 +274,7 @@ export function PartnershipForm() {
       }}
     >
       <h2 className="type-h4 text-primary">Your proposal</h2>
+      {f.trap}
       {errorCount ? (
         <Alert
           live
@@ -407,6 +410,7 @@ export function AdvertisingForm() {
         </h2>
         <p className="type-caption text-secondary">We reply within 2 working days.</p>
       </div>
+      {f.trap}
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       {f.network ? (
@@ -489,6 +493,7 @@ export function GrievanceForm({ type, page }: { type: string; page: string }) {
   const [network, setNetwork] = useState(false);
   const [pending, start] = useTransition();
   const uploads = useUploads("grievance_attachment", { max: GRIEVANCE_LIMITS.files });
+  const { trap, guard } = useFormGuard();
   const set = (k: string, value: string) => {
     setV((x) => ({ ...x, [k]: value }));
     if (k in errors) setErrors((e) => Object.fromEntries(Object.entries(e).filter(([key]) => key !== k)));
@@ -500,15 +505,18 @@ export function GrievanceForm({ type, page }: { type: string; page: string }) {
     start(async () => {
       let r: RaiseResult;
       try {
-        r = await raiseComplaint({
-          type: v.type ?? "",
-          pageUrl: v.pageUrl ?? "",
-          description: v.description ?? "",
-          name: v.name ?? "",
-          email: v.email ?? "",
-          mobile: v.mobile ?? "",
-          files: uploads.items.filter((i) => i.state === "uploaded").map((i) => i.fileId ?? ""),
-        });
+        r = await raiseComplaint(
+          {
+            type: v.type ?? "",
+            pageUrl: v.pageUrl ?? "",
+            description: v.description ?? "",
+            name: v.name ?? "",
+            email: v.email ?? "",
+            mobile: v.mobile ?? "",
+            files: uploads.items.filter((i) => i.state === "uploaded").map((i) => i.fileId ?? ""),
+          },
+          guard(),
+        );
       } catch {
         setNetwork(true);
         return;
@@ -563,6 +571,7 @@ export function GrievanceForm({ type, page }: { type: string; page: string }) {
       <h2 id="raise" className="type-h3 text-primary">
         Raise a complaint
       </h2>
+      {trap}
       <ErrorSummary errors={errors} />
       {result?.reason === "limited" ? (
         <Alert live tone="error" title="Too many complaints from here. Try again in an hour." />

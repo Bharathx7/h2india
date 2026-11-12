@@ -94,7 +94,7 @@ test("a visitor submits an event: errors, then a reference, the queue and the em
   await editor.close();
 });
 
-test("a full webinar shows the closed state; registering sends the confirmation", async ({ page, browser }) => {
+test("a full webinar shows the closed state; registering sends the confirmation", async ({ page, browser }, info) => {
   test.setTimeout(150_000);
   await signInOperator(page, "Content editor");
   const t = tag();
@@ -114,6 +114,7 @@ test("a full webinar shows the closed state; registering sends the confirmation"
   const slug = (created.body.doc as unknown as { slug: string }).slug;
 
   const a = await browser.newContext();
+  await ownIp(a, info);
   const pa = await a.newPage();
   await pa.goto(`/events/${slug}`);
   expect(await seriousIssues(pa)).toEqual([]);
@@ -132,6 +133,7 @@ test("a full webinar shows the closed state; registering sends the confirmation"
 
   // The one seat is taken: the next visitor sees the closed state with the replay form.
   const b = await browser.newContext();
+  await ownIp(b, info);
   const pb = await b.newPage();
   await pb.goto(`/events/${slug}`);
   await expect(pb.getByText("Registration closed")).toBeVisible();
@@ -146,7 +148,7 @@ test("a full webinar shows the closed state; registering sends the confirmation"
   expect(await ics.text()).toContain(`SUMMARY:Sizing webinar ${t}`);
 });
 
-test("a replay opens only for people who registered and are signed in", async ({ page, browser }) => {
+test("a replay opens only for people who registered and are signed in", async ({ page, browser }, info) => {
   test.setTimeout(150_000);
   await signInOperator(page, "Content editor");
   const t = tag();
@@ -171,6 +173,7 @@ test("a replay opens only for people who registered and are signed in", async ({
   const slug = (created.body.doc as unknown as { slug: string }).slug;
 
   const visitor = await browser.newContext();
+  await ownIp(visitor, info);
   const pv = await visitor.newPage();
   await pv.goto(`/events/${slug}`);
   await expect(pv.getByRole("heading", { name: "Enter your work email to watch" })).toBeVisible();
@@ -178,6 +181,7 @@ test("a replay opens only for people who registered and are signed in", async ({
   await visitor.close();
 
   const member = await browser.newContext();
+  await ownIp(member, info);
   const pm = await member.newPage();
   const email = newEmail("replay");
   await signInNew(pm, email);

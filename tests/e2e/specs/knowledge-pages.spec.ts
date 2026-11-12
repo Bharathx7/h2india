@@ -37,7 +37,10 @@ async function seriousIssues(page: Page) {
   return axe.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id);
 }
 
-test("the gated report form records consent with its version and starts the download", async ({ page, browser }) => {
+test("the gated report form records consent with its version and starts the download", async ({
+  page,
+  browser,
+}, info) => {
   test.setTimeout(120_000);
   await signInOperator(page, "Editor-in-chief");
   const t = tag();
@@ -63,6 +66,7 @@ test("the gated report form records consent with its version and starts the down
   const slug = (created.body.doc as unknown as { slug: string }).slug;
 
   const reader = await browser.newContext();
+  await ownIp(reader, info);
   const p = await reader.newPage();
   await p.goto(`/knowledge/reports/${slug}`);
   await expect(p.getByRole("heading", { level: 1 })).toHaveText(`Buyer survey ${t}`);

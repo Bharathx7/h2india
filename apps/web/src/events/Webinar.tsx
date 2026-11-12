@@ -3,6 +3,7 @@
 import { JOB_ROLES } from "@h2india/core/companies/client";
 import { Alert, Button, buttonClasses, Checkbox, cx, FormField, Icon, Input, Select, StatusBadge } from "@h2india/ui";
 import Link from "next/link";
+import { useFormGuard } from "@/lib/form-guard";
 import { useState, useTransition, type ReactNode } from "react";
 import { registerWebinar, type RegisterResult } from "@/app/(app)/(site)/events/[slug]/actions";
 
@@ -220,6 +221,7 @@ function RegisterForm({
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [problem, setProblem] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const { trap, guard } = useFormGuard();
   const set = (k: keyof typeof v, value: string | boolean) => {
     setV((x) => ({ ...x, [k]: value }));
   };
@@ -228,7 +230,7 @@ function RegisterForm({
     start(async () => {
       let r: RegisterResult;
       try {
-        r = await registerWebinar(info.slug, v);
+        r = await registerWebinar(info.slug, v, false, guard());
       } catch {
         setProblem("We couldn’t send your form. Check your connection and try again. Your answers are still here.");
         return;
@@ -261,12 +263,13 @@ function RegisterForm({
       </div>
       <form
         noValidate
-        className="flex flex-col gap-3"
+        className="relative flex flex-col gap-3"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
         }}
       >
+        {trap}
         {member ? (
           <p className="type-body-sm text-body">Registering as {memberName}.</p>
         ) : (
@@ -369,12 +372,14 @@ export function ReplayRequest({ slug, state }: { slug: string; state: "full" | "
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
+  const { trap, guard } = useFormGuard();
   const submit = () => {
     start(async () => {
       const r = await registerWebinar(
         slug,
         { name: "", email, organisation: "", role: "", mobile: "", sponsorConsent: false },
         true,
+        guard(),
       ).catch(() => null);
       if (r?.ok) setSent(true);
       else if (r && r.reason === "invalid") setError(r.errors?.email ?? "Enter your work email");
@@ -412,12 +417,13 @@ export function ReplayRequest({ slug, state }: { slug: string; state: "full" | "
       ) : (
         <form
           noValidate
-          className="flex flex-col gap-3"
+          className="relative flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
         >
+          {trap}
           <p className="type-body-sm text-body">
             {replay
               ? "Free. If you registered, use the same email and you'll go straight in."

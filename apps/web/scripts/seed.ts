@@ -432,6 +432,65 @@ async function seedTrust(payload: Payload, publish: boolean): Promise<string> {
   return `Company and help: ${String(created)} records created${out.length ? `, ${out.join(", ")} set` : ""}`;
 }
 
+/** Sample past issues for the newsletter archive (445:5885, 446:6106), step 5.9. Sending arrives with step 11.3. */
+async function seedNewsletterIssues(payload: Payload, publish: boolean): Promise<string> {
+  const rows = JSON.parse(await readFile(path.join(seedDir, "newsletter-issues.json"), "utf8")) as {
+    number: number;
+    sentOn: string;
+    title: string;
+    highlights: string[];
+    sections?: { heading: string; lines: string[] }[];
+  }[];
+  const paragraph = (text: string) => ({
+    type: "paragraph",
+    version: 1,
+    format: "",
+    indent: 0,
+    direction: "ltr",
+    children: [{ type: "text", version: 1, text, format: 0, detail: 0, mode: "normal", style: "" }],
+  });
+  let created = 0;
+  for (const r of rows) {
+    const slug = `india-h2-weekly-${String(r.number)}`;
+    const found = await payload.find({
+      collection: "newsletter-issues",
+      where: { slug: { equals: slug } },
+      draft: true,
+      limit: 1,
+      depth: 0,
+    });
+    if (found.docs.length) continue;
+    await payload.create({
+      collection: "newsletter-issues",
+      data: {
+        list: "weekly",
+        number: r.number,
+        sentOn: r.sentOn,
+        title: r.title,
+        slug,
+        highlights: r.highlights.map((text) => ({ text })),
+        sections: (r.sections ?? []).map((s) => ({
+          heading: s.heading,
+          body: {
+            root: {
+              type: "root",
+              version: 1,
+              format: "",
+              indent: 0,
+              direction: "ltr",
+              children: s.lines.map(paragraph),
+            },
+          },
+        })),
+        sample: true,
+        _status: publish ? "published" : "draft",
+      } as never,
+    });
+    created += 1;
+  }
+  return `Newsletter issues: ${String(created)} created`;
+}
+
 async function main(): Promise<number> {
   const payload = await getPayload({ config });
   const publish = showSample();
@@ -458,6 +517,7 @@ async function main(): Promise<number> {
   console.log(await seedHomeFigures(payload));
   console.log(await seedSight(payload));
   console.log(await seedTrust(payload, publish));
+  console.log(await seedNewsletterIssues(payload, publish));
   return problems > 0 ? 1 : 0;
 }
 

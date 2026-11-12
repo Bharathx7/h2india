@@ -1,4 +1,5 @@
 import config from "@payload-config";
+import { checkForm, type FormGuard } from "@h2india/core";
 import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import { ReportGateError, requestReport } from "@/cms/knowledge/gate";
@@ -14,6 +15,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const body = ((await request.json().catch(() => null)) ?? {}) as Record<string, unknown>;
   const text = (key: string) => (typeof body[key] === "string" ? body[key] : undefined);
   const session = await getSession();
+  // Form protection (step 5.9) for the gated form. Members and free reports send no details, so nothing to check.
+  if (!session && (text("email") ?? text("name"))) {
+    const guard = (typeof body.guard === "object" && body.guard !== null ? body.guard : undefined) as
+      FormGuard | undefined;
+    const check = await checkForm({ form: "report-gate", ip: (await requestContext()).ip ?? null, guard });
+    if (!check.ok) return apiError(429, "RATE_LIMITED", "Too many requests from here. Try again in an hour.");
+  }
   try {
     const result = await requestReport(await getPayload({ config }), {
       slug,

@@ -172,6 +172,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Contact, partnership and advertising forms post through `submitContent()` like step 5.7 (CON-, PE-, ADV-).
 - Scrollable table wrappers need `tabIndex={0}`, `role="region"` and a label (axe "scrollable-region-focusable").
 
+## Newsletter, consent and form protection (step 5.9)
+
+- Every public form calls `checkForm()` (`@h2india/core`) on the server before saving, and sends `guard()` from `useFormGuard()` (`apps/web/src/lib/form-guard.tsx`) with its `{trap}` rendered inside the form. A new public form does both.
+- Cookie choices live in the `h2_consent` cookie (`@h2india/core/consent/cookies`); read them with `useCookieChoice()`. Load nothing that tracks people except through `Analytics`, which needs consent and skips operators. Bump `COOKIE_CONSENT_VERSION` when the categories or banner words change.
+- Newsletter mail carries `unsubscribeHeaders()`; unsubscribing goes only through `unsubscribe()` (one-click POST or the confirm page).
+- Browser tests start as a returning visitor who rejected optional cookies (`ownIp()` sets the cookie); `consent-newsletter.spec.ts` tests the banner from a fresh context.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

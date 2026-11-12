@@ -17,8 +17,15 @@ const BAND_TOPICS: Record<string, string> = {
   Mobility: "mobility",
 };
 
+// The sign-up box lives in @h2india/ui, so only the timing half of the form guard applies (step 5.9).
+const loadedAt = typeof performance === "undefined" ? 0 : performance.timeOrigin;
 async function signUp(email: string, topics: string[]): Promise<boolean> {
-  const result = await subscribeToNewsletter({ email, topics, source: "newsroom" });
+  const result = await subscribeToNewsletter({
+    email,
+    topics,
+    source: "newsroom",
+    guard: { website: "", elapsedMs: Date.now() - loadedAt },
+  });
   return result.status === "sent" || result.status === "already";
 }
 

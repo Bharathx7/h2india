@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormGuard } from "@/lib/form-guard";
 import { JOB_ROLES } from "@h2india/core/companies/client";
 import { Button, Checkbox, FormField, Icon, Input, Select } from "@h2india/ui";
 import Link from "next/link";
@@ -153,6 +154,7 @@ function ReportGate({
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [problem, setProblem] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const { trap, guard } = useFormGuard();
   const ask = !member && gated;
 
   const submit = () => {
@@ -161,7 +163,7 @@ function ReportGate({
       const res = await fetch(`/api/v1/reports/${encodeURIComponent(slug)}/download`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(ask ? values : {}),
+        body: JSON.stringify(ask ? { ...values, guard: guard() } : {}),
       });
       const body = (await res.json().catch(() => ({}))) as {
         url?: string;
@@ -193,12 +195,13 @@ function ReportGate({
       {cover}
       <form
         noValidate
-        className="flex flex-col gap-3"
+        className="relative flex flex-col gap-3"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
         }}
       >
+        {ask ? trap : null}
         {ask ? (
           <>
             <FormField label="Full name" required error={errors.name}>

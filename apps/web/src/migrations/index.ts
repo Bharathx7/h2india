@@ -13,6 +13,7 @@ import * as migration_20261112_175006_knowledge_pages from './20261112_175006_kn
 import * as migration_20261112_183145_events_submissions from './20261112_183145_events_submissions';
 import * as migration_20261112_183156_events_drop_format from './20261112_183156_events_drop_format';
 import * as migration_20261112_190010_trust_pages from './20261112_190010_trust_pages';
+import * as migration_20261112_193125_newsletter_issues from './20261112_193125_newsletter_issues';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20261112_190010_trust_pages.up,
     down: migration_20261112_190010_trust_pages.down,
-    name: '20261112_190010_trust_pages'
+    name: '20261112_190010_trust_pages',
+  },
+  {
+    up: migration_20261112_193125_newsletter_issues.up,
+    down: migration_20261112_193125_newsletter_issues.down,
+    name: '20261112_193125_newsletter_issues'
   },
 ];

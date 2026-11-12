@@ -2,7 +2,19 @@ import { createDb, schema, type DbHandle } from "@h2india/db";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { useTestEnv } from "../testing/factory";
-import { firstIssueDate, formatIssueDay, linkToken, openLink, resendLink, savePreferences, subscribe } from "./index";
+import {
+  firstIssueDate,
+  formatIssueDay,
+  linkToken,
+  maskEmail,
+  openLink,
+  resendLink,
+  savePreferences,
+  subscribe,
+  unsubscribe,
+  unsubscribeHeaders,
+  unsubscribeToken,
+} from "./index";
 
 // India H₂ Weekly with double opt-in (step 5.1, A46): a sign-up stays pending until the emailed link is opened; signing
 // up again when confirmed sends a change-topics link; links expire after 48 hours and only the latest one works.
@@ -75,5 +87,21 @@ describe.skipIf(!url)("newsletter sign-up", () => {
     });
     const forged = `${linkToken(r?.id ?? "", "manage", r?.linkNonce ?? "", Date.now() + 60_000).slice(0, -3)}abc`;
     expect(await openLink(forged)).toEqual({ ok: false, reason: "invalid" });
+  });
+
+  it("unsubscribes in one click, with the headers mail apps use, and only with a genuine token", async () => {
+    const r = await row();
+    const id = r?.id ?? "";
+    expect(unsubscribeHeaders(id)).toMatchObject({ "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" });
+    expect(unsubscribeHeaders(id)["List-Unsubscribe"]).toMatch(
+      /^<https?:\/\/.+\/api\/newsletter\/unsubscribe\?token=.+>$/,
+    );
+    expect(await unsubscribe(`${unsubscribeToken(id).slice(0, -3)}abc`)).toBeNull();
+    // A confirm or manage token can't unsubscribe anyone.
+    expect(await unsubscribe(linkToken(id, "manage", r?.linkNonce ?? "", Date.now() + 60_000))).toBeNull();
+    expect(await unsubscribe(unsubscribeToken(id))).toBe(maskEmail(email));
+    expect((await row())?.status).toBe("unsubscribed");
+    expect(await unsubscribe(unsubscribeToken(id))).toBe(maskEmail(email)); // safe to repeat
+    expect(maskEmail("ravi@greenfieldh2.in")).toBe("r••••@greenfieldh2.in");
   });
 });

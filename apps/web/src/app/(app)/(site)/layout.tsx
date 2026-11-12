@@ -9,5 +9,9 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   const viewer = await siteViewer();
   const prelaunch = await comingSoonFor(viewer);
   if (prelaunch) return <ComingSoon launchLine={prelaunch.launchLine} />;
-  return <SiteChrome user={viewer?.user ?? null}>{children}</SiteChrome>;
+  return (
+    <SiteChrome user={viewer?.user ?? null} operator={viewer?.operator ?? false}>
+      {children}
+    </SiteChrome>
+  );
 }

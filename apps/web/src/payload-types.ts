@@ -94,6 +94,7 @@ export interface Config {
     'tracker-hubs': TrackerHub;
     'tracker-changes': TrackerChange;
     'early-listings': EarlyListing;
+    'newsletter-issues': NewsletterIssue;
     'legal-pages': LegalPage;
     'help-articles': HelpArticle;
     'team-members': TeamMember;
@@ -136,6 +137,7 @@ export interface Config {
     'tracker-hubs': TrackerHubsSelect<false> | TrackerHubsSelect<true>;
     'tracker-changes': TrackerChangesSelect<false> | TrackerChangesSelect<true>;
     'early-listings': EarlyListingsSelect<false> | EarlyListingsSelect<true>;
+    'newsletter-issues': NewsletterIssuesSelect<false> | NewsletterIssuesSelect<true>;
     'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
     'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
@@ -3138,6 +3140,69 @@ export interface EarlyListing {
   createdAt: string;
 }
 /**
+ * Past issues shown in the newsletter archive. Sending arrives with step 11.3.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-issues".
+ */
+export interface NewsletterIssue {
+  id: number;
+  list: 'weekly' | 'tender-digest';
+  number: number;
+  sentOn: string;
+  readMinutes?: number | null;
+  title: string;
+  /**
+   * For example india-h2-weekly-4.
+   */
+  slug: string;
+  /**
+   * The three lines under the title in the archive.
+   */
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  sections?:
+    | {
+        heading:
+          | 'This week in Indian hydrogen'
+          | 'Opportunities closing this week'
+          | 'Number of the week'
+          | 'Explainer of the week'
+          | 'New on the marketplace'
+          | 'People and jobs'
+          | 'Events this month'
+          | 'Global to India';
+        body?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample content (F9).
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * Terms, privacy, cookies, editorial, corrections and sponsored content (66:5004, 521:305…). Final texts come from our lawyers (M2). Each published change adds a version history row.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3398,6 +3463,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'early-listings';
         value: number | EarlyListing;
+      } | null)
+    | ({
+        relationTo: 'newsletter-issues';
+        value: number | NewsletterIssue;
       } | null)
     | ({
         relationTo: 'legal-pages';
@@ -4790,6 +4859,35 @@ export interface EarlyListingsSelect<T extends boolean = true> {
   status?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-issues_select".
+ */
+export interface NewsletterIssuesSelect<T extends boolean = true> {
+  list?: T;
+  number?: T;
+  sentOn?: T;
+  readMinutes?: T;
+  title?: T;
+  slug?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -141,6 +141,13 @@
       "when": 1794511378722,
       "tag": "0019_terms_version",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794511751063,
+      "tag": "0020_cookie_consents",
+      "breakpoints": true
     }
   ]
 }

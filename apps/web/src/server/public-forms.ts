@@ -1,9 +1,18 @@
 "use server";
 
 import config from "@payload-config";
-import { underLimit } from "@h2india/core";
+import { checkForm, underLimit, type FormGuard } from "@h2india/core";
 import { PRODUCT_CLASSES } from "@h2india/core/catalogue";
-import { isEmailAddress, NewsletterError, resendLink, savePreferences, subscribe } from "@h2india/core/newsletter";
+import { recordCookieConsent } from "@h2india/core/consent";
+import {
+  isEmailAddress,
+  maskEmail,
+  NewsletterError,
+  resendLink,
+  savePreferences,
+  subscribe,
+  unsubscribe,
+} from "@h2india/core/newsletter";
 import { getPayload } from "payload";
 import { EARLY_LISTING_CONSENT } from "@/cms/home/collections";
 import { requestContext } from "./request-context";
@@ -17,8 +26,8 @@ async function allowed(form: string, max: number): Promise<boolean> {
 }
 
 export type SubscribeResult =
-  | { status: "sent"; email: string }
-  | { status: "already"; email: string }
+  | { status: "sent"; email: string; masked: string }
+  | { status: "already"; email: string; masked: string }
   | { status: "invalid"; message: string }
   | { status: "error"; message: string };
 
@@ -27,15 +36,28 @@ export async function subscribeToNewsletter(input: {
   email: string;
   topics: string[];
   source: "footer" | "coming-soon" | "newsletter-page" | "newsroom";
+  tenderDigest?: boolean;
+  monthlyNote?: boolean;
+  guard?: FormGuard;
 }): Promise<SubscribeResult> {
   const email = input.email.trim();
   if (!isEmailAddress(email)) return { status: "invalid", message: "Enter a full email address, like name@company.in" };
+  const { ip } = await requestContext();
+  if (!(await checkForm({ form: "newsletter", ip: ip ?? null, guard: input.guard })).ok) {
+    return { status: "error", message: "Too many sign-ups from here. Try again in an hour." };
+  }
   if (!(await allowed("newsletter", 10))) {
     return { status: "error", message: "Too many sign-ups from here. Try again in an hour." };
   }
   try {
-    const status = await subscribe({ email, topics: input.topics, source: input.source });
-    return { status, email: email.toLowerCase() };
+    const status = await subscribe({
+      email,
+      topics: input.topics,
+      source: input.source,
+      tenderDigest: input.tenderDigest,
+      monthlyNote: input.monthlyNote,
+    });
+    return { status, email: email.toLowerCase(), masked: maskEmail(email.toLowerCase()) };
   } catch (error) {
     if (error instanceof NewsletterError) return { status: "invalid", message: error.message };
     console.error("[newsletter] sign-up failed", error);
@@ -76,7 +98,7 @@ export type EarlyListingResult =
 const MOBILE = /^(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}$/;
 
 /** "Are you a supplier? Get listed early" on the Coming soon page (743:6988, A47). */
-export async function requestEarlyListing(input: EarlyListingInput): Promise<EarlyListingResult> {
+export async function requestEarlyListing(input: EarlyListingInput, guard?: FormGuard): Promise<EarlyListingResult> {
   const errors: Partial<Record<keyof EarlyListingInput | "form", string>> = {};
   const value = {
     company: input.company.trim(),
@@ -92,7 +114,8 @@ export async function requestEarlyListing(input: EarlyListingInput): Promise<Ear
   if (!PRODUCT_CLASSES.some((c) => c.id === value.sells)) errors.sells = "Choose what you sell";
   if (!input.consent) errors.consent = "Tick the box so we can contact you";
   if (Object.keys(errors).length) return { ok: false, errors };
-  if (!(await allowed("early-listing", 5))) {
+  const { ip } = await requestContext();
+  if (!(await checkForm({ form: "early-listing", ip: ip ?? null, guard })).ok || !(await allowed("early-listing", 5))) {
     return { ok: false, errors: { form: "Too many requests from here. Try again in an hour." } };
   }
   try {
@@ -106,4 +129,16 @@ export async function requestEarlyListing(input: EarlyListingInput): Promise<Ear
     console.error("[early-listing] not saved", error);
     return { ok: false, errors: { form: "We couldn't send this. This is on our side; try again in a moment." } };
   }
+}
+
+/** Keeps a record of a cookie choice (banner 53:1455 or Cookie preferences); no personal data (step 5.9). */
+export async function recordConsent(value: string, source: "banner" | "preferences"): Promise<boolean> {
+  if (!(await allowed("cookie-consent", 30))) return false;
+  return recordCookieConsent(value, source);
+}
+
+/** "Unsubscribe" on /newsletter/unsubscribe (the link in every issue's footer). */
+export async function unsubscribeFromNewsletter(token: string): Promise<string | null> {
+  if (!(await allowed("newsletter-unsubscribe", 30))) return null;
+  return unsubscribe(token);
 }

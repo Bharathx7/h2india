@@ -48,10 +48,16 @@ export const serverEnvSchema = z.object({
   EMAIL_FROM_SECURITY: optionalText(),
   // Where support requests are sent until the admin queue exists (decision A16).
   SUPPORT_EMAIL: z.email().default("support@h2india.local"),
+  // Bot challenge for public forms (step 5.9). The provider is not chosen yet; without both values the honeypot,
+  // timing and rate limits still apply and no challenge is asked.
+  BOT_CHALLENGE_SECRET: optionalText(),
+  BOT_CHALLENGE_VERIFY_URL: optionalUrl,
 });
 
 export const clientEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: url,
+  /** The analytics script, once the tool is chosen (M10). Loaded only after consent, never for operators. */
+  NEXT_PUBLIC_ANALYTICS_SRC: optionalUrl,
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

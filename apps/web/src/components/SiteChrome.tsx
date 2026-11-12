@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS } from "@/lib/site-nav";
 import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { subscribeToNewsletter } from "@/server/public-forms";
+import { Analytics } from "@/consent/Analytics";
+import { CookieBanner } from "@/consent/CookieBanner";
 
 // The public site's header and footer (Site header 25:635, Footer v2 153:179) around every public page. The header's
 // search opens the search overlay (step 5.2); the footer signs people up for India H₂ Weekly (A46).
@@ -18,7 +20,15 @@ const FOOTER_TOPICS: Record<string, string> = {
   Mobility: "mobility",
 };
 
-export function SiteChrome({ user, children }: { user: SiteUser | null; children: ReactNode }) {
+export function SiteChrome({
+  user,
+  operator = false,
+  children,
+}: {
+  user: SiteUser | null;
+  operator?: boolean;
+  children: ReactNode;
+}) {
   const search = useHeaderSearch();
   return (
     <>
@@ -47,10 +57,14 @@ export function SiteChrome({ user, children }: { user: SiteUser | null; children
             email,
             topics: topics.map((t) => FOOTER_TOPICS[t] ?? t),
             source: "footer",
+            // The footer form lives in @h2india/ui, so only the timing half of the form guard applies (step 5.9).
+            guard: { website: "", elapsedMs: Date.now() - performance.timeOrigin },
           });
           return result.status === "sent" || result.status === "already";
         }}
       />
+      <CookieBanner />
+      <Analytics operator={operator} />
     </>
   );
 }
