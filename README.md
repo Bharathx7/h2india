@@ -10,6 +10,8 @@ Gate 0 was approved on 11 Nov 2026. **Batch 1 (foundations)** is in progress: St
 
 ## Quick start
 
+On Windows, double-click `start-local.cmd`: it starts everything and opens http://localhost:3000 (`docs/runbooks/run-locally.md`). By hand:
+
 ```bash
 pnpm install
 cp .env.example .env.local      # then change the change-me values
