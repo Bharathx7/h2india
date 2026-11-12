@@ -71,6 +71,13 @@
       "when": 1794459515591,
       "tag": "0009_authz_roles_manage",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794460816602,
+      "tag": "0010_files",
+      "breakpoints": true
     }
   ]
 }

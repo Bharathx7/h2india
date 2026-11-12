@@ -3,6 +3,7 @@
 import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
 import {
+  closeSupportRequest,
   decideRecovery,
   readRecovery,
   RecoveryCodeError,
@@ -11,10 +12,13 @@ import {
   sendNewMobileCode,
   startRecovery,
   submitLostEmail,
+  submitSupportRequest,
+  SupportRequestError,
   submitMobileChange,
   verifyFactor,
   type Factor,
   type RecoveryKind,
+  type SupportField,
 } from "@h2india/core/recovery";
 import { cookies, headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
@@ -131,6 +135,54 @@ export async function decide(requestId: string, approve: boolean): Promise<Outco
       actor: await loadActor(getDb(), session.user.id),
       requestId,
       approve,
+      context: await requestContext(),
+    });
+    return { ok: true };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+/** Lost email, "Or send a support request" (528:534). The person is signed out; the Work ID was uploaded first. */
+export async function sendSupportRequest(input: {
+  fullName: string;
+  company: string;
+  contactEmail: string;
+  fileId: string;
+  fileKey?: string;
+}): Promise<
+  | { ok: true; reference: string; company: string; contactEmail: string }
+  | { ok: false; field: SupportField | null; message: string }
+> {
+  const session = await getSession();
+  const context = await requestContext();
+  try {
+    const result = await submitSupportRequest({
+      ...input,
+      actor: await loadActor(getDb(), session?.user.id ?? null),
+      ip: context.ip,
+      context,
+    });
+    return {
+      ok: true,
+      reference: result.reference,
+      company: input.company.trim(),
+      contactEmail: input.contactEmail.trim().toLowerCase(),
+    };
+  } catch (error) {
+    if (error instanceof SupportRequestError) return { ok: false, field: error.field, message: error.message };
+    throw error;
+  }
+}
+
+/** Support marks a request handled (A23); the Work ID is deleted 30 days later (A22). */
+export async function closeSupport(requestId: string): Promise<Outcome> {
+  const session = await getSession();
+  if (!session) return { ok: false, code: "NOT_SIGNED_IN" };
+  try {
+    await closeSupportRequest({
+      actor: await loadActor(getDb(), session.user.id),
+      requestId,
       context: await requestContext(),
     });
     return { ok: true };

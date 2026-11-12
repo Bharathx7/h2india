@@ -7,6 +7,7 @@ const url = z.url();
 const secret = (min: number) => z.string().min(min, `must be at least ${min} characters`);
 /** A setting that may be left empty in .env files ("NAME=" counts as not set). */
 const optionalText = () => z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional());
+const optionalUrl = z.preprocess((v) => (v === "" ? undefined : v), z.url().optional());
 
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -28,6 +29,13 @@ export const serverEnvSchema = z.object({
   S3_SECRET_KEY: secret(8),
   S3_BUCKET_PRIVATE: z.string().min(3),
   S3_BUCKET_PUBLIC: z.string().min(3),
+  /** Where browser uploads land until the worker has checked them (step 3.7). */
+  S3_BUCKET_QUARANTINE: z.string().min(3).default("h2india-quarantine"),
+  /** Base URL that serves the public bucket (a CDN in production). Defaults to the bucket on S3_ENDPOINT. */
+  S3_PUBLIC_URL: optionalUrl,
+  /** ClamAV daemon (clamd) for the virus scan. */
+  CLAMAV_HOST: z.string().min(1).default("localhost"),
+  CLAMAV_PORT: z.coerce.number().int().positive().default(3310),
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_USER: optionalText(),

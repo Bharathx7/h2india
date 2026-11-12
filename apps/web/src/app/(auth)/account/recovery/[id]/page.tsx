@@ -1,21 +1,67 @@
-import { recoveryForReview } from "@h2india/core/recovery";
+import { getDb } from "@h2india/core";
+import { loadActor } from "@h2india/core/authz";
+import { formatIstDateTime } from "@h2india/core/companies/client";
+import { canHandleSupport, recoveryForReview } from "@h2india/core/recovery";
+import { Button } from "@h2india/ui";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/server/auth";
 import { AuthCard } from "../../../AuthCard";
 import { StatusIcon } from "../../../StatusIcon";
-import { DecideButtons } from "./DecideButtons";
+import { CloseSupportButton, DecideButtons } from "./DecideButtons";
 
-// Approve a recovery (step 3.5). Not drawn (decision A11): built from the auth card and the Join request screens.
-// The server checks who may answer (an Admin of that company, or support for A17); this page only shows it.
+// Review a recovery request (steps 3.5 and 3.7). Not drawn (decision A11): built from the auth card and the Join
+// request screens. Only an Admin of the company or operators with Users access see it; the server checks every answer.
 export const metadata: Metadata = { title: "Review a request · H2 India", robots: { index: false } };
 
 export default async function RecoveryReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession();
   if (!session) redirect(`/sign-in?next=/account/recovery/${id}`);
-  const row = await recoveryForReview(id).catch(() => null);
+  const actor = await loadActor(getDb(), session.user.id);
+  const row = await recoveryForReview(actor, id);
   if (!row) notFound();
+
+  if (row.r.kind === "support") {
+    const open = row.r.status === "Waiting for support";
+    return (
+      <AuthCard>
+        <p className="type-caption text-secondary">Support request · {row.r.reference}</p>
+        <StatusIcon name="shield-check" />
+        <h1 className="type-h2 text-primary">Lost email: check their ID</h1>
+        <p className="type-body text-body">
+          Check the work ID with the company before you change anything. Reply within 2 working days.
+        </p>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 type-body-sm">
+          <dt className="text-secondary">Name</dt>
+          <dd className="text-primary">{row.r.contactName}</dd>
+          <dt className="text-secondary">Company</dt>
+          <dd className="text-primary">{row.r.contactCompany}</dd>
+          <dt className="text-secondary">Reply to</dt>
+          <dd className="text-primary break-all">{row.r.contactEmail}</dd>
+          <dt className="text-secondary">Sent</dt>
+          <dd className="text-primary">{formatIstDateTime(row.r.createdAt)}</dd>
+        </dl>
+        {row.r.documentFileId ? (
+          <Button asChild variant="outline" size="lg" className="w-full">
+            <a href={`/api/v1/files/${row.r.documentFileId}/link`} target="_blank" rel="noopener noreferrer">
+              Open work ID
+            </a>
+          </Button>
+        ) : null}
+        {open && canHandleSupport(actor) ? (
+          <CloseSupportButton requestId={id} />
+        ) : (
+          <p className="type-body text-body" role="status">
+            {open
+              ? "Waiting for H2 India support."
+              : "This request is closed. The work ID is deleted 30 days after closing."}
+          </p>
+        )}
+      </AuthCard>
+    );
+  }
+
   const person = row.name || row.email || "A team member";
   const mobile = row.r.kind === "mobile";
   const open = row.r.status === "Waiting for admin" || row.r.status === "Waiting for support";

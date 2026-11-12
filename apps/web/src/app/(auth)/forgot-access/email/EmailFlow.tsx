@@ -10,6 +10,7 @@ import { addNewEmail, askAdminForEmail, signInWithRecovery, verify } from "../ac
 import { CodeField } from "../CodeField";
 import { EmailStep } from "../EmailStep";
 import { Waiting } from "../Waiting";
+import { SupportRequestForm, SupportRequestSent, type Sent } from "./SupportRequest";
 
 type Step = "choose" | "email" | "mobile" | "waiting" | "new-email" | "sent";
 
@@ -23,6 +24,7 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
   const [emailError, setEmailError] = useState<string>();
   const [problem, setProblem] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState<Sent | null>(null);
 
   const onAnswer = useCallback((s: string) => {
     if (s === "Approved") {
@@ -52,6 +54,14 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
         >
           Continue
         </Button>
+      </AuthCard>
+    );
+  }
+
+  if (sent) {
+    return (
+      <AuthCard>
+        <SupportRequestSent sent={sent} />
       </AuthCard>
     );
   }
@@ -140,6 +150,7 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
           >
             Use my mobile and admin
           </Button>
+          <SupportRequestForm onSent={setSent} />
         </>
       ) : null}
       {step === "email" ? (

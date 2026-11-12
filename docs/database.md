@@ -60,6 +60,16 @@ member) and when they accepted the terms.
 The audit log is append-only in the database: UPDATE and TRUNCATE are always refused, and DELETE only for entries
 older than 8 years (decision A18) inside the retention job `pruneAuditLog()`, which records how many it removed.
 
+## Files (step 3.7)
+
+| Table   | Holds                                                                                                                                                                                                                                                                                                                                                                            |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `files` | One row per upload: kind, status (Uploading, Checking, Available, Rejected, Abandoned, Deleted), uploader or a hashed key for a signed-out uploader, owning company, the record it is attached to, declared and detected type and size, SHA-256, storage bucket and keys, image sizes, why it was refused (size, type, virus, unreadable, missing) and when retention removes it |
+
+The bytes are in object storage: `quarantine` (unchecked browser uploads), `private` (documents, opened only by a
+signed link) and `public` (checked logos and product images). Support requests (`recovery_requests`, kind
+`support`) point at their Work ID with `document_file_id`.
+
 ## Migrations
 
 | Command            | What it does                                                                        |

@@ -14,7 +14,11 @@ export interface FileUploadProps {
   multiple?: boolean;
   /** Largest file in MB; larger files raise the error state. */
   maxSizeMb?: number;
+  /** Checks one file before upload; returns the message to show, or nothing when it's fine. Replaces the size check. */
+  check?: (file: File) => string | undefined;
   label?: ReactNode;
+  /** The heading in the error state (505:329). */
+  errorLabel?: ReactNode;
   hint?: ReactNode;
   /** Error from the caller (for example a failed upload). The zone's own size check sets one too. */
   error?: string;
@@ -27,7 +31,9 @@ export function FileUpload({
   accept = ".pdf,.jpg,.jpeg,.png",
   multiple = true,
   maxSizeMb = 10,
+  check,
   label = "Drop files here or browse",
+  errorLabel = "That file can't be used",
   hint = `PDF, JPG or PNG, up to ${maxSizeMb} MB each`,
   error,
   disabled,
@@ -42,9 +48,13 @@ export function FileUpload({
   const take = (list: FileList | null) => {
     if (!list || list.length === 0) return;
     const files = Array.from(list);
-    const tooBig = files.find((f) => f.size > maxSizeMb * 1024 * 1024);
-    if (tooBig) {
-      setOwnError(`${tooBig.name} is over ${maxSizeMb} MB. Upload a smaller PDF, JPG or PNG.`);
+    const sizeCheck = (f: File) =>
+      f.size > maxSizeMb * 1024 * 1024
+        ? `${f.name} is over ${maxSizeMb} MB. Upload a smaller PDF, JPG or PNG.`
+        : undefined;
+    const problem = files.map((f) => (check ?? sizeCheck)(f)).find(Boolean);
+    if (problem) {
+      setOwnError(problem);
       return;
     }
     setOwnError(undefined);
@@ -93,7 +103,7 @@ export function FileUpload({
         />
       </svg>
       <Icon name="upload" size={24} className={shownError ? "text-icon-error" : "text-icon-primary"} />
-      <span className="type-label text-primary">{label}</span>
+      <span className="type-label text-primary">{shownError ? errorLabel : label}</span>
       <span className={cx("type-caption", shownError ? "text-error" : "text-secondary")} aria-live="polite">
         {shownError ?? hint}
       </span>
@@ -116,8 +126,9 @@ export function FileUpload({
 }
 
 // Figma "File row" (18:215): one uploaded file with its status. Icon and words carry the state, not colour alone.
+// "checking" (step 3.7) is not drawn: it follows the uploading row, while the virus scan and type check run.
 
-export type FileRowStatus = "uploading" | "uploaded" | "error";
+export type FileRowStatus = "uploading" | "checking" | "uploaded" | "error";
 
 export interface FileRowProps {
   name: string;
@@ -153,8 +164,14 @@ export function FileRow({
       <Icon name="file-text" size={24} className="text-icon-secondary" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate type-label text-primary">{name}</span>
-        <span className={cx("type-caption", status === "error" ? "text-error" : "text-secondary")}>
-          {status === "uploading" ? `Uploading · ${pct}%` : status === "error" ? error : meta}
+        <span className={cx("type-caption", status === "error" ? "text-error" : "text-secondary")} aria-live="polite">
+          {status === "uploading"
+            ? `Uploading · ${pct}%`
+            : status === "checking"
+              ? "Checking file…"
+              : status === "error"
+                ? error
+                : meta}
         </span>
         {status === "uploading" ? (
           <span
@@ -169,7 +186,7 @@ export function FileRow({
           </span>
         ) : null}
       </div>
-      {status === "uploading" ? (
+      {status === "uploading" || status === "checking" ? (
         <Icon name="loader" size={24} className="animate-spin text-icon-secondary motion-reduce:animate-none" />
       ) : status === "uploaded" ? (
         <Icon name="check-circle" size={24} label="Uploaded" className="text-icon-success" />
@@ -180,7 +197,7 @@ export function FileRow({
         <button
           type="button"
           onClick={onRemove}
-          aria-label={status === "uploading" ? `Cancel uploading ${name}` : `Remove ${name}`}
+          aria-label={status === "uploading" || status === "checking" ? `Cancel uploading ${name}` : `Remove ${name}`}
           className="rounded-control text-icon-secondary hover:text-icon-primary"
         >
           <Icon name="x" size={20} />

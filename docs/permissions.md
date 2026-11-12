@@ -61,6 +61,19 @@ Only the **Finance** grid is drawn; the other six are drafted from each role's d
 
 Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as the playbook asks in step 11.4. The last Super admin can't be removed. The Audit log screen (656:872) sits with Users: reading it needs Users view, exporting it needs Users export (only Super admin today).
 
+## Files (step 3.7)
+
+Who may upload and open each kind of file (`packages/core/src/files/rules.ts`). The uploader can always open their own file.
+
+| Kind                     | Upload                                           | Open (company)                | Open (operators)  |
+| ------------------------ | ------------------------------------------------ | ----------------------------- | ----------------- |
+| Verification document    | Submit verification documents                    | Submit verification documents | Verification view |
+| Work ID (lost email)     | Anyone, signed out (20 per IP address per hour)  | —                             | Users view        |
+| Quote attachment         | Send quote requests or answer them               | See quote requests            | Queues view       |
+| Datasheet, product image | Add and change products                          | See the company profile       | Catalogue view    |
+| Logo                     | Signed in (company logo: Change company details) | See the company profile       | Catalogue view    |
+| Delivery photo           | The delivery link (Stage 10)                     | See orders                    | Orders view       |
+
 ## Defaults
 
 - A person who creates a company becomes its **Admin**.

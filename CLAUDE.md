@@ -81,6 +81,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Settings: declare with `defineSetting()` and change only with `setSetting()` (needs `settings.edit`, audited). Feature flags stay in `packages/config`.
 - Never write to `core.audit_log` except through `audit()`; never set `h2.audit_retention` outside `pruneAuditLog()`.
 
+## Files (step 3.7)
+
+- Upload only through `startUpload` → browser PUT to the signed quarantine link → `completeUpload` → worker `processFile`. Never accept file bytes in a page or API route, and never serve a file from the app's own domain.
+- A file is usable only when `status = 'Available'`. Open it only with `fileLink()` (permission check, 5-minute link); add who may read a new kind to `files/rules.ts` with least access.
+- Limits and types per kind live in `packages/config/src/files.ts` (A20); show the same messages in the browser with `checkFile()` and `uploadProblemMessage()`.
+- A record that holds a file attaches it with `attachFile()` and sets retention with `scheduleFileDeletion()` where a decision asks for it (Work ID: A22).
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
