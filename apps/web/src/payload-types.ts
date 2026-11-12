@@ -815,6 +815,11 @@ export interface Tender {
   issuer: string;
   tenderId: string;
   /**
+   * For example Solar Energy Corporation of India.
+   */
+  issuerName?: string | null;
+  issuerType?: ('SECI' | 'Public sector companies' | 'State agencies' | 'Ports' | 'Private') | null;
+  /**
    * For example Open tender · two-bid system.
    */
   mode?: string | null;
@@ -822,6 +827,20 @@ export interface Tender {
    * For example Systems › Electrolysers.
    */
   category?: string | null;
+  /**
+   * The tenders list filters on this (455:1621).
+   */
+  sector?:
+    | (
+        | 'Production'
+        | 'Ammonia and methanol'
+        | 'Electrolysers'
+        | 'Refuelling stations'
+        | 'EPC'
+        | 'Equipment'
+        | 'Services'
+      )
+    | null;
   states?:
     | (
         | 'all-india'
@@ -867,19 +886,39 @@ export interface Tender {
    * Or “Not disclosed”.
    */
   value?: string | null;
+  /**
+   * Leave empty when the value isn't published.
+   */
+  valueBand?: ('Under ₹10 crore' | '₹10–100 crore' | 'Over ₹100 crore') | null;
   emd?: string | null;
   documentFee?: string | null;
   /**
    * India time (IST).
    */
+  publishedAt?: string | null;
+  /**
+   * India time (IST).
+   */
   bidDueAt: string;
+  /**
+   * Fill in when a corrigendum moves the bid due date: the tender shows as Extended.
+   */
+  extendedFrom?: string | null;
+  /**
+   * Key facts (457:3222), for example Green ammonia producers with plants in India.
+   */
+  whoCanBid?: string | null;
   keyDates?:
     | {
         /**
          * Pre-bid meeting, Technical bid opening…
          */
         label: string;
-        at: string;
+        at?: string | null;
+        /**
+         * Instead of a date, or after it: “online”, “After technical evaluation”.
+         */
+        note?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -920,19 +959,55 @@ export interface Tender {
      * India time (IST).
      */
     declaredAt?: string | null;
+    /**
+     * When only the month or year is public, for example Aug 2025.
+     */
+    dateLabel?: string | null;
     winners?:
       | {
           name: string;
           capacity?: string | null;
           price?: string | null;
+          /**
+           * For example Noida, Uttar Pradesh.
+           */
+          place?: string | null;
+          /**
+           * For example Green ammonia · Producer.
+           */
+          about?: string | null;
+          /**
+           * The company's profile address, when it has one.
+           */
+          profileSlug?: string | null;
           id?: string | null;
         }[]
       | null;
+    /**
+     * When there are many, for example 9 companies, incl. L&T Energy GreenTech.
+     */
+    winnersLine?: string | null;
+    /**
+     * For example 4,50,000 t/yr in total.
+     */
+    capacityLine?: string | null;
+    /**
+     * For example ₹52.25 per kg.
+     */
+    price?: string | null;
     /**
      * Number of bidders, or “Not public”.
      */
     bidders?: string | null;
     whatItMeans?: string | null;
+    /**
+     * “What it means” links here (460:4147).
+     */
+    analysis?: (number | null) | Article;
+    /**
+     * For example SECI e-reverse auction result, 8 Aug 2025.
+     */
+    source?: string | null;
   };
   topics?: (number | Topic)[] | null;
   /**
@@ -964,33 +1039,63 @@ export interface Grant {
    * Part of the address. Don't change it once published.
    */
   slug: string;
+  /**
+   * Short name: ANRF, MNRE, DST.
+   */
   funder: string;
   /**
-   * For example Up to ₹5,00,00,000.
+   * For example Anusandhan National Research Foundation.
+   */
+  funderName?: string | null;
+  /**
+   * For example Up to ₹1.5 crore per project, over 3 years.
    */
   amountPerProject?: string | null;
+  /**
+   * Under the title on cards; the amount is used when empty.
+   */
+  summary?: string | null;
   themes?:
-    | ('Electrolysers' | 'Storage' | 'Fuel cells' | 'Safety and standards' | 'Materials' | 'Transport' | 'Industry')[]
-    | null;
-  whoCanApply?:
     | (
-        | 'Green hydrogen producers'
-        | 'Electrolyser manufacturers'
-        | 'Project developers'
-        | 'Research institutions'
-        | 'Start-ups'
-        | 'Manufacturers'
-        | 'State agencies'
+        | 'Production'
+        | 'Storage and transport'
+        | 'Fuel cells'
+        | 'Materials and catalysts'
+        | 'Safety and testing'
+        | 'Applications'
       )[]
     | null;
+  whoCanApply?: ('Researchers' | 'Institutions' | 'Start-ups' | 'Companies' | 'Consortia')[] | null;
+  /**
+   * At a glance (463:5337), for example Researchers at recognised Indian institutions.
+   */
+  whoText?: string | null;
   /**
    * India time (IST).
    */
   deadline: string;
   /**
-   * Leave empty: it follows the deadline.
+   * Leave empty: it follows the deadline. Announced: dates are out, applications aren't.
    */
-  statusOverride?: 'Closed' | null;
+  statusOverride?: ('Announced' | 'Closed') | null;
+  /**
+   * The research areas drawn as chips, for example Low-iridium PEM anodes.
+   */
+  focusAreas?: string[] | null;
+  focusNote?: string | null;
+  /**
+   * Steps before the first future date show as done; the next one as current.
+   */
+  steps?:
+    | {
+        step: string;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown under the steps, for example An industry partner is optional.
+   */
   howToApply: string;
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
@@ -1005,16 +1110,22 @@ export interface Grant {
         id?: string | null;
       }[]
     | null;
+  /**
+   * For example 2025 call.
+   */
+  pastCallLabel?: string | null;
+  pastCallUrl?: string | null;
   pastAwardees?:
     | {
         name: string;
         project?: string | null;
+        amount?: string | null;
         year?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Shown once the call closes, for example Q3 2027.
+   * Shown once the call closes, for example mid-2027. Announced calls show it too.
    */
   nextCallExpected?: string | null;
   states?:
@@ -1088,16 +1199,32 @@ export interface Job {
    * Part of the address. Don't change it once published.
    */
   slug: string;
-  /**
-   * Links to the company profile in Stage 6.
-   */
   company: string;
+  function?:
+    | (
+        | 'Engineering'
+        | 'Operations and maintenance'
+        | 'Safety'
+        | 'Research'
+        | 'Policy and regulation'
+        | 'Sales and business development'
+      )
+    | null;
+  jobType?: ('Full-time' | 'Part-time' | 'Contract' | 'Internship') | null;
   /**
-   * For example Engineering · commissioning.
+   * The company's H2 India profile address, when it has one.
    */
-  function?: string | null;
+  companySlug?: string | null;
+  /**
+   * Under the name, for example Electrolyser manufacturer · Ratnagiri.
+   */
+  companyLine?: string | null;
   location: string;
   workMode?: ('On site' | 'Hybrid' | 'Remote') | null;
+  /**
+   * For example 60% travel.
+   */
+  locationNote?: string | null;
   states?:
     | (
         | 'all-india'
@@ -1139,12 +1266,26 @@ export interface Job {
         | 'west-bengal'
       )[]
     | null;
-  experience?: ('0–2 years' | '3–6 years' | '7–10 years' | '10+ years') | null;
+  experience?:
+    | ('Students' | '0–2 years' | '2–4 years' | '3–6 years' | '4–8 years' | '5–8 years' | '6–10 years' | '10+ years')
+    | null;
   /**
-   * ₹ lakh a year, for example 12–16.
+   * ₹ lakh a year, for example 12–16; or as written, starting with ₹.
    */
   salaryBand?: string | null;
   description: string;
+  duties?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  needs?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
   skills?: string[] | null;
   howToApply: 'link' | 'email' | 'form';
   applyEmail?: string | null;
@@ -1156,6 +1297,9 @@ export interface Job {
    * India time (IST).
    */
   closesAt: string;
+  /**
+   * Editors only (A69): pinned at the top of the jobs list.
+   */
   featured?: boolean | null;
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
@@ -1171,6 +1315,16 @@ export interface Job {
       }[]
     | null;
   topics?: (number | Topic)[] | null;
+  /**
+   * Jobs companies post (467:7472) wait here as drafts. Publishing approves them.
+   */
+  post?: {
+    state?: ('Draft' | 'Submitted for review') | null;
+    reference?: string | null;
+    organisationId?: string | null;
+    submittedBy?: string | null;
+    submittedAt?: string | null;
+  };
   /**
    * From the dates; nobody needs to change it.
    */
@@ -3108,18 +3262,26 @@ export interface TendersSelect<T extends boolean = true> {
   slug?: T;
   issuer?: T;
   tenderId?: T;
+  issuerName?: T;
+  issuerType?: T;
   mode?: T;
   category?: T;
+  sector?: T;
   states?: T;
   value?: T;
+  valueBand?: T;
   emd?: T;
   documentFee?: T;
+  publishedAt?: T;
   bidDueAt?: T;
+  extendedFrom?: T;
+  whoCanBid?: T;
   keyDates?:
     | T
     | {
         label?: T;
         at?: T;
+        note?: T;
         id?: T;
       };
   description?: T;
@@ -3152,16 +3314,25 @@ export interface TendersSelect<T extends boolean = true> {
     | T
     | {
         declaredAt?: T;
+        dateLabel?: T;
         winners?:
           | T
           | {
               name?: T;
               capacity?: T;
               price?: T;
+              place?: T;
+              about?: T;
+              profileSlug?: T;
               id?: T;
             };
+        winnersLine?: T;
+        capacityLine?: T;
+        price?: T;
         bidders?: T;
         whatItMeans?: T;
+        analysis?: T;
+        source?: T;
       };
   topics?: T;
   status?: T;
@@ -3186,11 +3357,23 @@ export interface GrantsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   funder?: T;
+  funderName?: T;
   amountPerProject?: T;
+  summary?: T;
   themes?: T;
   whoCanApply?: T;
+  whoText?: T;
   deadline?: T;
   statusOverride?: T;
+  focusAreas?: T;
+  focusNote?: T;
+  steps?:
+    | T
+    | {
+        step?: T;
+        at?: T;
+        id?: T;
+      };
   howToApply?: T;
   sourceUrl?: T;
   documents?:
@@ -3202,11 +3385,14 @@ export interface GrantsSelect<T extends boolean = true> {
         checkedAt?: T;
         id?: T;
       };
+  pastCallLabel?: T;
+  pastCallUrl?: T;
   pastAwardees?:
     | T
     | {
         name?: T;
         project?: T;
+        amount?: T;
         year?: T;
         id?: T;
       };
@@ -3236,12 +3422,28 @@ export interface JobsSelect<T extends boolean = true> {
   slug?: T;
   company?: T;
   function?: T;
+  jobType?: T;
+  companySlug?: T;
+  companyLine?: T;
   location?: T;
   workMode?: T;
+  locationNote?: T;
   states?: T;
   experience?: T;
   salaryBand?: T;
   description?: T;
+  duties?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  needs?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
   skills?: T;
   howToApply?: T;
   applyEmail?: T;
@@ -3259,6 +3461,15 @@ export interface JobsSelect<T extends boolean = true> {
         id?: T;
       };
   topics?: T;
+  post?:
+    | T
+    | {
+        state?: T;
+        reference?: T;
+        organisationId?: T;
+        submittedBy?: T;
+        submittedAt?: T;
+      };
   status?: T;
   owner?: T;
   verification?:

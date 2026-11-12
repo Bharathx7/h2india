@@ -19,8 +19,10 @@ const seedDir = path.resolve(here, "../seed");
 
 const CONTENT: ContentTypeName[] = [
   "glossary",
-  "tenders",
   "schemes",
+  "tenders",
+  "grants",
+  "jobs",
   "events",
   "tracker-projects",
   "tracker-factories",
@@ -52,7 +54,8 @@ function relativeDates(value: unknown): unknown {
     const m = /^([+-]\d+)d(?: (\d{2}:\d{2}))?$/.exec(value);
     if (!m) return value;
     const day = istDay.format(new Date(Date.now() + Number(m[1]) * 86_400_000));
-    return m[2] ? `${day} ${m[2]}` : day;
+    // A full India-time ISO time, so dates inside arrays (key dates, steps) read the same as top-level fields.
+    return `${day}T${m[2] ?? "00:00"}:00+05:30`;
   }
   if (Array.isArray(value)) return value.map(relativeDates);
   if (value && typeof value === "object") {

@@ -140,6 +140,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - The schemes hub uses `?state=` as a filter, so its designed states are forced with `?view=loading|error|empty`.
 - Newsroom reads are cached by `news/data.ts`; when a filter's meaning changes, bump `CACHE_VERSION` there so old entries aren't served.
 
+## Tenders, grants and jobs (step 5.5)
+
+- Public reads go through `apps/web/src/opportunities/data.ts`; filters, labels and JobPosting data are pure in `opportunities/views.ts` (unit-tested). Tables and cards read the same filtered list.
+- Statuses only from `tenderStatus()`, `grantStatus()` and `jobStatus()` in `cms/records/status.ts`; "days left" only from `daysLeft()` in `opportunities/views.ts` (India calendar days).
+- Job posting rules (options, limits, closing date) live in `@h2india/core/opportunities` (`/rules` for client code). A posted job is saved only by `saveJobPost()` in `opportunities/posting.ts`: always a draft, for a company the person belongs to, never Featured (A69). An editor publishing it is the approval.
+- Create alert, Track and Save go to `/member/alerts` or `/member/saved` through `memberHref()` (sign-in first when signed out) until step 7.3 (A71).
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

@@ -285,6 +285,63 @@ export function SchemeCard(s: {
   );
 }
 
+/** Job card (464:6071): company, role, place and mode, experience and salary chips, posted and closing dates, Apply. */
+export function JobCard(j: {
+  company: string;
+  initials: string;
+  role: string;
+  where: string;
+  chips: string[];
+  dates: string;
+  href: string;
+  /** Featured jobs (A69) carry a visible label. */
+  featured?: boolean;
+}) {
+  return (
+    <article
+      data-reveal-item=""
+      className="group card-lift relative flex h-full flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-mint type-label-sm text-primary">
+            {j.initials}
+          </span>
+          <p className="truncate type-label-sm text-link">{j.company}</p>
+        </div>
+        {j.featured ? <ContentLabel>Featured</ContentLabel> : null}
+      </div>
+      <h3 className="type-label-lg text-primary">
+        <a href={j.href} className={cx(stretch, "focus-visible:outline-none")}>
+          {j.role}
+        </a>
+      </h3>
+      <p className="type-body-sm text-secondary">{j.where}</p>
+      {j.chips.length ? (
+        <ul className="flex flex-wrap gap-2">
+          {j.chips.map((c) => (
+            <li
+              key={c}
+              className="inline-flex h-8 items-center rounded-pill border-[1.5px] border-control px-2.75 type-label text-primary"
+            >
+              {c}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="mt-auto flex items-center justify-between gap-2">
+        <p className="type-caption text-secondary">{j.dates}</p>
+        <span
+          aria-hidden="true"
+          className="inline-flex h-8 shrink-0 items-center rounded-pill border border-control px-3.25 type-label text-primary group-hover:border-focus group-hover:bg-subtle"
+        >
+          Apply
+        </span>
+      </div>
+    </article>
+  );
+}
+
 /** Content label for sponsored and press-release pieces (A28): always shown with the type. */
 function ContentLabel({ children }: { children: string }) {
   return (

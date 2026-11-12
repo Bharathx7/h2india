@@ -1,0 +1,161 @@
+[
+  {
+    "slug": "anrf-hydrogen-materials-catalysts",
+    "title": "Hydrogen materials and catalysts: call for proposals",
+    "funder": "ANRF",
+    "funderName": "Anusandhan National Research Foundation",
+    "sourceUrl": "https://example.org/sample/anrf-hydrogen-materials-catalysts",
+    "publish": "yes",
+    "howToApply": "An industry partner is optional. Proposals with a co-funding partner score higher.",
+    "amountPerProject": "Up to ₹1.5 crore per project, over 3 years",
+    "summary": "Up to ₹1.5 crore per project over 3 years",
+    "themes": ["Materials and catalysts"],
+    "whoCanApply": ["Researchers", "Institutions"],
+    "whoText": "Researchers at recognised Indian institutions; start-ups as industry partners",
+    "deadline": "+4d 17:00",
+    "focusAreas": [
+      "Low-iridium PEM anodes",
+      "AEM membranes",
+      "Non-precious catalysts",
+      "Durability testing",
+      "Recycling of stack materials"
+    ],
+    "focusNote": "Projects should lead to materials that Indian electrolyser makers can test within three years.",
+    "steps": [
+      {
+        "step": "Register your institution on the ANRF portal"
+      },
+      {
+        "step": "Submit a 10-page proposal with budget",
+        "at": "+4d"
+      },
+      {
+        "step": "Expert review and shortlist presentations",
+        "at": "+90d"
+      },
+      {
+        "step": "Results expected",
+        "at": "+120d"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Call document",
+        "url": "https://example.org/sample/anrf-call",
+        "kind": "PDF"
+      },
+      {
+        "title": "Proposal template",
+        "url": "https://example.org/sample/anrf-template",
+        "kind": "Word"
+      },
+      {
+        "title": "Budget format",
+        "url": "https://example.org/sample/anrf-budget",
+        "kind": "Excel"
+      }
+    ],
+    "pastCallLabel": "2025 call",
+    "pastCallUrl": "https://example.org/sample/anrf-2025",
+    "pastAwardees": [
+      {
+        "name": "Centre for Clean Fuels Research, Pune",
+        "project": "Low-iridium anodes for PEM stacks",
+        "amount": "₹1.2 crore"
+      },
+      {
+        "name": "Deccan Institute of Science, Hyderabad",
+        "project": "Nickel–iron catalysts for alkaline electrolysis",
+        "amount": "₹95 lakh"
+      },
+      {
+        "name": "Eastern Institute of Technology, Bhubaneswar",
+        "project": "Accelerated stress tests for AEM membranes",
+        "amount": "₹1.4 crore"
+      }
+    ],
+    "nextCallExpected": "mid-2027"
+  },
+  {
+    "slug": "dst-hydrogen-valley-innovation-clusters",
+    "title": "Hydrogen valley innovation clusters",
+    "funder": "DST",
+    "funderName": "Department of Science and Technology",
+    "sourceUrl": "https://example.org/sample/dst-hydrogen-valley-innovation-clusters",
+    "publish": "yes",
+    "howToApply": "Apply on the funder's portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Grant for regional clusters linking production and use",
+    "themes": ["Production", "Applications"],
+    "whoCanApply": ["Consortia", "Institutions"],
+    "deadline": "+2d 17:00"
+  },
+  {
+    "slug": "mnre-green-hydrogen-rd-scheme",
+    "title": "Green hydrogen R&D scheme: call for proposals",
+    "funder": "MNRE",
+    "funderName": "Ministry of New and Renewable Energy",
+    "sourceUrl": "https://example.org/sample/mnre-green-hydrogen-rd-scheme",
+    "publish": "yes",
+    "howToApply": "Apply on the funder's portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Grants for research projects, size set per proposal",
+    "themes": ["Production", "Storage and transport"],
+    "whoCanApply": ["Researchers", "Institutions"],
+    "deadline": "+33d 17:00"
+  },
+  {
+    "slug": "mnre-start-up-pilot-fund",
+    "title": "Start-up pilot fund for hydrogen applications",
+    "funder": "MNRE",
+    "funderName": "Ministry of New and Renewable Energy",
+    "sourceUrl": "https://example.org/sample/mnre-start-up-pilot-fund",
+    "publish": "yes",
+    "howToApply": "Applications open on the MNRE portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Up to ₹50 lakh per pilot project",
+    "amountPerProject": "Up to ₹50 lakh per pilot project",
+    "themes": ["Applications"],
+    "whoCanApply": ["Start-ups"],
+    "deadline": "+38d 17:00"
+  },
+  {
+    "slug": "india-eu-clean-hydrogen-research-call",
+    "title": "India–EU clean hydrogen research call",
+    "funder": "India–EU",
+    "funderName": "India–EU Trade and Technology Council",
+    "sourceUrl": "https://example.org/sample/india-eu-clean-hydrogen-research-call",
+    "publish": "yes",
+    "howToApply": "Apply on the funder's portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Joint funding for Indian and European research teams",
+    "themes": ["Production", "Applications"],
+    "whoCanApply": ["Researchers", "Start-ups"],
+    "deadline": "+80d 17:00"
+  },
+  {
+    "slug": "mnre-centres-of-excellence-green-hydrogen",
+    "title": "Centres of Excellence in green hydrogen",
+    "funder": "MNRE",
+    "funderName": "Ministry of New and Renewable Energy",
+    "sourceUrl": "https://example.org/sample/mnre-centres-of-excellence-green-hydrogen",
+    "publish": "yes",
+    "howToApply": "Apply on the funder's portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Grant to set up testing and research centres",
+    "themes": ["Safety and testing"],
+    "whoCanApply": ["Institutions"],
+    "deadline": "+75d 17:00",
+    "statusOverride": "Announced",
+    "nextCallExpected": "Jan 2027"
+  },
+  {
+    "slug": "birac-hydrogen-safety-testing-call",
+    "title": "Hydrogen safety testing: call for proposals",
+    "funder": "BIRAC",
+    "funderName": "Biotechnology Industry Research Assistance Council",
+    "sourceUrl": "https://example.org/sample/birac-hydrogen-safety-testing-call",
+    "publish": "yes",
+    "howToApply": "Apply on the funder's portal. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "summary": "Up to ₹40 lakh for safety test methods",
+    "themes": ["Safety and testing"],
+    "whoCanApply": ["Companies", "Start-ups"],
+    "deadline": "-20d 17:00",
+    "nextCallExpected": "mid-2027"
+  }
+]

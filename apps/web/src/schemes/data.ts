@@ -5,30 +5,20 @@ import { STATE_OPTIONS } from "@/cms/records/common";
 import { schemeStatus, tenderStatus } from "@/cms/records/status";
 import { publicWhere, showSample } from "@/cms/sample";
 import { summarise, type ArticleSummary } from "@/news/data";
+import { daysLeft, toneOf } from "@/opportunities/views";
 import { dayMonthYear } from "@/news/format";
 import type { Scheme, SightTracker, Tender, TrackerHub, TrackerPolicy, TrackerProject } from "@/payload-types";
 
 // Schemes, the SIGHT tracker and state pages (step 5.4). Only what readers may see: published, and not sample where
 // samples are hidden (A37). Statuses follow the dates (step 4.3); applications always happen on the official portal.
 
-const DAY = 86_400_000;
 const payload = () => getPayload({ config });
 const and = (...parts: Where[]): Where => ({ and: [publicWhere(), ...parts] });
 
 export const stateLabel = (value: string) => STATE_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
 /** The badge tone for a scheme or tender status (Status badge 20:96). */
-export function toneOf(status: string): BadgeTone {
-  if (status === "Closing soon") return "warning";
-  if (status === "Open" || status === "Results declared") return "success";
-  if (status === "Closed" || status === "Awarded") return "neutral";
-  return "progress";
-}
-
-function daysLeft(iso: string, now: Date): string {
-  const days = Math.ceil((new Date(iso).getTime() - now.getTime()) / DAY);
-  return days <= 0 ? "closes today" : `${String(days)} ${days === 1 ? "day" : "days"} left`;
-}
+export { toneOf };
 
 /** The agency line: "MNRE / SECI", or just the agency when the ministry is the same. */
 export const agencyOf = (s: Pick<Scheme, "ministry" | "runBy">) =>
@@ -122,7 +112,7 @@ function placeOf(states: string[] | null | undefined): string {
 }
 
 export function tenderView(t: Tender, now = new Date()): TenderView {
-  const status = tenderStatus({ bidDueAt: t.bidDueAt, result: t.result ?? null }, now);
+  const status = tenderStatus(t, now);
   const page = `/opportunities/tenders/${t.slug}`;
   return {
     issuer: t.issuer,

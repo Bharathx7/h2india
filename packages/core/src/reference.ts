@@ -14,6 +14,7 @@ export const REFERENCE_TYPES = {
   DRR: "Delivery receipt",
   EV: "Event",
   SUP: "Support request",
+  JOB: "Job post",
 } as const;
 
 /** Digits after the year. Support requests use five, as drawn (528:664, "SUP-2026-01942"). */

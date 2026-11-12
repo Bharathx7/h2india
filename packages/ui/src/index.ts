@@ -127,6 +127,7 @@ export {
   SchemeCard,
   StatFigure,
   TenderCard,
+  JobCard,
 } from "./components/cards/Cards";
 export type { CardStatus } from "./components/cards/Cards";
 export { OrgCard } from "./components/cards/OrgCard";

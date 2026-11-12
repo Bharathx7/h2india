@@ -8,6 +8,7 @@ import * as migration_20261112_092925_home from './20261112_092925_home';
 import * as migration_20261112_150948_newsroom from './20261112_150948_newsroom';
 import * as migration_20261112_151557_newsroom_variants from './20261112_151557_newsroom_variants';
 import * as migration_20261112_155725_schemes from './20261112_155725_schemes';
+import * as migration_20261112_164411_opportunities from './20261112_164411_opportunities';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20261112_155725_schemes.up,
     down: migration_20261112_155725_schemes.down,
-    name: '20261112_155725_schemes'
+    name: '20261112_155725_schemes',
+  },
+  {
+    up: migration_20261112_164411_opportunities.up,
+    down: migration_20261112_164411_opportunities.down,
+    name: '20261112_164411_opportunities'
   },
 ];
