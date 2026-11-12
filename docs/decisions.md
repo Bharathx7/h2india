@@ -28,7 +28,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | F3 | Member sidebar: add a Job applications item? | You | Stage 7 (Batch 3) | No item; page reachable from Home feed | Open |  |
 | F4 | Application landing: only Refuelling and mobility is designed. Design all 7 or reuse one template? | You | Stage 6 (Batch 3) | One template driven by data | Open |  |
 | F5 | Delete the unused Wide hero variants? | You | Stage 2 (Batch 1) | Do not build them | Decided 11 Nov 2026 | Not built; the Figma variants stay untouched. |
-| F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Open |  |
+| F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Decided 12 Nov 2026 | Founder: build the pause button; no animation with reduced motion. |
 | F7 | Featured-event price and the organiser's payment step (Flow G) | You | Stage 5 (Batch 2) | Submission goes straight to review, no payment | Open |  |
 | F8 | EV-2026-0412: who organises it? | You | Stage 13 (Batch 5) | Sample data only; fixed when sample data is replaced | Open |  |
 | F9 | Sample data to replace: tracker prices and projects, state policies, report titles, careers, fee and payout figures | You and content team | Stage 13 (Batch 5) | Seed data marked as sample, hidden in production | Answered | Founder, 12 Nov 2026: sample content, marked as sample and hidden in production, until real content replaces it (M20). |
@@ -147,6 +147,9 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A39 | Do imports go live (step 4.6) | You | Step 4.6 | Everything imports as a draft; records, glossary, standards and tracker rows may carry publish=yes (editors publish those, A30); articles always stay drafts for the Editor-in-chief | Answered | Founder, 12 Nov 2026. |
 | A40 | Sample seed scope (step 4.6) | You | Step 4.6 | Grow it page by page: now the tracker, glossary, reports and the companies named in the design; each Stage 5 page adds its frame's sample data | Answered | Founder, 12 Nov 2026. |
 | A41 | Import commands: check or write by default (step 4.6) | You | Step 4.6 | Check by default (a dry run that changes nothing); --apply writes | Answered | Founder, 12 Nov 2026. |
+| A42 | Home page wording (step 5.1) | You | Step 5.1 | As drawn: hero "India's hydrogen ecosystem, in one place"; the National Green Hydrogen Mission 2030 targets as fixed text with their MNRE source line; the founder checks them before launch. No other claims written by us | Answered | Founder, 12 Nov 2026. |
+| A43 | Home modules whose data comes later (step 5.1) | You | Step 5.1 | Product classes and categories defined now (Stage 6 reuses them) so the marketplace tiles match the frame, without counts; Featured products and the logged-in followed topics show their designed empty states until Stages 6 and 7 | Answered | Founder, 12 Nov 2026. |
+| A44 | Who sees the real site while Coming soon is on (step 5.1) | You | Step 5.1 | Signed-in operators, plus people whose email is on an allow-list a Super admin keeps in settings | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -189,4 +192,5 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).
 - 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).
 - 12 Nov 2026: Tracker sources per record with a change log (A34), confidence as source tier plus an estimate tick (A35), Cancelled and Completed added (A36), sample content behind FLAG_SAMPLE_CONTENT (A37).
+- 12 Nov 2026: Home: pause button built (F6), drawn wording with sourced mission targets (A42), category tiles now and empty states for later data (A43), operators plus an allow-list behind Coming soon (A44).
 - 12 Nov 2026: Company importer now with basic profile fields (A38); imports land as drafts, records may be published (A39); the sample seed grows page by page (A40); imports check by default (A41).
