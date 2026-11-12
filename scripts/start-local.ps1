@@ -72,8 +72,13 @@ if (-not (Test-Command 'docker')) {
   Stop-Here 'Docker Desktop is not installed. Install it with: winget install Docker.DockerDesktop  (it needs WSL 2), restart the computer, then run this again.'
 }
 if (-not (Test-DockerRunning)) {
-  $dockerApp = Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'
-  if (Test-Path -LiteralPath $dockerApp) {
+  # Docker Desktop installs for all users (Program Files) or for one user (AppData\Local\Programs).
+  $dockerApp = @(
+    (Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'),
+    (Join-Path $env:LOCALAPPDATA 'Programs\DockerDesktop\Docker Desktop.exe'),
+    (Join-Path $env:LOCALAPPDATA 'Programs\Docker\Docker\Docker Desktop.exe')
+  ) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+  if ($dockerApp) {
     Write-Host 'Docker Desktop is not running: starting it (this can take a minute)'
     Start-Process -FilePath $dockerApp
     $deadline = (Get-Date).AddMinutes(3)
