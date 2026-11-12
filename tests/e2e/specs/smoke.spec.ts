@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("home placeholder loads", async ({ page }) => {
+test("home page loads", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Public website");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("India’s hydrogen ecosystem, in one place");
 });
 
 test("health endpoint answers", async ({ request }) => {

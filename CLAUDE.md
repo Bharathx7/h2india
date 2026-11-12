@@ -135,6 +135,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 `transactions` is **off** (Batch 6 on hold). Every cart, checkout, order, payment and payout route calls `requireFlag("transactions")` on the server; hiding a button is not enough.
 
+`comingSoon` (FLAG_COMING_SOON) is **off**. When on, every public page shows the Coming soon page except to signed-in operators and the emails on the Pre-launch allow-list (A44); newsletter pages stay reachable so pre-launch sign-ups can confirm.
+
 `sampleContent` (FLAG_SAMPLE_CONTENT) is **off** by default (F9, A37). Content with `sample` ticked is shown only when it is on (local, staging). Collections with a sample field use `publicOrEditor` and `refuseSamplePublish` from `cms/sample.ts`; Local API reads for readers use `publicWhere()`.
 
 ## Definition of done (every screen)

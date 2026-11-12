@@ -17,6 +17,9 @@ const seedDir = path.resolve(here, "../seed");
 
 const CONTENT: ContentTypeName[] = [
   "glossary",
+  "tenders",
+  "schemes",
+  "events",
   "tracker-projects",
   "tracker-factories",
   "tracker-pilots",
@@ -27,7 +30,114 @@ const CONTENT: ContentTypeName[] = [
 ];
 
 async function rowsOf(name: string): Promise<Record<string, unknown>[]> {
-  return JSON.parse(await readFile(path.join(seedDir, `${name}.json`), "utf8")) as Record<string, unknown>[];
+  const rows = JSON.parse(await readFile(path.join(seedDir, `${name}.json`), "utf8")) as Record<string, unknown>[];
+  return rows.map((r) => relativeDates(r) as Record<string, unknown>);
+}
+
+const istDay = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Kolkata",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/**
+ * Home sample data (step 5.1) uses dates relative to today, so tenders stay open and events upcoming: "+5d 17:00" is
+ * five days from today at 17:00 India time, "-2d" two days ago.
+ */
+function relativeDates(value: unknown): unknown {
+  if (typeof value === "string") {
+    const m = /^([+-]\d+)d(?: (\d{2}:\d{2}))?$/.exec(value);
+    if (!m) return value;
+    const day = istDay.format(new Date(Date.now() + Number(m[1]) * 86_400_000));
+    return m[2] ? `${day} ${m[2]}` : day;
+  }
+  if (Array.isArray(value)) return value.map(relativeDates);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, relativeDates(v)]));
+  }
+  return value;
+}
+
+const TOPICS = [
+  { slug: "policy", name: "Policy" },
+  { slug: "projects", name: "Projects" },
+  { slug: "tenders-awards", name: "Tenders & awards" },
+  { slug: "technology", name: "Technology" },
+  { slug: "mobility", name: "Mobility" },
+];
+
+/** The topics the home page's sample articles sit in (378:3895). */
+async function seedTopics(payload: Payload): Promise<void> {
+  for (const t of TOPICS) {
+    const found = await payload.find({ collection: "topics", where: { slug: { equals: t.slug } }, limit: 1, depth: 0 });
+    if (!found.docs[0]) await payload.create({ collection: "topics", data: t });
+  }
+  const author = await payload.find({
+    collection: "authors",
+    where: { slug: { equals: "h2-india-newsroom-sample" } },
+    limit: 1,
+    depth: 0,
+  });
+  if (!author.docs[0]) {
+    await payload.create({
+      collection: "authors",
+      data: { name: "H2 India newsroom (sample)", slug: "h2-india-newsroom-sample", kind: "staff" },
+    });
+  }
+}
+
+/** Sample articles (378:3895) import as drafts like any article (A39); the seed then publishes them where allowed. */
+async function seedArticles(payload: Payload, publish: boolean): Promise<string> {
+  const rows = await rowsOf("articles");
+  const report = await importContent(
+    payload,
+    "articles",
+    rows.map((r) => ({ ...r, publish: "no" })),
+    { apply: true, firstRow: 1, sample: true },
+  );
+  console.log(formatReport(report));
+  if (!publish) return "Articles: kept as drafts";
+  let published = 0;
+  for (const r of rows) {
+    const found = await payload.find({
+      collection: "articles",
+      where: { slug: { equals: String(r.slug) } },
+      draft: true,
+      limit: 1,
+      depth: 0,
+    });
+    const doc = found.docs[0];
+    if (!doc || doc._status === "published") continue;
+    await payload.update({
+      collection: "articles",
+      id: doc.id,
+      data: { _status: "published", workflow: "Published" },
+      context: { workflow: true },
+    });
+    published += 1;
+  }
+  return `Articles: ${String(published)} published`;
+}
+
+/** Home figures (A45): the drawn figures with their sources, flagged sample. Never overwrites figures an editor set. */
+async function seedHomeFigures(payload: Payload): Promise<string> {
+  const current = await payload.findGlobal({ slug: "home-figures", depth: 0 });
+  if ((current.figures ?? []).length && !current.sample) return "Home figures: kept the editors' figures";
+  const data = JSON.parse(await readFile(path.join(seedDir, "home-figures.json"), "utf8")) as {
+    figures: { value: string; label: string; source: string; asOf: string }[];
+    sight: { asOf: string } & Record<string, unknown>;
+  };
+  const day = (d: string) => new Date(`${d}T00:00:00+05:30`).toISOString();
+  await payload.updateGlobal({
+    slug: "home-figures",
+    data: {
+      figures: data.figures.map((f) => ({ ...f, asOf: day(f.asOf) })),
+      sight: { ...data.sight, asOf: day(data.sight.asOf) },
+      sample: true,
+    },
+  });
+  return "Home figures: sample figures set";
 }
 
 /** A one-page PDF standing in for a report file. */
@@ -109,6 +219,9 @@ async function main(): Promise<number> {
     problems += report.counts.error;
   }
   console.log(await seedReports(payload, publish));
+  await seedTopics(payload);
+  console.log(await seedArticles(payload, publish));
+  console.log(await seedHomeFigures(payload));
   return problems > 0 ? 1 : 0;
 }
 

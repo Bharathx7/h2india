@@ -1,3 +1,4 @@
+import { APPLICATIONS, PRODUCT_CLASSES } from "@h2india/core/catalogue";
 import type { FooterColumn, MegaSection, SiteLinks } from "@h2india/ui";
 
 // Site header, mega menus and footer from Figma (Site header 25:635, Mega menu 369:7387, Footer v2 153:179).
@@ -42,19 +43,9 @@ export const MEGA_MENUS: MegaSection[] = [
           { label: "Hydrogen generators", href: "/marketplace/systems/hydrogen-generators" },
         ],
       },
-      { id: "components", label: "Components", href: "/marketplace/components", categories: [] },
-      { id: "equipment", label: "Equipment", href: "/marketplace/equipment", categories: [] },
-      { id: "services", label: "Services", href: "/marketplace/services", categories: [] },
-      { id: "materials", label: "Materials", href: "/marketplace/materials", categories: [] },
+      ...PRODUCT_CLASSES.filter((c) => c.id !== "systems").map((c) => ({ ...c, categories: [] })),
     ],
-    applications: [
-      { label: "Production", href: "/marketplace/applications/production" },
-      { label: "Storage & transport", href: "/marketplace/applications/storage-transport" },
-      { label: "Refuelling & mobility", href: "/marketplace/applications/refuelling-mobility" },
-      { label: "Fuel cells & power", href: "/marketplace/applications/fuel-cells-power" },
-      { label: "Industrial use", href: "/marketplace/applications/industrial-use" },
-      { label: "Safety & testing", href: "/marketplace/applications/safety-testing" },
-    ],
+    applications: APPLICATIONS.map(({ label, href }) => ({ label, href })),
     tools: [
       { label: "Brands", href: "/marketplace/brands", icon: "building" },
       { label: "Compare products", href: "/marketplace/compare", icon: "compare" },

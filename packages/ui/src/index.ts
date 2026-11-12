@@ -109,3 +109,19 @@ export type {
 } from "./components/site/types";
 export { BellPanel, NotificationList, NotificationRow } from "./components/Notifications";
 export type { BellPanelProps, NotificationRowData } from "./components/Notifications";
+
+// Cards (step 5.1) and the home motion pieces (781:7247)
+export {
+  ArticleCard,
+  CategoryTile,
+  EventCard,
+  FeatureCard,
+  SchemeCard,
+  StatFigure,
+  TenderCard,
+} from "./components/cards/Cards";
+export type { CardStatus } from "./components/cards/Cards";
+export { HeroNetwork } from "./components/home/HeroNetwork";
+export { LogoMarquee } from "./components/home/LogoMarquee";
+export type { MarqueeBrand } from "./components/home/LogoMarquee";
+export { PauseButton, Reveal, useReducedMotion } from "./components/home/Motion";

@@ -40,6 +40,14 @@ export default defineConfig({
           timeout: 120_000,
         },
         {
+          // A second copy of the app with Coming soon switched on (step 5.1, A44).
+          command: "pnpm --filter @h2india/web exec next start -p 3001",
+          url: "http://localhost:3001/api/health",
+          env: { FLAG_SAMPLE_CONTENT: "false", FLAG_COMING_SOON: "true" },
+          reuseExistingServer: false,
+          timeout: 120_000,
+        },
+        {
           command: "pnpm --filter @h2india/worker start",
           wait: { stdout: /worker ready/ },
           reuseExistingServer: false,

@@ -12,6 +12,7 @@ import { Articles } from "./cms/collections/Articles";
 import { Authors } from "./cms/collections/Authors";
 import { Corrections } from "./cms/collections/Corrections";
 import { Editors } from "./cms/collections/Editors";
+import { EarlyListings, HomeFigures, Prelaunch } from "./cms/home/collections";
 import { Media } from "./cms/collections/Media";
 import { Tags, Topics } from "./cms/collections/Taxonomy";
 import {
@@ -88,13 +89,14 @@ export default buildConfig({
     TrackerPolicies,
     TrackerHubs,
     TrackerChanges,
+    EarlyListings,
     Authors,
     Topics,
     Tags,
     Media,
     Editors,
   ],
-  globals: [TrackerMethodology],
+  globals: [TrackerMethodology, HomeFigures, Prelaunch],
   editor: lexicalEditor(),
   endpoints: [
     {

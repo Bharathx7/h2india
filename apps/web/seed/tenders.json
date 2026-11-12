@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "seci-green-ammonia-mode-2a-tranche-ii",
+    "title": "Selection of green ammonia producers, Mode 2A Tranche II",
+    "issuer": "SECI",
+    "tenderId": "SECI/C&P/HO/2026/0412",
+    "mode": "Open tender · two-bid system",
+    "category": "Production › Green ammonia",
+    "states": ["all-india"],
+    "emd": "as per RfS",
+    "bidDueAt": "+5d 17:00",
+    "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
+    "sourceUrl": "https://example.org/sample/seci-green-ammonia",
+    "publish": "yes"
+  },
+  {
+    "slug": "iocl-10-mw-pem-electrolyser-panipat",
+    "title": "Supply of a 10 MW PEM electrolyser, Panipat refinery",
+    "issuer": "IOCL",
+    "tenderId": "IOCL/PR/GH2/2026-27/09",
+    "mode": "Open tender · two-bid system",
+    "category": "Equipment › Electrolysers",
+    "states": ["haryana"],
+    "emd": "as per RfS",
+    "bidDueAt": "+11d 15:00",
+    "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
+    "sourceUrl": "https://example.org/sample/iocl-panipat-electrolyser",
+    "publish": "yes"
+  },
+  {
+    "slug": "dpa-green-hydrogen-bunkering-pilot-kandla",
+    "title": "EPC for a green hydrogen bunkering pilot at Kandla",
+    "issuer": "Deendayal Port Authority",
+    "tenderId": "DPA/ENG/GH2/2026/03",
+    "mode": "Open tender · two-bid system",
+    "category": "EPC › Ports",
+    "states": ["gujarat"],
+    "emd": "as per RfS",
+    "bidDueAt": "+18d 15:00",
+    "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
+    "sourceUrl": "https://example.org/sample/dpa-bunkering-pilot",
+    "publish": "yes"
+  }
+]

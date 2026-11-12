@@ -18,7 +18,8 @@ export const h2indiaStrategy: AuthStrategy = {
     const session = await auth.api.getSession({ headers }).catch(() => null);
     if (!session) return { user: null };
     const actor = await loadActor(getDb(), session.user.id);
-    const permissions = [...actor.operator].filter((p) => p.startsWith("content."));
+    // settings.edit lets a Super admin keep the Pre-launch allow-list (A44).
+    const permissions = [...actor.operator].filter((p) => p.startsWith("content.") || p === "settings.edit");
     if (!permissions.includes("content.view")) return { user: null };
     const found = await payload.find({
       collection: "editors",

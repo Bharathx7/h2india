@@ -1,0 +1,39 @@
+[
+  {
+    "slug": "sight-green-hydrogen-production",
+    "name": "SIGHT programme: green hydrogen production incentive",
+    "runBy": "SECI",
+    "ministry": "MNRE",
+    "whoCanApply": ["Green hydrogen producers", "Project developers"],
+    "nextDeadline": "+5d 17:00",
+    "summary": "Production incentive, up to ₹4 per kg in year one",
+    "sourceUrl": "https://example.org/sample/sight-production",
+    "verification": { "at": "-2d" },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-hydrogen-hubs-common-infrastructure",
+    "name": "Green hydrogen hubs: support for common infrastructure",
+    "runBy": "MNRE",
+    "ministry": "MNRE",
+    "whoCanApply": ["State agencies", "Project developers"],
+    "deadlineNote": "Guidelines expected Dec 2026",
+    "statusOverride": "Next round expected",
+    "summary": "Grant support for shared pipelines, storage and port facilities",
+    "sourceUrl": "https://example.org/sample/hydrogen-hubs",
+    "verification": { "at": "-2d" },
+    "publish": "yes"
+  },
+  {
+    "slug": "gujarat-green-hydrogen-policy",
+    "name": "Gujarat green hydrogen policy: land and power incentives",
+    "runBy": "Gujarat Energy Development Agency",
+    "states": ["gujarat"],
+    "whoCanApply": ["Green hydrogen producers", "Project developers"],
+    "deadlineNote": "Applications accepted all year",
+    "summary": "Concessional land and electricity duty exemption for producers",
+    "sourceUrl": "https://example.org/sample/gujarat-policy",
+    "verification": { "at": "-2d" },
+    "publish": "yes"
+  }
+]
