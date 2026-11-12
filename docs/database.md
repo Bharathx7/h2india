@@ -88,6 +88,12 @@ signed link) and `public` (checked logos and product images). Support requests (
 | `notification_settings`    | Quiet hours and "Unsubscribe from everything" (548:8)                                                                                                                                          |
 | `template_approvals`       | SMS (DLT) and WhatsApp template status set by a Super admin when the provider confirms it (A25)                                                                                                |
 
+## Content (Stage 4, schema `cms`)
+
+Payload owns the `cms` schema (ADR 0004): one table per collection (`articles`, `authors`, `topics`, `tags`, `media`,
+`editors`) plus its array, relationship and version tables (`_articles_v`). Its migrations are in
+`apps/web/src/migrations` and run after the core ones in `pnpm db:migrate`.
+
 ## Migrations
 
 | Command            | What it does                                                                        |

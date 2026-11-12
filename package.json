@@ -25,7 +25,7 @@
     "tokens:build": "pnpm --filter @h2india/ui tokens:build",
     "tokens:diff": "pnpm --filter @h2india/ui tokens:diff",
     "db:generate": "pnpm --filter @h2india/db generate",
-    "db:migrate": "pnpm --filter @h2india/db migrate",
+    "db:migrate": "pnpm --filter @h2india/db migrate && pnpm --filter @h2india/web cms:migrate",
     "db:seed": "pnpm --filter @h2india/db seed",
     "db:reset": "pnpm --filter @h2india/db reset"
   },

@@ -131,6 +131,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A23 | How lost-email support requests reach support before the admin back office | You | Step 3.7 | Email to the support address with a link to a sign-in-protected review page (details and Work ID); replying and account changes from the admin Users screen (step 11.4) | Answered | Founder, 12 Nov 2026. |
 | A24 | Clock values (System settings 707:793 and playbook Section 5) | You | Step 3.8 | As drawn: supplier review 2 working days; queue amber 24 h, red 48 h; supplier accepts an order 48 h; buyer accepts a delivery 5 working days; supplier replies to a dispute 2 working days; H2 India reviews a dispute after 5 working days; grievances acknowledged in 24 h, resolved in 15 days; RFQ moderation 1 working day; payout 2 working days after acceptance, runs at 11:00 and 16:00 IST; data-rights requests due in 30 days; bank-change hold 72 h (C5) | Answered | Founder, 12 Nov 2026. Changes apply to new deadlines only. |
 | A25 | Starting approval status of SMS and WhatsApp templates before the provider (M5) registers them | You | Step 3.9 | All unapproved in production until a Super admin marks each approved after DLT or Meta confirm it; the local and test fake providers treat templates as approved | Answered | Founder, 12 Nov 2026. |
+| A26 | Where editors write (step 4.1) | You | Step 4.1 | Payload's editor at /cms from Stage 4, signed in with our accounts and branded; the designed Content screens (638:8, 639:8, record editors) are built in Stage 11 on the same data, and "Open CMS" stays | Answered | Founder, 12 Nov 2026. |
+| A27 | Which article types need a legal check, and who does it (step 4.2) | You | Step 4.2 | Sponsored and press-release pieces always, any other piece an editor flags; the Editor-in-chief passes it (639:8) | Answered | Founder, 12 Nov 2026. |
+| A28 | Article types and fields (step 4.1) | You | Step 4.1 | The six drawn types (news, analysis, explainer, interview, press release, sponsored) with the fields on their frames; sponsored and press-release labels come from the type | Answered | Founder, 12 Nov 2026. |
+| A29 | Scheme pages and applications (step 4.3) | You | Step 4.3 | Link out to the official portal only; no applying on H2 India | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -169,3 +173,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You chose the drawn upload limits (A20), PNG from SVG logos (A21), 30-day Work ID retention (A22) and email plus review page for support requests (A23).
 - 12 Nov 2026: You confirmed the drawn clock values (A24) and answered M18: Monday to Saturday, minus gazetted holidays, maintained by a Super admin.
 - 12 Nov 2026: You chose to keep every SMS and WhatsApp template unapproved until the provider confirms it (A25).
+- 12 Nov 2026: Stage 4 decisions: Payload editor now (A26), legal check for sponsored, press release and flagged pieces by the Editor-in-chief (A27), six article types as drawn (A28), schemes link to official portals only (A29).

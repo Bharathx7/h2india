@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "allowJs": false,
+    "allowJs": true,
     "incremental": true,
     "types": ["node"],
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@/*": ["./src/*"], "@payload-config": ["./src/payload.config.ts"] }
   },
   "include": ["next-env.d.ts", "src", ".next/types/**/*.ts", "next.config.ts"],
   "exclude": ["node_modules"]

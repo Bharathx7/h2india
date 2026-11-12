@@ -5,7 +5,18 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const SAFE_ID = /^[A-Za-z0-9._-]{8,64}$/;
 
+/** Better Auth's session cookie (prefix "h2"; "__Secure-" in production). */
+const signedIn = (request: NextRequest) => request.cookies.getAll().some((c) => c.name.endsWith("h2.session_token"));
+
 export function proxy(request: NextRequest) {
+  // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.
+  const { pathname } = request.nextUrl;
+  if (pathname === "/cms/logout") return NextResponse.redirect(new URL("/sign-out", request.url));
+  if (pathname.startsWith("/cms") && !signedIn(request)) {
+    return NextResponse.redirect(new URL("/sign-in?next=/cms", request.url));
+  }
+  // Signed in but sent to Payload's sign-in page: the account has no Content access.
+  if (pathname === "/cms/login") return NextResponse.redirect(new URL("/", request.url));
   const incoming = request.headers.get("x-request-id");
   const id = incoming && SAFE_ID.test(incoming) ? incoming : crypto.randomUUID();
   const headers = new Headers(request.headers);

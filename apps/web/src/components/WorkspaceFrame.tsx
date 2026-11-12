@@ -3,8 +3,8 @@
 import { BellPanel, WorkspaceShell, type WorkspaceArea, type WorkspaceNavGroup, type WorkspaceUser } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { bellData, markAllRead, markOneRead } from "@/app/(workspace)/notifications/actions";
-import type { Row } from "@/app/(workspace)/notifications/rows";
+import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
+import type { Row } from "@/app/(app)/(workspace)/notifications/rows";
 
 // The workspace shell with the live bell (97:3168): unread count, latest five, Mark all read. Refreshes every minute
 // and whenever the panel opens.
