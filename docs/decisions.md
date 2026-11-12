@@ -130,6 +130,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A22 | How long the Work ID from a lost-email support request is kept | You | Step 3.7 | Deleted 30 days after the request is closed; the audit log keeps who opened it | Answered | Founder, 12 Nov 2026. |
 | A23 | How lost-email support requests reach support before the admin back office | You | Step 3.7 | Email to the support address with a link to a sign-in-protected review page (details and Work ID); replying and account changes from the admin Users screen (step 11.4) | Answered | Founder, 12 Nov 2026. |
 | A24 | Clock values (System settings 707:793 and playbook Section 5) | You | Step 3.8 | As drawn: supplier review 2 working days; queue amber 24 h, red 48 h; supplier accepts an order 48 h; buyer accepts a delivery 5 working days; supplier replies to a dispute 2 working days; H2 India reviews a dispute after 5 working days; grievances acknowledged in 24 h, resolved in 15 days; RFQ moderation 1 working day; payout 2 working days after acceptance, runs at 11:00 and 16:00 IST; data-rights requests due in 30 days; bank-change hold 72 h (C5) | Answered | Founder, 12 Nov 2026. Changes apply to new deadlines only. |
+| A25 | Starting approval status of SMS and WhatsApp templates before the provider (M5) registers them | You | Step 3.9 | All unapproved in production until a Super admin marks each approved after DLT or Meta confirm it; the local and test fake providers treat templates as approved | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -167,3 +168,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You set audit retention to 8 years (A18).
 - 12 Nov 2026: You chose the drawn upload limits (A20), PNG from SVG logos (A21), 30-day Work ID retention (A22) and email plus review page for support requests (A23).
 - 12 Nov 2026: You confirmed the drawn clock values (A24) and answered M18: Monday to Saturday, minus gazetted holidays, maintained by a Super admin.
+- 12 Nov 2026: You chose to keep every SMS and WhatsApp template unapproved until the provider confirms it (A25).

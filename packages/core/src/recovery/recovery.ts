@@ -7,11 +7,11 @@ import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { can } from "../authz/can";
 import { DEFAULT_ROLE } from "../authz/catalogue";
-import { smsSender } from "../companies/adapters/sms";
 import { hashToken } from "../companies/drafts";
 import { normaliseMobile } from "../companies/rules";
 import { getDb } from "../db";
-import { mailTransport } from "../mail/transport";
+import { deliverEmail, deliverSms, TemplateNotApprovedError } from "../notify/channels";
+import { notify } from "../notify/notify";
 import { nextReference } from "../reference";
 import { normaliseEmail } from "../sign-in/rules";
 import { checkCode, sendCode } from "./codes";
@@ -55,16 +55,9 @@ export function maskMobile(mobile: string | null): string | null {
   return `+91 ••••• ${digits.slice(5)}`;
 }
 
-async function send(to: string, mail: { subject: string; html: string; text: string }) {
-  const env = parseServerEnv();
-  await mailTransport(env).sendMail({
-    from: env.EMAIL_FROM_SECURITY ?? env.EMAIL_FROM,
-    to,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text,
-  });
-}
+type Mail = { subject: string; html: string; text: string };
+const security = (to: string, mail: Mail, template: "email.new_email_confirm" | "email.mobile_changed") =>
+  deliverEmail({ template, event: `account.${template.slice(6)}`, to, mail, security: true });
 
 async function byToken(token: string) {
   const db = getDb();
@@ -227,7 +220,7 @@ export async function claimRecoverySession(token: string): Promise<string> {
 
 async function admins(organisationId: string, except: string | null) {
   return getDb()
-    .select({ name: u.name, email: u.email })
+    .select({ id: u.id, name: u.name, email: u.email })
     .from(m)
     .innerJoin(u, eq(u.id, m.userId))
     .where(
@@ -245,16 +238,29 @@ async function notifyPasskeyReset(userId: string, organisationId: string | null)
   const db = getDb();
   const [person] = await db.select({ name: u.name, email: u.email }).from(u).where(eq(u.id, userId));
   const [org] = await db.select({ name: o.legalName }).from(o).where(eq(o.id, organisationId));
+  const who = person?.name || person?.email || "A team member";
   for (const admin of await admins(organisationId, userId)) {
-    await send(
-      admin.email,
-      await renderRecovery(env.APP_URL, "passkeyReset", {
-        adminName: admin.name.split(/\s+/)[0] ?? "",
-        person: person?.name || person?.email || "A team member",
-        company: org?.name ?? "your company",
-        supportEmail: env.SUPPORT_EMAIL,
-      }),
-    );
+    await notify({
+      event: "recovery.passkey_reset",
+      topic: "team.requests",
+      userId: admin.id,
+      scope: organisationId,
+      email: {
+        template: "email.passkey_reset_admin",
+        mail: await renderRecovery(env.APP_URL, "passkeyReset", {
+          adminName: admin.name.split(/\s+/)[0] ?? "",
+          person: who,
+          company: org?.name ?? "your company",
+          supportEmail: env.SUPPORT_EMAIL,
+        }),
+      },
+      inApp: {
+        category: "team",
+        icon: "lock",
+        title: `${who} reset their passkey`,
+        body: "No action is needed if you expected this.",
+      },
+    });
   }
 }
 
@@ -278,23 +284,39 @@ async function askForApproval(row: typeof rr.$inferSelect, what: "mobile" | "ema
   const name = person?.name || person?.email || "A team member";
   if (approvers.length > 0) {
     for (const admin of approvers) {
-      await send(
-        admin.email,
-        await renderRecovery(env.APP_URL, "recoveryApproval", {
-          adminName: admin.name.split(/\s+/)[0] ?? "",
-          person: name,
-          company: org?.name ?? "your company",
-          what,
-          url,
-        }),
-      );
+      await notify({
+        event: "recovery.approval_needed",
+        topic: "team.requests",
+        userId: admin.id,
+        scope: row.organisationId ?? "",
+        email: {
+          template: "email.recovery_approval",
+          mail: await renderRecovery(env.APP_URL, "recoveryApproval", {
+            adminName: admin.name.split(/\s+/)[0] ?? "",
+            person: name,
+            company: org?.name ?? "your company",
+            what,
+            url,
+          }),
+        },
+        inApp: {
+          category: "team",
+          icon: "shield-check",
+          title: what === "mobile" ? `Approve ${name}'s new mobile number` : `Confirm it's ${name}`,
+          body: what === "mobile" ? "It takes effect when you approve it" : "They lost access to their work email",
+          href: `/account/recovery/${row.id}`,
+          actionLabel: "Review request",
+        },
+      });
     }
   } else {
     const reference = await nextReference(db, "SUP");
     await db.update(rr).set({ reference }).where(eq(rr.id, row.id));
-    await send(
-      env.SUPPORT_EMAIL,
-      await renderRecovery(env.APP_URL, "supportRequest", {
+    await deliverEmail({
+      template: "email.support_request",
+      event: "recovery.support_request",
+      to: env.SUPPORT_EMAIL,
+      mail: await renderRecovery(env.APP_URL, "supportRequest", {
         reference,
         name,
         company: org?.name ?? "No company",
@@ -302,7 +324,7 @@ async function askForApproval(row: typeof rr.$inferSelect, what: "mobile" | "ema
         kind: what === "mobile" ? "New mobile number to approve" : "Lost email: confirm the person",
         url,
       }),
-    );
+    });
   }
   await audit(db, {
     actorId: row.userId,
@@ -351,8 +373,23 @@ async function applyMobileChange(requestId: string, userId: string, mobile: stri
       after: { mobile },
     });
   });
-  await smsSender().send({ to: mobile, text: "Your new mobile number for H2 India is confirmed. -H2 India" });
-  if (before?.email) await send(before.email, await renderRecovery(env.APP_URL, "mobileChanged", { mobile }));
+  // A courtesy notice: if its SMS template isn't approved yet (M5), the refusal is logged and the change still stands.
+  await deliverSms({
+    template: "sms.mobile_changed",
+    event: "account.mobile_changed",
+    userId,
+    to: mobile,
+    data: {},
+  }).catch((error: unknown) => {
+    if (!(error instanceof TemplateNotApprovedError)) throw error;
+  });
+  if (before?.email) {
+    await security(
+      before.email,
+      await renderRecovery(env.APP_URL, "mobileChanged", { mobile }),
+      "email.mobile_changed",
+    );
+  }
 }
 
 /** Lost email, "Use my mobile and admin" (528:534): after the mobile code, ask an Admin (or support) to confirm. */
@@ -442,12 +479,13 @@ export async function requestNewEmail(input: { userId: string; email: string }):
     expiresAt: new Date(Date.now() + 24 * HOURS),
   });
   const env = parseServerEnv();
-  await send(
+  await security(
     email,
     await renderRecovery(env.APP_URL, "newEmail", {
       email,
       url: `${env.APP_URL}/forgot-access/email/confirm?request=${row.id}&token=${token}`,
     }),
+    "email.new_email_confirm",
   );
 }
 

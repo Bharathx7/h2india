@@ -3,7 +3,7 @@ import { randomInt, timingSafeEqual } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "../sign-in/throttle";
-import { smsSender, verificationSms } from "./adapters/sms";
+import { deliverSms } from "../notify/channels";
 import { hashToken, markMobileVerified } from "./drafts";
 import { JOIN, normaliseMobile } from "./rules";
 
@@ -47,7 +47,7 @@ export async function sendMobileCode(input: { draftToken: string; mobile: string
     value: `${hashToken(code)}:0`,
     expiresAt: sql`now() + make_interval(mins => ${JOIN.mobileCodeMinutes})`,
   });
-  await smsSender().send({ to: mobile, text: verificationSms(code) });
+  await deliverSms({ template: "sms.otp_sign_in", event: "join.mobile_code", to: mobile, data: { code } });
   return { mobile };
 }
 

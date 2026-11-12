@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=../../.env.local src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --packages=external --alias:@h2india/core=../../packages/core/src --alias:@h2india/config=../../packages/config/src --alias:@h2india/db=../../packages/db/src/index.ts",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --packages=external --alias:@h2india/core=../../packages/core/src --alias:@h2india/config=../../packages/config/src --alias:@h2india/db=../../packages/db/src/index.ts --alias:@h2india/emails=../../packages/emails/src",
     "start": "node --env-file-if-exists=../../.env.local dist/index.js",
     "typecheck": "tsc -p tsconfig.json"
   },
@@ -16,6 +16,7 @@
     "@h2india/core": "workspace:*",
     "bullmq": "6.7.4",
     "drizzle-orm": "0.45.4",
+    "nodemailer": "10.5.0",
     "pg": "8.23.1",
     "sharp": "0.35.5",
     "uuidv7": "1.2.1",

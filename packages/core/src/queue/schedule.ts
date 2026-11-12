@@ -7,6 +7,8 @@ import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";
 import { enqueueFileCheck } from "../files/jobs";
 import { sweepFiles } from "../files/files";
+import { sendDueDeliveries } from "../notify/channels";
+import { pruneNotifications } from "../notify/inapp";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
 
@@ -26,6 +28,8 @@ const MINUTE = 60_000;
 
 export const SCHEDULES: Scheduled[] = [
   { id: "deadlines-tick", every: MINUTE, run: () => runDeadlines(getDb()) },
+  // Step 3.9: WhatsApp held by quiet hours, and failed emails due for a retry.
+  { id: "notify-due", every: MINUTE, run: () => sendDueDeliveries() },
   { id: "files-sweep", every: 15 * MINUTE, run: () => sweepFiles(enqueueFileCheck) },
   {
     id: "gstin-sweep",
@@ -43,6 +47,8 @@ export const SCHEDULES: Scheduled[] = [
         .delete(schema.verifications)
         .where(sql`${schema.verifications.expiresAt} < now() - interval '1 day'`),
   },
+  // 02:30 IST every day: "We keep notifications for 90 days" (97:2564).
+  { id: "notifications-prune", pattern: "0 21 * * *", run: () => pruneNotifications(getDb()) },
   // 03:00 IST every day.
   { id: "audit-retention", pattern: "30 21 * * *", run: () => pruneAuditLog(getDb()) },
 ];

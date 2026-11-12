@@ -78,6 +78,16 @@ signed link) and `public` (checked logos and product images). Support requests (
 | `deadlines`    | One deadline on one record: clock type, subject, started, warn and due times, when warn and expire fired, status (Open, Done, Cancelled); one open deadline per type and subject |
 | `dead_letters` | Jobs that failed every retry: queue, job, masked data, error, attempts, and whether someone retried or dismissed it                                                              |
 
+## Notifications (step 3.9)
+
+| Table                      | Holds                                                                                                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `notifications`            | In-app notifications for the bell and the centre: person, category (quotes, orders, team, alerts, account), icon, words, link, when visible (quiet hours) and when read; kept 90 days          |
+| `notification_deliveries`  | Every message on every channel: template, recipient, status (Sent, Failed, Skipped, Refused, Waiting), reason, provider and its answer, attempts; a copy only for messages that may be retried |
+| `notification_preferences` | A person's choices that differ from the drawn defaults, per topic and channel; personal (`scope` empty) or for one company                                                                     |
+| `notification_settings`    | Quiet hours and "Unsubscribe from everything" (548:8)                                                                                                                                          |
+| `template_approvals`       | SMS (DLT) and WhatsApp template status set by a Super admin when the provider confirms it (A25)                                                                                                |
+
 ## Migrations
 
 | Command            | What it does                                                                        |

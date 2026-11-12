@@ -27,6 +27,7 @@ export class JoinRequestError extends Error {
 }
 
 export interface CompanyAdmin {
+  id: string;
   name: string;
   email: string;
 }
@@ -34,7 +35,7 @@ export interface CompanyAdmin {
 /** The Admins of a company, who answer join requests (575:696, 592:371). */
 export async function companyAdmins(ex: Executor, organisationId: string): Promise<CompanyAdmin[]> {
   return ex
-    .select({ name: u.name, email: u.email })
+    .select({ id: u.id, name: u.name, email: u.email })
     .from(m)
     .innerJoin(u, eq(u.id, m.userId))
     .where(and(eq(m.organisationId, organisationId), inArray(m.role, [DEFAULT_ROLE.creator])))

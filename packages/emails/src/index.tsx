@@ -67,3 +67,8 @@ export function renderRecovery<K extends keyof typeof builders>(
   const build = builders[kind] as (i: typeof input) => NoticeMessage;
   return renderNotice(appUrl, build(input));
 }
+
+export { APPROVED_TEXT, TEMPLATES } from "./registry";
+export type { Channel, TemplateEntry, TemplateId, TextTemplateId } from "./registry";
+export { renderSample } from "./samples";
+export type { Sample } from "./samples";

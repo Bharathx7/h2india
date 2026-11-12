@@ -6,3 +6,4 @@ export * from "./recovery";
 export * from "./settings";
 export * from "./files";
 export * from "./clocks";
+export * from "./notify";

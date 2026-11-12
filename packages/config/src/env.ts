@@ -34,6 +34,9 @@ export const serverEnvSchema = z.object({
   /** Base URL that serves the public bucket (a CDN in production). Defaults to the bucket on S3_ENDPOINT. */
   S3_PUBLIC_URL: optionalUrl,
   /** ClamAV daemon (clamd) for the virus scan. */
+  /** SMS and WhatsApp providers (M5). "fake" delivers to Mailpit and treats templates as approved. */
+  SMS_PROVIDER: z.enum(["fake"]).default("fake"),
+  WHATSAPP_PROVIDER: z.enum(["fake"]).default("fake"),
   CLAMAV_HOST: z.string().min(1).default("localhost"),
   CLAMAV_PORT: z.coerce.number().int().positive().default(3310),
   SMTP_HOST: z.string().min(1),
