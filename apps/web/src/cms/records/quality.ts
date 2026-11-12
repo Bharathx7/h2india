@@ -1,13 +1,16 @@
 import type { Payload } from "payload";
+import { TRACKER_SLUGS } from "../tracker/options";
 import { RECORD_COLLECTIONS } from "./collections";
 
 // Data quality (646:9, 646:733; step 4.3): records nobody has verified for the configured age (30 days, red after 60,
-// A31), and open possible updates. The admin screens come in step 11.3.
+// A31), tracker records included (643:1330, step 4.5), and open possible updates. The admin screens come in step 11.3.
 
 export const STALE_DAYS = 30;
 export const RED_DAYS = 60;
 
-const TITLE: Record<(typeof RECORD_COLLECTIONS)[number], string> = {
+const CHECKED = [...RECORD_COLLECTIONS, ...TRACKER_SLUGS] as const;
+
+const TITLE: Record<string, string> = {
   schemes: "name",
   tenders: "title",
   grants: "title",
@@ -18,7 +21,7 @@ const TITLE: Record<(typeof RECORD_COLLECTIONS)[number], string> = {
 export async function staleRecords(payload: Payload, now: Date = new Date(), staleDays = STALE_DAYS) {
   const cutoff = new Date(now.getTime() - staleDays * 86_400_000).toISOString();
   const rows = await Promise.all(
-    RECORD_COLLECTIONS.map(async (collection) => {
+    CHECKED.map(async (collection) => {
       const res = await payload.find({
         collection,
         where: { or: [{ "verification.at": { less_than: cutoff } }, { "verification.at": { exists: false } }] },
@@ -29,7 +32,8 @@ export async function staleRecords(payload: Payload, now: Date = new Date(), sta
       return res.docs.map((d) => {
         const doc = d as unknown as Record<string, unknown> & {
           id: number;
-          sourceUrl: string;
+          sourceUrl?: string;
+          source?: { url?: string | null; name?: string } | null;
           verification?: { at?: string | null } | null;
           owner?: { name?: string } | number | null;
         };
@@ -38,12 +42,13 @@ export async function staleRecords(payload: Payload, now: Date = new Date(), sta
         return {
           collection,
           id: doc.id,
-          title: typeof doc[TITLE[collection]] === "string" ? (doc[TITLE[collection]] as string) : "",
+          title:
+            typeof doc[TITLE[collection] ?? "name"] === "string" ? (doc[TITLE[collection] ?? "name"] as string) : "",
           owner: typeof doc.owner === "object" && doc.owner ? (doc.owner.name ?? null) : null,
           lastVerified: at,
           days,
           tone: days === null || days >= RED_DAYS ? ("error" as const) : ("warning" as const),
-          source: doc.sourceUrl,
+          source: doc.sourceUrl ?? doc.source?.url ?? doc.source?.name ?? null,
         };
       });
     }),

@@ -1,7 +1,8 @@
 import { audit, getDb } from "@h2india/core";
 import { GST_STATES } from "@h2india/core/companies/client";
 import { APIError, type CollectionConfig, type Endpoint, type Field } from "payload";
-import { canDelete, canEdit, editorOf, publishedOrEditor } from "../roles";
+import { canDelete, canEdit, editorOf } from "../roles";
+import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
 
 // What every record shares (step 4.3, A30, A31): an official source and documents, "last verified" with who and a
@@ -101,7 +102,7 @@ export const statesField: Field = { name: "states", type: "select", hasMany: tru
 export const topicsField: Field = { name: "topics", type: "relationship", relationTo: "topics", hasMany: true };
 
 /** POST /api/cms/<records>/:id/verify { note }: "Mark verified now" (640:8). */
-function verifyEndpoint(slug: string): Endpoint {
+export function verifyEndpoint(slug: string): Endpoint {
   return {
     path: "/:id/verify",
     method: "post",
@@ -152,7 +153,7 @@ export function recordCollection(input: {
       defaultColumns: input.defaultColumns ?? [input.titleField, "status", "verification.at", "updatedAt"],
     },
     versions: { drafts: true, maxPerDoc: 50 },
-    access: { read: publishedOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
+    access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
     endpoints: [verifyEndpoint(input.slug)],
     hooks: {
       afterRead: [
@@ -173,6 +174,7 @@ export function recordCollection(input: {
           }
           return data;
         },
+        refuseSamplePublish,
       ],
     },
     fields: [...input.fields, ...sidebarFields],

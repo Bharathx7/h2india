@@ -66,6 +66,10 @@ Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as th
 - Content editors draft everything; the Editor-in-chief (or a Super admin) publishes articles, Hydrogen 101 chapters,
   buyer's guides, reports, videos and podcasts. Records, glossary terms and standards are published by any editor
   (A30).
+- Tracker records (step 4.5) are published by any editor, like records (A30); Recent changes are written by the system
+  and only Content delete can remove a wrong entry.
+- Sample content (F9, A37): with FLAG_SAMPLE_CONTENT off, nobody can publish a sample-flagged item and readers never
+  see one; editors still do.
 - Report leads (step 4.4, A33) are personal data: only operators with Content export (Editor-in-chief, Super admin) can
   see them; Content delete runs the 24-month clean-up on demand. Report PDFs open for editors in the CMS and for
   readers only through the gated download.

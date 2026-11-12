@@ -4,6 +4,7 @@ import { JOB_ROLES } from "@h2india/core/companies/client";
 import { signDownload } from "@h2india/core/files";
 import { sendReportCopy } from "@h2india/core/notify";
 import type { Payload } from "payload";
+import { publicWhere } from "../sample";
 import { EMAIL_LINK_DAYS, REPORTS_PREFIX, reportLink } from "./library";
 
 // The gated report download (form 736:421, "Your report is ready" 736:833; step 4.4, A33): record who downloaded
@@ -41,7 +42,7 @@ export class ReportGateError extends Error {
 async function publishedReport(payload: Payload, slug: string) {
   const found = await payload.find({
     collection: "reports",
-    where: { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+    where: { and: [{ slug: { equals: slug } }, publicWhere()] },
     limit: 1,
     depth: 1,
   });

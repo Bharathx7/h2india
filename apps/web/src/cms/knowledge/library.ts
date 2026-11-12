@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { parseServerEnv } from "@h2india/config";
-import type { Payload, Where } from "payload";
+import type { Payload } from "payload";
+import { publicWhere } from "../sample";
 import type { LinkableTerm } from "./glossary-links";
 
 // Knowledge helpers (step 4.4): chapter neighbours, the glossary for hover-cards, and report download links.
@@ -8,14 +9,12 @@ import type { LinkableTerm } from "./glossary-links";
 /** Report PDFs sit under this prefix in the private bucket. */
 export const REPORTS_PREFIX = "cms-reports";
 
-const PUBLISHED: Where = { _status: { equals: "published" } };
-
 /** A Hydrogen 101 chapter with the chapters before and after it (by chapter number). Published only, unless draft. */
 export async function chapterWithNeighbours(payload: Payload, slug: string, opts: { draft?: boolean } = {}) {
   const draft = opts.draft ?? false;
   const found = await payload.find({
     collection: "chapters",
-    where: draft ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, PUBLISHED] },
+    where: draft ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, publicWhere()] },
     limit: 1,
     draft,
   });
@@ -25,14 +24,14 @@ export async function chapterWithNeighbours(payload: Payload, slug: string, opts
   const [previous, next] = await Promise.all([
     payload.find({
       collection: "chapters",
-      where: { and: [{ order: { less_than: chapter.order } }, PUBLISHED] },
+      where: { and: [{ order: { less_than: chapter.order } }, publicWhere()] },
       sort: "-order",
       limit: 1,
       select: pick,
     }),
     payload.find({
       collection: "chapters",
-      where: { and: [{ order: { greater_than: chapter.order } }, PUBLISHED] },
+      where: { and: [{ order: { greater_than: chapter.order } }, publicWhere()] },
       sort: "order",
       limit: 1,
       select: pick,
@@ -60,7 +59,7 @@ export async function glossaryTerms(payload: Payload): Promise<LinkableTerm[]> {
   if (cache?.key === key) return cache.terms;
   const res = await payload.find({
     collection: "glossary",
-    where: { and: [PUBLISHED, { autoLink: { not_equals: false } }] },
+    where: { and: [publicWhere(), { autoLink: { not_equals: false } }] },
     depth: 0,
     pagination: false,
     select: { term: true, slug: true, expansion: true, short: true, aliases: true },

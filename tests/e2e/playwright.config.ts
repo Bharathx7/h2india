@@ -34,6 +34,8 @@ export default defineConfig({
         {
           command: "pnpm --filter @h2india/web start",
           url: `${baseURL}/api/health`,
+          // Production behaviour: sample content hidden (A37).
+          env: { FLAG_SAMPLE_CONTENT: "false" },
           reuseExistingServer: false,
           timeout: 120_000,
         },

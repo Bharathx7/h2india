@@ -95,6 +95,12 @@ Payload owns the `cms` schema (ADR 0004): one table per collection (`articles`, 
 `standards`, `reports`, `report_files`, `report_leads`, `videos`, `podcasts`) plus its array, relationship and version
 tables (`_articles_v`). Its migrations are in `apps/web/src/migrations` and run after the core ones in `pnpm db:migrate`.
 
+Tracker (step 4.5): `tracker_projects`, `tracker_factories`, `tracker_pilots`, `tracker_stations`, `tracker_prices`,
+`tracker_policies`, `tracker_hubs`, each with versions, a status history and its source group (`source_name`,
+`source_url`, `source_tier`, `source_as_of`); `tracker_changes` (one row per changed field when a record is published:
+the feed for Recent changes); `tracker_methodology` (a global with the Methodology page's text). The tracker's status
+column is `stage` because Payload's own `_status` holds draft or published. Prices are paise per kg (`price_paise`).
+
 `report_leads` holds personal data from the gated report form (A33): name, work email, company, role, whether the
 sponsor may contact them and the exact words they agreed to, or the member's user ID. Rows are deleted 24 months after
 the download (daily job `report-leads-prune`).

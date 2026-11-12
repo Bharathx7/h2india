@@ -110,6 +110,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Change an article's status only with `transitionArticle()` (`cms/workflow.ts`); it checks the rule and permission and writes the audit log. Direct publishing is refused.
 - Read content in server code through Payload's Local API (`getPayload({ config })`), never by SQL on the cms schema.
 - Show an article body with `ArticleBody` and pass `glossary={await glossaryTerms(payload)}`: glossary hover-cards are linked automatically (first mention only), never by hand.
+- Tracker records (`cms/tracker`) always carry a source, its type and an as-of date. Recent changes are written by the collection hook when a record is published; never write `tracker-changes` by hand. The status field is `stage`.
 - Report PDFs are private; readers get them only through `requestReport()` (`cms/knowledge/gate.ts`), which records the lead and consent. Report leads are personal data (A33).
 
 ## Companies and Join (step 3.3)
@@ -131,6 +132,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 ## Feature flags
 
 `transactions` is **off** (Batch 6 on hold). Every cart, checkout, order, payment and payout route calls `requireFlag("transactions")` on the server; hiding a button is not enough.
+
+`sampleContent` (FLAG_SAMPLE_CONTENT) is **off** by default (F9, A37). Content with `sample` ticked is shown only when it is on (local, staging). Collections with a sample field use `publicOrEditor` and `refuseSamplePublish` from `cms/sample.ts`; Local API reads for readers use `publicWhere()`.
 
 ## Definition of done (every screen)
 

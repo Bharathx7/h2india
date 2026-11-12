@@ -139,6 +139,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A31 | Record fields (step 4.3) | You | Step 4.3 | As drawn on the admin record editors and public pages; a tender keeps its result on the same record; records not verified for 30 days go to Data quality, red after 60 | Answered | Founder, 12 Nov 2026. |
 | A32 | Who adds video and podcast series (step 4.4) | You | Step 4.4 | Content editors add episodes and series (URLs until M9); the Editor-in-chief publishes them, as with articles | Answered | Founder, 12 Nov 2026. |
 | A33 | Gated report leads: retention and sponsors (step 4.4) | You | Step 4.4 | Deleted 24 months after the download; sponsors get only the leads who ticked the box, as a CSV exported by H2 India staff (step 11.3); signed-in members skip the form and are never shared | Answered | Founder, 12 Nov 2026. |
+| A34 | Tracker sources: per figure or per record (step 4.5) | You | Step 4.5 | Per record, as drawn (643:1330, 740:20): each record has its source (name, link, type), as-of date and who entered it; every published change logs the field, before, after, source, date and who, which feeds Recent changes | Answered | Founder, 12 Nov 2026. |
+| A35 | Tracker "confidence" (step 4.5; not drawn) | You | Step 4.5 | The source's tier from the Methodology page (740:469: government notice or tender result, filing, company announcement, press report) plus an "estimate" tick per figure, shown as "2028 (company estimate)" | Answered | Founder, 12 Nov 2026. |
+| A36 | Tracker end states (step 4.5; not drawn) | You | Step 4.5 | Add Cancelled to every view (kept on the record, left out of totals) and Completed for pilots, besides the drawn statuses | Answered | Founder, 12 Nov 2026. |
+| A37 | How sample content is hidden (F9, step 4.5) | You | Step 4.5 | Flag FLAG_SAMPLE_CONTENT, off by default. Local and staging switch it on; with it off (production) sample-flagged items are never shown and can't be published. Applies to tracker, records and knowledge | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -180,3 +184,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Stage 4 decisions: Payload editor now (A26), legal check for sponsored, press release and flagged pieces by the Editor-in-chief (A27), six article types as drawn (A28), schemes link to official portals only (A29).
 - 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).
 - 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).
+- 12 Nov 2026: Tracker sources per record with a change log (A34), confidence as source tier plus an estimate tick (A35), Cancelled and Completed added (A36), sample content behind FLAG_SAMPLE_CONTENT (A37).
