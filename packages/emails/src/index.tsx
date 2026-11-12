@@ -1,7 +1,19 @@
 // Email, WhatsApp and SMS templates from Figma page 16 (step 3.9). Server only.
 import { render } from "@react-email/components";
+import type { ReactElement } from "react";
 import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
 import { reportDownloadMessage } from "./knowledge/messages";
+import {
+  NewsletterConfirm,
+  newsletterConfirmSubject,
+  NewsletterManage,
+  newsletterManageSubject,
+  NewsletterWelcome,
+  newsletterWelcomeSubject,
+  type NewsletterConfirmProps,
+  type NewsletterManageProps,
+  type NewsletterWelcomeProps,
+} from "./newsletter/Newsletter";
 import { Notice } from "./notice";
 import {
   mobileChangedMessage,
@@ -48,6 +60,25 @@ export function renderJoinRequestToAdmin(appUrl: string, input: Parameters<typeo
 export function renderJoinRequestAnswered(appUrl: string, input: Parameters<typeof joinRequestAnsweredMessage>[0]) {
   return renderNotice(appUrl, joinRequestAnsweredMessage(input));
 }
+
+async function renderElement(subject: string, element: ReactElement): Promise<RenderedEmail> {
+  return { subject, html: await render(element), text: await render(element, { plainText: true }) };
+}
+
+/** India H₂ Weekly: confirm (676:8), welcome (its variant) and already subscribed (step 5.1, A46). */
+export function renderNewsletterConfirm(props: NewsletterConfirmProps) {
+  return renderElement(newsletterConfirmSubject, <NewsletterConfirm {...props} />);
+}
+
+export function renderNewsletterWelcome(props: NewsletterWelcomeProps) {
+  return renderElement(newsletterWelcomeSubject, <NewsletterWelcome {...props} />);
+}
+
+export function renderNewsletterManage(props: NewsletterManageProps) {
+  return renderElement(newsletterManageSubject, <NewsletterManage {...props} />);
+}
+
+export { ISSUE_CONTENTS, ISSUE_SCHEDULE } from "./newsletter/Newsletter";
 
 /** The emailed copy of a gated report (step 4.4). */
 export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {

@@ -54,12 +54,12 @@ const ICON_COLOUR: Record<BadgeTone, string> = {
 export interface StatusBadgeProps extends HTMLAttributes<HTMLSpanElement> {
   /** The status word exactly as stored, for example "Under review". */
   status: string;
-  /** Needed only for a status not in STATUS_TONE. */
+  /** Overrides STATUS_TONE, for components drawn with their own tone (tender and scheme cards draw Open as Success). */
   tone?: BadgeTone;
 }
 
 export function StatusBadge({ status, tone, className, ...rest }: StatusBadgeProps) {
-  const t = STATUS_TONE[status] ?? tone ?? "neutral";
+  const t = tone ?? STATUS_TONE[status] ?? "neutral";
   const style = TONE[t];
   return (
     <span

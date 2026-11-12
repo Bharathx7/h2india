@@ -25,3 +25,5 @@ export { FAKE_GSTINS } from "./adapters/gstin";
 export { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "./repo";
 export { companyRow, importCompanies, slugifyCompany } from "./import";
 export type { CompanyRow } from "./import";
+export { listedBrands } from "./brands";
+export type { ListedBrand } from "./brands";

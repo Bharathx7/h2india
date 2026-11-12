@@ -1,7 +1,8 @@
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig, type Endpoint } from "payload";
 import { KeyFacts, KeyNumbers } from "../blocks";
-import { canDelete, canEdit, canPublish, editorOf, publishedOrEditor } from "../roles";
+import { canDelete, canEdit, canPublish, editorOf } from "../roles";
+import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
 import { ALWAYS_LEGAL, ARTICLE_TYPES, WORKFLOW } from "../types";
 import { RULES, transitionArticle, type Action } from "../workflow";
@@ -88,8 +89,8 @@ export const Articles: CollectionConfig = {
     components: { edit: { PublishButton: "@/cms/admin/WorkflowPublish#WorkflowPublish" } },
   },
   versions: { drafts: { autosave: { interval: 2000 } }, maxPerDoc: 50 },
-  access: { read: publishedOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [guardPublishing] },
+  access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
+  hooks: { beforeChange: [guardPublishing, refuseSamplePublish] },
   endpoints: [workflowEndpoint],
   fields: [
     {
@@ -212,6 +213,11 @@ export const Articles: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     { name: "editor", type: "relationship", relationTo: "editors", admin: { position: "sidebar" } },
+    {
+      name: "sample",
+      type: "checkbox",
+      admin: { position: "sidebar", description: "Sample content (F9): never shown in production." },
+    },
     {
       name: "legal",
       type: "group",

@@ -50,3 +50,117 @@
     background-image: none;
   }
 }
+
+/* Home motion (Motion spec · Home 781:7247). Reduced motion swaps each for its static fallback. */
+
+/* Hero reveal: H1, sub-line, search and chips on first load, 750 ms. */
+@keyframes h2-hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-reveal));
+  }
+}
+
+@utility hero-reveal {
+  animation: h2-hero-reveal 750ms cubic-bezier(0, 0.4, 0, 1) both;
+}
+
+/* Section reveal: fades up 16 px the first time it scrolls into view; cards in a row follow 40 ms apart.
+   Only armed by script (data-reveal="armed"), so the page reads fine without it. */
+@utility reveal-section {
+  transition:
+    opacity 400ms cubic-bezier(0.33, 1, 0.68, 1),
+    transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+  &[data-reveal="armed"] {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-reveal));
+  }
+  &[data-reveal="armed"] [data-reveal-item] {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-reveal));
+  }
+  & [data-reveal-item] {
+    transition:
+      opacity 400ms cubic-bezier(0.33, 1, 0.68, 1),
+      transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+    transition-delay: calc(var(--reveal-index, 0) * 40ms);
+  }
+}
+
+/* Logo strip: continuous sideways scroll, 90 s a loop, linear. */
+@keyframes h2-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility marquee-track {
+  animation: h2-marquee 90s linear infinite;
+  &[data-paused="true"] {
+    animation-play-state: paused;
+  }
+}
+
+/* Hover · cards: 2 px lift and shadow, 250 ms ease; reduced motion keeps the shadow only. */
+@utility card-lift {
+  transition:
+    transform 250ms ease,
+    box-shadow 250ms ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-ink-lift);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-reveal,
+  .marquee-track {
+    animation: none;
+  }
+  .reveal-section[data-reveal="armed"],
+  .reveal-section[data-reveal="armed"] [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+  }
+  .card-lift:hover {
+    transform: none;
+  }
+}
+
+/* Hero network detail box: the text changes with the focus (400 ms). */
+@keyframes h2-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Depth layers behind home sections (Figma "Depth / …", 846:11119 and the Gradient styles). Decorative only. */
+@utility depth-dot-grid {
+  /* 2 px dots on a 24 px grid in fresh/300, fading out radially. */
+  background-image: radial-gradient(circle, var(--color-fresh-300) 1px, transparent 1.25px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(closest-side, black 20%, transparent 100%);
+  pointer-events: none;
+}
+
+@utility depth-accent-glow {
+  /* Gradient/Accent glow: fresh/500 fading out from the centre. */
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-fresh-500) 22%, transparent),
+    transparent
+  );
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+@utility depth-deep-glow {
+  /* Gradient/Deep glow: fresh/600 on dark bands. */
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-fresh-600) 45%, transparent),
+    transparent
+  );
+  border-radius: 9999px;
+  pointer-events: none;
+}

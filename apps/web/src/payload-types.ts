@@ -92,6 +92,7 @@ export interface Config {
     'tracker-policies': TrackerPolicy;
     'tracker-hubs': TrackerHub;
     'tracker-changes': TrackerChange;
+    'early-listings': EarlyListing;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -129,6 +130,7 @@ export interface Config {
     'tracker-policies': TrackerPoliciesSelect<false> | TrackerPoliciesSelect<true>;
     'tracker-hubs': TrackerHubsSelect<false> | TrackerHubsSelect<true>;
     'tracker-changes': TrackerChangesSelect<false> | TrackerChangesSelect<true>;
+    'early-listings': EarlyListingsSelect<false> | EarlyListingsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -145,9 +147,13 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'tracker-methodology': TrackerMethodology;
+    'home-figures': HomeFigure;
+    prelaunch: Prelaunch;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
+    'home-figures': HomeFiguresSelect<false> | HomeFiguresSelect<true>;
+    prelaunch: PrelaunchSelect<false> | PrelaunchSelect<true>;
   };
   locale: null;
   widgets: {
@@ -251,6 +257,10 @@ export interface Article {
     | null;
   authors: (number | Author)[];
   editor?: (number | null) | Editor;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
   legal?: {
     /**
      * Always on for sponsored and press-release pieces (A27).
@@ -2363,6 +2373,27 @@ export interface TrackerChange {
   createdAt: string;
 }
 /**
+ * Suppliers who asked to be listed before launch (the Coming soon page).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "early-listings".
+ */
+export interface EarlyListing {
+  id: number;
+  company: string;
+  name: string;
+  email: string;
+  mobile: string;
+  sells: 'systems' | 'components' | 'equipment' | 'services' | 'materials';
+  /**
+   * The words they agreed to, as shown.
+   */
+  consentText?: string | null;
+  status?: ('New' | 'Contacted' | 'Listed' | 'Not a fit') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -2487,6 +2518,10 @@ export interface PayloadLockedDocument {
         value: number | TrackerChange;
       } | null)
     | ({
+        relationTo: 'early-listings';
+        value: number | EarlyListing;
+      } | null)
+    | ({
         relationTo: 'authors';
         value: number | Author;
       } | null)
@@ -2590,6 +2625,7 @@ export interface ArticlesSelect<T extends boolean = true> {
       };
   authors?: T;
   editor?: T;
+  sample?: T;
   legal?:
     | T
     | {
@@ -3504,6 +3540,21 @@ export interface TrackerChangesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "early-listings_select".
+ */
+export interface EarlyListingsSelect<T extends boolean = true> {
+  company?: T;
+  name?: T;
+  email?: T;
+  mobile?: T;
+  sells?: T;
+  consentText?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
@@ -3684,6 +3735,109 @@ export interface TrackerMethodology {
   createdAt?: string | null;
 }
 /**
+ * The figures on the home page. Every figure needs its source and the date it was true; readers see both.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-figures".
+ */
+export interface HomeFigure {
+  id: number;
+  /**
+   * Up to three figures. Open tenders are counted live and added after these; verified listings join in Stage 6.
+   */
+  figures?:
+    | {
+        /**
+         * As readers see it, for example 8.62 or ~8,000.
+         */
+        value: string;
+        /**
+         * For example lakh tonnes a year of green H₂ awarded under SIGHT.
+         */
+        label: string;
+        /**
+         * For example SECI or MNRE.
+         */
+        source: string;
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  sight?: {
+    /**
+     * One bar per tranche, in order. The total is added up for you.
+     */
+    production?:
+      | {
+          /**
+           * For example Tranche I · awarded Jan 2024.
+           */
+          label: string;
+          /**
+           * Lakh tonnes a year, for example 4.12.
+           */
+          value: number;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * One bar per tranche, in order. The total is added up for you.
+     */
+    manufacturing?:
+      | {
+          /**
+           * For example Tranche I · awarded Jan 2024.
+           */
+          label: string;
+          /**
+           * MW a year, for example 1500.
+           */
+          value: number;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * The source line, for example SECI award results under the SIGHT programme.
+     */
+    source?: string | null;
+    asOf?: string | null;
+  };
+  /**
+   * Sample figures (F9): shown only where sample content is switched on, never in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * While the Coming soon flag is on, visitors see the pre-launch page. Signed-in operators and the emails below see the real site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prelaunch".
+ */
+export interface Prelaunch {
+  id: number;
+  /**
+   * Top right of the Coming soon page (743:6880).
+   */
+  launchLine: string;
+  /**
+   * People who sign in with one of these emails skip the Coming soon page.
+   */
+  allowList?:
+    | {
+        email: string;
+        /**
+         * Who and why.
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracker-methodology_select".
  */
@@ -3709,6 +3863,62 @@ export interface TrackerMethodologySelect<T extends boolean = true> {
         id?: T;
       };
   updateNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-figures_select".
+ */
+export interface HomeFiguresSelect<T extends boolean = true> {
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
+      };
+  sight?:
+    | T
+    | {
+        production?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              id?: T;
+            };
+        manufacturing?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              id?: T;
+            };
+        source?: T;
+        asOf?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prelaunch_select".
+ */
+export interface PrelaunchSelect<T extends boolean = true> {
+  launchLine?: T;
+  allowList?:
+    | T
+    | {
+        email?: T;
+        note?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "specifying-pem-electrolysers-webinar",
+    "name": "Specifying PEM electrolysers for Indian sites",
+    "organiser": "H2 India",
+    "format": "Webinar · online",
+    "startsAt": "+8d 16:00",
+    "endsAt": "+8d 17:00",
+    "tickets": "Free",
+    "sourceUrl": "https://example.org/sample/pem-webinar",
+    "publish": "yes"
+  },
+  {
+    "slug": "green-hydrogen-india-summit-2026",
+    "name": "Green Hydrogen India Summit 2026",
+    "organiser": "Sample organiser",
+    "format": "Conference · in person",
+    "venue": "Bharat Mandapam, New Delhi",
+    "startsAt": "+24d 09:30",
+    "endsAt": "+25d 18:00",
+    "tickets": "Paid",
+    "sourceUrl": "https://example.org/sample/summit",
+    "publish": "yes"
+  },
+  {
+    "slug": "hydrogen-safety-basics-training",
+    "name": "Hydrogen safety basics for plant teams",
+    "organiser": "Sample organiser",
+    "format": "Webinar · online",
+    "startsAt": "+32d 10:00",
+    "endsAt": "+32d 13:00",
+    "tickets": "Paid",
+    "sourceUrl": "https://example.org/sample/safety-training",
+    "publish": "yes"
+  },
+  {
+    "slug": "inside-an-indian-electrolyser-factory",
+    "name": "Inside an Indian electrolyser factory",
+    "organiser": "Sample organiser",
+    "format": "Workshop · in person",
+    "venue": "Chakan, Pune",
+    "startsAt": "+66d 10:00",
+    "endsAt": "+66d 13:00",
+    "tickets": "Free",
+    "sourceUrl": "https://example.org/sample/factory-visit",
+    "publish": "yes"
+  }
+]

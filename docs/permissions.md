@@ -78,6 +78,12 @@ Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as th
 - Report leads (step 4.4, A33) are personal data: only operators with Content export (Editor-in-chief, Super admin) can
   see them; Content delete runs the 24-month clean-up on demand. Report PDFs open for editors in the CMS and for
   readers only through the gated download.
+- Home (step 5.1): any editor updates the Home figures (A45). Only Settings edit (a Super admin) sees and changes the
+  Pre-launch setting, the Coming soon launch line and allow-list (A44, A48); the CMS carries settings.edit for this.
+  Early listing requests (A47) are personal data like report leads: Content export to see them, Content delete to
+  remove them; nobody creates them in the CMS.
+- While Coming soon is on, signed-in operators and the allow-listed emails see the real site; everyone else, members
+  included, sees the pre-launch page.
 
 ## Files (step 3.7)
 

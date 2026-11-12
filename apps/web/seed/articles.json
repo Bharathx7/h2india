@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "kandla-hub-land-allotment-green-ammonia",
+    "title": "Kandla hub moves to land allotment for its first green ammonia plants",
+    "type": "news",
+    "topics": "projects",
+    "dek": "Sample story from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real story before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/kandla"
+      }
+    ],
+    "publishedAt": "-2d 09:00",
+    "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "sight-tranche-ii-explained",
+    "title": "SIGHT Tranche II, explained in five minutes",
+    "type": "explainer",
+    "topics": "policy",
+    "dek": "Sample explainer from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real explainer before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/sight-tranche-ii"
+      }
+    ],
+    "publishedAt": "-4d 09:00",
+    "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "state-nodal-agencies-reporting-format",
+    "title": "State nodal agencies get a common reporting format for hydrogen projects",
+    "type": "news",
+    "topics": "policy",
+    "dek": "Sample story from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real story before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/reporting-format"
+      }
+    ],
+    "publishedAt": "-3d 09:00",
+    "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "refinery-pilots-shortlisted-electrolyser-suppliers",
+    "title": "Refinery pilots: shortlisted electrolyser suppliers named",
+    "type": "news",
+    "topics": "tenders-awards",
+    "dek": "Sample story from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real story before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/refinery-pilots"
+      }
+    ],
+    "publishedAt": "-4d 08:00",
+    "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "iit-low-iridium-pem-catalyst",
+    "title": "IIT team reports low-iridium PEM catalyst results",
+    "type": "news",
+    "topics": "technology",
+    "dek": "Sample story from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real story before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/catalyst"
+      }
+    ],
+    "publishedAt": "-5d 09:00",
+    "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "leh-hydrogen-bus-one-lakh-km",
+    "title": "Hydrogen bus pilot in Leh passes one lakh kilometres",
+    "type": "news",
+    "topics": "mobility",
+    "dek": "Sample story from the home page design (377:4917).",
+    "body": "Sample article. Replace it with a real story before launch.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/leh-bus"
+      }
+    ],
+    "publishedAt": "-6d 09:00",
+    "authors": "h2-india-newsroom-sample"
+  }
+]

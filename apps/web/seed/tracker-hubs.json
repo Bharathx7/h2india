@@ -28,5 +28,35 @@
       "asOf": "2026-11-01"
     },
     "publish": "yes"
+  },
+  {
+    "slug": "paradip-port",
+    "name": "Paradip",
+    "kind": "Hub",
+    "state": "odisha",
+    "location": "Paradip, Odisha",
+    "latitude": 20.26,
+    "longitude": 86.67,
+    "source": {
+      "name": "MNRE",
+      "tier": "official",
+      "asOf": "2026-11-10"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "vo-chidambaranar-port",
+    "name": "V.O. Chidambaranar",
+    "kind": "Hub",
+    "state": "tamil-nadu",
+    "location": "Thoothukudi, Tamil Nadu",
+    "latitude": 8.76,
+    "longitude": 78.13,
+    "source": {
+      "name": "MNRE",
+      "tier": "official",
+      "asOf": "2026-11-10"
+    },
+    "publish": "yes"
   }
 ]

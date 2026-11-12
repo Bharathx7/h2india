@@ -1,5 +1,8 @@
 import type { RenderedEmail } from "./index";
 import {
+  renderNewsletterConfirm,
+  renderNewsletterManage,
+  renderNewsletterWelcome,
   renderJoinRequestAnswered,
   renderJoinRequestToAdmin,
   renderRecovery,
@@ -92,6 +95,27 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
       return email(renderRecovery(appUrl, "newEmail", { email: "arjun.shah@greenfieldh2.in", url }));
     case "email.mobile_changed":
       return email(renderRecovery(appUrl, "mobileChanged", { mobile: "+91 98•••• 6218" }));
+    case "email.newsletter_confirmation":
+      return email(
+        renderNewsletterConfirm({
+          appUrl,
+          confirmUrl: `${appUrl}/newsletter/confirm`,
+          firstIssue: "Monday 16 November",
+          linkUntil: "12 Nov 2026, 8:12 PM IST",
+          window: "48 hours",
+        }),
+      );
+    case "email.newsletter_welcome":
+      return email(
+        renderNewsletterWelcome({
+          appUrl,
+          manageUrl: `${appUrl}/newsletter/confirm`,
+          firstIssue: "Monday 16 November",
+          topics: ["Policy", "Tenders & schemes", "Projects"],
+        }),
+      );
+    case "email.newsletter_manage":
+      return email(renderNewsletterManage({ appUrl, manageUrl: `${appUrl}/newsletter/confirm`, window: "7 days" }));
     case "email.report_download":
       return email(
         renderReportDownload(appUrl, {

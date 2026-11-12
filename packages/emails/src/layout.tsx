@@ -10,10 +10,12 @@ export interface EmailLayoutProps {
   preview: string;
   /** Why the person is getting this email (footer "Reason" line). */
   reason: string;
+  /** Footer "Email preferences" link; defaults to the signed-in notification settings. */
+  preferencesHref?: string;
   children: ReactNode;
 }
 
-export function EmailLayout({ appUrl, preview, reason, children }: EmailLayoutProps) {
+export function EmailLayout({ appUrl, preview, reason, preferencesHref, children }: EmailLayoutProps) {
   return (
     <Html lang="en">
       <Head />
@@ -30,7 +32,7 @@ export function EmailLayout({ appUrl, preview, reason, children }: EmailLayoutPr
           <Section style={{ padding: "24px 32px", backgroundColor: colour.subtle }}>
             <Text style={{ ...type.caption, color: colour.body, margin: "0 0 8px" }}>{reason}</Text>
             <Text style={{ ...type.caption, margin: 0 }}>
-              <Link href={`${appUrl}/notifications?tab=email`} style={{ color: colour.link }}>
+              <Link href={preferencesHref ?? `${appUrl}/notifications?tab=email`} style={{ color: colour.link }}>
                 Email preferences
               </Link>
             </Text>

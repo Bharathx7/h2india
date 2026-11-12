@@ -89,6 +89,12 @@ signed link) and `public` (checked logos and product images). Support requests (
 | `notification_settings`    | Quiet hours and "Unsubscribe from everything" (548:8)                                                                                                                                          |
 | `template_approvals`       | SMS (DLT) and WhatsApp template status set by a Super admin when the provider confirms it (A25)                                                                                                |
 
+## Newsletter (step 5.1, A46)
+
+| Table                    | Holds                                                                                                                                                                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `newsletter_subscribers` | India H₂ Weekly sign-ups: lower-cased email (unique), status (pending, confirmed, unsubscribed), topic keys, the two "Also send me" choices, where they signed up, the consent text version, a nonce so only the latest emailed link works, confirmed and unsubscribed times |
+
 ## Content (Stage 4, schema `cms`)
 
 Payload owns the `cms` schema (ADR 0004): one table per collection (`articles`, `authors`, `topics`, `tags`, `media`,
@@ -101,6 +107,11 @@ Tracker (step 4.5): `tracker_projects`, `tracker_factories`, `tracker_pilots`, `
 `source_url`, `source_tier`, `source_as_of`); `tracker_changes` (one row per changed field when a record is published:
 the feed for Recent changes); `tracker_methodology` (a global with the Methodology page's text). The tracker's status
 column is `stage` because Payload's own `_status` holds draft or published. Prices are paise per kg (`price_paise`).
+
+Home (step 5.1): `home_figures` (a global: up to three headline figures with source and as-of date, and the SIGHT bars,
+A45), `prelaunch` (a global: the Coming soon launch line and the allow-list, Super admin only, A44 and A48) and
+`early_listings` (the Coming soon supplier form: company, name, work email, mobile, class, the consent words and a
+follow-up status, A47). `articles` gained a `sample` flag (F9).
 
 `report_leads` holds personal data from the gated report form (A33): name, work email, company, role, whether the
 sponsor may contact them and the exact words they agreed to, or the member's user ID. Rows are deleted 24 months after

@@ -28,7 +28,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | F3 | Member sidebar: add a Job applications item? | You | Stage 7 (Batch 3) | No item; page reachable from Home feed | Open |  |
 | F4 | Application landing: only Refuelling and mobility is designed. Design all 7 or reuse one template? | You | Stage 6 (Batch 3) | One template driven by data | Open |  |
 | F5 | Delete the unused Wide hero variants? | You | Stage 2 (Batch 1) | Do not build them | Decided 11 Nov 2026 | Not built; the Figma variants stay untouched. |
-| F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Open |  |
+| F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Decided 12 Nov 2026 | Founder: build the pause button; no animation with reduced motion. |
 | F7 | Featured-event price and the organiser's payment step (Flow G) | You | Stage 5 (Batch 2) | Submission goes straight to review, no payment | Open |  |
 | F8 | EV-2026-0412: who organises it? | You | Stage 13 (Batch 5) | Sample data only; fixed when sample data is replaced | Open |  |
 | F9 | Sample data to replace: tracker prices and projects, state policies, report titles, careers, fee and payout figures | You and content team | Stage 13 (Batch 5) | Seed data marked as sample, hidden in production | Answered | Founder, 12 Nov 2026: sample content, marked as sample and hidden in production, until real content replaces it (M20). |
@@ -147,6 +147,13 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A39 | Do imports go live (step 4.6) | You | Step 4.6 | Everything imports as a draft; records, glossary, standards and tracker rows may carry publish=yes (editors publish those, A30); articles always stay drafts for the Editor-in-chief | Answered | Founder, 12 Nov 2026. |
 | A40 | Sample seed scope (step 4.6) | You | Step 4.6 | Grow it page by page: now the tracker, glossary, reports and the companies named in the design; each Stage 5 page adds its frame's sample data | Answered | Founder, 12 Nov 2026. |
 | A41 | Import commands: check or write by default (step 4.6) | You | Step 4.6 | Check by default (a dry run that changes nothing); --apply writes | Answered | Founder, 12 Nov 2026. |
+| A42 | Home page wording (step 5.1) | You | Step 5.1 | As drawn: hero "India's hydrogen ecosystem, in one place"; the National Green Hydrogen Mission 2030 targets as fixed text with their MNRE source line; the founder checks them before launch. No other claims written by us | Answered | Founder, 12 Nov 2026. |
+| A43 | Home modules whose data comes later (step 5.1) | You | Step 5.1 | Product classes and categories defined now (Stage 6 reuses them) so the marketplace tiles match the frame, without counts; Featured products and the logged-in followed topics show their designed empty states until Stages 6 and 7 | Answered | Founder, 12 Nov 2026. |
+| A44 | Who sees the real site while Coming soon is on (step 5.1) | You | Step 5.1 | Signed-in operators, plus people whose email is on an allow-list a Super admin keeps in settings | Answered | Founder, 12 Nov 2026. |
+| A45 | Where the home page figures come from (step 5.1) | You | Step 5.1 | Editors enter each headline figure (the live tiles and the SIGHT bars) in a CMS setting with its source and as-of date, both required; open tenders are counted live; the verified-listings tile stays hidden until Stage 6 has real listings | Answered | Founder, 12 Nov 2026. |
+| A46 | Newsletter sign-up timing (step 5.1) | You | Step 5.1 | Brought forward from 5.9: subscriber records, double opt-in with an expiring link, the confirm-and-choose-topics page and the already-subscribed email now; archive, issue pages, cookies and analytics stay in 5.9 | Answered | Founder, 12 Nov 2026. |
+| A47 | Coming soon "Get listed early" form (step 5.1; no step owns it) | You | Step 5.1 | Saved as leads in a protected CMS list that operators read and export; rate-limited, with a consent line; no automatic emails | Answered | Founder, 12 Nov 2026. |
+| A48 | Coming soon launch line and issue preview (step 5.1) | You | Step 5.1 | A Super admin edits the launch line in settings (default as drawn); the latest-issue preview shows only once a real issue exists (step 11.3) | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -164,6 +171,11 @@ Small calls made while building the design system. None changes a Figma value; e
 | D-UI8 | The Enter code screens (524:1840, 524:1930) use six plain Input boxes (64 x 46, Body/Default, 12 apart) instead of the OTP input component (18:142: 48 x 56, Heading/H2). Code follows the screens with `OtpInput size="field"`. | Designer | Default in use | Using the OTP input in the screens, or retiring it, would remove the second style. |
 | D-UI9 | The sample GSTINs on the board (526:8) fail the GSTIN check character, including the example in the format message ("like 27AAKCG5521M1Z3"). Code keeps Figma's wording; the fake provider uses valid numbers (`docs/runbooks/test-gstins.md`). | Designer | Default in use | A valid example would be 27AAKCG5521M1Z9. |
 | D-UI10 | Join step 4 needs a "Company name" field when the portal cannot give the legal name (no GSTIN, not found, pending, unverified buyer). No frame draws it; code uses the standard form field. | Designer | Default in use | Drawing it on the board would settle its place. |
+| D-UI11 | Tender and scheme cards draw "Open" in the Success tone (378:3661, 378:3862) while the Status badge description lists Open under In progress. Cards follow their frames: `StatusBadge` now takes an explicit tone over the default. | Designer | Default in use | One tone for Open everywhere would remove the exception. |
+| D-UI12 | India H₂ Weekly topics differ by frame: the confirm page (448:7157) has Policy, Tenders & schemes, Products, Projects, Technology, Jobs; Coming soon (743:6889) adds News; the footer (153:179) has Tenders and Mobility. One topic list holds all of them; each form shows its drawn chips and the confirm page adds any extra one a subscriber chose. | Designer | Default in use | One drawn list would let every form use it. |
+| D-UI13 | Home headings wrap line by line as in Figma; the site-wide balanced wrapping (base.css) is turned off inside the home page so the H1 breaks as drawn. | Claude | Done | Remove the override if balanced wrapping is preferred. |
+| D-UI14 | The hero network's pause button (F6) is not drawn: a 32 px round button in the card's top-right corner, white outline on the dark card, as the logo strip's "Pause logo strip" (779:7136). | Designer | Default in use | Draw it on 375:7052 to settle its place. |
+| D-UI15 | Words written for states the frames don't show (A11): the "For you" cards before alerts, saves and follows exist; Featured products, tenders, events and news empty states; the early-listing consent line and thank-you; the already-subscribed email (`docs/runbooks/home.md` lists them). | Founder | To check | Change any of them in one place each. |
 
 ## Change log
 
@@ -189,4 +201,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).
 - 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).
 - 12 Nov 2026: Tracker sources per record with a change log (A34), confidence as source tier plus an estimate tick (A35), Cancelled and Completed added (A36), sample content behind FLAG_SAMPLE_CONTENT (A37).
+- 12 Nov 2026: Home: pause button built (F6), drawn wording with sourced mission targets (A42), category tiles now and empty states for later data (A43), operators plus an allow-list behind Coming soon (A44).
+- 12 Nov 2026: Home figures entered by editors with source and date (A45), newsletter sign-up brought forward (A46), early-listing leads in the CMS (A47), editable launch line and issue preview only when real (A48).
+- 12 Nov 2026: Step 5.1 built. Added D-UI11 to D-UI15.
 - 12 Nov 2026: Company importer now with basic profile fields (A38); imports land as drafts, records may be published (A39); the sample seed grows page by page (A40); imports check by default (A41).

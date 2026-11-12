@@ -160,8 +160,16 @@ export const TEMPLATES = {
     key: "newsletter_confirmation",
     name: "Newsletter confirmation",
     frame: "676:8",
-    step: "5.9",
-    built: false,
+    step: "5.1 (A46)",
+    built: true,
+  },
+  "email.newsletter_welcome": {
+    channel: "email",
+    key: "newsletter_welcome",
+    name: "Newsletter welcome (after confirming)",
+    frame: "676:8",
+    step: "5.1 (A46)",
+    built: true,
   },
   "email.webinar_registration": {
     channel: "email",
@@ -356,6 +364,14 @@ export const TEMPLATES = {
     name: "Mobile number changed",
     frame: null,
     step: "3.5",
+    built: true,
+  },
+  "email.newsletter_manage": {
+    channel: "email",
+    key: "newsletter_manage",
+    name: "Newsletter: already subscribed, change topics",
+    frame: null,
+    step: "5.1 (A46)",
     built: true,
   },
   "email.report_download": {
