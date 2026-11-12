@@ -5,6 +5,8 @@ import * as migration_20261112_075241_knowledge from './20261112_075241_knowledg
 import * as migration_20261112_083201_tracker from './20261112_083201_tracker';
 import * as migration_20261112_084700_report_dates from './20261112_084700_report_dates';
 import * as migration_20261112_092925_home from './20261112_092925_home';
+import * as migration_20261112_150948_newsroom from './20261112_150948_newsroom';
+import * as migration_20261112_151557_newsroom_variants from './20261112_151557_newsroom_variants';
 
 export const migrations = [
   {
@@ -40,6 +42,16 @@ export const migrations = [
   {
     up: migration_20261112_092925_home.up,
     down: migration_20261112_092925_home.down,
-    name: '20261112_092925_home'
+    name: '20261112_092925_home',
+  },
+  {
+    up: migration_20261112_150948_newsroom.up,
+    down: migration_20261112_150948_newsroom.down,
+    name: '20261112_150948_newsroom',
+  },
+  {
+    up: migration_20261112_151557_newsroom_variants.up,
+    down: migration_20261112_151557_newsroom_variants.down,
+    name: '20261112_151557_newsroom_variants'
   },
 ];

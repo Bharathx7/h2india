@@ -11,6 +11,8 @@ import { getPayload, type Payload } from "payload";
 import { importContent } from "../src/cms/import/run";
 import type { ContentTypeName } from "../src/cms/import/types";
 import { showSample } from "../src/cms/sample";
+import { parseDate } from "../src/cms/import/values";
+import { ALWAYS_LEGAL } from "../src/cms/types";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const seedDir = path.resolve(here, "../seed");
@@ -59,19 +61,75 @@ function relativeDates(value: unknown): unknown {
   return value;
 }
 
-const TOPICS = [
-  { slug: "policy", name: "Policy" },
-  { slug: "projects", name: "Projects" },
-  { slug: "tenders-awards", name: "Tenders & awards" },
-  { slug: "technology", name: "Technology" },
-  { slug: "mobility", name: "Mobility" },
+/** The newsroom's sections, named and ordered as the news tabs (428:473, step 5.3, A57). Real sections, not samples. */
+const TOPICS: { slug: string; name: string; order: number | null; description?: string }[] = [
+  { slug: "policy", name: "Policy & regulation", order: 1 },
+  { slug: "projects", name: "Projects & investment", order: 2 },
+  { slug: "tenders-awards", name: "Tenders & awards", order: 3 },
+  { slug: "technology", name: "Technology", order: 4 },
+  { slug: "mobility", name: "Mobility", order: 5 },
+  { slug: "markets", name: "Markets & prices", order: 6 },
+  { slug: "global", name: "Global to India", order: 7 },
+  // A topic page that isn't a news section (442:4049): no order, so it stays out of the tabs.
+  {
+    slug: "green-ammonia",
+    name: "Green ammonia",
+    order: null,
+    description:
+      "Ammonia made with green hydrogen instead of natural gas. India's fertiliser plants use millions of tonnes of ammonia a year, and SIGHT Mode 2A buys green ammonia for them on 10-year contracts. Everything on H2 India about it, in one place.",
+  },
+];
+
+/** Bylines from the design (434:2844, 441:801). An author page shows only when readers can see one of their stories. */
+const SAMPLE_AUTHORS = [
+  { slug: "ananya-rao-sample", name: "Ananya Rao", title: "Senior correspondent, New Delhi" },
+  { slug: "vikram-iyer-sample", name: "Vikram Iyer", title: "Markets editor, Mumbai" },
+  { slug: "arjun-sharma-sample", name: "Arjun Sharma", title: "Technical editor, Pune" },
+  {
+    slug: "meera-kulkarni-sample",
+    name: "Meera Kulkarni",
+    title: "Technology reporter, Bengaluru",
+    kind: "contributor" as const,
+    organisation: "Freelance",
+  },
+];
+
+const SAMPLE_TAGS = [
+  { slug: "green-ammonia", name: "Green ammonia" },
+  { slug: "sight", name: "SIGHT" },
+  { slug: "seci", name: "SECI" },
+  { slug: "tenders", name: "Tenders" },
+  { slug: "fertilisers", name: "Fertilisers" },
+  { slug: "peso", name: "PESO" },
 ];
 
 /** The topics the home page's sample articles sit in (378:3895). */
 async function seedTopics(payload: Payload): Promise<void> {
   for (const t of TOPICS) {
     const found = await payload.find({ collection: "topics", where: { slug: { equals: t.slug } }, limit: 1, depth: 0 });
-    if (!found.docs[0]) await payload.create({ collection: "topics", data: t });
+    const doc = found.docs[0];
+    if (!doc) await payload.create({ collection: "topics", data: t });
+    else if (doc.name !== t.name || (doc.order ?? null) !== t.order) {
+      await payload.update({ collection: "topics", id: doc.id, data: { name: t.name, order: t.order } });
+    }
+  }
+  for (const t of SAMPLE_TAGS) {
+    const found = await payload.find({ collection: "tags", where: { slug: { equals: t.slug } }, limit: 1, depth: 0 });
+    if (!found.docs[0]) await payload.create({ collection: "tags", data: t });
+  }
+  for (const a of SAMPLE_AUTHORS) {
+    const found = await payload.find({
+      collection: "authors",
+      where: { slug: { equals: a.slug } },
+      limit: 1,
+      depth: 0,
+    });
+    if (!found.docs[0]) {
+      await payload.create({
+        collection: "authors",
+        data: { kind: "staff", ...a, bio: "Sample author from the newsroom design. Replace before launch." },
+      });
+    }
   }
   const author = await payload.find({
     collection: "authors",
@@ -89,7 +147,7 @@ async function seedTopics(payload: Payload): Promise<void> {
 
 /** Sample articles (378:3895) import as drafts like any article (A39); the seed then publishes them where allowed. */
 async function seedArticles(payload: Payload, publish: boolean): Promise<string> {
-  const rows = await rowsOf("articles");
+  const rows = (await rowsOf("articles")).map(liveDates);
   const report = await importContent(
     payload,
     "articles",
@@ -109,15 +167,56 @@ async function seedArticles(payload: Payload, publish: boolean): Promise<string>
     });
     const doc = found.docs[0];
     if (!doc || doc._status === "published") continue;
+    // Sponsored and press-release pieces always need the legal check (A27); sample ones pass it here.
+    const legal = ALWAYS_LEGAL.includes(doc.type) ? { legal: { passedAt: new Date().toISOString() } } : {};
     await payload.update({
       collection: "articles",
       id: doc.id,
-      data: { _status: "published", workflow: "Published" },
+      data: { _status: "published", workflow: "Published", ...legal },
       context: { workflow: true },
     });
     published += 1;
   }
   return `Articles: ${String(published)} published`;
+}
+
+/** Live explainer times inside the "live" group (801:7492) are India time, like every other seed date. */
+function liveDates(row: Record<string, unknown>): Record<string, unknown> {
+  const live = row.live as { summaryAt?: string; updates?: { at: string }[] } | undefined;
+  if (!live) return row;
+  const iso = (t: string | undefined) => (t ? (parseDate(t) ?? t) : t);
+  return {
+    ...row,
+    live: { ...live, summaryAt: iso(live.summaryAt), updates: live.updates?.map((u) => ({ ...u, at: iso(u.at) })) },
+  };
+}
+
+/** Sample guides for Insights (440:40, 441:801), published where sample content may be. */
+async function seedGuides(payload: Payload, publish: boolean): Promise<string> {
+  const rows = await rowsOf("guides");
+  const report = await importContent(
+    payload,
+    "guides",
+    rows.map((r) => ({ ...r, publish: "no" })),
+    { apply: true, firstRow: 1, sample: true },
+  );
+  console.log(formatReport(report));
+  if (!publish) return "Guides: kept as drafts";
+  let published = 0;
+  for (const r of rows) {
+    const found = await payload.find({
+      collection: "guides",
+      where: { slug: { equals: String(r.slug) } },
+      draft: true,
+      limit: 1,
+      depth: 0,
+    });
+    const doc = found.docs[0];
+    if (!doc || doc._status === "published") continue;
+    await payload.update({ collection: "guides", id: doc.id, data: { _status: "published" } });
+    published += 1;
+  }
+  return `Guides: ${String(published)} published`;
 }
 
 /** Home figures (A45): the drawn figures with their sources, flagged sample. Never overwrites figures an editor set. */
@@ -221,6 +320,7 @@ async function main(): Promise<number> {
   console.log(await seedReports(payload, publish));
   await seedTopics(payload);
   console.log(await seedArticles(payload, publish));
+  console.log(await seedGuides(payload, publish));
   console.log(await seedHomeFigures(payload));
   return problems > 0 ? 1 : 0;
 }

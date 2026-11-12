@@ -14,6 +14,7 @@ export interface ContentImportType {
 export const CONTENT_TYPES = {
   glossary: { collection: "glossary", titleField: "term", publishable: true },
   articles: { collection: "articles", titleField: "title", publishable: false },
+  guides: { collection: "guides", titleField: "title", publishable: false },
   schemes: { collection: "schemes", titleField: "name", publishable: true },
   tenders: { collection: "tenders", titleField: "title", publishable: true },
   events: { collection: "events", titleField: "name", publishable: true },

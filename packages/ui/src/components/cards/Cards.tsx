@@ -288,7 +288,8 @@ function ContentLabel({ children }: { children: string }) {
 
 /**
  * Article card v2 (152:241). "lead" is the home lead story (gradient plate), "standard" the grid and swipe card,
- * "compact" the list row without an image.
+ * "compact" the list row without an image, "hero" the news home's lead story with excerpt and byline (428:601), and
+ * "row" the list row with a small image tile (press releases 428:1247, section lists 430:1952).
  */
 export function ArticleCard({
   layout = "standard",
@@ -297,9 +298,11 @@ export function ArticleCard({
   href,
   readLabel,
   badge,
+  excerpt,
+  meta,
   className,
 }: {
-  layout?: "lead" | "standard" | "compact";
+  layout?: "lead" | "standard" | "compact" | "hero" | "row";
   /** "PROJECTS · 10 NOV 2026" */
   section: string;
   title: string;
@@ -308,8 +311,63 @@ export function ArticleCard({
   readLabel?: string;
   /** Sponsored or Press release. */
   badge?: string | null;
+  /** The standfirst, on the hero layout. */
+  excerpt?: string;
+  /** "By Ananya Rao", on the hero layout. */
+  meta?: string;
   className?: string;
 }) {
+  if (layout === "hero") {
+    return (
+      <article
+        data-reveal-item=""
+        className={cx(
+          "group card-lift relative flex flex-col overflow-hidden rounded-card border border-default bg-page",
+          className,
+        )}
+      >
+        <div className="flex h-50 w-full shrink-0 items-center justify-center bg-tint text-icon-primary md:h-75">
+          <Icon name="newspaper" size={52} />
+        </div>
+        <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
+          {badge ? <ContentLabel>{badge}</ContentLabel> : null}
+          <p className="type-eyebrow text-secondary">{section}</p>
+          <h3 className="type-h3 text-primary">{title}</h3>
+          {excerpt ? <p className="type-body text-body">{excerpt}</p> : null}
+          {meta ? <p className="type-caption text-secondary">{meta}</p> : null}
+          <a href={href} className={cx(arrowLink, stretch)}>
+            {readLabel ?? "Read"}
+            <Icon name="arrow-right" size={16} />
+            <span className="sr-only">: {title}</span>
+          </a>
+        </div>
+      </article>
+    );
+  }
+  if (layout === "row") {
+    return (
+      <article
+        data-reveal-item=""
+        className={cx(
+          "group card-lift relative flex items-start gap-4 rounded-card border border-default bg-page p-3 shadow-soft",
+          className,
+        )}
+      >
+        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-control bg-mint text-icon-primary max-md:h-16 max-md:w-20">
+          <Icon name="newspaper" size={24} />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {badge ? <ContentLabel>{badge}</ContentLabel> : null}
+          <p className="type-eyebrow text-secondary">{section}</p>
+          <h3 className="type-h4 text-primary group-hover:text-link-hover">
+            <a href={href} className={cx(stretch, "focus-visible:outline-none")}>
+              {title}
+            </a>
+          </h3>
+        </div>
+      </article>
+    );
+  }
   if (layout === "compact") {
     return (
       <article

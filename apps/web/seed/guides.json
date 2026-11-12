@@ -1,0 +1,59 @@
+[
+  {
+    "slug": "compare-pem-alkaline-electrolysers",
+    "title": "How to compare PEM and alkaline electrolysers for an Indian site",
+    "level": "Professional",
+    "summary": "Most Indian sites trade off three things: power quality, water and how often the plant will ramp. This guide compares the two technologies on each, with the questions to put to suppliers.",
+    "audience": "Plant engineers and procurement teams choosing a first electrolyser for an Indian site.",
+    "learn": [
+      {
+        "point": "How each technology handles variable power"
+      },
+      {
+        "point": "Water, space and service needs"
+      },
+      {
+        "point": "Four questions to put to suppliers"
+      }
+    ],
+    "topics": "technology",
+    "authors": "arjun-sharma-sample",
+    "body": "Choosing between PEM (proton exchange membrane) and alkaline electrolysers is the first big decision for most Indian projects. Neither is better everywhere.\n\n## 1. Power and ramping\n\nPEM follows solar or wind output within seconds, so it suits plants running on variable renewable power. Alkaline prefers a steady load.\n\n## 2. Water and site\n\nBoth need demineralised water, roughly 10–15 litres per kilogram of hydrogen once treatment losses are included.\n\n## 3. What to ask suppliers\n\n1. What is the guaranteed stack life at my load profile?\n2. What is the specific energy (kWh/kg) at 30% and 100% load?\n3. Who services the stack in India, and how fast?\n4. Which parts are made in India, and which are imported?\n\n*Sample guide from the design (441:801). Replace it before launch.*"
+  },
+  {
+    "slug": "hydrogen-101-grey-blue-green",
+    "title": "Hydrogen 101: grey, blue and green, in plain words",
+    "level": "Beginner",
+    "summary": "What the colours mean, and why buyers in India care about the difference.",
+    "topics": "policy",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "peso-approvals-hydrogen-cylinders",
+    "title": "PESO approvals for hydrogen cylinders, step by step",
+    "level": "Beginner",
+    "summary": "The approvals a cylinder needs before it can be filled and moved in India.",
+    "topics": "policy",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "dm-water-for-electrolysers",
+    "title": "DM water for electrolysers: sizing the treatment skid",
+    "level": "Professional",
+    "summary": "How much water a plant needs, and how to size its treatment.",
+    "topics": "technology",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "storage-350-or-700-bar",
+    "title": "Storage at 350 or 700 bar: choosing for mobility pilots",
+    "level": "Professional",
+    "summary": "What changes in cost and safety between the two pressures.",
+    "topics": "mobility",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  }
+]

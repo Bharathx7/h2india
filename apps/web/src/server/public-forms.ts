@@ -26,7 +26,7 @@ export type SubscribeResult =
 export async function subscribeToNewsletter(input: {
   email: string;
   topics: string[];
-  source: "footer" | "coming-soon" | "newsletter-page";
+  source: "footer" | "coming-soon" | "newsletter-page" | "newsroom";
 }): Promise<SubscribeResult> {
   const email = input.email.trim();
   if (!isEmailAddress(email)) return { status: "invalid", message: "Enter a full email address, like name@company.in" };

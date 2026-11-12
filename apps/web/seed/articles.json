@@ -3,7 +3,7 @@
     "slug": "kandla-hub-land-allotment-green-ammonia",
     "title": "Kandla hub moves to land allotment for its first green ammonia plants",
     "type": "news",
-    "topics": "projects",
+    "topics": "projects; green-ammonia",
     "dek": "Sample story from the home page design (377:4917).",
     "body": "Sample article. Replace it with a real story before launch.",
     "sources": [
@@ -29,7 +29,8 @@
       }
     ],
     "publishedAt": "-4d 09:00",
-    "authors": "h2-india-newsroom-sample"
+    "authors": "h2-india-newsroom-sample",
+    "level": "Beginner"
   },
   {
     "slug": "state-nodal-agencies-reporting-format",
@@ -94,5 +95,602 @@
     ],
     "publishedAt": "-6d 09:00",
     "authors": "h2-india-newsroom-sample"
+  },
+  {
+    "slug": "seci-opens-bids-green-ammonia-sight-tranche-ii",
+    "title": "SECI opens bids for green ammonia under SIGHT Tranche II",
+    "type": "news",
+    "topics": "tenders-awards; green-ammonia",
+    "dek": "The second green ammonia round asks producers to quote a delivered price for fertiliser plants in four states. Bids are due on 15 November.",
+    "body": "The Solar Energy Corporation of India (SECI) has opened bids for the second green ammonia round under the SIGHT programme. Producers must quote a delivered price per kilogram for fertiliser plants in Gujarat, Maharashtra, Odisha and Andhra Pradesh.\n\nBids are due on 15 November. As in the first round, SECI will sign a 10-year purchase agreement with each winner and pay the SIGHT incentive for the first three years. The tender document, the RfS, sets a ceiling price for each plant.\n\n## What changes from Tranche I\n\nThe first round set prices between ₹51.80 and ₹55.75 per kg across its first four auctions. This time SECI has added a delivery-performance clause: producers who miss more than 10% of committed volume in a year lose part of the incentive.\n\n> \"This round rewards producers who can deliver, not just those who bid lowest.\" Procurement head at a fertiliser company, speaking on condition of anonymity\n\nBidders H2 India spoke to said the bigger question is power: most plants will need round-the-clock renewable supply, which pushes up the cost of storage.\n\n*Sample story from the newsroom design (434:2844). Replace it before launch.*",
+    "sources": [
+      {
+        "title": "SECI: Request for Selection, green ammonia, Mode 2A Tranche II (PDF)",
+        "url": "https://example.org/sample/seci-rfs"
+      },
+      {
+        "title": "MNRE: SIGHT Component II guidelines, Mode 2A",
+        "url": "https://example.org/sample/mnre-sight"
+      },
+      {
+        "title": "H2 India: SIGHT programme tracker",
+        "url": "https://example.org/sample/tracker"
+      }
+    ],
+    "publishedAt": "-2d 10:30",
+    "authors": "ananya-rao-sample",
+    "featured": true,
+    "states": ["gujarat", "maharashtra", "odisha", "andhra-pradesh"],
+    "tags": ["green-ammonia", "sight", "seci", "tenders", "fertilisers"],
+    "keyFacts": [
+      {
+        "label": "Issuer",
+        "value": "SECI for MNRE"
+      },
+      {
+        "label": "Scheme",
+        "value": "SIGHT · Mode 2A Tranche II"
+      },
+      {
+        "label": "Bid due",
+        "value": "15 Nov 2026, 15:00 IST"
+      },
+      {
+        "label": "Who can bid",
+        "value": "Green ammonia producers with plants in India"
+      }
+    ]
+  },
+  {
+    "slug": "peso-draft-rules-hydrogen-refuelling",
+    "title": "PESO draft rules set out who can approve hydrogen refuelling stations",
+    "type": "news",
+    "topics": "policy",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/peso-draft-rules-hydrogen-refuelling"
+      }
+    ],
+    "publishedAt": "-1d 11:00",
+    "authors": "ananya-rao-sample",
+    "tags": ["peso"]
+  },
+  {
+    "slug": "dholera-hydrogen-valley-land-deal",
+    "title": "Dholera signs first land deal for a 1 GW electrolyser park near Bhavnagar",
+    "type": "news",
+    "topics": "projects",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/dholera-hydrogen-valley-land-deal"
+      }
+    ],
+    "publishedAt": "-1d 09:30",
+    "authors": "vikram-iyer-sample",
+    "states": ["gujarat"]
+  },
+  {
+    "slug": "green-hydrogen-standard-12-month-averaging",
+    "title": "Green Hydrogen Standard: what the 12-month averaging rule means for producers",
+    "type": "explainer",
+    "topics": "policy",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/green-hydrogen-standard-12-month-averaging"
+      }
+    ],
+    "publishedAt": "-3d 09:00",
+    "authors": "vikram-iyer-sample",
+    "level": "Professional"
+  },
+  {
+    "slug": "bis-draft-standard-hydrogen-dispensers",
+    "title": "BIS publishes a draft standard for hydrogen dispensers",
+    "type": "news",
+    "topics": "policy",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/bis-draft-standard-hydrogen-dispensers"
+      }
+    ],
+    "publishedAt": "-5d 10:00",
+    "authors": "ananya-rao-sample",
+    "tags": ["peso"]
+  },
+  {
+    "slug": "mnre-extends-state-hydrogen-hubs-deadline",
+    "title": "MNRE extends the deadline for state hydrogen hub proposals",
+    "type": "news",
+    "topics": "policy",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/mnre-extends-state-hydrogen-hubs-deadline"
+      }
+    ],
+    "publishedAt": "-6d 10:00",
+    "authors": "ananya-rao-sample"
+  },
+  {
+    "slug": "maharashtra-updates-hydrogen-policy-incentives",
+    "title": "Maharashtra updates incentives in its green hydrogen policy",
+    "type": "news",
+    "topics": "policy",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/maharashtra-updates-hydrogen-policy-incentives"
+      }
+    ],
+    "publishedAt": "-7d 10:00",
+    "authors": "vikram-iyer-sample",
+    "states": ["maharashtra"]
+  },
+  {
+    "slug": "kandla-three-more-plants-allotted",
+    "title": "Kandla hydrogen hub: three more plants allotted land",
+    "type": "news",
+    "topics": "projects",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/kandla-three-more-plants-allotted"
+      }
+    ],
+    "publishedAt": "-3d 11:00",
+    "authors": "vikram-iyer-sample",
+    "states": ["gujarat"]
+  },
+  {
+    "slug": "konkan-hydrogen-tech-raises-funding",
+    "title": "Konkan Hydrogen Tech raises funding to expand its stack line",
+    "type": "news",
+    "topics": "projects",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/konkan-hydrogen-tech-raises-funding"
+      }
+    ],
+    "publishedAt": "-4d 11:00",
+    "authors": "vikram-iyer-sample",
+    "states": ["maharashtra"]
+  },
+  {
+    "slug": "tamil-nadu-shortlists-valley-sites",
+    "title": "Tamil Nadu shortlists two sites for a hydrogen valley",
+    "type": "news",
+    "topics": "projects",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/tamil-nadu-shortlists-valley-sites"
+      }
+    ],
+    "publishedAt": "-6d 11:00",
+    "authors": "ananya-rao-sample",
+    "states": ["tamil-nadu"]
+  },
+  {
+    "slug": "iocl-extends-panipat-electrolyser-bid",
+    "title": "IOCL extends bid date for its Panipat electrolyser tender",
+    "type": "news",
+    "topics": "tenders-awards",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/iocl-extends-panipat-electrolyser-bid"
+      }
+    ],
+    "publishedAt": "-1d 13:00",
+    "authors": "ananya-rao-sample",
+    "states": ["haryana"],
+    "tags": ["tenders"]
+  },
+  {
+    "slug": "green-methanol-round-draft-rfs",
+    "title": "Green methanol round: what changed in SECI's draft RfS",
+    "type": "analysis",
+    "topics": "tenders-awards",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/green-methanol-round-draft-rfs"
+      }
+    ],
+    "publishedAt": "-5d 09:00",
+    "authors": "vikram-iyer-sample",
+    "level": "Expert",
+    "tags": ["seci", "tenders"],
+    "whyItMatters": "Sample: why this matters to buyers. Replace before launch."
+  },
+  {
+    "slug": "results-latest-green-ammonia-auctions",
+    "title": "Results: who won the latest green ammonia auctions",
+    "type": "news",
+    "topics": "tenders-awards; green-ammonia",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/results-latest-green-ammonia-auctions"
+      }
+    ],
+    "publishedAt": "-11d 09:00",
+    "authors": "ananya-rao-sample",
+    "tags": ["green-ammonia", "sight"]
+  },
+  {
+    "slug": "iit-madras-1000-hour-aem-stack",
+    "title": "IIT Madras team reports a 1,000-hour AEM stack test",
+    "type": "news",
+    "topics": "technology",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/iit-madras-1000-hour-aem-stack"
+      }
+    ],
+    "publishedAt": "-2d 12:00",
+    "authors": "meera-kulkarni-sample"
+  },
+  {
+    "slug": "hydrogen-leak-detection-sensors",
+    "title": "Hydrogen leak detection: what PESO now expects on site",
+    "type": "explainer",
+    "topics": "technology",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/hydrogen-leak-detection-sensors"
+      }
+    ],
+    "publishedAt": "-6d 12:00",
+    "authors": "meera-kulkarni-sample",
+    "level": "Beginner",
+    "tags": ["peso"]
+  },
+  {
+    "slug": "alkaline-or-pem-solar-profile",
+    "title": "Alkaline or PEM on a solar-only profile: field data",
+    "type": "analysis",
+    "topics": "technology",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/alkaline-or-pem-solar-profile"
+      }
+    ],
+    "publishedAt": "-8d 12:00",
+    "authors": "meera-kulkarni-sample",
+    "level": "Expert",
+    "whyItMatters": "Sample: why this matters to buyers. Replace before launch."
+  },
+  {
+    "slug": "two-hydrogen-buses-trial-leh",
+    "title": "Two hydrogen buses begin trial runs in Leh",
+    "type": "news",
+    "topics": "mobility",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/two-hydrogen-buses-trial-leh"
+      }
+    ],
+    "publishedAt": "-2d 15:00",
+    "authors": "ananya-rao-sample",
+    "states": ["ladakh"]
+  },
+  {
+    "slug": "350-bar-bus-station-costs",
+    "title": "What a 350 bar bus station costs to run in India",
+    "type": "analysis",
+    "topics": "mobility",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/350-bar-bus-station-costs"
+      }
+    ],
+    "publishedAt": "-5d 15:00",
+    "authors": "vikram-iyer-sample",
+    "level": "Professional",
+    "whyItMatters": "Sample: why this matters to buyers. Replace before launch."
+  },
+  {
+    "slug": "fuel-cell-trucks-mumbai-pune",
+    "title": "Fuel cell trucks start freight trials on the Mumbai–Pune route",
+    "type": "news",
+    "topics": "mobility",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/fuel-cell-trucks-mumbai-pune"
+      }
+    ],
+    "publishedAt": "-7d 15:00",
+    "authors": "ananya-rao-sample",
+    "states": ["maharashtra"]
+  },
+  {
+    "slug": "indian-hydrogen-prices-october",
+    "title": "Indian hydrogen prices in October: where bids are landing",
+    "type": "analysis",
+    "topics": "markets",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/indian-hydrogen-prices-october"
+      }
+    ],
+    "publishedAt": "-3d 16:00",
+    "authors": "vikram-iyer-sample",
+    "level": "Professional",
+    "whyItMatters": "Sample: why this matters to buyers. Replace before launch."
+  },
+  {
+    "slug": "lcoh-worked-example-india",
+    "title": "What sets the cost of hydrogen in India: a worked LCOH example",
+    "type": "analysis",
+    "topics": "markets",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/lcoh-worked-example-india"
+      }
+    ],
+    "publishedAt": "-9d 16:00",
+    "authors": "vikram-iyer-sample",
+    "level": "Expert",
+    "whyItMatters": "Sample: why this matters to buyers. Replace before launch."
+  },
+  {
+    "slug": "eu-carbon-border-india-hydrogen",
+    "title": "EU carbon border rules: what Indian hydrogen exporters need to show",
+    "type": "explainer",
+    "topics": "global",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/eu-carbon-border-india-hydrogen"
+      }
+    ],
+    "publishedAt": "-4d 16:00",
+    "authors": "meera-kulkarni-sample",
+    "level": "Professional"
+  },
+  {
+    "slug": "india-japan-hydrogen-shipping-pact",
+    "title": "India and Japan sign a pact on hydrogen shipping",
+    "type": "news",
+    "topics": "global",
+    "dek": "Sample story from the newsroom design. Replace it with a real story before launch.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/india-japan-hydrogen-shipping-pact"
+      }
+    ],
+    "publishedAt": "-8d 16:00",
+    "authors": "ananya-rao-sample"
+  },
+  {
+    "slug": "hydrotek-opens-pune-service-centre",
+    "title": "Hydrotek Systems opens a stack service centre in Pune",
+    "type": "press_release",
+    "topics": "projects",
+    "dek": "Issued by Hydrotek Systems. Sample press release from the design (437:4212).",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Hydrotek Systems press office",
+        "url": "https://example.org/sample/hydrotek"
+      }
+    ],
+    "publishedAt": "-2d 17:00",
+    "authors": "h2-india-newsroom-sample",
+    "issuer": "Hydrotek Systems"
+  },
+  {
+    "slug": "pranava-h2-peso-approval-cylinders",
+    "title": "Pranava H2 receives PESO approval for 350 bar cylinders",
+    "type": "press_release",
+    "topics": "technology",
+    "dek": "Issued by Pranava H2. Sample press release.",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Pranava H2 press office",
+        "url": "https://example.org/sample/pranava"
+      }
+    ],
+    "publishedAt": "-4d 17:00",
+    "authors": "h2-india-newsroom-sample",
+    "issuer": "Pranava H2"
+  },
+  {
+    "slug": "electrolyser-buyers-guide-sponsored",
+    "title": "Choosing a stack service partner: what to check first",
+    "type": "sponsored",
+    "topics": "technology",
+    "dek": "Sponsored by Hydrotek Systems. Sample sponsored article from the design (437:4387).",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/electrolyser-buyers-guide-sponsored"
+      }
+    ],
+    "publishedAt": "-3d 18:00",
+    "authors": "h2-india-newsroom-sample",
+    "sponsor": {
+      "name": "Hydrotek Systems",
+      "disclosure": "This article is paid for by the sponsor. H2 India's editors checked its facts.",
+      "about": "Hydrotek Systems makes PEM electrolysers and offers stack service in India (sample)."
+    }
+  },
+  {
+    "slug": "interview-fertiliser-procurement-head",
+    "title": "“Stable supply is the number buyers should ask about”",
+    "type": "interview",
+    "topics": "tenders-awards",
+    "dek": "A fertiliser buyer on what she looks for in a green ammonia bid. Sample interview from the design (437:4020).",
+    "body": "Sample article. Replace it with a real story before launch.\n\n## What happened\n\nA short sample paragraph so the page has a body to show.\n\n## What it means\n\nAnother sample paragraph.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/interview-fertiliser-procurement-head"
+      }
+    ],
+    "publishedAt": "-6d 18:00",
+    "authors": "ananya-rao-sample",
+    "interviewee": {
+      "name": "Kavita Menon",
+      "role": "Head of procurement",
+      "organisation": "Deccan Fertilisers (sample)"
+    }
+  },
+  {
+    "slug": "live-seci-green-ammonia-auction-tranche-ii",
+    "title": "Live: SECI green ammonia auction, Tranche II results",
+    "type": "news",
+    "topics": "tenders-awards; green-ammonia",
+    "dek": "Results for the seven regional lots are coming in through the day. Newest updates first.",
+    "body": "Sample live explainer from the design (801:7492). The updates above are the story; this text is the background.",
+    "sources": [
+      {
+        "title": "Sample source",
+        "url": "https://example.org/sample/live-seci-green-ammonia-auction-tranche-ii"
+      }
+    ],
+    "publishedAt": "-0d 10:00",
+    "authors": "ananya-rao-sample",
+    "tags": ["green-ammonia", "sight", "seci", "tenders", "fertilisers"],
+    "keyFacts": [
+      {
+        "label": "Issuer",
+        "value": "SECI for MNRE"
+      },
+      {
+        "label": "Scheme",
+        "value": "SIGHT · Mode 2A Tranche II"
+      },
+      {
+        "label": "Results",
+        "value": "Today, through the day"
+      },
+      {
+        "label": "On offer",
+        "value": "7,50,000 t/yr in 7 regional lots"
+      }
+    ],
+    "live": {
+      "status": "live",
+      "summaryAt": "-0d 14:42",
+      "summary": [
+        {
+          "point": "Six of seven lots awarded so far: 4,20,000 t/yr."
+        },
+        {
+          "point": "Lowest price ₹49.20 a kilo, in the Odisha lot."
+        },
+        {
+          "point": "The Andhra Pradesh lot goes to a second price round this evening."
+        }
+      ],
+      "keyNumbers": [
+        {
+          "value": "4,20,000 t/yr",
+          "label": "green ammonia awarded so far today"
+        },
+        {
+          "value": "₹49.20",
+          "label": "per kg, lowest bid (Odisha lot)"
+        },
+        {
+          "value": "6 of 7",
+          "label": "regional lots awarded"
+        }
+      ],
+      "keyNumbersSource": "Source: SECI result sheets (sample)",
+      "updates": [
+        {
+          "at": "-0d 10:00",
+          "title": "What to watch today",
+          "text": "Prices against Tranche I, how much of the 7,50,000 t/yr on offer is awarded, and whether new bidders win."
+        },
+        {
+          "at": "-0d 11:30",
+          "title": "E-reverse auction opens for seven regional lots",
+          "text": "Each lot is tied to fertiliser plants in one region, as in Tranche I."
+        },
+        {
+          "at": "-0d 12:05",
+          "title": "SECI publishes the first result sheet",
+          "text": "The sheet lists winning bidders, quantities and prices for the first four lots.",
+          "document": {
+            "title": "SECI result sheet, Tranche II, lots 1–4",
+            "url": "https://example.org/sample/seci-results",
+            "note": "PDF · 2 pages · seci.co.in"
+          }
+        },
+        {
+          "at": "-0d 13:15",
+          "title": "Lowest price so far: ₹49.20 a kilo in the Odisha lot",
+          "text": "That is below the ₹51.80–55.75 range of Tranche I. Developers told H2 India cheaper electrolysers and round-the-clock renewable power explain most of the drop."
+        },
+        {
+          "at": "-0d 14:42",
+          "title": "Last two lots awarded; total reaches 4,20,000 t/yr",
+          "text": "SECI has now awarded six of the seven regional lots. The Andhra Pradesh lot closes after a second price round this evening."
+        }
+      ]
+    }
   }
 ]

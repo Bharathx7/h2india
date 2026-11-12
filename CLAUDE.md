@@ -124,6 +124,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Log a search with no results only when it is finished (the /search page, or Enter in the overlay), with `logSearchMiss()`; never store who searched.
 - Integration tests need `TEST_MEILI_MASTER_KEY` and use their own prefixed indexes (`SEARCH_INDEX_PREFIX`). Runbook: `docs/runbooks/search.md`.
 
+## Newsroom (step 5.3)
+
+- Public newsroom reads go through `apps/web/src/news/data.ts`: every read is cached under `NEWS_TAG`, and the collections that feed the newsroom spread `newsroomHooks` (`cms/newsroom.ts`) so a save refreshes the cache. A new collection the newsroom shows needs both.
+- Pure formatting (IST times, eyebrows) lives in `news/format.ts` and structured data in `news/jsonld.ts`, so they're unit-tested without the CMS. Web unit tests import with relative paths, not `@/`.
+- A topic with an `order` is a news section. Article slugs can't be a section's or a word in `RESERVED_NEWS_SLUGS` (checked in a save hook, because Payload skips validation for drafts).
+- A published article changes only through the workflow; the one exception is the `live-update` action, which publishes the live explainer block alone (A61).
+- Every `<main>` on a newsroom page carries `[&_:is(h1,h2,h3)]:text-wrap`, so headings wrap as drawn rather than balanced. Runbook: `docs/runbooks/news.md`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

@@ -18,7 +18,8 @@ type Action =
   | "unschedule"
   | "publish"
   | "unpublish"
-  | "correct";
+  | "correct"
+  | "live-update";
 
 const box = { border: "1px solid var(--theme-elevation-150)", borderRadius: 8, padding: 16, marginBottom: 24 } as const;
 const button = {
@@ -37,6 +38,7 @@ export function WorkflowPanel() {
   const flagged = useFormFields(([fields]) => Boolean(fields["legal.flagged"]?.value));
   const passedAt = useFormFields(([fields]) => fields["legal.passedAt"]?.value as string | undefined);
   const publishAt = useFormFields(([fields]) => fields.publishAt?.value as string | undefined);
+  const live = useFormFields(([fields]) => fields["live.status"]?.value as string | undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -95,7 +97,11 @@ export function WorkflowPanel() {
       act("unschedule", "Unschedule"),
       act("back-to-draft", "Back to draft"),
     ],
-    Published: [act("correct", "Add correction", true), act("unpublish", "Unpublish")],
+    Published: [
+      ...(live === "live" || live === "ended" ? [act("live-update", "Publish live update", true)] : []),
+      act("correct", "Add correction", live !== "live" && live !== "ended"),
+      act("unpublish", "Unpublish"),
+    ],
   };
 
   return (

@@ -290,7 +290,7 @@ function SearchError({ q, tab }: { q: string; tab: Tab }) {
 /** Loading (127:6835): the count line, the tabs and six cards in the final layout. */
 function ResultsSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading results">
+    <div role="status" aria-busy="true" aria-label="Loading results">
       <span className="mt-3 block h-4 w-64 rounded-[6px] shimmer" />
       <span className="mt-6 block h-11 w-64 rounded-pill shimmer" />
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">

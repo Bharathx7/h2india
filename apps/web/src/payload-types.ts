@@ -206,7 +206,63 @@ export interface Article {
    * Part of the address. Don't change it once published.
    */
   slug: string;
+  /**
+   * The lead story on the news home (428:473), or the featured piece on Insights (440:40).
+   */
+  featured?: boolean | null;
+  /**
+   * Who it's written for. Shown on Insights (440:40).
+   */
+  level?: ('Beginner' | 'Professional' | 'Expert') | null;
+  /**
+   * For the news home's state filter. Leave empty for national stories.
+   */
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
   dek: string;
+  /**
+   * The side box on analysis pieces (437:3709).
+   */
+  whyItMatters?: string | null;
   heroImage?: (number | null) | Media;
   body: {
     root: {
@@ -235,6 +291,10 @@ export interface Article {
   sponsor?: {
     name?: string | null;
     logo?: (number | null) | Media;
+    /**
+     * “About the sponsor” in the side column (437:4387): what the company does.
+     */
+    about?: string | null;
     disclosure?: string | null;
   };
   /**
@@ -281,6 +341,62 @@ export interface Article {
         id?: string | null;
       }[]
     | null;
+  keyFacts?:
+    | {
+        /**
+         * For example Issuer, Bid due
+         */
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * For an event that unfolds through the day (an auction, a results day). Updates show newest first.
+   */
+  live?: {
+    status?: ('off' | 'live' | 'ended') | null;
+    summary?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    summaryAt?: string | null;
+    keyNumbers?:
+      | {
+          /**
+           * As readers see it, for example ₹49.20
+           */
+          value: string;
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    keyNumbersSource?: string | null;
+    meaning?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    updates?:
+      | {
+          at: string;
+          title: string;
+          text?: string | null;
+          document?: {
+            title?: string | null;
+            url?: string | null;
+            /**
+             * For example PDF · 3 pages · seci.co.in
+             */
+            note?: string | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+  };
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -296,8 +412,15 @@ export interface Article {
 export interface Topic {
   id: number;
   name: string;
+  /**
+   * The section's address, /news/<slug>. Don't change it once published.
+   */
   slug: string;
   description?: string | null;
+  /**
+   * Where the section sits in the news tabs and on the news home (428:473); lowest first.
+   */
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1162,6 +1285,20 @@ export interface Guide {
   title: string;
   slug: string;
   summary: string;
+  /**
+   * Who it's written for. Shown on Insights (440:40).
+   */
+  level?: ('Beginner' | 'Professional' | 'Expert') | null;
+  /**
+   * For example Plant engineers and procurement teams choosing a first electrolyser.
+   */
+  audience?: string | null;
+  learn?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
   authors?: (number | Author)[] | null;
   heroImage?: (number | null) | Media;
   body: {
@@ -2596,7 +2733,11 @@ export interface ArticlesSelect<T extends boolean = true> {
   tags?: T;
   title?: T;
   slug?: T;
+  featured?: T;
+  level?: T;
+  states?: T;
   dek?: T;
+  whyItMatters?: T;
   heroImage?: T;
   body?: T;
   interviewee?:
@@ -2612,6 +2753,7 @@ export interface ArticlesSelect<T extends boolean = true> {
     | {
         name?: T;
         logo?: T;
+        about?: T;
         disclosure?: T;
       };
   sources?:
@@ -2641,6 +2783,54 @@ export interface ArticlesSelect<T extends boolean = true> {
         note?: T;
         by?: T;
         id?: T;
+      };
+  keyFacts?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  live?:
+    | T
+    | {
+        status?: T;
+        summary?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        summaryAt?: T;
+        keyNumbers?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+        keyNumbersSource?: T;
+        meaning?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        updates?:
+          | T
+          | {
+              at?: T;
+              title?: T;
+              text?: T;
+              document?:
+                | T
+                | {
+                    title?: T;
+                    url?: T;
+                    note?: T;
+                  };
+              id?: T;
+            };
       };
   seo?:
     | T
@@ -3004,6 +3194,14 @@ export interface GuidesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   summary?: T;
+  level?: T;
+  audience?: T;
+  learn?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
   authors?: T;
   heroImage?: T;
   body?: T;
@@ -3583,6 +3781,7 @@ export interface TopicsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   description?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

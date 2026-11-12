@@ -101,6 +101,7 @@ export { SiteHeader } from "./components/site/SiteHeader";
 export type { SiteHeaderProps } from "./components/site/SiteHeader";
 export { MegaMenuPanel } from "./components/site/MegaMenu";
 export { SiteFooter } from "./components/site/SiteFooter";
+export { NewsletterBand, SignUpBox } from "./components/site/NewsletterBand";
 export type { FooterColumn, SiteFooterProps } from "./components/site/SiteFooter";
 export { AnnouncementBar, CookieBanner, readConsent } from "./components/site/Banners";
 export type { ConsentChoice } from "./components/site/Banners";

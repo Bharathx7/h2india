@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { slugFrom } from "../slug";
+import { newsroomHooks } from "../newsroom";
 import { canDelete, canEdit } from "../roles";
 
 // Authors (444:5431 staff, 444:5946 external contributor). Press releases are credited to the issuing organisation.
@@ -7,6 +8,7 @@ export const Authors: CollectionConfig = {
   slug: "authors",
   admin: { useAsTitle: "name", group: "People", defaultColumns: ["name", "kind", "title", "organisation"] },
   access: { read: () => true, create: canEdit, update: canEdit, delete: canDelete },
+  hooks: newsroomHooks,
   fields: [
     { name: "name", type: "text", required: true },
     {

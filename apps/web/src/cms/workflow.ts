@@ -15,7 +15,8 @@ export type Action =
   | "unschedule"
   | "publish"
   | "unpublish"
-  | "correct";
+  | "correct"
+  | "live-update";
 
 interface Rule {
   from: WorkflowStatus[];
@@ -34,6 +35,9 @@ export const RULES: Record<Action, Rule> = {
   publish: { from: ["In review", "Scheduled"], to: "Published", needs: "content.publish" },
   unpublish: { from: ["Published"], to: "Draft", needs: "content.publish" },
   correct: { from: ["Published"], to: null, needs: "content.publish" },
+  // Step 5.3: a published live explainer takes new updates (801:7492) without going back through review. Only the
+  // live block is published; any other unpublished edit stays a draft.
+  "live-update": { from: ["Published"], to: null, needs: "content.edit" },
 };
 
 export interface Actor {
@@ -131,6 +135,20 @@ export async function transitionArticle(
         },
         overrideAccess: true,
       });
+      break;
+    }
+    case "live-update": {
+      const live = (doc as { live?: { status?: string | null } }).live;
+      if (live?.status !== "live" && live?.status !== "ended") {
+        throw new APIError(
+          "Only a live explainer takes live updates. Set Live explainer › Status first.",
+          400,
+          null,
+          true,
+        );
+      }
+      data.live = live;
+      publish = true;
       break;
     }
     default:

@@ -153,7 +153,7 @@ const KNOWLEDGE_KIND: Record<KnowledgeSlug, string> = {
 
 const KNOWLEDGE_PATH: Record<KnowledgeSlug, string> = {
   chapters: "/knowledge/hydrogen-101",
-  guides: "/knowledge/guides",
+  guides: "/knowledge/insights",
   glossary: "/knowledge/glossary",
   standards: "/knowledge/standards",
   reports: "/knowledge/reports",

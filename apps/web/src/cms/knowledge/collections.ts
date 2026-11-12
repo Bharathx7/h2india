@@ -5,6 +5,7 @@ import { canDelete, canEdit, canPublish, canView, has } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { scanUpload } from "../scan";
 import { slugFrom } from "../slug";
+import { levelField, newsroomHooks } from "../newsroom";
 import { searchHooks } from "../../search/hooks";
 import { chapterWithNeighbours, purgeReportLeads } from "./library";
 
@@ -109,15 +110,36 @@ export const Chapters: CollectionConfig = {
   ],
 };
 
+// Guides are the "Guide" pieces on Insights (440:40, post 441:801, step 5.3, A55) and the buyer's guides (step 5.6).
 export const Guides: CollectionConfig = {
   slug: "guides",
   labels: { singular: "Buyer's guide", plural: "Buyer's guides" },
   admin: { useAsTitle: "title", group: "Knowledge" },
   ...editorial,
+  hooks: {
+    ...editorial.hooks,
+    afterChange: [...editorial.hooks.afterChange, ...newsroomHooks.afterChange],
+    afterDelete: [...editorial.hooks.afterDelete, ...newsroomHooks.afterDelete],
+  },
   fields: [
     { name: "title", type: "text", required: true },
     slug("title"),
     { name: "summary", type: "textarea", required: true, maxLength: 300 },
+    levelField(),
+    {
+      name: "audience",
+      label: "Who this is for",
+      type: "textarea",
+      maxLength: 300,
+      admin: { description: "For example Plant engineers and procurement teams choosing a first electrolyser." },
+    },
+    {
+      name: "learn",
+      label: "You will learn",
+      type: "array",
+      maxRows: 6,
+      fields: [{ name: "point", type: "text", required: true }],
+    },
     { name: "authors", type: "relationship", relationTo: "authors", hasMany: true },
     { name: "heroImage", type: "upload", relationTo: "media" },
     { ...body, required: true },
