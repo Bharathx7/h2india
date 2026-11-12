@@ -1,5 +1,6 @@
 // Prints the SQL that seeds roles and permissions from src/authz/catalogue.ts (step 3.4).
-// Usage: pnpm --filter @h2india/core exec tsx scripts/authz-seed.ts > ../db/migrations/0005_authz_seed.sql
+// Usage: pnpm --filter @h2india/core exec tsx scripts/authz-seed.ts > ../db/migrations/<new custom migration>.sql
+// (0005_authz_seed.sql, then 0009_authz_roles_manage.sql). Every statement is idempotent.
 // Run once per change to the catalogue, as a new migration; never edit an applied migration.
 import {
   COMPANY_PERMISSIONS,
@@ -27,7 +28,7 @@ for (const area of OPERATOR_AREAS) {
     ]);
   }
 }
-for (const [key, text] of Object.entries(OPERATOR_EXTRA)) perms.push([key, "operator", text, false]);
+for (const [key, text] of Object.entries(OPERATOR_EXTRA)) perms.push([key, "operator", text, key === "roles.manage"]);
 
 lines.push('INSERT INTO "core"."permissions" ("key", "layer", "description", "sensitive") VALUES');
 lines.push(

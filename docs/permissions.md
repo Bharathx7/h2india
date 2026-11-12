@@ -43,20 +43,23 @@ Order limits are per person (`memberships.order_limit_paise`), as in 575:696 ("O
 
 Only the **Finance** grid is drawn; the other six are drafted from each role's description for the founder to review. V view, E create or edit, D delete, X export. Sensitive areas (moves money, shows bank or personal data, or changes who can do what) are marked *.
 
-| Area            | Super admin | Catalogue moderator | Supplier verifier | Operations | Editor-in-chief | Content editor | Finance |
-| --------------- | :---------: | :-----------------: | :---------------: | :--------: | :-------------: | :------------: | :-----: |
-| Overview        |    VEDX     |          V          |         V         |     V      |        V        |       V        |    V    |
-| Queues          |    VEDX     |         VE          |        VE         |     VE     |       VE        |       V        |         |
-| Content         |    VEDX     |                     |                   |            |      VEDX       |       VE       |         |
-| Catalogue       |    VEDX     |        VEDX         |         V         |     V      |                 |                |    V    |
-| Verification *  |    VEDX     |                     |        VEX        |     V      |                 |                |    V    |
-| Orders          |    VEDX     |                     |                   |    VEX     |                 |                |   VX    |
-| Money *         |    VEDX     |                     |                   |            |                 |                |   VEX   |
-| Users *         |    VEDX     |                     |         V         |     V      |                 |                |    V    |
-| Compliance *    |    VEDX     |                     |         V         |            |       VE        |                |         |
-| Reports         |    VEDX     |          V          |                   |     VX     |        V        |       V        |   VX    |
-| Settings *      |    VEDX     |                     |                   |            |                 |                |         |
-| Publish content |      ✓      |                     |                   |            |        ✓        |                |         |
+| Area                    | Super admin | Catalogue moderator | Supplier verifier | Operations | Editor-in-chief | Content editor | Finance |
+| ----------------------- | :---------: | :-----------------: | :---------------: | :--------: | :-------------: | :------------: | :-----: |
+| Overview                |    VEDX     |          V          |         V         |     V      |        V        |       V        |    V    |
+| Queues                  |    VEDX     |         VE          |        VE         |     VE     |       VE        |       V        |         |
+| Content                 |    VEDX     |                     |                   |            |      VEDX       |       VE       |         |
+| Catalogue               |    VEDX     |        VEDX         |         V         |     V      |                 |                |    V    |
+| Verification *          |    VEDX     |                     |        VEX        |     V      |                 |                |    V    |
+| Orders                  |    VEDX     |                     |                   |    VEX     |                 |                |   VX    |
+| Money *                 |    VEDX     |                     |                   |            |                 |                |   VEX   |
+| Users *                 |    VEDX     |                     |         V         |     V      |                 |                |    V    |
+| Compliance *            |    VEDX     |                     |         V         |            |       VE        |                |         |
+| Reports                 |    VEDX     |          V          |                   |     VX     |        V        |       V        |   VX    |
+| Settings *              |    VEDX     |                     |                   |            |                 |                |         |
+| Publish content         |      ✓      |                     |                   |            |        ✓        |                |         |
+| Change operator roles * |      ✓      |                     |                   |            |                 |                |         |
+
+Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as the playbook asks in step 11.4. The last Super admin can't be removed. The Audit log screen (656:872) sits with Users: reading it needs Users view, exporting it needs Users export (only Super admin today).
 
 ## Defaults
 

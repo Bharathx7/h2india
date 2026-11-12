@@ -11,6 +11,15 @@ test("health endpoint answers", async ({ request }) => {
   expect(await res.json()).toEqual({ status: "ok" });
 });
 
+test("every response carries a request ID for the audit log, and a safe incoming ID is kept", async ({ request }) => {
+  const fresh = await request.get("/api/health");
+  expect(fresh.headers()["x-request-id"]).toMatch(/^[0-9a-f-]{36}$/);
+  const kept = await request.get("/api/health", { headers: { "x-request-id": "lb-abc12345" } });
+  expect(kept.headers()["x-request-id"]).toBe("lb-abc12345");
+  const unsafe = await request.get("/api/health", { headers: { "x-request-id": "<script>" } });
+  expect(unsafe.headers()["x-request-id"]).not.toBe("<script>");
+});
+
 // /sign-in is the real page since step 3.2; the workspaces are still placeholders.
 for (const [path, title] of [
   ["/sign-in", "Sign in to H2 India"],

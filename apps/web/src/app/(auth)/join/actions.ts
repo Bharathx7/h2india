@@ -27,6 +27,7 @@ import { getDb } from "@h2india/core";
 import { normaliseEmail } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
+import { requestContext } from "@/server/request-context";
 import { clearDraftCookie, draftToken, ensureDraft, workspaceFor } from "@/server/join";
 
 // Server side of the Join flow (step 3.3). Every rule lives in packages/core; these only connect the screens to it.
@@ -99,7 +100,11 @@ async function nextAfterDetails(token: string, user: { id: string; email: string
   }
   if (draft.organisationId) {
     try {
-      const request = await requestToJoin({ userId: user.id, organisationId: draft.organisationId });
+      const request = await requestToJoin({
+        userId: user.id,
+        organisationId: draft.organisationId,
+        context: await requestContext(),
+      });
       if (request.created)
         await notifyAdminsOfRequest(request.id).catch((e: unknown) => {
           console.error("join: emailing the admins failed", e);
@@ -181,7 +186,13 @@ export async function createCompanyAction(input: CompanyInput): Promise<Result<s
   const profile = await joinProfile(session.user.id);
   if (profile?.profileType !== "buyer" && profile?.profileType !== "supplier") return fail("NO_PATH");
   try {
-    await createCompany({ userId: session.user.id, kind: profile.profileType, gstins: input.gstins, name: input.name });
+    await createCompany({
+      userId: session.user.id,
+      kind: profile.profileType,
+      gstins: input.gstins,
+      name: input.name,
+      context: await requestContext(),
+    });
     const token = await draftToken();
     if (token) await discardDraft(token);
     await clearDraftCookie();
@@ -197,7 +208,7 @@ export async function requestToJoinAction(organisationId: string): Promise<Resul
   const session = await getSession();
   if (!session) return fail("NOT_SIGNED_IN");
   try {
-    const request = await requestToJoin({ userId: session.user.id, organisationId });
+    const request = await requestToJoin({ userId: session.user.id, organisationId, context: await requestContext() });
     if (request.created)
       await notifyAdminsOfRequest(request.id).catch((e: unknown) => {
         console.error("join: emailing the admins failed", e);
@@ -228,7 +239,7 @@ export async function cancelAction(requestId: string): Promise<Result<string>> {
   const session = await getSession();
   if (!session) return fail("NOT_SIGNED_IN");
   try {
-    await cancelJoinRequest({ userId: session.user.id, requestId });
+    await cancelJoinRequest({ userId: session.user.id, requestId, context: await requestContext() });
     return { ok: true, value: "/join" };
   } catch (error) {
     if (error instanceof JoinRequestError) return fail(error.code);

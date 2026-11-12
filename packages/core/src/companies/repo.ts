@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, isNull } from "drizzle-orm";
+import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { inScope, type Scope } from "../authz/scope";
@@ -35,16 +36,36 @@ export async function listInvitations(ex: Executor, scope: Scope, organisationId
 }
 
 /** Company settings: change the shown legal name. */
-export async function renameOrganisation(ex: Executor, actor: Actor, organisationId: string, legalName: string) {
+export async function renameOrganisation(
+  ex: Executor,
+  actor: Actor,
+  organisationId: string,
+  legalName: string,
+  context?: RequestContext,
+) {
   assertCan(actor, "company.manage", { organisationId });
-  await ex.update(o).set({ legalName: legalName.trim() }).where(eq(o.id, organisationId));
+  await ex.transaction(async (tx) => {
+    const [before] = await tx.select({ legalName: o.legalName }).from(o).where(eq(o.id, organisationId)).for("update");
+    await tx.update(o).set({ legalName: legalName.trim() }).where(eq(o.id, organisationId));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "company.rename",
+      resourceType: "organisation",
+      resourceId: organisationId,
+      companyId: organisationId,
+      before: before ?? null,
+      after: { legalName: legalName.trim() },
+      context,
+    });
+  });
 }
 
-/** Team settings: change someone's role or order limit. */
+/** Team settings: change someone's role or order limit. Audited with the values before and after. */
 export async function changeMemberRole(
   ex: Executor,
   actor: Actor,
-  input: { organisationId: string; userId: string; role: string; orderLimitPaise?: bigint | null },
+  input: { organisationId: string; userId: string; role: string; orderLimitPaise?: bigint | null; reason?: string },
+  context?: RequestContext,
 ) {
   assertCan(actor, "team.manage", { organisationId: input.organisationId });
   const [org] = await ex.select({ kind: o.kind }).from(o).where(eq(o.id, input.organisationId));
@@ -55,11 +76,27 @@ export async function changeMemberRole(
       and(eq(schema.roles.scope, org?.kind === "supplier" ? "supplier" : "buyer"), eq(schema.roles.name, input.role)),
     );
   if (!known) throw new Error(`No role "${input.role}" for this company`);
-  await ex
-    .update(m)
-    .set({
-      role: input.role,
-      ...(input.orderLimitPaise !== undefined ? { orderLimitPaise: input.orderLimitPaise } : {}),
-    })
-    .where(and(eq(m.organisationId, input.organisationId), eq(m.userId, input.userId)));
+  const seat = and(eq(m.organisationId, input.organisationId), eq(m.userId, input.userId));
+  await ex.transaction(async (tx) => {
+    const [before] = await tx
+      .select({ role: m.role, orderLimitPaise: m.orderLimitPaise })
+      .from(m)
+      .where(seat)
+      .for("update");
+    if (!before) throw new Error("This person is not in the company");
+    const orderLimitPaise = input.orderLimitPaise !== undefined ? input.orderLimitPaise : before.orderLimitPaise;
+    await tx.update(m).set({ role: input.role, orderLimitPaise }).where(seat);
+    const money = (v: bigint | null) => (v === null ? null : v.toString());
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "membership.change",
+      resourceType: "membership",
+      resourceId: input.userId,
+      companyId: input.organisationId,
+      before: { role: before.role, orderLimitPaise: money(before.orderLimitPaise) },
+      after: { role: input.role, orderLimitPaise: money(orderLimitPaise) },
+      reason: input.reason ?? null,
+      context,
+    });
+  });
 }
