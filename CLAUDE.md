@@ -66,6 +66,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - After sign-in, send people only to `safeReturnPath(next)`.
 - Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
 
+## Authorisation (step 3.4)
+
+- Decide permissions only with `can(actor, permission, { organisationId })` from `@h2india/core/authz`; load the actor per request with `loadActor()`.
+- Every read of a company-owned table takes a `Scope` from `scopeFor(actor)` as its first argument and filters with `inScope()`.
+- Every new company-owned record type adds a case to `packages/core/src/authz/authz.int.test.ts` (company B cannot read or change company A's record).
+- Roles and permissions are data. To change the defaults, edit `authz/catalogue.ts`, then generate a new seed migration with `scripts/authz-seed.ts`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

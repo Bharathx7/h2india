@@ -1,6 +1,7 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
+import { DEFAULT_ROLE } from "../authz/catalogue";
 import { getDb } from "../db";
 import { gstinProvider, GstinProviderUnavailableError, type GstinRecord } from "./adapters/gstin";
 import { findRegistered } from "./check";
@@ -146,7 +147,7 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
           checkedAt: c.pending ? null : new Date(),
         });
       }
-      await tx.insert(m).values({ organisationId, userId: input.userId, role: "owner" });
+      await tx.insert(m).values({ organisationId, userId: input.userId, role: DEFAULT_ROLE.creator });
       await audit(tx, {
         actorId: input.userId,
         action: "organisation.create",

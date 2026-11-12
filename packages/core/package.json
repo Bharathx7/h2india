@@ -9,7 +9,8 @@
     "./sign-in": "./src/sign-in/rules.ts",
     "./companies": "./src/companies/index.ts",
     "./companies/client": "./src/companies/client.ts",
-    "./jobs": "./src/jobs.ts"
+    "./jobs": "./src/jobs.ts",
+    "./authz": "./src/authz/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

@@ -153,7 +153,7 @@ describe.skipIf(!url)("companies and join requests", () => {
       .select({ role: schema.memberships.role })
       .from(schema.memberships)
       .where(eq(schema.memberships.userId, asker.id));
-    expect(members).toEqual([{ role: "member" }]);
+    expect(members).toEqual([{ role: "Requester" }]);
     const history = await h.db.execute(
       sql`SELECT from_status, to_status FROM core.status_history WHERE entity_id = ${first.id}`,
     );

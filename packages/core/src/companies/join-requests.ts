@@ -1,6 +1,9 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
+import { loadActor } from "../authz/actor";
+import { can } from "../authz/can";
+import { DEFAULT_ROLE } from "../authz/catalogue";
 import { getDb } from "../db";
 import { changeStatus } from "../status";
 import { JOIN } from "./rules";
@@ -28,13 +31,13 @@ export interface CompanyAdmin {
   email: string;
 }
 
-/** Owners and admins of a company, who approve join requests. */
+/** The Admins of a company, who answer join requests (575:696, 592:371). */
 export async function companyAdmins(ex: Executor, organisationId: string): Promise<CompanyAdmin[]> {
   return ex
     .select({ name: u.name, email: u.email })
     .from(m)
     .innerJoin(u, eq(u.id, m.userId))
-    .where(and(eq(m.organisationId, organisationId), inArray(m.role, ["owner", "admin"])))
+    .where(and(eq(m.organisationId, organisationId), inArray(m.role, [DEFAULT_ROLE.creator])))
     .orderBy(m.createdAt);
 }
 
@@ -195,21 +198,28 @@ export async function cancelJoinRequest(input: { userId: string; requestId: stri
 }
 
 async function assertAdmin(db: ReturnType<typeof getDb>, adminId: string, organisationId: string) {
-  const [row] = await db
-    .select({ role: m.role })
-    .from(m)
-    .where(and(eq(m.organisationId, organisationId), eq(m.userId, adminId)));
-  if (!row || (row.role !== "owner" && row.role !== "admin")) {
+  const actor = await loadActor(db, adminId);
+  if (!can(actor, "team.manage", { organisationId })) {
     throw new JoinRequestError("NOT_ALLOWED", "Only a company admin can answer join requests");
   }
 }
 
-/** A company admin approves: the person becomes a member (role refined in step 3.4). */
-export async function approveJoinRequest(input: { adminId: string; requestId: string; context?: RequestContext }) {
+/**
+ * A company admin approves: the person joins with the least role (Requester for buyers, Viewer for suppliers)
+ * unless the admin chooses another.
+ */
+export async function approveJoinRequest(input: {
+  adminId: string;
+  requestId: string;
+  role?: string;
+  context?: RequestContext;
+}) {
   const db = getDb();
   const [row] = await db.select().from(r).where(eq(r.id, input.requestId));
   if (!row) throw new JoinRequestError("NOT_FOUND", "No such request");
   await assertAdmin(db, input.adminId, row.organisationId);
+  const [org] = await db.select({ kind: o.kind }).from(o).where(eq(o.id, row.organisationId));
+  const role = input.role ?? DEFAULT_ROLE.joined[org?.kind === "supplier" ? "supplier" : "buyer"];
   await changeStatus(db, {
     table: r,
     entityType: "join_request",
@@ -222,10 +232,7 @@ export async function approveJoinRequest(input: { adminId: string; requestId: st
     context: input.context,
     also: async (tx) => {
       await tx.update(r).set({ decidedBy: input.adminId, decidedAt: new Date() }).where(eq(r.id, row.id));
-      await tx
-        .insert(m)
-        .values({ organisationId: row.organisationId, userId: row.userId, role: "member" })
-        .onConflictDoNothing();
+      await tx.insert(m).values({ organisationId: row.organisationId, userId: row.userId, role }).onConflictDoNothing();
     },
   });
 }

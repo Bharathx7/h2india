@@ -22,3 +22,4 @@ export { MobileCodeError, sendMobileCode, verifyMobileCode } from "./mobile";
 export { notifyAdminsOfRequest, notifyRequester } from "./notify";
 export { enqueueGstinCheck, GSTIN_QUEUE, pendingGstins, redisConnection, runGstinCheck } from "./jobs";
 export { FAKE_GSTINS } from "./adapters/gstin";
+export { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "./repo";
