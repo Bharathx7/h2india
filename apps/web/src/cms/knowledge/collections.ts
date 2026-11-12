@@ -5,6 +5,7 @@ import { canDelete, canEdit, canPublish, canView, has } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { scanUpload } from "../scan";
 import { slugFrom } from "../slug";
+import { searchHooks } from "../../search/hooks";
 import { chapterWithNeighbours, purgeReportLeads } from "./library";
 
 // The knowledge library (step 4.4, Figma page 09): Hydrogen 101 chapters (471:1876), buyer's guides (472:2135),
@@ -54,14 +55,14 @@ const editorialPublish: CollectionBeforeChangeHook = ({ data, req }) => {
 const editorial = {
   versions: { drafts: true, maxPerDoc: 30 },
   access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [editorialPublish, refuseSamplePublish] },
+  hooks: { beforeChange: [editorialPublish, refuseSamplePublish], ...searchHooks },
 } satisfies Partial<CollectionConfig>;
 
 /** Reference records (glossary, standards): like schemes and tenders, editors publish them (A30). */
 const reference = {
   versions: { drafts: true, maxPerDoc: 30 },
   access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [refuseSamplePublish] },
+  hooks: { beforeChange: [refuseSamplePublish], ...searchHooks },
 } satisfies Partial<CollectionConfig>;
 
 export const Chapters: CollectionConfig = {

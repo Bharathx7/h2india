@@ -3,3 +3,4 @@
 export { GSTIN_QUEUE, redisConnection, runGstinCheck } from "./companies/jobs";
 export { enqueueFileCheck, FILES_QUEUE, processFile, sweepFiles } from "./files";
 export { installSchedules, recordFailedJob, runScheduled, QUEUES, SCHEDULES } from "./queue";
+export { callWeb } from "./internal";

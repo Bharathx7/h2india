@@ -4,6 +4,7 @@ import { APIError, type CollectionConfig, type Endpoint, type Field } from "payl
 import { canDelete, canEdit, editorOf } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
+import { searchHooks } from "../../search/hooks";
 
 // What every record shares (step 4.3, A30, A31): an official source and documents, "last verified" with who and a
 // note (Records not verified for 30 days move to Data quality), owner, states, topics, a sample flag (F9), drafts and
@@ -156,6 +157,8 @@ export function recordCollection(input: {
     access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
     endpoints: [verifyEndpoint(input.slug)],
     hooks: {
+      // Search (step 5.2): saves and deletes queue an index change in the same transaction.
+      ...searchHooks,
       afterRead: [
         ({ doc }) => {
           const d = doc as Record<string, unknown>;

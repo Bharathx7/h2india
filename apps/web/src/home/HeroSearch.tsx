@@ -4,8 +4,12 @@ import { Button, CategoryChip, cx, Icon } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type SyntheticEvent } from "react";
+import { openHeaderSearch } from "@/components/HeaderSearch";
+import { searchPageHref } from "@/search/present";
 
-// Hero search (783:7523; phones 381:5864): scope chips, the search field and Popular links. Search results are step 5.2.
+// Hero search (783:7523; phones 381:5864): scope chips, the search field and Popular links. Products and companies open
+// the /search page (step 5.2); news, schemes and tenders, which that page doesn't list, open the header search overlay
+// on their scope.
 
 const SCOPES = [
   { id: "products", label: "Products" },
@@ -33,7 +37,8 @@ export function HeroSearch() {
   const submit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const q = query.trim();
-    router.push(`/search?${new URLSearchParams({ type: scope, ...(q ? { q } : {}) }).toString()}`);
+    if (scope === "products" || scope === "companies") router.push(searchPageHref(q, scope));
+    else openHeaderSearch({ query: q, scope });
   };
   return (
     <>

@@ -18,7 +18,8 @@
     "./notify": "./src/notify/index.ts",
     "./importing": "./src/importing/index.ts",
     "./catalogue": "./src/catalogue/classes.ts",
-    "./newsletter": "./src/newsletter/index.ts"
+    "./newsletter": "./src/newsletter/index.ts",
+    "./search": "./src/search/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
@@ -33,6 +34,7 @@
     "better-auth": "1.7.20",
     "bullmq": "6.7.4",
     "drizzle-orm": "0.45.4",
+    "meilisearch": "0.63.0",
     "nodemailer": "10.5.0",
     "sharp": "0.35.5",
     "uuidv7": "1.2.1",

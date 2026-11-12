@@ -18,7 +18,7 @@ jobs:
     name: Check, test, build, smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Real PostgreSQL and Redis for integration tests (step 3.1), Mailpit for emails (step 3.2). Throwaway credentials, CI only.
+    # Real PostgreSQL and Redis for integration tests (step 3.1), Meilisearch (5.2), Mailpit for emails (step 3.2). Throwaway credentials, CI only.
     services:
       postgres:
         image: postgres:17-alpine
@@ -34,6 +34,14 @@ jobs:
         ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      # Search (step 5.2). The key matches .env.example, which CI copies to .env.local for the app.
+      meilisearch:
+        image: getmeili/meilisearch:v1.56
+        env:
+          MEILI_MASTER_KEY: change-me-meili-master-key
+          MEILI_ENV: development
+          MEILI_NO_ANALYTICS: "true"
+        ports: ["7700:7700"]
       # Catches every email the app sends; the sign-in tests read their codes from it (step 3.2).
       mailpit:
         image: axllent/mailpit:v1.33.1
@@ -43,6 +51,8 @@ jobs:
       TEST_DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india_test
       REDIS_URL: redis://localhost:6379
       MAILPIT_URL: http://localhost:8025
+      # The search integration tests use their own prefixed indexes on this engine (step 5.2).
+      TEST_MEILI_MASTER_KEY: change-me-meili-master-key
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

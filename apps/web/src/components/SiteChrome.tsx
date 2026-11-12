@@ -1,13 +1,13 @@
 "use client";
 
 import { SiteFooter, SiteHeader, type SiteUser } from "@h2india/ui";
-import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS } from "@/lib/site-nav";
+import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { subscribeToNewsletter } from "@/server/public-forms";
 
 // The public site's header and footer (Site header 25:635, Footer v2 153:179) around every public page. The header's
-// search opens the search page (step 5.2 adds the overlay); the footer signs people up for India H₂ Weekly (A46).
+// search opens the search overlay (step 5.2); the footer signs people up for India H₂ Weekly (A46).
 
 /** The footer's topic chips (153:179) and the newsletter topics they stand for. */
 const FOOTER_TOPICS: Record<string, string> = {
@@ -19,7 +19,7 @@ const FOOTER_TOPICS: Record<string, string> = {
 };
 
 export function SiteChrome({ user, children }: { user: SiteUser | null; children: ReactNode }) {
-  const router = useRouter();
+  const search = useHeaderSearch();
   return (
     <>
       <a
@@ -34,9 +34,10 @@ export function SiteChrome({ user, children }: { user: SiteUser | null; children
         tagline="India's hydrogen ecosystem platform"
         user={user}
         onOpenSearch={() => {
-          router.push("/search");
+          search.setOpen(true);
         }}
       />
+      <HeaderSearch search={search} />
       {children}
       <SiteFooter
         columns={FOOTER_COLUMNS}

@@ -1,7 +1,8 @@
 // Background worker (steps 3.3, 3.7, 3.8): GSTIN checks, file checks, and the clocks queue that runs the deadline
 // engine and housekeeping on a schedule. Every job retries with back-off; one that fails every attempt is written to
-// the dead-letter list with its error. Messages (3.9), search indexing (Stage 4) and imports (Stage 8) join later.
+// the dead-letter list with its error. Search indexing (5.2) runs on the index queue; imports (Stage 8) join later.
 import {
+  callWeb,
   installSchedules,
   processFile,
   QUEUES,
@@ -49,6 +50,9 @@ work<{ fileId: string }>(
   },
   2,
 );
+
+// Search (step 5.2): a save nudges this queue; the web app applies the waiting outbox rows to the index.
+work(QUEUES.index, () => callWeb("/api/internal/search-sync"), 1);
 
 // One at a time, so two ticks never race; each job reads its work from the database.
 work(QUEUES.clocks, (job) => runScheduled(job.name), 1);

@@ -8,3 +8,4 @@ export * from "./files";
 export * from "./clocks";
 export * from "./notify";
 export * from "./newsletter";
+export * from "./search";

@@ -154,6 +154,12 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A46 | Newsletter sign-up timing (step 5.1) | You | Step 5.1 | Brought forward from 5.9: subscriber records, double opt-in with an expiring link, the confirm-and-choose-topics page and the already-subscribed email now; archive, issue pages, cookies and analytics stay in 5.9 | Answered | Founder, 12 Nov 2026. |
 | A47 | Coming soon "Get listed early" form (step 5.1; no step owns it) | You | Step 5.1 | Saved as leads in a protected CMS list that operators read and export; rate-limited, with a consent line; no automatic emails | Answered | Founder, 12 Nov 2026. |
 | A48 | Coming soon launch line and issue preview (step 5.1) | You | Step 5.1 | A Super admin edits the launch line in settings (default as drawn); the latest-issue preview shows only once a real issue exists (step 11.3) | Answered | Founder, 12 Nov 2026. |
+| A49 | Search page scope (step 5.2). The /search page (63:795, 71:5194) is drawn for Products and Suppliers only, with product filters that need the category attribute schemas (step 6.1); the header overlay (372:16695) covers every content type | You | Step 5.2 | Build the search plumbing and the overlay for every type now; /search gets its drawn layout, the Products and Suppliers tabs and its states; the product grid, filters, sort and grid/spec-table toggle are switched on in Stage 6. The home hero sends news, schemes and tenders searches to the overlay on that scope | Answered | Founder, 12 Nov 2026. |
+| A50 | Search synonyms (step 5.2) | You | Step 5.2 | Starter list: H2 = hydrogen, PEM = proton exchange membrane. Try twenty real buyer searches and send the words that should mean the same thing | Open |  |
+| A51 | How long searches with no results are kept (step 5.2, for Search management 707:281) | You | Step 11.3 | Kept with no expiry (only the words, scope and time; never who searched) until you set a period | Open |  |
+| A52 | Spelling suggestion in the overlay's no-results state ("Did you mean …", 372:16870). Meilisearch has no "did you mean" | You | Step 11.3 | Left out: typo tolerance already finds most misspellings (electrolyzer, compresor). Revisit with the no-result log in Search management | Open |  |
+| A53 | Org card on the Suppliers tab (477:324) shows Follow and "Usually replies within 1 day" | You | Stages 7 and 9 | Left out until follows (Stage 7) and reply times from RFQs (Stage 9) exist; the card shows only real data | Open |  |
+| A54 | Rate limit for the public search API (/api/v1/search/suggest) | You | Step 5.9 (form protection) | None yet: read-only and served from the search engine. Set it with the other public limits in 5.9 | Open |  |
 
 ## Design-system notes (Stage 2)
 
@@ -205,3 +211,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Home figures entered by editors with source and date (A45), newsletter sign-up brought forward (A46), early-listing leads in the CMS (A47), editable launch line and issue preview only when real (A48).
 - 12 Nov 2026: Step 5.1 built. Added D-UI11 to D-UI15.
 - 12 Nov 2026: Company importer now with basic profile fields (A38); imports land as drafts, records may be published (A39); the sample seed grows page by page (A40); imports check by default (A41).
+- 12 Nov 2026: Step 5.2 planned and built. You chose A49 (search page: products later). Added A50 to A54 (synonyms, no-result log retention, spelling suggestion, org card extras, search API limit), all open with safe defaults.

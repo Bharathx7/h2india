@@ -10,6 +10,7 @@ import { sweepFiles } from "../files/files";
 import { sendDueDeliveries } from "../notify/channels";
 import { pruneNotifications } from "../notify/inapp";
 import { callWeb } from "../internal";
+import { pruneSearchOutbox } from "../search/outbox";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
 
@@ -31,6 +32,12 @@ export const SCHEDULES: Scheduled[] = [
   { id: "deadlines-tick", every: MINUTE, run: () => runDeadlines(getDb()) },
   // Step 4.2: articles scheduled for now are published by the web app, which runs the CMS.
   { id: "cms-publish-due", every: MINUTE, run: () => callWeb("/api/internal/publish-due") },
+  // Step 5.2: applies search changes a save's nudge missed (Redis down, worker restarting). The CMS lives in the web
+  // app, so the web app reads the records and writes the index. Unpublished content leaves search within a minute.
+  { id: "search-sync", every: MINUTE, run: () => callWeb("/api/internal/search-sync") },
+  // 00:05 IST every day: record statuses follow the date (Closing soon, Closed), so their result rows are rebuilt.
+  { id: "search-refresh", pattern: "35 18 * * *", run: () => callWeb("/api/internal/search-sync?refresh=records") },
+  { id: "search-outbox-prune", every: 60 * MINUTE, run: () => pruneSearchOutbox(getDb()) },
   // Step 3.9: WhatsApp held by quiet hours, and failed emails due for a retry.
   { id: "notify-due", every: MINUTE, run: () => sendDueDeliveries() },
   { id: "files-sweep", every: 15 * MINUTE, run: () => sweepFiles(enqueueFileCheck) },

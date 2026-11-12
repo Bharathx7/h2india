@@ -115,6 +115,15 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Tracker records (`cms/tracker`) always carry a source, its type and an as-of date. Recent changes are written by the collection hook when a record is published; never write `tracker-changes` by hand. The status field is `stage`.
 - Report PDFs are private; readers get them only through `requestReport()` (`cms/knowledge/gate.ts`), which records the lead and consent. Report leads are personal data (A33).
 
+## Search (step 5.2)
+
+- The Meilisearch indexes are a copy; the database is the truth. Index definitions and synonyms live in `packages/core/src/search/indexes.ts`; only `packages/core/src/search/client.ts` talks to the engine.
+- Every change reaches search through `core.search_outbox`, written in the same transaction as the record change: CMS collections spread `searchHooks` (`apps/web/src/search/hooks.ts`) into their hooks; core code calls `queueIndexChange(tx, …)`. Never write to an index directly from a page or hook.
+- A new content type adds its index to `SEARCH_INDEXES`, its collection to `COLLECTION_INDEX` and its document builder to `apps/web/src/search/documents.ts`. Documents are built only from what readers may see (`publicWhere()`), never drafts or company-private data.
+- No price in search: product documents are made only with `productDocument()`, which keeps the allowed fields and throws on a price. Don't add price-like fields to any index.
+- Log a search with no results only when it is finished (the /search page, or Enter in the overlay), with `logSearchMiss()`; never store who searched.
+- Integration tests need `TEST_MEILI_MASTER_KEY` and use their own prefixed indexes (`SEARCH_INDEX_PREFIX`). Runbook: `docs/runbooks/search.md`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

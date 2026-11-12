@@ -74,6 +74,13 @@ export type { NotificationItem, ReviewCheck, ReviewPanelProps } from "./componen
 export { DatePicker, formatDate, parseDate } from "./components/DatePicker";
 export { SearchSuggest } from "./components/SearchSuggest";
 export type { Suggestion, SuggestionGroup } from "./components/SearchSuggest";
+export { SearchOverlay } from "./components/SearchOverlay";
+export type {
+  SearchOverlayGroup,
+  SearchOverlayItem,
+  SearchOverlayProps,
+  SearchOverlayState,
+} from "./components/SearchOverlay";
 
 // Brand
 export { Logo } from "./brand/Logo";
@@ -121,6 +128,8 @@ export {
   TenderCard,
 } from "./components/cards/Cards";
 export type { CardStatus } from "./components/cards/Cards";
+export { OrgCard } from "./components/cards/OrgCard";
+export type { OrgCardProps } from "./components/cards/OrgCard";
 export { HeroNetwork } from "./components/home/HeroNetwork";
 export { LogoMarquee } from "./components/home/LogoMarquee";
 export type { MarqueeBrand } from "./components/home/LogoMarquee";

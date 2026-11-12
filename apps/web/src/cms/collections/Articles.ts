@@ -6,6 +6,7 @@ import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
 import { ALWAYS_LEGAL, ARTICLE_TYPES, WORKFLOW } from "../types";
 import { RULES, transitionArticle, type Action } from "../workflow";
+import { searchHooks } from "../../search/hooks";
 
 // Articles: the six types (A28) with their header variants (437:3709 to 437:4387), authors, topics, tags, sources and
 // SEO (639:8). Drafts and versions are kept and comparable. Only content.publish may publish (step 4.1); the editorial
@@ -90,7 +91,8 @@ export const Articles: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 2000 } }, maxPerDoc: 50 },
   access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [guardPublishing, refuseSamplePublish] },
+  // Search (step 5.2): every save queues an index change; unpublishing removes the article from search.
+  hooks: { beforeChange: [guardPublishing, refuseSamplePublish], ...searchHooks },
   endpoints: [workflowEndpoint],
   fields: [
     {

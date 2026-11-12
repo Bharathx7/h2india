@@ -5,6 +5,7 @@ import { audit } from "../audit";
 import { getDb } from "../db";
 import { listOf, yesNo } from "../importing/csv";
 import { summarise, type ImportReport, type RowResult } from "../importing/report";
+import { nudgeIndexer, queueIndexChange } from "../search/outbox";
 import { GST_STATES } from "./gstin";
 
 // Pre-seeded company profiles (step 4.6, A38): created Unclaimed with no members, so nobody can act for the company
@@ -122,6 +123,8 @@ export async function importCompanies(
   if (!opts.apply || report.counts.error > 0) return report;
 
   await db.transaction(async (tx) => {
+    // Search (step 5.2): every profile written here reaches the companies index through the outbox.
+    const changed: string[] = [];
     for (const { result } of parsed) {
       if (!result.success) continue;
       const r = result.data;
@@ -135,6 +138,7 @@ export async function importCompanies(
           .set({ legalName: r.legal_name, kind: r.kind, state: r.state ?? null })
           .where(eq(o.id, found.organisationId));
         await tx.update(p).set(values).where(eq(p.organisationId, found.organisationId));
+        changed.push(found.organisationId);
       } else {
         const [org] = await tx
           .insert(o)
@@ -152,8 +156,10 @@ export async function importCompanies(
         await tx
           .insert(p)
           .values({ organisationId: org.id, slug, importKey: r.key, claimStatus: "Unclaimed", ...values });
+        changed.push(org.id);
       }
     }
+    await queueIndexChange(tx, "companies", changed);
     await audit(tx, {
       actorId: null,
       action: "companies.import",
@@ -162,5 +168,6 @@ export async function importCompanies(
       after: { created: report.counts.create, updated: report.counts.update, sample: opts.sample ?? false },
     });
   });
+  await nudgeIndexer();
   return summarise("companies", true, results);
 }
