@@ -31,7 +31,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | F6 | Home hero animation: add a visible pause button (WCAG 2.2.2)? | You | Stage 5 (Batch 2) | Build the pause button; the motion spec already assumes one | Open |  |
 | F7 | Featured-event price and the organiser's payment step (Flow G) | You | Stage 5 (Batch 2) | Submission goes straight to review, no payment | Open |  |
 | F8 | EV-2026-0412: who organises it? | You | Stage 13 (Batch 5) | Sample data only; fixed when sample data is replaced | Open |  |
-| F9 | Sample data to replace: tracker prices and projects, state policies, report titles, careers, fee and payout figures | You and content team | Stage 13 (Batch 5) | Seed data marked as sample, hidden in production | Open |  |
+| F9 | Sample data to replace: tracker prices and projects, state policies, report titles, careers, fee and payout figures | You and content team | Stage 13 (Batch 5) | Seed data marked as sample, hidden in production | Answered | Founder, 12 Nov 2026: sample content, marked as sample and hidden in production, until real content replaces it (M20). |
 
 ## Flow gaps recorded in Doc 4
 
@@ -115,6 +115,8 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A7 | Confirming the email during Join: link (Verify email 365:27778) or 6-digit code (note on the sign-in code email 671:428) | You | Step 3.3 | A link that works for 24 hours, as the screens show | Answered | Founder, 12 Nov 2026. People who arrive from an email-code sign-in have already proved their email and skip it. |
 | A8 | Join Done screen for a supplier company (only the buyer version is drawn) | You | Step 3.3 | "You're in" and Go to your workspace, without the buyer checklist; the supplier's onboarding checklist is on the supplier dashboard (Stage 8) | Answered | Founder, 12 Nov 2026. |
 | A9 | Wording of Join emails page 16 does not draw: Confirm your email, join request to the admin (and reminder), request approved or rejected (M21) | You | Step 3.3 | Plain messages in the sign-in email's frame, reusing the screens' copy; listed in `packages/emails/src/join/messages.ts` | Open | Change the wording any time; nothing else depends on it. |
+| A10 | Scope of the current work: "up to the Home page and the screens linked to it" | You | Stages 3 to 5 | Stages 3 to 5 in playbook order: rest of Stage 3, the content system (Stage 4), Home and the whole public website (Stage 5). Marketplace and RFQ links show their designed empty states until Batch 3 | Answered | Founder, 12 Nov 2026. |
+| A11 | A screen the work needs is not drawn in Figma | You | All stages | Build it in code from the design system, consistent with the drawn screens, and list it in `docs/design-fidelity.md` for the designer | Answered | Founder, 12 Nov 2026: "build it by yourself in the code … it should go with the screens as same as others". Decisions (not drawings) still come to you. |
 
 ## Design-system notes (Stage 2)
 
@@ -146,3 +148,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You accepted A4 (passkey offer as built) and the C6 default (mobile for verification and recovery only). Step 3.2 merged.
 - 12 Nov 2026: Step 3.3 planned. You decided A5 (member path), A6 (role list), A7 (verify email by link) and A8 (supplier Done screen).
 - 12 Nov 2026: Step 3.3 built. Added A9 (join email wording, open), D-UI9 (sample GSTINs) and D-UI10 (company name field).
+- 12 Nov 2026: You set the scope (A10: Stages 3 to 5), how undrawn screens are handled (A11) and sample content (F9). Step 3.3 merged.
