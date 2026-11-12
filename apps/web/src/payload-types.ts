@@ -69,6 +69,12 @@ export interface Config {
   collections: {
     articles: Article;
     corrections: Correction;
+    schemes: Scheme;
+    tenders: Tender;
+    grants: Grant;
+    jobs: Job;
+    events: Event;
+    'source-changes': SourceChange;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -83,6 +89,12 @@ export interface Config {
   collectionsSelect: {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     corrections: CorrectionsSelect<false> | CorrectionsSelect<true>;
+    schemes: SchemesSelect<false> | SchemesSelect<true>;
+    tenders: TendersSelect<false> | TendersSelect<true>;
+    grants: GrantsSelect<false> | GrantsSelect<true>;
+    jobs: JobsSelect<false> | JobsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    'source-changes': SourceChangesSelect<false> | SourceChangesSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -371,6 +383,691 @@ export interface Correction {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "schemes".
+ */
+export interface Scheme {
+  id: number;
+  name: string;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  /**
+   * For example SECI, for MNRE.
+   */
+  runBy: string;
+  ministry?: string | null;
+  whoCanApply?:
+    | (
+        | 'Green hydrogen producers'
+        | 'Electrolyser manufacturers'
+        | 'Project developers'
+        | 'Research institutions'
+        | 'Start-ups'
+        | 'Manufacturers'
+        | 'State agencies'
+      )[]
+    | null;
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
+  /**
+   * India time (IST).
+   */
+  nextDeadline?: string | null;
+  /**
+   * When there's no single date, for example “Opens with each tranche”.
+   */
+  deadlineNote?: string | null;
+  /**
+   * Leave empty: Open or Closing soon come from the deadline.
+   */
+  statusOverride?: ('Closed' | 'Next round expected') | null;
+  summary: string;
+  purpose?: string | null;
+  tranches?:
+    | {
+        mode: string;
+        tranche?: string | null;
+        product?: string | null;
+        capacity?: string | null;
+        /**
+         * For example Results declared, Closing soon.
+         */
+        state?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  eligibility?:
+    | {
+        condition: string;
+        id?: string | null;
+      }[]
+    | null;
+  benefits?: string | null;
+  timeline?:
+    | {
+        when: string;
+        what: string;
+        id?: string | null;
+      }[]
+    | null;
+  documentsNeeded?:
+    | {
+        document: string;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   */
+  sourceUrl: string;
+  documents?:
+    | {
+        title: string;
+        url: string;
+        kind?: ('PDF' | 'Word' | 'Excel' | 'Web page') | null;
+        checkedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * From the dates; nobody needs to change it.
+   */
+  status?: string | null;
+  owner?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenders".
+ */
+export interface Tender {
+  id: number;
+  title: string;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  issuer: string;
+  tenderId: string;
+  /**
+   * For example Open tender · two-bid system.
+   */
+  mode?: string | null;
+  /**
+   * For example Systems › Electrolysers.
+   */
+  category?: string | null;
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
+  /**
+   * Or “Not disclosed”.
+   */
+  value?: string | null;
+  emd?: string | null;
+  documentFee?: string | null;
+  /**
+   * India time (IST).
+   */
+  bidDueAt: string;
+  keyDates?:
+    | {
+        /**
+         * Pre-bid meeting, Technical bid opening…
+         */
+        label: string;
+        at: string;
+        id?: string | null;
+      }[]
+    | null;
+  description: string;
+  eligibility?:
+    | {
+        condition: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   */
+  sourceUrl: string;
+  documents?:
+    | {
+        title: string;
+        url: string;
+        kind?: ('PDF' | 'Word' | 'Excel' | 'Web page') | null;
+        checkedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  corrigenda?:
+    | {
+        title: string;
+        date: string;
+        change?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  result?: {
+    /**
+     * India time (IST).
+     */
+    declaredAt?: string | null;
+    winners?:
+      | {
+          name: string;
+          capacity?: string | null;
+          price?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Number of bidders, or “Not public”.
+     */
+    bidders?: string | null;
+    whatItMeans?: string | null;
+  };
+  topics?: (number | Topic)[] | null;
+  /**
+   * From the dates; nobody needs to change it.
+   */
+  status?: string | null;
+  owner?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grants".
+ */
+export interface Grant {
+  id: number;
+  title: string;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  funder: string;
+  /**
+   * For example Up to ₹5,00,00,000.
+   */
+  amountPerProject?: string | null;
+  themes?:
+    | ('Electrolysers' | 'Storage' | 'Fuel cells' | 'Safety and standards' | 'Materials' | 'Transport' | 'Industry')[]
+    | null;
+  whoCanApply?:
+    | (
+        | 'Green hydrogen producers'
+        | 'Electrolyser manufacturers'
+        | 'Project developers'
+        | 'Research institutions'
+        | 'Start-ups'
+        | 'Manufacturers'
+        | 'State agencies'
+      )[]
+    | null;
+  /**
+   * India time (IST).
+   */
+  deadline: string;
+  /**
+   * Leave empty: it follows the deadline.
+   */
+  statusOverride?: 'Closed' | null;
+  howToApply: string;
+  /**
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   */
+  sourceUrl: string;
+  documents?:
+    | {
+        title: string;
+        url: string;
+        kind?: ('PDF' | 'Word' | 'Excel' | 'Web page') | null;
+        checkedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pastAwardees?:
+    | {
+        name: string;
+        project?: string | null;
+        year?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown once the call closes, for example Q3 2027.
+   */
+  nextCallExpected?: string | null;
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * From the dates; nobody needs to change it.
+   */
+  status?: string | null;
+  owner?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jobs".
+ */
+export interface Job {
+  id: number;
+  role: string;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  /**
+   * Links to the company profile in Stage 6.
+   */
+  company: string;
+  /**
+   * For example Engineering · commissioning.
+   */
+  function?: string | null;
+  location: string;
+  workMode?: ('On site' | 'Hybrid' | 'Remote') | null;
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
+  experience?: ('0–2 years' | '3–6 years' | '7–10 years' | '10+ years') | null;
+  /**
+   * ₹ lakh a year, for example 12–16.
+   */
+  salaryBand?: string | null;
+  description: string;
+  skills?: string[] | null;
+  howToApply: 'link' | 'email' | 'form';
+  applyEmail?: string | null;
+  /**
+   * India time (IST).
+   */
+  postedAt?: string | null;
+  /**
+   * India time (IST).
+   */
+  closesAt: string;
+  featured?: boolean | null;
+  /**
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   */
+  sourceUrl: string;
+  documents?:
+    | {
+        title: string;
+        url: string;
+        kind?: ('PDF' | 'Word' | 'Excel' | 'Web page') | null;
+        checkedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * From the dates; nobody needs to change it.
+   */
+  status?: string | null;
+  owner?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  name: string;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  organiser: string;
+  format: 'Conference · in person' | 'Workshop · in person' | 'Expo · in person' | 'Webinar · online' | 'Hybrid';
+  /**
+   * India time (IST).
+   */
+  startsAt: string;
+  /**
+   * India time (IST).
+   */
+  endsAt?: string | null;
+  /**
+   * Leave empty for online events.
+   */
+  venue?: string | null;
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
+  tickets?: ('Free' | 'Paid') | null;
+  /**
+   * For example ₹3,500 to ₹6,000.
+   */
+  priceText?: string | null;
+  registrationUrl?: string | null;
+  description?: string | null;
+  sponsoredPlacement?: boolean | null;
+  inNewsletter?: boolean | null;
+  /**
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   */
+  sourceUrl: string;
+  documents?:
+    | {
+        title: string;
+        url: string;
+        kind?: ('PDF' | 'Word' | 'Excel' | 'Web page') | null;
+        checkedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * From the dates; nobody needs to change it.
+   */
+  status?: string | null;
+  owner?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-changes".
+ */
+export interface SourceChange {
+  id: number;
+  record:
+    | {
+        relationTo: 'schemes';
+        value: number | Scheme;
+      }
+    | {
+        relationTo: 'tenders';
+        value: number | Tender;
+      }
+    | {
+        relationTo: 'grants';
+        value: number | Grant;
+      }
+    | {
+        relationTo: 'jobs';
+        value: number | Job;
+      }
+    | {
+        relationTo: 'events';
+        value: number | Event;
+      };
+  /**
+   * For example New corrigendum: Corrigendum 2 posted.
+   */
+  title: string;
+  source: string;
+  before?: string | null;
+  now?: string | null;
+  detectedAt: string;
+  status: 'Open' | 'Dismissed' | 'Confirmed';
+  decidedBy?: (number | null) | Editor;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -400,6 +1097,30 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'corrections';
         value: number | Correction;
+      } | null)
+    | ({
+        relationTo: 'schemes';
+        value: number | Scheme;
+      } | null)
+    | ({
+        relationTo: 'tenders';
+        value: number | Tender;
+      } | null)
+    | ({
+        relationTo: 'grants';
+        value: number | Grant;
+      } | null)
+    | ({
+        relationTo: 'jobs';
+        value: number | Job;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'source-changes';
+        value: number | SourceChange;
       } | null)
     | ({
         relationTo: 'authors';
@@ -543,6 +1264,317 @@ export interface CorrectionsSelect<T extends boolean = true> {
   reporterEmail?: T;
   resolution?: T;
   resolvedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "schemes_select".
+ */
+export interface SchemesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  runBy?: T;
+  ministry?: T;
+  whoCanApply?: T;
+  states?: T;
+  nextDeadline?: T;
+  deadlineNote?: T;
+  statusOverride?: T;
+  summary?: T;
+  purpose?: T;
+  tranches?:
+    | T
+    | {
+        mode?: T;
+        tranche?: T;
+        product?: T;
+        capacity?: T;
+        state?: T;
+        id?: T;
+      };
+  eligibility?:
+    | T
+    | {
+        condition?: T;
+        id?: T;
+      };
+  benefits?: T;
+  timeline?:
+    | T
+    | {
+        when?: T;
+        what?: T;
+        id?: T;
+      };
+  documentsNeeded?:
+    | T
+    | {
+        document?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  sourceUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        kind?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  topics?: T;
+  status?: T;
+  owner?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenders_select".
+ */
+export interface TendersSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  issuer?: T;
+  tenderId?: T;
+  mode?: T;
+  category?: T;
+  states?: T;
+  value?: T;
+  emd?: T;
+  documentFee?: T;
+  bidDueAt?: T;
+  keyDates?:
+    | T
+    | {
+        label?: T;
+        at?: T;
+        id?: T;
+      };
+  description?: T;
+  eligibility?:
+    | T
+    | {
+        condition?: T;
+        id?: T;
+      };
+  sourceUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        kind?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  corrigenda?:
+    | T
+    | {
+        title?: T;
+        date?: T;
+        change?: T;
+        id?: T;
+      };
+  result?:
+    | T
+    | {
+        declaredAt?: T;
+        winners?:
+          | T
+          | {
+              name?: T;
+              capacity?: T;
+              price?: T;
+              id?: T;
+            };
+        bidders?: T;
+        whatItMeans?: T;
+      };
+  topics?: T;
+  status?: T;
+  owner?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "grants_select".
+ */
+export interface GrantsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  funder?: T;
+  amountPerProject?: T;
+  themes?: T;
+  whoCanApply?: T;
+  deadline?: T;
+  statusOverride?: T;
+  howToApply?: T;
+  sourceUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        kind?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  pastAwardees?:
+    | T
+    | {
+        name?: T;
+        project?: T;
+        year?: T;
+        id?: T;
+      };
+  nextCallExpected?: T;
+  states?: T;
+  topics?: T;
+  status?: T;
+  owner?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jobs_select".
+ */
+export interface JobsSelect<T extends boolean = true> {
+  role?: T;
+  slug?: T;
+  company?: T;
+  function?: T;
+  location?: T;
+  workMode?: T;
+  states?: T;
+  experience?: T;
+  salaryBand?: T;
+  description?: T;
+  skills?: T;
+  howToApply?: T;
+  applyEmail?: T;
+  postedAt?: T;
+  closesAt?: T;
+  featured?: T;
+  sourceUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        kind?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  topics?: T;
+  status?: T;
+  owner?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  organiser?: T;
+  format?: T;
+  startsAt?: T;
+  endsAt?: T;
+  venue?: T;
+  states?: T;
+  tickets?: T;
+  priceText?: T;
+  registrationUrl?: T;
+  description?: T;
+  sponsoredPlacement?: T;
+  inNewsletter?: T;
+  sourceUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        kind?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  topics?: T;
+  status?: T;
+  owner?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-changes_select".
+ */
+export interface SourceChangesSelect<T extends boolean = true> {
+  record?: T;
+  title?: T;
+  source?: T;
+  before?: T;
+  now?: T;
+  detectedAt?: T;
+  status?: T;
+  decidedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
