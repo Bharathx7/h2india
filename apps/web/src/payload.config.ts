@@ -10,6 +10,7 @@ import { buildConfig } from "payload";
 import sharp from "sharp";
 import { Articles } from "./cms/collections/Articles";
 import { Authors } from "./cms/collections/Authors";
+import { Corrections } from "./cms/collections/Corrections";
 import { Editors } from "./cms/collections/Editors";
 import { Media } from "./cms/collections/Media";
 import { Tags, Topics } from "./cms/collections/Taxonomy";
@@ -35,7 +36,7 @@ export default buildConfig({
       graphics: { Logo: "@/cms/admin/Brand#Logo", Icon: "@/cms/admin/Brand#Icon" },
     },
   },
-  collections: [Articles, Authors, Topics, Tags, Media, Editors],
+  collections: [Articles, Corrections, Authors, Topics, Tags, Media, Editors],
   editor: lexicalEditor(),
   db: postgresAdapter({
     pool: { connectionString: env.DATABASE_URL },

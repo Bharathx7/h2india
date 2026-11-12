@@ -9,6 +9,7 @@ import { enqueueFileCheck } from "../files/jobs";
 import { sweepFiles } from "../files/files";
 import { sendDueDeliveries } from "../notify/channels";
 import { pruneNotifications } from "../notify/inapp";
+import { callWeb } from "../internal";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
 
@@ -28,6 +29,8 @@ const MINUTE = 60_000;
 
 export const SCHEDULES: Scheduled[] = [
   { id: "deadlines-tick", every: MINUTE, run: () => runDeadlines(getDb()) },
+  // Step 4.2: articles scheduled for now are published by the web app, which runs the CMS.
+  { id: "cms-publish-due", every: MINUTE, run: () => callWeb("/api/internal/publish-due") },
   // Step 3.9: WhatsApp held by quiet hours, and failed emails due for a retry.
   { id: "notify-due", every: MINUTE, run: () => sendDueDeliveries() },
   { id: "files-sweep", every: 15 * MINUTE, run: () => sweepFiles(enqueueFileCheck) },

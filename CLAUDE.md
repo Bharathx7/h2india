@@ -107,6 +107,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Content lives in Payload (`apps/web/src/payload.config.ts`, collections in `apps/web/src/cms`), tables in the `cms` schema. Editors use /cms with their H2 India account; access comes from operator permissions (`content.view/edit/delete/publish`) via `cms/auth-strategy.ts`.
 - After changing a collection: `pnpm --filter @h2india/web cms:migration <name>` (then mark the generated `MigrateUpArgs`/`MigrateDownArgs` imports as `type`), `pnpm --filter @h2india/web cms:types`, and commit the migration, `payload-types.ts` and the import map.
 - An article type's label (Sponsored, Press release) comes from `cms/types.ts`, never a free field. Publishing rules live in the collection hooks, not the UI.
+- Change an article's status only with `transitionArticle()` (`cms/workflow.ts`); it checks the rule and permission and writes the audit log. Direct publishing is refused.
 - Read content in server code through Payload's Local API (`getPayload({ config })`), never by SQL on the cms schema.
 
 ## Companies and Join (step 3.3)

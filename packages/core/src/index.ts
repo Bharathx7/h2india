@@ -13,3 +13,4 @@ export type { SettingDef } from "./settings";
 export { changeStatus, StatusConflictError, TransitionNotAllowedError } from "./status";
 export type { ChangeStatus, Transitions } from "./status";
 export { getDb } from "./db";
+export { callWeb, internalKey, isInternalKey } from "./internal";
