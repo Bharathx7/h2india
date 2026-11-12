@@ -14,3 +14,4 @@ export { changeStatus, StatusConflictError, TransitionNotAllowedError } from "./
 export type { ChangeStatus, Transitions } from "./status";
 export { getDb } from "./db";
 export { callWeb, internalKey, isInternalKey } from "./internal";
+export { underLimit } from "./limits";

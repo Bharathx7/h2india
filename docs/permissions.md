@@ -61,6 +61,15 @@ Only the **Finance** grid is drawn; the other six are drafted from each role's d
 
 Changing operator roles (`roles.manage`, step 3.6) is kept to Super admin, as the playbook asks in step 11.4. The last Super admin can't be removed. The Audit log screen (656:872) sits with Users: reading it needs Users view, exporting it needs Users export (only Super admin today).
 
+## Content (Stage 4)
+
+- Content editors draft everything; the Editor-in-chief (or a Super admin) publishes articles, Hydrogen 101 chapters,
+  buyer's guides, reports, videos and podcasts. Records, glossary terms and standards are published by any editor
+  (A30).
+- Report leads (step 4.4, A33) are personal data: only operators with Content export (Editor-in-chief, Super admin) can
+  see them; Content delete runs the 24-month clean-up on demand. Report PDFs open for editors in the CMS and for
+  readers only through the gated download.
+
 ## Files (step 3.7)
 
 Who may upload and open each kind of file (`packages/core/src/files/rules.ts`). The uploader can always open their own file.

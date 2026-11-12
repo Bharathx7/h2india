@@ -22,3 +22,6 @@ packages/ui/tokens.figma.json
 
 # Git bundle used to hand the repository over without GitHub access
 *.bundle
+
+# Redis snapshot written when redis-server runs from apps/web
+dump.rdb

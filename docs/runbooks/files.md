@@ -26,6 +26,13 @@
   minutes; uploads wait in "Checking file…" until it answers, and the queue retries.
 - If the scanner is down, files stay Checking. Nothing is ever marked clean without a scan.
 
+## CMS uploads (step 4.4)
+
+Images and report PDFs that editors upload in /cms are scanned with ClamAV before Payload stores them; an infected file
+is refused ("This file failed the virus check") and, if the scanner can't be reached, the upload fails and can be
+tried again. Images go to the public bucket under `cms/`; report PDFs to the private bucket under `cms-reports/`,
+opened by readers only through the gated download's 5-minute link.
+
 ## Checking it yourself (playbook "You do")
 
 1. Download the EICAR test file from eicar.org (it is harmless and every scanner flags it).

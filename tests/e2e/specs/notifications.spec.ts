@@ -158,7 +158,7 @@ test("/dev/messages lists every template and sends a built one to you", async ({
   await signInNew(page, email);
   await page.goto("/dev/messages");
   await expect(page.getByRole("heading", { name: "Message templates" })).toBeVisible();
-  await expect(page.getByRole("row")).toHaveCount(45); // header + 34 designed + 10 undrawn
+  await expect(page.getByRole("row")).toHaveCount(46); // header + 34 designed + 11 undrawn
   const row = page.getByRole("row", { name: /Sign-in code email sign_in_code 671:428/ });
   await row.getByRole("button", { name: "Send to me" }).click();
   await expect(row.getByRole("status")).toHaveText(`Sent to ${email}`);

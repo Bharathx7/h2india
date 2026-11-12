@@ -1,6 +1,7 @@
 // Email, WhatsApp and SMS templates from Figma page 16 (step 3.9). Server only.
 import { render } from "@react-email/components";
 import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
+import { reportDownloadMessage } from "./knowledge/messages";
 import { Notice } from "./notice";
 import {
   mobileChangedMessage,
@@ -46,6 +47,11 @@ export function renderJoinRequestToAdmin(appUrl: string, input: Parameters<typeo
 
 export function renderJoinRequestAnswered(appUrl: string, input: Parameters<typeof joinRequestAnsweredMessage>[0]) {
   return renderNotice(appUrl, joinRequestAnsweredMessage(input));
+}
+
+/** The emailed copy of a gated report (step 4.4). */
+export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {
+  return renderNotice(appUrl, reportDownloadMessage(input));
 }
 
 type Builder = (input: never) => NoticeMessage;

@@ -91,8 +91,13 @@ signed link) and `public` (checked logos and product images). Support requests (
 ## Content (Stage 4, schema `cms`)
 
 Payload owns the `cms` schema (ADR 0004): one table per collection (`articles`, `authors`, `topics`, `tags`, `media`,
-`editors`) plus its array, relationship and version tables (`_articles_v`). Its migrations are in
-`apps/web/src/migrations` and run after the core ones in `pnpm db:migrate`.
+`editors`; records `schemes`, `tenders`, `grants`, `jobs`, `events`; knowledge `chapters`, `guides`, `glossary`,
+`standards`, `reports`, `report_files`, `report_leads`, `videos`, `podcasts`) plus its array, relationship and version
+tables (`_articles_v`). Its migrations are in `apps/web/src/migrations` and run after the core ones in `pnpm db:migrate`.
+
+`report_leads` holds personal data from the gated report form (A33): name, work email, company, role, whether the
+sponsor may contact them and the exact words they agreed to, or the member's user ID. Rows are deleted 24 months after
+the download (daily job `report-leads-prune`).
 
 ## Migrations
 

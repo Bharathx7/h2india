@@ -109,6 +109,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - An article type's label (Sponsored, Press release) comes from `cms/types.ts`, never a free field. Publishing rules live in the collection hooks, not the UI.
 - Change an article's status only with `transitionArticle()` (`cms/workflow.ts`); it checks the rule and permission and writes the audit log. Direct publishing is refused.
 - Read content in server code through Payload's Local API (`getPayload({ config })`), never by SQL on the cms schema.
+- Show an article body with `ArticleBody` and pass `glossary={await glossaryTerms(payload)}`: glossary hover-cards are linked automatically (first mention only), never by hand.
+- Report PDFs are private; readers get them only through `requestReport()` (`cms/knowledge/gate.ts`), which records the lead and consent. Report leads are personal data (A33).
 
 ## Companies and Join (step 3.3)
 

@@ -35,6 +35,8 @@ export type { AsyncState } from "./components/AsyncSection";
 export { FileRow, FileUpload } from "./components/Upload";
 export type { FileRowStatus } from "./components/Upload";
 export { Tooltip } from "./components/Tooltip";
+export { GlossaryTerm } from "./components/GlossaryTerm";
+export type { GlossaryTermProps } from "./components/GlossaryTerm";
 export { Toaster, useToast } from "./components/Toast";
 export type { ToastOptions, ToastTone } from "./components/Toast";
 

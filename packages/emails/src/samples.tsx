@@ -3,6 +3,7 @@ import {
   renderJoinRequestAnswered,
   renderJoinRequestToAdmin,
   renderRecovery,
+  renderReportDownload,
   renderSignInCode,
   renderVerifyEmail,
 } from "./index";
@@ -91,6 +92,15 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
       return email(renderRecovery(appUrl, "newEmail", { email: "arjun.shah@greenfieldh2.in", url }));
     case "email.mobile_changed":
       return email(renderRecovery(appUrl, "mobileChanged", { mobile: "+91 98•••• 6218" }));
+    case "email.report_download":
+      return email(
+        renderReportDownload(appUrl, {
+          name: "Ravi",
+          title: "Electrolyser buying in India 2026",
+          url: `${appUrl}/knowledge/reports`,
+          days: 7,
+        }),
+      );
     case "email.test": {
       const element = (
         <Notice

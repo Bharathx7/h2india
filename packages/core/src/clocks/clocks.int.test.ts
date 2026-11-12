@@ -215,8 +215,9 @@ describe.skipIf(!url)("clocks", () => {
   });
 
   it("runs every scheduled housekeeping job", async () => {
-    // cms-publish-due calls the web app, which the end-to-end tests cover.
-    for (const s of SCHEDULES.filter((x) => x.id !== "cms-publish-due")) await runScheduled(s.id);
+    // cms-publish-due and report-leads-prune call the web app, which the end-to-end tests cover.
+    const web = new Set(["cms-publish-due", "report-leads-prune"]);
+    for (const s of SCHEDULES.filter((x) => !web.has(x.id))) await runScheduled(s.id);
     await expect(runScheduled("nope")).rejects.toThrow("No schedule");
   });
 });

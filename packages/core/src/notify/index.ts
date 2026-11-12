@@ -18,5 +18,6 @@ export type { Choices, QuietSettings } from "./preferences";
 export { TOPICS } from "./topics";
 export type { Category, NotifyChannel, Topic, TopicName } from "./topics";
 export { sendTestMessage } from "./test-send";
+export { sendReportCopy } from "./reports";
 export { TEMPLATES } from "@h2india/emails/registry";
 export type { TemplateEntry, TemplateId } from "@h2india/emails/registry";

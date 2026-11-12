@@ -23,6 +23,7 @@ import {
   TabPanel,
   Tabs,
   Toaster,
+  GlossaryTerm,
   Tooltip,
   useToast,
 } from "@h2india/ui";
@@ -119,6 +120,19 @@ export function OverlayHintsDemo() {
           </Button>
         </Tooltip>
         <ToastButtons />
+      </Row>
+      <Row label="Glossary hover-card (in articles)">
+        <p className="type-body text-body">
+          SECI issued the{" "}
+          <GlossaryTerm
+            term="RfS"
+            definition="Request for Selection: the tender document SECI issues to invite bids for a SIGHT round."
+            href="/knowledge/glossary/rfs"
+          >
+            RfS
+          </GlossaryTerm>{" "}
+          for tranche III last week.
+        </p>
       </Row>
     </Toaster>
   );

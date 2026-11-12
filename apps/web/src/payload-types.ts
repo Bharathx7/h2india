@@ -75,6 +75,15 @@ export interface Config {
     jobs: Job;
     events: Event;
     'source-changes': SourceChange;
+    chapters: Chapter;
+    guides: Guide;
+    glossary: Glossary;
+    standards: Standard;
+    reports: Report;
+    'report-files': ReportFile;
+    'report-leads': ReportLead;
+    videos: Video;
+    podcasts: Podcast;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -95,6 +104,15 @@ export interface Config {
     jobs: JobsSelect<false> | JobsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'source-changes': SourceChangesSelect<false> | SourceChangesSelect<true>;
+    chapters: ChaptersSelect<false> | ChaptersSelect<true>;
+    guides: GuidesSelect<false> | GuidesSelect<true>;
+    glossary: GlossarySelect<false> | GlossarySelect<true>;
+    standards: StandardsSelect<false> | StandardsSelect<true>;
+    reports: ReportsSelect<false> | ReportsSelect<true>;
+    'report-files': ReportFilesSelect<false> | ReportFilesSelect<true>;
+    'report-leads': ReportLeadsSelect<false> | ReportLeadsSelect<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
+    podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -1068,6 +1086,339 @@ export interface SourceChange {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chapters".
+ */
+export interface Chapter {
+  id: number;
+  /**
+   * Chapter number: sets previous and next.
+   */
+  order: number;
+  title: string;
+  slug: string;
+  summary: string;
+  readingMinutes?: number | null;
+  heroImage?: (number | null) | Media;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides".
+ */
+export interface Guide {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  authors?: (number | Author)[] | null;
+  heroImage?: (number | null) | Media;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Catalogue categories; linked to live products with the marketplace (Stage 6).
+   */
+  productCategories?: string[] | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "glossary".
+ */
+export interface Glossary {
+  id: number;
+  /**
+   * As readers see it, for example RfS.
+   */
+  term: string;
+  slug: string;
+  /**
+   * For example Request for Selection.
+   */
+  expansion?: string | null;
+  /**
+   * Other ways it's written; each is linked in articles too.
+   */
+  aliases?: string[] | null;
+  /**
+   * Shown in the hover-card in articles, after the expansion: for example the tender document SECI issues to invite bids for a SIGHT round.
+   */
+  short: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  related?: (number | Glossary)[] | null;
+  standards?: (number | Standard)[] | null;
+  /**
+   * Link it in articles automatically (first mention only).
+   */
+  autoLink?: boolean | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "standards".
+ */
+export interface Standard {
+  id: number;
+  /**
+   * For example ISO 22734:2019.
+   */
+  code: string;
+  kind: 'Standard' | 'Regulation' | 'Rule' | 'Guideline';
+  title: string;
+  slug: string;
+  /**
+   * ISO, IEC, BIS, PESO, MNRE…
+   */
+  issuer: string;
+  inForce?: ('In force' | 'Draft' | 'Withdrawn' | 'Superseded') | null;
+  summary: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Equipment it applies to; linked to products in Stage 6.
+   */
+  appliesTo?: string[] | null;
+  sourceUrl: string;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reports".
+ */
+export interface Report {
+  id: number;
+  title: string;
+  slug: string;
+  /**
+   * On the cover, for example SURVEY · 2026.
+   */
+  kicker?: string | null;
+  /**
+   * For example what 62 buyers told us.
+   */
+  subtitle?: string | null;
+  summary: string;
+  findings?:
+    | {
+        finding: string;
+        id?: string | null;
+      }[]
+    | null;
+  contents?:
+    | {
+        chapter: string;
+        id?: string | null;
+      }[]
+    | null;
+  writtenBy?: string | null;
+  /**
+   * Readers give their details to download (736:421).
+   */
+  gated?: boolean | null;
+  file: number | ReportFile;
+  sponsor?: {
+    /**
+     * Leave empty when nobody paid for it.
+     */
+    name?: string | null;
+    /**
+     * For example Hydrotek Systems paid for this survey. H2 India wrote it.
+     */
+    disclosure?: string | null;
+  };
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-files".
+ */
+export interface ReportFile {
+  id: number;
+  pages?: number | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-leads".
+ */
+export interface ReportLead {
+  id: number;
+  report: number | Report;
+  name: string;
+  email: string;
+  /**
+   * Empty for signed-in members.
+   */
+  company?: string | null;
+  role?: string | null;
+  sponsorConsent?: boolean | null;
+  /**
+   * The words they agreed to, as shown.
+   */
+  consentText?: string | null;
+  /**
+   * Set when a signed-in member downloaded it (never shared).
+   */
+  userId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
+  title: string;
+  slug: string;
+  series?: string | null;
+  description: string;
+  /**
+   * Where it's hosted (M9). Only the address is kept here.
+   */
+  url: string;
+  durationMinutes?: number | null;
+  transcript?: string | null;
+  thumbnail?: (number | null) | Media;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts".
+ */
+export interface Podcast {
+  id: number;
+  title: string;
+  slug: string;
+  show: string;
+  episode?: number | null;
+  description: string;
+  guests?: string[] | null;
+  /**
+   * Where it's hosted (M9). Only the address is kept here.
+   */
+  url: string;
+  durationMinutes?: number | null;
+  transcript?: string | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1121,6 +1472,42 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'source-changes';
         value: number | SourceChange;
+      } | null)
+    | ({
+        relationTo: 'chapters';
+        value: number | Chapter;
+      } | null)
+    | ({
+        relationTo: 'guides';
+        value: number | Guide;
+      } | null)
+    | ({
+        relationTo: 'glossary';
+        value: number | Glossary;
+      } | null)
+    | ({
+        relationTo: 'standards';
+        value: number | Standard;
+      } | null)
+    | ({
+        relationTo: 'reports';
+        value: number | Report;
+      } | null)
+    | ({
+        relationTo: 'report-files';
+        value: number | ReportFile;
+      } | null)
+    | ({
+        relationTo: 'report-leads';
+        value: number | ReportLead;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null)
+    | ({
+        relationTo: 'podcasts';
+        value: number | Podcast;
       } | null)
     | ({
         relationTo: 'authors';
@@ -1577,6 +1964,195 @@ export interface SourceChangesSelect<T extends boolean = true> {
   decidedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chapters_select".
+ */
+export interface ChaptersSelect<T extends boolean = true> {
+  order?: T;
+  title?: T;
+  slug?: T;
+  summary?: T;
+  readingMinutes?: T;
+  heroImage?: T;
+  body?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides_select".
+ */
+export interface GuidesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  authors?: T;
+  heroImage?: T;
+  body?: T;
+  productCategories?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "glossary_select".
+ */
+export interface GlossarySelect<T extends boolean = true> {
+  term?: T;
+  slug?: T;
+  expansion?: T;
+  aliases?: T;
+  short?: T;
+  body?: T;
+  related?: T;
+  standards?: T;
+  autoLink?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "standards_select".
+ */
+export interface StandardsSelect<T extends boolean = true> {
+  code?: T;
+  kind?: T;
+  title?: T;
+  slug?: T;
+  issuer?: T;
+  inForce?: T;
+  summary?: T;
+  body?: T;
+  appliesTo?: T;
+  sourceUrl?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reports_select".
+ */
+export interface ReportsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  kicker?: T;
+  subtitle?: T;
+  summary?: T;
+  findings?:
+    | T
+    | {
+        finding?: T;
+        id?: T;
+      };
+  contents?:
+    | T
+    | {
+        chapter?: T;
+        id?: T;
+      };
+  writtenBy?: T;
+  gated?: T;
+  file?: T;
+  sponsor?:
+    | T
+    | {
+        name?: T;
+        disclosure?: T;
+      };
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-files_select".
+ */
+export interface ReportFilesSelect<T extends boolean = true> {
+  pages?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "report-leads_select".
+ */
+export interface ReportLeadsSelect<T extends boolean = true> {
+  report?: T;
+  name?: T;
+  email?: T;
+  company?: T;
+  role?: T;
+  sponsorConsent?: T;
+  consentText?: T;
+  userId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  series?: T;
+  description?: T;
+  url?: T;
+  durationMinutes?: T;
+  transcript?: T;
+  thumbnail?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts_select".
+ */
+export interface PodcastsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  show?: T;
+  episode?: T;
+  description?: T;
+  guests?: T;
+  url?: T;
+  durationMinutes?: T;
+  transcript?: T;
+  topics?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
