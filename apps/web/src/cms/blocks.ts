@@ -1,7 +1,7 @@
 import type { Block } from "payload";
 
 // Article components from Figma page 02 that live inside the body (step 4.1): Key numbers box and Key facts box.
-// Glossary hover-cards are added with the glossary in step 4.4.
+// Glossary hover-cards are automatic: terms from the glossary are linked when the article is shown (step 4.4).
 
 export const KeyNumbers: Block = {
   slug: "keyNumbers",
@@ -23,6 +23,7 @@ export const KeyNumbers: Block = {
   ],
 };
 
+/** Key facts box (434:2844): label and value pairs, for example ISSUER · SECI for MNRE. */
 export const KeyFacts: Block = {
   slug: "keyFacts",
   labels: { singular: "Key facts", plural: "Key facts" },
@@ -34,7 +35,10 @@ export const KeyFacts: Block = {
       minRows: 1,
       maxRows: 8,
       required: true,
-      fields: [{ name: "fact", type: "text", required: true }],
+      fields: [
+        { name: "label", type: "text", required: true, admin: { description: "For example Issuer, Bid due." } },
+        { name: "value", type: "text", required: true },
+      ],
     },
   ],
 };

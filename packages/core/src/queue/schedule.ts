@@ -54,6 +54,8 @@ export const SCHEDULES: Scheduled[] = [
   { id: "notifications-prune", pattern: "0 21 * * *", run: () => pruneNotifications(getDb()) },
   // 03:00 IST every day.
   { id: "audit-retention", pattern: "30 21 * * *", run: () => pruneAuditLog(getDb()) },
+  // 03:15 IST every day: report leads are deleted 24 months after the download (A33). The web app runs the CMS.
+  { id: "report-leads-prune", pattern: "45 21 * * *", run: () => callWeb("/api/internal/report-leads-prune") },
 ];
 
 /** Registers (or updates) every schedule. Safe to call on every worker start. */

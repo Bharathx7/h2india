@@ -137,6 +137,8 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A29 | Scheme pages and applications (step 4.3) | You | Step 4.3 | Link out to the official portal only; no applying on H2 India | Answered | Founder, 12 Nov 2026. |
 | A30 | Who publishes records (schemes, tenders, grants, jobs, events; step 4.3) | You | Step 4.3 | Content editors publish record changes directly; every change is versioned and audited (articles still need the Editor-in-chief) | Answered | Founder, 12 Nov 2026. |
 | A31 | Record fields (step 4.3) | You | Step 4.3 | As drawn on the admin record editors and public pages; a tender keeps its result on the same record; records not verified for 30 days go to Data quality, red after 60 | Answered | Founder, 12 Nov 2026. |
+| A32 | Who adds video and podcast series (step 4.4) | You | Step 4.4 | Content editors add episodes and series (URLs until M9); the Editor-in-chief publishes them, as with articles | Answered | Founder, 12 Nov 2026. |
+| A33 | Gated report leads: retention and sponsors (step 4.4) | You | Step 4.4 | Deleted 24 months after the download; sponsors get only the leads who ticked the box, as a CSV exported by H2 India staff (step 11.3); signed-in members skip the form and are never shared | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -177,3 +179,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You chose to keep every SMS and WhatsApp template unapproved until the provider confirms it (A25).
 - 12 Nov 2026: Stage 4 decisions: Payload editor now (A26), legal check for sponsored, press release and flagged pieces by the Editor-in-chief (A27), six article types as drawn (A28), schemes link to official portals only (A29).
 - 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).
+- 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).

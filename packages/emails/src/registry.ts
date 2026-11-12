@@ -358,6 +358,14 @@ export const TEMPLATES = {
     step: "3.5",
     built: true,
   },
+  "email.report_download": {
+    channel: "email",
+    key: "report_download",
+    name: "Your report (gated download copy)",
+    frame: null,
+    step: "4.4",
+    built: true,
+  },
   "email.test": {
     channel: "email",
     key: "test",

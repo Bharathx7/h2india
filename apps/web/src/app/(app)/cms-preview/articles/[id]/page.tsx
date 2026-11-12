@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 import { ArticleBody } from "@/components/article/ArticleBody";
+import { glossaryTerms } from "@/cms/knowledge/library";
 import { typeBadge, ARTICLE_TYPES } from "@/cms/types";
 
 // Preview of a draft for editors (step 4.1, "Preview" on 639:8). Only signed-in editors; the public article page with
@@ -48,7 +49,7 @@ export default async function ArticlePreview({ params }: { params: Promise<{ id:
           </p>
         ) : null}
       </header>
-      <ArticleBody data={article.body} />
+      <ArticleBody data={article.body} glossary={await glossaryTerms(payload)} />
       {(article.corrections ?? []).length > 0 ? (
         <section aria-labelledby="corrections" className="border-t border-default pt-4">
           <h2 id="corrections" className="type-h4">

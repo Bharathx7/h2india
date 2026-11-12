@@ -16,3 +16,6 @@ export type { FileStatus, FileView, StartedUpload, StartUpload } from "./files";
 export { enqueueFileCheck, FILES_QUEUE } from "./jobs";
 export { READ_RULES, UPLOAD_RULES } from "./rules";
 export { sniffType } from "./sniff";
+export { signDownload } from "./storage";
+export { scanBytes } from "./clamav";
+export type { ScanResult } from "./clamav";

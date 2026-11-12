@@ -14,6 +14,18 @@ import { Corrections } from "./cms/collections/Corrections";
 import { Editors } from "./cms/collections/Editors";
 import { Media } from "./cms/collections/Media";
 import { Tags, Topics } from "./cms/collections/Taxonomy";
+import {
+  Chapters,
+  Glossary,
+  Guides,
+  Podcasts,
+  ReportFiles,
+  ReportLeads,
+  Reports,
+  Standards,
+  Videos,
+} from "./cms/knowledge/collections";
+import { REPORTS_PREFIX } from "./cms/knowledge/library";
 import { Events, Grants, Jobs, Schemes, SourceChanges, Tenders } from "./cms/records/collections";
 import { possibleUpdates, staleRecords } from "./cms/records/quality";
 import { has } from "./cms/roles";
@@ -48,6 +60,15 @@ export default buildConfig({
     Jobs,
     Events,
     SourceChanges,
+    Chapters,
+    Guides,
+    Glossary,
+    Standards,
+    Reports,
+    ReportFiles,
+    ReportLeads,
+    Videos,
+    Podcasts,
     Authors,
     Topics,
     Tags,
@@ -78,6 +99,17 @@ export default buildConfig({
   telemetry: false,
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   plugins: [
+    // Report PDFs (step 4.4): private bucket; editors open them through the CMS, readers only through the gate.
+    s3Storage({
+      collections: { "report-files": { prefix: REPORTS_PREFIX } },
+      bucket: env.S3_BUCKET_PRIVATE,
+      config: {
+        endpoint: env.S3_ENDPOINT,
+        region: env.S3_REGION,
+        credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
+        forcePathStyle: !env.S3_ENDPOINT.includes("amazonaws.com"),
+      },
+    }),
     s3Storage({
       collections: {
         media: {

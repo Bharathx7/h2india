@@ -1,13 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { canDelete, canEdit } from "../roles";
+import { scanUpload } from "../scan";
 
 // Images for articles and records (step 4.1). Alt text is required: media without it can't be saved. Stored in the
-// public bucket under cms/ and served from the storage domain. SVG isn't accepted (it can carry script).
+// public bucket under cms/ and served from the storage domain. SVG isn't accepted (it can carry script). Virus-checked
+// before it is stored (step 4.4).
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "Image", plural: "Media" },
   admin: { useAsTitle: "alt", group: "Content", defaultColumns: ["filename", "alt", "credit"] },
   access: { read: () => true, create: canEdit, update: canEdit, delete: canDelete },
+  hooks: { beforeOperation: [scanUpload] },
   upload: {
     mimeTypes: ["image/jpeg", "image/png", "image/webp"],
     imageSizes: [
