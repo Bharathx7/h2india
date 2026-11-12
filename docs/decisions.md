@@ -135,6 +135,8 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A27 | Which article types need a legal check, and who does it (step 4.2) | You | Step 4.2 | Sponsored and press-release pieces always, any other piece an editor flags; the Editor-in-chief passes it (639:8) | Answered | Founder, 12 Nov 2026. |
 | A28 | Article types and fields (step 4.1) | You | Step 4.1 | The six drawn types (news, analysis, explainer, interview, press release, sponsored) with the fields on their frames; sponsored and press-release labels come from the type | Answered | Founder, 12 Nov 2026. |
 | A29 | Scheme pages and applications (step 4.3) | You | Step 4.3 | Link out to the official portal only; no applying on H2 India | Answered | Founder, 12 Nov 2026. |
+| A30 | Who publishes records (schemes, tenders, grants, jobs, events; step 4.3) | You | Step 4.3 | Content editors publish record changes directly; every change is versioned and audited (articles still need the Editor-in-chief) | Answered | Founder, 12 Nov 2026. |
+| A31 | Record fields (step 4.3) | You | Step 4.3 | As drawn on the admin record editors and public pages; a tender keeps its result on the same record; records not verified for 30 days go to Data quality, red after 60 | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -174,3 +176,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You confirmed the drawn clock values (A24) and answered M18: Monday to Saturday, minus gazetted holidays, maintained by a Super admin.
 - 12 Nov 2026: You chose to keep every SMS and WhatsApp template unapproved until the provider confirms it (A25).
 - 12 Nov 2026: Stage 4 decisions: Payload editor now (A26), legal check for sponsored, press release and flagged pieces by the Editor-in-chief (A27), six article types as drawn (A28), schemes link to official portals only (A29).
+- 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).

@@ -14,6 +14,9 @@ import { Corrections } from "./cms/collections/Corrections";
 import { Editors } from "./cms/collections/Editors";
 import { Media } from "./cms/collections/Media";
 import { Tags, Topics } from "./cms/collections/Taxonomy";
+import { Events, Grants, Jobs, Schemes, SourceChanges, Tenders } from "./cms/records/collections";
+import { possibleUpdates, staleRecords } from "./cms/records/quality";
+import { has } from "./cms/roles";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
 // database, editors signed in with their H2 India account, the editor at /cms.
@@ -36,8 +39,34 @@ export default buildConfig({
       graphics: { Logo: "@/cms/admin/Brand#Logo", Icon: "@/cms/admin/Brand#Icon" },
     },
   },
-  collections: [Articles, Corrections, Authors, Topics, Tags, Media, Editors],
+  collections: [
+    Articles,
+    Corrections,
+    Schemes,
+    Tenders,
+    Grants,
+    Jobs,
+    Events,
+    SourceChanges,
+    Authors,
+    Topics,
+    Tags,
+    Media,
+    Editors,
+  ],
   editor: lexicalEditor(),
+  endpoints: [
+    {
+      // GET /api/cms/data-quality: stale records and possible updates (646:9, 646:733) for editors.
+      path: "/data-quality",
+      method: "get",
+      handler: async (req) => {
+        if (!has(req, "content.view")) return Response.json({ errors: [{ message: "Editors only" }] }, { status: 403 });
+        const [stale, updates] = await Promise.all([staleRecords(req.payload), possibleUpdates(req.payload)]);
+        return Response.json({ stale, updates });
+      },
+    },
+  ],
   db: postgresAdapter({
     pool: { connectionString: env.DATABASE_URL },
     schemaName: "cms",

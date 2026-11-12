@@ -158,3 +158,58 @@ test("the CMS opens for editors and is closed to everyone else", async ({ page, 
   await expect(visitor).not.toHaveURL(/\/cms/);
   await visitor.close();
 });
+
+test("records: status follows the dates, verification is recorded, stale records are listed", async ({ page }) => {
+  await signInOperator(page, "Content editor");
+  const stamp = String(Date.now());
+  // A30: a Content editor publishes record changes.
+  const tender = await cms(page.request, "POST", "tenders", {
+    _status: "published",
+    title: `Supply and commissioning of a 5 MW PEM electrolyser ${stamp}`,
+    issuer: "Northern Refineries Limited, Panipat",
+    tenderId: `NRL/PNP/GH2/${stamp}`,
+    bidDueAt: new Date(Date.now() + 2500).toISOString(),
+    description: "Supply, installation and commissioning.",
+    sourceUrl: "https://eprocure.gov.in",
+  });
+  expect(tender.status, JSON.stringify(tender.body.errors)).toBe(201);
+  const id = tender.body.doc?.id;
+  const read = async () =>
+    (await cms(page.request, "GET", `tenders/${String(id)}`)).body as unknown as {
+      status: string;
+      sourceUrl: string;
+      verification?: { at?: string };
+    };
+  expect((await read()).status).toBe("Closing soon");
+  // Nobody touches it: at the deadline it is closed.
+  await expect.poll(async () => (await read()).status, { timeout: 10_000 }).toBe("Closed");
+
+  const verified = await cms(page.request, "POST", `tenders/${String(id)}/verify`, { note: "Checked the portal." });
+  expect(verified.status).toBe(200);
+  const after = await read();
+  expect(after.sourceUrl).toBe("https://eprocure.gov.in");
+  expect(after.verification?.at).toBeTruthy();
+
+  const old = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+  const scheme = (name: string, verifiedDaysAgo: number) =>
+    cms(page.request, "POST", "schemes", {
+      _status: "published",
+      name,
+      runBy: "SECI, for MNRE",
+      summary: "A per-kg incentive.",
+      sourceUrl: "https://seci.co.in",
+      verification: { at: old(verifiedDaysAgo) },
+    });
+  await scheme(`Odisha green hydrogen policy ${stamp}`, 73);
+  await scheme(`Hydrogen valley clusters ${stamp}`, 37);
+  await scheme(`Recently checked ${stamp}`, 2);
+  const quality = await page.request.get("/api/cms/data-quality");
+  expect(quality.status()).toBe(200);
+  const stale = ((await quality.json()) as { stale: { title: string; days: number; tone: string }[] }).stale.filter(
+    (r) => r.title.endsWith(stamp),
+  );
+  expect(stale.map((r) => [r.title.replace(` ${stamp}`, ""), r.days, r.tone])).toEqual([
+    ["Odisha green hydrogen policy", 73, "error"],
+    ["Hydrogen valley clusters", 37, "warning"],
+  ]);
+});
