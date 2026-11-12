@@ -84,6 +84,14 @@ export interface Config {
     'report-leads': ReportLead;
     videos: Video;
     podcasts: Podcast;
+    'tracker-projects': TrackerProject;
+    'tracker-factories': TrackerFactory;
+    'tracker-pilots': TrackerPilot;
+    'tracker-stations': TrackerStation;
+    'tracker-prices': TrackerPrice;
+    'tracker-policies': TrackerPolicy;
+    'tracker-hubs': TrackerHub;
+    'tracker-changes': TrackerChange;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -113,6 +121,14 @@ export interface Config {
     'report-leads': ReportLeadsSelect<false> | ReportLeadsSelect<true>;
     videos: VideosSelect<false> | VideosSelect<true>;
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
+    'tracker-projects': TrackerProjectsSelect<false> | TrackerProjectsSelect<true>;
+    'tracker-factories': TrackerFactoriesSelect<false> | TrackerFactoriesSelect<true>;
+    'tracker-pilots': TrackerPilotsSelect<false> | TrackerPilotsSelect<true>;
+    'tracker-stations': TrackerStationsSelect<false> | TrackerStationsSelect<true>;
+    'tracker-prices': TrackerPricesSelect<false> | TrackerPricesSelect<true>;
+    'tracker-policies': TrackerPoliciesSelect<false> | TrackerPoliciesSelect<true>;
+    'tracker-hubs': TrackerHubsSelect<false> | TrackerHubsSelect<true>;
+    'tracker-changes': TrackerChangesSelect<false> | TrackerChangesSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -127,8 +143,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'tracker-methodology': TrackerMethodology;
+  };
+  globalsSelect: {
+    'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -1419,6 +1439,927 @@ export interface Podcast {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-projects".
+ */
+export interface TrackerProject {
+  id: number;
+  name: string;
+  /**
+   * The developer.
+   */
+  company: string;
+  product?: ('Green hydrogen' | 'Green ammonia' | 'Green methanol' | 'Other') | null;
+  /**
+   * For example Mundra, Kutch, Gujarat.
+   */
+  location?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  /**
+   * For the map.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  /**
+   * Hydrogen, tonnes a year.
+   */
+  capacityTpa: number;
+  /**
+   * Ammonia or methanol, when that is the product.
+   */
+  productCapacityTpa?: number | null;
+  electrolyserMw?: number | null;
+  technology?: ('Alkaline' | 'PEM' | 'SOEC' | 'AEM' | 'PEM fuel cell' | 'Other') | null;
+  /**
+   * For example Solar and wind hybrid, 600 MW.
+   */
+  renewablePower?: string | null;
+  /**
+   * For example SIGHT Mode 2A, Tranche I.
+   */
+  scheme?: string | null;
+  underSight?: boolean | null;
+  expectedStartYear?: number | null;
+  linkedCompanies?:
+    | {
+        name: string;
+        /**
+         * For example Developer, or Electrolyser supply.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedArticles?: (number | Article)[] | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  stage: 'Announced' | 'Awarded' | 'Contracted' | 'Under construction' | 'Commissioned' | 'Cancelled';
+  /**
+   * When it reached this status.
+   */
+  statusDate?: string | null;
+  /**
+   * A row is added when the status changes; add earlier steps by hand.
+   */
+  statusHistory?:
+    | {
+        status: 'Announced' | 'Awarded' | 'Contracted' | 'Under construction' | 'Commissioned' | 'Cancelled';
+        date: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  /**
+   * Figures that are estimates; shown as, for example, 2028 (company estimate).
+   */
+  estimates?: ('Hydrogen capacity' | 'Product capacity' | 'Electrolysers' | 'Expected start-up')[] | null;
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-factories".
+ */
+export interface TrackerFactory {
+  id: number;
+  /**
+   * For example Hydrotek Systems factory.
+   */
+  name: string;
+  company: string;
+  product: 'Electrolyser' | 'Electrolyser stack' | 'Fuel cell' | 'Other';
+  /**
+   * Nameplate MW of electrolysers a year.
+   */
+  capacityMwPerYear: number;
+  technology?: ('Alkaline' | 'PEM' | 'SOEC' | 'AEM' | 'PEM fuel cell' | 'Other') | null;
+  tranche?: ('SIGHT Tranche I' | 'SIGHT Tranche II' | 'SIGHT Tranche III' | 'Not under SIGHT') | null;
+  /**
+   * For example Mundra, Kutch, Gujarat.
+   */
+  location?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  /**
+   * For the map.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  linkedCompanies?:
+    | {
+        name: string;
+        /**
+         * For example Developer, or Electrolyser supply.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedArticles?: (number | Article)[] | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  stage: 'Announced' | 'Awarded' | 'Under construction' | 'Operating' | 'Cancelled';
+  /**
+   * When it reached this status.
+   */
+  statusDate?: string | null;
+  /**
+   * A row is added when the status changes; add earlier steps by hand.
+   */
+  statusHistory?:
+    | {
+        status: 'Announced' | 'Awarded' | 'Under construction' | 'Operating' | 'Cancelled';
+        date: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  /**
+   * Figures that are estimates; shown as, for example, 2028 (company estimate).
+   */
+  estimates?: 'Capacity'[] | null;
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-pilots".
+ */
+export interface TrackerPilot {
+  id: number;
+  /**
+   * For example Harbour tug, Kandla.
+   */
+  name: string;
+  sector: 'Mobility' | 'Steel' | 'Shipping' | 'Other';
+  leadPartner: string;
+  routeOrSite: string;
+  /**
+   * For example 10 buses, or 5% blend.
+   */
+  units?: string | null;
+  /**
+   * Number of vehicles, for the mobility total.
+   */
+  vehicles?: number | null;
+  /**
+   * For example NGHM pilot scheme.
+   */
+  funding?: string | null;
+  /**
+   * For example Mundra, Kutch, Gujarat.
+   */
+  location?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  /**
+   * For the map.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  /**
+   * Points along the route, for the map's pilot routes.
+   */
+  route?:
+    | {
+        latitude: number;
+        longitude: number;
+        id?: string | null;
+      }[]
+    | null;
+  linkedCompanies?:
+    | {
+        name: string;
+        /**
+         * For example Developer, or Electrolyser supply.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedArticles?: (number | Article)[] | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  stage: 'Planned' | 'Under construction' | 'Running' | 'Completed' | 'Cancelled';
+  /**
+   * When it reached this status.
+   */
+  statusDate?: string | null;
+  /**
+   * A row is added when the status changes; add earlier steps by hand.
+   */
+  statusHistory?:
+    | {
+        status: 'Planned' | 'Under construction' | 'Running' | 'Completed' | 'Cancelled';
+        date: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  /**
+   * Figures that are estimates; shown as, for example, 2028 (company estimate).
+   */
+  estimates?: 'Vehicles or units'[] | null;
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-stations".
+ */
+export interface TrackerStation {
+  id: number;
+  /**
+   * For example Bus depot, Bengaluru.
+   */
+  name: string;
+  operator: string;
+  /**
+   * For example 350 and 700.
+   */
+  pressures?: number[] | null;
+  capacityKgPerDay?: number | null;
+  vehiclesServed?: string | null;
+  /**
+   * While the tender is open.
+   */
+  closingDate?: string | null;
+  /**
+   * For example Mundra, Kutch, Gujarat.
+   */
+  location?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  /**
+   * For the map.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  linkedCompanies?:
+    | {
+        name: string;
+        /**
+         * For example Developer, or Electrolyser supply.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedArticles?: (number | Article)[] | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  stage: 'Planned' | 'Tender open' | 'Under construction' | 'Operating' | 'Cancelled';
+  /**
+   * When it reached this status.
+   */
+  statusDate?: string | null;
+  /**
+   * A row is added when the status changes; add earlier steps by hand.
+   */
+  statusHistory?:
+    | {
+        status: 'Planned' | 'Tender open' | 'Under construction' | 'Operating' | 'Cancelled';
+        date: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  /**
+   * Figures that are estimates; shown as, for example, 2028 (company estimate).
+   */
+  estimates?: 'Capacity'[] | null;
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-prices".
+ */
+export interface TrackerPrice {
+  id: number;
+  name: string;
+  product: 'Green H₂' | 'Green NH₃' | 'Methanol' | 'Other';
+  /**
+   * As discovered, for example 397.00.
+   */
+  price: string;
+  gstBasis: 'Excl. GST' | 'Incl. GST';
+  pricePaise?: number | null;
+  discoveredOn: string;
+  winner?: string | null;
+  buyer?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  relatedArticles?: (number | Article)[] | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-policies".
+ */
+export interface TrackerPolicy {
+  id: number;
+  state:
+    | 'all-india'
+    | 'andaman-and-nicobar-islands'
+    | 'andhra-pradesh'
+    | 'arunachal-pradesh'
+    | 'assam'
+    | 'bihar'
+    | 'chandigarh'
+    | 'chhattisgarh'
+    | 'dadra-and-nagar-haveli-and-daman-and-diu'
+    | 'delhi'
+    | 'goa'
+    | 'gujarat'
+    | 'haryana'
+    | 'himachal-pradesh'
+    | 'jammu-and-kashmir'
+    | 'jharkhand'
+    | 'karnataka'
+    | 'kerala'
+    | 'ladakh'
+    | 'lakshadweep'
+    | 'madhya-pradesh'
+    | 'maharashtra'
+    | 'manipur'
+    | 'meghalaya'
+    | 'mizoram'
+    | 'nagaland'
+    | 'odisha'
+    | 'puducherry'
+    | 'punjab'
+    | 'rajasthan'
+    | 'sikkim'
+    | 'tamil-nadu'
+    | 'telangana'
+    | 'tripura'
+    | 'uttar-pradesh'
+    | 'uttarakhand'
+    | 'west-bengal';
+  /**
+   * Usually the state, for example Uttar Pradesh.
+   */
+  name: string;
+  /**
+   * For example Green Hydrogen Policy.
+   */
+  policy: string;
+  type: 'Dedicated' | 'Provisions';
+  year: number;
+  /**
+   * Our summary, for example Capital subsidy; land and stamp duty relief.
+   */
+  keyIncentives: string;
+  officialUrl: string;
+  scheme?: (number | null) | Scheme;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-hubs".
+ */
+export interface TrackerHub {
+  id: number;
+  /**
+   * For example Deendayal Port.
+   */
+  name: string;
+  kind: 'Hub' | 'Valley';
+  description?: string | null;
+  /**
+   * For example Mundra, Kutch, Gujarat.
+   */
+  location?: string | null;
+  state?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )
+    | null;
+  /**
+   * For the map.
+   */
+  latitude?: number | null;
+  longitude?: number | null;
+  /**
+   * Part of the address. Don't change it once published.
+   */
+  slug: string;
+  /**
+   * Every tracker value shows its source and as-of date.
+   */
+  source: {
+    /**
+     * For example Hydrotek commissioning note, 4 Oct 2026.
+     */
+    name: string;
+    url?: string | null;
+    /**
+     * Its place in Which sources we trust (Methodology). This is the figure's confidence.
+     */
+    tier: 'official' | 'filing' | 'company' | 'press';
+    asOf: string;
+  };
+  owner?: (number | null) | Editor;
+  /**
+   * Who last changed its figures.
+   */
+  enteredBy?: (number | null) | Editor;
+  verification?: {
+    at?: string | null;
+    by?: (number | null) | Editor;
+    note?: string | null;
+  };
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Written automatically when a tracker record is published. Feeds Recent changes.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-changes".
+ */
+export interface TrackerChange {
+  id: number;
+  at: string;
+  record:
+    | {
+        relationTo: 'tracker-projects';
+        value: number | TrackerProject;
+      }
+    | {
+        relationTo: 'tracker-factories';
+        value: number | TrackerFactory;
+      }
+    | {
+        relationTo: 'tracker-pilots';
+        value: number | TrackerPilot;
+      }
+    | {
+        relationTo: 'tracker-stations';
+        value: number | TrackerStation;
+      }
+    | {
+        relationTo: 'tracker-prices';
+        value: number | TrackerPrice;
+      }
+    | {
+        relationTo: 'tracker-policies';
+        value: number | TrackerPolicy;
+      }
+    | {
+        relationTo: 'tracker-hubs';
+        value: number | TrackerHub;
+      };
+  recordTitle: string;
+  recordSlug?: string | null;
+  view: string;
+  field: string;
+  before?: string | null;
+  after?: string | null;
+  source?: string | null;
+  sourceUrl?: string | null;
+  changedBy?: (number | null) | Editor;
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1508,6 +2449,38 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'podcasts';
         value: number | Podcast;
+      } | null)
+    | ({
+        relationTo: 'tracker-projects';
+        value: number | TrackerProject;
+      } | null)
+    | ({
+        relationTo: 'tracker-factories';
+        value: number | TrackerFactory;
+      } | null)
+    | ({
+        relationTo: 'tracker-pilots';
+        value: number | TrackerPilot;
+      } | null)
+    | ({
+        relationTo: 'tracker-stations';
+        value: number | TrackerStation;
+      } | null)
+    | ({
+        relationTo: 'tracker-prices';
+        value: number | TrackerPrice;
+      } | null)
+    | ({
+        relationTo: 'tracker-policies';
+        value: number | TrackerPolicy;
+      } | null)
+    | ({
+        relationTo: 'tracker-hubs';
+        value: number | TrackerHub;
+      } | null)
+    | ({
+        relationTo: 'tracker-changes';
+        value: number | TrackerChange;
       } | null)
     | ({
         relationTo: 'authors';
@@ -2156,6 +3129,376 @@ export interface PodcastsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-projects_select".
+ */
+export interface TrackerProjectsSelect<T extends boolean = true> {
+  name?: T;
+  company?: T;
+  product?: T;
+  location?: T;
+  state?: T;
+  latitude?: T;
+  longitude?: T;
+  capacityTpa?: T;
+  productCapacityTpa?: T;
+  electrolyserMw?: T;
+  technology?: T;
+  renewablePower?: T;
+  scheme?: T;
+  underSight?: T;
+  expectedStartYear?: T;
+  linkedCompanies?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  relatedArticles?: T;
+  slug?: T;
+  stage?: T;
+  statusDate?: T;
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        date?: T;
+        source?: T;
+        id?: T;
+      };
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  estimates?: T;
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-factories_select".
+ */
+export interface TrackerFactoriesSelect<T extends boolean = true> {
+  name?: T;
+  company?: T;
+  product?: T;
+  capacityMwPerYear?: T;
+  technology?: T;
+  tranche?: T;
+  location?: T;
+  state?: T;
+  latitude?: T;
+  longitude?: T;
+  linkedCompanies?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  relatedArticles?: T;
+  slug?: T;
+  stage?: T;
+  statusDate?: T;
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        date?: T;
+        source?: T;
+        id?: T;
+      };
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  estimates?: T;
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-pilots_select".
+ */
+export interface TrackerPilotsSelect<T extends boolean = true> {
+  name?: T;
+  sector?: T;
+  leadPartner?: T;
+  routeOrSite?: T;
+  units?: T;
+  vehicles?: T;
+  funding?: T;
+  location?: T;
+  state?: T;
+  latitude?: T;
+  longitude?: T;
+  route?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        id?: T;
+      };
+  linkedCompanies?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  relatedArticles?: T;
+  slug?: T;
+  stage?: T;
+  statusDate?: T;
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        date?: T;
+        source?: T;
+        id?: T;
+      };
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  estimates?: T;
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-stations_select".
+ */
+export interface TrackerStationsSelect<T extends boolean = true> {
+  name?: T;
+  operator?: T;
+  pressures?: T;
+  capacityKgPerDay?: T;
+  vehiclesServed?: T;
+  closingDate?: T;
+  location?: T;
+  state?: T;
+  latitude?: T;
+  longitude?: T;
+  linkedCompanies?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  relatedArticles?: T;
+  slug?: T;
+  stage?: T;
+  statusDate?: T;
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        date?: T;
+        source?: T;
+        id?: T;
+      };
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  estimates?: T;
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-prices_select".
+ */
+export interface TrackerPricesSelect<T extends boolean = true> {
+  name?: T;
+  product?: T;
+  price?: T;
+  gstBasis?: T;
+  pricePaise?: T;
+  discoveredOn?: T;
+  winner?: T;
+  buyer?: T;
+  state?: T;
+  relatedArticles?: T;
+  slug?: T;
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-policies_select".
+ */
+export interface TrackerPoliciesSelect<T extends boolean = true> {
+  state?: T;
+  name?: T;
+  policy?: T;
+  type?: T;
+  year?: T;
+  keyIncentives?: T;
+  officialUrl?: T;
+  scheme?: T;
+  slug?: T;
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-hubs_select".
+ */
+export interface TrackerHubsSelect<T extends boolean = true> {
+  name?: T;
+  kind?: T;
+  description?: T;
+  location?: T;
+  state?: T;
+  latitude?: T;
+  longitude?: T;
+  slug?: T;
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        tier?: T;
+        asOf?: T;
+      };
+  owner?: T;
+  enteredBy?: T;
+  verification?:
+    | T
+    | {
+        at?: T;
+        by?: T;
+        note?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-changes_select".
+ */
+export interface TrackerChangesSelect<T extends boolean = true> {
+  at?: T;
+  record?: T;
+  recordTitle?: T;
+  recordSlug?: T;
+  view?: T;
+  field?: T;
+  before?: T;
+  after?: T;
+  source?: T;
+  sourceUrl?: T;
+  changedBy?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
@@ -2304,6 +3647,66 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-methodology".
+ */
+export interface TrackerMethodology {
+  id: number;
+  statusMeanings?:
+    | {
+        status: string;
+        meaning: string;
+        evidence: string;
+        id?: string | null;
+      }[]
+    | null;
+  sources?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  units?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  updateNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-methodology_select".
+ */
+export interface TrackerMethodologySelect<T extends boolean = true> {
+  statusMeanings?:
+    | T
+    | {
+        status?: T;
+        meaning?: T;
+        evidence?: T;
+        id?: T;
+      };
+  sources?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  units?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updateNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

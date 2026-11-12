@@ -1,7 +1,8 @@
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig, type Field } from "payload";
 import { KeyFacts, KeyNumbers } from "../blocks";
-import { canDelete, canEdit, canPublish, canView, has, publishedOrEditor } from "../roles";
+import { canDelete, canEdit, canPublish, canView, has } from "../roles";
+import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { scanUpload } from "../scan";
 import { slugFrom } from "../slug";
 import { chapterWithNeighbours, purgeReportLeads } from "./library";
@@ -52,14 +53,15 @@ const editorialPublish: CollectionBeforeChangeHook = ({ data, req }) => {
 
 const editorial = {
   versions: { drafts: true, maxPerDoc: 30 },
-  access: { read: publishedOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [editorialPublish] },
+  access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
+  hooks: { beforeChange: [editorialPublish, refuseSamplePublish] },
 } satisfies Partial<CollectionConfig>;
 
 /** Reference records (glossary, standards): like schemes and tenders, editors publish them (A30). */
 const reference = {
   versions: { drafts: true, maxPerDoc: 30 },
-  access: { read: publishedOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
+  access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
+  hooks: { beforeChange: [refuseSamplePublish] },
 } satisfies Partial<CollectionConfig>;
 
 export const Chapters: CollectionConfig = {

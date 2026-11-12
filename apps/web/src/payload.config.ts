@@ -28,6 +28,17 @@ import {
 import { REPORTS_PREFIX } from "./cms/knowledge/library";
 import { Events, Grants, Jobs, Schemes, SourceChanges, Tenders } from "./cms/records/collections";
 import { possibleUpdates, staleRecords } from "./cms/records/quality";
+import { TrackerChanges } from "./cms/tracker/changes";
+import {
+  TrackerFactories,
+  TrackerHubs,
+  TrackerMethodology,
+  TrackerPilots,
+  TrackerPolicies,
+  TrackerPrices,
+  TrackerProjects,
+  TrackerStations,
+} from "./cms/tracker/collections";
 import { has } from "./cms/roles";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
@@ -69,12 +80,21 @@ export default buildConfig({
     ReportLeads,
     Videos,
     Podcasts,
+    TrackerProjects,
+    TrackerFactories,
+    TrackerPilots,
+    TrackerStations,
+    TrackerPrices,
+    TrackerPolicies,
+    TrackerHubs,
+    TrackerChanges,
     Authors,
     Topics,
     Tags,
     Media,
     Editors,
   ],
+  globals: [TrackerMethodology],
   editor: lexicalEditor(),
   endpoints: [
     {
