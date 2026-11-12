@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnvConfig } from "@next/env";
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 // Settings live in one .env.local at the repository root (playbook step 1.6), shared by web, worker and scripts.
@@ -15,4 +16,5 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 };
 
-export default nextConfig;
+// Payload (step 4.1) adds the settings its admin and API need.
+export default withPayload(nextConfig);

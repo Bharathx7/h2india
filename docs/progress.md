@@ -57,7 +57,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 4.1 | Install the CMS and define the content model | Not started |
+| 4.1 | Install the CMS and define the content model | Done 12 Nov 2026: Payload 3.93 inside the app (tables in the `cms` schema, migrations with `pnpm db:migrate`), editor at /cms signed in with H2 India accounts (operators with Content access; Editor-in-chief and Content editor from the operator roles), branded (A26); collections Articles (six types with labels from the type, A28; Key numbers and Key facts blocks; sources; SEO; drafts, autosave and comparable versions), Authors (staff, contributor, organisation), Topics, Tags, Media (alt text required, stored in the public bucket). Publishing needs content.publish, sources, and the legal check for sponsored, press-release and flagged pieces (A27). Draft preview for editors. Not yet in the model: company and scheme embeds (Stages 6 and 4.3), chart block, inline legal-check comments (a note field instead), glossary hover-cards (4.4) |
 | 4.2 | Editorial workflow | Not started |
 | 4.3 | Records: schemes, tenders, grants, jobs, events | Not started |
 | 4.4 | Knowledge library | Not started |
