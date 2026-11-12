@@ -88,6 +88,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Limits and types per kind live in `packages/config/src/files.ts` (A20); show the same messages in the browser with `checkFile()` and `uploadProblemMessage()`.
 - A record that holds a file attaches it with `attachFile()` and sets retention with `scheduleFileDeletion()` where a decision asks for it (Work ID: A22).
 
+## Clocks and jobs (step 3.8)
+
+- Every timer is a deadline in `core.deadlines`, started with `startClock()` from a named clock in `packages/config/src/clocks.ts` (A24). Never compute a due date by hand, and never keep a deadline only in the queue.
+- Working days come from `workingCalendar()` (IST, Monday to Saturday minus `core.holidays`, M18).
+- React to a deadline with `onDeadline(type, handler)`; the handler runs inside the claim's transaction, so anything it sends must be idempotent (queue a job with a stable job ID).
+- New background work goes on a queue from `QUEUES` through `enqueue()`; job data never holds secrets (it is kept, masked, in the dead-letter list). Housekeeping goes in `queue/schedule.ts`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
