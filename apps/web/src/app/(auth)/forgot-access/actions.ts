@@ -18,6 +18,7 @@ import {
 } from "@h2india/core/recovery";
 import { cookies, headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
+import { requestContext } from "@/server/request-context";
 
 // Server side of account recovery (step 3.5). The recovery token lives in an http-only cookie for this browser.
 
@@ -126,7 +127,12 @@ export async function decide(requestId: string, approve: boolean): Promise<Outco
   const session = await getSession();
   if (!session) return { ok: false, code: "NOT_SIGNED_IN" };
   try {
-    await decideRecovery({ actor: await loadActor(getDb(), session.user.id), requestId, approve });
+    await decideRecovery({
+      actor: await loadActor(getDb(), session.user.id),
+      requestId,
+      approve,
+      context: await requestContext(),
+    });
     return { ok: true };
   } catch (error) {
     return failure(error);

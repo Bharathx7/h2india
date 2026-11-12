@@ -3,7 +3,7 @@ import { schema } from "@h2india/db";
 import { renderRecovery } from "@h2india/emails";
 import { randomBytes } from "node:crypto";
 import { and, eq, gt, ne, sql } from "drizzle-orm";
-import { audit } from "../audit";
+import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { can } from "../authz/can";
 import { DEFAULT_ROLE } from "../authz/catalogue";
@@ -357,7 +357,12 @@ export async function submitLostEmail(token: string): Promise<string> {
 }
 
 /** An Admin of that company, or an operator handling the support queue, approves or declines (A14 to A17). */
-export async function decideRecovery(input: { actor: Actor; requestId: string; approve: boolean }) {
+export async function decideRecovery(input: {
+  actor: Actor;
+  requestId: string;
+  approve: boolean;
+  context?: RequestContext;
+}) {
   const db = getDb();
   const [row] = await db.select().from(rr).where(eq(rr.id, input.requestId));
   if (!row || !row.userId) throw new RecoveryError("NOT_FOUND", "No such request");
@@ -383,6 +388,7 @@ export async function decideRecovery(input: { actor: Actor; requestId: string; a
     resourceType: "recovery_request",
     resourceId: row.id,
     companyId: row.organisationId,
+    context: input.context,
   });
 }
 

@@ -50,6 +50,16 @@ Auth's; the columns follow our conventions. Never write to them except through `
 People (`users`) also hold the Join details: mobile and when it was verified, job role, path (buyer, supplier,
 member) and when they accepted the terms.
 
+## Audit and settings (step 3.6)
+
+| Table       | Holds                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `audit_log` | Who did what to which record, when, from where (IP, user agent, request ID) and why, with masked before and after values |
+| `settings`  | Platform settings changed by operators (key, JSON value, who and when); each setting is declared in code with a schema   |
+
+The audit log is append-only in the database: UPDATE and TRUNCATE are always refused, and DELETE only for entries
+older than 8 years (decision A18) inside the retention job `pruneAuditLog()`, which records how many it removed.
+
 ## Migrations
 
 | Command            | What it does                                                                        |

@@ -123,6 +123,8 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A15 | Lost email, "Use my mobile and admin" (528:534): what happens after the mobile code and the admin's confirmation | You | Step 3.5 | The person adds a new work email, confirms it by link; it becomes their sign-in email; admins are told | Answered | Founder, 12 Nov 2026. |
 | A16 | Who handles lost-email support requests | You | Step 3.5 | Operators with Users access (Super admin, Supplier verifier, Operations) in the admin queue (Stage 11); until then each request is emailed to the support address | Answered | Founder, 12 Nov 2026. |
 | A17 | Approval needed but the person is the company's only Admin | You | Step 3.5 | H2 India support approves, through the same queue, with an ID check | Answered | Founder, 12 Nov 2026. |
+| A18 | How long audit log entries are kept (CERT-In needs at least 180 days) | You | Step 3.6 | 8 years, removed by a logged retention job; to be confirmed with the lawyer and CA | Answered | Founder, 12 Nov 2026. |
+| A19 | Who can read and export the Audit log (656:872) | You | Step 11.4 | Read with Users view (Super admin, Supplier verifier, Operations, Finance); export with Users export (Super admin only) | Open | Built this way in step 3.6; change in the Operator roles screen. |
 
 ## Design-system notes (Stage 2)
 
@@ -157,3 +159,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: You set the scope (A10: Stages 3 to 5), how undrawn screens are handled (A11) and sample content (F9). Step 3.3 merged.
 - 12 Nov 2026: Step 3.4 built and merged. You accepted the drafted operator grids (A12) and least access for approved join requests (A13).
 - 12 Nov 2026: Step 3.5 planned. You decided A14 to A17 (mobile change approval, lost email, support desk, sole admin).
+- 12 Nov 2026: You set audit retention to 8 years (A18).

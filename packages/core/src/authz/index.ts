@@ -6,3 +6,4 @@ export { assertCan, can, ForbiddenError, withinLimit } from "./can";
 export type { Resource } from "./can";
 export { inScope, scopeFor } from "./scope";
 export type { Scope } from "./scope";
+export { grantOperatorRole, OperatorRoleError, revokeOperatorRole, SUPER_ADMIN } from "./grants";

@@ -73,6 +73,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Every new company-owned record type adds a case to `packages/core/src/authz/authz.int.test.ts` (company B cannot read or change company A's record).
 - Roles and permissions are data. To change the defaults, edit `authz/catalogue.ts`, then generate a new seed migration with `scripts/authz-seed.ts`.
 
+## Audit log (step 3.6)
+
+- Every status change, permission or role change, setting change, money action and admin action calls `audit()` in the same transaction as the change, with before and after values and a reason where the design asks for one.
+- In the web app, pass `await requestContext()` (`apps/web/src/server/request-context.ts`) so the entry gets the IP, user agent and request ID.
+- `mask()` hides secrets and codes fully and keeps the last four of bank, card, PAN and mobile numbers; name fields so it recognises them (`accountNumber`, `mobile`, `code`).
+- Settings: declare with `defineSetting()` and change only with `setSetting()` (needs `settings.edit`, audited). Feature flags stay in `packages/config`.
+- Never write to `core.audit_log` except through `audit()`; never set `h2.audit_retention` outside `pruneAuditLog()`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.
