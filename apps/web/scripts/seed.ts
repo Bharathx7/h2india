@@ -219,6 +219,20 @@ async function seedGuides(payload: Payload, publish: boolean): Promise<string> {
   return `Guides: ${String(published)} published`;
 }
 
+/** The SIGHT tracker (418:2079, step 5.4): sample figures, rounds and awardees. Never overwrites an editor's tracker. */
+async function seedSight(payload: Payload): Promise<string> {
+  const current = await payload.findGlobal({ slug: "sight-tracker", depth: 0 });
+  if (current.intro && !current.sample) return "SIGHT tracker: kept the editors' tracker";
+  const data = relativeDates(
+    JSON.parse(await readFile(path.join(seedDir, "sight-tracker.json"), "utf8")) as Record<string, unknown>,
+  ) as Record<string, unknown> & { verifiedAt?: string };
+  await payload.updateGlobal({
+    slug: "sight-tracker",
+    data: { ...data, verifiedAt: data.verifiedAt ? (parseDate(data.verifiedAt) ?? null) : null, sample: true },
+  });
+  return "SIGHT tracker: sample tracker set";
+}
+
 /** Home figures (A45): the drawn figures with their sources, flagged sample. Never overwrites figures an editor set. */
 async function seedHomeFigures(payload: Payload): Promise<string> {
   const current = await payload.findGlobal({ slug: "home-figures", depth: 0 });
@@ -322,6 +336,7 @@ async function main(): Promise<number> {
   console.log(await seedArticles(payload, publish));
   console.log(await seedGuides(payload, publish));
   console.log(await seedHomeFigures(payload));
+  console.log(await seedSight(payload));
   return problems > 0 ? 1 : 0;
 }
 

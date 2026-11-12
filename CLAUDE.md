@@ -132,6 +132,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A published article changes only through the workflow; the one exception is the `live-update` action, which publishes the live explainer block alone (A61).
 - Every `<main>` on a newsroom page carries `[&_:is(h1,h2,h3)]:text-wrap`, so headings wrap as drawn rather than balanced. Runbook: `docs/runbooks/news.md`.
 
+## Schemes and states (step 5.4)
+
+- Eligibility rules are data on each scheme (`eligibilityRules`, CMS group in `cms/records/eligibility.ts`); the matching is `matchSchemes()` in `@h2india/core/schemes`. A scheme counts only when an editor ticks "Rules checked". Never write criteria in code or seeds (M25).
+- Scheme statuses: `schemeStatus()` with `SCHEME_STATUS_OVERRIDES` (Announced, Results declared, Next round expected, Closed); otherwise the deadline decides.
+- Tenders link to schemes (`schemes` relationship); scheme pages and the SIGHT tracker read related tenders from it. The SIGHT tracker's figures, rounds and awardees are the `sight-tracker` global.
+- The schemes hub uses `?state=` as a filter, so its designed states are forced with `?view=loading|error|empty`.
+- Newsroom reads are cached by `news/data.ts`; when a filter's meaning changes, bump `CACHE_VERSION` there so old entries aren't served.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

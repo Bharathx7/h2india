@@ -11,7 +11,8 @@
     "bidDueAt": "+5d 17:00",
     "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
     "sourceUrl": "https://example.org/sample/seci-green-ammonia",
-    "publish": "yes"
+    "publish": "yes",
+    "schemes": "sight-green-hydrogen-production"
   },
   {
     "slug": "iocl-10-mw-pem-electrolyser-panipat",
@@ -39,6 +40,21 @@
     "bidDueAt": "+18d 15:00",
     "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
     "sourceUrl": "https://example.org/sample/dpa-bunkering-pilot",
+    "publish": "yes"
+  },
+  {
+    "slug": "seci-green-methanol-mode-2c-tranche-i",
+    "title": "Selection of green methanol producers, Mode 2C Tranche I",
+    "issuer": "SECI",
+    "tenderId": "SECI/C&P/HO/2026/0388",
+    "mode": "Open tender · two-bid system",
+    "category": "Production › Green methanol",
+    "states": ["all-india"],
+    "emd": "as per RfS",
+    "bidDueAt": "+40d 17:00",
+    "description": "Sample tender from the SIGHT tracker design (418:2079). Replace with a real tender before launch.",
+    "sourceUrl": "https://example.org/sample/seci-green-methanol",
+    "schemes": "sight-green-hydrogen-production",
     "publish": "yes"
   }
 ]

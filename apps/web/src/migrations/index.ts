@@ -7,6 +7,7 @@ import * as migration_20261112_084700_report_dates from './20261112_084700_repor
 import * as migration_20261112_092925_home from './20261112_092925_home';
 import * as migration_20261112_150948_newsroom from './20261112_150948_newsroom';
 import * as migration_20261112_151557_newsroom_variants from './20261112_151557_newsroom_variants';
+import * as migration_20261112_155725_schemes from './20261112_155725_schemes';
 
 export const migrations = [
   {
@@ -52,6 +53,11 @@ export const migrations = [
   {
     up: migration_20261112_151557_newsroom_variants.up,
     down: migration_20261112_151557_newsroom_variants.down,
-    name: '20261112_151557_newsroom_variants'
+    name: '20261112_151557_newsroom_variants',
+  },
+  {
+    up: migration_20261112_155725_schemes.up,
+    down: migration_20261112_155725_schemes.down,
+    name: '20261112_155725_schemes'
   },
 ];

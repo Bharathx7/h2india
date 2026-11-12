@@ -1,7 +1,8 @@
 import type { CollectionConfig, Field } from "payload";
 import { canEdit, canView } from "../roles";
 import { istDate, recordCollection, slugField, sourceFields, statesField, topicsField } from "./common";
-import { eventStatus, grantStatus, jobStatus, schemeStatus, tenderStatus } from "./status";
+import { eventStatus, grantStatus, jobStatus, SCHEME_STATUS_OVERRIDES, schemeStatus, tenderStatus } from "./status";
+import { BENEFIT_TYPES, eligibilityRulesField } from "./eligibility";
 
 // The five record types (step 4.3, A31) with fields from the admin editors (640:8 Scheme, 640:773 Tender, 643:8 Grant,
 // 643:778 Event, 645:8 Job) and the public pages (416:1354, 457:3222, 459:3621, 463:5337, 465:6591, 729:11207).
@@ -58,8 +59,21 @@ export const Schemes: CollectionConfig = recordCollection({
       name: "statusOverride",
       label: "Scheme status",
       type: "select",
-      options: ["Closed", "Next round expected"],
+      options: [...SCHEME_STATUS_OVERRIDES],
       admin: { description: "Leave empty: Open or Closing soon come from the deadline." },
+    },
+    {
+      type: "row",
+      fields: [
+        { name: "outlay", type: "text", admin: { description: "For example ₹13,050 crore for Component II." } },
+        { name: "benefitTypes", label: "Benefit type", type: "select", hasMany: true, options: BENEFIT_TYPES },
+      ],
+    },
+    {
+      name: "howToApply",
+      label: "How to apply",
+      type: "textarea",
+      admin: { description: "Shown in “At a glance” (416:1354). Applications always happen on the official portal." },
     },
     { name: "summary", label: "What applicants get", type: "textarea", required: true },
     { name: "purpose", type: "textarea" },
@@ -73,10 +87,22 @@ export const Schemes: CollectionConfig = recordCollection({
         { name: "product", type: "text" },
         { name: "capacity", type: "text" },
         { name: "state", type: "text", admin: { description: "For example Results declared, Closing soon." } },
+        { name: "resultsUrl", label: "Results link", type: "text" },
       ],
     },
     list("eligibility", "Who can apply (conditions)", "condition"),
     { name: "benefits", type: "textarea" },
+    {
+      name: "benefitRates",
+      label: "Benefit cards",
+      type: "array",
+      maxRows: 4,
+      admin: { description: "The figures under Benefits (416:1354), for example Year 1 · ₹4 / kg." },
+      fields: [
+        { name: "label", type: "text", required: true },
+        { name: "value", type: "text", required: true },
+      ],
+    },
     {
       name: "timeline",
       type: "array",
@@ -97,6 +123,7 @@ export const Schemes: CollectionConfig = recordCollection({
     },
     ...sourceFields("Official page"),
     topicsField,
+    eligibilityRulesField,
   ],
 });
 
@@ -148,6 +175,14 @@ export const Tenders: CollectionConfig = recordCollection({
       ],
     },
     { name: "description", label: "What this tender is for", type: "textarea", required: true },
+    {
+      name: "schemes",
+      label: "Under schemes",
+      type: "relationship",
+      relationTo: "schemes",
+      hasMany: true,
+      admin: { description: "Shows the tender on these schemes' pages and the SIGHT tracker (step 5.4)." },
+    },
     list("eligibility", "Who can bid", "condition"),
     ...sourceFields("Tender portal link"),
     {

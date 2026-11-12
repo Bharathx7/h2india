@@ -1,0 +1,118 @@
+{
+  "intro": "SIGHT (Strategic Interventions for Green Hydrogen Transition) is the ₹17,490 crore incentive programme of the National Green Hydrogen Mission. SECI runs it in rounds: Component I supports electrolyser factories, Component II supports producers of green hydrogen, ammonia and methanol. This page tracks every round and who won it.",
+  "sourcesLine": "SECI, MNRE",
+  "verifiedAt": "-2d",
+  "figures": [
+    {
+      "value": "8.62 lakh",
+      "label": "t/yr of green hydrogen awarded (Mode 1)",
+      "source": "Source: SECI results, Jan 2024 and 2025 (sample)"
+    },
+    {
+      "value": "3,000",
+      "label": "MW/yr of electrolyser manufacturing awarded",
+      "source": "Source: SECI results, Tranches I and II, 2024 (sample)"
+    },
+    {
+      "value": "7.24 lakh",
+      "label": "t/yr of green ammonia awarded in 13 auctions",
+      "source": "Source: SECI results, Jul–Aug 2025 (sample)"
+    },
+    {
+      "value": "5 lakh",
+      "label": "t/yr of green methanol offered in the first round",
+      "source": "Source: SECI draft RfS, May 2026 (sample)"
+    }
+  ],
+  "rounds": [
+    {
+      "component": "II · Production",
+      "mode": "2A",
+      "tranche": "II",
+      "product": "Green ammonia",
+      "offered": "Per RfS",
+      "awarded": "—",
+      "bidDue": "15 Nov 2026",
+      "result": "—",
+      "status": "Closing soon"
+    },
+    {
+      "component": "II · Production",
+      "mode": "2C",
+      "tranche": "I",
+      "product": "Green methanol",
+      "offered": "5,00,000 t/yr",
+      "awarded": "—",
+      "bidDue": "Not yet set",
+      "result": "—",
+      "status": "Announced"
+    },
+    {
+      "component": "II · Production",
+      "mode": "2A",
+      "tranche": "I",
+      "product": "Green ammonia",
+      "offered": "7,24,000 t/yr",
+      "awarded": "7,24,000 t/yr",
+      "bidDue": "Jun 2025",
+      "result": "Aug 2025",
+      "status": "Results declared"
+    },
+    {
+      "component": "II · Production",
+      "mode": "1",
+      "tranche": "II",
+      "product": "Green hydrogen",
+      "offered": "4,50,000 t/yr",
+      "awarded": "4,50,000 t/yr",
+      "bidDue": "Sep 2024",
+      "result": "Mar 2025",
+      "status": "Results declared"
+    },
+    {
+      "component": "I · Electrolysers",
+      "mode": "—",
+      "tranche": "II",
+      "product": "Electrolyser manufacturing",
+      "offered": "1,500 MW/yr",
+      "awarded": "1,500 MW/yr",
+      "bidDue": "Apr 2024",
+      "result": "Jul 2024",
+      "status": "Results declared"
+    }
+  ],
+  "awardees": [
+    {
+      "company": "Sample Awardee One",
+      "round": "Mode 1 · Tranche II",
+      "group": "Green hydrogen",
+      "capacity": "90,000 t/yr",
+      "priceOrIncentive": "₹300 crore incentive"
+    },
+    {
+      "company": "Sample Awardee Two",
+      "round": "Mode 2A · Tranche I",
+      "group": "Green ammonia",
+      "capacity": "75,000 t/yr",
+      "priceOrIncentive": "₹55.75 per kg"
+    },
+    {
+      "company": "Hydrotek Systems",
+      "round": "Component I · Tranche II",
+      "group": "Electrolysers",
+      "capacity": "300 MW/yr",
+      "priceOrIncentive": "Not public",
+      "profileSlug": "hydrotek-systems"
+    }
+  ],
+  "sources": [
+    {
+      "title": "MNRE · National Green Hydrogen Mission",
+      "url": "https://example.org/sample/mnre-nghm"
+    },
+    {
+      "title": "SECI · tenders and results",
+      "url": "https://example.org/sample/seci"
+    }
+  ]
+}

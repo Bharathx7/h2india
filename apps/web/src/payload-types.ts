@@ -149,11 +149,13 @@ export interface Config {
     'tracker-methodology': TrackerMethodology;
     'home-figures': HomeFigure;
     prelaunch: Prelaunch;
+    'sight-tracker': SightTracker;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
     'home-figures': HomeFiguresSelect<false> | HomeFiguresSelect<true>;
     prelaunch: PrelaunchSelect<false> | PrelaunchSelect<true>;
+    'sight-tracker': SightTrackerSelect<false> | SightTrackerSelect<true>;
   };
   locale: null;
   widgets: {
@@ -631,7 +633,17 @@ export interface Scheme {
   /**
    * Leave empty: Open or Closing soon come from the deadline.
    */
-  statusOverride?: ('Closed' | 'Next round expected') | null;
+  statusOverride?: ('Announced' | 'Results declared' | 'Next round expected' | 'Closed') | null;
+  /**
+   * For example ₹13,050 crore for Component II.
+   */
+  outlay?: string | null;
+  benefitTypes?:
+    ('Capital subsidy' | 'Production incentive' | 'Viability gap funding' | 'Grant' | 'Tax or duty exemption')[] | null;
+  /**
+   * Shown in “At a glance” (416:1354). Applications always happen on the official portal.
+   */
+  howToApply?: string | null;
   summary: string;
   purpose?: string | null;
   tranches?:
@@ -644,6 +656,7 @@ export interface Scheme {
          * For example Results declared, Closing soon.
          */
         state?: string | null;
+        resultsUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -654,6 +667,16 @@ export interface Scheme {
       }[]
     | null;
   benefits?: string | null;
+  /**
+   * The figures under Benefits (416:1354), for example Year 1 · ₹4 / kg.
+   */
+  benefitRates?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
   timeline?:
     | {
         when: string;
@@ -688,6 +711,78 @@ export interface Scheme {
       }[]
     | null;
   topics?: (number | Topic)[] | null;
+  /**
+   * Who the official notice says can apply, in the checker's terms. Leave a list empty when the notice doesn't limit it. Never guess (M25).
+   */
+  eligibilityRules?: {
+    /**
+     * Only schemes with this ticked appear in the eligibility checker.
+     */
+    checked?: boolean | null;
+    organisations?:
+      | ('producer' | 'manufacturer' | 'startup' | 'research' | 'industrial' | 'state-agency' | 'transport' | 'other')[]
+      | null;
+    states?:
+      | (
+          | 'all-india'
+          | 'andaman-and-nicobar-islands'
+          | 'andhra-pradesh'
+          | 'arunachal-pradesh'
+          | 'assam'
+          | 'bihar'
+          | 'chandigarh'
+          | 'chhattisgarh'
+          | 'dadra-and-nagar-haveli-and-daman-and-diu'
+          | 'delhi'
+          | 'goa'
+          | 'gujarat'
+          | 'haryana'
+          | 'himachal-pradesh'
+          | 'jammu-and-kashmir'
+          | 'jharkhand'
+          | 'karnataka'
+          | 'kerala'
+          | 'ladakh'
+          | 'lakshadweep'
+          | 'madhya-pradesh'
+          | 'maharashtra'
+          | 'manipur'
+          | 'meghalaya'
+          | 'mizoram'
+          | 'nagaland'
+          | 'odisha'
+          | 'puducherry'
+          | 'punjab'
+          | 'rajasthan'
+          | 'sikkim'
+          | 'tamil-nadu'
+          | 'telangana'
+          | 'tripura'
+          | 'uttar-pradesh'
+          | 'uttarakhand'
+          | 'west-bengal'
+        )[]
+      | null;
+    activities?:
+      | (
+          | 'production'
+          | 'electrolysers'
+          | 'fuel-cells'
+          | 'storage'
+          | 'refuelling'
+          | 'industry'
+          | 'research'
+          | 'services'
+        )[]
+      | null;
+    sizes?: ('micro' | 'small' | 'medium' | 'large')[] | null;
+    dpiitOnly?: boolean | null;
+    stages?: ('idea' | 'pilot' | 'first-plant' | 'expanding')[] | null;
+    /**
+     * Shown with each match (750:8), for example “The minimum investment in the policy notice”.
+     */
+    checkNext?: string[] | null;
+  };
   /**
    * From the dates; nobody needs to change it.
    */
@@ -789,6 +884,10 @@ export interface Tender {
       }[]
     | null;
   description: string;
+  /**
+   * Shows the tender on these schemes' pages and the SIGHT tracker (step 5.4).
+   */
+  schemes?: (number | Scheme)[] | null;
   eligibility?:
     | {
         condition: string;
@@ -2323,6 +2422,42 @@ export interface TrackerPolicy {
   officialUrl: string;
   scheme?: (number | null) | Scheme;
   /**
+   * Two lines under the policy name on the state page. Our summary; the policy text decides.
+   */
+  summary?: string | null;
+  /**
+   * One row per incentive the policy text covers. Anything left out shows “Not specified” on Compare states.
+   */
+  incentives?:
+    | {
+        category:
+          | 'Capital subsidy'
+          | 'Power and wheeling'
+          | 'Land'
+          | 'Electricity duty'
+          | 'Mobility support'
+          | 'Equipment buyers'
+          | 'Other';
+        /**
+         * For example Producers.
+         */
+        for?: string | null;
+        summary: string;
+        id?: string | null;
+      }[]
+    | null;
+  nodalAgency?: {
+    /**
+     * For example Maharashtra Energy Development Agency.
+     */
+    name?: string | null;
+    /**
+     * For example MEDA.
+     */
+    short?: string | null;
+    url?: string | null;
+  };
+  /**
    * Part of the address. Don't change it once published.
    */
   slug: string;
@@ -2371,6 +2506,12 @@ export interface TrackerHub {
   name: string;
   kind: 'Hub' | 'Valley';
   description?: string | null;
+  /**
+   * For example Foundation set up; demonstrations starting.
+   */
+  status?: string | null;
+  lead?: string | null;
+  focus?: string | null;
   /**
    * For example Mundra, Kutch, Gujarat.
    */
@@ -2871,6 +3012,9 @@ export interface SchemesSelect<T extends boolean = true> {
   nextDeadline?: T;
   deadlineNote?: T;
   statusOverride?: T;
+  outlay?: T;
+  benefitTypes?: T;
+  howToApply?: T;
   summary?: T;
   purpose?: T;
   tranches?:
@@ -2881,6 +3025,7 @@ export interface SchemesSelect<T extends boolean = true> {
         product?: T;
         capacity?: T;
         state?: T;
+        resultsUrl?: T;
         id?: T;
       };
   eligibility?:
@@ -2890,6 +3035,13 @@ export interface SchemesSelect<T extends boolean = true> {
         id?: T;
       };
   benefits?: T;
+  benefitRates?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
   timeline?:
     | T
     | {
@@ -2921,6 +3073,18 @@ export interface SchemesSelect<T extends boolean = true> {
         id?: T;
       };
   topics?: T;
+  eligibilityRules?:
+    | T
+    | {
+        checked?: T;
+        organisations?: T;
+        states?: T;
+        activities?: T;
+        sizes?: T;
+        dpiitOnly?: T;
+        stages?: T;
+        checkNext?: T;
+      };
   status?: T;
   owner?: T;
   verification?:
@@ -2959,6 +3123,7 @@ export interface TendersSelect<T extends boolean = true> {
         id?: T;
       };
   description?: T;
+  schemes?: T;
   eligibility?:
     | T
     | {
@@ -3658,6 +3823,22 @@ export interface TrackerPoliciesSelect<T extends boolean = true> {
   keyIncentives?: T;
   officialUrl?: T;
   scheme?: T;
+  summary?: T;
+  incentives?:
+    | T
+    | {
+        category?: T;
+        for?: T;
+        summary?: T;
+        id?: T;
+      };
+  nodalAgency?:
+    | T
+    | {
+        name?: T;
+        short?: T;
+        url?: T;
+      };
   slug?: T;
   source?:
     | T
@@ -3689,6 +3870,9 @@ export interface TrackerHubsSelect<T extends boolean = true> {
   name?: T;
   kind?: T;
   description?: T;
+  status?: T;
+  lead?: T;
+  focus?: T;
   location?: T;
   state?: T;
   latitude?: T;
@@ -4037,6 +4221,79 @@ export interface Prelaunch {
   createdAt?: string | null;
 }
 /**
+ * The SIGHT programme tracker page. Figures need their source.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sight-tracker".
+ */
+export interface SightTracker {
+  id: number;
+  intro: string;
+  verifiedAt?: string | null;
+  /**
+   * For example SECI, MNRE.
+   */
+  sourcesLine?: string | null;
+  figures?:
+    | {
+        /**
+         * As readers see it: 8.62 lakh
+         */
+        value: string;
+        label: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Newest first, as on the page.
+   */
+  rounds?:
+    | {
+        /**
+         * II · Production
+         */
+        component: string;
+        mode?: string | null;
+        tranche?: string | null;
+        product: string;
+        offered?: string | null;
+        awarded?: string | null;
+        bidDue?: string | null;
+        result?: string | null;
+        status: 'Closing soon' | 'Open' | 'Announced' | 'Results declared' | 'Upcoming';
+        id?: string | null;
+      }[]
+    | null;
+  awardees?:
+    | {
+        company: string;
+        round: string;
+        group?: ('Electrolysers' | 'Green hydrogen' | 'Green ammonia' | 'Green methanol') | null;
+        capacity?: string | null;
+        priceOrIncentive?: string | null;
+        /**
+         * The company's H2 India profile slug, if it has one.
+         */
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sources?:
+    | {
+        title: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample figures (F9): hidden where sample content is off.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracker-methodology_select".
  */
@@ -4118,6 +4375,59 @@ export interface PrelaunchSelect<T extends boolean = true> {
         note?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sight-tracker_select".
+ */
+export interface SightTrackerSelect<T extends boolean = true> {
+  intro?: T;
+  verifiedAt?: T;
+  sourcesLine?: T;
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        id?: T;
+      };
+  rounds?:
+    | T
+    | {
+        component?: T;
+        mode?: T;
+        tranche?: T;
+        product?: T;
+        offered?: T;
+        awarded?: T;
+        bidDue?: T;
+        result?: T;
+        status?: T;
+        id?: T;
+      };
+  awardees?:
+    | T
+    | {
+        company?: T;
+        round?: T;
+        group?: T;
+        capacity?: T;
+        priceOrIncentive?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  sources?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        id?: T;
+      };
+  sample?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

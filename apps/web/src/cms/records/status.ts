@@ -11,6 +11,8 @@ export type RecordStatus =
   | "Closed"
   | "Awarded"
   | "Next round expected"
+  | "Announced"
+  | "Results declared"
   | "Upcoming"
   | "Happening now"
   | "Past"
@@ -25,11 +27,15 @@ function byDeadline(deadline: Date | null, now: Date): "Open" | "Closing soon" |
 
 const date = (v: string | Date | null | undefined) => (v ? new Date(v) : null);
 
+/** The statuses an editor sets on a scheme (421:4769 and the hub badges); without one, the deadline decides. */
+export const SCHEME_STATUS_OVERRIDES = ["Announced", "Results declared", "Next round expected", "Closed"] as const;
+
 export function schemeStatus(
   s: { nextDeadline?: string | null; override?: string | null },
   now = new Date(),
 ): RecordStatus {
-  if (s.override === "Closed" || s.override === "Next round expected") return s.override;
+  const override = SCHEME_STATUS_OVERRIDES.find((o) => o === s.override);
+  if (override) return override;
   return byDeadline(date(s.nextDeadline), now);
 }
 

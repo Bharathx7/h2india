@@ -41,6 +41,7 @@ import {
   TrackerStations,
 } from "./cms/tracker/collections";
 import { has } from "./cms/roles";
+import { SightTracker } from "./cms/records/sight";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
 // database, editors signed in with their H2 India account, the editor at /cms.
@@ -96,7 +97,7 @@ export default buildConfig({
     Media,
     Editors,
   ],
-  globals: [TrackerMethodology, HomeFigures, Prelaunch],
+  globals: [TrackerMethodology, HomeFigures, Prelaunch, SightTracker],
   editor: lexicalEditor(),
   endpoints: [
     {

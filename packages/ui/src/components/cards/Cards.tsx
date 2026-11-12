@@ -227,8 +227,11 @@ export function SchemeCard(s: {
   deadline: string;
   verified: string | null;
   href: string;
-  saveHref: string;
-  alertHref: string;
+  /** Save and alert need member accounts (Stage 7); the buttons show only when given. */
+  saveHref?: string;
+  alertHref?: string;
+  /** The arrow link's words; "Check eligibility" as drawn. */
+  actionLabel?: string;
 }) {
   const round =
     "inline-flex size-8 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus";
@@ -259,18 +262,24 @@ export function SchemeCard(s: {
       {s.verified ? <p className="type-caption text-secondary">Last verified {s.verified}</p> : null}
       <div className="flex items-center justify-between">
         <a href={s.href} className={cx(arrowLink, stretch)}>
-          Check eligibility
+          {s.actionLabel ?? "Check eligibility"}
           <Icon name="arrow-right" size={16} />
           <span className="sr-only">: {s.title}</span>
         </a>
-        <div className={cx(above, "flex items-center gap-2")}>
-          <a href={s.saveHref} className={round} aria-label={`Save ${s.title}`}>
-            <Icon name="heart" size={14} />
-          </a>
-          <a href={s.alertHref} className={round} aria-label={`Set an alert for ${s.title}`}>
-            <Icon name="bell" size={14} />
-          </a>
-        </div>
+        {s.saveHref || s.alertHref ? (
+          <div className={cx(above, "flex items-center gap-2")}>
+            {s.saveHref ? (
+              <a href={s.saveHref} className={round} aria-label={`Save ${s.title}`}>
+                <Icon name="heart" size={14} />
+              </a>
+            ) : null}
+            {s.alertHref ? (
+              <a href={s.alertHref} className={round} aria-label={`Set an alert for ${s.title}`}>
+                <Icon name="bell" size={14} />
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );

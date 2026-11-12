@@ -19,9 +19,15 @@ const SAFETY_NET_SECONDS = 300;
 
 const payload = () => getPayload({ config });
 
+/** Bumped when a read's filters change meaning, so entries cached under the old meaning are never served. */
+const CACHE_VERSION = 2;
+
 /** Caches a read under the newsroom tag. The arguments are part of the key. */
 function cached<A extends unknown[], R>(name: string, read: (...args: A) => Promise<R>) {
-  return unstable_cache(read, [`news:${name}`], { tags: [NEWS_TAG], revalidate: SAFETY_NET_SECONDS });
+  return unstable_cache(read, [`news:v${String(CACHE_VERSION)}:${name}`], {
+    tags: [NEWS_TAG],
+    revalidate: SAFETY_NET_SECONDS,
+  });
 }
 
 /** Words in a Lexical body, for "Read · 7 min". */
@@ -149,8 +155,9 @@ export interface ArticleFilter {
   types?: string[];
   /** Not these types. */
   notTypes?: string[];
-  /** A state value from STATE_OPTIONS; national stories (no state) are always included. */
+  /** A state value from STATE_OPTIONS; national stories (no state) are included unless stateOnly. */
   state?: string;
+  stateOnly?: boolean;
   featured?: boolean;
   exclude?: number[];
   page?: number;
@@ -189,7 +196,11 @@ async function articleWhere(f: ArticleFilter): Promise<Where | null> {
   if (f.types?.length) parts.push({ type: { in: f.types } });
   if (f.notTypes?.length) parts.push({ type: { not_in: f.notTypes } });
   if (f.state && STATE_OPTIONS.some((o) => o.value === f.state)) {
-    parts.push({ or: [{ states: { in: [f.state, "all-india"] } }, { states: { exists: false } }] });
+    parts.push(
+      f.stateOnly
+        ? { states: { in: [f.state] } }
+        : { or: [{ states: { in: [f.state, "all-india"] } }, { states: { exists: false } }] },
+    );
   }
   if (f.featured) parts.push({ featured: { equals: true } });
   if (f.exclude?.length) parts.push({ id: { not_in: f.exclude } });

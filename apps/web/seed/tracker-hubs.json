@@ -16,10 +16,10 @@
   },
   {
     "slug": "pune-valley",
-    "name": "Pune valley",
+    "name": "Pune Hydrogen Valley",
     "kind": "Valley",
     "state": "maharashtra",
-    "location": "Pune, Maharashtra",
+    "location": "Pune–Mumbai, Maharashtra",
     "latitude": 18.52,
     "longitude": 73.86,
     "source": {
@@ -27,7 +27,10 @@
       "tier": "official",
       "asOf": "2026-11-01"
     },
-    "publish": "yes"
+    "publish": "yes",
+    "status": "Foundation set up; demonstrations starting",
+    "lead": "CSIR–National Chemical Laboratory (CSIR–NCL)",
+    "focus": "Green chemicals and sustainable transport"
   },
   {
     "slug": "paradip-port",
@@ -56,6 +59,60 @@
       "name": "MNRE",
       "tier": "official",
       "asOf": "2026-11-10"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "jodhpur-valley",
+    "name": "Jodhpur Hydrogen Valley",
+    "kind": "Valley",
+    "state": "rajasthan",
+    "location": "Jodhpur, Rajasthan",
+    "latitude": 26.3,
+    "longitude": 73.0,
+    "lead": "IIT Jodhpur",
+    "focus": "Hydrogen mobility, green ammonia, blending in city gas",
+    "status": "Sample: status from the design",
+    "source": {
+      "name": "MNRE notice",
+      "tier": "official",
+      "asOf": "2026-11-05"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "odisha-valley",
+    "name": "Odisha Hydrogen Valley",
+    "kind": "Valley",
+    "state": "odisha",
+    "location": "Bhubaneswar, Odisha",
+    "latitude": 20.3,
+    "longitude": 85.8,
+    "lead": "IIT Bhubaneswar",
+    "focus": "Green steel by the DRI route, hydrogen for mining transport",
+    "status": "Sample: status from the design",
+    "source": {
+      "name": "MNRE notice",
+      "tier": "official",
+      "asOf": "2026-11-05"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "kerala-valley",
+    "name": "Kerala Hydrogen Valley",
+    "kind": "Valley",
+    "state": "kerala",
+    "location": "Kochi and Alappuzha, Kerala",
+    "latitude": 9.9,
+    "longitude": 76.3,
+    "lead": "ANERT",
+    "focus": "Green ammonia, city gas blending, transport",
+    "status": "Sample: status from the design",
+    "source": {
+      "name": "MNRE notice",
+      "tier": "official",
+      "asOf": "2026-11-05"
     },
     "publish": "yes"
   }
