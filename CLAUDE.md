@@ -23,16 +23,18 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Commands
 
-| What                    | Command                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| Install                 | `pnpm install`                                                                        |
-| Local services (Docker) | `cp .env.example .env.local` once, then `pnpm dev:up`, `pnpm health`, `pnpm dev:down` |
-| Web app                 | `pnpm dev` (http://localhost:3000)                                                    |
-| Worker                  | `pnpm dev:worker`                                                                     |
-| All checks              | `pnpm check` (types, lint, format)                                                    |
-| Unit tests              | `pnpm test`                                                                           |
-| Browser tests           | `pnpm e2e` (app running), or `E2E_START_SERVER=1 pnpm e2e` after `pnpm build`         |
-| Build                   | `pnpm build`                                                                          |
+| What                         | Command                                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Install                      | `pnpm install`                                                                                        |
+| Local services (Docker)      | `cp .env.example .env.local` once, then `pnpm dev:up`, `pnpm health`, `pnpm dev:down`                 |
+| Web app                      | `pnpm dev` (http://localhost:3000)                                                                    |
+| Worker                       | `pnpm dev:worker`                                                                                     |
+| All checks                   | `pnpm check` (types, lint, format)                                                                    |
+| Unit tests                   | `pnpm test`                                                                                           |
+| Browser tests                | `pnpm e2e` (app running), or `E2E_START_SERVER=1 pnpm e2e` after `pnpm build`                         |
+| Build                        | `pnpm build`                                                                                          |
+| Sample data (local, staging) | `pnpm db:seed`; set `FLAG_SAMPLE_CONTENT=true` to see it                                              |
+| Bulk import                  | `pnpm import:<type> <file.csv\|file.json>` checks; add `--apply` to write (`docs/runbooks/import.md`) |
 
 ## Layout
 

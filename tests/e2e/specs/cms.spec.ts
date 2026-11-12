@@ -53,6 +53,8 @@ test("a Content editor drafts and previews every article type but can't publish"
 test("an Editor-in-chief publishes through the workflow; sponsored pieces need the legal check first", async ({
   page,
 }) => {
+  // The worker publishes scheduled pieces on its every-minute tick, so allow for a full minute and more.
+  test.setTimeout(150_000);
   await signInOperator(page, "Editor-in-chief");
   const author = await newAuthor(page.request, "Vikram Bose");
   const base = { dek: "Standfirst.", body: paragraph("Body."), authors: [author] };

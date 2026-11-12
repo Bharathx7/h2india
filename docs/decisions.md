@@ -143,6 +143,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A35 | Tracker "confidence" (step 4.5; not drawn) | You | Step 4.5 | The source's tier from the Methodology page (740:469: government notice or tender result, filing, company announcement, press report) plus an "estimate" tick per figure, shown as "2028 (company estimate)" | Answered | Founder, 12 Nov 2026. |
 | A36 | Tracker end states (step 4.5; not drawn) | You | Step 4.5 | Add Cancelled to every view (kept on the record, left out of totals) and Completed for pilots, besides the drawn statuses | Answered | Founder, 12 Nov 2026. |
 | A37 | How sample content is hidden (F9, step 4.5) | You | Step 4.5 | Flag FLAG_SAMPLE_CONTENT, off by default. Local and staging switch it on; with it off (production) sample-flagged items are never shown and can't be published. Applies to tracker, records and knowledge | Answered | Founder, 12 Nov 2026. |
+| A38 | Company importer timing (step 4.6) | You | Step 4.6 | Now, with the basic profile fields from 481:8 and a claim state of Unclaimed; Stage 6 builds the profile pages and the claim flow (6.7) on top | Answered | Founder, 12 Nov 2026. |
+| A39 | Do imports go live (step 4.6) | You | Step 4.6 | Everything imports as a draft; records, glossary, standards and tracker rows may carry publish=yes (editors publish those, A30); articles always stay drafts for the Editor-in-chief | Answered | Founder, 12 Nov 2026. |
+| A40 | Sample seed scope (step 4.6) | You | Step 4.6 | Grow it page by page: now the tracker, glossary, reports and the companies named in the design; each Stage 5 page adds its frame's sample data | Answered | Founder, 12 Nov 2026. |
+| A41 | Import commands: check or write by default (step 4.6) | You | Step 4.6 | Check by default (a dry run that changes nothing); --apply writes | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -185,3 +189,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Content editors publish record changes (A30); record fields as drawn (A31).
 - 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).
 - 12 Nov 2026: Tracker sources per record with a change log (A34), confidence as source tier plus an estimate tick (A35), Cancelled and Completed added (A36), sample content behind FLAG_SAMPLE_CONTENT (A37).
+- 12 Nov 2026: Company importer now with basic profile fields (A38); imports land as drafts, records may be published (A39); the sample seed grows page by page (A40); imports check by default (A41).

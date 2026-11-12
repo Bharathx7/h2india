@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "green-hydrogen-supply-to-a-refinery",
+    "name": "Green hydrogen supply to a refinery",
+    "product": "Green H₂",
+    "price": "397.00",
+    "gstBasis": "Excl. GST",
+    "discoveredOn": "2026-09",
+    "winner": "Private developer",
+    "source": {
+      "name": "Tender portal",
+      "tier": "official",
+      "asOf": "2026-11-03"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-hydrogen-for-a-urea-plant-price",
+    "name": "Green hydrogen for a urea plant",
+    "product": "Green H₂",
+    "price": "420.00",
+    "gstBasis": "Excl. GST",
+    "discoveredOn": "2026-07",
+    "winner": "Private developer",
+    "source": {
+      "name": "SECI result",
+      "tier": "official",
+      "asOf": "2026-08-02"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-methanol-pilot-supply",
+    "name": "Green methanol pilot supply",
+    "product": "Methanol",
+    "price": "78.00",
+    "gstBasis": "Excl. GST",
+    "discoveredOn": "2026-10",
+    "winner": "Private developer",
+    "source": {
+      "name": "Tender portal",
+      "tier": "official",
+      "asOf": "2026-10-21"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-ammonia-auction-lot-a",
+    "name": "Green ammonia auction, lot A",
+    "product": "Green NH₃",
+    "price": "52.40",
+    "gstBasis": "Excl. GST",
+    "discoveredOn": "2025-08",
+    "winner": "Private developer",
+    "source": {
+      "name": "SECI result",
+      "tier": "official",
+      "asOf": "2025-08-20"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "green-ammonia-auction-lot-b",
+    "name": "Green ammonia auction, lot B",
+    "product": "Green NH₃",
+    "price": "55.75",
+    "gstBasis": "Excl. GST",
+    "discoveredOn": "2025-08",
+    "winner": "Private developer",
+    "source": {
+      "name": "SECI result",
+      "tier": "official",
+      "asOf": "2025-08-20"
+    },
+    "publish": "yes"
+  }
+]

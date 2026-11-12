@@ -1,0 +1,78 @@
+[
+  {
+    "slug": "state-of-indian-hydrogen-october-2026",
+    "title": "State of Indian Hydrogen · October 2026",
+    "kicker": "Data note",
+    "publishedOn": "2026-11-01",
+    "pages": 14,
+    "gated": false,
+    "summary": "The month's projects, prices and policies from the India Hydrogen Tracker."
+  },
+  {
+    "slug": "electrolyser-buying-in-india-2026",
+    "title": "Electrolyser buying in India 2026",
+    "subtitle": "what 62 buyers told us",
+    "kicker": "Survey",
+    "publishedOn": "2026-11-04",
+    "pages": 36,
+    "gated": true,
+    "summary": "We asked 62 people who buy or specify electrolysers at Indian companies, PSUs and labs how they choose a supplier, what they check before ordering and what slows them down.",
+    "findings": [
+      "Lead time, not price, was the most common reason for choosing a supplier.",
+      "7 in 10 want a performance guarantee in kWh/kg written into the contract.",
+      "Fewer than a third checked stack degradation data before ordering.",
+      "Most plan a first order under 5 MW before committing to larger plants."
+    ],
+    "contents": [
+      "Who we asked",
+      "What buyers order first",
+      "The specs that decide a purchase",
+      "Payment terms and guarantees",
+      "Approvals and site readiness",
+      "What suppliers could do better",
+      "Method and questionnaire"
+    ],
+    "writtenBy": "The H2 India research desk. Fieldwork from 1 Sep to 10 Oct 2026; 62 complete responses. Method notes are in the report.",
+    "sponsor": {
+      "name": "Hydrotek Systems",
+      "disclosure": "Hydrotek Systems paid for this survey. H2 India wrote the questions and the analysis, and the sponsor saw the report only after it was final."
+    }
+  },
+  {
+    "slug": "green-ammonia-offtake-in-india",
+    "title": "Green ammonia offtake in India",
+    "subtitle": "who is signing, and on what terms",
+    "kicker": "Analysis",
+    "publishedOn": "2026-10-20",
+    "pages": 28,
+    "gated": true,
+    "summary": "Who is signing green ammonia offtake in India, and on what terms."
+  },
+  {
+    "slug": "state-of-indian-hydrogen-september-2026",
+    "title": "State of Indian Hydrogen · September 2026",
+    "kicker": "Data note",
+    "publishedOn": "2026-10-01",
+    "pages": 12,
+    "gated": false,
+    "summary": "The month's projects, prices and policies from the India Hydrogen Tracker."
+  },
+  {
+    "slug": "hydrogen-jobs-and-skills-in-india-2026",
+    "title": "Hydrogen jobs and skills in India 2026",
+    "kicker": "Survey",
+    "publishedOn": "2026-09-15",
+    "pages": 24,
+    "gated": true,
+    "summary": "Which hydrogen roles Indian employers are hiring for, and the skills they find hardest to fill."
+  },
+  {
+    "slug": "state-of-indian-hydrogen-august-2026",
+    "title": "State of Indian Hydrogen · August 2026",
+    "kicker": "Data note",
+    "publishedOn": "2026-09-01",
+    "pages": 12,
+    "gated": false,
+    "summary": "The month's projects, prices and policies from the India Hydrogen Tracker."
+  }
+]

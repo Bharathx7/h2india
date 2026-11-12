@@ -3,6 +3,7 @@ import * as migration_20261112_071218_workflow from './20261112_071218_workflow'
 import * as migration_20261112_073105_records from './20261112_073105_records';
 import * as migration_20261112_075241_knowledge from './20261112_075241_knowledge';
 import * as migration_20261112_083201_tracker from './20261112_083201_tracker';
+import * as migration_20261112_084700_report_dates from './20261112_084700_report_dates';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261112_083201_tracker.up,
     down: migration_20261112_083201_tracker.down,
-    name: '20261112_083201_tracker'
+    name: '20261112_083201_tracker',
+  },
+  {
+    up: migration_20261112_084700_report_dates.up,
+    down: migration_20261112_084700_report_dates.down,
+    name: '20261112_084700_report_dates'
   },
 ];

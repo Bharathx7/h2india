@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "electrolyser",
+    "term": "Electrolyser",
+    "aliases": ["electrolyzer"],
+    "short": "A machine that splits water into hydrogen and oxygen using electricity.",
+    "publish": "yes"
+  },
+  {
+    "slug": "electrolyser-stack",
+    "term": "Electrolyser stack",
+    "short": "The core of an electrolyser: many cells pressed together where the splitting happens.",
+    "publish": "yes"
+  },
+  {
+    "slug": "electrolysis",
+    "term": "Electrolysis",
+    "short": "Splitting water with electricity. Green hydrogen in India is mostly made this way.",
+    "publish": "yes"
+  },
+  {
+    "slug": "electrolyte",
+    "term": "Electrolyte",
+    "short": "The liquid or membrane that carries charge between the electrodes in a cell.",
+    "publish": "yes"
+  },
+  {
+    "slug": "emissions-intensity",
+    "term": "Emissions intensity",
+    "short": "Greenhouse gas emitted per kilogram of hydrogen, in kg CO₂ equivalent.",
+    "publish": "yes"
+  },
+  {
+    "slug": "energy-density",
+    "term": "Energy density",
+    "short": "How much energy a fuel holds per kilogram or per litre.",
+    "publish": "yes"
+  },
+  {
+    "slug": "epc",
+    "term": "EPC",
+    "expansion": "Engineering, procurement and construction",
+    "short": "one contractor designs, buys and builds a plant.",
+    "publish": "yes"
+  },
+  {
+    "slug": "e-fuels",
+    "term": "E-fuels",
+    "aliases": ["e-fuel"],
+    "short": "Fuels such as e-methanol made from green hydrogen and captured carbon.",
+    "publish": "yes"
+  },
+  {
+    "slug": "lcoh",
+    "term": "LCOH",
+    "expansion": "Levelised cost of hydrogen",
+    "short": "the average cost to produce one kilogram over a plant's life, including equipment, power and upkeep.",
+    "publish": "yes"
+  },
+  {
+    "slug": "rfs",
+    "term": "RfS",
+    "expansion": "Request for Selection",
+    "short": "the tender document SECI issues to invite bids for a SIGHT round.",
+    "publish": "yes"
+  }
+]

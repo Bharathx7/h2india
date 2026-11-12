@@ -26,8 +26,15 @@
     "tokens:diff": "pnpm --filter @h2india/ui tokens:diff",
     "db:generate": "pnpm --filter @h2india/db generate",
     "db:migrate": "pnpm --filter @h2india/db migrate && pnpm --filter @h2india/web cms:migrate",
-    "db:seed": "pnpm --filter @h2india/db seed",
-    "db:reset": "pnpm --filter @h2india/db reset"
+    "db:seed": "pnpm --filter @h2india/db seed && pnpm --filter @h2india/web seed",
+    "db:reset": "pnpm --filter @h2india/db reset",
+    "content:import": "node scripts/content-import.mjs",
+    "import:glossary": "node scripts/content-import.mjs glossary",
+    "import:articles": "node scripts/content-import.mjs articles",
+    "import:schemes": "node scripts/content-import.mjs schemes",
+    "import:tenders": "node scripts/content-import.mjs tenders",
+    "import:events": "node scripts/content-import.mjs events",
+    "import:companies": "node scripts/content-import.mjs companies"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"

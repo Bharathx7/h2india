@@ -1,0 +1,95 @@
+[
+  {
+    "key": "hydrotek-systems",
+    "legal_name": "Hydrotek Systems Private Limited",
+    "trade_name": "Hydrotek Systems",
+    "kind": "supplier",
+    "types": ["Manufacturer", "Services"],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "website": "https://example.org/sample/hydrotek-systems",
+    "categories": ["PEM electrolysers", "Compressors", "Storage tanks"],
+    "summary": "Hydrotek Systems designs and builds PEM electrolysers from 10 kW to 2.5 MW. Stacks, power electronics integration and containerised plants are made at our Chakan factory near Pune.",
+    "founded": 2014,
+    "employees": "51–200"
+  },
+  {
+    "key": "greenfield-hydrogen",
+    "legal_name": "Greenfield Hydrogen Private Limited",
+    "trade_name": "Greenfield Hydrogen",
+    "kind": "buyer",
+    "types": ["Developer"],
+    "city": "Talegaon",
+    "state": "Maharashtra",
+    "categories": ["Green hydrogen projects"]
+  },
+  {
+    "key": "pranava-h2",
+    "legal_name": "Pranava H2 Private Limited",
+    "trade_name": "Pranava H2",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "categories": ["Electrolysers", "Electrolyser stacks"]
+  },
+  {
+    "key": "konkan-hydrogen-tech",
+    "legal_name": "Konkan Hydrogen Tech Private Limited",
+    "trade_name": "Konkan Hydrogen Tech",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Ratnagiri",
+    "state": "Maharashtra",
+    "categories": ["Electrolysers"]
+  },
+  {
+    "key": "pem-power-india",
+    "legal_name": "PEM Power India Private Limited",
+    "trade_name": "PEM Power India",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "categories": ["Electrolysers", "Fuel cells"]
+  },
+  {
+    "key": "polar-composites",
+    "legal_name": "Polar Composites Private Limited",
+    "trade_name": "Polar Composites",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Vadodara",
+    "state": "Gujarat",
+    "categories": ["Storage tanks", "Cylinders"]
+  },
+  {
+    "key": "greencell-power",
+    "legal_name": "GreenCell Power Private Limited",
+    "trade_name": "GreenCell Power",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "categories": ["Electrolyser stacks"]
+  },
+  {
+    "key": "kutch-ammonia-works",
+    "legal_name": "Kutch Ammonia Works Private Limited",
+    "trade_name": "Kutch Ammonia Works",
+    "kind": "buyer",
+    "types": ["Developer"],
+    "city": "Mundra",
+    "state": "Gujarat",
+    "categories": ["Green ammonia"]
+  },
+  {
+    "key": "deccan-ammonia-works",
+    "legal_name": "Deccan Ammonia Works Private Limited",
+    "trade_name": "Deccan Ammonia Works",
+    "kind": "buyer",
+    "types": ["Developer"],
+    "state": "Odisha",
+    "categories": ["Green ammonia"]
+  }
+]

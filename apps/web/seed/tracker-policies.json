@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "maharashtra",
+    "state": "maharashtra",
+    "name": "Maharashtra",
+    "policy": "Green Hydrogen Policy",
+    "type": "Dedicated",
+    "keyIncentives": "Capital subsidy; power and transmission charge relief",
+    "year": 2023,
+    "officialUrl": "https://example.org/sample/maharashtra",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "uttar-pradesh",
+    "state": "uttar-pradesh",
+    "name": "Uttar Pradesh",
+    "policy": "Green Hydrogen Policy",
+    "type": "Dedicated",
+    "keyIncentives": "Capital subsidy; stamp duty exemption",
+    "year": 2024,
+    "officialUrl": "https://example.org/sample/uttar-pradesh",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "rajasthan",
+    "state": "rajasthan",
+    "name": "Rajasthan",
+    "policy": "Green Hydrogen Policy",
+    "type": "Dedicated",
+    "keyIncentives": "Land allotment; transmission charge relief",
+    "year": 2023,
+    "officialUrl": "https://example.org/sample/rajasthan",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "andhra-pradesh",
+    "state": "andhra-pradesh",
+    "name": "Andhra Pradesh",
+    "policy": "Green Hydrogen and Green Ammonia Policy",
+    "type": "Dedicated",
+    "keyIncentives": "Power banking; transmission charge relief",
+    "year": 2023,
+    "officialUrl": "https://example.org/sample/andhra-pradesh",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "gujarat",
+    "state": "gujarat",
+    "name": "Gujarat",
+    "policy": "Green hydrogen policy: land and power incentives",
+    "type": "Dedicated",
+    "keyIncentives": "Concessional land; electricity duty exemption",
+    "year": 2023,
+    "officialUrl": "https://example.org/sample/gujarat",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "odisha",
+    "state": "odisha",
+    "name": "Odisha",
+    "policy": "Industrial Policy Resolution",
+    "type": "Provisions",
+    "keyIncentives": "Investment subsidy for green hydrogen units",
+    "year": 2022,
+    "officialUrl": "https://example.org/sample/odisha",
+    "source": {
+      "name": "State notice",
+      "tier": "official",
+      "asOf": "2026-11-04"
+    },
+    "publish": "yes"
+  }
+]

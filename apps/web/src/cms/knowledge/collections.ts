@@ -251,7 +251,22 @@ export const Reports: CollectionConfig = {
   fields: [
     { name: "title", type: "text", required: true },
     slug("title"),
-    { name: "kicker", type: "text", admin: { description: "On the cover, for example SURVEY · 2026." } },
+    {
+      name: "kicker",
+      type: "text",
+      admin: { description: "On the cover, for example Survey, Data note or Analysis." },
+    },
+    {
+      name: "publishedOn",
+      label: "Published on",
+      type: "date",
+      required: true,
+      index: true,
+      admin: {
+        date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" },
+        description: "Shown on the listing (736:8).",
+      },
+    },
     { name: "subtitle", type: "text", admin: { description: "For example what 62 buyers told us." } },
     { name: "summary", type: "textarea", required: true },
     {

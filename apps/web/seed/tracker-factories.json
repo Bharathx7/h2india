@@ -1,0 +1,107 @@
+[
+  {
+    "slug": "private-manufacturer-gujarat",
+    "name": "Electrolyser factory, Gujarat",
+    "company": "Private manufacturer",
+    "product": "Electrolyser",
+    "capacityMwPerYear": 500,
+    "technology": "Alkaline",
+    "tranche": "SIGHT Tranche I",
+    "location": "Gujarat",
+    "state": "gujarat",
+    "latitude": 22.31,
+    "longitude": 73.18,
+    "stage": "Operating",
+    "statusDate": "2026-10-14",
+    "source": {
+      "name": "SECI result notice",
+      "tier": "official",
+      "asOf": "2026-10-14"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "hydrotek-systems-factory",
+    "name": "Hydrotek Systems factory",
+    "company": "Hydrotek Systems",
+    "product": "Electrolyser",
+    "capacityMwPerYear": 300,
+    "technology": "PEM",
+    "tranche": "SIGHT Tranche II",
+    "location": "Pune, MH",
+    "state": "maharashtra",
+    "latitude": 18.76,
+    "longitude": 73.86,
+    "stage": "Under construction",
+    "statusDate": "2026-11-09",
+    "source": {
+      "name": "Company update",
+      "tier": "company",
+      "asOf": "2026-11-09"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "konkan-hydrogen-tech-factory",
+    "name": "Konkan Hydrogen Tech factory",
+    "company": "Konkan Hydrogen Tech",
+    "product": "Electrolyser",
+    "capacityMwPerYear": 200,
+    "technology": "Alkaline",
+    "tranche": "SIGHT Tranche II",
+    "location": "Ratnagiri, MH",
+    "state": "maharashtra",
+    "latitude": 16.99,
+    "longitude": 73.3,
+    "stage": "Awarded",
+    "statusDate": "2026-10-28",
+    "source": {
+      "name": "SECI result notice",
+      "tier": "official",
+      "asOf": "2026-10-28"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "pranava-h2-stack-line",
+    "name": "Pranava H2 stack line",
+    "company": "Pranava H2",
+    "product": "Electrolyser stack",
+    "capacityMwPerYear": 100,
+    "technology": "PEM",
+    "tranche": "Not under SIGHT",
+    "location": "Maharashtra",
+    "state": "maharashtra",
+    "latitude": 18.52,
+    "longitude": 73.86,
+    "stage": "Operating",
+    "statusDate": "2026-11-02",
+    "source": {
+      "name": "Company announcement",
+      "tier": "company",
+      "asOf": "2026-11-02"
+    },
+    "publish": "yes"
+  },
+  {
+    "slug": "fuel-cell-plant-tamil-nadu",
+    "name": "Fuel cell plant, Tamil Nadu",
+    "company": "Private manufacturer",
+    "product": "Fuel cell",
+    "capacityMwPerYear": 50,
+    "technology": "PEM fuel cell",
+    "tranche": "Not under SIGHT",
+    "location": "Tamil Nadu",
+    "state": "tamil-nadu",
+    "latitude": 13.08,
+    "longitude": 80.27,
+    "stage": "Announced",
+    "statusDate": "2026-10-21",
+    "source": {
+      "name": "Company announcement",
+      "tier": "company",
+      "asOf": "2026-10-21"
+    },
+    "publish": "yes"
+  }
+]
