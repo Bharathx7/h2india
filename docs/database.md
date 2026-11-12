@@ -70,6 +70,14 @@ The bytes are in object storage: `quarantine` (unchecked browser uploads), `priv
 signed link) and `public` (checked logos and product images). Support requests (`recovery_requests`, kind
 `support`) point at their Work ID with `document_file_id`.
 
+## Clocks (step 3.8)
+
+| Table          | Holds                                                                                                                                                                            |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `holidays`     | Days that don't count as working days (M18): IST date, name, source; Sundays are off anyway                                                                                      |
+| `deadlines`    | One deadline on one record: clock type, subject, started, warn and due times, when warn and expire fired, status (Open, Done, Cancelled); one open deadline per type and subject |
+| `dead_letters` | Jobs that failed every retry: queue, job, masked data, error, attempts, and whether someone retried or dismissed it                                                              |
+
 ## Migrations
 
 | Command            | What it does                                                                        |
