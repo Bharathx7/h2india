@@ -150,6 +150,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A42 | Home page wording (step 5.1) | You | Step 5.1 | As drawn: hero "India's hydrogen ecosystem, in one place"; the National Green Hydrogen Mission 2030 targets as fixed text with their MNRE source line; the founder checks them before launch. No other claims written by us | Answered | Founder, 12 Nov 2026. |
 | A43 | Home modules whose data comes later (step 5.1) | You | Step 5.1 | Product classes and categories defined now (Stage 6 reuses them) so the marketplace tiles match the frame, without counts; Featured products and the logged-in followed topics show their designed empty states until Stages 6 and 7 | Answered | Founder, 12 Nov 2026. |
 | A44 | Who sees the real site while Coming soon is on (step 5.1) | You | Step 5.1 | Signed-in operators, plus people whose email is on an allow-list a Super admin keeps in settings | Answered | Founder, 12 Nov 2026. |
+| A45 | Where the home page figures come from (step 5.1) | You | Step 5.1 | Editors enter each headline figure (the live tiles and the SIGHT bars) in a CMS setting with its source and as-of date, both required; open tenders are counted live; the verified-listings tile stays hidden until Stage 6 has real listings | Answered | Founder, 12 Nov 2026. |
+| A46 | Newsletter sign-up timing (step 5.1) | You | Step 5.1 | Brought forward from 5.9: subscriber records, double opt-in with an expiring link, the confirm-and-choose-topics page and the already-subscribed email now; archive, issue pages, cookies and analytics stay in 5.9 | Answered | Founder, 12 Nov 2026. |
+| A47 | Coming soon "Get listed early" form (step 5.1; no step owns it) | You | Step 5.1 | Saved as leads in a protected CMS list that operators read and export; rate-limited, with a consent line; no automatic emails | Answered | Founder, 12 Nov 2026. |
+| A48 | Coming soon launch line and issue preview (step 5.1) | You | Step 5.1 | A Super admin edits the launch line in settings (default as drawn); the latest-issue preview shows only once a real issue exists (step 11.3) | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -193,4 +197,5 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Video and podcast series by Content editors, published by the Editor-in-chief (A32); report leads kept 24 months, opted-in leads exported to sponsors by staff (A33).
 - 12 Nov 2026: Tracker sources per record with a change log (A34), confidence as source tier plus an estimate tick (A35), Cancelled and Completed added (A36), sample content behind FLAG_SAMPLE_CONTENT (A37).
 - 12 Nov 2026: Home: pause button built (F6), drawn wording with sourced mission targets (A42), category tiles now and empty states for later data (A43), operators plus an allow-list behind Coming soon (A44).
+- 12 Nov 2026: Home figures entered by editors with source and date (A45), newsletter sign-up brought forward (A46), early-listing leads in the CMS (A47), editable launch line and issue preview only when real (A48).
 - 12 Nov 2026: Company importer now with basic profile fields (A38); imports land as drafts, records may be published (A39); the sample seed grows page by page (A40); imports check by default (A41).
