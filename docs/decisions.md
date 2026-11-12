@@ -125,6 +125,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A17 | Approval needed but the person is the company's only Admin | You | Step 3.5 | H2 India support approves, through the same queue, with an ID check | Answered | Founder, 12 Nov 2026. |
 | A18 | How long audit log entries are kept (CERT-In needs at least 180 days) | You | Step 3.6 | 8 years, removed by a logged retention job; to be confirmed with the lawyer and CA | Answered | Founder, 12 Nov 2026. |
 | A19 | Who can read and export the Audit log (656:872) | You | Step 11.4 | Read with Users view (Super admin, Supplier verifier, Operations, Finance); export with Users export (Super admin only) | Open | Built this way in step 3.6; change in the Operator roles screen. |
+| A20 | Upload size limits per document type | You | Step 3.7 | As drawn: verification documents, Work ID and quote attachments PDF/JPG/PNG up to 10 MB; logo 5 MB; product images and delivery photos (up to 5) 10 MB each; datasheet PDF 20 MB | Answered | Founder, 12 Nov 2026. |
+| A21 | SVG logos (505:329 accepts SVG, which can carry script) | You | Step 3.7 | Accept SVG but keep only a clean PNG made from it; the SVG is never served | Answered | Founder, 12 Nov 2026. |
+| A22 | How long the Work ID from a lost-email support request is kept | You | Step 3.7 | Deleted 30 days after the request is closed; the audit log keeps who opened it | Answered | Founder, 12 Nov 2026. |
+| A23 | How lost-email support requests reach support before the admin back office | You | Step 3.7 | Email to the support address with a link to a sign-in-protected review page (details and Work ID); replying and account changes from the admin Users screen (step 11.4) | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -160,3 +164,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 3.4 built and merged. You accepted the drafted operator grids (A12) and least access for approved join requests (A13).
 - 12 Nov 2026: Step 3.5 planned. You decided A14 to A17 (mobile change approval, lost email, support desk, sole admin).
 - 12 Nov 2026: You set audit retention to 8 years (A18).
+- 12 Nov 2026: You chose the drawn upload limits (A20), PNG from SVG logos (A21), 30-day Work ID retention (A22) and email plus review page for support requests (A23).

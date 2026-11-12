@@ -54,6 +54,7 @@ export function UploadDemo() {
       <div className="flex flex-col gap-3">
         <FileUpload onFiles={() => undefined} error="This file is over 10 MB. Upload a smaller PDF, JPG or PNG." />
         <FileRow name="GST-certificate.pdf" status="uploading" progress={64} onRemove={() => undefined} />
+        <FileRow name="GST-certificate.pdf" status="checking" onRemove={() => undefined} />
         <FileRow name="GST-certificate.pdf" status="uploaded" meta="PDF · 1.2 MB" onRemove={() => undefined} />
         <FileRow name="GST-certificate.pdf" status="error" onRemove={() => undefined} />
       </div>

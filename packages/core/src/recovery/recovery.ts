@@ -30,7 +30,15 @@ export type Factor = "email" | "mobile" | "new_mobile";
 export class RecoveryError extends Error {
   constructor(
     readonly code:
-      "NOT_FOUND" | "EXPIRED" | "NOT_READY" | "NOT_ALLOWED" | "INVALID_MOBILE" | "INVALID_EMAIL" | "EMAIL_TAKEN",
+      | "NOT_FOUND"
+      | "EXPIRED"
+      | "NOT_READY"
+      | "NOT_ALLOWED"
+      | "INVALID_MOBILE"
+      | "INVALID_EMAIL"
+      | "EMAIL_TAKEN"
+      | "INVALID"
+      | "TOO_MANY",
     message: string,
   ) {
     super(message);
@@ -392,15 +400,24 @@ export async function decideRecovery(input: {
   });
 }
 
-/** What the approval page shows (not drawn; built from the design system, decision A11). */
-export async function recoveryForReview(requestId: string) {
+/**
+ * What the review page shows (not drawn; built from the design system, decision A11). Only the people who may answer
+ * see it: an Admin of the company, or operators with Users access (support, A16). Anyone else gets null.
+ */
+export async function recoveryForReview(actor: Actor, requestId: string) {
+  if (!/^[0-9a-f-]{36}$/i.test(requestId)) return null;
   const [row] = await getDb()
     .select({ r: rr, name: u.name, email: u.email, company: o.legalName })
     .from(rr)
     .leftJoin(u, eq(u.id, rr.userId))
     .leftJoin(o, eq(o.id, rr.organisationId))
     .where(eq(rr.id, requestId));
-  return row ?? null;
+  if (!row) return null;
+  const admin =
+    row.r.organisationId !== null &&
+    row.r.userId !== actor.userId &&
+    can(actor, "team.manage", { organisationId: row.r.organisationId });
+  return admin || can(actor, "users.view") ? row : null;
 }
 
 /** Lost email, after signing in (A15): send a confirmation link to the new work email. */

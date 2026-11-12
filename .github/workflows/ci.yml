@@ -55,8 +55,19 @@ jobs:
       - run: cp .env.example .env.local
       - name: Types, lint and format
         run: pnpm check
+      # File storage and the virus scanner (step 3.7), started here because they need start-up commands. The scanner
+      # downloads its signatures first, so it starts early and the wait comes just before the tests.
+      - name: Start file storage and virus scanner
+        run: |
+          docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=h2india -e MINIO_ROOT_PASSWORD=change-me-minio cgr.dev/chainguard/minio:latest server /data
+          docker run -d --name clamav -p 3310:3310 clamav/clamav:1.5
+          for i in $(seq 1 60); do curl -fsS localhost:9000/minio/health/live && break; sleep 2; done
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest mb --ignore-existing local/h2india-private local/h2india-public local/h2india-quarantine
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest anonymous set download local/h2india-public
       - name: Migrations apply cleanly
         run: pnpm db:migrate
+      - name: Wait for the virus scanner
+        run: for i in $(seq 1 100); do (echo PING | nc -q1 localhost 3310 | grep -q PONG) && exit 0; sleep 3; done; docker logs clamav; exit 1
       - name: Unit and integration tests
         run: pnpm test
       - name: Build

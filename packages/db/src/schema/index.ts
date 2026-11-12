@@ -4,3 +4,4 @@ export * from "./companies";
 export * from "./authz";
 export * from "./recovery";
 export * from "./settings";
+export * from "./files";

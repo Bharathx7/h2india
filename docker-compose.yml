@@ -57,7 +57,8 @@ services:
       interval: 5s
       retries: 20
 
-  # Creates the two buckets once: private (documents, datasheets) with anonymous access off, public (images).
+  # Creates the buckets once: quarantine (unchecked uploads) and private (documents, datasheets) with anonymous access
+  # off, public (checked images) readable by anyone. MinIO answers browser uploads from any origin by default.
   minio-init:
     image: cgr.dev/chainguard/minio:latest
     profiles: ["init"]
@@ -68,10 +69,22 @@ services:
       MC_HOST_local: http://${S3_ACCESS_KEY}:${S3_SECRET_KEY}@minio:9000
       PRIVATE: ${S3_BUCKET_PRIVATE:?set in .env.local}
       PUBLIC: ${S3_BUCKET_PUBLIC:?set in .env.local}
+      QUARANTINE: ${S3_BUCKET_QUARANTINE:-h2india-quarantine}
     entrypoint: ["/bin/sh", "-c"]
     command:
-      - mc mb --ignore-existing local/$${PRIVATE} && mc anonymous set none local/$${PRIVATE} && mc mb --ignore-existing local/$${PUBLIC}
+      - mc mb --ignore-existing local/$${PRIVATE} local/$${PUBLIC} local/$${QUARANTINE} && mc anonymous set none local/$${PRIVATE} && mc anonymous set none local/$${QUARANTINE} && mc anonymous set download local/$${PUBLIC}
     restart: "no"
+
+  # Virus scanner for uploads (step 3.7). The first start downloads the signatures, which takes a few minutes.
+  clamav:
+    image: clamav/clamav:1.5
+    ports: ["127.0.0.1:${CLAMAV_PORT:-3310}:3310"]
+    volumes: [clamdata:/var/lib/clamav]
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 30s
+      start_period: 5m
+      retries: 10
 
   # Catches every outgoing email so nothing reaches a real inbox. Open http://localhost:8025
   mailpit:
@@ -87,3 +100,4 @@ volumes:
   redisdata:
   meilidata:
   miniodata:
+  clamdata:
