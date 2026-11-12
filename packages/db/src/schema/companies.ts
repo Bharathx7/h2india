@@ -174,6 +174,7 @@ export const joinDrafts = core.table(
     fullName: text("full_name"),
     jobRole: text("job_role"),
     termsAcceptedAt: utc("terms_accepted_at"),
+    termsVersion: text("terms_version"),
     expiresAt: utc("expires_at").notNull(),
     ...timestamps,
   },

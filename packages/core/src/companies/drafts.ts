@@ -26,6 +26,7 @@ export interface JoinDraft {
   fullName: string | null;
   jobRole: string | null;
   termsAccepted: boolean;
+  termsVersion: string | null;
 }
 
 export async function startDraft(): Promise<string> {
@@ -52,6 +53,7 @@ export async function readDraft(token: string | undefined): Promise<JoinDraft | 
     fullName: row.fullName,
     jobRole: row.jobRole,
     termsAccepted: row.termsAcceptedAt !== null,
+    termsVersion: row.termsVersion,
   };
 }
 
@@ -62,6 +64,8 @@ export interface DraftPatch {
   fullName?: string;
   jobRole?: string;
   termsAccepted?: boolean;
+  /** The Terms of use version shown when they ticked the box (step 5.8). */
+  termsVersion?: string;
 }
 
 export async function updateDraft(token: string, patch: DraftPatch): Promise<void> {
@@ -73,7 +77,7 @@ export async function updateDraft(token: string, patch: DraftPatch): Promise<voi
       ...(patch.email !== undefined ? { email: normaliseEmail(patch.email) } : {}),
       ...(patch.fullName !== undefined ? { fullName: patch.fullName.trim() } : {}),
       ...(patch.jobRole !== undefined ? { jobRole: patch.jobRole } : {}),
-      ...(patch.termsAccepted ? { termsAcceptedAt: new Date() } : {}),
+      ...(patch.termsAccepted ? { termsAcceptedAt: new Date(), termsVersion: patch.termsVersion ?? null } : {}),
     })
     .where(eq(d.tokenHash, hashToken(token)));
 }
@@ -103,6 +107,7 @@ export async function applyDraft(token: string, user: { id: string; email: strin
       jobRole: draft.jobRole,
       profileType: draft.path,
       termsAcceptedAt: new Date(),
+      termsVersion: draft.termsVersion,
     })
     .where(eq(u.id, user.id));
   return draft;

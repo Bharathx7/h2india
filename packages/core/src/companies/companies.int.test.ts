@@ -187,6 +187,7 @@ describe.skipIf(!url)("companies and join requests", () => {
       fullName: "Draft Owner",
       jobRole: "Engineering",
       termsAccepted: true,
+      termsVersion: "1.1",
     });
     await h.db
       .update(schema.joinDrafts)
@@ -196,6 +197,12 @@ describe.skipIf(!url)("companies and join requests", () => {
     expect(await applyDraft(token, { id: someoneElse.id, email: someoneElse.email })).toBeNull();
     expect(await applyDraft(token, { id: owner.id, email: owner.email })).toMatchObject({ path: "member" });
     const [after] = await h.db.select().from(schema.users).where(eq(schema.users.id, owner.id));
-    expect(after).toMatchObject({ profileType: "member", jobRole: "Engineering", mobile: "+91 98201 23456" });
+    // The terms version they accepted is kept with the account (step 5.8).
+    expect(after).toMatchObject({
+      profileType: "member",
+      jobRole: "Engineering",
+      mobile: "+91 98201 23456",
+      termsVersion: "1.1",
+    });
   });
 });
