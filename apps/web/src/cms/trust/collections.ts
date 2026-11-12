@@ -487,3 +487,25 @@ export const AudienceFaqs: GlobalConfig = {
   versions: { max: 20 },
   fields: [faqs("buyers", "Questions buyers ask"), faqs("suppliers", "Questions suppliers ask")],
 };
+
+/** Planned maintenance (679:620, step 5.10): shown to everyone while the maintenance flag is on. */
+export const Maintenance: GlobalConfig = {
+  slug: "maintenance",
+  label: "Planned maintenance",
+  admin: {
+    group: "Company",
+    description:
+      "The times shown on the maintenance page. The page itself is switched on with FLAG_MAINTENANCE during the work.",
+  },
+  access: { read: () => true, update: canEdit },
+  fields: [
+    {
+      type: "row",
+      fields: [
+        { name: "startedAt", type: "date", admin: { date: { pickerAppearance: "dayAndTime" } } },
+        { name: "backBy", type: "date", admin: { date: { pickerAppearance: "dayAndTime" } } },
+      ],
+    },
+    { name: "statusUrl", label: "Live status page link", type: "text" },
+  ],
+};

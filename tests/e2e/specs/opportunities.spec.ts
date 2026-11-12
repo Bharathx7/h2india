@@ -342,7 +342,8 @@ test("jobs: expired jobs leave the list but keep a closed page; filters narrow t
   await page.goto(`/opportunities/jobs/${gone.slug}`);
   await expect(page.getByText("This job is no longer taking applications")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Applications closed" })).toBeVisible();
-  await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
+  // A closed job carries no JobPosting (its breadcrumb trail still has BreadcrumbList data, step 5.10).
+  await expect(page.locator('script[type="application/ld+json"]', { hasText: "JobPosting" })).toHaveCount(0);
 });
 
 test("the opportunities home lists what's closing and links every section", async ({ page }) => {

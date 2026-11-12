@@ -179,6 +179,15 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Newsletter mail carries `unsubscribeHeaders()`; unsubscribing goes only through `unsubscribe()` (one-click POST or the confirm page).
 - Browser tests start as a returning visitor who rejected optional cookies (`ownIp()` sets the cookie); `consent-newsletter.spec.ts` tests the banner from a fresh context.
 
+## Search engines, errors and maintenance (step 5.10)
+
+- Indexing stays off until Launch 1: the `searchIndexing` flag drives robots.txt and meta robots. Don't add `robots` to page metadata.
+- Every public page sets `alternates.canonical`. Absolute URLs come from `absolute()` (`apps/web/src/seo/site.ts`).
+- A new public content type adds its collection and URL to `COLLECTIONS` in `apps/web/src/seo/sitemaps.ts`.
+- Structured data goes through `JsonLd` (`apps/web/src/seo/jsonld.tsx`); breadcrumbs get BreadcrumbList from `Crumbs` automatically. Only facts the page shows.
+- Redirects live in `apps/web/src/seo/redirects.json` (301, followed by `seo.spec.ts`); every target must be a real page.
+- Unknown addresses render `app/global-not-found.tsx`; a missing record calls `notFound()`. Public errors render `(site)/error.tsx` with the digest as the reference, logged with the request ID by `instrumentation.ts`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

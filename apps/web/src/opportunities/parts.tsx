@@ -5,22 +5,28 @@ import { wrap } from "@/news/parts";
 import type { ArticleSummary } from "@/news/data";
 import { dayMonthYear } from "@/news/format";
 import type { JobView } from "./views";
+import { breadcrumbLd, JsonLd } from "@/seo/jsonld";
 
 // Pieces the step 5.5 pages share: crumbs, section headings, the documents list, the sign-in prompt behind Create
 // alert, Track and Save (alerts and saved items arrive with member accounts in step 7.3, A71), and loading cards.
 
 export { wrap };
 
+/** The breadcrumb trail, with its BreadcrumbList structured data (step 5.10). */
 export function Crumbs({ items }: { items: { label: string; href?: string }[] }) {
+  const all = [{ label: "Home", href: "/" }, ...items];
   return (
-    <Breadcrumbs
-      items={[{ label: "Home", href: "/" }, ...items]}
-      renderLink={(c, className) => (
-        <Link href={c.href} className={className}>
-          {c.label}
-        </Link>
-      )}
-    />
+    <>
+      <JsonLd data={breadcrumbLd(all)} />
+      <Breadcrumbs
+        items={all}
+        renderLink={(c, className) => (
+          <Link href={c.href} className={className}>
+            {c.label}
+          </Link>
+        )}
+      />
+    </>
   );
 }
 

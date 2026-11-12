@@ -44,7 +44,15 @@ import {
 import { has } from "./cms/roles";
 import { SightTracker } from "./cms/records/sight";
 import { Submissions } from "./cms/submissions";
-import { AudienceFaqs, HelpArticles, LegalPages, Pricing, TeamMembers, TrustSettings } from "./cms/trust/collections";
+import {
+  AudienceFaqs,
+  HelpArticles,
+  LegalPages,
+  Maintenance,
+  Pricing,
+  TeamMembers,
+  TrustSettings,
+} from "./cms/trust/collections";
 import { NewsletterIssues } from "./cms/newsletter/issues";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
@@ -115,6 +123,7 @@ export default buildConfig({
     TrustSettings,
     Pricing,
     AudienceFaqs,
+    Maintenance,
   ],
   editor: lexicalEditor(),
   endpoints: [

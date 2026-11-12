@@ -12,6 +12,7 @@ import { calendarLinks, clock, dayMonthYear, isWebinar, multiDay, timeRange } fr
 import { ReplayRequest, WebinarFlow } from "@/events/Webinar";
 import { ShareButton, WeeklyBox } from "@/news/client";
 import { getSession } from "@/server/auth";
+import { eventLd, JsonLd } from "@/seo/jsonld";
 import type { Article, Event } from "@/payload-types";
 
 // An event (expo 729:11207 and 824:13453, live day 733:493; webinar 732:521 and 824:13975, full 827:14696, registered
@@ -226,6 +227,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
       const play = playbackFor(replay.url);
       return (
         <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+          <JsonLd data={eventLd(e)} />
           <div className={cx(wrap, "flex flex-col gap-2 pt-6 md:pt-8")}>
             {crumbs(e.name, webinarCrumb)}
             <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
@@ -372,6 +374,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
     const opens = joinOpensAt(new Date(e.startsAt));
     return (
       <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+        <JsonLd data={eventLd(e)} />
         <div className={cx(wrap, "pt-6 md:pt-8")}>{crumbs(e.name, webinarCrumb)}</div>
         <div className={cx(wrap, "pb-16 pt-4")}>
           <WebinarFlow
@@ -404,6 +407,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
     const profiles = await companiesBySlug((e.exhibitors ?? []).map((x) => x.profileSlug ?? ""));
     return (
       <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+        <JsonLd data={eventLd(e)} />
         <div className={cx(wrap, "flex flex-col gap-2 pt-6 md:pt-8")}>
           <Crumbs
             items={[
@@ -517,6 +521,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
   ];
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+      <JsonLd data={eventLd(e)} />
       <div className={cx(wrap, "flex flex-col gap-2 pt-6 md:pt-8")}>
         {crumbs(e.name)}
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">

@@ -7,3 +7,25 @@ export async function register() {
   parseClientEnv();
   readFlags();
 }
+
+/**
+ * Logs every server error with its digest (the reference the 500 page shows) and the request ID from the proxy, so a
+ * reference quoted to support leads to the request and its audit entries (step 5.10).
+ */
+export function onRequestError(
+  error: unknown,
+  request: { path: string; method: string; headers: Record<string, string | string[] | undefined> },
+): void {
+  const digest = (error as { digest?: string }).digest ?? null;
+  const requestId = request.headers["x-request-id"] ?? null;
+  console.error(
+    JSON.stringify({
+      level: "error",
+      event: "request.error",
+      digest,
+      requestId,
+      method: request.method,
+      path: request.path,
+    }),
+  );
+}

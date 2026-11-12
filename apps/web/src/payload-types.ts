@@ -164,6 +164,7 @@ export interface Config {
     'trust-settings': TrustSetting;
     pricing: Pricing;
     'audience-faqs': AudienceFaq;
+    maintenance: Maintenance;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
@@ -174,6 +175,7 @@ export interface Config {
     'trust-settings': TrustSettingsSelect<false> | TrustSettingsSelect<true>;
     pricing: PricingSelect<false> | PricingSelect<true>;
     'audience-faqs': AudienceFaqsSelect<false> | AudienceFaqsSelect<true>;
+    maintenance: MaintenanceSelect<false> | MaintenanceSelect<true>;
   };
   locale: null;
   widgets: {
@@ -5560,6 +5562,20 @@ export interface AudienceFaq {
   createdAt?: string | null;
 }
 /**
+ * The times shown on the maintenance page. The page itself is switched on with FLAG_MAINTENANCE during the work.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance".
+ */
+export interface Maintenance {
+  id: number;
+  startedAt?: string | null;
+  backBy?: string | null;
+  statusUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracker-methodology_select".
  */
@@ -5849,6 +5865,18 @@ export interface AudienceFaqsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance_select".
+ */
+export interface MaintenanceSelect<T extends boolean = true> {
+  startedAt?: T;
+  backBy?: T;
+  statusUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

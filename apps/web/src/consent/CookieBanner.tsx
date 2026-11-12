@@ -24,14 +24,14 @@ export function CookieBanner() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-page pb-[env(safe-area-inset-bottom)] shadow-ink-float"
     >
       <div className="mx-auto flex max-w-300 flex-col gap-4 px-4 py-5 md:flex-row md:items-center md:justify-between md:px-6 xl:px-0">
-        <div className="flex max-w-190 flex-col gap-1">
+        <div className="flex max-w-190 min-w-0 flex-col gap-1">
           <h2 className="type-label-lg text-primary">We use cookies</h2>
           <p className="type-body-sm text-secondary">
             Necessary cookies keep you signed in and your cart safe. Optional cookies help us improve H2 India. Change
             this any time in Cookie preferences.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 md:shrink-0 md:flex-nowrap">
           <Link href="/legal/cookies#preferences" className={cx(buttonClasses({ variant: "ghost" }))}>
             Cookie preferences
           </Link>
