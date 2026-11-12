@@ -1,0 +1,80 @@
+[
+  {
+    "slug": "green-hydrogen-standard-india",
+    "code": "MNRE OM 18 Aug 2023",
+    "title": "Green Hydrogen Standard for India",
+    "kind": "Notification",
+    "issuer": "MNRE",
+    "inForce": "In force",
+    "dated": "2023-08-18",
+    "documentType": "office memorandum",
+    "checkedAt": "-2d",
+    "summary": "Hydrogen made with renewable energy counts as green only if its well-to-gate emissions are no more than 2 kg CO₂ equivalent per kg of hydrogen, averaged over 12 months. Sample record: replace before launch.",
+    "scope": [
+      {
+        "point": "Producers selling or claiming green hydrogen in India"
+      },
+      {
+        "point": "Projects under the National Green Hydrogen Mission and SIGHT tenders"
+      },
+      {
+        "point": "Buyers and certifiers checking green claims"
+      }
+    ],
+    "appliesTo": ["Electrolysers", "Electrolyser stacks", "Green hydrogen supply", "Certification services"],
+    "sourceUrl": "https://example.org/sample/mnre-ghs",
+    "publish": "yes"
+  },
+  {
+    "slug": "iso-22734-2019",
+    "code": "ISO 22734:2019",
+    "title": "Hydrogen generators using water electrolysis",
+    "kind": "Standard",
+    "issuer": "ISO",
+    "inForce": "In force",
+    "dated": "2019-09-01",
+    "summary": "Safety and performance of electrolysers for industrial and commercial use. Sample record: replace before launch.",
+    "appliesTo": ["Electrolysers"],
+    "sourceUrl": "https://example.org/sample/iso-22734",
+    "publish": "yes"
+  },
+  {
+    "slug": "gas-cylinders-rules-2016",
+    "code": "GCR 2016",
+    "title": "Gas Cylinders Rules, 2016",
+    "kind": "Rule",
+    "issuer": "PESO",
+    "inForce": "In force",
+    "dated": "2016-02-23",
+    "summary": "Approval, filling and testing of gas cylinders, including hydrogen cylinders. Sample record: replace before launch.",
+    "appliesTo": ["Cylinders", "Storage tanks"],
+    "sourceUrl": "https://example.org/sample/peso-gcr",
+    "publish": "yes"
+  },
+  {
+    "slug": "iso-19880-1-2020",
+    "code": "ISO 19880-1:2020",
+    "title": "Gaseous hydrogen fuelling stations, general requirements",
+    "kind": "Standard",
+    "issuer": "ISO",
+    "inForce": "In force",
+    "dated": "2020-03-01",
+    "summary": "Design, installation and operation of hydrogen refuelling stations. Sample record: replace before launch.",
+    "appliesTo": ["Refuelling stations", "Compressors"],
+    "sourceUrl": "https://example.org/sample/iso-19880",
+    "publish": "yes"
+  },
+  {
+    "slug": "iec-62282-2-100-2020",
+    "code": "IEC 62282-2-100:2020",
+    "title": "Fuel cell modules, safety",
+    "kind": "Standard",
+    "issuer": "IEC",
+    "inForce": "In force",
+    "dated": "2020-05-01",
+    "summary": "Safety of fuel cell modules used in stationary and mobile systems. Sample record: replace before launch.",
+    "appliesTo": ["Fuel cells"],
+    "sourceUrl": "https://example.org/sample/iec-62282",
+    "publish": "yes"
+  }
+]

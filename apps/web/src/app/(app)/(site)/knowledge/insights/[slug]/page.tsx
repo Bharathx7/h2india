@@ -2,7 +2,7 @@ import config from "@payload-config";
 import { ArrowLink, Breadcrumbs, cx, Icon } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getPayload } from "payload";
 import { ArticleBody, headingsOf } from "@/components/article/ArticleBody";
 import { glossaryTerms } from "@/cms/knowledge/library";
@@ -34,6 +34,8 @@ const objects = <T extends object>(rel: unknown): T[] =>
 export default async function GuidePage({ params }: { params: Params }) {
   const guide = await getGuide((await params).slug);
   if (!guide) notFound();
+  // A guide written for a product category is a buyer's guide (472:2135, step 5.6) and lives there.
+  if ((guide.productCategories ?? []).length) redirect(`/knowledge/guides/${guide.slug}`);
   const payload = await getPayload({ config });
   const [glossary, related] = await Promise.all([glossaryTerms(payload), listInsights({ limit: 4 })]);
   const authors = objects<Author>(guide.authors);

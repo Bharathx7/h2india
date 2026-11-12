@@ -4,64 +4,81 @@
     "term": "Electrolyser",
     "aliases": ["electrolyzer"],
     "short": "A machine that splits water into hydrogen and oxygen using electricity.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Technology"
   },
   {
     "slug": "electrolyser-stack",
     "term": "Electrolyser stack",
     "short": "The core of an electrolyser: many cells pressed together where the splitting happens.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Technology"
   },
   {
     "slug": "electrolysis",
     "term": "Electrolysis",
     "short": "Splitting water with electricity. Green hydrogen in India is mostly made this way.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Technology"
   },
   {
     "slug": "electrolyte",
     "term": "Electrolyte",
     "short": "The liquid or membrane that carries charge between the electrodes in a cell.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Technology"
   },
   {
     "slug": "emissions-intensity",
     "term": "Emissions intensity",
     "short": "Greenhouse gas emitted per kilogram of hydrogen, in kg CO₂ equivalent.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Units",
+    "popular": "yes"
   },
   {
     "slug": "energy-density",
     "term": "Energy density",
     "short": "How much energy a fuel holds per kilogram or per litre.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Units"
   },
   {
     "slug": "epc",
     "term": "EPC",
     "expansion": "Engineering, procurement and construction",
     "short": "one contractor designs, buys and builds a plant.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Markets"
   },
   {
     "slug": "e-fuels",
     "term": "E-fuels",
     "aliases": ["e-fuel"],
     "short": "Fuels such as e-methanol made from green hydrogen and captured carbon.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Technology"
   },
   {
     "slug": "lcoh",
     "term": "LCOH",
     "expansion": "Levelised cost of hydrogen",
     "short": "the average cost to produce one kilogram over a plant's life, including equipment, power and upkeep.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Economics",
+    "aliases": ["levelized cost of hydrogen"],
+    "formula": "LCOH = (equipment cost + lifetime running costs + lifetime power cost, all discounted) ÷ lifetime kilograms produced",
+    "formulaNote": "Unit: ₹/kg or US$/kg of hydrogen. State whether it includes compression, storage and GST when comparing figures.",
+    "popular": "yes",
+    "related": ["electrolyser", "emissions-intensity"]
   },
   {
     "slug": "rfs",
     "term": "RfS",
     "expansion": "Request for Selection",
     "short": "the tender document SECI issues to invite bids for a SIGHT round.",
-    "publish": "yes"
+    "publish": "yes",
+    "category": "Policy",
+    "popular": "yes"
   }
 ]

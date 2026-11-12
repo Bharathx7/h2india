@@ -147,12 +147,14 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'tracker-methodology': TrackerMethodology;
+    'tracker-overview': TrackerOverview;
     'home-figures': HomeFigure;
     prelaunch: Prelaunch;
     'sight-tracker': SightTracker;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
+    'tracker-overview': TrackerOverviewSelect<false> | TrackerOverviewSelect<true>;
     'home-figures': HomeFiguresSelect<false> | HomeFiguresSelect<true>;
     prelaunch: PrelaunchSelect<false> | PrelaunchSelect<true>;
     'sight-tracker': SightTrackerSelect<false> | SightTrackerSelect<true>;
@@ -1505,6 +1507,7 @@ export interface Chapter {
   summary: string;
   readingMinutes?: number | null;
   heroImage?: (number | null) | Media;
+  heroCaption?: string | null;
   body: {
     root: {
       type: string;
@@ -1520,6 +1523,157 @@ export interface Chapter {
     };
     [k: string]: unknown;
   };
+  keyTerms?: (number | Glossary)[] | null;
+  /**
+   * Questions at the end of the chapter (471:1876). The answer is checked in the browser.
+   */
+  quiz?:
+    | {
+        question: string;
+        options?:
+          | {
+              option: string;
+              id?: string | null;
+            }[]
+          | null;
+        answer: number;
+        /**
+         * Shown after they check.
+         */
+        explanation?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "glossary".
+ */
+export interface Glossary {
+  id: number;
+  /**
+   * As readers see it, for example RfS.
+   */
+  term: string;
+  slug: string;
+  /**
+   * For example Request for Selection.
+   */
+  expansion?: string | null;
+  /**
+   * Shown under the term (735:3810), for example Economics.
+   */
+  category?: ('Technology' | 'Economics' | 'Policy' | 'Safety' | 'Markets' | 'Units') | null;
+  /**
+   * Other ways it's written; each is linked in articles too.
+   */
+  aliases?: string[] | null;
+  /**
+   * Shown in the hover-card in articles, after the expansion: for example the tender document SECI issues to invite bids for a SIGHT round.
+   */
+  short: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * A formula, shown in a code box. Leave empty when there isn't one.
+   */
+  formula?: string | null;
+  formulaNote?: string | null;
+  /**
+   * Listed under Most searched on the glossary (735:3378).
+   */
+  popular?: boolean | null;
+  related?: (number | Glossary)[] | null;
+  standards?: (number | Standard)[] | null;
+  /**
+   * Link it in articles automatically (first mention only).
+   */
+  autoLink?: boolean | null;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "standards".
+ */
+export interface Standard {
+  id: number;
+  /**
+   * For example ISO 22734:2019.
+   */
+  code: string;
+  kind: 'Standard' | 'Rule' | 'Notification' | 'Guideline' | 'Regulation';
+  title: string;
+  slug: string;
+  /**
+   * ISO, IEC, BIS, PESO, MNRE…
+   */
+  issuer: string;
+  inForce?: ('In force' | 'Draft' | 'Withdrawn' | 'Superseded') | null;
+  /**
+   * Its date.
+   */
+  dated?: string | null;
+  /**
+   * For example office memorandum.
+   */
+  documentType?: string | null;
+  checkedAt?: string | null;
+  summary: string;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  scope?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  related?: (number | Standard)[] | null;
+  /**
+   * Equipment it applies to; linked to products in Stage 6.
+   */
+  appliesTo?: string[] | null;
+  sourceUrl: string;
   topics?: (number | Topic)[] | null;
   /**
    * Sample content (F9): never shown in production.
@@ -1573,107 +1727,6 @@ export interface Guide {
    * Catalogue categories; linked to live products with the marketplace (Stage 6).
    */
   productCategories?: string[] | null;
-  topics?: (number | Topic)[] | null;
-  /**
-   * Sample content (F9): never shown in production.
-   */
-  sample?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "glossary".
- */
-export interface Glossary {
-  id: number;
-  /**
-   * As readers see it, for example RfS.
-   */
-  term: string;
-  slug: string;
-  /**
-   * For example Request for Selection.
-   */
-  expansion?: string | null;
-  /**
-   * Other ways it's written; each is linked in articles too.
-   */
-  aliases?: string[] | null;
-  /**
-   * Shown in the hover-card in articles, after the expansion: for example the tender document SECI issues to invite bids for a SIGHT round.
-   */
-  short: string;
-  body?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  related?: (number | Glossary)[] | null;
-  standards?: (number | Standard)[] | null;
-  /**
-   * Link it in articles automatically (first mention only).
-   */
-  autoLink?: boolean | null;
-  topics?: (number | Topic)[] | null;
-  /**
-   * Sample content (F9): never shown in production.
-   */
-  sample?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "standards".
- */
-export interface Standard {
-  id: number;
-  /**
-   * For example ISO 22734:2019.
-   */
-  code: string;
-  kind: 'Standard' | 'Regulation' | 'Rule' | 'Guideline';
-  title: string;
-  slug: string;
-  /**
-   * ISO, IEC, BIS, PESO, MNRE…
-   */
-  issuer: string;
-  inForce?: ('In force' | 'Draft' | 'Withdrawn' | 'Superseded') | null;
-  summary: string;
-  body?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Equipment it applies to; linked to products in Stage 6.
-   */
-  appliesTo?: string[] | null;
-  sourceUrl: string;
   topics?: (number | Topic)[] | null;
   /**
    * Sample content (F9): never shown in production.
@@ -1782,6 +1835,10 @@ export interface ReportLead {
    */
   consentText?: string | null;
   /**
+   * The version of those words.
+   */
+  consentVersion?: string | null;
+  /**
    * Set when a signed-in member downloaded it (never shared).
    */
   userId?: string | null;
@@ -1797,12 +1854,48 @@ export interface Video {
   title: string;
   slug: string;
   series?: string | null;
+  /**
+   * The row it sits in on Videos (273:22177).
+   */
+  kind?: ('Explainer' | '60-second explainer' | 'Interview' | 'Event highlight') | null;
+  /**
+   * The big video at the top of Videos.
+   */
+  featured?: boolean | null;
+  /**
+   * For example English with Hindi subtitles.
+   */
+  language?: string | null;
   description: string;
   /**
    * Where it's hosted (M9). Only the address is kept here.
    */
   url: string;
   durationMinutes?: number | null;
+  publishedOn?: string | null;
+  people?:
+    | {
+        name: string;
+        /**
+         * For example CTO, Hydrotek Systems · guest.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  chapters?:
+    | {
+        /**
+         * mm:ss
+         */
+        at: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Speaker on its own line ending with a colon.
+   */
   transcript?: string | null;
   thumbnail?: (number | null) | Media;
   topics?: (number | Topic)[] | null;
@@ -1827,10 +1920,38 @@ export interface Podcast {
   description: string;
   guests?: string[] | null;
   /**
+   * For example Spotify, Apple Podcasts and YouTube.
+   */
+  alsoOn?: string | null;
+  /**
    * Where it's hosted (M9). Only the address is kept here.
    */
   url: string;
   durationMinutes?: number | null;
+  publishedOn?: string | null;
+  people?:
+    | {
+        name: string;
+        /**
+         * For example CTO, Hydrotek Systems · guest.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  chapters?:
+    | {
+        /**
+         * mm:ss
+         */
+        at: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Speaker on its own line ending with a colon.
+   */
   transcript?: string | null;
   topics?: (number | Topic)[] | null;
   /**
@@ -3555,7 +3676,23 @@ export interface ChaptersSelect<T extends boolean = true> {
   summary?: T;
   readingMinutes?: T;
   heroImage?: T;
+  heroCaption?: T;
   body?: T;
+  keyTerms?: T;
+  quiz?:
+    | T
+    | {
+        question?: T;
+        options?:
+          | T
+          | {
+              option?: T;
+              id?: T;
+            };
+        answer?: T;
+        explanation?: T;
+        id?: T;
+      };
   topics?: T;
   sample?: T;
   updatedAt?: T;
@@ -3596,9 +3733,13 @@ export interface GlossarySelect<T extends boolean = true> {
   term?: T;
   slug?: T;
   expansion?: T;
+  category?: T;
   aliases?: T;
   short?: T;
   body?: T;
+  formula?: T;
+  formulaNote?: T;
+  popular?: T;
   related?: T;
   standards?: T;
   autoLink?: T;
@@ -3619,8 +3760,18 @@ export interface StandardsSelect<T extends boolean = true> {
   slug?: T;
   issuer?: T;
   inForce?: T;
+  dated?: T;
+  documentType?: T;
+  checkedAt?: T;
   summary?: T;
   body?: T;
+  scope?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  related?: T;
   appliesTo?: T;
   sourceUrl?: T;
   topics?: T;
@@ -3699,6 +3850,7 @@ export interface ReportLeadsSelect<T extends boolean = true> {
   role?: T;
   sponsorConsent?: T;
   consentText?: T;
+  consentVersion?: T;
   userId?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3711,9 +3863,27 @@ export interface VideosSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   series?: T;
+  kind?: T;
+  featured?: T;
+  language?: T;
   description?: T;
   url?: T;
   durationMinutes?: T;
+  publishedOn?: T;
+  people?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  chapters?:
+    | T
+    | {
+        at?: T;
+        title?: T;
+        id?: T;
+      };
   transcript?: T;
   thumbnail?: T;
   topics?: T;
@@ -3733,8 +3903,24 @@ export interface PodcastsSelect<T extends boolean = true> {
   episode?: T;
   description?: T;
   guests?: T;
+  alsoOn?: T;
   url?: T;
   durationMinutes?: T;
+  publishedOn?: T;
+  people?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  chapters?:
+    | T
+    | {
+        at?: T;
+        title?: T;
+        id?: T;
+      };
   transcript?: T;
   topics?: T;
   sample?: T;
@@ -4329,6 +4515,39 @@ export interface TrackerMethodology {
   createdAt?: string | null;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-overview".
+ */
+export interface TrackerOverview {
+  id: number;
+  figures?:
+    | {
+        /**
+         * For example 8.62 lakh.
+         */
+        value: string;
+        /**
+         * t/yr of green H₂ production awarded
+         */
+        label: string;
+        /**
+         * For example SECI · SIGHT tranches.
+         */
+        source: string;
+        sourceUrl?: string | null;
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  dataAsOf?: string | null;
+  /**
+   * Sample figures (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The figures on the home page. Every figure needs its source and the date it was true; readers see both.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4530,6 +4749,27 @@ export interface TrackerMethodologySelect<T extends boolean = true> {
         id?: T;
       };
   updateNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-overview_select".
+ */
+export interface TrackerOverviewSelect<T extends boolean = true> {
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        sourceUrl?: T;
+        asOf?: T;
+        id?: T;
+      };
+  dataAsOf?: T;
+  sample?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -34,6 +34,7 @@ import {
   TrackerFactories,
   TrackerHubs,
   TrackerMethodology,
+  TrackerOverview,
   TrackerPilots,
   TrackerPolicies,
   TrackerPrices,
@@ -97,7 +98,7 @@ export default buildConfig({
     Media,
     Editors,
   ],
-  globals: [TrackerMethodology, HomeFigures, Prelaunch, SightTracker],
+  globals: [TrackerMethodology, TrackerOverview, HomeFigures, Prelaunch, SightTracker],
   editor: lexicalEditor(),
   endpoints: [
     {

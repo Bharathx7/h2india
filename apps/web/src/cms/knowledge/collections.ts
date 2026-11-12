@@ -104,7 +104,41 @@ export const Chapters: CollectionConfig = {
     { name: "summary", type: "textarea", required: true, maxLength: 300 },
     { name: "readingMinutes", type: "number" },
     { name: "heroImage", type: "upload", relationTo: "media" },
+    { name: "heroCaption", label: "Picture caption", type: "text" },
     { ...body, required: true },
+    {
+      name: "keyTerms",
+      label: "Key terms in this chapter",
+      type: "relationship",
+      relationTo: "glossary",
+      hasMany: true,
+    },
+    {
+      name: "quiz",
+      label: "Check your understanding",
+      type: "array",
+      maxRows: 5,
+      admin: { description: "Questions at the end of the chapter (471:1876). The answer is checked in the browser." },
+      fields: [
+        { name: "question", type: "text", required: true },
+        {
+          name: "options",
+          type: "array",
+          minRows: 2,
+          maxRows: 5,
+          fields: [{ name: "option", type: "text", required: true }],
+        },
+        {
+          name: "answer",
+          label: "Correct option (1 for the first)",
+          type: "number",
+          required: true,
+          min: 1,
+          max: 5,
+        },
+        { name: "explanation", type: "text", admin: { description: "Shown after they check." } },
+      ],
+    },
     topics,
     sample,
   ],
@@ -172,6 +206,12 @@ export const Glossary: CollectionConfig = {
     slug("term"),
     { name: "expansion", type: "text", admin: { description: "For example Request for Selection." } },
     {
+      name: "category",
+      type: "select",
+      options: ["Technology", "Economics", "Policy", "Safety", "Markets", "Units"],
+      admin: { description: "Shown under the term (735:3810), for example Economics." },
+    },
+    {
       name: "aliases",
       type: "text",
       hasMany: true,
@@ -188,7 +228,20 @@ export const Glossary: CollectionConfig = {
           "Shown in the hover-card in articles, after the expansion: for example the tender document SECI issues to invite bids for a SIGHT round.",
       },
     },
-    body,
+    { ...body, label: "In plain language" },
+    {
+      name: "formula",
+      label: "How it's worked out",
+      type: "textarea",
+      admin: { description: "A formula, shown in a code box. Leave empty when there isn't one." },
+    },
+    { name: "formulaNote", label: "Units note", type: "text" },
+    {
+      name: "popular",
+      label: "Most searched",
+      type: "checkbox",
+      admin: { position: "sidebar", description: "Listed under Most searched on the glossary (735:3378)." },
+    },
     { name: "related", type: "relationship", relationTo: "glossary", hasMany: true },
     { name: "standards", type: "relationship", relationTo: "standards", hasMany: true },
     {
@@ -223,7 +276,7 @@ export const Standards: CollectionConfig = {
           type: "select",
           required: true,
           defaultValue: "Standard",
-          options: ["Standard", "Regulation", "Rule", "Guideline"],
+          options: ["Standard", "Rule", "Notification", "Guideline", "Regulation"],
         },
       ],
     },
@@ -242,8 +295,37 @@ export const Standards: CollectionConfig = {
         },
       ],
     },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "dated",
+          type: "date",
+          admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" }, description: "Its date." },
+        },
+        {
+          name: "documentType",
+          label: "Document",
+          type: "text",
+          admin: { description: "For example office memorandum." },
+        },
+        {
+          name: "checkedAt",
+          label: "Last checked by H2 India",
+          type: "date",
+          admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
+        },
+      ],
+    },
     { name: "summary", type: "textarea", required: true, maxLength: 400 },
     body,
+    {
+      name: "scope",
+      label: "Scope and who it affects",
+      type: "array",
+      fields: [{ name: "point", type: "text", required: true }],
+    },
+    { name: "related", label: "Related records", type: "relationship", relationTo: "standards", hasMany: true },
     {
       name: "appliesTo",
       type: "text",
@@ -333,7 +415,41 @@ const mediaFields = (urlLabel: string): Field[] => [
     admin: { description: "Where it's hosted (M9). Only the address is kept here." },
   },
   { name: "durationMinutes", type: "number" },
-  { name: "transcript", type: "textarea" },
+  {
+    name: "publishedOn",
+    label: "Published on",
+    type: "date",
+    index: true,
+    admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
+  },
+  {
+    name: "people",
+    label: "In this episode",
+    type: "array",
+    fields: [
+      {
+        type: "row",
+        fields: [
+          { name: "name", type: "text", required: true },
+          { name: "role", type: "text", admin: { description: "For example CTO, Hydrotek Systems · guest." } },
+        ],
+      },
+    ],
+  },
+  {
+    name: "chapters",
+    type: "array",
+    fields: [
+      {
+        type: "row",
+        fields: [
+          { name: "at", label: "Starts at", type: "text", required: true, admin: { description: "mm:ss" } },
+          { name: "title", type: "text", required: true },
+        ],
+      },
+    ],
+  },
+  { name: "transcript", type: "textarea", admin: { description: "Speaker on its own line ending with a colon." } },
 ];
 
 export const Videos: CollectionConfig = {
@@ -344,6 +460,19 @@ export const Videos: CollectionConfig = {
     { name: "title", type: "text", required: true },
     slug("title"),
     { name: "series", type: "text", index: true },
+    {
+      name: "kind",
+      type: "select",
+      defaultValue: "Explainer",
+      options: ["Explainer", "60-second explainer", "Interview", "Event highlight"],
+      admin: { description: "The row it sits in on Videos (273:22177)." },
+    },
+    {
+      name: "featured",
+      type: "checkbox",
+      admin: { position: "sidebar", description: "The big video at the top of Videos." },
+    },
+    { name: "language", type: "text", admin: { description: "For example English with Hindi subtitles." } },
     { name: "description", type: "textarea", required: true },
     ...mediaFields("Video address"),
     { name: "thumbnail", type: "upload", relationTo: "media" },
@@ -369,6 +498,12 @@ export const Podcasts: CollectionConfig = {
     },
     { name: "description", type: "textarea", required: true },
     { name: "guests", type: "text", hasMany: true },
+    {
+      name: "alsoOn",
+      label: "Also on",
+      type: "text",
+      admin: { description: "For example Spotify, Apple Podcasts and YouTube." },
+    },
     ...mediaFields("Audio address"),
     topics,
     sample,
@@ -415,6 +550,7 @@ export const ReportLeads: CollectionConfig = {
     { name: "role", type: "text" },
     { name: "sponsorConsent", label: "Sponsor may contact", type: "checkbox", defaultValue: false },
     { name: "consentText", type: "text", admin: { description: "The words they agreed to, as shown." } },
+    { name: "consentVersion", type: "text", admin: { description: "The version of those words." } },
     {
       name: "userId",
       type: "text",

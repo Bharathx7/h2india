@@ -23,6 +23,7 @@ const CONTENT: ContentTypeName[] = [
   "tenders",
   "grants",
   "jobs",
+  "standards",
   "events",
   "tracker-projects",
   "tracker-factories",
@@ -194,21 +195,30 @@ function liveDates(row: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
-/** Sample guides for Insights (440:40, 441:801), published where sample content may be. */
-async function seedGuides(payload: Payload, publish: boolean): Promise<string> {
-  const rows = await rowsOf("guides");
+/**
+ * Editorial samples (guides for Insights and buyer's guides 440:40, 472:2135; Hydrogen 101 471:1876; videos and
+ * podcasts 273:22177, 736:1169): imported as drafts, as the workflow requires (A39), then published where sample
+ * content may be.
+ */
+async function seedEditorial(
+  payload: Payload,
+  type: "guides" | "chapters" | "videos" | "podcasts",
+  publish: boolean,
+): Promise<string> {
+  const rows = await rowsOf(type);
   const report = await importContent(
     payload,
-    "guides",
+    type,
     rows.map((r) => ({ ...r, publish: "no" })),
     { apply: true, firstRow: 1, sample: true },
   );
   console.log(formatReport(report));
-  if (!publish) return "Guides: kept as drafts";
+  const label = type.charAt(0).toUpperCase() + type.slice(1);
+  if (!publish) return `${label}: kept as drafts`;
   let published = 0;
   for (const r of rows) {
     const found = await payload.find({
-      collection: "guides",
+      collection: type,
       where: { slug: { equals: String(r.slug) } },
       draft: true,
       limit: 1,
@@ -216,10 +226,28 @@ async function seedGuides(payload: Payload, publish: boolean): Promise<string> {
     });
     const doc = found.docs[0];
     if (!doc || doc._status === "published") continue;
-    await payload.update({ collection: "guides", id: doc.id, data: { _status: "published" } });
+    await payload.update({ collection: type, id: doc.id, data: { _status: "published" } as never });
     published += 1;
   }
-  return `Guides: ${String(published)} published`;
+  return `${label}: ${String(published)} published`;
+}
+
+/** Tracker overview figures (796:7867, step 5.6), flagged sample. Never overwrites an editor's figures. */
+async function seedTrackerOverview(payload: Payload): Promise<string> {
+  const current = await payload.findGlobal({ slug: "tracker-overview", depth: 0 });
+  if ((current.figures ?? []).length && !current.sample) return "Tracker overview: kept the editors' figures";
+  const data = relativeDates(
+    JSON.parse(await readFile(path.join(seedDir, "tracker-overview.json"), "utf8")) as Record<string, unknown>,
+  ) as { figures: { value: string; label: string; source: string; asOf: string }[]; dataAsOf?: string };
+  await payload.updateGlobal({
+    slug: "tracker-overview",
+    data: {
+      figures: data.figures.map((f) => ({ ...f, asOf: parseDate(f.asOf) ?? f.asOf })),
+      dataAsOf: data.dataAsOf ? (parseDate(data.dataAsOf) ?? null) : null,
+      sample: true,
+    },
+  });
+  return "Tracker overview: sample figures set";
 }
 
 /** The SIGHT tracker (418:2079, step 5.4): sample figures, rounds and awardees. Never overwrites an editor's tracker. */
@@ -337,7 +365,10 @@ async function main(): Promise<number> {
   console.log(await seedReports(payload, publish));
   await seedTopics(payload);
   console.log(await seedArticles(payload, publish));
-  console.log(await seedGuides(payload, publish));
+  for (const type of ["guides", "chapters", "videos", "podcasts"] as const) {
+    console.log(await seedEditorial(payload, type, publish));
+  }
+  console.log(await seedTrackerOverview(payload));
   console.log(await seedHomeFigures(payload));
   console.log(await seedSight(payload));
   return problems > 0 ? 1 : 0;

@@ -147,6 +147,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Job posting rules (options, limits, closing date) live in `@h2india/core/opportunities` (`/rules` for client code). A posted job is saved only by `saveJobPost()` in `opportunities/posting.ts`: always a draft, for a company the person belongs to, never Featured (A69). An editor publishing it is the approval.
 - Create alert, Track and Save go to `/member/alerts` or `/member/saved` through `memberHref()` (sign-in first when signed out) until step 7.3 (A71).
 
+## Knowledge and tracker pages (step 5.6)
+
+- Public reads: `apps/web/src/knowledge/data.ts` and `apps/web/src/tracker/data.ts` (published only, samples only where shown). Tracker sub-views are configured once in `tracker/views.ts` (filters, tiles, chart, columns); the page, its CSV and the tests use the same config, and every CSV row carries its source and as-of date.
+- Video and audio play only through `@h2india/core/media` (M9): no third-party embeds or player scripts until the host is chosen.
+- Gated reports record the consent words and `CONSENT_VERSION` (`cms/knowledge/gate.ts`); bump the version whenever the words change.
+- A guide with product categories is a buyer's guide (`/knowledge/guides/<slug>`); the Insights page redirects it there.
+- Links inside a sentence are underlined (axe "link-in-text-block"); colour alone isn't enough.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

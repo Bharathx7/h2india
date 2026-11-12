@@ -12,6 +12,8 @@ import { EMAIL_LINK_DAYS, REPORTS_PREFIX, reportLink } from "./library";
 // form; their downloads are recorded for our counts and never shared. Free (ungated) reports just download.
 
 export const CONSENT_TEXT = (sponsor: string) => `${sponsor}, the sponsor, may contact me about this report`;
+/** The version of CONSENT_TEXT; change it whenever the words change, so each lead records what it agreed to. */
+export const CONSENT_VERSION = "report-sponsor-v1";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LINK_SECONDS = 300;
 
@@ -116,6 +118,7 @@ export async function requestReport(payload: Payload, input: ReportRequest) {
       company: details.company || null,
       sponsorConsent: consent,
       consentText: consent && sponsor ? CONSENT_TEXT(sponsor) : null,
+      consentVersion: consent ? CONSENT_VERSION : null,
       userId: member?.userId ?? null,
     },
   });
