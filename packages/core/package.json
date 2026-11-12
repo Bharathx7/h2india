@@ -10,7 +10,8 @@
     "./companies": "./src/companies/index.ts",
     "./companies/client": "./src/companies/client.ts",
     "./jobs": "./src/jobs.ts",
-    "./authz": "./src/authz/index.ts"
+    "./authz": "./src/authz/index.ts",
+    "./recovery": "./src/recovery/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
@@ -24,6 +25,7 @@
     "bullmq": "6.7.4",
     "drizzle-orm": "0.45.4",
     "nodemailer": "10.5.0",
-    "uuidv7": "1.2.1"
+    "uuidv7": "1.2.1",
+    "zod": "4.6.7"
   }
 }

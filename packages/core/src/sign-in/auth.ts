@@ -9,6 +9,7 @@ import { uuidv7 } from "uuidv7";
 import { sendVerifyEmail } from "../companies/notify";
 import { JOIN } from "../companies/rules";
 import { getDb } from "../db";
+import { recoveryPlugin } from "../recovery/plugin";
 import { afterSignIn, beforeSignIn } from "./hooks";
 import { sendSignInCode } from "./mail";
 import { normaliseEmail, SIGN_IN } from "./rules";
@@ -102,6 +103,7 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
         origin: env.APP_URL,
         authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
       }),
+      recoveryPlugin(),
       ...(options.plugins ?? []),
     ],
   });

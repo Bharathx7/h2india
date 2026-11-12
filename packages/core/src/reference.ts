@@ -13,7 +13,11 @@ export const REFERENCE_TYPES = {
   GRV: "Grievance",
   DRR: "Delivery receipt",
   EV: "Event",
+  SUP: "Support request",
 } as const;
+
+/** Digits after the year. Support requests use five, as drawn (528:664, "SUP-2026-01942"). */
+const WIDTH: Partial<Record<keyof typeof REFERENCE_TYPES, number>> = { SUP: 5 };
 
 export type ReferenceType = keyof typeof REFERENCE_TYPES;
 
@@ -22,7 +26,7 @@ export function istYear(at: Date): number {
 }
 
 export function formatReference(type: ReferenceType, year: number, n: number): string {
-  return `${type}-${String(year)}-${String(n).padStart(4, "0")}`;
+  return `${type}-${String(year)}-${String(n).padStart(WIDTH[type] ?? 4, "0")}`;
 }
 
 /** Takes the next number atomically. Safe when many requests ask at once; gaps can occur if a transaction rolls back. */

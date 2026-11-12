@@ -35,6 +35,8 @@ export const serverEnvSchema = z.object({
   EMAIL_FROM: z.string().min(3),
   // Sender for sign-in and security emails (Figma 671:428 uses security@). Falls back to EMAIL_FROM.
   EMAIL_FROM_SECURITY: optionalText(),
+  // Where support requests are sent until the admin queue exists (decision A16).
+  SUPPORT_EMAIL: z.email().default("support@h2india.local"),
 });
 
 export const clientEnvSchema = z.object({

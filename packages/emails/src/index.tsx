@@ -2,6 +2,14 @@
 import { render } from "@react-email/components";
 import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
 import { Notice } from "./notice";
+import {
+  mobileChangedMessage,
+  newEmailMessage,
+  passkeyResetMessage,
+  recoveryApprovalMessage,
+  supportReceivedMessage,
+  supportRequestMessage,
+} from "./recovery/messages";
 import { SignInCode, signInCodeSubject, type SignInCodeProps } from "./sign-in/SignInCode";
 
 export interface RenderedEmail {
@@ -13,7 +21,7 @@ export interface RenderedEmail {
 export async function renderSignInCode(props: SignInCodeProps): Promise<RenderedEmail> {
   const element = <SignInCode {...props} />;
   return {
-    subject: signInCodeSubject(props.code),
+    subject: signInCodeSubject(props.code, props.purpose),
     html: await render(element),
     text: await render(element, { plainText: true }),
   };
@@ -38,4 +46,24 @@ export function renderJoinRequestToAdmin(appUrl: string, input: Parameters<typeo
 
 export function renderJoinRequestAnswered(appUrl: string, input: Parameters<typeof joinRequestAnsweredMessage>[0]) {
   return renderNotice(appUrl, joinRequestAnsweredMessage(input));
+}
+
+type Builder = (input: never) => NoticeMessage;
+const builders = {
+  passkeyReset: passkeyResetMessage,
+  recoveryApproval: recoveryApprovalMessage,
+  supportRequest: supportRequestMessage,
+  supportReceived: supportReceivedMessage,
+  newEmail: newEmailMessage,
+  mobileChanged: mobileChangedMessage,
+} satisfies Record<string, Builder>;
+
+/** Renders one of the recovery messages (step 3.5). */
+export function renderRecovery<K extends keyof typeof builders>(
+  appUrl: string,
+  kind: K,
+  input: Parameters<(typeof builders)[K]>[0],
+): Promise<RenderedEmail> {
+  const build = builders[kind] as (i: typeof input) => NoticeMessage;
+  return renderNotice(appUrl, build(input));
 }

@@ -119,6 +119,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A11 | A screen the work needs is not drawn in Figma | You | All stages | Build it in code from the design system, consistent with the drawn screens, and list it in `docs/design-fidelity.md` for the designer | Answered | Founder, 12 Nov 2026: "build it by yourself in the code … it should go with the screens as same as others". Decisions (not drawings) still come to you. |
 | A12 | Operator permission grids: only Finance is drawn (656:8) | You | Step 3.4 | The six other grids drafted from each role's description (`docs/permissions.md`) | Answered | Founder, 12 Nov 2026: use the drafted grids; change them later in the Operator roles screen. |
 | A13 | Role of a person whose join request is approved | You | Step 3.4 | Least access: Requester (buyer) or Viewer (supplier); the Admin can raise it | Answered | Founder, 12 Nov 2026. |
+| A14 | Changing the mobile number (528:293, 528:480): who needs an admin's approval | You | Step 3.5 | Everyone in a company waits for an Admin; an Admin's own change waits for another Admin; individual members change it at once with an email notice | Answered | Founder, 12 Nov 2026. |
+| A15 | Lost email, "Use my mobile and admin" (528:534): what happens after the mobile code and the admin's confirmation | You | Step 3.5 | The person adds a new work email, confirms it by link; it becomes their sign-in email; admins are told | Answered | Founder, 12 Nov 2026. |
+| A16 | Who handles lost-email support requests | You | Step 3.5 | Operators with Users access (Super admin, Supplier verifier, Operations) in the admin queue (Stage 11); until then each request is emailed to the support address | Answered | Founder, 12 Nov 2026. |
+| A17 | Approval needed but the person is the company's only Admin | You | Step 3.5 | H2 India support approves, through the same queue, with an ID check | Answered | Founder, 12 Nov 2026. |
 
 ## Design-system notes (Stage 2)
 
@@ -152,3 +156,4 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 3.3 built. Added A9 (join email wording, open), D-UI9 (sample GSTINs) and D-UI10 (company name field).
 - 12 Nov 2026: You set the scope (A10: Stages 3 to 5), how undrawn screens are handled (A11) and sample content (F9). Step 3.3 merged.
 - 12 Nov 2026: Step 3.4 built and merged. You accepted the drafted operator grids (A12) and least access for approved join requests (A13).
+- 12 Nov 2026: Step 3.5 planned. You decided A14 to A17 (mobile change approval, lost email, support desk, sole admin).

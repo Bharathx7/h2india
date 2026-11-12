@@ -43,6 +43,13 @@
       "when": 1794457965787,
       "tag": "0005_authz_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794458380974,
+      "tag": "0006_recovery",
+      "breakpoints": true
     }
   ]
 }

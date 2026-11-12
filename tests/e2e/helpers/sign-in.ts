@@ -22,7 +22,17 @@ interface MailpitList {
 }
 
 /** The newest sign-in code sent to this address, sent at or after `after` and not equal to `previous`. */
-export async function latestCode(page: Page, email: string, after = 0, previous?: string): Promise<string> {
+export async function latestCode(
+  page: Page,
+  email: string,
+  after = 0,
+  previous?: string,
+  purpose: "sign-in" | "verification" | "any" = "any",
+): Promise<string> {
+  const subject =
+    purpose === "any"
+      ? /^(\d{6}) is your H2 India (?:sign-in|verification) code$/
+      : new RegExp(`^(\\d{6}) is your H2 India ${purpose} code$`);
   let found = "";
   await expect
     .poll(
@@ -32,7 +42,8 @@ export async function latestCode(page: Page, email: string, after = 0, previous?
         );
         const list = (await res.json()) as MailpitList;
         const fresh = (list.messages ?? []).filter((m) => new Date(m.Created).getTime() >= after);
-        found = /^(\d{6}) is your H2 India sign-in code$/.exec(fresh[0]?.Subject ?? "")?.[1] ?? "";
+        const match = fresh.find((m) => subject.test(m.Subject));
+        found = subject.exec(match?.Subject ?? "")?.[1] ?? "";
         return found === previous ? "" : found;
       },
       { message: `a sign-in code email for ${email}`, timeout: 10_000 },
