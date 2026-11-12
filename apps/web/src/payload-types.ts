@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     articles: Article;
+    corrections: Correction;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    corrections: CorrectionsSelect<false> | CorrectionsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -131,6 +133,12 @@ export interface EditorAuthOperations {
  */
 export interface Article {
   id: number;
+  /**
+   * Changed with the Workflow panel above.
+   */
+  workflow?: ('Draft' | 'In review' | 'Legal check' | 'Scheduled' | 'Published') | null;
+  publishAt?: string | null;
+  publishedAt?: string | null;
   /**
    * Sponsored and press-release pieces always show their label.
    */
@@ -202,6 +210,17 @@ export interface Article {
     passedBy?: (number | null) | Editor;
     passedAt?: string | null;
   };
+  /**
+   * Corrections show here after publishing, with the date and what changed. Readers see them at the end of the article.
+   */
+  corrections?:
+    | {
+        date: string;
+        note: string;
+        by?: (number | null) | Editor;
+        id?: string | null;
+      }[]
+    | null;
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -336,6 +355,22 @@ export interface Editor {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "corrections".
+ */
+export interface Correction {
+  id: number;
+  article: number | Article;
+  status: 'Open' | 'Resolved' | 'Rejected';
+  source: 'reader' | 'editor';
+  description: string;
+  reporterEmail?: string | null;
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -361,6 +396,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'corrections';
+        value: number | Correction;
       } | null)
     | ({
         relationTo: 'authors';
@@ -429,6 +468,9 @@ export interface PayloadMigration {
  * via the `definition` "articles_select".
  */
 export interface ArticlesSelect<T extends boolean = true> {
+  workflow?: T;
+  publishAt?: T;
+  publishedAt?: T;
   type?: T;
   topics?: T;
   tags?: T;
@@ -471,6 +513,14 @@ export interface ArticlesSelect<T extends boolean = true> {
         passedBy?: T;
         passedAt?: T;
       };
+  corrections?:
+    | T
+    | {
+        date?: T;
+        note?: T;
+        by?: T;
+        id?: T;
+      };
   seo?:
     | T
     | {
@@ -480,6 +530,21 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "corrections_select".
+ */
+export interface CorrectionsSelect<T extends boolean = true> {
+  article?: T;
+  status?: T;
+  source?: T;
+  description?: T;
+  reporterEmail?: T;
+  resolution?: T;
+  resolvedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,9 +1,10 @@
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
-import { APIError, type CollectionBeforeChangeHook, type CollectionConfig } from "payload";
+import { APIError, type CollectionBeforeChangeHook, type CollectionConfig, type Endpoint } from "payload";
 import { KeyFacts, KeyNumbers } from "../blocks";
-import { canDelete, canEdit, canPublish, publishedOrEditor } from "../roles";
+import { canDelete, canEdit, canPublish, editorOf, publishedOrEditor } from "../roles";
 import { slugFrom } from "../slug";
-import { ALWAYS_LEGAL, ARTICLE_TYPES } from "../types";
+import { ALWAYS_LEGAL, ARTICLE_TYPES, WORKFLOW } from "../types";
+import { RULES, transitionArticle, type Action } from "../workflow";
 
 // Articles: the six types (A28) with their header variants (437:3709 to 437:4387), authors, topics, tags, sources and
 // SEO (639:8). Drafts and versions are kept and comparable. Only content.publish may publish (step 4.1); the editorial
@@ -18,13 +19,16 @@ interface ArticleData {
   legal?: { flagged?: boolean | null; passedAt?: string | null } | null;
 }
 
-const guardPublishing: CollectionBeforeChangeHook = ({ data, originalDoc, req }) => {
+const guardPublishing: CollectionBeforeChangeHook = ({ data, originalDoc, req, context }) => {
   const next = data as ArticleData;
   const before = originalDoc as ArticleData | undefined;
-  const publishing = next._status === "published";
-  if (!publishing) return data;
-  if (!canPublish(req)) {
-    throw new APIError("Only an Editor-in-chief can publish. Send it for review instead.", 403, null, true);
+  if (next._status !== "published") return data;
+  // Publishing happens only through the workflow (step 4.2), which checks the rules and writes the audit log.
+  if (!context.workflow) {
+    if (!canPublish(req)) {
+      throw new APIError("Only an Editor-in-chief can publish. Send it for review instead.", 403, null, true);
+    }
+    throw new APIError("Publish from the Workflow panel, so the legal check and schedule are kept.", 400, null, true);
   }
   const type = next.type ?? before?.type ?? "";
   const legal = { ...(before?.legal ?? {}), ...(next.legal ?? {}) };
@@ -37,6 +41,43 @@ const guardPublishing: CollectionBeforeChangeHook = ({ data, originalDoc, req })
   return data;
 };
 
+/** POST /api/cms/articles/:id/workflow { action, publishAt?, note? } */
+const workflowEndpoint: Endpoint = {
+  path: "/:id/workflow",
+  method: "post",
+  handler: async (req) => {
+    const editor = editorOf(req);
+    if (!editor) return Response.json({ errors: [{ message: "Sign in as an editor." }] }, { status: 401 });
+    const body = (req.json ? await req.json().catch(() => ({})) : {}) as {
+      action?: string;
+      publishAt?: string;
+      note?: string;
+    };
+    if (!body.action || !(body.action in RULES)) {
+      return Response.json({ errors: [{ message: "Unknown action" }] }, { status: 400 });
+    }
+    try {
+      const doc = await transitionArticle(req.payload, {
+        id:
+          typeof req.routeParams?.id === "string" || typeof req.routeParams?.id === "number" ? req.routeParams.id : "",
+        action: body.action as Action,
+        actor: {
+          editorId: editor.id,
+          h2UserId: (req.user as { h2UserId?: string } | null)?.h2UserId ?? null,
+          permissions: editor.permissions ?? [],
+        },
+        publishAt: body.publishAt,
+        note: body.note,
+      });
+      return Response.json({ doc });
+    } catch (error) {
+      const status = error instanceof APIError ? error.status : 500;
+      const message = error instanceof APIError ? error.message : "Something went wrong";
+      return Response.json({ errors: [{ message }] }, { status });
+    }
+  },
+};
+
 export const Articles: CollectionConfig = {
   slug: "articles",
   admin: {
@@ -44,11 +85,34 @@ export const Articles: CollectionConfig = {
     group: "Content",
     defaultColumns: ["title", "type", "_status", "updatedAt"],
     preview: (doc) => `/cms-preview/articles/${String(doc.id)}`,
+    components: { edit: { PublishButton: "@/cms/admin/WorkflowPublish#WorkflowPublish" } },
   },
   versions: { drafts: { autosave: { interval: 2000 } }, maxPerDoc: 50 },
   access: { read: publishedOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
   hooks: { beforeChange: [guardPublishing] },
+  endpoints: [workflowEndpoint],
   fields: [
+    {
+      name: "workflowPanel",
+      type: "ui",
+      admin: { position: "sidebar", components: { Field: "@/cms/admin/WorkflowPanel#WorkflowPanel" } },
+    },
+    {
+      name: "workflow",
+      type: "select",
+      defaultValue: "Draft",
+      options: [...WORKFLOW],
+      index: true,
+      admin: { position: "sidebar", readOnly: true, description: "Changed with the Workflow panel above." },
+    },
+    {
+      name: "publishAt",
+      label: "Publish at",
+      type: "date",
+      index: true,
+      admin: { position: "sidebar", date: { pickerAppearance: "dayAndTime", displayFormat: "d MMM yyyy, h:mm a" } },
+    },
+    { name: "publishedAt", type: "date", index: true, admin: { position: "sidebar", readOnly: true } },
     {
       type: "row",
       fields: [
@@ -166,6 +230,21 @@ export const Articles: CollectionConfig = {
         },
         { name: "passedBy", type: "relationship", relationTo: "editors", admin: { readOnly: true } },
         { name: "passedAt", type: "date", admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } } },
+      ],
+    },
+    {
+      name: "corrections",
+      label: "Corrections log",
+      type: "array",
+      admin: {
+        readOnly: true,
+        description:
+          "Corrections show here after publishing, with the date and what changed. Readers see them at the end of the article.",
+      },
+      fields: [
+        { name: "date", type: "date", required: true },
+        { name: "note", type: "textarea", required: true },
+        { name: "by", type: "relationship", relationTo: "editors" },
       ],
     },
     {

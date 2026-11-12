@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { cms, newAuthor, paragraph, signInOperator } from "../helpers/cms";
 import { signInNew } from "../helpers/join";
-import { newEmail, ownIp } from "../helpers/sign-in";
+import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 
-// Step 4.1 DONE WHEN: an editor can create, preview and save a draft of each article type; a Content editor cannot
-// publish, an Editor-in-chief can; media without alt text cannot be saved.
+// Steps 4.1 and 4.2 DONE WHEN: an editor can create, preview and save a draft of each article type; a Content editor cannot
+// publish, an Editor-in-chief can; media without alt text cannot be saved; a scheduled article publishes within a
+// minute; a piece needing legal check can't be published until it passes; a correction shows a dated note.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
 test.skip(({ isMobile }) => isMobile, "the CMS is checked at desktop width");
 
@@ -49,25 +50,51 @@ test("a Content editor drafts and previews every article type but can't publish"
   }
 });
 
-test("an Editor-in-chief publishes; sponsored and press-release pieces need the legal check first", async ({
+test("an Editor-in-chief publishes through the workflow; sponsored pieces need the legal check first", async ({
   page,
 }) => {
   await signInOperator(page, "Editor-in-chief");
   const author = await newAuthor(page.request, "Vikram Bose");
   const base = { dek: "Standfirst.", body: paragraph("Body."), authors: [author] };
+  const flow = (id: number | undefined, action: string, extra: object = {}) =>
+    cms(page.request, "POST", `articles/${String(id)}/workflow`, { action, ...extra });
+
   const news = await cms(page.request, "POST", "articles?draft=true", {
     ...base,
     type: "news",
     title: `News ${String(Date.now())}`,
   });
-  const noSources = await cms(page.request, "PATCH", `articles/${String(news.body.doc?.id)}`, { _status: "published" });
-  expect(noSources.body.errors?.[0]?.message).toBe("Add at least one source before publishing.");
-  const ok = await cms(page.request, "PATCH", `articles/${String(news.body.doc?.id)}`, {
-    _status: "published",
+  const id = news.body.doc?.id;
+  // Payload's own publish is replaced by the workflow.
+  const direct = await cms(page.request, "PATCH", `articles/${String(id)}`, { _status: "published" });
+  expect(direct.body.errors?.[0]?.message).toBe(
+    "Publish from the Workflow panel, so the legal check and schedule are kept.",
+  );
+  expect((await flow(id, "publish")).body.errors?.[0]?.message).toBe("An article that is draft can't do that.");
+  expect((await flow(id, "submit")).status).toBe(200);
+  expect((await flow(id, "publish")).body.errors?.[0]?.message).toBe("Add at least one source before publishing.");
+  await cms(page.request, "PATCH", `articles/${String(id)}?draft=true`, {
     sources: [{ title: "PIB release, 3 Nov 2026", url: "https://pib.gov.in" }],
   });
-  expect(ok.status).toBe(200);
-  expect(ok.body.doc?._status).toBe("published");
+  const published = await flow(id, "publish");
+  expect(published.status).toBe(200);
+  expect(published.body.doc?._status).toBe("published");
+
+  // A correction adds a dated note on the article and an entry in the Corrections queue.
+  expect((await flow(id, "correct", { note: "The plant ran 4,100 hours, not 4,000." })).status).toBe(200);
+  await page.goto(`/cms-preview/articles/${String(id)}`);
+  await expect(page.getByRole("heading", { name: "Corrections" })).toBeVisible();
+  await expect(page.getByRole("main")).toContainText("The plant ran 4,100 hours, not 4,000.");
+  const queue = await cms(page.request, "GET", `corrections?where[article][equals]=${String(id)}`);
+  expect((queue.body as unknown as { totalDocs: number }).totalDocs).toBe(1);
+  const audited = await withDb(async (db) => {
+    const r = await db.query<{ action: string }>(
+      "SELECT action FROM core.audit_log WHERE resource_type = 'article' AND resource_id = $1 ORDER BY at",
+      [String(id)],
+    );
+    return r.rows.map((x) => x.action);
+  });
+  expect(audited).toEqual(["article.submit", "article.publish", "article.correct"]);
 
   const sponsored = await cms(page.request, "POST", "articles?draft=true", {
     ...base,
@@ -76,11 +103,26 @@ test("an Editor-in-chief publishes; sponsored and press-release pieces need the 
     sponsor: { name: "Hydrotek Systems" },
     sources: [{ title: "Hydrotek datasheet" }],
   });
-  const blocked = await cms(page.request, "PATCH", `articles/${String(sponsored.body.doc?.id)}`, {
-    _status: "published",
-  });
-  expect(blocked.status).toBe(400);
-  expect(blocked.body.errors?.[0]?.message).toBe("This piece needs a legal check before it's published.");
+  const sid = sponsored.body.doc?.id;
+  await flow(sid, "submit");
+  const soon = new Date(Date.now() + 3000).toISOString();
+  expect((await flow(sid, "schedule", { publishAt: soon })).body.errors?.[0]?.message).toBe(
+    "This piece needs a legal check before it's scheduled.",
+  );
+  expect((await flow(sid, "send-to-legal")).status).toBe(200);
+  expect((await flow(sid, "pass-legal")).status).toBe(200);
+  expect((await flow(sid, "schedule", { publishAt: soon })).status).toBe(200);
+  // The worker publishes it at its time (it checks every minute).
+  await expect
+    .poll(
+      async () =>
+        (await cms(page.request, "GET", `articles/${String(sid)}?draft=true`)).body as unknown as { workflow: string },
+      {
+        timeout: 90_000,
+        intervals: [2000],
+      },
+    )
+    .toMatchObject({ workflow: "Published" });
 });
 
 test("media can't be saved without alt text", async ({ page }) => {

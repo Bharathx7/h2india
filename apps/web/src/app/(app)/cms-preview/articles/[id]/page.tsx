@@ -49,6 +49,20 @@ export default async function ArticlePreview({ params }: { params: Promise<{ id:
         ) : null}
       </header>
       <ArticleBody data={article.body} />
+      {(article.corrections ?? []).length > 0 ? (
+        <section aria-labelledby="corrections" className="border-t border-default pt-4">
+          <h2 id="corrections" className="type-h4">
+            Corrections
+          </h2>
+          <ul className="mt-2 flex flex-col gap-2 type-body-sm text-body">
+            {(article.corrections ?? []).map((c) => (
+              <li key={c.id ?? c.date}>
+                <span className="type-label">{formatIstDateTime(new Date(c.date))}:</span> {c.note}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {sources.length > 0 ? (
         <section aria-labelledby="sources" className="border-t border-default pt-4">
           <h2 id="sources" className="type-h4">
