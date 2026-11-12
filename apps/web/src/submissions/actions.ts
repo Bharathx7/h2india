@@ -11,7 +11,7 @@ import { getPayload } from "payload";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 
-// The public submission forms (step 5.7). Every check runs here (CHECKS in @h2india/core/events). A submission gets
+// The public submission forms (step 5.7), and Contact, Partnership and Advertise (step 5.8). Every check runs here (CHECKS in @h2india/core/events). A submission gets
 // its reference (EV-, PR-, COR-, WFU-), enters the Submissions queue under review, and the sender gets Submission
 // received (673:352) when we have their email. Events and press releases need an account (505:421).
 
@@ -34,6 +34,28 @@ const ROWS: Record<SubmissionKind, (d: Record<string, unknown>) => { label: stri
   ],
   correction: (d) => [{ label: "Page", value: String(d.page) }],
   pitch: (d) => [{ label: "Topic", value: String(d.topic) }],
+  contact: (d) => [
+    { label: "About", value: String(d.topic) },
+    { label: "Company", value: String(d.company) },
+  ],
+  partnership: (d) => [
+    { label: "Organisation", value: String(d.organisation) },
+    { label: "Partner type", value: String(d.partnerType) },
+  ],
+  advertising: (d) => [
+    { label: "Company", value: String(d.company) },
+    { label: "Interested in", value: Array.isArray(d.interests) ? d.interests.map(String).join(", ") : "" },
+  ],
+};
+
+const RETURN_PATH: Record<SubmissionKind, string> = {
+  event: "events/submit",
+  press_release: "news/submit",
+  correction: "legal/corrections",
+  pitch: "knowledge/insights/write",
+  contact: "contact",
+  partnership: "contact/partnerships",
+  advertising: "advertise",
 };
 
 export async function submitContent(kind: SubmissionKind, input: Record<string, unknown>): Promise<SubmitResult> {
@@ -100,7 +122,7 @@ export async function submitContent(kind: SubmissionKind, input: Record<string, 
           reference,
           title: v.title,
           rows: ROWS[kind]({ ...v.details, title: v.title }),
-          url: `${parseServerEnv().APP_URL}/${kind === "event" ? "events/submit" : kind === "press_release" ? "news/submit" : ""}`,
+          url: `${parseServerEnv().APP_URL}/${RETURN_PATH[kind]}`,
         },
       );
     }

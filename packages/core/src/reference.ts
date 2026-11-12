@@ -18,10 +18,14 @@ export const REFERENCE_TYPES = {
   PR: "Press release",
   COR: "Correction",
   WFU: "Write for us pitch",
+  CON: "Contact message",
+  PE: "Partnership enquiry",
+  ADV: "Advertising enquiry",
 } as const;
 
-/** Digits after the year. Support requests use five, as drawn (528:664, "SUP-2026-01942"). */
-const WIDTH: Partial<Record<keyof typeof REFERENCE_TYPES, number>> = { SUP: 5 };
+/** Digits after the year. Support requests and grievances use five, as drawn (528:664 "SUP-2026-01942", 519:538
+ * "GRV-2026-00318"). */
+const WIDTH: Partial<Record<keyof typeof REFERENCE_TYPES, number>> = { SUP: 5, GRV: 5 };
 
 export type ReferenceType = keyof typeof REFERENCE_TYPES;
 

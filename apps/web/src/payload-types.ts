@@ -94,6 +94,9 @@ export interface Config {
     'tracker-hubs': TrackerHub;
     'tracker-changes': TrackerChange;
     'early-listings': EarlyListing;
+    'legal-pages': LegalPage;
+    'help-articles': HelpArticle;
+    'team-members': TeamMember;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -133,6 +136,9 @@ export interface Config {
     'tracker-hubs': TrackerHubsSelect<false> | TrackerHubsSelect<true>;
     'tracker-changes': TrackerChangesSelect<false> | TrackerChangesSelect<true>;
     'early-listings': EarlyListingsSelect<false> | EarlyListingsSelect<true>;
+    'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
+    'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -153,6 +159,9 @@ export interface Config {
     'home-figures': HomeFigure;
     prelaunch: Prelaunch;
     'sight-tracker': SightTracker;
+    'trust-settings': TrustSetting;
+    pricing: Pricing;
+    'audience-faqs': AudienceFaq;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
@@ -160,6 +169,9 @@ export interface Config {
     'home-figures': HomeFiguresSelect<false> | HomeFiguresSelect<true>;
     prelaunch: PrelaunchSelect<false> | PrelaunchSelect<true>;
     'sight-tracker': SightTrackerSelect<false> | SightTrackerSelect<true>;
+    'trust-settings': TrustSettingsSelect<false> | TrustSettingsSelect<true>;
+    pricing: PricingSelect<false> | PricingSelect<true>;
+    'audience-faqs': AudienceFaqsSelect<false> | AudienceFaqsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1635,7 +1647,7 @@ export interface SourceChange {
   createdAt: string;
 }
 /**
- * Events, press releases, corrections and pitches from the public forms, newest first.
+ * Events, press releases, corrections, pitches, contact messages and partnership and advertising enquiries from the public forms, newest first.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "submissions".
@@ -1643,8 +1655,8 @@ export interface SourceChange {
 export interface Submission {
   id: number;
   reference: string;
-  kind: 'event' | 'press_release' | 'correction' | 'pitch';
-  status: 'Under review' | 'Published' | 'Needs changes' | 'Declined';
+  kind: 'event' | 'press_release' | 'correction' | 'pitch' | 'contact' | 'partnership' | 'advertising';
+  status: 'Under review' | 'Published' | 'Needs changes' | 'Declined' | 'Answered';
   title: string;
   /**
    * Everything the form asked, as sent.
@@ -3126,6 +3138,136 @@ export interface EarlyListing {
   createdAt: string;
 }
 /**
+ * Terms, privacy, cookies, editorial, corrections and sponsored content (66:5004, 521:305…). Final texts come from our lawyers (M2). Each published change adds a version history row.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages".
+ */
+export interface LegalPage {
+  id: number;
+  slug: 'terms' | 'privacy' | 'cookies' | 'editorial-policy' | 'corrections' | 'sponsored-content';
+  title: string;
+  /**
+   * For example 1.1. People who accept the terms are recorded against this.
+   */
+  version: string;
+  effectiveOn: string;
+  /**
+   * Numbered in order; the Contents list is made from the headings.
+   */
+  sections?:
+    | {
+        heading: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Newest first: version, date and what changed.
+   */
+  history?:
+    | {
+        version: string;
+        date: string;
+        changed: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Help centre articles (96:1942, 278:23978).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles".
+ */
+export interface HelpArticle {
+  id: number;
+  title: string;
+  slug: string;
+  category: 'getting-started' | 'buying' | 'selling' | 'payments' | 'verification' | 'alerts' | 'account';
+  readMinutes?: number | null;
+  /**
+   * 1 to 6 puts it in Popular articles, in that order.
+   */
+  popular?: number | null;
+  /**
+   * 1 to 3 lists it on its category card.
+   */
+  featured?: number | null;
+  intro: string;
+  sections?:
+    | {
+        heading: string;
+        steps?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A paragraph instead of, or after, the steps.
+         */
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The grey box, for example What each role can do.
+   */
+  callout?: {
+    title?: string | null;
+    text?: string | null;
+  };
+  related?: (number | HelpArticle)[] | null;
+  /**
+   * Other words people search for, for example GST invoice, NEFT.
+   */
+  keywords?: string[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Management team and advisors (66:3923). Only people who agreed to be shown.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  group: 'Management' | 'Advisors';
+  order: number;
+  linkedin?: string | null;
+  /**
+   * Shown as Founder on the Media kit (741:6058).
+   */
+  founder?: boolean | null;
+  /**
+   * One line for the Media kit.
+   */
+  bio?: string | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3256,6 +3398,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'early-listings';
         value: number | EarlyListing;
+      } | null)
+    | ({
+        relationTo: 'legal-pages';
+        value: number | LegalPage;
+      } | null)
+    | ({
+        relationTo: 'help-articles';
+        value: number | HelpArticle;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: number | TeamMember;
       } | null)
     | ({
         relationTo: 'authors';
@@ -4639,6 +4793,90 @@ export interface EarlyListingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages_select".
+ */
+export interface LegalPagesSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  version?: T;
+  effectiveOn?: T;
+  sections?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        id?: T;
+      };
+  history?:
+    | T
+    | {
+        version?: T;
+        date?: T;
+        changed?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles_select".
+ */
+export interface HelpArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  readMinutes?: T;
+  popular?: T;
+  featured?: T;
+  intro?: T;
+  sections?:
+    | T
+    | {
+        heading?: T;
+        steps?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        text?: T;
+        id?: T;
+      };
+  callout?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
+  related?: T;
+  keywords?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  group?: T;
+  order?: T;
+  linkedin?: T;
+  founder?: T;
+  bio?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
@@ -5029,6 +5267,201 @@ export interface SightTracker {
   createdAt?: string | null;
 }
 /**
+ * Who runs H2 India, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-settings".
+ */
+export interface TrustSetting {
+  id: number;
+  /**
+   * The legal name, for example Example Ventures Private Limited (M2).
+   */
+  operatingCompany?: string | null;
+  gstin?: string | null;
+  registeredOffice?: string | null;
+  officeHours?: string | null;
+  /**
+   * Who runs H2 India (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.
+   */
+  disclosure?: string | null;
+  disclosureDate?: string | null;
+  grievanceOfficer?: {
+    name?: string | null;
+    designation?: string | null;
+    email?: string | null;
+  };
+  /**
+   * Named on Partner with H2 India (742:8) and the Media kit (741:6058).
+   */
+  partnerships?: {
+    name?: string | null;
+    role?: string | null;
+  };
+  boilerplate?: string | null;
+  /**
+   * The Download media kit (PDF) buttons are hidden until this is set.
+   */
+  mediaKitUrl?: string | null;
+  /**
+   * The four tiles on About (66:4251), each with its source and date.
+   */
+  aboutFigures?:
+    | {
+        value: string;
+        label: string;
+        source: string;
+        /**
+         * Oct 2026, 31 Oct 2026
+         */
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Our audience (741:5605) and Audience at a glance (741:6058): from our own analytics and lists, never rounded up.
+   */
+  audience?:
+    | {
+        value: string;
+        label: string;
+        source: string;
+        /**
+         * Oct 2026, 31 Oct 2026
+         */
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample figures and names (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The Pricing page (512:148). Prices, the launch offer and the rate card version are decisions C1, C3 and M16: enter them only when confirmed. Sections without prices say they're being finalised.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricing".
+ */
+export interface Pricing {
+  id: number;
+  /**
+   * Rate card version 1.0 · effective 1 December 2026 · all prices exclude GST
+   */
+  rateCardNote?: string | null;
+  plans?:
+    | {
+        /**
+         * Free listing, Growth…
+         */
+        name: string;
+        /**
+         * ₹0, ₹4,999, Custom
+         */
+        price: string;
+        /**
+         * always, a month, yearly contract
+         */
+        period?: string | null;
+        summary: string;
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        cta: string;
+        href: string;
+        highlight?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  commission?: {
+    /**
+     * ₹0
+     */
+    launchValue?: string | null;
+    /**
+     * until 30 June 2027 (C1)
+     */
+    launchNote?: string | null;
+    /**
+     * 3%
+     */
+    afterValue?: string | null;
+    /**
+     * of each order paid through H2 India
+     */
+    afterNote?: string | null;
+    /**
+     * Capped at … per order. GST is added…
+     */
+    afterDetail?: string | null;
+    examples?:
+      | {
+          order: string;
+          commission: string;
+          id?: string | null;
+        }[]
+      | null;
+    footnote?: string | null;
+  };
+  addOns?:
+    | {
+        name: string;
+        /**
+         * from ₹40,000
+         */
+        price: string;
+        /**
+         * a year
+         */
+        unit?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample prices (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audience-faqs".
+ */
+export interface AudienceFaq {
+  id: number;
+  buyers?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  suppliers?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracker-methodology_select".
  */
@@ -5184,6 +5617,140 @@ export interface SightTrackerSelect<T extends boolean = true> {
         id?: T;
       };
   sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-settings_select".
+ */
+export interface TrustSettingsSelect<T extends boolean = true> {
+  operatingCompany?: T;
+  gstin?: T;
+  registeredOffice?: T;
+  officeHours?: T;
+  disclosure?: T;
+  disclosureDate?: T;
+  grievanceOfficer?:
+    | T
+    | {
+        name?: T;
+        designation?: T;
+        email?: T;
+      };
+  partnerships?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+      };
+  boilerplate?: T;
+  mediaKitUrl?: T;
+  aboutFigures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
+      };
+  audience?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricing_select".
+ */
+export interface PricingSelect<T extends boolean = true> {
+  rateCardNote?: T;
+  plans?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        period?: T;
+        summary?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        cta?: T;
+        href?: T;
+        highlight?: T;
+        id?: T;
+      };
+  commission?:
+    | T
+    | {
+        launchValue?: T;
+        launchNote?: T;
+        afterValue?: T;
+        afterNote?: T;
+        afterDetail?: T;
+        examples?:
+          | T
+          | {
+              order?: T;
+              commission?: T;
+              id?: T;
+            };
+        footnote?: T;
+      };
+  addOns?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        unit?: T;
+        text?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audience-faqs_select".
+ */
+export interface AudienceFaqsSelect<T extends boolean = true> {
+  buyers?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  suppliers?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

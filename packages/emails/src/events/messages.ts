@@ -82,7 +82,8 @@ export function webinarReplayMessage(input: { name: string; title: string; url: 
   };
 }
 
-export type SubmissionKind = "event" | "press_release" | "correction" | "pitch";
+export type SubmissionKind =
+  "event" | "press_release" | "correction" | "pitch" | "contact" | "partnership" | "advertising";
 
 const SUBMISSION_WORDS: Record<SubmissionKind, { noun: string; headline: string; review: string }> = {
   event: {
@@ -100,6 +101,21 @@ const SUBMISSION_WORDS: Record<SubmissionKind, { noun: string; headline: string;
     noun: "correction",
     headline: "Thanks, we've received your correction",
     review: "we'll check it against the source and tell you the outcome.",
+  },
+  contact: {
+    noun: "message",
+    headline: "Thanks, we've got your message",
+    review: "the right team will reply, most within 1 working day.",
+  },
+  partnership: {
+    noun: "proposal",
+    headline: "Thanks, we've got your proposal",
+    review: "we read every proposal and reply within 3 working days, yes or no.",
+  },
+  advertising: {
+    noun: "enquiry",
+    headline: "Thanks, we've got your enquiry",
+    review: "we reply within 2 working days.",
   },
   pitch: {
     noun: "pitch",
@@ -120,7 +136,7 @@ export function submissionReceivedMessage(input: {
   return {
     subject: `We've received your ${w.noun}: ${input.title}`,
     preview: `Reference ${input.reference}. We usually review within 1 working day.`,
-    reason: `You're getting this because you submitted ${w.noun === "event" ? "an event" : `a ${w.noun}`} to H2 India.`,
+    reason: `You're getting this because you submitted ${/^[aeiou]/.test(w.noun) ? "an" : "a"} ${w.noun} to H2 India.`,
     eyebrow: `Submission · ${input.reference}`,
     headline: w.headline,
     paragraphs: [`Hi ${firstName(input.name)}, ${w.review}`],

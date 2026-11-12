@@ -8,6 +8,7 @@ import {
   renderRecovery,
   renderReportDownload,
   renderSubmissionReceived,
+  renderGrievance,
   renderWebinarRegistered,
   renderSignInCode,
   renderVerifyEmail,
@@ -138,6 +139,22 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           joinUrl: `${appUrl}/events/electrolyser-buying/join`,
           host: "H2 India editorial team",
           calendar: { google: appUrl, outlook: appUrl, ics: `${appUrl}/events/electrolyser-buying/ics` },
+        }),
+      );
+    case "email.grievance_acknowledgement":
+      return email(
+        renderGrievance(appUrl, {
+          name: "Suresh Natarajan",
+          reference: "GRV-2026-00318",
+          about: "Listing · Type IV cylinder, 350 bar · Hydrotek Systems",
+          raised: "10 Nov 2026, 9:40 PM IST",
+          acknowledged: "11 Nov 2026, 10:15 AM IST",
+          resolveBy: "25 Nov 2026",
+          teamLine: "our listings team is checking the certificate with the supplier",
+          officer:
+            "[Grievance officer], Grievance Officer, H2 India · grievance@[H2 India domain] · [Registered office address]",
+          signature: "[Grievance officer], Grievance Officer, H2 India",
+          statusUrl: `${appUrl}/legal/grievance-officer?ticket=GRV-2026-00318`,
         }),
       );
     case "email.submission_received":

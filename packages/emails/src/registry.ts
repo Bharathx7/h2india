@@ -185,7 +185,7 @@ export const TEMPLATES = {
     name: "Grievance acknowledgement",
     frame: "676:154",
     step: "5.8",
-    built: false,
+    built: true,
   },
   "email.listing_approved": {
     channel: "email",

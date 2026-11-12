@@ -25,7 +25,9 @@
     "./opportunities/rules": "./src/opportunities/jobs.ts",
     "./media": "./src/media/index.ts",
     "./events": "./src/events/index.ts",
-    "./events/rules": "./src/events/submissions.ts"
+    "./events/rules": "./src/events/submissions.ts",
+    "./grievances": "./src/grievances/index.ts",
+    "./grievances/rules": "./src/grievances/rules.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

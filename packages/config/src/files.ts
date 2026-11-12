@@ -53,6 +53,15 @@ export const FILE_KINDS = {
     visibility: "public",
     sensitive: false,
   },
+  /** Attachments to a grievance (519:8): "PDF, JPG or PNG, up to 10 MB each, up to 5 files". Personal data. */
+  grievance_attachment: {
+    label: "Attachment",
+    types: DOCS,
+    maxMb: 10,
+    maxCount: 5,
+    visibility: "private",
+    sensitive: true,
+  },
   delivery_photo: {
     label: "Photo",
     types: ["image/jpeg", "image/png"],

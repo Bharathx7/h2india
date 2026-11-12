@@ -2,13 +2,17 @@
 // Suggest a correction 504:455 and Write for us 504:985. Pure checks with the messages drawn; the limits are the
 // counters on the frames ("0 / 2,000", "0 / 6,000", "0 / 1,000", "0 / 1,500"). No featured-event payment (F7).
 
-export type SubmissionKind = "event" | "press_release" | "correction" | "pitch";
+export type SubmissionKind =
+  "event" | "press_release" | "correction" | "pitch" | "contact" | "partnership" | "advertising";
 
-export const SUBMISSION_PREFIX: Record<SubmissionKind, "EV" | "PR" | "COR" | "WFU"> = {
+export const SUBMISSION_PREFIX: Record<SubmissionKind, "EV" | "PR" | "COR" | "WFU" | "CON" | "PE" | "ADV"> = {
   event: "EV",
   press_release: "PR",
   correction: "COR",
   pitch: "WFU",
+  contact: "CON",
+  partnership: "PE",
+  advertising: "ADV",
 };
 
 export const SUBMISSION_LIMITS = {
@@ -17,6 +21,9 @@ export const SUBMISSION_LIMITS = {
   pressBody: 6000,
   correction: 1000,
   pitchOutline: 1500,
+  contactMessage: 2000,
+  proposal: 1000,
+  advertisingMessage: 1000,
   eventLogos: 1,
   pressImages: 5,
 };
@@ -200,17 +207,132 @@ export function checkPitch(input: Record<string, unknown>): Result {
   };
 }
 
+// ------------------------------------------------------------------- company pages (step 5.8)
+
+/** Contact us (66:4591): the topic chips and "When we reply". Grievance goes to its own form (519:8). */
+export const CONTACT_TOPICS = [
+  { value: "Buyer help", reply: "1 working day" },
+  { value: "Supplier onboarding", reply: "1 working day" },
+  { value: "Newsroom tip", reply: "If we follow up" },
+  { value: "Advertising", reply: "2 working days" },
+  { value: "Partnerships", reply: "3 working days" },
+] as const;
+
+/** Partner with H2 India (742:8): the five partner types and what each usually covers. */
+export const PARTNER_TYPES = [
+  { value: "Industry body", hint: "Member news, directory listings, co-hosted webinars" },
+  { value: "Event organiser", hint: "Calendar listing, media partnership, exhibitor lists" },
+  { value: "Research or university", hint: "Data, reports, student and researcher profiles" },
+  { value: "State agency", hint: "Scheme and policy pages, state hub data" },
+  { value: "Media", hint: "Content sharing and co-reporting" },
+] as const;
+
+/** Advertise and sponsor (741:5605): "Interested in". */
+export const AD_INTERESTS = [
+  "Newsletter",
+  "Webinar",
+  "Category partner",
+  "Featured event",
+  "Sponsored article",
+] as const;
+
+const MOBILE = /^[6-9]\d{9}$/;
+const mobileOk = (text: string) => MOBILE.test(text.replace(/[\s-]/g, "").replace(/^\+?91/, ""));
+
+export function checkContact(input: Record<string, unknown>): Result {
+  const e: Errors = {};
+  const topic = t(input.topic);
+  const name = t(input.name);
+  const email = t(input.email).toLowerCase();
+  const company = t(input.company);
+  const mobile = t(input.mobile);
+  const message = t(input.message);
+  if (!CONTACT_TOPICS.some((c) => c.value === topic)) e.topic = "Choose what this is about";
+  if (name.length < 2) e.name = "Enter your full name";
+  if (!EMAIL.test(email)) e.email = "Enter your work email, like you@company.com";
+  if (company.length < 2) e.company = "Enter your company name";
+  if (mobile && !mobileOk(mobile)) e.mobile = "Enter a 10-digit Indian mobile number";
+  if (message.length < 10) e.message = "Tell us what you need";
+  else if (message.length > SUBMISSION_LIMITS.contactMessage) e.message = "Keep it under 2,000 characters";
+  if (Object.keys(e).length) return { ok: false, errors: e };
+  return {
+    ok: true,
+    value: {
+      title: `${topic}: ${company}`,
+      details: { topic, company, message },
+      contact: { name, email, phone: mobile || null },
+    },
+  };
+}
+
+export function checkPartnership(input: Record<string, unknown>): Result {
+  const e: Errors = {};
+  const organisation = t(input.organisation);
+  const partnerType = t(input.partnerType);
+  const proposal = t(input.proposal);
+  const name = t(input.name);
+  const email = t(input.email).toLowerCase();
+  const phone = t(input.phone);
+  if (organisation.length < 2) e.organisation = "Enter your organisation";
+  if (!PARTNER_TYPES.some((p) => p.value === partnerType)) e.partnerType = "Choose a partner type";
+  if (proposal.length < 20) e.proposal = "Tell us about your proposal in a few sentences";
+  else if (proposal.length > SUBMISSION_LIMITS.proposal) e.proposal = "Keep it under 1,000 characters";
+  if (name.length < 2) e.name = "Enter your name";
+  if (!EMAIL.test(email)) e.email = "Enter your work email, like name@organisation.in";
+  if (phone && !mobileOk(phone)) e.phone = "Enter a 10-digit Indian mobile number";
+  if (Object.keys(e).length) return { ok: false, errors: e };
+  return {
+    ok: true,
+    value: {
+      title: `${partnerType}: ${organisation}`,
+      details: { organisation, partnerType, proposal },
+      contact: { name, email, phone: phone || null },
+    },
+  };
+}
+
+export function checkAdvertising(input: Record<string, unknown>): Result {
+  const e: Errors = {};
+  const name = t(input.name);
+  const email = t(input.email).toLowerCase();
+  const company = t(input.company);
+  const interests = Array.isArray(input.interests)
+    ? input.interests.map(t).filter((i) => (AD_INTERESTS as readonly string[]).includes(i))
+    : [];
+  const message = t(input.message);
+  if (name.length < 2) e.name = "Enter your full name";
+  if (!EMAIL.test(email)) e.email = "Enter your work email, like name@company.in";
+  if (company.length < 2) e.company = "Enter your company";
+  if (!interests.length) e.interests = "Choose at least one placement";
+  if (message.length > SUBMISSION_LIMITS.advertisingMessage) e.message = "Keep it under 1,000 characters";
+  if (Object.keys(e).length) return { ok: false, errors: e };
+  return {
+    ok: true,
+    value: {
+      title: `${interests.join(", ")}: ${company}`,
+      details: { company, interests, message: message || null },
+      contact: { name, email, phone: null },
+    },
+  };
+}
+
 export const CHECKS: Record<SubmissionKind, (input: Record<string, unknown>, now?: Date) => Result> = {
   event: checkEvent,
   press_release: checkPressRelease,
   correction: checkCorrection,
   pitch: checkPitch,
+  contact: checkContact,
+  partnership: checkPartnership,
+  advertising: checkAdvertising,
 };
 
-/** Events and press releases need an account (505:421); corrections and pitches don't. */
+/** Events and press releases need an account (505:421); the other forms don't. */
 export const NEEDS_ACCOUNT: Record<SubmissionKind, boolean> = {
   event: true,
   press_release: true,
   correction: false,
   pitch: false,
+  contact: false,
+  partnership: false,
+  advertising: false,
 };

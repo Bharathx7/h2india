@@ -10,6 +10,7 @@ import {
   type WebinarDetails,
 } from "./events/messages";
 import { reportDownloadMessage } from "./knowledge/messages";
+import { grievanceMessage, type GrievanceDetails } from "./trust/messages";
 import {
   NewsletterConfirm,
   newsletterConfirmSubject,
@@ -101,6 +102,12 @@ export function renderSubmissionReceived(appUrl: string, input: Parameters<typeo
   return renderNotice(appUrl, submissionReceivedMessage(input));
 }
 export type { SubmissionKind, WebinarDetails } from "./events/messages";
+
+/** Grievance acknowledgement (676:154, step 5.8). */
+export function renderGrievance(appUrl: string, input: GrievanceDetails) {
+  return renderNotice(appUrl, grievanceMessage(input));
+}
+export type { GrievanceDetails } from "./trust/messages";
 
 export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {
   return renderNotice(appUrl, reportDownloadMessage(input));

@@ -163,6 +163,15 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Public forms post through `submitContent()` (`apps/web/src/submissions/actions.ts`): checks in `@h2india/core/events/rules`, a reference (EV-, PR-, COR-, WFU-), the Submissions queue, the audit log and Submission received. Events and press releases need an account.
 - Messages whose templates live in `@h2india/emails` are sent from core (`notify/events.ts`); the web app doesn't import the emails package.
 
+## Company, trust, legal and help (step 5.8)
+
+- Company details, the grievance officer, About and audience figures live in the CMS setting Company and legal details (`trust-settings`); read them only through `trustDetails()` (`apps/web/src/trust/data.ts`), which returns the design's `[placeholders]` until M2 is entered. Never write a name, address or legal text in a page.
+- Legal pages are `legal-pages` records (version, last updated, sections, history), published by an Editor-in-chief; render them with `LegalDocument`. Without a published version the page says it's being finalised.
+- Prices on Pricing come only from the `pricing` setting (C1, C3, M16); `pricing()` returns null for hidden samples and each section has a being-finalised state.
+- Grievances go through `raiseGrievance()` and `moveGrievance()` (`@h2india/core/grievances`): GRV reference, two clocks, status changes through `changeStatus()`. The status lookup needs the ticket and the email together (`findGrievance()`) and returns only the steps.
+- Contact, partnership and advertising forms post through `submitContent()` like step 5.7 (CON-, PE-, ADV-).
+- Scrollable table wrappers need `tabIndex={0}`, `role="region"` and a label (axe "scrollable-region-focusable").
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

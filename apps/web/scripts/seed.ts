@@ -346,6 +346,92 @@ async function seedReports(payload: Payload, publish: boolean): Promise<string> 
   return `Reports: ${String(created)} created, ${String(rows.length - created)} already there`;
 }
 
+/**
+ * Company, legal and help content (step 5.8), flagged sample: settings figures and names, the team, the two legal
+ * pages with drawn text (Terms 66:5004, Cookies 521:459), help articles (278:23978 in full; the rest as titles) and
+ * the Pricing page's drawn prices (C1, C3, M16 still open). Never overwrites what editors entered.
+ */
+async function seedTrust(payload: Payload, publish: boolean): Promise<string> {
+  type Doc = Record<string, unknown> & { slug?: string };
+  const data = JSON.parse(await readFile(path.join(seedDir, "trust.json"), "utf8")) as {
+    settings: Record<string, unknown>;
+    team: Doc[];
+    legal: Doc[];
+    help: (Doc & { related?: string[]; sections?: { heading: string; steps?: string[] }[] })[];
+    pricing: Record<string, unknown> & { plans: (Doc & { features: string[] })[] };
+    faqs: Record<string, unknown>;
+  };
+  const status = publish ? "published" : "draft";
+  const out: string[] = [];
+
+  const settings = await payload.findGlobal({ slug: "trust-settings", depth: 0 });
+  if (!settings.audience?.length || settings.sample) {
+    await payload.updateGlobal({ slug: "trust-settings", data: { ...data.settings, sample: true } });
+    out.push("settings");
+  }
+  const pricing = await payload.findGlobal({ slug: "pricing", depth: 0 });
+  if (!pricing.plans?.length || pricing.sample) {
+    await payload.updateGlobal({
+      slug: "pricing",
+      data: {
+        ...data.pricing,
+        plans: data.pricing.plans.map((p) => ({ ...p, features: p.features.map((text) => ({ text })) })),
+        sample: true,
+      },
+    });
+    out.push("pricing");
+  }
+  const faqs = await payload.findGlobal({ slug: "audience-faqs", depth: 0 });
+  if (!faqs.buyers?.length) {
+    await payload.updateGlobal({ slug: "audience-faqs", data: data.faqs });
+    out.push("questions");
+  }
+
+  const exists = async (collection: "team-members" | "legal-pages" | "help-articles", where: Record<string, unknown>) =>
+    (await payload.find({ collection, where: where as never, draft: true, limit: 1, depth: 0 })).docs[0];
+  let created = 0;
+  for (const m of data.team) {
+    if (await exists("team-members", { name: { equals: m.name } })) continue;
+    await payload.create({ collection: "team-members", data: { ...m, sample: true, _status: status } as never });
+    created += 1;
+  }
+  for (const l of data.legal) {
+    if (await exists("legal-pages", { slug: { equals: l.slug } })) continue;
+    await payload.create({ collection: "legal-pages", data: { ...l, sample: true, _status: status } as never });
+    created += 1;
+  }
+  const ids = new Map<string, number>();
+  for (const h of data.help) {
+    const found = await exists("help-articles", { slug: { equals: h.slug } });
+    if (found) {
+      ids.set(String(h.slug), found.id);
+      continue;
+    }
+    const doc = await payload.create({
+      collection: "help-articles",
+      data: {
+        ...h,
+        related: [],
+        intro: h.intro ?? "Sample article. The full text arrives with the feature it explains.",
+        sections: (h.sections ?? []).map((s) => ({
+          heading: s.heading,
+          steps: (s.steps ?? []).map((text) => ({ text })),
+        })),
+        sample: true,
+        _status: status,
+      } as never,
+    });
+    ids.set(String(h.slug), doc.id);
+    created += 1;
+  }
+  for (const h of data.help) {
+    const related = (h.related ?? []).map((r) => ids.get(r)).filter((x): x is number => x !== undefined);
+    const id = ids.get(String(h.slug));
+    if (related.length && id) await payload.update({ collection: "help-articles", id, data: { related } });
+  }
+  return `Company and help: ${String(created)} records created${out.length ? `, ${out.join(", ")} set` : ""}`;
+}
+
 async function main(): Promise<number> {
   const payload = await getPayload({ config });
   const publish = showSample();
@@ -371,6 +457,7 @@ async function main(): Promise<number> {
   console.log(await seedTrackerOverview(payload));
   console.log(await seedHomeFigures(payload));
   console.log(await seedSight(payload));
+  console.log(await seedTrust(payload, publish));
   return problems > 0 ? 1 : 0;
 }
 

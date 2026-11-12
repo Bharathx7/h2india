@@ -1,9 +1,11 @@
 import { parseServerEnv } from "@h2india/config";
 import {
+  renderGrievance,
   renderSubmissionReceived,
   renderWebinarRegistered,
   renderWebinarReminder,
   renderWebinarReplay,
+  type GrievanceDetails,
   type SubmissionKind,
   type WebinarDetails,
 } from "@h2india/emails";
@@ -12,7 +14,7 @@ import { deliverEmail, deliverWhatsApp, TemplateNotApprovedError } from "./chann
 // Webinar and submission messages (step 5.7): Webinar registration 676:83 with its reminder and replay variants,
 // WhatsApp 676:405 and 676:459, and Submission received 673:352.
 
-export type { SubmissionKind, WebinarDetails };
+export type { GrievanceDetails, SubmissionKind, WebinarDetails };
 
 const appUrl = () => parseServerEnv().APP_URL;
 
@@ -89,5 +91,16 @@ export async function sendSubmissionReceived(
     userId: to.userId ?? null,
     to: to.email,
     mail: await renderSubmissionReceived(appUrl(), input),
+  });
+}
+
+/** Grievance acknowledgement (676:154, step 5.8): a copy when the complaint is raised, and again when acknowledged. */
+export async function sendGrievance(to: Recipient, d: GrievanceDetails): Promise<void> {
+  await deliverEmail({
+    template: "email.grievance_acknowledgement",
+    event: d.acknowledged ? "grievance.acknowledged" : "grievance.raised",
+    userId: to.userId ?? null,
+    to: to.email,
+    mail: await renderGrievance(appUrl(), d),
   });
 }

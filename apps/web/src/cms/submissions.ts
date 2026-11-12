@@ -11,6 +11,9 @@ export const SUBMISSION_KINDS = [
   { value: "press_release", label: "Press release" },
   { value: "correction", label: "Correction" },
   { value: "pitch", label: "Write for us" },
+  { value: "contact", label: "Contact message" },
+  { value: "partnership", label: "Partnership enquiry" },
+  { value: "advertising", label: "Advertising enquiry" },
 ] as const;
 
 export const Submissions: CollectionConfig = {
@@ -20,7 +23,8 @@ export const Submissions: CollectionConfig = {
     useAsTitle: "title",
     group: "Queues",
     defaultColumns: ["reference", "kind", "title", "status", "createdAt"],
-    description: "Events, press releases, corrections and pitches from the public forms, newest first.",
+    description:
+      "Events, press releases, corrections, pitches, contact messages and partnership and advertising enquiries from the public forms, newest first.",
   },
   defaultSort: "-createdAt",
   access: { read: canView, create: () => false, update: canEdit, delete: canDelete },
@@ -43,7 +47,7 @@ export const Submissions: CollectionConfig = {
           required: true,
           defaultValue: "Under review",
           index: true,
-          options: ["Under review", "Published", "Needs changes", "Declined"],
+          options: ["Under review", "Published", "Needs changes", "Declined", "Answered"],
         },
       ],
     },

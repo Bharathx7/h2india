@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PRODUCT_CLASSES } from "@h2india/core/catalogue";
 import { Alert, Button, Checkbox, cx, FormField, Icon, Input, Select } from "@h2india/ui";
 import { useState, type SyntheticEvent } from "react";
@@ -97,9 +98,9 @@ export function NewsletterSignup() {
       ) : null}
       <p className="type-caption text-secondary">
         One email a week. Unsubscribe any time. See our{" "}
-        <a href="/legal/privacy" className="text-link underline underline-offset-4 hover:text-link-hover">
+        <Link href="/legal/privacy" className="text-link underline underline-offset-4 hover:text-link-hover">
           privacy policy
-        </a>
+        </Link>
         .
       </p>
     </form>

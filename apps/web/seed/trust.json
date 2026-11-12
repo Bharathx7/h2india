@@ -1,0 +1,395 @@
+{
+  "settings": {
+    "partnerships": {
+      "name": "Imran Shaikh",
+      "role": "Head of Partnerships"
+    },
+    "aboutFigures": [
+      {
+        "value": "₹19,744",
+        "label": "crore: National Green Hydrogen Mission outlay",
+        "source": "MNRE",
+        "asOf": "approved Jan 2023"
+      },
+      {
+        "value": "5 MMT",
+        "label": "of green hydrogen a year targeted by 2030",
+        "source": "MNRE mission document",
+        "asOf": "2023"
+      },
+      {
+        "value": "8.62 lakh",
+        "label": "tonnes a year of production awarded under SIGHT",
+        "source": "SECI award lists",
+        "asOf": "as of 2025"
+      },
+      {
+        "value": "~8,000",
+        "label": "tonnes a year commissioned by February 2026",
+        "source": "PTI",
+        "asOf": "25 Mar 2026"
+      }
+    ],
+    "audience": [
+      {
+        "value": "1,86,400",
+        "label": "monthly visitors",
+        "source": "site analytics",
+        "asOf": "Oct 2026"
+      },
+      {
+        "value": "18,060",
+        "label": "India H₂ Weekly subscribers",
+        "source": "newsletter list",
+        "asOf": "31 Oct 2026"
+      },
+      {
+        "value": "3,870",
+        "label": "members",
+        "source": "accounts",
+        "asOf": "31 Oct 2026"
+      },
+      {
+        "value": "128",
+        "label": "verified suppliers",
+        "source": "directory",
+        "asOf": "31 Oct 2026"
+      }
+    ]
+  },
+  "team": [
+    {
+      "name": "Aditi Deshpande",
+      "role": "Founder and CEO",
+      "order": 1,
+      "founder": true,
+      "bio": "Founder and CEO. Leads H2 India's newsroom, marketplace and partnerships."
+    },
+    {
+      "name": "Vivek Bansal",
+      "role": "Head of Supplier Verification",
+      "order": 2
+    },
+    {
+      "name": "Sneha Iyer",
+      "role": "Head of Marketplace",
+      "order": 3
+    },
+    {
+      "name": "Rohit Nair",
+      "role": "Head of Engineering",
+      "order": 4
+    },
+    {
+      "name": "Imran Shaikh",
+      "role": "Head of Partnerships",
+      "order": 5
+    },
+    {
+      "name": "Lakshmi Pillai",
+      "role": "Head of Finance and Compliance",
+      "order": 6
+    }
+  ],
+  "legal": [
+    {
+      "slug": "terms",
+      "title": "Terms of use",
+      "version": "1.1",
+      "effectiveOn": "2026-11-10",
+      "sections": [
+        {
+          "heading": "Who we are",
+          "body": "H2 India is an online platform run by the company named in the footer, registered in India. We connect businesses that buy hydrogen equipment and services with suppliers we have checked, and publish news, data and listings about India's hydrogen economy. Suppliers sell their own products; H2 India is not the seller."
+        },
+        {
+          "heading": "Using H2 India",
+          "body": "You must act for a registered business when you buy or sell, and keep your details accurate. You may not copy listings, collect data by automated means, or arrange deals off H2 India to avoid agreed fees."
+        },
+        {
+          "heading": "Company accounts and roles",
+          "body": "Each company has one account. Admins invite people and give them a role. Your company is responsible for what its people do on H2 India."
+        },
+        {
+          "heading": "Quotes, orders and payments",
+          "body": "A quote is the supplier's offer and is valid until the date shown on it. When you accept a quote or place an order, your contract is with the supplier. Prices are in INR and every order ends in a GST invoice from the supplier."
+        },
+        {
+          "heading": "Fees",
+          "body": ""
+        },
+        {
+          "heading": "Liability",
+          "body": ""
+        },
+        {
+          "heading": "Grievance redressal",
+          "body": "Complaints are acknowledged within 24 hours and resolved within 15 days. See the Grievance officer page for contact details and the complaint form."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.1",
+          "date": "2026-11-10",
+          "changed": "Added grievance timelines and the Opportunities section"
+        },
+        {
+          "version": "1.0",
+          "date": "2026-10-01",
+          "changed": "First published for the beta"
+        }
+      ]
+    },
+    {
+      "slug": "cookies",
+      "title": "Cookie policy",
+      "version": "1.1",
+      "effectiveOn": "2026-10-01",
+      "sections": [
+        {
+          "heading": "What cookies are",
+          "body": "Small files a website stores in your browser so it can remember you between pages and visits."
+        },
+        {
+          "heading": "Cookies we need",
+          "body": "These keep you signed in, remember your cart and protect forms from abuse. The site doesn't work without them."
+        },
+        {
+          "heading": "Analytics",
+          "body": "With your permission, we count visits and see which pages are used, so we can improve them. We don't use advertising cookies."
+        },
+        {
+          "heading": "Your choices",
+          "body": "Change your choice at any time from Cookie preferences in the footer."
+        }
+      ],
+      "history": [
+        {
+          "version": "1.0",
+          "date": "2026-10-01",
+          "changed": "First published for the beta"
+        }
+      ]
+    }
+  ],
+  "help": [
+    {
+      "title": "Inviting your team and setting roles",
+      "slug": "inviting-your-team",
+      "category": "account",
+      "readMinutes": 2,
+      "featured": 1,
+      "intro": "Everyone at your company buys under one H2 India account. Admins invite colleagues and give each a role and an ordering limit. An order above someone's limit waits for an Approver before it goes to the supplier.",
+      "keywords": ["team", "roles", "invite", "colleague", "approver"],
+      "sections": [
+        {
+          "heading": "Invite a colleague",
+          "steps": [
+            "Open Company settings › Users and roles from your account menu.",
+            "Select Invite a colleague, enter their work email, pick a role (Requester, Approver or Admin) and set how much they can order up to.",
+            "They get an email and join with their own sign-in. The invite expires after 7 days."
+          ]
+        },
+        {
+          "heading": "Change or remove someone",
+          "steps": ["To change someone's role or limit, or to remove them, open the … menu on their row."]
+        }
+      ],
+      "callout": {
+        "title": "What each role can do",
+        "text": "Requester: creates quote requests, compares quotes and places orders up to their limit. Approver: approves orders above the company limit. Admin: manages company details, GSTINs, delivery sites, people and approval rules."
+      },
+      "related": ["adding-your-gstin"]
+    },
+    {
+      "title": "Adding your GSTIN",
+      "slug": "adding-your-gstin",
+      "category": "account",
+      "popular": 1,
+      "featured": 2,
+      "keywords": ["gst", "gstin", "tax"]
+    },
+    {
+      "title": "Paying by NEFT or RTGS",
+      "slug": "paying-by-neft-or-rtgs",
+      "category": "payments",
+      "readMinutes": 3,
+      "popular": 2,
+      "featured": 1,
+      "keywords": ["neft", "rtgs", "bank transfer"]
+    },
+    {
+      "title": "How to request a quote",
+      "slug": "how-to-request-a-quote",
+      "category": "buying",
+      "readMinutes": 4,
+      "popular": 3,
+      "featured": 1,
+      "keywords": ["rfq", "quote"]
+    },
+    {
+      "title": "What the badges mean",
+      "slug": "what-the-badges-mean",
+      "category": "verification",
+      "popular": 4,
+      "featured": 1,
+      "keywords": ["verified", "badge"]
+    },
+    {
+      "title": "Accepting a delivery with the OTP",
+      "slug": "accepting-a-delivery-with-the-otp",
+      "category": "buying",
+      "popular": 5,
+      "keywords": ["delivery", "otp"]
+    },
+    {
+      "title": "Downloading GST invoices",
+      "slug": "downloading-gst-invoices",
+      "category": "payments",
+      "popular": 6,
+      "keywords": ["gst invoice", "invoice"]
+    },
+    {
+      "title": "Creating a company account",
+      "slug": "creating-a-company-account",
+      "category": "getting-started",
+      "featured": 1
+    },
+    {
+      "title": "Listing your company",
+      "slug": "listing-your-company",
+      "category": "selling",
+      "featured": 1
+    },
+    {
+      "title": "Setting up tender alerts",
+      "slug": "setting-up-tender-alerts",
+      "category": "alerts",
+      "featured": 1,
+      "keywords": ["alerts", "tenders"]
+    }
+  ],
+  "pricing": {
+    "rateCardNote": "Rate card version 1.0 · effective 1 December 2026 · all prices exclude GST",
+    "plans": [
+      {
+        "name": "Free listing",
+        "price": "₹0",
+        "period": "always",
+        "summary": "For companies getting started on H2 India.",
+        "features": [
+          "Company storefront and verification badge",
+          "Up to 25 products",
+          "Reply to 10 quote requests a month",
+          "1 team seat",
+          "Submit news, events and jobs"
+        ],
+        "cta": "List your company",
+        "href": "/list-your-company"
+      },
+      {
+        "name": "Growth",
+        "price": "₹4,999",
+        "period": "a month",
+        "summary": "For suppliers who sell on H2 India every month.",
+        "features": [
+          "Everything in Free listing",
+          "Unlimited products and quote replies",
+          "Analytics by category and month",
+          "5 team seats",
+          "Featured storefront modules"
+        ],
+        "cta": "Start Growth",
+        "href": "/contact?about=supplier",
+        "highlight": true
+      },
+      {
+        "name": "Enterprise",
+        "price": "Custom",
+        "period": "yearly contract",
+        "summary": "For manufacturers and groups with several brands or sites.",
+        "features": [
+          "Everything in Growth",
+          "Unlimited team seats and brands",
+          "Account manager and onboarding",
+          "Bulk catalogue import",
+          "Invoiced yearly"
+        ],
+        "cta": "Contact us",
+        "href": "/contact?about=supplier"
+      }
+    ],
+    "commission": {
+      "launchValue": "₹0",
+      "launchNote": "until 30 June 2027",
+      "afterValue": "3%",
+      "afterNote": "of each order paid through H2 India",
+      "afterDetail": "Capped at ₹50,000 per order. GST is added to the fee. No sale, no fee.",
+      "examples": [
+        {
+          "order": "Fixed-price order of ₹2,00,000",
+          "commission": "₹6,000 + GST"
+        },
+        {
+          "order": "Quote order of ₹10,00,000",
+          "commission": "₹30,000 + GST"
+        },
+        {
+          "order": "Quote order of ₹20,00,000",
+          "commission": "₹50,000 + GST (cap reached)"
+        },
+        {
+          "order": "A month with no orders",
+          "commission": "₹0"
+        }
+      ],
+      "footnote": "Commission is billed monthly on a GST invoice, and your dashboard shows it for every order. GST TCS and income-tax TDS on payouts still apply, as the law requires."
+    },
+    "addOns": [
+      {
+        "name": "Sponsored placement",
+        "price": "from ₹40,000",
+        "unit": "a year",
+        "text": "Your products shown first in your categories, labelled Sponsored."
+      },
+      {
+        "name": "Sponsored webinar",
+        "price": "from ₹75,000",
+        "unit": "per webinar",
+        "text": "A technical webinar we host and promote. Registrants shared only with consent."
+      },
+      {
+        "name": "Newsletter sponsorship",
+        "price": "from ₹15,000",
+        "unit": "per issue",
+        "text": "One labelled sponsor slot in India H₂ Weekly."
+      },
+      {
+        "name": "Premium tracker",
+        "price": "from ₹2,999",
+        "unit": "a month",
+        "text": "Tracker exports, deeper alert filters and quarterly briefings."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Is there a set-up fee?",
+        "answer": "No. Listing is free and there's no set-up fee on any plan."
+      }
+    ]
+  },
+  "faqs": {
+    "buyers": [
+      {
+        "question": "Will I get a GST invoice?",
+        "answer": "Yes. Every order on H2 India ends in a GST invoice from the supplier, with your GSTIN on it if you add one to your account."
+      }
+    ],
+    "suppliers": [
+      {
+        "question": "What does it cost to list?",
+        "answer": "Listing is free. After the launch offer, H2 India charges a commission only on orders paid through H2 India, capped per order. See the pricing page for the rate card."
+      }
+    ]
+  }
+}

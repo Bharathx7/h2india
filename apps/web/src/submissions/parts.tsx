@@ -55,7 +55,7 @@ export function SideBoxes({
             </li>
           ))}
         </ul>
-        <Link href="/legal/editorial" className="inline-flex items-center gap-1 type-label-sm text-link">
+        <Link href="/legal/editorial-policy" className="inline-flex items-center gap-1 type-label-sm text-link">
           Read the full guidelines <Icon name="arrow-right" size={14} />
         </Link>
       </section>

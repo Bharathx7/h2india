@@ -1,6 +1,6 @@
 "use client";
 
-import { SUBMISSION_LIMITS, SUBMIT_EVENT_TYPES, SUBMIT_FORMATS } from "@h2india/core/events/rules";
+import { SUBMISSION_LIMITS, SUBMIT_EVENT_TYPES, SUBMIT_FORMATS, type SubmissionKind } from "@h2india/core/events/rules";
 import {
   Alert,
   Button,
@@ -27,7 +27,7 @@ import { ErrorSummary, FormCard, NetworkError, Success } from "./parts";
 // 503:294), Submit a press release 504:8 (505:193), Suggest a correction 504:455 (505:247) and Write for us 504:985
 // (505:288), with the shared states 505:329 (upload error) and 505:373 (network error). The server checks everything.
 
-type Kind = "event" | "press_release" | "correction" | "pitch";
+type Kind = SubmissionKind;
 type Values = Record<string, unknown>;
 
 const isoDay = (d: Date) =>
@@ -35,8 +35,8 @@ const isoDay = (d: Date) =>
 const fromIso = (s: unknown) =>
   typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T00:00:00`) : undefined;
 
-/** Form state, submit and the result, shared by the four forms. */
-function useSubmission(kind: Kind, initial: Values) {
+/** Form state, submit and the result, shared by the public forms (and the step 5.8 ones in trust/forms.tsx). */
+export function useSubmission(kind: Kind, initial: Values) {
   const [v, setV] = useState<Values>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<SubmitResult | null>(null);
@@ -82,7 +82,7 @@ function Actions({ pending, label, cancel }: { pending: boolean; label: string; 
   );
 }
 
-function Shell({ children, onSubmit }: { children: ReactNode; onSubmit: () => void }) {
+export function Shell({ children, onSubmit }: { children: ReactNode; onSubmit: () => void }) {
   return (
     <form
       noValidate
@@ -97,7 +97,7 @@ function Shell({ children, onSubmit }: { children: ReactNode; onSubmit: () => vo
   );
 }
 
-function Limited({ result }: { result: SubmitResult | null }) {
+export function Limited({ result }: { result: SubmitResult | null }) {
   if (!result || result.ok || result.reason !== "limited") return null;
   return <Alert live tone="error" title="Too many forms from here. Try again in an hour." />;
 }

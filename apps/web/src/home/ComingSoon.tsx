@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon, Logo, type IconName } from "@h2india/ui";
 import { EARLY_LISTING_CONSENT } from "@/cms/home/collections";
 import { EarlyListingForm, NewsletterSignup } from "./ComingSoonForms";
@@ -80,9 +81,9 @@ export function ComingSoon({ launchLine }: { launchLine: string }) {
       <footer className="bg-inverse">
         <div className={`${wrap} flex flex-col gap-3 py-6 text-inverse md:flex-row md:items-center md:gap-6`}>
           <p className="flex-1 type-caption">© {year} H2 India · India&rsquo;s hydrogen ecosystem platform</p>
-          <a href="/legal/privacy" className="type-label hover:underline">
+          <Link href="/legal/privacy" className="type-label hover:underline">
             Privacy
-          </a>
+          </Link>
         </div>
       </footer>
     </div>

@@ -21,6 +21,8 @@ export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   logo: { who: "signed-in" },
   // Images with a press release by a signed-in person (step 5.7, 504:8).
   press_image: { who: "signed-in" },
+  // Anyone may raise a grievance (519:8), signed in or not; limited per IP address like work_id.
+  grievance_attachment: { who: "anyone" },
   // The delivery link (695:13) gives its own proof; it arrives with deliveries in Stage 10.
   delivery_photo: { who: "not-yet", until: "Stage 10 delivery link" },
 };
@@ -33,5 +35,6 @@ export const READ_RULES: Record<FileKind, { company?: CompanyPermission; operato
   product_image: { company: "company.view", operator: "catalogue.view" },
   logo: { company: "company.view", operator: "catalogue.view" },
   press_image: { operator: "content.view" },
+  grievance_attachment: { operator: "compliance.view" },
   delivery_photo: { company: "order.view", operator: "orders.view" },
 };
