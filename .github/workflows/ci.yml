@@ -67,6 +67,9 @@ jobs:
       - run: cp .env.example .env.local
       - name: Types, lint and format
         run: pnpm check
+        env:
+          # Linting the whole repository needs more than the default heap.
+          NODE_OPTIONS: --max-old-space-size=6144
       # File storage and the virus scanner (step 3.7), started here because they need start-up commands. The scanner
       # downloads its signatures first, so it starts early and the wait comes just before the tests.
       - name: Start file storage and virus scanner
