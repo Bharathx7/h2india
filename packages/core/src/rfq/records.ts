@@ -1,4 +1,5 @@
 import type { ChosenDeadline } from "@h2india/config/clocks";
+import { requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
@@ -9,8 +10,10 @@ import { cancelDeadline, completeDeadline, onDeadline, startClock, startDeadline
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
 import { sendQuoteReceived, sendRfqChecked, sendRfqReceived, tellSuppliers } from "./notices";
+import { Money } from "../money";
 import { quoteFigures, scheduleProblem, type PaymentLine } from "./totals";
 import {
+  acceptable,
   MAX_RFQ_SUPPLIERS,
   needsModeration,
   quoteTransitions,
@@ -633,6 +636,81 @@ export async function requestRevision(
       organisationIds: [quote.organisationId],
       title: `${row.reference}: the buyer asks for a revised quote${input.aspects.length ? ` (${input.aspects.join(", ").toLowerCase()})` : ""}. "${input.message.trim().slice(0, 140)}"`,
     }),
+  );
+}
+
+/**
+ * Accept a quote (569:9), step 9.8. Ordering is part of Launch 2: with the transactions flag off this refuses on the
+ * server whatever calls it (C8). With it on, the quote becomes Accepted, the RFQ closes, every other open quote becomes
+ * Not selected and each of those suppliers is told once. The order itself is created from the accepted quote in
+ * Stage 10 (step 10.1), which adds it here in the same transaction.
+ */
+export async function acceptQuote(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  input: { rfqId: string; quoteId: string },
+  context?: RequestContext,
+  opts: { flags?: Record<string, string | undefined>; now?: Date } = {},
+) {
+  requireFlag("transactions", opts.flags);
+  assertCan(actor, "order.place", { organisationId });
+  const now = opts.now ?? new Date();
+  const row = await ownRfq(db, organisationId, input.rfqId);
+  if (row.status !== "Quotes received") throw new RfqError("This RFQ isn't open for accepting");
+  const [quote] = await db
+    .select()
+    .from(q)
+    .where(and(eq(q.id, input.quoteId), eq(q.rfqId, input.rfqId)));
+  if (!quote?.sentVersion) throw new RfqError("No such quote");
+  const [version] = await db
+    .select()
+    .from(qv)
+    .where(and(eq(qv.quoteId, quote.id), eq(qv.version, quote.sentVersion)));
+  if (!acceptable(quote.status as QuoteStatus, version?.validUntil ?? null, now))
+    throw new RfqError("This quote can't be accepted: it was withdrawn or has expired");
+  const others = await db
+    .select({ id: q.id, organisationId: q.organisationId })
+    .from(q)
+    .where(and(eq(q.rfqId, input.rfqId), inArray(q.status, ["Sent", "Revised", "Expired"])));
+  await moveQuote(
+    db,
+    actor.userId,
+    quote,
+    { from: quote.status as "Sent" | "Revised", to: "Accepted" },
+    {
+      context,
+      metadata: { version: quote.sentVersion },
+      also: async (tx) => {
+        await tx.update(q).set({ acceptedAt: now }).where(eq(q.id, quote.id));
+        await cancelDeadline(tx, { type: VALIDITY, subjectType: "quote", subjectId: quote.id });
+      },
+    },
+  );
+  await closeRfq(db, actor, organisationId, input.rfqId, { reason: "accepted", keepQuoteId: quote.id }, context);
+  const notChosen = others.filter((o) => o.id !== quote.id).map((o) => o.organisationId);
+  await tell(() =>
+    tellSuppliers(db, input.rfqId, {
+      event: "quote.not_selected",
+      organisationIds: notChosen,
+      title: `Your quote for ${row.reference} · ${row.title} was not selected. Thank you for quoting.`,
+    }),
+  );
+  await tell(() =>
+    tellSuppliers(db, input.rfqId, {
+      event: "quote.accepted",
+      organisationIds: [quote.organisationId],
+      title: `${row.reference}: the buyer accepted your quote (v${String(quote.sentVersion)})`,
+    }),
+  );
+}
+
+/** What each payment milestone comes to, in paise, adding up exactly to the total (569:9 payment schedule). */
+export function milestoneAmounts(totalPaise: bigint, schedule: PaymentLine[]): bigint[] {
+  if (!schedule.length) return [];
+  return Money.allocate(
+    totalPaise,
+    schedule.map((l) => l.percentBps),
   );
 }
 

@@ -3,7 +3,8 @@
 import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
 import { buyerOf } from "@h2india/core/buyer";
-import { closeRfq, extendOfferDeadline, requestRevision, RfqError } from "@h2india/core/rfq";
+import { FlagOffError } from "@h2india/config";
+import { acceptQuote, closeRfq, extendOfferDeadline, requestRevision, RfqError } from "@h2india/core/rfq";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -63,4 +64,19 @@ export async function revisionAction(id: string, quoteId: string, aspects: strin
   const { db, actor, org } = await buyer();
   const context = await requestContext();
   return run(id, () => requestRevision(db, actor, org, id, { quoteId, aspects, message }, context));
+}
+
+/** Accept a quote (569:9). Core refuses on the server while transactions are off (C8), whatever calls it. */
+export async function acceptAction(id: string, quoteId: string) {
+  const { db, actor, org } = await buyer();
+  const context = await requestContext();
+  try {
+    await acceptQuote(db, actor, org, { rfqId: id, quoteId }, context);
+  } catch (error) {
+    if (error instanceof FlagOffError) return { ok: false as const, error: "Ordering opens in Launch 2." };
+    if (error instanceof RfqError) return { ok: false as const, error: error.message };
+    throw error;
+  }
+  revalidatePath(`/buyer/rfqs/${id}`);
+  return { ok: true as const };
 }

@@ -6,7 +6,9 @@ import { scopeFor } from "../authz/scope";
 import { runDeadlines } from "../clocks/clocks";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
+import { FlagOffError } from "@h2india/config";
 import {
+  acceptQuote,
   approveRfq,
   buyerRfq,
   buyerRfqs,
@@ -15,6 +17,7 @@ import {
   declineRfq,
   extendOfferDeadline,
   markViewed,
+  milestoneAmounts,
   moveQuote,
   moveRfq,
   quoteVersion,
@@ -336,6 +339,55 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     expect(told.find((n) => n.userId === sup(0).admin.id && n.href === `/supplier/rfqs/${id}`)?.title).toMatch(
       "Prices are above budget",
     );
+  });
+
+  it("accepting: refused on the server while transactions are off; with them on, the others are told once", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const id = await draft([sup(0).org.id, sup(1).org.id]);
+    await submitRfq(h.db, admin, buyer.org.id, id);
+    await approveRfq(h.db, moderator, id);
+    const a = await loadActor(h.db, sup(0).admin.id);
+    const b = await loadActor(h.db, sup(1).admin.id);
+    const qa = await saveQuoteDraft(h.db, a, sup(0).org.id, id, quoteInput(398_000_000n));
+    await sendQuote(h.db, a, sup(0).org.id, qa.quoteId);
+    const qb = await saveQuoteDraft(h.db, b, sup(1).org.id, id, quoteInput(412_000_000n));
+    await sendQuote(h.db, b, sup(1).org.id, qb.quoteId);
+    // Off (the default, C8): refused whatever calls it.
+    await expect(
+      acceptQuote(h.db, admin, buyer.org.id, { rfqId: id, quoteId: qa.quoteId }, undefined, { flags: {} }),
+    ).rejects.toBeInstanceOf(FlagOffError);
+    expect(await quoteStatus(qa.quoteId)).toBe("Sent");
+    // On (in this test only): an expired quote can't be accepted…
+    const on = { flags: { FLAG_TRANSACTIONS: "true" } };
+    await expect(
+      acceptQuote(h.db, admin, buyer.org.id, { rfqId: id, quoteId: qa.quoteId }, undefined, {
+        ...on,
+        now: new Date(Date.now() + 40 * DAY),
+      }),
+    ).rejects.toThrow("expired");
+    // …a valid one is accepted, the RFQ closes and the other supplier is told once.
+    await acceptQuote(h.db, admin, buyer.org.id, { rfqId: id, quoteId: qa.quoteId }, undefined, on);
+    expect(await quoteStatus(qa.quoteId)).toBe("Accepted");
+    expect(await quoteStatus(qb.quoteId)).toBe("Not selected");
+    expect(await status(id)).toBe("Closed");
+    const told = await h.db
+      .select()
+      .from(schema.notifications)
+      .where(eq(schema.notifications.event, "quote.not_selected"));
+    expect(told.filter((n) => n.href === `/supplier/rfqs/${id}`).map((n) => n.userId)).toEqual([sup(1).admin.id]);
+    await expect(
+      acceptQuote(h.db, admin, buyer.org.id, { rfqId: id, quoteId: qb.quoteId }, undefined, on),
+    ).rejects.toBeInstanceOf(RfqError);
+  });
+
+  it("splits the payment schedule to the paisa (569:9)", () => {
+    expect(
+      milestoneAmounts(939_280_000n, [
+        { percentBps: 1000, trigger: "Advance" },
+        { percentBps: 8000, trigger: "On receipt" },
+        { percentBps: 1000, trigger: "Retention" },
+      ]),
+    ).toEqual([93_928_000n, 751_424_000n, 93_928_000n]);
   });
 
   it("refuses a forbidden move, at run time too", async () => {
