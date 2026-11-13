@@ -26,7 +26,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | 1.4 | Code quality gates | Done (11 Nov 2026) |
 | 1.5 | Continuous integration | Done (11 Nov 2026). First run happens on the first push |
 | 1.6 | Configuration and secrets policy | Done (11 Nov 2026) |
-| 1.7 | Walking skeleton on staging | Built 13 Nov 2026 (branch `step/1.7-server`, on top of 5.10, not merged): one Docker image built by the Image workflow and pushed to GitHub Container Registry, `infra/compose.prod.yml` (web-public, web-admin, worker, PostgreSQL, Redis, Meilisearch, MinIO, ClamAV, Mailpit until M6), host nginx for h2india.deecodes.io, adminh2india.deecodes.io and files.h2india.deecodes.io, settings made by `infra/new-env.sh`, `pnpm admin:bootstrap` for the first Super admin, worker calls the web app inside Docker (INTERNAL_WEB_URL). You: run `docs/runbooks/deploy.md` |
+| 1.7 | Walking skeleton on staging | Built 13 Nov 2026 (branch `step/1.7-server`, on top of 5.10, not merged): one Docker image built by the Image workflow and pushed to GitHub Container Registry, `infra/compose.prod.yml` (web-public, web-admin, worker, PostgreSQL, Redis, Meilisearch, MinIO, ClamAV, Mailpit until M6), host nginx for h2india.deecodes.io (with file storage under the bucket paths) and adminh2india.deecodes.io, settings made by `infra/new-env.sh`, `pnpm admin:bootstrap` for the first Super admin, worker calls the web app inside Docker (INTERNAL_WEB_URL). You: run `docs/runbooks/deploy.md` |
 
 ## Stage 2 · Design system in code · Batch 1
 

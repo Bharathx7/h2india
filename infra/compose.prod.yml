@@ -90,7 +90,7 @@ services:
       retries: 20
     logging: *logging
 
-  # File storage, served to browsers at files.<public domain> through nginx (uploads and the public bucket).
+  # File storage, served to browsers on the public domain under the bucket names through nginx.
   minio:
     image: cgr.dev/chainguard/minio:latest
     restart: unless-stopped

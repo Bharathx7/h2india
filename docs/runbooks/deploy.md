@@ -2,11 +2,10 @@
 
 Step 1.7 (ADR 0006, `docs/server.md`). One Docker image runs everything; the server's own nginx sits in front.
 
-| Address                     | What                                 | Container (port on 127.0.0.1) |
-| --------------------------- | ------------------------------------ | ----------------------------- |
-| `h2india.deecodes.io`       | Website, buyer/supplier/member, APIs | `web-public` (3100)           |
-| `adminh2india.deecodes.io`  | `/admin` and the CMS (`/cms`)        | `web-admin` (3101)            |
-| `files.h2india.deecodes.io` | Uploads and public images (MinIO)    | `minio` (3102)                |
+| Address                    | What                                 | Container (port on 127.0.0.1) |
+| -------------------------- | ------------------------------------ | ----------------------------- |
+| `h2india.deecodes.io`      | Website, buyer/supplier/member, APIs | `web-public` (3100)           |
+| `adminh2india.deecodes.io` | `/admin` and the CMS (`/cms`)        | `web-admin` (3101)            |
 
 Both web containers run the same image with their own `APP_URL`. Operators sign in on the admin domain separately;
 a passkey made on one domain doesn't work on the other.
@@ -16,7 +15,7 @@ never delivered. Read it through an SSH tunnel (step 7).
 
 ## Before the first deploy (once)
 
-1. **DNS.** Point `h2india`, `adminh2india` and `files.h2india` (A records under `deecodes.io`) at the server's IP.
+1. **DNS.** Point `h2india` and `adminh2india` (A records under `deecodes.io`) at the server's IP.
    If the DNS is on Cloudflare, set them to "DNS only" (grey cloud), or nginx sees Cloudflare's address instead of
    the visitor's.
 2. **Server memory.** The H2 India containers need about 4 GB on top of what the server already runs (ClamAV alone
@@ -31,7 +30,7 @@ Run on your Mac, from the repository:
 
 ```sh
 scp infra/compose.prod.yml infra/h2india.env.example infra/new-env.sh <server>:/tmp/
-scp infra/nginx/h2india.conf infra/nginx/h2india-proxy.conf <server>:/tmp/
+scp infra/nginx/h2india.conf infra/nginx/h2india-proxy.conf infra/nginx/h2india-files.conf <server>:/tmp/
 ```
 
 Then on the server. `<tag>` is the 12-character tag in the summary of the latest **Image** run on GitHub (Actions).
@@ -58,11 +57,11 @@ curl -sI http://127.0.0.1:3100 | head -1   # HTTP/1.1 200
 curl -sI http://127.0.0.1:3101/sign-in | head -1
 
 # 5. nginx and HTTPS
-sudo mv /tmp/h2india-proxy.conf /etc/nginx/snippets/h2india-proxy.conf
+sudo mv /tmp/h2india-proxy.conf /tmp/h2india-files.conf /etc/nginx/snippets/
 sudo mv /tmp/h2india.conf /etc/nginx/sites-available/h2india.conf
 sudo ln -s /etc/nginx/sites-available/h2india.conf /etc/nginx/sites-enabled/h2india.conf
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d h2india.deecodes.io -d adminh2india.deecodes.io -d files.h2india.deecodes.io
+sudo certbot --nginx -d h2india.deecodes.io -d adminh2india.deecodes.io
 
 # 6. Search indexes (empty until editors publish)
 dc run --rm tools pnpm search:reindex

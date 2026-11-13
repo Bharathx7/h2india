@@ -85,7 +85,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Files (step 3.7)
 
-- Upload only through `startUpload` → browser PUT to the signed quarantine link → `completeUpload` → worker `processFile`. Never accept file bytes in a page or API route, and never serve a file from the app's own domain.
+- Upload only through `startUpload` → browser PUT to the signed quarantine link → `completeUpload` → worker `processFile`. Never accept file bytes in a page or API route, and never serve a file through the app. On the server, storage shares the public domain under the bucket paths (only two domains); nginx gives those paths nosniff and a script-blocking CSP (`infra/nginx/h2india.conf`), so keep them.
 - A file is usable only when `status = 'Available'`. Open it only with `fileLink()` (permission check, 5-minute link); add who may read a new kind to `files/rules.ts` with least access.
 - Limits and types per kind live in `packages/config/src/files.ts` (A20); show the same messages in the browser with `checkFile()` and `uploadProblemMessage()`.
 - A record that holds a file attaches it with `attachFile()` and sets retention with `scheduleFileDeletion()` where a decision asks for it (Work ID: A22).
