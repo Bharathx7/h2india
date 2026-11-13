@@ -427,3 +427,35 @@ export async function rejectRequest(db: Database, actor: Actor, id: string, reas
   if (!reason.trim()) throw new DataRightsError("Give a reason");
   await finish(db, actor, await load(db, id), "Rejected", reason.trim(), context);
 }
+
+/** Grievances for the Compliance screen (660:281), oldest open first. Operators with compliance.view. */
+export async function listGrievances(db: Executor, actor: Actor, opts: { status?: string } = {}) {
+  assertCan(actor, "compliance.view");
+  const g = schema.grievances;
+  return db
+    .select()
+    .from(g)
+    .where(opts.status ? eq(g.status, opts.status) : undefined)
+    .orderBy(asc(g.createdAt))
+    .limit(300);
+}
+
+export async function grievanceDetail(db: Executor, actor: Actor, id: string) {
+  assertCan(actor, "compliance.view");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const [row] = await db.select().from(schema.grievances).where(eq(schema.grievances.id, id));
+  if (!row) return null;
+  const history = await db
+    .select()
+    .from(schema.statusHistory)
+    .where(and(eq(schema.statusHistory.entityType, "grievance"), eq(schema.statusHistory.entityId, id)))
+    .orderBy(asc(schema.statusHistory.at));
+  return { grievance: row, history };
+}
+
+export async function requestDetail(db: Executor, actor: Actor, id: string) {
+  assertCan(actor, "compliance.view");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const [row] = await db.select().from(r).where(eq(r.id, id));
+  return row ?? null;
+}

@@ -300,3 +300,10 @@ export async function operatorRoleGrid(db: Executor, actor: Actor) {
     people: people.filter((p) => p.roleId === r.id),
   }));
 }
+
+/** Find a person by email (Operator roles: add someone to a role). */
+export async function userIdByEmail(db: Executor, actor: Actor, email: string) {
+  assertCan(actor, "users.view");
+  const [row] = await db.select({ id: u.id }).from(u).where(eq(u.email, email.trim().toLowerCase()));
+  return row?.id ?? null;
+}
