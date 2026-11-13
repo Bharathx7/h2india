@@ -80,13 +80,17 @@ export default async function ProductsPage({
               <Icon name="plus" size={18} />
               Add product
             </Link>
-            <Link href="/supplier/products/new?from=datasheet" className={buttonClasses({ variant: "outline" })}>
+            <Link href="/supplier/products/datasheet" className={buttonClasses({ variant: "outline" })}>
               <Icon name="file-text" size={18} />
               From a datasheet
             </Link>
             <Link href="/supplier/products/import" className={buttonClasses({ variant: "outline" })}>
               <Icon name="upload" size={18} />
               Bulk upload
+            </Link>
+            <Link href="/supplier/products/quick" className={buttonClasses({ variant: "outline" })}>
+              <Icon name="sliders" size={18} />
+              Quick stock &amp; price
             </Link>
           </div>
         ) : null}

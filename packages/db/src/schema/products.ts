@@ -113,6 +113,8 @@ export const products = core.table(
     /** made_to_order or in_stock (Quick stock and price 722:12379). */
     stock: text("stock").notNull().default("made_to_order"),
     stockQty: integer("stock_qty"),
+    /** In-stock items: days to dispatch (722:12379 "Lead time · days"; "Ships in 3 days"). */
+    shipDays: integer("ship_days"),
     /** Product photos (602:281): file ids of product_image uploads, in order. */
     images: jsonb("images").$type<{ fileId: string }[]>().notNull().default([]),
     /** Why a new listing was rejected, as the operator wrote it (603:8). */
@@ -278,4 +280,41 @@ export const datasheetExtractions = core.table(
     ...timestamps,
   },
   (t) => [index("datasheet_extractions_org").on(t.organisationId, t.createdAt)],
+);
+
+/** One problem in an imported file (607:9 "Rows that need fixing"). */
+export interface ImportRowError {
+  row: number;
+  sku: string;
+  column: string;
+  message: string;
+}
+
+/**
+ * A spreadsheet import (step 8.5; Import products 272:4427, history 607:9). Runs in the worker; every valid row becomes
+ * a draft (never a live listing), matched on the supplier's own SKU so re-importing the file creates no duplicates.
+ * Status: Checking rows, Done, File not read.
+ */
+export const productImports = core.table(
+  "product_imports",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    fileId: uuid("file_id").notNull(),
+    fileName: text("file_name").notNull(),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => catalogueCategories.id),
+    status: text("status").notNull().default("Checking rows"),
+    rows: integer("rows").notNull().default(0),
+    saved: integer("saved").notNull().default(0),
+    errors: jsonb("errors").$type<ImportRowError[]>().notNull().default([]),
+    /** Why the file couldn't be read at all. */
+    error: text("error"),
+    createdBy: uuid("created_by").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [index("product_imports_org").on(t.organisationId, t.createdAt)],
 );

@@ -508,6 +508,7 @@ export interface SupplierProductRow {
   indicativeMaxPaise: bigint | null;
   stock: string;
   stockQty: number | null;
+  shipDays: number | null;
   leadTimeMinWeeks: number | null;
   leadTimeMaxWeeks: number | null;
   status: string;
@@ -559,6 +560,7 @@ export async function supplierProducts(
     indicativeMaxPaise: x.p.indicativeMaxPaise,
     stock: x.p.stock,
     stockQty: x.p.stockQty,
+    shipDays: x.p.shipDays,
     leadTimeMinWeeks: x.p.leadTimeMinWeeks,
     leadTimeMaxWeeks: x.p.leadTimeMaxWeeks,
     status: x.p.status,

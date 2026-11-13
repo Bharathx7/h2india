@@ -267,6 +267,13 @@
       "when": 1794564883189,
       "tag": "0037_datasheet_extractions",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1794565831062,
+      "tag": "0038_product_imports",
+      "breakpoints": true
     }
   ]
 }

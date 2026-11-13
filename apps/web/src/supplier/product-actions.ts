@@ -1,7 +1,16 @@
 "use server";
 
 import { Money } from "@h2india/core";
-import { deleteProduct, ProductError, saveProduct, setListingStatus, type ProductInput } from "@h2india/core/products";
+import {
+  deleteProduct,
+  ProductError,
+  saveProduct,
+  saveQuickStock,
+  setListingStatus,
+  startImport,
+  type ProductInput,
+  type QuickChange,
+} from "@h2india/core/products";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
 import { supplierActor } from "./actions";
@@ -101,4 +110,40 @@ export async function deleteProductAction(id: string): Promise<void> {
   const { db, actor, supplier } = await supplierActor();
   await deleteProduct(db, actor, supplier.organisationId, id, await requestContext());
   revalidatePath("/supplier/products");
+}
+
+export async function startImportAction(
+  fileId: string,
+  fileName: string,
+  categoryId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { db, actor, supplier } = await supplierActor();
+  try {
+    await startImport(db, actor, supplier.organisationId, {
+      fileId,
+      fileName,
+      categoryId,
+      context: await requestContext(),
+    });
+  } catch (error) {
+    if (error instanceof Error) return { ok: false, error: error.message };
+    throw error;
+  }
+  revalidatePath("/supplier/products/import");
+  return { ok: true };
+}
+
+export async function saveQuickStockAction(
+  changes: QuickChange[],
+): Promise<{ ok: true; saved: number } | { ok: false; problems: Record<string, string> }> {
+  const { db, actor, supplier } = await supplierActor();
+  try {
+    const saved = await saveQuickStock(db, actor, supplier.organisationId, changes, await requestContext());
+    revalidatePath("/supplier/products/quick");
+    revalidatePath("/supplier/products");
+    return { ok: true, saved };
+  } catch (error) {
+    if (error instanceof ProductError) return { ok: false, problems: error.errors };
+    throw error;
+  }
 }

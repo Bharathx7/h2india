@@ -1,7 +1,7 @@
 // Upload limits per kind of file (step 3.7, decisions A20 and A21). Configuration, shared by the upload zone in the
 // browser (hint text, first check) and the server and worker (the checks that count). Safe to import anywhere.
 
-export type FileType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/svg+xml";
+export type FileType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/svg+xml" | "text/csv";
 
 export interface FileKindRule {
   /** Shown in messages, for example "Work ID". */
@@ -37,6 +37,14 @@ export const FILE_KINDS = {
     label: "Photo",
     types: ["image/jpeg", "image/png"],
     maxMb: 2,
+    visibility: "private",
+    sensitive: false,
+  },
+  /** Import products from a CSV (272:4427): "Up to 500 rows". Read by the worker, never served. */
+  product_import: {
+    label: "CSV file",
+    types: ["text/csv"],
+    maxMb: 5,
     visibility: "private",
     sensitive: false,
   },
@@ -92,6 +100,7 @@ const SHORT: Record<FileType, string> = {
   "image/png": "PNG",
   "image/webp": "WebP",
   "image/svg+xml": "SVG",
+  "text/csv": "CSV",
 };
 
 const EXTENSIONS: Record<FileType, string[]> = {
@@ -100,6 +109,7 @@ const EXTENSIONS: Record<FileType, string[]> = {
   "image/png": [".png"],
   "image/webp": [".webp"],
   "image/svg+xml": [".svg"],
+  "text/csv": [".csv"],
 };
 
 /** "PDF, JPG or PNG" */

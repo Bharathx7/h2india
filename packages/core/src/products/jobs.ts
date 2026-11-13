@@ -3,6 +3,7 @@ import { and, eq, lt } from "drizzle-orm";
 import { getDb } from "../db";
 import { enqueue, QUEUES } from "../queue/queues";
 import { runExtraction } from "./datasheet";
+import { runProductImport } from "./import";
 
 // The imports queue (Stage 8): datasheet reading (8.4) and spreadsheet imports (8.5) run here, in the worker only.
 
@@ -10,6 +11,8 @@ export async function runImportJob(name: string, data: Record<string, string>): 
   switch (name) {
     case "datasheet-extract":
       return runExtraction(getDb(), data.id ?? "");
+    case "product-import":
+      return runProductImport(getDb(), data.id ?? "");
     default:
       throw new Error(`Unknown imports job ${name}`);
   }

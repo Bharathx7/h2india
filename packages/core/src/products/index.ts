@@ -7,3 +7,4 @@ export * from "./detail";
 export * from "./compare";
 export * from "./editor";
 export * from "./datasheet";
+export * from "./import";

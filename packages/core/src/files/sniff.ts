@@ -22,7 +22,30 @@ export function sniffType(bytes: Uint8Array): FileType | null {
   if (head.includes("%PDF-")) return "application/pdf";
   const text = Buffer.from(bytes.subarray(0, 4096));
   if (!text.includes(0) && SVG_START.test(text.toString("utf8"))) return "image/svg+xml";
+  // A CSV (step 8.5): UTF-8 text with no control bytes, whose first line has a comma.
+  if (
+    !text.includes(0) &&
+    isUtf8Text(bytes.subarray(0, 4096)) &&
+    /^[^\r\n]*,/.test(text.toString("utf8").replace(/^\uFEFF/, ""))
+  ) {
+    return "text/csv";
+  }
   return null;
+}
+
+function isUtf8Text(b: Uint8Array): boolean {
+  try {
+    const s = new TextDecoder("utf-8", { fatal: true }).decode(b);
+    // A cut-off multi-byte character at the 4 KB edge is fine; other control characters are not.
+    // No control characters other than tab, line feed and carriage return.
+    for (const ch of s) {
+      const c = ch.charCodeAt(0);
+      if (c < 32 && c !== 9 && c !== 10 && c !== 13) return false;
+    }
+    return true;
+  } catch {
+    return b.length >= 4096;
+  }
 }
 
 export const EXTENSION: Record<FileType, string> = {
@@ -31,4 +54,5 @@ export const EXTENSION: Record<FileType, string> = {
   "image/png": "png",
   "image/webp": "webp",
   "image/svg+xml": "svg",
+  "text/csv": "csv",
 };

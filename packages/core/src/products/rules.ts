@@ -75,6 +75,7 @@ export const INSTANT_FIELDS = [
   "minOrder",
   "stock",
   "stockQty",
+  "shipDays",
   "sku",
 ] as const;
 
@@ -100,6 +101,7 @@ export function changeKind(changed: readonly string[]): string {
 export function stockLine(p: {
   stock: string;
   stockQty: number | null;
+  shipDays?: number | null;
   leadTimeMinWeeks: number | null;
   leadTimeMaxWeeks: number | null;
 }): { line: string; sub: string } {
@@ -107,8 +109,14 @@ export function stockLine(p: {
     p.leadTimeMinWeeks || p.leadTimeMaxWeeks
       ? `${String(p.leadTimeMinWeeks ?? p.leadTimeMaxWeeks)}${p.leadTimeMaxWeeks && p.leadTimeMaxWeeks !== p.leadTimeMinWeeks ? `–${String(p.leadTimeMaxWeeks)}` : ""} weeks`
       : "";
-  if (p.stock === "in_stock")
-    return { line: `${String(p.stockQty ?? 0)} in stock`, sub: lead ? `Ships in ${lead}` : "" };
+  if (p.stock === "in_stock") {
+    const ships = p.shipDays
+      ? `Ships in ${String(p.shipDays)} ${p.shipDays === 1 ? "day" : "days"}`
+      : lead
+        ? `Ships in ${lead}`
+        : "";
+    return { line: `${String(p.stockQty ?? 0)} in stock`, sub: ships };
+  }
   return { line: lead ? "Made to order" : "Not set", sub: lead };
 }
 
