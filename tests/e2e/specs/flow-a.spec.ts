@@ -47,10 +47,10 @@ async function setUp(tag: string) {
           [email, `Quoter ${String(i + 1)}`],
         )
       ).rows[0]?.id;
-      await db.query(`INSERT INTO core.memberships (organisation_id, user_id, role) VALUES ($1, $2, 'Sales')`, [
-        org,
-        user,
-      ]);
+      await db.query(
+        `INSERT INTO core.memberships (id, organisation_id, user_id, role) VALUES (gen_random_uuid(), $1, $2, 'Sales')`,
+        [org, user],
+      );
       suppliers.push({ org: org ?? "", name, email });
     }
     for (const [i, s] of [suppliers[0], suppliers[0], suppliers[1]].entries())

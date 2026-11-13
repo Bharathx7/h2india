@@ -67,6 +67,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Numbers live in `SIGN_IN` (`@h2india/core/sign-in`, decision A2). Never repeat them in pages.
 - After sign-in, send people only to `safeReturnPath(next)`.
 - Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
+- A test that needs an existing person signs in with `signInExisting()` (`tests/e2e/helpers/rfq.ts`), which waits out the passkey offer and the redirect; rows inserted by SQL give `id` with `gen_random_uuid()` (ids are made in the app, not by the database).
 
 ## Authorisation (step 3.4)
 

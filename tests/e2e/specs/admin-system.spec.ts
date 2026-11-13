@@ -18,13 +18,16 @@ test("Users, roles and the audit log", async ({ page }) => {
   await page.getByRole("link", { name: "Operator roles" }).click();
   await expect(page.getByRole("region", { name: /permissions/ })).toBeVisible();
   await page.getByRole("link", { name: "Audit log" }).click();
-  await expect(page.getByRole("region", { name: "Audit log" }).or(page.getByText("Nothing matches"))).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Audit log" }).or(page.getByText("No entries for these filters")),
+  ).toBeVisible();
 });
 
 test("Compliance tabs and a data-rights request", async ({ page }) => {
   await signInOperator(page, "Super admin");
   await page.goto("/admin/compliance?tab=data-rights");
-  await page.getByLabel("Request").selectOption("erase");
+  await page.getByText("Log a request received by email or post").click();
+  await page.getByRole("combobox", { name: "Request" }).selectOption("erase");
   await page.getByLabel("Their email").fill(`nobody-${String(Date.now())}@example.com`);
   await page.getByRole("button", { name: "Log request" }).click();
   await expect(page.getByText("Request logged with a DRR reference")).toBeVisible();
@@ -36,7 +39,7 @@ test("Reports and System settings", async ({ page }) => {
   await page.goto("/admin/reports");
   await expect(page.getByRole("heading", { level: 1, name: "Reports" })).toBeVisible();
   await page.goto("/admin/settings");
-  await expect(page.getByRole("heading", { level: 2, name: "Switches" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "Clocks" })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "Failed jobs" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "System settings" })).toBeVisible();
+  for (const name of ["Feature flags", "SLA values", "Integrations", "Failed jobs"])
+    await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
 });

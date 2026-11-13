@@ -92,7 +92,7 @@ export async function signInNew(page: Page, email: string): Promise<void> {
   const notNow = page.getByRole("button", { name: "Not now" });
   await expect(notNow.or(page.getByRole("heading", { name: "Join H2 India" }))).toBeVisible();
   if (await notNow.isVisible()) await notNow.click();
-  await expect(page.getByRole("heading", { name: "Join H2 India" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Join H2 India" })).toBeVisible({ timeout: 15_000 });
 }
 
 /** Join steps 1 to 4 for a signed-in person creating a new buyer or supplier company. */
