@@ -50,6 +50,9 @@ export type ProductInput = Partial<Pick<ProductRow, Reviewed | Instant>>;
 
 const appUrl = () => parseServerEnv().APP_URL;
 
+/** Kinds that are a listing's first review (anything else is a change to a live listing). */
+export const NEW_LISTING_KINDS: readonly string[] = ["new listing", "from datasheet"];
+
 function slugFor(name: string): string {
   const base = name
     .toLowerCase()
@@ -196,7 +199,15 @@ export async function saveProduct(
   db: Database,
   actor: Actor,
   organisationId: string,
-  input: { id?: string; data: ProductInput; submit: boolean; context?: RequestContext },
+  input: {
+    id?: string;
+    data: ProductInput;
+    submit: boolean;
+    context?: RequestContext;
+    /** A new listing's kind in the queue ("from datasheet", step 8.4), and checks to add to the automated ones. */
+    kind?: string;
+    extraChecks?: { key: string; ok: boolean; label: string; detail?: string }[];
+  },
 ): Promise<{ id: string; status: string }> {
   if (!can(actor, "product.manage", { organisationId })) throw new ProductError("Not allowed");
   const data = pricingColumns(input.data);
@@ -313,10 +324,10 @@ export async function saveProduct(
         await tx.insert(r).values({
           productId: id,
           organisationId,
-          kind: "new listing",
+          kind: input.kind ?? ((await fromDatasheet(tx, id)) ? "from datasheet" : "new listing"),
           status: "In review",
           data: jsonSafe(pick({ ...(product ?? {}), ...data }, REVIEWED_FIELDS)),
-          checks: automatedChecks(defs, merged),
+          checks: [...automatedChecks(defs, merged), ...(input.extraChecks ?? [])],
           submittedBy: actor.userId,
           submittedAt: new Date(),
         });
@@ -360,6 +371,16 @@ export async function saveProduct(
       }
       return res;
     });
+}
+
+/** A listing started from a datasheet (step 8.4) shows in the queue as "from datasheet". */
+async function fromDatasheet(ex: Executor, productId: string): Promise<boolean> {
+  const [row] = await ex
+    .select({ id: schema.datasheetExtractions.id })
+    .from(schema.datasheetExtractions)
+    .where(eq(schema.datasheetExtractions.productId, productId))
+    .limit(1);
+  return Boolean(row);
 }
 
 /** A file uploaded by a colleague, or already attached here, stays as it is. */
@@ -619,7 +640,7 @@ export async function revisionDetail(db: Executor, actor: Actor, id: string) {
   if (!rev) return null;
   const [product] = await db.select().from(p).where(eq(p.id, rev.productId));
   if (!product) return null;
-  const isNew = rev.kind === "new listing";
+  const isNew = NEW_LISTING_KINDS.includes(rev.kind);
   const defs = await schemaOf(db, (rev.data.categoryId as string | undefined) ?? product.categoryId);
   const live = product as unknown as Record<string, unknown>;
   const submitted = rev.data;
@@ -718,7 +739,7 @@ export async function decideRevision(
   if (input.outcome === "Needs changes" && !notes.length)
     throw new ProductError("Add at least one change for the supplier");
   if (input.outcome === "Rejected" && !reason) throw new ProductError("Say why it can't be listed");
-  const isNew = rev.kind === "new listing";
+  const isNew = NEW_LISTING_KINDS.includes(rev.kind);
   if (input.outcome === "Approved" && isNew) {
     const [org] = await db
       .select({ v: schema.organisations.verification })

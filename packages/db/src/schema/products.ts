@@ -232,3 +232,50 @@ export const listingReports = core.table(
   },
   (t) => [index("listing_reports_status").on(t.status, t.createdAt)],
 );
+
+/** One field read from a datasheet (step 8.4). Confidence is worked out from the engine's score and the thresholds. */
+export interface ExtractedFieldRow {
+  attributeKey: string;
+  value: string | number | { min: number; max: number } | null;
+  unit?: string;
+  score: number;
+  confidence: "high" | "medium" | "low";
+  sourcePage?: number;
+  sourceText?: string;
+  /** The value can't be saved: outside the attribute's allowed range or of the wrong kind. */
+  problem?: string;
+}
+
+/**
+ * A datasheet read by the extraction engine (step 8.4; Datasheet review 610:8). Runs only in the worker; the file stays
+ * private. Status: Queued, Reading, Ready, Failed, Submitted. The engine and model version are kept for audit.
+ */
+export const datasheetExtractions = core.table(
+  "datasheet_extractions",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    fileId: uuid("file_id").notNull(),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => catalogueCategories.id),
+    status: text("status").notNull().default("Queued"),
+    engine: text("engine"),
+    engineVersion: text("engine_version"),
+    /** Where the file was processed (M8). */
+    region: text("region"),
+    fields: jsonb("fields").$type<ExtractedFieldRow[]>().notNull().default([]),
+    /** The supplier's check per field: accepted, edited (with the value), absent (not in the datasheet). */
+    decisions: jsonb("decisions")
+      .$type<Record<string, { state: "accepted" | "edited" | "absent"; value?: unknown }>>()
+      .notNull()
+      .default({}),
+    productId: uuid("product_id").references(() => products.id),
+    error: text("error"),
+    createdBy: uuid("created_by").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [index("datasheet_extractions_org").on(t.organisationId, t.createdAt)],
+);
