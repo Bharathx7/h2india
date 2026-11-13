@@ -10,6 +10,8 @@ export interface PublicCategory {
   id: string;
   slug: string;
   label: string;
+  /** The intro paragraph on its listing page (A146). */
+  description: string | null;
   classId: ClassId;
   parentId: string | null;
   liveProducts: number;
@@ -61,6 +63,7 @@ export async function publicCatalogue(db: Executor, opts: { includeSample: boole
     id: r.id,
     slug: r.slug,
     label: r.label,
+    description: r.description,
     classId: r.classId as ClassId,
     parentId: r.parentId,
     liveProducts: 0,

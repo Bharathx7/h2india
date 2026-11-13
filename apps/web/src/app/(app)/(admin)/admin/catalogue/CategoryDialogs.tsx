@@ -2,7 +2,7 @@
 
 import { ATTRIBUTE_TYPE_LABEL, formatAllowedValues, type AttributeDef } from "@h2india/core/catalogue/attributes";
 import type { TreeClass } from "@h2india/core/catalogue/taxonomy";
-import { Button, Checkbox, ConfirmDialog, FormField, Input, Modal, Select, Skeleton } from "@h2india/ui";
+import { Button, Checkbox, ConfirmDialog, FormField, Input, Modal, Select, Skeleton, Textarea } from "@h2india/ui";
 import { useEffect, useState, useTransition } from "react";
 import {
   addCategoryAction,
@@ -124,32 +124,33 @@ export function AddCategoryDialog(props: {
   );
 }
 
+/** Edit category (not drawn, A11): the name and the intro paragraph buyers read on its listing page (A146). */
 export function RenameCategoryDialog(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category: { id: string; label: string };
+  category: { id: string; label: string; description: string | null };
   onDone: Done;
 }) {
   const [label, setLabel] = useState(props.category.label);
+  const [description, setDescription] = useState(props.category.description ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const submit = () => {
     start(async () => {
-      const r = await renameCategoryAction(props.category.id, label);
+      const r = await renameCategoryAction(props.category.id, label, description);
       if (!r.ok) {
         setErrors(r.errors);
         return;
       }
       props.onOpenChange(false);
-      props.onDone(`Renamed to ${label.trim()}`);
+      props.onDone(`${label.trim()} saved`);
     });
   };
   return (
     <Modal
       open={props.open}
       onOpenChange={props.onOpenChange}
-      width={480}
-      title={`Rename ${props.category.label}`}
+      title={`Edit ${props.category.label}`}
       description="The page address stays the same, so links keep working."
       footer={
         <>
@@ -169,6 +170,7 @@ export function RenameCategoryDialog(props: {
     >
       <form
         noValidate
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           submit();
@@ -182,6 +184,20 @@ export function RenameCategoryDialog(props: {
               setLabel(e.target.value);
             }}
             autoComplete="off"
+          />
+        </FormField>
+        <FormField
+          label="Intro"
+          error={errors.description}
+          helper={`Shown under the heading on the listing page. ${String(description.length)} / 600`}
+        >
+          <Textarea
+            rows={4}
+            maxLength={600}
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
           />
         </FormField>
       </form>

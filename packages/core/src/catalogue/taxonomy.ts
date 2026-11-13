@@ -1,6 +1,7 @@
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, desc, eq, inArray, isNull, max, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
+import { queueProductsOf } from "../search/products";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import {
@@ -68,6 +69,7 @@ export interface CategoryDetail {
   parentId: string | null;
   parentLabel: string | null;
   label: string;
+  description: string | null;
   hidden: boolean;
   sample: boolean;
   liveProducts: number;
@@ -213,6 +215,7 @@ export async function categoryDetail(
     parentId: row.c.parentId,
     parentLabel: parent?.label ?? null,
     label: row.c.label,
+    description: row.c.description,
     hidden: row.c.hiddenAt !== null,
     sample: row.c.sample,
     liveProducts: 0,
@@ -634,6 +637,8 @@ export async function setCategoryHidden(
       .update(cat)
       .set({ hiddenAt: hidden ? now : null, updatedBy: actor.userId, updatedAt: now })
       .where(eq(cat.id, categoryId));
+    // Hidden categories' products leave search; shown ones come back.
+    await queueProductsOf(tx, { categoryIds: [categoryId] });
     await record(tx, {
       actor,
       categoryId,
@@ -681,6 +686,7 @@ export async function moveCategory(
       .update(cat)
       .set({ classId: to.id, updatedBy: actor.userId, updatedAt: now })
       .where(inArray(cat.id, family));
+    await queueProductsOf(tx, { categoryIds: [categoryId] });
     await record(tx, {
       actor,
       categoryId,
@@ -763,12 +769,18 @@ export async function duplicateCategory(
 }
 
 /** Rename a category (not drawn, A11). The address word (slug) stays, so links keep working. */
+export const CATEGORY_DESCRIPTION_MAX = 600;
+
+/**
+ * Edit category (not drawn, A11): its name and its intro paragraph (A146). The address word (slug) stays, so links
+ * keep working. Name changes reach search through the outbox.
+ */
 export async function renameCategory(
   db: Database,
   actor: Actor,
   categoryId: string,
   label: string,
-  opts: { context?: RequestContext; now?: Date } = {},
+  opts: { description?: string; context?: RequestContext; now?: Date } = {},
 ): Promise<Result<null>> {
   assertCan(actor, "catalogue.edit");
   const now = opts.now ?? new Date();
@@ -776,20 +788,36 @@ export async function renameCategory(
     const row = await categoryRow(tx, categoryId);
     const checked = await checkCategoryLabel(tx, label, { classId: row.classId, parentId: row.parentId }, categoryId);
     if ("error" in checked) return { ok: false, errors: { label: checked.error } };
-    if (checked.label === row.label) return { ok: true, value: null };
+    const description =
+      opts.description === undefined ? row.description : opts.description.trim().replace(/\s+/g, " ") || null;
+    if ((description?.length ?? 0) > CATEGORY_DESCRIPTION_MAX) {
+      return { ok: false, errors: { description: `Keep the intro to ${String(CATEGORY_DESCRIPTION_MAX)} characters` } };
+    }
+    const renamed = checked.label !== row.label;
+    const described = description !== row.description;
+    if (!renamed && !described) return { ok: true, value: null };
     await tx
       .update(cat)
-      .set({ label: checked.label, updatedBy: actor.userId, updatedAt: now })
+      .set({ label: checked.label, description, updatedBy: actor.userId, updatedAt: now })
       .where(eq(cat.id, categoryId));
+    if (renamed) await queueProductsOf(tx, { categoryIds: [categoryId] });
+    const parts = [
+      renamed ? `renamed ${row.label} to ${checked.label}` : null,
+      described
+        ? description
+          ? `changed the intro of ${checked.label}`
+          : `removed the intro of ${checked.label}`
+        : null,
+    ].filter(Boolean);
     await record(tx, {
       actor,
       categoryId,
-      summary: `renamed ${row.label} to ${checked.label}`,
-      action: "catalogue.category.renamed",
+      summary: parts.join(" and "),
+      action: renamed ? "catalogue.category.renamed" : "catalogue.category.described",
       resourceType: "catalogue_category",
       resourceId: categoryId,
-      before: { label: row.label },
-      after: { label: checked.label },
+      before: { label: row.label, description: row.description },
+      after: { label: checked.label, description },
       context: opts.context,
       now,
     });

@@ -1,5 +1,10 @@
 import { getDb } from "@h2india/core";
-import { companyDocuments, type SearchDocument, type SearchIndexUid } from "@h2india/core/search";
+import {
+  companyDocuments,
+  productSearchDocuments,
+  type SearchDocument,
+  type SearchIndexUid,
+} from "@h2india/core/search";
 import type { CollectionSlug, Payload, Where } from "payload";
 import { STATE_OPTIONS } from "../cms/records/common";
 import { publicWhere, showSample } from "../cms/sample";
@@ -243,7 +248,11 @@ export async function loadDocuments(
     for (const d of await companyDocuments(getDb(), { includeSample: showSample(), ids: recordIds })) docs.set(d.id, d);
     return docs;
   }
-  if (uid === "products") return docs; // Stage 6
+  if (uid === "products") {
+    for (const d of await productSearchDocuments(getDb(), { includeSample: showSample(), ids: recordIds }))
+      docs.set(d.id, d);
+    return docs;
+  }
   const wanted = new Map<CollectionSlug, string[]>();
   for (const id of recordIds) {
     const { collection, raw } = splitOutboxId(uid, id);
@@ -262,7 +271,7 @@ export async function loadDocuments(
 /** Every document one index should hold (pnpm search:reindex). */
 export async function allDocuments(payload: Payload, uid: SearchIndexUid): Promise<SearchDocument[]> {
   if (uid === "companies") return companyDocuments(getDb(), { includeSample: showSample() });
-  if (uid === "products") return [];
+  if (uid === "products") return productSearchDocuments(getDb(), { includeSample: showSample() });
   const docs: SearchDocument[] = [];
   for (const collection of collectionsOf(uid)) {
     for (const doc of await readable(payload, collection)) docs.push(build(collection, doc));

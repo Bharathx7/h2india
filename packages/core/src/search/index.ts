@@ -3,6 +3,7 @@ export { applyToIndex, ensureIndexes, indexName, replaceIndex, searchClient } fr
 export { companyDocuments, initialsOf } from "./companies";
 export type { CompanyDocument } from "./companies";
 export { findPriceField, PRODUCT_FIELDS, productDocument } from "./documents";
+export { productSearchDocuments, queueProductsOf } from "./products";
 export type { SearchDocument } from "./documents";
 export {
   isSearchIndex,

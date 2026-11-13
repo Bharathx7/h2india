@@ -91,6 +91,9 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
           <h1 id="listing-title" className="type-h1 text-primary">
             {title}
           </h1>
+          {(sub ?? category).description ? (
+            <p className="max-w-190 type-body-lg text-body">{(sub ?? category).description}</p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <p className="type-caption text-secondary">
               {total.toLocaleString("en-IN")} {total === 1 ? "product" : "products"}

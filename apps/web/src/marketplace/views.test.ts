@@ -6,6 +6,7 @@ const cat = (slug: string, classId: "systems" | "components" = "systems") => ({
   id: slug,
   slug,
   label: slug,
+  description: null,
   classId,
   parentId: null,
   liveProducts: 0,

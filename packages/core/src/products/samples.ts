@@ -2,6 +2,7 @@ import { schema, type Executor } from "@h2india/db";
 import { and, eq, isNull } from "drizzle-orm";
 import { checkAttributeValues } from "../catalogue/attributes";
 import { effectiveSchema } from "../catalogue/taxonomy";
+import { queueIndexChange } from "../search/outbox";
 
 // Sample products for local and staging (steps 6.3 and 6.4, F9): the PEM electrolysers in the sub-category table
 // (392:5787) with the Electrolysers attributes drawn on its filter panel (392:5007). Flagged sample, so production never
@@ -128,25 +129,29 @@ export async function seedProductSamples(db: Executor, now = new Date()): Promis
       skipped.push(`${name} (${Object.values(checked.errors).join("; ")})`);
       continue;
     }
-    await db.insert(p).values({
-      organisationId: profile.organisationId,
-      categoryId: pem.id,
-      slug,
-      name,
-      variant,
-      brand: null,
-      model: null,
-      summary: null,
-      attributes: checked.value,
-      certifications: i % 3 === 2 ? ["IEC 62282"] : ["ISO 22734"],
-      pricing: "quote",
-      leadTimeMinWeeks: leadMin,
-      leadTimeMaxWeeks: leadMax,
-      madeInIndia: supplier !== "kaveri-electrochem",
-      status: "Live",
-      publishedAt: new Date(now.getTime() - i * 86_400_000),
-      sample: true,
-    });
+    const [made] = await db
+      .insert(p)
+      .values({
+        organisationId: profile.organisationId,
+        categoryId: pem.id,
+        slug,
+        name,
+        variant,
+        brand: null,
+        model: null,
+        summary: null,
+        attributes: checked.value,
+        certifications: i % 3 === 2 ? ["IEC 62282"] : ["ISO 22734"],
+        pricing: "quote",
+        leadTimeMinWeeks: leadMin,
+        leadTimeMaxWeeks: leadMax,
+        madeInIndia: supplier !== "kaveri-electrochem",
+        status: "Live",
+        publishedAt: new Date(now.getTime() - i * 86_400_000),
+        sample: true,
+      })
+      .returning({ id: p.id });
+    if (made) await queueIndexChange(db, "products", [made.id]);
     added += 1;
   }
   return `products: ${String(added)} sample products added${skipped.length ? `; skipped ${skipped.join(", ")}` : ""}`;
@@ -226,47 +231,57 @@ export async function seedBrandAndServiceSamples(db: Executor): Promise<string> 
     .where(eq(schema.products.slug, slug))
     .limit(1);
   if (provider && testing && !exists) {
-    await db.insert(schema.products).values({
-      organisationId: provider,
-      categoryId: testing.id,
-      slug,
-      name: "Hydrogen safety: HAZOP and QRA studies",
-      summary:
-        "HAZOP, HAZID and quantitative risk assessment for electrolyser plants, storage, compression and refuelling stations, led by chartered process-safety engineers.",
-      status: "Live",
-      publishedAt: new Date(),
-      sample: true,
-      service: {
-        statesServed: ["Gujarat", "Maharashtra", "Odisha", "Tamil Nadu", "Rajasthan", "Karnataka"],
-        accreditations: [{ name: "ISO/IEC 17020 · NABCB" }, { name: "ISO 9001:2015 · TÜV India" }],
-        scope:
-          "Study planning, node definition, a facilitated HAZOP workshop with your team, bow-tie analysis of top events, consequence modelling (jet fire, explosion overpressure) and QRA against Indian and international risk criteria.",
-        deliverables: [
-          "HAZOP worksheets and action register",
-          "QRA report with individual and societal risk contours",
-          "Hazardous area classification drawing",
-          "Recommendations close-out tracker",
-        ],
-        standards: ["IEC 61882 (HAZOP)", "ISO 19880-1", "ISO/TR 15916", "IS/IEC 60079-10-1", "PESO Gas Cylinder Rules"],
-        facts: [
-          { label: "Typical duration", value: "2–4", unit: "weeks", note: "From receiving P&IDs" },
-          { label: "Workshop", value: "3", unit: "days", note: "On site or online" },
-          {
-            label: "Team",
-            value: "2 + 1",
-            unit: "engineers",
-            note: "Chartered process-safety lead, QRA analyst, scribe",
-          },
-          { label: "Software", value: "PHAST, Safeti", unit: "", note: "Licensed" },
-        ],
-        faqs: [
-          {
-            question: "How long does a HAZOP study take?",
-            answer: "Usually 2–4 weeks from receiving P&IDs, including one site visit and a 3-day workshop.",
-          },
-        ],
-      },
-    });
+    const [service] = await db
+      .insert(schema.products)
+      .values({
+        organisationId: provider,
+        categoryId: testing.id,
+        slug,
+        name: "Hydrogen safety: HAZOP and QRA studies",
+        summary:
+          "HAZOP, HAZID and quantitative risk assessment for electrolyser plants, storage, compression and refuelling stations, led by chartered process-safety engineers.",
+        status: "Live",
+        publishedAt: new Date(),
+        sample: true,
+        service: {
+          statesServed: ["Gujarat", "Maharashtra", "Odisha", "Tamil Nadu", "Rajasthan", "Karnataka"],
+          accreditations: [{ name: "ISO/IEC 17020 · NABCB" }, { name: "ISO 9001:2015 · TÜV India" }],
+          scope:
+            "Study planning, node definition, a facilitated HAZOP workshop with your team, bow-tie analysis of top events, consequence modelling (jet fire, explosion overpressure) and QRA against Indian and international risk criteria.",
+          deliverables: [
+            "HAZOP worksheets and action register",
+            "QRA report with individual and societal risk contours",
+            "Hazardous area classification drawing",
+            "Recommendations close-out tracker",
+          ],
+          standards: [
+            "IEC 61882 (HAZOP)",
+            "ISO 19880-1",
+            "ISO/TR 15916",
+            "IS/IEC 60079-10-1",
+            "PESO Gas Cylinder Rules",
+          ],
+          facts: [
+            { label: "Typical duration", value: "2–4", unit: "weeks", note: "From receiving P&IDs" },
+            { label: "Workshop", value: "3", unit: "days", note: "On site or online" },
+            {
+              label: "Team",
+              value: "2 + 1",
+              unit: "engineers",
+              note: "Chartered process-safety lead, QRA analyst, scribe",
+            },
+            { label: "Software", value: "PHAST, Safeti", unit: "", note: "Licensed" },
+          ],
+          faqs: [
+            {
+              question: "How long does a HAZOP study take?",
+              answer: "Usually 2–4 weeks from receiving P&IDs, including one site visit and a 3-day workshop.",
+            },
+          ],
+        },
+      })
+      .returning({ id: schema.products.id });
+    if (service) await queueIndexChange(db, "products", [service.id]);
     out.push("HAZOP and QRA service");
   }
   return `brands and services: ${out.length ? out.join(", ") : "nothing new"}`;

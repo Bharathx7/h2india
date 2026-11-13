@@ -79,8 +79,8 @@ export async function addCategoryAction(input: { classId: string; parentId: stri
   return run(async ({ db, actor, context }) => addCategory(db, actor, input, { context }));
 }
 
-export async function renameCategoryAction(categoryId: string, label: string) {
-  return run(async ({ db, actor, context }) => renameCategory(db, actor, categoryId, label, { context }));
+export async function renameCategoryAction(categoryId: string, label: string, description: string) {
+  return run(async ({ db, actor, context }) => renameCategory(db, actor, categoryId, label, { description, context }));
 }
 
 export async function setCategoryHiddenAction(categoryId: string, hidden: boolean) {

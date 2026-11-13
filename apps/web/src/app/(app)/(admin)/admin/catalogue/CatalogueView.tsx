@@ -394,7 +394,7 @@ function CategoryMenu(props: { label: string; hidden: boolean; topLevel: boolean
             props.onAction("rename");
           }}
         >
-          Rename category
+          Edit category
         </MenuItem>
         {props.topLevel ? (
           <MenuItem

@@ -44,6 +44,8 @@ export const catalogueCategories = core.table(
     parentId: uuid("parent_id").references((): AnyPgColumn => catalogueCategories.id),
     slug: text("slug").notNull(),
     label: text("label").notNull(),
+    /** The intro paragraph on the listing page (392:5787; Doc 3 category landing copy, A146). */
+    description: text("description"),
     position: integer("position").notNull().default(0),
     hiddenAt: utc("hidden_at"),
     sample: boolean("sample").notNull().default(false),

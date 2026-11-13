@@ -6,6 +6,7 @@ import { getDb } from "../db";
 import { listOf, yesNo } from "../importing/csv";
 import { summarise, type ImportReport, type RowResult } from "../importing/report";
 import { nudgeIndexer, queueIndexChange } from "../search/outbox";
+import { queueProductsOf } from "../search/products";
 import { GST_STATES } from "./gstin";
 
 // Pre-seeded company profiles (step 4.6, A38): created Unclaimed with no members, so nobody can act for the company
@@ -160,6 +161,8 @@ export async function importCompanies(
       }
     }
     await queueIndexChange(tx, "companies", changed);
+    // Product documents carry the supplier's name and state.
+    await queueProductsOf(tx, { organisationIds: changed });
     await audit(tx, {
       actorId: null,
       action: "companies.import",

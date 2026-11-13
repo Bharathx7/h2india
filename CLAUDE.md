@@ -208,6 +208,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Products live in `core.products` (A115). Public reads go through `listProducts()` (`@h2india/core/products`): live, non-sample unless the flag is on, filtered and counted in the database (A114). A company's own products only through `listCompanyProducts(scope)`.
 - Listing state is the address: `parseListing()` and `listingSearch()` in `@h2india/core/products/rules`. Filters come only from the category's filterable attributes (`effectiveSchema()`: parent's attributes, then the sub-category's).
 - The price rule is `canShowPrice()`: only the product page of a fixed-price item. `ProductCard`, listing rows and `ProductCard` data have no price at all; the database refuses a price on a quote-only product.
+- Product search documents come only from `productSearchDocuments()`; any change to a product, its category or its supplier queues it in the same transaction (`queueIndexChange(tx, "products", …)` or `queueProductsOf()`).
 - Compare selection: `useCompare()` (`marketplace/compare.ts`), up to `COMPARE_LIMIT`.
 - The product page reads `productDetail()`; its price comes only from there (`canShowPrice`, GST from the supplier's rate). Add to cart and Buy now render only when `isEnabled("transactions")`.
 - Ask a question and Report this listing go through `askQuestion()` and `reportListing()` after `checkForm()`.
