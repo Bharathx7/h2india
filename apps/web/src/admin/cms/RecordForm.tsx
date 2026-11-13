@@ -4,7 +4,6 @@ import {
   Alert,
   Button,
   Checkbox,
-  cx,
   FilterChip,
   FormField,
   Icon,
@@ -20,7 +19,9 @@ import { useState, useTransition } from "react";
 import { markVerifiedAction } from "@/admin/content/actions";
 import { BodyEditor } from "./ArticleEditor";
 import { blocksToLexical, lexicalToBlocks, type BodyBlock } from "./body";
+import { STALE_DAYS } from "@/cms/records/thresholds";
 import type { FieldSpec } from "./fields";
+import { recordCards } from "./layout";
 import { saveRecordAction, saveSettingAction, unpublishRecordAction } from "./record-actions";
 
 // The native content editor (step 4.6): any record, tracker entry, knowledge item, page or setting, drawn from its
@@ -37,6 +38,15 @@ const istLocal = (iso: unknown, withTime: boolean) => {
 };
 const fromIst = (v: string, withTime: boolean) =>
   v ? new Date(withTime ? `${v}:00+05:30` : `${v}T00:00:00+05:30`).toISOString() : null;
+const dayMonth = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short" });
+const dayMonthYear = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 const istStamp = (iso: string) =>
   new Date(iso).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });
 
@@ -158,8 +168,10 @@ function Field({
   switch (spec.kind) {
     case "group":
       return (
-        <fieldset className="flex flex-col gap-4 rounded-input border border-default p-4">
-          <legend className="px-1 type-label">{spec.label}</legend>
+        <fieldset
+          className={spec.bare ? "flex flex-col gap-4" : "flex flex-col gap-4 rounded-input border border-default p-4"}
+        >
+          <legend className={spec.bare ? "sr-only" : "px-1 type-label"}>{spec.label}</legend>
           {spec.description ? <p className="type-caption text-secondary">{spec.description}</p> : null}
           {(spec.fields ?? []).map((f) => (
             <Field
@@ -183,7 +195,7 @@ function Field({
       };
       return (
         <fieldset className="flex flex-col gap-3">
-          <legend className="type-label">
+          <legend className={spec.bare ? "sr-only" : "type-label"}>
             {spec.label}
             {spec.required ? (
               <span aria-hidden="true" className="text-error">
@@ -451,6 +463,8 @@ export interface FormMeta {
   status: string | null;
   updatedAt: string | null;
   verifiedAt: string | null;
+  /** Whole days since it was last verified (worked out on the server), or null. */
+  verifiedDays: number | null;
 }
 
 export function RecordForm({
@@ -528,78 +542,93 @@ export function RecordForm({
       locked={locked}
     />
   );
-  const main = fields.filter((f) => !f.sidebar);
-  const hasSide = Boolean(meta.id) || verify;
-  const side = fields.filter((f) => f.sidebar && f.name !== "verification");
+  const cards =
+    kind === "record"
+      ? recordCards(slug, singular, fields)
+      : [{ title: singular, fields: fields.filter((f) => !f.sidebar) }];
+  const side = fields.filter((f) => f.sidebar && f.name !== "verification" && f.name !== "status");
+  const editorName = (v: unknown) => {
+    const id = v && typeof v === "object" ? (v as { id: unknown }).id : v;
+    return (choices.editors ?? []).find((c) => c.id === id)?.label ?? null;
+  };
+  const owner = editorName(values.owner);
+  const verification = (values.verification ?? {}) as { at?: string | null; by?: unknown; note?: string | null };
+  const verifiedBy = editorName(verification.by);
+  const [status, setStatus] = useState<"Draft" | "Published">(meta.published ? "Published" : "Draft");
+  const days = meta.verifiedDays;
+  const stale = days === null || days >= STALE_DAYS;
+
+  const saveChanges = () => {
+    if (kind === "setting") {
+      save(drafts ? (status === "Published" ? "publish" : "draft") : "save");
+      return;
+    }
+    if (!drafts) {
+      save("save");
+      return;
+    }
+    if (status === "Published") {
+      save("publish");
+      return;
+    }
+    const id = meta.id;
+    run(
+      async () => {
+        const r = await saveRecordAction(slug, id, values, "draft");
+        if (r.ok && meta.published) return unpublishRecordAction(slug, r.id);
+        return r;
+      },
+      meta.published ? "Unpublished. It's a draft again." : "Draft saved.",
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Link href={backHref} className="inline-flex items-center gap-1 type-label text-secondary">
-            <Icon name="arrow-left" size={16} />
-            {backLabel}
-          </Link>
-          <h1 className="type-h2">
-            {meta.id || kind === "setting" ? title || singular : `New ${singular.toLowerCase()}`}
-          </h1>
-          <span className="flex flex-wrap items-center gap-2 type-caption text-secondary">
-            {drafts ? (
-              <StatusBadge
-                status={meta.published ? "Published" : "Draft"}
-                tone={meta.published ? "success" : "neutral"}
-              />
-            ) : null}
-            {meta.status ? <StatusBadge status={meta.status} /> : null}
-            {dirty ? "Unsaved changes" : meta.updatedAt ? `Saved ${istStamp(meta.updatedAt)} IST` : "Not saved yet"}
-          </span>
-        </div>
-        {canEdit ? (
-          <div className="flex flex-wrap gap-2">
-            {drafts ? (
-              <>
-                {meta.published && meta.id ? (
-                  <Button
-                    variant="ghost"
-                    disabled={pending}
-                    onClick={() => {
-                      const id = meta.id;
-                      if (id) run(() => unpublishRecordAction(slug, id), "Unpublished. It's a draft again.");
-                    }}
-                  >
-                    Unpublish
-                  </Button>
-                ) : null}
-                <Button
-                  variant="outline"
-                  disabled={pending}
-                  onClick={() => {
-                    save("draft");
-                  }}
-                >
-                  Save draft
-                </Button>
-                <Button
-                  disabled={pending}
-                  onClick={() => {
-                    save("publish");
-                  }}
-                >
-                  {meta.published ? "Publish changes" : "Publish"}
-                </Button>
-              </>
-            ) : (
-              <Button
-                disabled={pending}
-                onClick={() => {
-                  save("save");
-                }}
-              >
-                {pending ? "Saving…" : "Save"}
-              </Button>
-            )}
+      <div className="flex flex-col gap-3">
+        <Link href={backHref} className="inline-flex items-center gap-1 self-start type-label">
+          <Icon name="arrow-left" size={16} />
+          {backLabel}
+        </Link>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="type-h2">
+              {meta.id || kind === "setting" ? title || singular : `New ${singular.toLowerCase()}`}
+            </h1>
+            <span className="flex flex-wrap items-center gap-2 type-caption text-secondary">
+              {drafts ? (
+                <StatusBadge
+                  status={meta.published ? "Published" : "Draft"}
+                  tone={meta.published ? "success" : "neutral"}
+                />
+              ) : null}
+              {meta.status ? <StatusBadge status={meta.status} /> : null}
+              {[
+                singular,
+                owner ? `owner ${owner}` : null,
+                dirty ? "unsaved changes" : meta.updatedAt ? `updated ${dayMonth(meta.updatedAt)}` : "not saved yet",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
           </div>
-        ) : null}
+          {canEdit ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {verify && meta.id ? (
+                <VerifyButton
+                  collection={slug}
+                  id={meta.id}
+                  label="Mark verified"
+                  onDone={() => {
+                    router.refresh();
+                  }}
+                />
+              ) : null}
+              <Button disabled={pending} onClick={saveChanges}>
+                {pending ? "Saving…" : "Save changes"}
+              </Button>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {error ? (
@@ -614,58 +643,126 @@ export function RecordForm({
         </Alert>
       ) : null}
 
-      <div
-        className={cx("grid grid-cols-1 gap-6", (side.length > 0 || hasSide) && "lg:grid-cols-[minmax(0,1fr)_340px]")}
-      >
-        <section className="flex flex-col gap-5 rounded-card border border-default bg-page p-5">
-          {main.length ? (
-            main.map(field)
-          ) : (
-            <p className="type-body-sm text-secondary">Everything is in the side panel.</p>
-          )}
-        </section>
-        {side.length > 0 || hasSide ? (
-          <aside className="flex flex-col gap-6">
-            {verify && meta.id ? (
-              <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-                <h2 className="type-h5">Last verified</h2>
-                <p className="type-body-sm">
-                  {meta.verifiedAt ? `${istStamp(meta.verifiedAt)} IST` : "Never checked against its source."}
-                </p>
-                {canEdit ? (
-                  <VerifyButton
-                    collection={slug}
-                    id={meta.id}
-                    onDone={() => {
-                      router.refresh();
-                    }}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex flex-col gap-6">
+          {cards.map((c) => (
+            <section key={c.title} className="flex flex-col gap-4 rounded-card border border-default bg-page p-5">
+              <h2 className="type-h4">{c.title}</h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                {c.fields.map((f) => (
+                  <div
+                    key={f.name}
+                    className={
+                      f.kind === "text" ||
+                      f.kind === "number" ||
+                      f.kind === "date" ||
+                      f.kind === "email" ||
+                      ((f.kind === "select" || f.kind === "relationship" || f.kind === "radio") && !f.hasMany) ||
+                      f.kind === "checkbox"
+                        ? undefined
+                        : "md:col-span-2"
+                    }
+                  >
+                    {field(f)}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+        <aside className="flex flex-col gap-6">
+          {verify && meta.id ? (
+            <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="type-h4">Last verified</h2>
+                {days !== null ? (
+                  <StatusBadge
+                    status={days === 0 ? "Today" : `${String(days)} ${days === 1 ? "day" : "days"} ago`}
+                    tone={stale ? "warning" : "success"}
                   />
                 ) : null}
-              </section>
-            ) : null}
-            {side.length ? (
-              <section className="flex flex-col gap-5 rounded-card border border-default bg-page p-5">
-                <h2 className="type-h5">Details</h2>
-                {side.map(field)}
-              </section>
-            ) : null}
-            <Link href={cmsHref} className="type-caption text-secondary underline">
-              Open in the advanced editor
-            </Link>
-          </aside>
-        ) : null}
+              </div>
+              <p className="type-body-sm">
+                {meta.verifiedAt
+                  ? `${dayMonthYear(meta.verifiedAt)}${verifiedBy ? ` by ${verifiedBy}` : ""}`
+                  : "Never verified"}
+              </p>
+              {verification.note ? <p className="type-caption text-secondary">{verification.note}</p> : null}
+              {stale && meta.verifiedAt ? (
+                <p className="type-caption text-secondary">Due for a check. This record is in Data quality as stale.</p>
+              ) : null}
+              {canEdit ? (
+                <VerifyButton
+                  collection={slug}
+                  id={meta.id}
+                  label="Mark verified now"
+                  size="sm"
+                  onDone={() => {
+                    router.refresh();
+                  }}
+                />
+              ) : null}
+              <p className="type-caption text-secondary">
+                Records not verified for {STALE_DAYS} days move to Data quality.
+              </p>
+            </section>
+          ) : null}
+          {drafts ? (
+            <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+              <h2 className="type-h4">Workflow</h2>
+              <FormField label="Status">
+                <Select
+                  value={status}
+                  disabled={locked}
+                  onChange={(e) => {
+                    setStatus(e.target.value === "Published" ? "Published" : "Draft");
+                    setDirty(true);
+                  }}
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                </Select>
+              </FormField>
+              {meta.updatedAt ? (
+                <p className="type-caption text-secondary">Last saved {istStamp(meta.updatedAt)} IST</p>
+              ) : null}
+            </section>
+          ) : null}
+          {side.length ? (
+            <section className="flex flex-col gap-4 rounded-card border border-default bg-page p-5">
+              <h2 className="type-h4">Details</h2>
+              {side.map(field)}
+            </section>
+          ) : null}
+          <Link href={cmsHref} className="type-caption text-secondary underline">
+            Open in the advanced editor
+          </Link>
+        </aside>
       </div>
     </div>
   );
 }
 
-function VerifyButton({ collection, id, onDone }: { collection: string; id: number; onDone: () => void }) {
+function VerifyButton({
+  collection,
+  id,
+  onDone,
+  label,
+  size,
+}: {
+  collection: string;
+  id: number;
+  onDone: () => void;
+  label: string;
+  size?: "sm";
+}) {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
   return (
     <span className="flex flex-col gap-1">
       <Button
         variant="outline"
+        size={size}
         disabled={pending}
         onClick={() => {
           start(async () => {
@@ -676,7 +773,7 @@ function VerifyButton({ collection, id, onDone }: { collection: string; id: numb
         }}
       >
         <Icon name="check" size={16} />
-        Mark verified now
+        {label}
       </Button>
       {error ? <span className="type-caption text-error">{error}</span> : null}
     </span>

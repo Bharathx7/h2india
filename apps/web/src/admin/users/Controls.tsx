@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, Input, Modal, Select, Textarea } from "@h2india/ui";
+import { Alert, Button, FormField, Icon, Input, Modal, Select, Textarea } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { roleAction, suspendAction, suspendCompanyAction, viewAsAction } from "./actions";
@@ -101,26 +101,140 @@ function ReasonDialog({
   );
 }
 
-export function SuspendUser({ userId, name, suspended }: { userId: string; name: string; suspended: boolean }) {
-  return suspended ? (
-    <ReasonDialog
-      trigger="Lift suspension"
-      title={`Lift ${name}'s suspension?`}
-      description="They can sign in again straight away."
-      label="Reason"
-      confirm="Lift suspension"
-      go={(r) => suspendAction(userId, r, true)}
-    />
-  ) : (
-    <ReasonDialog
-      trigger="Suspend user"
-      destructive
-      title={`Suspend ${name}?`}
-      description="They're signed out everywhere at once and can't sign in. Their company stays as it is. They can appeal by email."
-      label="Reason"
-      confirm="Suspend user"
-      go={(r) => suspendAction(userId, r, false)}
-    />
+/** The person as the dialogs show them: initials, name and one line (653:568). */
+export interface PersonCard {
+  name: string;
+  line: string;
+}
+
+const SUSPEND_REASONS = [
+  "Spam or advertising (repeated)",
+  "Abusive or threatening posts",
+  "Pretending to be someone else",
+  "Suspected fraud",
+  "Other reason",
+];
+
+function Card({ person }: { person: PersonCard }) {
+  const letters = person.name
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <div className="flex items-center gap-3 rounded-card border border-default p-3">
+      <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-pill bg-mint type-caption">
+        {letters}
+      </span>
+      <span>
+        <span className="block type-label">{person.name}</span>
+        <span className="block type-caption text-secondary">{person.line}</span>
+      </span>
+    </div>
+  );
+}
+
+export function SuspendUser({ userId, person, suspended }: { userId: string; person: PersonCard; suspended: boolean }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [why, setWhy] = useState("");
+  const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+  const [pending, start] = useTransition();
+  if (suspended)
+    return (
+      <ReasonDialog
+        trigger="Lift suspension"
+        title={`Lift ${person.name}'s suspension?`}
+        description="They can sign in again straight away."
+        label="Reason"
+        confirm="Lift suspension"
+        go={(r) => suspendAction(userId, r, true)}
+      />
+    );
+  return (
+    <>
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Suspend
+      </Button>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        width={480}
+        title={`Suspend ${person.name}?`}
+        description="They can't sign in, comment or post until an operator lifts the suspension. Their content stays as it is."
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Keep active
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={pending || !why || !note.trim()}
+              onClick={() => {
+                start(async () => {
+                  const r = await suspendAction(userId, `${why}: ${note.trim()}`, false);
+                  if (!r.ok) {
+                    setError(r.error);
+                    return;
+                  }
+                  setOpen(false);
+                  setNote("");
+                  router.refresh();
+                });
+              }}
+            >
+              Suspend user
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {error ? <Alert tone="error" title={error} live /> : null}
+          <Card person={person} />
+          <FormField label="Reason" required>
+            <Select
+              value={why}
+              onChange={(e) => {
+                setWhy(e.target.value);
+              }}
+            >
+              <option value="">Choose a reason</option>
+              {SUSPEND_REASONS.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField
+            label="Note for the audit log"
+            required
+            helper="Logged with your name and the time. Anyone with the Users permission can lift it."
+          >
+            <Textarea
+              rows={4}
+              maxLength={500}
+              showCount
+              value={note}
+              onChange={(e) => {
+                setNote(e.target.value);
+              }}
+            />
+          </FormField>
+        </div>
+      </Modal>
+    </>
   );
 }
 
@@ -152,17 +266,94 @@ export function SuspendCompany({
   );
 }
 
-export function ViewAs({ userId, name }: { userId: string; name: string }) {
+/** View as user (657:328): read-only, with a reason, and a banner the whole time. */
+export function ViewAs({
+  userId,
+  name,
+  sees,
+  label,
+  variant = "outline",
+}: {
+  userId: string;
+  name: string;
+  /** "Pranava H2's supplier workspace", or "H2 India" for a member. */
+  sees: string;
+  label: string;
+  variant?: "outline" | "secondary";
+}) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
+  const [pending, start] = useTransition();
+  const first = name.split(/\s+/)[0] ?? name;
   return (
-    <ReasonDialog
-      trigger="View as user"
-      title={`View the site as ${name}?`}
-      description="Read-only, for 15 minutes: nothing can be saved, sent or changed. The start, the end and your reason are kept in the audit log."
-      label="Why do you need to see what they see?"
-      confirm="Start viewing"
-      min={10}
-      go={(r) => viewAsAction(userId, r)}
-    />
+    <>
+      <Button
+        variant={variant}
+        size="sm"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <Icon name="eye" size={16} />
+        {label}
+      </Button>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        width={480}
+        title={`View H2 India as ${name}?`}
+        description={`You'll see ${sees} the way ${first} does. It's read-only: you can't change anything, send messages or approve actions.`}
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={pending || reason.trim().length < 10}
+              onClick={() => {
+                start(async () => {
+                  const r = await viewAsAction(userId, reason);
+                  if (!r.ok) setError(r.error);
+                });
+              }}
+            >
+              <Icon name="eye" size={16} />
+              Start read-only view
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {error ? <Alert tone="error" title={error} live /> : null}
+          <ul className="flex flex-col gap-2 rounded-card bg-subtle p-3 type-body-sm">
+            <li className="flex items-center gap-2">
+              <Icon name="eye" size={16} />A banner shows the whole time, with a button to end the view.
+            </li>
+            <li className="flex items-center gap-2">
+              <Icon name="file-text" size={16} />
+              The start, end and your reason go in the audit log.
+            </li>
+          </ul>
+          <FormField label="Reason" required>
+            <Textarea
+              rows={3}
+              maxLength={300}
+              showCount
+              value={reason}
+              onChange={(e) => {
+                setReason(e.target.value);
+              }}
+            />
+          </FormField>
+        </div>
+      </Modal>
+    </>
   );
 }
 
@@ -241,5 +432,36 @@ export function RoleMember({ roles }: { roles: string[] }) {
         Only a Super admin can change operator roles. Changes apply at once, without a deploy.
       </p>
     </div>
+  );
+}
+
+/** A filter select that applies at once (651:8 "Type: all", "Status: all", "Passkey: any"). */
+export function AutoSelect({
+  name,
+  label,
+  value,
+  options,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <Select
+      name={name}
+      aria-label={label}
+      defaultValue={value}
+      boxClassName="w-44"
+      onChange={(e) => {
+        e.currentTarget.form?.requestSubmit();
+      }}
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </Select>
   );
 }

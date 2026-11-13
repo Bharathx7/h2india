@@ -80,10 +80,21 @@ export async function viewAsAction(userId: string, reason: string): Promise<R> {
     path: "/",
     maxAge,
   });
-  const detail = await userDetail(getDb(), actor, userId);
+  const [detail, me] = await Promise.all([
+    userDetail(getDb(), actor, userId),
+    actor.userId ? userDetail(getDb(), actor, actor.userId) : null,
+  ]);
+  // What the banner (657:486) shows: no secrets, only names, times and the operator's own reason.
   jar.set(
     "h2_view_as_display",
-    JSON.stringify({ name: detail?.person.name ?? "this person", until: started.expiresAt.toISOString() }),
+    JSON.stringify({
+      name: detail?.person.name ?? "this person",
+      org: detail?.companies[0]?.name ?? null,
+      until: started.expiresAt.toISOString(),
+      started: new Date().toISOString(),
+      by: me ? `${me.person.name}${me.operatorRoles[0] ? ` (${me.operatorRoles[0]})` : ""}` : null,
+      reason: reason.trim().slice(0, 300),
+    }),
     {
       sameSite: "lax",
       path: "/",

@@ -27,13 +27,28 @@ export async function listUsers(
     q?: string;
     type?: "buyer" | "supplier" | "member" | "operator";
     status?: "active" | "suspended";
+    /** Passkey: any · with (at least one) · none (651:8). */
+    passkey?: "with" | "none";
     limit?: number;
     offset?: number;
   } = {},
 ) {
   assertCan(actor, "users.view");
   const conds = [];
-  if (opts.q) conds.push(or(ilike(u.name, `%${opts.q}%`), ilike(u.email, `%${opts.q}%`)));
+  if (opts.q) {
+    const like = `%${opts.q}%`;
+    // Name, email, mobile, or a company they belong to by name or GSTIN (651:8 "Search name, email, mobile or GSTIN").
+    conds.push(
+      or(
+        ilike(u.name, like),
+        ilike(u.email, like),
+        ilike(u.mobile, like),
+        sql`exists (select 1 from core.memberships x join core.organisations y on y.id = x.organisation_id left join core.organisation_gstins g on g.organisation_id = y.id where x.user_id = ${u.id} and (y.legal_name ilike ${like} or g.gstin ilike ${like}))`,
+      ),
+    );
+  }
+  if (opts.passkey === "with") conds.push(sql`exists (select 1 from core.passkeys k where k.user_id = ${u.id})`);
+  if (opts.passkey === "none") conds.push(sql`not exists (select 1 from core.passkeys k where k.user_id = ${u.id})`);
   if (opts.status === "suspended") conds.push(sql`${u.suspendedAt} is not null`);
   if (opts.status === "active") conds.push(isNull(u.suspendedAt));
   if (opts.type === "operator") conds.push(sql`exists (select 1 from core.operator_roles r where r.user_id = ${u.id})`);
@@ -58,6 +73,18 @@ export async function listUsers(
           string | null
         >`(select string_agg(ro.name, ', ') from core.operator_roles r join core.roles ro on ro.id = r.role_id where r.user_id = core.users.id)`,
         lastActive: sql<Date | null>`(select max(s.updated_at) from core.sessions s where s.user_id = core.users.id)`,
+        passkeys: sql<number>`(select count(*)::int from core.passkeys k where k.user_id = core.users.id)`,
+        /** The first company (by joining date) with the person's role there, for the Organisation and role column. */
+        organisation: sql<
+          string | null
+        >`(select y.legal_name from core.memberships x join core.organisations y on y.id = x.organisation_id where x.user_id = core.users.id order by x.created_at limit 1)`,
+        role: sql<
+          string | null
+        >`(select x.role from core.memberships x where x.user_id = core.users.id order by x.created_at limit 1)`,
+        kind: sql<
+          string | null
+        >`(select y.kind from core.memberships x join core.organisations y on y.id = x.organisation_id where x.user_id = core.users.id order by x.created_at limit 1)`,
+        orgSuspended: sql<boolean>`exists (select 1 from core.memberships x join core.organisations y on y.id = x.organisation_id where x.user_id = core.users.id and y.suspended_at is not null)`,
       })
       .from(u)
       .where(where)
@@ -77,15 +104,17 @@ export async function userDetail(db: Executor, actor: Actor, userId: string) {
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return null;
   const [person] = await db.select().from(u).where(eq(u.id, userId));
   if (!person) return null;
-  const [companies, roles, sessions, activity] = await Promise.all([
+  const [companies, roles, sessions, activity, passkeys] = await Promise.all([
     db
       .select({
         id: o.id,
         name: o.legalName,
         kind: o.kind,
         role: m.role,
+        since: m.createdAt,
         verification: o.verification,
         suspendedAt: o.suspendedAt,
+        city: sql<string | null>`(select p.city from core.company_profiles p where p.organisation_id = ${o.id})`,
       })
       .from(m)
       .innerJoin(o, eq(o.id, m.organisationId))
@@ -106,6 +135,15 @@ export async function userDetail(db: Executor, actor: Actor, userId: string) {
       .where(or(eq(schema.auditLog.actorId, userId), eq(schema.auditLog.resourceId, userId)))
       .orderBy(desc(schema.auditLog.at))
       .limit(20),
+    db
+      .select({
+        name: schema.passkeys.name,
+        deviceType: schema.passkeys.deviceType,
+        createdAt: schema.passkeys.createdAt,
+      })
+      .from(schema.passkeys)
+      .where(eq(schema.passkeys.userId, userId))
+      .orderBy(schema.passkeys.createdAt),
   ]);
   const { suspendReason, ...rest } = person;
   return {
@@ -114,7 +152,30 @@ export async function userDetail(db: Executor, actor: Actor, userId: string) {
     operatorRoles: roles.map((r) => r.name),
     sessions,
     activity,
+    passkeys,
   };
+}
+
+/** Names and their role or company, for the Actor column of the Audit log (656:872). Unknown ids are left out. */
+export async function actorLabels(db: Executor, actor: Actor, ids: string[]) {
+  assertCan(actor, "users.view");
+  const unique = [...new Set(ids)].filter((x) => /^[0-9a-f-]{36}$/i.test(x));
+  if (!unique.length) return new Map<string, { name: string; detail: string }>();
+  const rows = await db
+    .select({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      operator: sql<
+        string | null
+      >`(select string_agg(ro.name, ', ') from core.operator_roles r join core.roles ro on ro.id = r.role_id where r.user_id = core.users.id)`,
+      company: sql<
+        string | null
+      >`(select y.legal_name || ' · ' || x.role from core.memberships x join core.organisations y on y.id = x.organisation_id where x.user_id = core.users.id order by x.created_at limit 1)`,
+    })
+    .from(u)
+    .where(inArray(u.id, unique));
+  return new Map(rows.map((r) => [r.id, { name: r.name || r.email, detail: r.operator ?? r.company ?? "Member" }]));
 }
 
 /** Suspend a person (653:568): sessions end at once and sign-in is refused with the designed message. */

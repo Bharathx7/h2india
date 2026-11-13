@@ -65,6 +65,8 @@ export interface RecordRow {
   verifiedAt: string | null;
   sample: boolean;
   thumbnail: string | null;
+  /** Media: "Image · 2400 × 1600 · Hydrotek Systems" (649:8). */
+  detail: string | null;
 }
 
 export async function listRecords(
@@ -100,6 +102,18 @@ export async function listRecords(
         updatedAt: String(d.updatedAt),
         verifiedAt: ver?.at ?? null,
         sample: d.sample === true,
+        detail:
+          typeof d.mimeType === "string"
+            ? [
+                d.mimeType.startsWith("image/") ? "Image" : d.mimeType === "application/pdf" ? "PDF" : "File",
+                typeof d.width === "number" && typeof d.height === "number"
+                  ? `${String(d.width)} × ${String(d.height)}`
+                  : null,
+                typeof d.credit === "string" && d.credit ? d.credit : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            : null,
         thumbnail:
           typeof d.thumbnailURL === "string"
             ? d.thumbnailURL

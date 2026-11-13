@@ -35,7 +35,7 @@ export default async function SettingPage({ params }: { params: Promise<{ slug: 
         slug={slug}
         singular={type.singular}
         backHref="/admin/content/settings"
-        backLabel="Site settings"
+        backLabel="Content · Site settings"
         titleField={null}
         fields={type.fields}
         initial={values}
@@ -45,6 +45,7 @@ export default async function SettingPage({ params }: { params: Promise<{ slug: 
           status: null,
           updatedAt: values.updatedAt ?? null,
           verifiedAt: null,
+          verifiedDays: null,
         }}
         choices={choices}
         canEdit={cms.can("content.edit")}

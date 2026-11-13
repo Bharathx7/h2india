@@ -7,6 +7,7 @@ import { contentType, listRecords } from "@/admin/cms/records";
 import { VERIFIED_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
+import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // A content library (step 4.6): every record of one type, newest change first, with search, its status and when it
@@ -33,27 +34,83 @@ export default async function LibraryPage({
   const list = await listRecords(cms, type, { q, page });
   const verified = VERIFIED_SLUGS.includes(collection);
   const gallery = type.upload && collection === "media";
+  const tabbed = collection === "media" || collection === "authors";
+  // Authors (649:730): how many articles each has written.
+  const articleCounts = new Map<number, number>();
+  const people = new Map<number, { title: string | null; organisation: string | null; kind: string }>();
+  if (collection === "authors") {
+    const found = await cms.payload.find({
+      collection: "authors",
+      where: { id: { in: list.rows.map((r) => r.id) } },
+      limit: list.rows.length || 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    for (const a of found.docs)
+      people.set(a.id, { title: a.title ?? null, organisation: a.organisation ?? null, kind: a.kind });
+    const res = await cms.payload.find({
+      collection: "articles",
+      draft: true,
+      limit: 5000,
+      depth: 0,
+      pagination: false,
+      select: { authors: true },
+      overrideAccess: true,
+    });
+    for (const a of res.docs)
+      for (const x of a.authors) {
+        const id = typeof x === "object" ? x.id : x;
+        articleCounts.set(id, (articleCounts.get(id) ?? 0) + 1);
+      }
+  }
   const href = (p: number) =>
     `/admin/content/${collection}?${new URLSearchParams({ ...(q ? { q } : {}), page: String(p) }).toString()}`;
 
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Link href="/admin/content?tab=records" className="inline-flex items-center gap-1 type-label text-secondary">
-            <Icon name="arrow-left" size={16} />
-            Content
-          </Link>
-          <h1 className="type-h2">{type.plural}</h1>
-          <p className="type-body-sm text-secondary">{list.total.toLocaleString("en-IN")} in all</p>
+      {tabbed ? (
+        <>
+          <ContentHeader
+            intro={
+              collection === "media"
+                ? "Images used across H2 India. Every image needs alt text before it can be used."
+                : "Everyone who writes for H2 India. Readers see the author under the article."
+            }
+            actions={
+              collection === "authors" && cms.can("content.edit") ? (
+                <Link href="/admin/content/authors/new" className={buttonClasses({})}>
+                  <Icon name="plus" size={16} />
+                  Add author
+                </Link>
+              ) : null
+            }
+          />
+          <ContentTabs
+            current={collection === "media" ? "media" : "authors"}
+            counts={await contentCounts(cms.payload)}
+          />
+        </>
+      ) : (
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <Link
+              href="/admin/content?tab=records"
+              className="inline-flex items-center gap-1 type-label text-secondary"
+            >
+              <Icon name="arrow-left" size={16} />
+              Content · Records
+            </Link>
+            <h1 className="type-h2">{type.plural}</h1>
+            <p className="type-body-sm text-secondary">{list.total.toLocaleString("en-IN")} in all</p>
+          </div>
+          {cms.can("content.edit") && !type.upload ? (
+            <Link href={`/admin/content/${collection}/new`} className={buttonClasses({})}>
+              <Icon name="plus" size={16} />
+              New {type.singular.toLowerCase()}
+            </Link>
+          ) : null}
         </div>
-        {cms.can("content.edit") && !type.upload ? (
-          <Link href={`/admin/content/${collection}/new`} className={buttonClasses({})}>
-            <Icon name="plus" size={16} />
-            New {type.singular.toLowerCase()}
-          </Link>
-        ) : null}
-      </div>
+      )}
 
       {type.upload && cms.can("content.edit") ? (
         <ContentUpload
@@ -108,11 +165,85 @@ export default async function LibraryPage({
                     <Icon name="image" size={24} />
                   </span>
                 )}
-                <span className="line-clamp-2 p-3 type-caption">{r.title}</span>
+                <span className="flex flex-col gap-1 p-3">
+                  <span className="line-clamp-2 type-label">{r.title}</span>
+                  {r.detail ? <span className="type-caption text-secondary">{r.detail}</span> : null}
+                </span>
               </Link>
             </li>
           ))}
         </ul>
+      ) : collection === "authors" ? (
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label="Authors"
+          className="relative overflow-x-auto rounded-card border border-default bg-page"
+        >
+          <table className="w-full min-w-[760px]">
+            <thead>
+              <tr className="bg-subtle text-left type-caption text-secondary">
+                <th scope="col" className="px-4 py-3">
+                  Author
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  Role
+                </th>
+                <th scope="col" className="px-2 py-3">
+                  Organisation
+                </th>
+                <th scope="col" className="px-2 py-3 text-right">
+                  Articles
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.rows.map((r) => {
+                const p = people.get(r.id);
+                const initials = r.title
+                  .split(/\s+/)
+                  .map((w) => w.charAt(0))
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+                return (
+                  <tr key={r.id} className="border-t border-default">
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-3">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-mint type-caption">
+                          {initials}
+                        </span>
+                        <span className="flex flex-col">
+                          <Link href={`/admin/content/authors/${String(r.id)}`} className="type-label hover:underline">
+                            {r.title}
+                          </Link>
+                          {p?.kind === "contributor" ? <StatusBadge status="External" tone="neutral" /> : null}
+                        </span>
+                      </span>
+                    </td>
+                    <td className="px-2 py-3 type-body-sm">
+                      {p?.title ??
+                        (p?.kind === "contributor" ? "Contributor" : p?.kind === "organisation" ? "Organisation" : "—")}
+                    </td>
+                    <td className="px-2 py-3 type-body-sm">{p?.organisation ?? "—"}</td>
+                    <td className="px-2 py-3 text-right type-body-sm tabular-nums">{articleCounts.get(r.id) ?? 0}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/admin/content/authors/${String(r.id)}`}
+                        className={buttonClasses({ variant: "outline", size: "sm" })}
+                      >
+                        Open<span className="sr-only"> {r.title}</span>
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div
           tabIndex={0}

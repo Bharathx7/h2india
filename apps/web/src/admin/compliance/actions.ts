@@ -41,7 +41,12 @@ async function run(work: () => Promise<unknown>, path: string): Promise<R> {
   return { ok: true };
 }
 
-export async function moveGrievanceAction(id: string, to: GrievanceStatus, note: string): Promise<R> {
+export async function moveGrievanceAction(
+  id: string,
+  to: GrievanceStatus,
+  note: string,
+  extra: { outcome?: string; team?: string } = {},
+): Promise<R> {
   const { actor, userId } = await operator();
   if (!can(actor, "compliance.edit")) return { ok: false, error: "Your role can't change grievances." };
   const context = await requestContext();
@@ -52,7 +57,8 @@ export async function moveGrievanceAction(id: string, to: GrievanceStatus, note:
         to,
         actorId: userId,
         publicNote: note || undefined,
-        outcome: to === "Resolved" ? note || undefined : undefined,
+        team: extra.team?.trim() || undefined,
+        outcome: to === "Resolved" ? extra.outcome?.trim() || note || undefined : undefined,
         context,
       }),
     `/admin/compliance/grievances/${id}`,

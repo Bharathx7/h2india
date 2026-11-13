@@ -24,11 +24,18 @@ export default async function NewRecordPage({ params }: { params: Promise<{ coll
         slug={collection}
         singular={type.singular}
         backHref={`/admin/content/${collection}`}
-        backLabel={type.plural}
+        backLabel={`Content · Records · ${type.plural}`}
         titleField={type.titleField === "id" ? null : type.titleField}
         fields={type.fields}
         initial={{}}
-        meta={{ id: null, published: type.drafts ? false : null, status: null, updatedAt: null, verifiedAt: null }}
+        meta={{
+          id: null,
+          published: type.drafts ? false : null,
+          status: null,
+          updatedAt: null,
+          verifiedAt: null,
+          verifiedDays: null,
+        }}
         choices={choices}
         canEdit={cms.can("content.edit")}
         verify={false}

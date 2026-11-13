@@ -161,9 +161,13 @@ export function SendSettings({
           />
         ))}
       </fieldset>
-      <p className="type-body-sm">
-        Segment: <span className="type-label">All confirmed subscribers · {audience.toLocaleString("en-IN")}</span>
-      </p>
+      <label className="flex flex-col gap-1.5">
+        <span className="type-label">Segment</span>
+        <Select value="all" disabled>
+          <option value="all">All subscribers · {audience.toLocaleString("en-IN")}</option>
+        </Select>
+        <span className="type-caption text-secondary">Topic segments come later (A171).</span>
+      </label>
       <label className="flex flex-col gap-1.5">
         <span className="type-label">
           Send at (IST) <span className="text-error">*</span>
@@ -232,6 +236,38 @@ export function SendSettings({
         </span>
         {lastTest ? <span className="type-caption text-secondary">Last test sent {lastTest}</span> : null}
       </label>
+    </div>
+  );
+}
+
+/** Preview width (648:312 Desktop / Mobile): the issue as it reads on a laptop or a phone. */
+export function PreviewWidth({ children }: { children: React.ReactNode }) {
+  const [mobile, setMobile] = useState(false);
+  return (
+    <div className="flex flex-col gap-3">
+      <div role="group" aria-label="Preview" className="flex gap-2 self-end">
+        {(["Desktop", "Mobile"] as const).map((w) => {
+          const on = (w === "Mobile") === mobile;
+          return (
+            <button
+              key={w}
+              type="button"
+              aria-pressed={on}
+              onClick={() => {
+                setMobile(w === "Mobile");
+              }}
+              className={
+                on
+                  ? "inline-flex h-8 items-center rounded-pill bg-inverse px-3 type-label text-inverse"
+                  : "inline-flex h-8 items-center rounded-pill border-[1.5px] border-control bg-page px-3 type-label"
+              }
+            >
+              {w}
+            </button>
+          );
+        })}
+      </div>
+      <div className={mobile ? "mx-auto w-full max-w-[390px]" : "w-full"}>{children}</div>
     </div>
   );
 }

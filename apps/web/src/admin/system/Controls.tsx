@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, Input, Modal, Select, Switch } from "@h2india/ui";
+import { Alert, Button, FormField, Icon, Input, Modal, Select, Switch, Toaster, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { clockAction, deadLetterAction, flagAction, proposalAction, scheduleReportAction } from "./actions";
@@ -23,46 +23,56 @@ function useRun() {
   return { msg, pending, go };
 }
 
+/** A switch row (707:793): name and what it does on the left, the switch with On or Off on the right. A reason is
+ * required before it can change; money switches become a proposal for a second operator. */
 export function FlagRow({
   flag,
   label,
   hint,
   on,
   twoPerson,
+  canEdit,
 }: {
   flag: string;
   label: string;
   hint: string;
   on: boolean;
   twoPerson: boolean;
+  canEdit: boolean;
 }) {
   const r = useRun();
   const [reason, setReason] = useState("");
   return (
     <li className="flex flex-col gap-2 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-4">
+        <span>
+          <span className="block type-label">{label}</span>
+          <span className="block type-caption text-secondary">
+            {hint}
+            {twoPerson ? " Needs a second operator to approve." : ""}
+          </span>
+        </span>
         <Switch
-          label={label}
+          label={on ? "On" : "Off"}
+          aria-label={label}
           checked={on}
-          disabled={r.pending || !reason.trim()}
+          disabled={!canEdit || r.pending || !reason.trim()}
           onCheckedChange={(v) => {
             r.go(() => flagAction(flag, v, reason));
           }}
+          className="shrink-0"
         />
+      </div>
+      {canEdit ? (
         <Input
           aria-label={`Reason for changing ${label}`}
-          placeholder="Reason (required)"
+          placeholder="Reason for the change (required)"
           value={reason}
           onChange={(e) => {
             setReason(e.target.value);
           }}
-          boxClassName="max-w-72"
         />
-      </div>
-      <p className="type-caption text-secondary">
-        {hint}
-        {twoPerson ? " Needs a second operator to approve." : ""}
-      </p>
+      ) : null}
       {r.msg ? <Alert tone={r.msg.tone} title={r.msg.text} live /> : null}
     </li>
   );
@@ -201,9 +211,18 @@ export function FailedJob({ id }: { id: string }) {
   );
 }
 
+/** Schedule a report email (267:7338) and its toast (267:6920). The email itself waits for its wording (M21). */
 export function ScheduleReport() {
+  return (
+    <Toaster>
+      <ScheduleReportDialog />
+    </Toaster>
+  );
+}
+
+function ScheduleReportDialog() {
   const router = useRouter();
-  const [done, setDone] = useState(false);
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [frequency, setFrequency] = useState<"weekly" | "monthly">("weekly");
@@ -211,25 +230,25 @@ export function ScheduleReport() {
   const [pending, start] = useTransition();
   return (
     <>
-      {done ? <Alert tone="success" title="Report scheduled" live /> : null}
       <Button
         variant="outline"
         onClick={() => {
           setOpen(true);
         }}
       >
+        <Icon name="calendar" size={16} />
         Schedule report email
       </Button>
       <Modal
         open={open}
         onOpenChange={setOpen}
         width={480}
-        title="Schedule report email"
-        description="The overview figures, emailed on a schedule. Weekly goes on Mondays and monthly on the 1st, at 9:00 AM IST."
+        title="Schedule a report email"
+        description="Reports use the filters you have set. Each email has a CSV attached."
         footer={
           <div className="flex justify-end gap-3">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => {
                 setOpen(false);
               }}
@@ -246,7 +265,15 @@ export function ScheduleReport() {
                     return;
                   }
                   setOpen(false);
-                  setDone(true);
+                  setError("");
+                  toast({
+                    tone: "success",
+                    title: "Report scheduled",
+                    body:
+                      frequency === "weekly"
+                        ? "The first email goes out on Monday at 9:00."
+                        : "The first email goes out on the 1st at 9:00.",
+                  });
                   router.refresh();
                 });
               }}
@@ -256,29 +283,29 @@ export function ScheduleReport() {
           </div>
         }
       >
-        {error ? <Alert tone="error" title={error} live /> : null}
-        <label className="flex flex-col gap-1.5">
-          <span className="type-label">Send to</span>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-          />
-        </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="type-label">How often</span>
-          <Select
-            value={frequency}
-            onChange={(e) => {
-              setFrequency(e.target.value as "weekly" | "monthly");
-            }}
-          >
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </Select>
-        </label>
+        <div className="flex flex-col gap-4">
+          {error ? <Alert tone="error" title={error} live /> : null}
+          <FormField label="How often" helper="Weekly goes on Mondays and monthly on the 1st, at 9:00 AM IST.">
+            <Select
+              value={frequency}
+              onChange={(e) => {
+                setFrequency(e.target.value as "weekly" | "monthly");
+              }}
+            >
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </Select>
+          </FormField>
+          <FormField label="Send to">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            />
+          </FormField>
+        </div>
       </Modal>
     </>
   );

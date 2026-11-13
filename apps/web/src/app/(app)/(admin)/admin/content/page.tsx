@@ -8,26 +8,15 @@ import Link from "next/link";
 import { getPayload } from "payload";
 import { MarkVerified } from "@/admin/content/Controls";
 import { AdminShell, requireOperator } from "@/admin/shell";
-import { RECORD_COLLECTIONS } from "@/cms/records/collections";
 import { possibleUpdates, RED_DAYS, STALE_DAYS, staleRecords } from "@/cms/records/quality";
-import { TRACKER_SLUGS } from "@/cms/tracker/options";
-import { ARTICLE_TYPES, WORKFLOW } from "@/cms/types";
+import { ArticlesLibrary } from "@/admin/cms/ArticlesLibrary";
+import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
 import { CONTENT_GROUPS } from "@/admin/cms/registry";
 
 // Content (step 11.3): Articles, Records, Newsletter (647:8), Media, Authors and Data quality (646:9, 646:733).
-// Articles, records, media and authors are edited in the CMS; this shows their counts and opens them there.
+// Articles (638:8, 642:326), records, media (649:8) and authors (649:730) open the native editors.
 export const metadata: Metadata = { title: "Content · H2 India admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
-
-const TABS: readonly { key: string; label: string; href?: string }[] = [
-  { key: "articles", label: "Articles" },
-  { key: "records", label: "Records" },
-  { key: "newsletter", label: "Newsletter" },
-  { key: "media", label: "Media", href: "/admin/content/media" },
-  { key: "authors", label: "Authors", href: "/admin/content/authors" },
-  { key: "calendar", label: "Calendar", href: "/admin/content/calendar" },
-  { key: "quality", label: "Data quality" },
-];
 
 const LABEL: Record<string, string> = {
   schemes: "Scheme",
@@ -40,192 +29,31 @@ const LABEL: Record<string, string> = {
 export default async function ContentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; view?: string; status?: string; q?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    view?: string;
+    status?: string;
+    q?: string;
+    type?: string;
+    author?: string;
+    sort?: string;
+    page?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const { userId } = await requireOperator("content.view", "/admin/content");
-  const tab = TABS.find((t) => t.key === sp.tab && !t.href)?.key ?? "quality";
+  const tab = (["articles", "records", "newsletter", "quality"] as const).find((t) => t === sp.tab) ?? "quality";
   const payload = await getPayload({ config });
   const db = getDb();
-  const count = async (collection: "articles" | "media" | "authors" | "newsletter-issues") =>
-    (await payload.count({ collection, overrideAccess: true })).totalDocs;
-  const records = async () => {
-    const n = await Promise.all(
-      [...RECORD_COLLECTIONS, ...TRACKER_SLUGS].map((c) => payload.count({ collection: c, overrideAccess: true })),
-    );
-    return n.reduce((a, x) => a + x.totalDocs, 0);
-  };
-  const [articles, media, authors, issues, recordCount, stale, updates] = await Promise.all([
-    count("articles"),
-    count("media"),
-    count("authors"),
-    count("newsletter-issues"),
-    records(),
+  const [counts, stale, updates] = await Promise.all([
+    contentCounts(payload),
     staleRecords(payload),
     possibleUpdates(payload),
   ]);
-  const counts: Record<string, number> = {
-    articles,
-    records: recordCount,
-    newsletter: issues,
-    media,
-    authors,
-    quality: stale.length + updates.length,
-  };
 
   let body: React.ReactNode;
   if (tab === "articles") {
-    const filter = WORKFLOW.find((w) => w === sp.status);
-    const q = sp.q?.trim() ?? "";
-    const all = await payload.find({
-      collection: "articles",
-      draft: true,
-      sort: "-updatedAt",
-      limit: 200,
-      depth: 1,
-      overrideAccess: true,
-      ...(q ? { where: { title: { like: q } } } : {}),
-    });
-    const statusOf = (d: (typeof all.docs)[number]) => d.workflow ?? "Draft";
-    const rows = all.docs.filter((d) => !filter || statusOf(d) === filter);
-    const tone = (st: string) =>
-      st === "Published" ? "success" : st === "Legal check" ? "warning" : st === "Draft" ? "neutral" : "progress";
-    body = (
-      <>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {[undefined, ...WORKFLOW].map((st) => (
-              <Link
-                key={st ?? "all"}
-                href={`/admin/content?tab=articles${st ? `&status=${encodeURIComponent(st)}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-                aria-current={filter === st ? "page" : undefined}
-                className={cx(
-                  "inline-flex h-9 items-center rounded-pill border-[1.5px] px-3 type-label",
-                  filter === st ? "border-transparent bg-inverse text-inverse" : "border-control bg-page",
-                )}
-              >
-                {st ?? "All"} · {all.docs.filter((d) => !st || statusOf(d) === st).length}
-              </Link>
-            ))}
-          </div>
-          <form action="/admin/content" className="flex gap-2" role="search">
-            <input type="hidden" name="tab" value="articles" />
-            {filter ? <input type="hidden" name="status" value={filter} /> : null}
-            <label htmlFor="article-search" className="sr-only">
-              Search headlines
-            </label>
-            <input
-              id="article-search"
-              name="q"
-              defaultValue={q}
-              placeholder="Search headlines"
-              className="h-9 w-64 rounded-input border-[1.5px] border-control bg-page px-3 type-body-sm"
-            />
-            <button type="submit" className={buttonClasses({ variant: "outline", size: "sm" })}>
-              Search
-            </button>
-          </form>
-        </div>
-        {rows.length ? (
-          <div
-            tabIndex={0}
-            role="region"
-            aria-label="Articles"
-            className="relative overflow-x-auto rounded-card border border-default bg-page"
-          >
-            <table className="w-full min-w-[960px]">
-              <thead>
-                <tr className="bg-subtle text-left type-caption text-secondary">
-                  <th scope="col" className="px-4 py-3">
-                    Headline
-                  </th>
-                  <th scope="col" className="px-2 py-3">
-                    Type
-                  </th>
-                  <th scope="col" className="px-2 py-3">
-                    Status
-                  </th>
-                  <th scope="col" className="px-2 py-3">
-                    Authors
-                  </th>
-                  <th scope="col" className="px-2 py-3">
-                    Updated (IST)
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((d) => {
-                  const st = statusOf(d);
-                  return (
-                    <tr key={String(d.id)} className="border-t border-default align-top">
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/admin/content/articles/${String(d.id)}`}
-                          className="block type-label hover:underline"
-                        >
-                          {d.title || "Untitled article"}
-                        </Link>
-                        <span className="block type-caption text-secondary">
-                          {st === "Scheduled" && d.publishAt
-                            ? `Publishes ${formatIstDateTime(new Date(d.publishAt))}`
-                            : d.publishedAt
-                              ? `Published ${formatIstDate(new Date(d.publishedAt))}`
-                              : (d.dek || "").slice(0, 90)}
-                        </span>
-                      </td>
-                      <td className="px-2 py-3 type-body-sm">
-                        {ARTICLE_TYPES.find((t) => t.value === d.type)?.label ?? d.type}
-                      </td>
-                      <td className="px-2 py-3">
-                        <StatusBadge status={st} tone={tone(st)} />
-                      </td>
-                      <td className="px-2 py-3 type-body-sm">
-                        {d.authors
-                          .map((a) => (typeof a === "object" ? a.name : ""))
-                          .filter(Boolean)
-                          .join(", ") || "—"}
-                      </td>
-                      <td className="px-2 py-3 type-body-sm">{formatIstDateTime(new Date(d.updatedAt))}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Link
-                          href={`/admin/content/articles/${String(d.id)}`}
-                          className={buttonClasses({ variant: "outline", size: "sm" })}
-                        >
-                          <Icon name="pencil" size={14} />
-                          Edit<span className="sr-only"> {d.title}</span>
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="rounded-card border border-default bg-page">
-            <EmptyState
-              kind={all.docs.length || q ? "no-results" : "first-use"}
-              icon="newspaper"
-              title={all.docs.length || q ? "No articles match" : "No articles yet"}
-              action={
-                <Link href="/admin/content/articles/new" className={buttonClasses({})}>
-                  <Icon name="plus" size={16} />
-                  New article
-                </Link>
-              }
-            >
-              {all.docs.length || q ? "Try another status or search." : "Write the first story for the newsroom."}
-            </EmptyState>
-          </div>
-        )}
-        <p className="type-caption text-secondary">
-          Showing {rows.length} of {all.totalDocs}
-        </p>
-      </>
-    );
+    body = <ArticlesLibrary payload={payload} sp={sp} />;
   } else if (tab === "quality") {
     const view = sp.view === "updates" ? "updates" : "stale";
     body = (
@@ -362,6 +190,9 @@ export default async function ContentPage({
       sends.find((x) => x.issueId === id)?.status ?? (sentOn && new Date(sentOn) < new Date() ? "Sent" : "Draft");
     const filter = sp.status;
     const rows = all.docs.filter((d) => !filter || statusOf(String(d.id), d.sentOn) === filter);
+    /** Opens and clicks as a share of delivered (647:8), only once the provider reports them (M6). */
+    const share = (x: number | null | undefined, of: number | undefined) =>
+      x === null || x === undefined || !of ? "—" : `${(Math.round((x / of) * 1000) / 10).toFixed(1)}%`;
     body = (
       <>
         <div className="flex flex-wrap gap-2">
@@ -437,24 +268,25 @@ export default async function ContentPage({
                     <td className="px-2 py-3 text-right type-mono">
                       {send?.delivered ? send.delivered.toLocaleString("en-IN") : "—"}
                     </td>
-                    <td className="px-2 py-3 text-right type-mono">{send?.opens ?? "—"}</td>
-                    <td className="px-2 py-3 text-right type-mono">{send?.clicks ?? "—"}</td>
+                    <td className="px-2 py-3 text-right type-mono">{share(send?.opens, send?.delivered)}</td>
+                    <td className="px-2 py-3 text-right type-mono">{share(send?.clicks, send?.delivered)}</td>
                     <td className="px-4 py-3 text-right">
                       {st === "Sent" ? (
                         <Link
                           href={`/admin/content/newsletter/${String(d.id)}/stats`}
-                          className={cx(buttonClasses({ variant: "ghost", size: "sm" }), "mr-2")}
+                          className={buttonClasses({ variant: "ghost", size: "sm" })}
                         >
                           Stats<span className="sr-only"> {d.title}</span>
                         </Link>
-                      ) : null}
-                      <Link
-                        href={`/admin/content/newsletter/${String(d.id)}`}
-                        className={buttonClasses({ variant: "outline", size: "sm" })}
-                      >
-                        {st === "Draft" ? "Continue" : "Open"}
-                        <span className="sr-only"> {d.title}</span>
-                      </Link>
+                      ) : (
+                        <Link
+                          href={`/admin/content/newsletter/${String(d.id)}`}
+                          className={buttonClasses({ variant: "outline", size: "sm" })}
+                        >
+                          {st === "Draft" ? "Continue" : "Open"}
+                          <span className="sr-only"> {d.title}</span>
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 );
@@ -514,21 +346,16 @@ export default async function ContentPage({
 
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="type-h2">Content</h1>
-          <p className="type-body-sm text-secondary">
-            {tab === "quality"
-              ? `Records nobody has checked for ${String(STALE_DAYS)} days or more, and changes spotted on official sources. Verify against the source, or edit if something changed.`
-              : tab === "newsletter"
-                ? "India H₂ Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
-                : tab === "articles"
-                  ? "Every story from draft to published. Open one to write, review, schedule or correct it."
-                  : "Articles, records, media and authors."}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {tab === "newsletter" ? (
+      <ContentHeader
+        intro={
+          tab === "quality"
+            ? `Records nobody has checked for ${String(STALE_DAYS)} days or more, and changes spotted on official sources. Verify against the source, or edit if something changed.`
+            : tab === "newsletter"
+              ? "India H₂ Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
+              : "Articles and structured records. Everything is reviewed before it's published, and every published piece keeps a corrections log."
+        }
+        actions={
+          tab === "newsletter" ? (
             <Link href="/admin/content/newsletter-issues/new" className={buttonClasses({})}>
               <Icon name="plus" size={16} />
               New issue
@@ -544,24 +371,10 @@ export default async function ContentPage({
                 New article
               </Link>
             </>
-          )}
-        </div>
-      </div>
-      <nav aria-label="Content" className="flex gap-6 overflow-x-auto border-b border-default">
-        {TABS.map((t) => (
-          <Link
-            key={t.key}
-            href={t.href ?? `/admin/content?tab=${t.key}`}
-            aria-current={t.key === tab ? "page" : undefined}
-            className={cx(
-              "-mb-px border-b-2 py-3 whitespace-nowrap type-label",
-              t.key === tab ? "border-inverse" : "border-transparent text-secondary",
-            )}
-          >
-            {t.label} <span className="text-secondary">{counts[t.key]?.toLocaleString("en-IN")}</span>
-          </Link>
-        ))}
-      </nav>
+          )
+        }
+      />
+      <ContentTabs current={tab} counts={counts} />
       {body}
     </AdminShell>
   );

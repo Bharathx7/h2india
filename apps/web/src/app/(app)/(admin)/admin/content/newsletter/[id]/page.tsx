@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
-import { SendSettings } from "@/admin/content/Controls";
+import { PreviewWidth, SendSettings } from "@/admin/content/Controls";
 import { issueContent, NEWSLETTER_CHARTS } from "@/admin/content/issue";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
@@ -67,62 +67,64 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <section aria-label="Preview" className="rounded-card bg-subtle p-6">
-          <div className="mx-auto flex max-w-150 flex-col gap-5 rounded-card bg-page p-6">
-            <p className="type-caption text-secondary">{content.masthead}</p>
-            {send?.editorNote ? (
-              <div className="rounded-input border border-dashed border-default p-3">
-                <p className="type-eyebrow text-secondary">Editor&apos;s note</p>
-                <p className="type-body-sm">{send.editorNote}</p>
-              </div>
-            ) : null}
-            {content.sections
-              .filter((s) => !s.late)
-              .map((s) => (
-                <PreviewSection key={s.heading} section={s} />
-              ))}
-            {content.chart ? (
-              <div className="flex flex-col gap-2">
-                <p className="type-eyebrow text-secondary">Chart of the week</p>
-                <p className="type-label">{content.chart.title}</p>
-                <ul className="flex flex-col gap-1">
-                  {content.chart.bars.map((b) => {
-                    const max = Math.max(...(content.chart?.bars.map((x) => x.value) ?? [1]), 1);
-                    return (
-                      <li
-                        key={b.label}
-                        className="grid grid-cols-[120px_minmax(0,1fr)_48px] items-center gap-2 type-caption"
-                      >
-                        <span className="truncate">{b.label}</span>
-                        <span
-                          className="h-2.5 rounded-pill bg-accent"
-                          style={{ width: `${String(Math.max(2, Math.round((b.value / max) * 100)))}%` }}
-                        />
-                        <span className="text-right">{b.value.toLocaleString("en-IN")}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <p className="type-caption text-secondary">{content.chart.source}</p>
-              </div>
-            ) : null}
-            {send?.sponsor ? (
-              <div className="flex flex-col gap-1 rounded-card bg-mint p-4">
-                <p className="type-eyebrow text-secondary">Sponsored</p>
-                <p className="type-label">
-                  {send.sponsor.name} · {send.sponsor.headline}
-                </p>
-                {send.sponsor.text ? <p className="type-caption">{send.sponsor.text}</p> : null}
-              </div>
-            ) : null}
-            {content.sections
-              .filter((s) => s.late)
-              .map((s) => (
-                <PreviewSection key={s.heading} section={s} />
-              ))}
-            <p className="type-caption text-secondary">
-              You get this because you subscribed to India H₂ Weekly. Manage preferences · Unsubscribe
-            </p>
-          </div>
+          <PreviewWidth>
+            <div className="mx-auto flex max-w-150 flex-col gap-5 rounded-card bg-page p-6">
+              <p className="type-caption text-secondary">{content.masthead}</p>
+              {send?.editorNote ? (
+                <div className="rounded-input border border-dashed border-default p-3">
+                  <p className="type-eyebrow text-secondary">Editor&apos;s note</p>
+                  <p className="type-body-sm">{send.editorNote}</p>
+                </div>
+              ) : null}
+              {content.sections
+                .filter((s) => !s.late)
+                .map((s) => (
+                  <PreviewSection key={s.heading} section={s} />
+                ))}
+              {content.chart ? (
+                <div className="flex flex-col gap-2">
+                  <p className="type-eyebrow text-secondary">Chart of the week</p>
+                  <p className="type-label">{content.chart.title}</p>
+                  <ul className="flex flex-col gap-1">
+                    {content.chart.bars.map((b) => {
+                      const max = Math.max(...(content.chart?.bars.map((x) => x.value) ?? [1]), 1);
+                      return (
+                        <li
+                          key={b.label}
+                          className="grid grid-cols-[120px_minmax(0,1fr)_48px] items-center gap-2 type-caption"
+                        >
+                          <span className="truncate">{b.label}</span>
+                          <span
+                            className="h-2.5 rounded-pill bg-accent"
+                            style={{ width: `${String(Math.max(2, Math.round((b.value / max) * 100)))}%` }}
+                          />
+                          <span className="text-right">{b.value.toLocaleString("en-IN")}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p className="type-caption text-secondary">{content.chart.source}</p>
+                </div>
+              ) : null}
+              {send?.sponsor ? (
+                <div className="flex flex-col gap-1 rounded-card bg-mint p-4">
+                  <p className="type-eyebrow text-secondary">Sponsored</p>
+                  <p className="type-label">
+                    {send.sponsor.name} · {send.sponsor.headline}
+                  </p>
+                  {send.sponsor.text ? <p className="type-caption">{send.sponsor.text}</p> : null}
+                </div>
+              ) : null}
+              {content.sections
+                .filter((s) => s.late)
+                .map((s) => (
+                  <PreviewSection key={s.heading} section={s} />
+                ))}
+              <p className="type-caption text-secondary">
+                You get this because you subscribed to India H₂ Weekly. Manage preferences · Unsubscribe
+              </p>
+            </div>
+          </PreviewWidth>
         </section>
         <section className="self-start rounded-card border border-default bg-page p-5">
           <SendSettings

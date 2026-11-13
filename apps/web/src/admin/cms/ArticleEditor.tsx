@@ -2,6 +2,7 @@
 
 import {
   Alert,
+  buttonClasses,
   Button,
   Checkbox,
   cx,
@@ -403,14 +404,6 @@ export function ArticleEditor({
     .join(" ")
     .split(/\s+/)
     .filter(Boolean).length;
-  const checks = [
-    { ok: form.title.trim().length > 0, label: "Headline" },
-    { ok: form.dek.trim().length > 0, label: "Standfirst" },
-    { ok: words > 0, label: "Body" },
-    { ok: form.authors.length > 0, label: "At least one author" },
-    { ok: form.sources.some((s) => s.title.trim()), label: "At least one source" },
-    ...(legal ? [{ ok: Boolean(meta?.legalPassed), label: "Legal check passed" }] : []),
-  ];
 
   const save = (then?: (id: number) => Promise<{ ok: boolean; error?: string }>) => {
     setError("");
@@ -461,47 +454,103 @@ export function ArticleEditor({
   if (status === "Published")
     buttons.push({ action: "unpublish", label: "Unpublish", variant: "ghost", needsPublish: true });
 
+  const authorNames = form.authors.map((id) => choices.authors.find((a) => a.id === id)?.label).filter(Boolean);
+  const editorName = choices.editors.find((e) => e.id === form.editor)?.label ?? null;
+  const typeLabel = TYPES.find((t) => t.value === form.type)?.label ?? "Article";
+  const steps = STEPS.filter((x) => x !== "Legal check" || legal);
+  const sourcesNeeded = !form.sources.some((x) => x.title.trim());
+  const seoTitle = form.seo.title || form.title;
+  const actionButtons = meta ? buttons.filter((b) => !b.needsPublish || canPublish) : [];
+  const ordered = [
+    ...actionButtons.filter((b) => b.variant === "ghost" || b.variant === "outline"),
+    ...actionButtons.filter((b) => !b.variant || b.variant === "primary"),
+  ];
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <Link href="/admin/content?tab=articles" className="inline-flex items-center gap-1 type-label text-secondary">
-            <Icon name="arrow-left" size={16} />
-            Content library
-          </Link>
-          <h1 className="type-h2">{meta ? form.title || "Untitled article" : "New article"}</h1>
-          <span className="flex flex-wrap items-center gap-2 type-caption text-secondary">
-            <StatusBadge status={status} tone={TONE[status] ?? "neutral"} />
-            {dirty
-              ? "Unsaved changes"
-              : meta
-                ? `Saved ${new Date(meta.updatedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })} IST`
-                : "Not saved yet"}
-            {` · ${String(words)} words`}
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {meta?.slug && status === "Published" ? (
-            <Link
-              href={`/news/${meta.slug}`}
-              target="_blank"
-              className={cx("inline-flex h-10 items-center gap-2 px-3 type-label")}
+      <div className="flex flex-col gap-3">
+        <Link href="/admin/content?tab=articles" className="inline-flex items-center gap-1 self-start type-label">
+          <Icon name="arrow-left" size={16} />
+          Content · Articles
+        </Link>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex max-w-3xl flex-col gap-2">
+            <h1 className="type-h2">{meta ? form.title || "Untitled article" : "New article"}</h1>
+            <span className="flex flex-wrap items-center gap-2 type-caption text-secondary">
+              <StatusBadge status={status} tone={TONE[status] ?? "neutral"} />
+              {[
+                typeLabel,
+                authorNames.length ? `by ${authorNames.join(", ")}` : null,
+                editorName ? `edited by ${editorName}` : null,
+                dirty
+                  ? "unsaved changes"
+                  : meta
+                    ? `saved ${new Date(meta.updatedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} IST`
+                    : "not saved yet",
+                `${String(words)} words`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {meta?.slug && status === "Published" ? (
+              <Link href={`/news/${meta.slug}`} target="_blank" className={buttonClasses({ variant: "ghost" })}>
+                <Icon name="eye" size={16} />
+                View live
+              </Link>
+            ) : null}
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                save();
+              }}
             >
-              <Icon name="external-link" size={16} />
-              View live
-            </Link>
-          ) : null}
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() => {
-              save();
-            }}
-          >
-            {pending ? "Saving…" : "Save draft"}
-          </Button>
+              {pending ? "Saving…" : "Save draft"}
+            </Button>
+            {ordered.map((b) => (
+              <Button
+                key={b.action}
+                variant={b.variant ?? "primary"}
+                disabled={pending}
+                onClick={() => {
+                  act(b.action);
+                }}
+              >
+                {b.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
+
+      <ol
+        aria-label="Workflow"
+        className="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-card border border-default bg-page px-5 py-3"
+      >
+        {steps.map((x, i) => {
+          const here = x === status;
+          const done = STEPS.indexOf(x) < STEPS.indexOf(status);
+          return (
+            <li
+              key={x}
+              aria-current={here ? "step" : undefined}
+              className={cx("flex items-center gap-2 type-body-sm", here ? "type-label" : done ? "" : "text-secondary")}
+            >
+              <span
+                className={cx(
+                  "flex size-6 items-center justify-center rounded-pill type-caption",
+                  done ? "bg-accent" : here ? "bg-inverse text-inverse" : "border border-default",
+                )}
+              >
+                {done ? <Icon name="check" size={14} /> : i + 1}
+              </span>
+              {x}
+            </li>
+          );
+        })}
+      </ol>
 
       {error ? (
         <Alert tone="error" title="Not saved">
@@ -509,19 +558,14 @@ export function ArticleEditor({
         </Alert>
       ) : null}
       {notice ? <Alert tone="success" title={notice} /> : null}
+      {meta && buttons.some((b) => b.needsPublish) && !canPublish ? (
+        <Alert tone="info" title="An Editor-in-chief schedules and publishes." />
+      ) : null}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="flex flex-col gap-6">
-          <Card title="Story">
-            <FormField
-              label="Type"
-              required
-              helper={
-                ALWAYS_LEGAL.includes(form.type)
-                  ? "Readers always see this label, and it needs a legal check."
-                  : undefined
-              }
-            >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="flex flex-col gap-5 self-start rounded-card border border-default bg-page p-5">
+          <div className="flex flex-wrap items-start gap-3">
+            <FormField label="Type" required className="w-48">
               <Select
                 value={form.type}
                 onChange={(e) => {
@@ -535,120 +579,277 @@ export function ArticleEditor({
                 ))}
               </Select>
             </FormField>
-            <FormField label="Headline" required>
-              <Textarea
-                rows={2}
-                maxLength={140}
-                showCount
-                value={form.title}
+            <div className="min-w-56 flex-1">
+              <Picker
+                label="Tags"
+                options={choices.tags}
+                value={form.tags}
+                onChange={(v) => {
+                  set("tags", v);
+                }}
+              />
+            </div>
+          </div>
+          {ALWAYS_LEGAL.includes(form.type) ? (
+            <p className="type-caption text-secondary">Readers always see this label, and it needs a legal check.</p>
+          ) : null}
+          <FormField label="Headline" required>
+            <Textarea
+              rows={2}
+              maxLength={140}
+              showCount
+              className="type-h3"
+              value={form.title}
+              onChange={(e) => {
+                set("title", e.target.value);
+              }}
+            />
+          </FormField>
+          <FormField label="Standfirst" required helper="One or two sentences under the headline.">
+            <Textarea
+              rows={3}
+              maxLength={300}
+              showCount
+              value={form.dek}
+              onChange={(e) => {
+                set("dek", e.target.value);
+              }}
+            />
+          </FormField>
+          <FormField label="Why it matters" helper="Optional. A short box for readers in a hurry.">
+            <Textarea
+              rows={3}
+              value={form.whyItMatters}
+              onChange={(e) => {
+                set("whyItMatters", e.target.value);
+              }}
+            />
+          </FormField>
+          {form.type === "interview" ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {(["name", "role", "organisation"] as const).map((k) => (
+                <FormField key={k} label={k === "name" ? "Interviewee" : k === "role" ? "Their role" : "Organisation"}>
+                  <Input
+                    value={form.interviewee[k]}
+                    onChange={(e) => {
+                      set("interviewee", { ...form.interviewee, [k]: e.target.value });
+                    }}
+                  />
+                </FormField>
+              ))}
+            </div>
+          ) : null}
+          {form.type === "press_release" ? (
+            <FormField label="Issued by" required>
+              <Input
+                value={form.issuer}
                 onChange={(e) => {
-                  set("title", e.target.value);
+                  set("issuer", e.target.value);
                 }}
               />
             </FormField>
-            <FormField label="Standfirst" required helper="One or two sentences under the headline.">
-              <Textarea
-                rows={3}
-                maxLength={300}
-                showCount
-                value={form.dek}
-                onChange={(e) => {
-                  set("dek", e.target.value);
-                }}
-              />
-            </FormField>
-            <FormField label="Why it matters" helper="Optional. A short box for readers in a hurry.">
-              <Textarea
-                rows={3}
-                value={form.whyItMatters}
-                onChange={(e) => {
-                  set("whyItMatters", e.target.value);
-                }}
-              />
-            </FormField>
-            {form.type === "interview" ? (
-              <div className="grid gap-4 md:grid-cols-3">
-                {(["name", "role", "organisation"] as const).map((k) => (
-                  <FormField
-                    key={k}
-                    label={k === "name" ? "Interviewee" : k === "role" ? "Their role" : "Organisation"}
-                  >
-                    <Input
-                      value={form.interviewee[k]}
-                      onChange={(e) => {
-                        set("interviewee", { ...form.interviewee, [k]: e.target.value });
-                      }}
-                    />
-                  </FormField>
-                ))}
-              </div>
-            ) : null}
-            {form.type === "press_release" ? (
-              <FormField label="Issued by" required>
+          ) : null}
+          {form.type === "sponsored" ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField label="Sponsor" required>
                 <Input
-                  value={form.issuer}
+                  value={form.sponsor.name}
                   onChange={(e) => {
-                    set("issuer", e.target.value);
+                    set("sponsor", { ...form.sponsor, name: e.target.value });
                   }}
                 />
               </FormField>
-            ) : null}
-            {form.type === "sponsored" ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormField label="Sponsor" required>
-                  <Input
-                    value={form.sponsor.name}
-                    onChange={(e) => {
-                      set("sponsor", { ...form.sponsor, name: e.target.value });
-                    }}
-                  />
-                </FormField>
-                <FormField label="About the sponsor">
-                  <Input
-                    value={form.sponsor.about}
-                    onChange={(e) => {
-                      set("sponsor", { ...form.sponsor, about: e.target.value });
-                    }}
-                  />
-                </FormField>
-                <FormField label="Disclosure" className="md:col-span-2">
-                  <Textarea
-                    rows={2}
-                    value={form.sponsor.disclosure}
-                    onChange={(e) => {
-                      set("sponsor", { ...form.sponsor, disclosure: e.target.value });
-                    }}
-                  />
-                </FormField>
-              </div>
-            ) : null}
-          </Card>
-
-          <Card title="Body">
+              <FormField label="About the sponsor">
+                <Input
+                  value={form.sponsor.about}
+                  onChange={(e) => {
+                    set("sponsor", { ...form.sponsor, about: e.target.value });
+                  }}
+                />
+              </FormField>
+              <FormField label="Disclosure" className="md:col-span-2">
+                <Textarea
+                  rows={2}
+                  value={form.sponsor.disclosure}
+                  onChange={(e) => {
+                    set("sponsor", { ...form.sponsor, disclosure: e.target.value });
+                  }}
+                />
+              </FormField>
+            </div>
+          ) : null}
+          <div className="flex flex-col gap-3 border-t border-default pt-4">
+            <h2 className="type-label">Body</h2>
             <BodyEditor
               blocks={form.body}
               onChange={(b) => {
                 set("body", b);
               }}
             />
+          </div>
+        </section>
+
+        <aside className="flex flex-col gap-6">
+          <Card title="People and schedule">
+            <Picker
+              label="Author"
+              options={choices.authors}
+              value={form.authors}
+              onChange={(v) => {
+                set("authors", v);
+              }}
+              helper="Required. Shown in the byline."
+            />
+            <FormField label="Editor">
+              <Select
+                value={form.editor === null ? "" : String(form.editor)}
+                onChange={(e) => {
+                  set("editor", e.target.value ? Number(e.target.value) : null);
+                }}
+              >
+                <option value="">Not set</option>
+                {choices.editors.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <div className="flex flex-col gap-2">
+              <span className="flex items-center justify-between gap-2 type-label">
+                Legal check
+                {legal ? (
+                  <StatusBadge
+                    status={meta?.legalPassed ? "Passed" : "Not checked yet"}
+                    tone={meta?.legalPassed ? "success" : "warning"}
+                  />
+                ) : null}
+              </span>
+              {ALWAYS_LEGAL.includes(form.type) ? (
+                <p className="type-caption text-secondary">
+                  Sponsored pieces and press releases always need a legal check.
+                </p>
+              ) : (
+                <Checkbox
+                  label="Needs a legal check"
+                  checked={form.legal.flagged}
+                  onCheckedChange={(c) => {
+                    set("legal", { ...form.legal, flagged: c === true });
+                  }}
+                />
+              )}
+              {legal ? (
+                <Textarea
+                  aria-label="Note for the legal check"
+                  placeholder="Note for the legal check"
+                  rows={2}
+                  value={form.legal.note}
+                  onChange={(e) => {
+                    set("legal", { ...form.legal, note: e.target.value });
+                  }}
+                />
+              ) : null}
+            </div>
+            {meta && status === "In review" && canPublish && (!legal || meta.legalPassed) ? (
+              <div className="flex flex-col gap-2">
+                <FormField label="Publish">
+                  <Input
+                    type="datetime-local"
+                    value={publishAt}
+                    onChange={(e) => {
+                      setPublishAt(e.target.value);
+                    }}
+                  />
+                </FormField>
+                <Button
+                  variant="outline"
+                  disabled={pending || !publishAt}
+                  onClick={() => {
+                    act("schedule", { publishAt: fromLocal(publishAt) });
+                  }}
+                >
+                  <Icon name="calendar" size={16} />
+                  Schedule
+                </Button>
+              </div>
+            ) : meta?.publishAt && status === "Scheduled" ? (
+              <p className="type-body-sm">
+                <span className="block type-label">Publish</span>
+                {new Date(meta.publishAt).toLocaleString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}{" "}
+                IST
+              </p>
+            ) : null}
+            <Picker
+              label="Topics"
+              options={choices.topics}
+              value={form.topics}
+              onChange={(v) => {
+                set("topics", v);
+              }}
+            />
+            <FormField label="States">
+              <Select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) set("states", [...form.states, e.target.value]);
+                }}
+              >
+                <option value="">Add a state…</option>
+                {states
+                  .filter((x) => !form.states.includes(x.value))
+                  .map((x) => (
+                    <option key={x.value} value={x.value}>
+                      {x.label}
+                    </option>
+                  ))}
+              </Select>
+              {form.states.length ? (
+                <span className="flex flex-wrap gap-2">
+                  {form.states.map((v) => (
+                    <FilterChip
+                      key={v}
+                      label={states.find((x) => x.value === v)?.label ?? v}
+                      onRemove={() => {
+                        set(
+                          "states",
+                          form.states.filter((x) => x !== v),
+                        );
+                      }}
+                    />
+                  ))}
+                </span>
+              ) : null}
+            </FormField>
+            <Switch
+              label="Featured on the newsroom"
+              checked={form.featured}
+              onCheckedChange={(c) => {
+                set("featured", c);
+              }}
+            />
           </Card>
 
-          <Card title="Sources">
-            <p className="type-caption text-secondary">
-              Every article needs at least one source before it's published.
-            </p>
+          <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="type-h5">Sources</h2>
+              {sourcesNeeded ? <StatusBadge status="Required" tone="warning" /> : null}
+            </div>
             {form.sources.length ? (
               <ul className="flex flex-col gap-3">
-                {form.sources.map((s, i) => (
-                  <li key={i} className="grid gap-2 rounded-input border border-default p-3 md:grid-cols-2">
+                {form.sources.map((x, i) => (
+                  <li key={i} className="flex flex-col gap-2 border-b border-default pb-3">
                     <Input
                       aria-label={`Source ${String(i + 1)} title`}
-                      placeholder="Title, for example MNRE order of 4 January"
-                      value={s.title}
+                      placeholder="Title"
+                      value={x.title}
                       onChange={(e) => {
                         set(
                           "sources",
-                          form.sources.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)),
+                          form.sources.map((y, j) => (j === i ? { ...y, title: e.target.value } : y)),
                         );
                       }}
                     />
@@ -656,33 +857,33 @@ export function ArticleEditor({
                       aria-label={`Source ${String(i + 1)} link`}
                       placeholder="https://"
                       type="url"
-                      value={s.url}
+                      value={x.url}
                       onChange={(e) => {
                         set(
                           "sources",
-                          form.sources.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)),
+                          form.sources.map((y, j) => (j === i ? { ...y, url: e.target.value } : y)),
                         );
                       }}
                     />
                     <Input
                       aria-label={`Source ${String(i + 1)} note`}
                       placeholder="Note (optional)"
-                      value={s.note}
+                      value={x.note}
                       onChange={(e) => {
                         set(
                           "sources",
-                          form.sources.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)),
+                          form.sources.map((y, j) => (j === i ? { ...y, note: e.target.value } : y)),
                         );
                       }}
                     />
                     <span className="flex items-center justify-between gap-2">
                       <Checkbox
                         label="Internal only"
-                        checked={s.internal}
+                        checked={x.internal}
                         onCheckedChange={(c) => {
                           set(
                             "sources",
-                            form.sources.map((x, j) => (j === i ? { ...x, internal: c === true } : x)),
+                            form.sources.map((y, j) => (j === i ? { ...y, internal: c === true } : y)),
                           );
                         }}
                       />
@@ -714,306 +915,92 @@ export function ArticleEditor({
                 Add source
               </Button>
             </span>
-          </Card>
+            <p className="type-caption text-secondary">
+              Every article needs sources before it&apos;s published. They&apos;re listed at the end for readers.
+            </p>
+          </section>
 
-          <Card title="Search and sharing">
-            <FormField label="SEO title" helper="Leave empty to use the headline.">
+          <Card title="SEO">
+            <FormField label="Search title" helper={`${String(seoTitle.length)} of 60 characters`}>
               <Input
                 maxLength={60}
+                placeholder={form.title}
                 value={form.seo.title}
                 onChange={(e) => {
                   set("seo", { ...form.seo, title: e.target.value });
                 }}
               />
             </FormField>
-            <FormField label="SEO description" helper="Leave empty to use the standfirst.">
+            <FormField label="Meta description">
               <Textarea
-                rows={2}
+                rows={4}
                 maxLength={160}
                 showCount
+                placeholder={form.dek}
                 value={form.seo.description}
                 onChange={(e) => {
                   set("seo", { ...form.seo, description: e.target.value });
                 }}
               />
             </FormField>
-            <div className="flex flex-col gap-1 rounded-input bg-subtle p-4" aria-label="Search preview">
-              <span className="type-caption text-secondary">Preview</span>
-              <span className="type-label text-link">{(form.seo.title || form.title || "Headline").slice(0, 60)}</span>
-              <span className="type-caption text-secondary">h2india.in/news/{meta?.slug ?? "…"}</span>
-              <span className="type-body-sm text-body">
+            <FormField label="URL">
+              <Input value={`/news/${meta?.slug ?? ""}`} readOnly disabled />
+            </FormField>
+            <div className="flex flex-col gap-1 rounded-input bg-subtle p-3">
+              <span className="type-eyebrow text-secondary">Search preview</span>
+              <span className="type-label text-link">{(seoTitle || "Headline").slice(0, 60)} | H2 India</span>
+              <span className="type-caption text-secondary">news › {meta?.slug ?? "…"}</span>
+              <span className="type-caption text-body">
                 {(form.seo.description || form.dek || "Standfirst").slice(0, 160)}
               </span>
             </div>
           </Card>
-        </div>
 
-        <aside className="flex flex-col gap-6">
-          <Card title="Workflow">
-            <ol className="flex flex-col gap-2" aria-label="Workflow steps">
-              {STEPS.filter((s) => s !== "Legal check" || legal).map((s) => {
-                const here = s === status;
-                const done = STEPS.indexOf(s) < STEPS.indexOf(status);
-                return (
-                  <li
-                    key={s}
-                    aria-current={here ? "step" : undefined}
-                    className={cx(
-                      "flex items-center gap-2 type-body-sm",
-                      here ? "type-label" : done ? "text-body" : "text-secondary",
-                    )}
-                  >
-                    <span
-                      className={cx(
-                        "flex size-5 items-center justify-center rounded-pill border",
-                        here
-                          ? "border-transparent bg-inverse text-inverse"
-                          : done
-                            ? "border-transparent bg-accent"
-                            : "border-default",
-                      )}
-                    >
-                      {done ? <Icon name="check" size={12} /> : null}
+          <Card title="Corrections log">
+            <p className="type-caption text-secondary">
+              Corrections show here after publishing, with the date and what changed. Readers see them at the end of the
+              article.
+            </p>
+            {meta?.corrections.length ? (
+              <ul className="flex flex-col gap-2">
+                {meta.corrections.map((c, i) => (
+                  <li key={i} className="type-body-sm">
+                    <span className="block type-caption text-secondary">
+                      {new Date(c.date).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium" })}
                     </span>
-                    {s}
+                    {c.note}
                   </li>
-                );
-              })}
-            </ol>
-            <ul className="flex flex-col gap-1 border-t border-default pt-3">
-              {checks.map((c) => (
-                <li
-                  key={c.label}
-                  className={cx("flex items-center gap-2 type-caption", c.ok ? "text-body" : "text-secondary")}
-                >
-                  <Icon name={c.ok ? "check-circle" : "alert-circle"} size={14} />
-                  {c.label}
-                </li>
-              ))}
-            </ul>
-            {meta ? (
-              <div className="flex flex-col gap-2">
-                {status === "In review" && canPublish && (!legal || meta.legalPassed) ? (
-                  <span className="flex flex-col gap-2">
-                    <FormField label="Publish at (IST)">
-                      <Input
-                        type="datetime-local"
-                        value={publishAt}
-                        onChange={(e) => {
-                          setPublishAt(e.target.value);
-                        }}
-                      />
-                    </FormField>
-                    <Button
-                      variant="outline"
-                      disabled={pending || !publishAt}
-                      onClick={() => {
-                        act("schedule", { publishAt: fromLocal(publishAt) });
-                      }}
-                    >
-                      <Icon name="calendar" size={16} />
-                      Schedule
-                    </Button>
-                  </span>
-                ) : null}
-                {status === "Scheduled" && meta.publishAt ? (
-                  <p className="type-body-sm">
-                    Publishes{" "}
-                    {new Date(meta.publishAt).toLocaleString("en-IN", {
-                      timeZone: "Asia/Kolkata",
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}{" "}
-                    IST
-                  </p>
-                ) : null}
-                {buttons
-                  .filter((b) => !b.needsPublish || canPublish)
-                  .map((b) => (
-                    <Button
-                      key={b.action}
-                      variant={b.variant ?? "primary"}
-                      disabled={pending}
-                      onClick={() => {
-                        act(b.action);
-                      }}
-                    >
-                      {b.label}
-                    </Button>
-                  ))}
-                {buttons.some((b) => b.needsPublish) && !canPublish ? (
-                  <p className="type-caption text-secondary">An Editor-in-chief schedules and publishes.</p>
-                ) : null}
-              </div>
-            ) : (
-              <p className="type-caption text-secondary">Save the draft to start the workflow.</p>
-            )}
-          </Card>
-
-          <Card title="Filing">
-            <Picker
-              label="Topics"
-              options={choices.topics}
-              value={form.topics}
-              onChange={(v) => {
-                set("topics", v);
-              }}
-            />
-            <Picker
-              label="Tags"
-              options={choices.tags}
-              value={form.tags}
-              onChange={(v) => {
-                set("tags", v);
-              }}
-            />
-            <FormField label="States">
-              <Select
-                value=""
-                onChange={(e) => {
-                  if (e.target.value) set("states", [...form.states, e.target.value]);
-                }}
-              >
-                <option value="">Add a state…</option>
-                {states
-                  .filter((s) => !form.states.includes(s.value))
-                  .map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-              </Select>
-              {form.states.length ? (
-                <span className="flex flex-wrap gap-2">
-                  {form.states.map((v) => (
-                    <FilterChip
-                      key={v}
-                      label={states.find((s) => s.value === v)?.label ?? v}
-                      onRemove={() => {
-                        set(
-                          "states",
-                          form.states.filter((x) => x !== v),
-                        );
-                      }}
-                    />
-                  ))}
-                </span>
-              ) : null}
-            </FormField>
-            <Switch
-              label="Featured on the newsroom"
-              checked={form.featured}
-              onCheckedChange={(c) => {
-                set("featured", c);
-              }}
-            />
-          </Card>
-
-          <Card title="People">
-            <Picker
-              label="Authors"
-              options={choices.authors}
-              value={form.authors}
-              onChange={(v) => {
-                set("authors", v);
-              }}
-              helper="Required. Shown in the byline."
-            />
-            <FormField label="Editor">
-              <Select
-                value={form.editor === null ? "" : String(form.editor)}
-                onChange={(e) => {
-                  set("editor", e.target.value ? Number(e.target.value) : null);
-                }}
-              >
-                <option value="">Not set</option>
-                {choices.editors.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
                 ))}
-              </Select>
-            </FormField>
-          </Card>
-
-          <Card title="Legal check">
-            {ALWAYS_LEGAL.includes(form.type) ? (
-              <p className="type-body-sm">Sponsored pieces and press releases always need a legal check.</p>
-            ) : (
-              <Checkbox
-                label="Needs a legal check"
-                checked={form.legal.flagged}
-                onCheckedChange={(c) => {
-                  set("legal", { ...form.legal, flagged: c === true });
-                }}
-              />
-            )}
-            {legal ? (
-              <>
-                <FormField label="Note for the legal check">
-                  <Textarea
-                    rows={2}
-                    value={form.legal.note}
-                    onChange={(e) => {
-                      set("legal", { ...form.legal, note: e.target.value });
-                    }}
-                  />
-                </FormField>
-                <StatusBadge
-                  status={meta?.legalPassed ? "Passed" : "Not checked yet"}
-                  tone={meta?.legalPassed ? "success" : "warning"}
-                />
-              </>
+              </ul>
             ) : null}
+            {meta && status === "Published" && canPublish ? (
+              <FormField
+                label="What was corrected"
+                helper="Readers see this note under the article. Saves and republishes."
+              >
+                <Textarea
+                  rows={2}
+                  value={correction}
+                  onChange={(e) => {
+                    setCorrection(e.target.value);
+                  }}
+                />
+              </FormField>
+            ) : null}
+            <span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pending || !meta || status !== "Published" || !canPublish || !correction.trim()}
+                onClick={() => {
+                  act("correct", { note: correction });
+                  setCorrection("");
+                }}
+              >
+                Add correction
+              </Button>
+            </span>
           </Card>
-
-          {meta && status === "Published" ? (
-            <Card title="Corrections">
-              {meta.corrections.length ? (
-                <ul className="flex flex-col gap-2">
-                  {meta.corrections.map((c, i) => (
-                    <li key={i} className="type-body-sm">
-                      <span className="block type-caption text-secondary">
-                        {new Date(c.date).toLocaleDateString("en-IN", {
-                          timeZone: "Asia/Kolkata",
-                          dateStyle: "medium",
-                        })}
-                      </span>
-                      {c.note}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="type-caption text-secondary">No corrections yet.</p>
-              )}
-              {canPublish ? (
-                <>
-                  <FormField
-                    label="What was corrected"
-                    helper="Readers see this note under the article. Saves and republishes."
-                  >
-                    <Textarea
-                      rows={2}
-                      value={correction}
-                      onChange={(e) => {
-                        setCorrection(e.target.value);
-                      }}
-                    />
-                  </FormField>
-                  <Button
-                    variant="outline"
-                    disabled={pending || !correction.trim()}
-                    onClick={() => {
-                      act("correct", { note: correction });
-                      setCorrection("");
-                    }}
-                  >
-                    Publish correction
-                  </Button>
-                </>
-              ) : null}
-            </Card>
-          ) : null}
 
           {meta ? (
             <Link

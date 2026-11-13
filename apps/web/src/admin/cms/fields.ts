@@ -37,6 +37,8 @@ export interface FieldSpec {
   /** Relationship and upload: the collection it points to. */
   relationTo?: string;
   fields?: FieldSpec[];
+  /** Drawn inside a card that already carries its label: the label is for screen readers only. */
+  bare?: boolean;
 }
 
 /** Fields Payload adds for its own bookkeeping, or for uploaded files; never edited by hand. */

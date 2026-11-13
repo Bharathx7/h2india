@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, Input, Select, Textarea } from "@h2india/ui";
+import { Alert, Button, FormField, Input, Select, Textarea } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
@@ -31,38 +31,96 @@ function useRun() {
   return { msg, pending, go };
 }
 
-export function MoveGrievance({ id, next }: { id: string; next: string[] }) {
+/**
+ * Status and assignee, the note the person sees, and the outcome (661:325). Every move goes through moveGrievance()
+ * (changeStatus, history, audit); resolving needs the outcome.
+ */
+export function MoveGrievance({
+  id,
+  next,
+  person,
+  team: startTeam,
+}: {
+  id: string;
+  next: string[];
+  person: string;
+  team: string;
+}) {
   const r = useRun();
   const [note, setNote] = useState("");
+  const [team, setTeam] = useState(startTeam);
+  const [outcome, setOutcome] = useState("");
   if (!next.length) return <p className="type-body-sm text-secondary">Resolved. Nothing more to do.</p>;
+  const steps = next.filter((to) => to !== "Resolved");
+  const canResolve = next.includes("Resolved");
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
       {r.msg ? <Alert tone={r.msg.tone} title={r.msg.text} live /> : null}
-      <label className="flex flex-col gap-1.5">
-        <span className="type-label">Note to the person (shown when they look up the ticket)</span>
-        <Textarea
-          rows={3}
-          maxLength={1000}
-          value={note}
-          onChange={(e) => {
-            setNote(e.target.value);
-          }}
-        />
-      </label>
-      <div className="flex flex-wrap gap-2">
-        {next.map((to) => (
+      <section className="flex flex-col gap-3">
+        <h2 className="type-h4">Status and assignee</h2>
+        <FormField label="Assignee" helper="The team or person handling it. The complainant sees the team.">
+          <Input
+            value={team}
+            maxLength={80}
+            onChange={(e) => {
+              setTeam(e.target.value);
+            }}
+          />
+        </FormField>
+        <FormField label={`Note to ${person}`} helper="Shown when they look up the ticket.">
+          <Textarea
+            rows={4}
+            maxLength={1000}
+            showCount
+            value={note}
+            onChange={(e) => {
+              setNote(e.target.value);
+            }}
+          />
+        </FormField>
+        <div className="flex flex-wrap gap-2">
+          {steps.map((to) => (
+            <Button
+              key={to}
+              variant={to === "Acknowledged" ? "primary" : "outline"}
+              disabled={r.pending}
+              onClick={() => {
+                r.go(() => moveGrievanceAction(id, to as never, note, { team }), `Moved to ${to}`);
+              }}
+            >
+              {to === "Acknowledged" ? "Acknowledge" : "Start review"}
+            </Button>
+          ))}
+        </div>
+      </section>
+      {canResolve ? (
+        <section className="flex flex-col gap-3 border-t border-default pt-5">
+          <h2 className="type-h4">Outcome</h2>
+          <p className="type-body-sm text-body">
+            Record what you decided before you resolve the complaint. {person} sees the outcome when they look up the
+            ticket.
+          </p>
+          <FormField label="Outcome" required>
+            <Textarea
+              rows={3}
+              maxLength={1000}
+              value={outcome}
+              onChange={(e) => {
+                setOutcome(e.target.value);
+              }}
+            />
+          </FormField>
           <Button
-            key={to}
-            variant={to === "Resolved" ? "primary" : "outline"}
-            disabled={r.pending || (to === "Resolved" && !note.trim())}
+            className="self-start"
+            disabled={r.pending || !outcome.trim()}
             onClick={() => {
-              r.go(() => moveGrievanceAction(id, to as never, note), `Moved to ${to}`);
+              r.go(() => moveGrievanceAction(id, "Resolved", note, { outcome, team }), "Resolved");
             }}
           >
-            {to === "Acknowledged" ? "Acknowledge" : to === "In review" ? "Start review" : "Resolve"}
+            Resolve complaint
           </Button>
-        ))}
-      </div>
+        </section>
+      ) : null}
     </div>
   );
 }

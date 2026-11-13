@@ -10,6 +10,11 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 export const metadata: Metadata = { title: "Edit · H2 India admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
+/** Whole days since a time (for "14 days ago" on Last verified). */
+function daysSince(iso: string): number {
+  return Math.floor((new Date().getTime() - new Date(iso).getTime()) / 86_400_000);
+}
+
 export default async function EditRecordPage({ params }: { params: Promise<{ collection: string; id: string }> }) {
   const { collection, id } = await params;
   const { userId } = await requireOperator("content.view", `/admin/content/${collection}/${id}`);
@@ -38,7 +43,9 @@ export default async function EditRecordPage({ params }: { params: Promise<{ col
         slug={collection}
         singular={type.singular}
         backHref={`/admin/content/${collection}`}
-        backLabel={type.plural}
+        backLabel={
+          type.upload || collection === "authors" ? `Content · ${type.plural}` : `Content · Records · ${type.plural}`
+        }
         titleField={type.titleField === "id" ? null : type.titleField}
         fields={type.fields}
         initial={doc}
@@ -48,6 +55,7 @@ export default async function EditRecordPage({ params }: { params: Promise<{ col
           status: typeof doc.status === "string" ? doc.status : null,
           updatedAt: doc.updatedAt,
           verifiedAt: verification?.at ?? null,
+          verifiedDays: verification?.at ? daysSince(verification.at) : null,
         }}
         choices={choices}
         canEdit={cms.can("content.edit")}
