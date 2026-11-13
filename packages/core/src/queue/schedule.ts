@@ -10,6 +10,7 @@ import { runDeadlines } from "../clocks/clocks";
 import "../events/reminders";
 // Registers the end of a payout bank change hold (step 8.6).
 import "../supplier/bank";
+import "../rfq/records";
 import { expireJoinRequests } from "../companies/join-requests";
 import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";

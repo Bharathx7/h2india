@@ -302,6 +302,13 @@
       "when": 1794567792234,
       "tag": "0042_buyer_workspace",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794568884289,
+      "tag": "0043_rfq_quotes",
+      "breakpoints": true
     }
   ]
 }

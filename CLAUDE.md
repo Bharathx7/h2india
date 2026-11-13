@@ -255,6 +255,10 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A second GSTIN must share the company's PAN; only a verified GSTIN can be the default; a GSTIN a delivery site bills to can't be removed.
 - Approval rules are stored now and enforced only when ordering opens (A162). Project lists never carry a price.
 - Every new buyer-owned table gets a case in `authz/authz.int.test.ts` and `buyer/buyer.int.test.ts`.
+- RFQs and quotes live in `@h2india/core/rfq` (pure rules in `/rfq/rules` and `/rfq/totals`). Statuses change only through `moveRfq()`/`moveQuote()` with a typed move from `transitions.ts` (A163); never set `status` directly.
+- A sent quote version is never changed; revising saves a new version. Buyers read only sent versions (`quoteVersion()`), suppliers see an RFQ only once `sentAt` is set.
+- Quote figures come only from `quoteFigures()` (GST per line, freight with its own rate); payment schedules are basis points that add to 10000 (`scheduleProblem()`).
+- The offer deadline and quote validity are `CHOSEN_DEADLINES` started with `startDeadline()` at the chosen time; moving one cancels and starts it again.
 
 ## Server and deploys (step 1.7)
 

@@ -50,7 +50,22 @@ export const CLOCKS = {
   teamInvitation: { label: "A team invitation expires", duration: { days: 14 }, source: "Invitation email 673:155" },
   bankChangeHold: { label: "Payouts held after a bank change", duration: { hours: 72 }, source: "588:1179 (C5)" },
   dataRightsDue: { label: "Data-rights request due", duration: { days: 30 }, source: "Compliance 660:1786" },
+  rfqExpiring: {
+    label: "An RFQ shows Expiring before its offer deadline",
+    duration: { hours: 48 },
+    source: "Doc 1 buyer dashboard: quotes expiring in 48h",
+  },
 } as const satisfies Record<string, ClockRule>;
+
+/**
+ * Deadlines whose due time a person chooses (step 9.2): the buyer's offer deadline and the supplier's quote validity.
+ * They are started with startDeadline() at the chosen time, and moved by cancelling and starting again.
+ */
+export const CHOSEN_DEADLINES = {
+  rfqOfferDeadline: { label: "RFQ offer deadline", source: "RFQ wizard step 3 398:10059" },
+  quoteValidity: { label: "Quote valid until", source: "Quote builder 617:8" },
+} as const;
+export type ChosenDeadline = keyof typeof CHOSEN_DEADLINES;
 
 export type ClockName = keyof typeof CLOCKS;
 

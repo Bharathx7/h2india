@@ -33,13 +33,18 @@ export function istYear(at: Date): number {
   return Number(new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", year: "numeric" }).format(at));
 }
 
+/** Quotes are numbered without a year, from Q-1001 (playbook step 9.2). */
+const UNDATED: Partial<Record<ReferenceType, number>> = { Q: 1000 };
+
 export function formatReference(type: ReferenceType, year: number, n: number): string {
+  const base = UNDATED[type];
+  if (base !== undefined) return `${type}-${String(base + n)}`;
   return `${type}-${String(year)}-${String(n).padStart(WIDTH[type] ?? 4, "0")}`;
 }
 
 /** Takes the next number atomically. Safe when many requests ask at once; gaps can occur if a transaction rolls back. */
 export async function nextReference(ex: Executor, type: ReferenceType, at: Date = new Date()): Promise<string> {
-  const year = istYear(at);
+  const year = UNDATED[type] !== undefined ? 0 : istYear(at);
   const result = await ex.execute<{ last_value: number }>(sql`
     INSERT INTO core.reference_sequences (type, year, last_value) VALUES (${type}, ${year}, 1)
     ON CONFLICT (type, year) DO UPDATE SET last_value = core.reference_sequences.last_value + 1
