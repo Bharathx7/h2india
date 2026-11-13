@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, isNull, ne } from "drizzle-orm";
+import { TIER_1 } from "./verification-rules";
 
 // Onboarding checklist (584:8; phones 585:15), step 8.1. Every item is worked out from the supplier's records, never
 // from ticks: company and GSTIN, payout bank account (step 8.6), storefront basics (step 8.7), first product or
@@ -29,6 +30,8 @@ export interface Checklist {
 export interface SupplierFacts {
   gstin: { number: string; status: string } | null;
   companyComplete: boolean;
+  /** Tier 1 company documents (GST certificate, PAN): uploaded and verified (step 8.2). */
+  documents: { uploaded: number; verified: number; needed: number };
   bank: { last4: string; nameMatches: boolean; verified: boolean } | null;
   storefront: { hasLogo: boolean; hasAbout: boolean; locations: number; published: boolean } | null;
   products: { total: number; submitted: number };
@@ -52,8 +55,21 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
     .where(eq(schema.supplierReviews.organisationId, organisationId))
     .orderBy(desc(schema.supplierReviews.submittedAt))
     .limit(1);
+  const docs = await db
+    .select({ type: schema.verificationDocuments.type, status: schema.verificationDocuments.status })
+    .from(schema.verificationDocuments)
+    .where(
+      and(
+        eq(schema.verificationDocuments.organisationId, organisationId),
+        isNull(schema.verificationDocuments.deletedAt),
+      ),
+    );
+  const tier1 = TIER_1 as readonly string[];
+  const uploaded = new Set(docs.filter((x) => tier1.includes(x.type) && x.status !== "Rejected").map((x) => x.type));
+  const verified = new Set(docs.filter((x) => tier1.includes(x.type) && x.status === "Verified").map((x) => x.type));
   return {
     gstin: gst ?? null,
+    documents: { uploaded: uploaded.size, verified: verified.size, needed: tier1.length },
     companyComplete: Boolean(org?.legalName && org.state && gst),
     bank: null,
     storefront: null,
@@ -66,14 +82,26 @@ const GST_WORDS: Record<string, string> = { Pending: "Being checked", Active: "A
 
 /** The five steps as drawn, in the order on 584:8. Pure: unit-tested. */
 export function buildChecklist(f: SupplierFacts): Checklist {
+  const docs = f.documents;
   const company: ChecklistItem = {
     key: "company",
     title: "Company details and GSTIN",
-    state: !f.gstin || !f.companyComplete ? "todo" : f.gstin.status === "Active" ? "done" : "checking",
+    state:
+      !f.gstin || !f.companyComplete || docs.uploaded < docs.needed
+        ? "todo"
+        : f.gstin.status === "Active" && docs.verified >= docs.needed
+          ? "done"
+          : "checking",
     detail: f.gstin
-      ? `${f.gstin.number}${f.gstin.status === "Pending" ? " · checking in the background" : ""}`
+      ? docs.uploaded < docs.needed
+        ? `${f.gstin.number} · upload your GST certificate and PAN in Verification`
+        : `${f.gstin.number}${f.gstin.status === "Pending" || docs.verified < docs.needed ? " · checking in the background" : ""}`
       : "Add your registered address and GSTIN",
-    badge: f.gstin ? (GST_WORDS[f.gstin.status] ?? f.gstin.status) : undefined,
+    badge: f.gstin
+      ? docs.uploaded >= docs.needed && (f.gstin.status !== "Active" || docs.verified < docs.needed)
+        ? "Being checked"
+        : (GST_WORDS[f.gstin.status] ?? f.gstin.status)
+      : undefined,
   };
   const bank: ChecklistItem = {
     key: "bank",

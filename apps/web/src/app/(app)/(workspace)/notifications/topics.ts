@@ -56,6 +56,12 @@ export const TOPIC_LABELS: Record<TopicName, { group: string; label: string; hin
       hint: "A day before and an hour before events you registered for.",
       locked: [],
     },
+    "company.verification": {
+      group: "Company",
+      label: "Verification and listing reviews",
+      hint: "Documents about to expire, badges, and decisions on your listings",
+      locked: [],
+    },
     "team.requests": {
       group: "Team",
       label: "Someone asks to join or needs your approval",
@@ -82,7 +88,7 @@ const BY_AREA: Record<WorkspaceArea, TopicName[]> = {
     "team.requests",
     "account.security",
   ],
-  supplier: ["order.status_changed", "message.received", "team.requests", "account.security"],
+  supplier: ["order.status_changed", "message.received", "company.verification", "team.requests", "account.security"],
   member: ["alert.matches", "follow.updates", "event.reminders", "account.security"],
   admin: ["account.security"],
 };

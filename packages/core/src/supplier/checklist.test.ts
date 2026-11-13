@@ -4,6 +4,7 @@ import { buildChecklist, canSubmitForReview, type SupplierFacts } from "./checkl
 const base: SupplierFacts = {
   gstin: null,
   companyComplete: false,
+  documents: { uploaded: 0, verified: 0, needed: 2 },
   bank: null,
   storefront: null,
   products: { total: 0, submitted: 0 },
@@ -25,6 +26,7 @@ describe("onboarding checklist (584:8)", () => {
       ...base,
       gstin: { number: "33AAJCP7712L1Z4", status: "Pending" },
       companyComplete: true,
+      documents: { uploaded: 2, verified: 0, needed: 2 },
       bank: { last4: "4417", nameMatches: true, verified: true },
       storefront: { hasLogo: true, hasAbout: true, locations: 2, published: true },
     });
@@ -42,9 +44,9 @@ describe("onboarding checklist (584:8)", () => {
     expect(canSubmitForReview(c)).toBe(false);
     const ready = buildChecklist({
       ...base,
-      ...c,
       gstin: { number: "x", status: "Active" },
       companyComplete: true,
+      documents: { uploaded: 2, verified: 2, needed: 2 },
       bank: { last4: "1", nameMatches: true, verified: true },
       storefront: { hasLogo: true, hasAbout: true, locations: 0, published: true },
       products: { total: 1, submitted: 0 },

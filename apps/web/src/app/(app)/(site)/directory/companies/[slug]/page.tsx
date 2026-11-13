@@ -2,6 +2,8 @@ import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { companyProfile } from "@h2india/core/companies";
 import { storefrontProducts } from "@h2india/core/products";
+import { publicBadges } from "@h2india/core/supplier";
+import { formatIstDate } from "@h2india/core/time";
 import { Alert, buttonClasses, cx, EmptyState, Icon, ProductCard, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,6 +24,21 @@ import { getSession } from "@/server/auth";
 type Params = Promise<{ slug: string }>;
 const TABS = ["overview", "products", "projects", "certifications", "news", "events", "jobs", "contact"] as const;
 type Tab = (typeof TABS)[number];
+/** Badges with the date H2 India last checked each one (step 8.2: "the badge with today's date"). */
+async function Badges({ organisationId }: { organisationId: string }) {
+  const badges = await publicBadges(getDb(), organisationId);
+  if (!badges.length) return null;
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {badges.map((b) => (
+        <li key={b.kind} className="type-caption text-secondary">
+          <span className="type-label-sm text-primary">{b.label}</span> · checked {formatIstDate(b.lastCheckedAt)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const load = (slug: string) => companyProfile(getDb(), slug, { includeSample: showSample() });
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -100,6 +117,7 @@ export default async function CompanyPage({
               ? "H2 India has checked this company's registration."
               : "H2 India hasn't completed its checks on this company yet."}
           </p>
+          <Badges organisationId={c.organisationId} />
           <Link href="/verification" className="inline-flex items-center gap-1.5 type-label text-link">
             How we verify suppliers
             <Icon name="arrow-right" size={16} />

@@ -199,7 +199,7 @@ test("when the GST portal is down the person continues, and the background check
   expect(await status()).toEqual({ portal_status: "Pending", verification: "Pending" });
   await expect.poll(status, { timeout: 45_000, intervals: [1000] }).toEqual({
     portal_status: "Active",
-    verification: "Verified",
+    verification: "GST verified",
   });
 });
 

@@ -84,6 +84,13 @@ export const TOPICS = {
     defaults: { email: true, whatsapp: false, in_app: true },
     locked: ["email"],
   },
+  // Not drawn (A11): supplier verification and listing reviews (steps 8.2, 8.3), sent to the company's admins.
+  "company.verification": {
+    group: "Company",
+    label: "Verification and listing reviews",
+    hint: "Documents about to expire, badges, and decisions on your listings",
+    defaults: { email: true, whatsapp: false, in_app: true },
+  },
   // Not drawn: join requests and recoveries that need a company admin (A11).
   "team.requests": {
     group: "Team",

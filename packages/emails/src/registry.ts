@@ -137,7 +137,7 @@ export const TEMPLATES = {
     name: "Verification status · document expiring",
     frame: "673:221",
     step: "8.2",
-    built: false,
+    built: true,
   },
   "email.listing_needs_changes": {
     channel: "email",

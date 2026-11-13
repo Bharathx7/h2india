@@ -239,6 +239,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Supplier pages call `requireSupplier()` and render in `SupplierShell` (`apps/web/src/supplier/shell.tsx`); server actions get the company from `supplierActor()`, never from the form. Core lives in `@h2india/core/supplier`.
 - The onboarding checklist is `buildChecklist(supplierFacts())`: derived from records only. A step that adds a supplier record adds it to `supplierFacts()`.
 - Every new supplier-owned table gets a case in `supplier/supplier.int.test.ts` proving supplier B can't read or change supplier A's rows.
+- Badges are granted and revoked only through `grantBadge()`/`revokeBadge()` (operators, recorded evidence, audited); `organisations.verification = "Verified"` follows the Verified supplier badge and is set only by `syncCompanyVerified()`. Company-records checks go through `supplier/adapters/registry.ts`.
 
 ## Server and deploys (step 1.7)
 

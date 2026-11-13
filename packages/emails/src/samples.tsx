@@ -11,6 +11,7 @@ import {
   renderGrievance,
   renderWebinarRegistered,
   renderAlertDigest,
+  renderDocumentExpiring,
   renderSignInCode,
   renderVerifyEmail,
 } from "./index";
@@ -172,6 +173,21 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
             { label: "Place", value: "Ratnagiri, Maharashtra" },
           ],
           url: `${appUrl}/events/submit`,
+        }),
+      );
+    case "email.verification_status":
+      return email(
+        renderDocumentExpiring(appUrl, {
+          name: "Nikhil Desai",
+          company: "Hydrotek Systems",
+          companyLine: "Hydrotek Systems Private Limited · verified since 14 Mar 2026",
+          document: "ISO 22734 certificate",
+          scope: "PEM electrolysers",
+          expires: "23 Nov 2026",
+          days: 12,
+          others: "All valid. Next to expire: PESO licence, 30 Jun 2027",
+          uploadUrl: `${appUrl}/supplier/verification`,
+          statusUrl: `${appUrl}/supplier/verification`,
         }),
       );
     case "email.tender_alert_digest":

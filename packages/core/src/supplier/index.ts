@@ -2,3 +2,6 @@
 export * from "./context";
 export * from "./checklist";
 export * from "./review";
+export * from "./verification";
+export * from "./verification-rules";
+export { useRegistry, type RegistryAdapter } from "./adapters/registry";

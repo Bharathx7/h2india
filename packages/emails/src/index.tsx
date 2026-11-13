@@ -145,3 +145,17 @@ export type { AlertDigestItem, AlertDigestProps } from "./alerts/AlertDigest";
 export async function renderAlertDigest(subject: string, props: AlertDigestProps): Promise<RenderedEmail> {
   return renderElement(subject, <AlertDigest {...props} />);
 }
+
+// Supplier verification (step 8.2): Verification status 673:221 and its variants.
+import { documentExpiringMessage, needsChangesMessage, verifiedMessage } from "./supplier/messages";
+export type { ExpiringDocument } from "./supplier/messages";
+
+export function renderDocumentExpiring(appUrl: string, input: Parameters<typeof documentExpiringMessage>[0]) {
+  return renderNotice(appUrl, documentExpiringMessage(input));
+}
+export function renderVerified(appUrl: string, input: Parameters<typeof verifiedMessage>[0]) {
+  return renderNotice(appUrl, verifiedMessage(input));
+}
+export function renderVerificationChanges(appUrl: string, input: Parameters<typeof needsChangesMessage>[0]) {
+  return renderNotice(appUrl, needsChangesMessage(input));
+}

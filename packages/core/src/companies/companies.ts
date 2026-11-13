@@ -123,7 +123,7 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
   }
   const legalName = (active[0]?.record?.legalName ?? input.name ?? "").trim();
   if (!legalName) throw new CompanyError("NAME_REQUIRED", "Enter the company name");
-  const verification = active.length > 0 ? "Verified" : checked.some((c) => c.pending) ? "Pending" : "Unverified";
+  const verification = active.length > 0 ? "GST verified" : checked.some((c) => c.pending) ? "Pending" : "Unverified";
   const first = active[0]?.record ?? null;
 
   let organisationId = "";
