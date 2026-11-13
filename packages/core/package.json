@@ -21,6 +21,8 @@
     "./catalogue/attributes": "./src/catalogue/attributes.ts",
     "./catalogue/taxonomy": "./src/catalogue/index.ts",
     "./brands": "./src/brands/index.ts",
+    "./directory": "./src/directory/index.ts",
+    "./directory/rules": "./src/directory/rules.ts",
     "./products": "./src/products/index.ts",
     "./products/rules": "./src/products/rules.ts",
     "./products/rules-client": "./src/products/rules-client.ts",

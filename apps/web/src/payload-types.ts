@@ -99,6 +99,8 @@ export interface Config {
     'help-articles': HelpArticle;
     'team-members': TeamMember;
     'application-pages': ApplicationPage;
+    people: Person;
+    associations: Association;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -143,6 +145,8 @@ export interface Config {
     'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     'application-pages': ApplicationPagesSelect<false> | ApplicationPagesSelect<true>;
+    people: PeopleSelect<false> | PeopleSelect<true>;
+    associations: AssociationsSelect<false> | AssociationsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -3417,6 +3421,82 @@ export interface ApplicationPage {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * People in the directory (756:12213). Only people who agreed to be listed (M24).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people".
+ */
+export interface Person {
+  id: number;
+  name: string;
+  slug: string;
+  /**
+   * For example CTO or Senior scientist.
+   */
+  role: string;
+  /**
+   * Leave empty for independents.
+   */
+  organisation?: string | null;
+  city?: string | null;
+  state?: string | null;
+  affiliation: 'Company' | 'Research institution' | 'Government or PSU' | 'Independent';
+  expertise?:
+    | (
+        | 'Electrolysers'
+        | 'Fuel cells'
+        | 'Storage and compression'
+        | 'Safety and approvals'
+        | 'Policy and finance'
+        | 'Research and testing'
+      )[]
+    | null;
+  /**
+   * The chips on the card, for example PEM electrolysers, Plant sizing.
+   */
+  topics?: string[] | null;
+  availableFor?: ('Speaking' | 'Consulting' | 'Research collaboration')[] | null;
+  bio?: string | null;
+  consentRecorded?: boolean | null;
+  /**
+   * Where and when they agreed, for example signed form 12 Nov 2026 (file in Drive: …).
+   */
+  consentEvidence?: string | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Industry bodies, alliances, chambers and government bodies (498:8).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "associations".
+ */
+export interface Association {
+  id: number;
+  name: string;
+  slug: string;
+  kind: 'industry' | 'alliance' | 'chamber' | 'government';
+  city?: string | null;
+  summary: string;
+  /**
+   * As the body states it, if it does.
+   */
+  memberCompanies?: number | null;
+  website: string;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3567,6 +3647,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'application-pages';
         value: number | ApplicationPage;
+      } | null)
+    | ({
+        relationTo: 'people';
+        value: number | Person;
+      } | null)
+    | ({
+        relationTo: 'associations';
+        value: number | Association;
       } | null)
     | ({
         relationTo: 'authors';
@@ -5100,6 +5188,46 @@ export interface ApplicationPagesSelect<T extends boolean = true> {
         title?: T;
         text?: T;
       };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people_select".
+ */
+export interface PeopleSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  role?: T;
+  organisation?: T;
+  city?: T;
+  state?: T;
+  affiliation?: T;
+  expertise?: T;
+  topics?: T;
+  availableFor?: T;
+  bio?: T;
+  consentRecorded?: T;
+  consentEvidence?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "associations_select".
+ */
+export interface AssociationsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  kind?: T;
+  city?: T;
+  summary?: T;
+  memberCompanies?: T;
+  website?: T;
   sample?: T;
   updatedAt?: T;
   createdAt?: T;

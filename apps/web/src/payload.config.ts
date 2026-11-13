@@ -55,6 +55,7 @@ import {
 } from "./cms/trust/collections";
 import { NewsletterIssues } from "./cms/newsletter/issues";
 import { ApplicationPages } from "./cms/marketplace/collections";
+import { Associations, People } from "./cms/directory/collections";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
 // database, editors signed in with their H2 India account, the editor at /cms.
@@ -110,6 +111,8 @@ export default buildConfig({
     HelpArticles,
     TeamMembers,
     ApplicationPages,
+    People,
+    Associations,
     Authors,
     Topics,
     Tags,

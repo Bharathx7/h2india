@@ -237,6 +237,11 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A129 | Where brands come from | You | Step 6.5 | Brand records (name, origin, owner, description) and their dealers are added by import or the catalogue team until a brand admin screen exists; products link to a brand | Open | |
 | A130 | Attach P&IDs on Request a proposal (400:11134) | You | Step 9.3 | Not built: the attachment joins the quote request wizard | Open | |
 | A131 | Compare selection for signed-in people | You | Step 6.5 | Kept in the browser and copied to the server (compare_lists) whenever it changes; the compare page uses the server copy when the address has no products | Open | |
+| A132 | People directory before M24 | You and lawyer | M24 | Only profiles an editor creates in the CMS with "This person agreed to be listed" ticked and where and when they agreed; a person can't be published without it, and lists, profiles and maps read only those. No email or phone is shown; Contact via H2 India goes to the Contact form. Person pages stay out of the sitemap | Open | Playbook safe default. "Create your profile" signs in and goes to the member profile (7.4). |
+| A133 | Maps before M7 | You | M7 | The map component takes a provider adapter; with none chosen, its place shows the companies by state as a list (also the keyboard alternative). Used by the directory map view and the ecosystem map; list and map read the same filtered companies | Open | Replaces the interim note in A76 for these pages. |
+| A134 | Directory filters without data | You | Step 6.6 | Value-chain stage, GST verified and Certificates checked aren't shown until profiles carry them; Follow on cards arrives with follows (7.2); "Usually replies within …" with RFQs (9) | Open | |
+| A135 | Start-up spotlight extras | You | Step 6.6 | The page lists profiles typed Start-up. The weekly featured story, the DPIIT recognised badge and the stage filter arrive when editors start the series and profiles carry the data; Apply to be featured goes to Contact | Open | |
+| A136 | Associations' article and event counts (498:8) | You | Step 6.6 | Not shown until associations are linked to articles and events | Open | |
 
 ## Design-system notes (Stage 2)
 
@@ -293,6 +298,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 5.4 built. Added A62 to A67 (addresses, alerts, closing-soon window, applicant groups, checker rules, sample awardees), open with safe defaults; M25 still open, so no scheme has rules.
 - 13 Nov 2026: Step 5.10 built. Added A99 to A102 (indexing switch, hy-gen redirects, 500 reference, maintenance access), open with safe defaults; M14 still open.
 - 13 Nov 2026: Step 5.9 built. Added A94 to A98 (bot challenge, cookie categories and analytics, issue pages, manage link, one-click unsubscribe), open with safe defaults; M10 still open.
+- 13 Nov 2026: Step 6.6 built with the M7 and M24 safe defaults. Added A132 to A136, open.
 - 13 Nov 2026: Step 6.5 built. A116 now follows the frames (5). Added A127 to A131, open with safe defaults.
 - 13 Nov 2026: Step 6.4 built. Added A120 to A126, open with safe defaults.
 - 13 Nov 2026: Step 6.3 built. Added A114 to A119, open with safe defaults.

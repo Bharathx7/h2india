@@ -16,6 +16,7 @@ import * as migration_20261112_190010_trust_pages from './20261112_190010_trust_
 import * as migration_20261112_193125_newsletter_issues from './20261112_193125_newsletter_issues';
 import * as migration_20261112_201854_maintenance from './20261112_201854_maintenance';
 import * as migration_20261113_055110_application_pages from './20261113_055110_application_pages';
+import * as migration_20261113_064225_directory_people_associations from './20261113_064225_directory_people_associations';
 
 export const migrations = [
   {
@@ -106,6 +107,11 @@ export const migrations = [
   {
     up: migration_20261113_055110_application_pages.up,
     down: migration_20261113_055110_application_pages.down,
-    name: '20261113_055110_application_pages'
+    name: '20261113_055110_application_pages',
+  },
+  {
+    up: migration_20261113_064225_directory_people_associations.up,
+    down: migration_20261113_064225_directory_people_associations.down,
+    name: '20261113_064225_directory_people_associations'
   },
 ];

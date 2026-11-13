@@ -213,6 +213,12 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Ask a question and Report this listing go through `askQuestion()` and `reportListing()` after `checkForm()`.
 - Services are products in the Services class with `service` details; a paused service stays visible and can't take a request. Compare: `compareProducts()` (one category, no price). Brands: `@h2india/core/brands`; a dealer is Verified only through `recordDealerEvidence()` while the letter is valid.
 
+## Directory (step 6.6)
+
+- Companies: `directoryEntries()` and the pure `filterDirectory()` (`@h2india/core/directory`); list and map read the same result. Maps only through `MapView` (`packages/ui`) with a provider adapter; until M7 there is no provider and the list by state shows.
+- People are the `people` CMS collection and are read only with `consentRecorded` (M24); never show a person's email or phone, and keep person pages out of the sitemap. Associations are the `associations` collection.
+- On pages where `?state=` is a real filter (directory, people), the designed states are forced with `?ui=` (companies accepts `?state=loading|error|empty`).
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
