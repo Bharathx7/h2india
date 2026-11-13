@@ -36,5 +36,5 @@ test("skipping leaves a usable, empty home", async ({ page }) => {
   await page.goto("/member/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/member$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Home" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Your feed" })).toBeVisible();
 });

@@ -69,7 +69,11 @@ export function CompareSave({ product, signedIn }: { product: ProductRef; signed
           {on ? "In compare" : "Compare"}
         </button>
         <Link
-          href={signedIn ? "/member/saved" : `/sign-in?next=${encodeURIComponent("/member/saved")}`}
+          href={
+            signedIn
+              ? `/member/saved?product=${product.slug}`
+              : `/sign-in?next=${encodeURIComponent(`/member/saved?product=${product.slug}`)}`
+          }
           className="inline-flex items-center gap-2 rounded-control px-2 py-1 type-label text-primary hover:bg-subtle"
         >
           <Icon name="heart" size={18} />

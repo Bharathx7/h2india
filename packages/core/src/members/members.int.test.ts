@@ -15,6 +15,7 @@ import {
   unfollow,
 } from "./profile";
 import { suggestAlerts } from "./rules";
+import { listSaved, removeSaved, saveItem, setFollowLevel } from "./saved";
 
 // Step 7.1 DONE WHEN: a new member completes onboarding and their choices are stored (and drive the feed, 7.2);
 // skipping leaves a usable member with nothing followed.
@@ -79,5 +80,44 @@ describe.skipIf(!url)("member onboarding and follows", () => {
     await completeOnboarding(h.db, u.id);
     expect(await needsOnboarding(h.db, u.id)).toBe(false);
     expect(await h.db.select().from(schema.follows).where(eq(schema.follows.userId, u.id))).toEqual([]);
+  });
+
+  // Step 7.2 DONE WHEN: saved items are private to the member, saving twice keeps one, and unfollowing never removes
+  // what was saved; a follow's level changes only for its owner.
+  it("keeps saved items private and separate from follows", async () => {
+    const a = await makeUser(h.db, "Asha");
+    const b = await makeUser(h.db, "Bala");
+    const item = {
+      targetType: "tender" as const,
+      targetId: "t-1",
+      title: "Electrolyser tender",
+      href: "/opportunities/tenders/t-1",
+    };
+    await saveItem(h.db, a.id, item);
+    await saveItem(h.db, a.id, item);
+    await follow(h.db, a.id, { targetType: "company", targetId: "c9", label: "Hydrotek" });
+    const [saved] = await listSaved(h.db, a.id);
+    expect((await listSaved(h.db, a.id)).length).toBe(1);
+    expect(await listSaved(h.db, b.id)).toEqual([]);
+    await unfollow(h.db, a.id, "company", "c9");
+    expect((await listSaved(h.db, a.id)).length).toBe(1);
+    // Someone else's id changes nothing.
+    await removeSaved(h.db, b.id, saved?.id ?? "");
+    expect((await listSaved(h.db, a.id)).length).toBe(1);
+    await removeSaved(h.db, a.id, saved?.id ?? "");
+    expect(await listSaved(h.db, a.id)).toEqual([]);
+  });
+
+  it("changes a follow's level only for its owner", async () => {
+    const a = await makeUser(h.db, "Chitra");
+    const b = await makeUser(h.db, "Dev");
+    await follow(h.db, a.id, { targetType: "topic", targetId: "electrolysers", label: "Electrolysers" });
+    const [f] = await listFollows(h.db, a.id);
+    expect(f?.level).toBe("all");
+    await setFollowLevel(h.db, b.id, f?.id ?? "", "none");
+    expect((await listFollows(h.db, a.id))[0]?.level).toBe("all");
+    await setFollowLevel(h.db, a.id, f?.id ?? "", "digest");
+    expect((await listFollows(h.db, a.id))[0]?.level).toBe("digest");
+    await expect(setFollowLevel(h.db, a.id, f?.id ?? "", "loud")).rejects.toThrow();
   });
 });

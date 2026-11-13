@@ -552,7 +552,11 @@ function CardActions({ product, category, signedIn }: { product: Card; category:
         }}
       />
       <Link
-        href={signedIn ? "/member/saved" : `/sign-in?next=${encodeURIComponent("/member/saved")}`}
+        href={
+          signedIn
+            ? `/member/saved?product=${product.slug}`
+            : `/sign-in?next=${encodeURIComponent(`/member/saved?product=${product.slug}`)}`
+        }
         aria-label={`Save ${product.name} to a list`}
         className="flex size-8 items-center justify-center rounded-pill border border-control bg-page text-icon-primary hover:border-focus"
       >
@@ -649,7 +653,11 @@ function ProductTable(props: ListingProps) {
                 <td className="py-3 pr-3 pl-2 align-middle">
                   <span className="flex items-center gap-2">
                     <Link
-                      href={props.signedIn ? "/member/saved" : `/sign-in?next=${encodeURIComponent("/member/saved")}`}
+                      href={
+                        props.signedIn
+                          ? `/member/saved?product=${p.slug}`
+                          : `/sign-in?next=${encodeURIComponent(`/member/saved?product=${p.slug}`)}`
+                      }
                       aria-label={`Save ${p.name} to a list`}
                       className="flex size-8 items-center justify-center rounded-pill border border-control hover:border-focus"
                     >

@@ -169,3 +169,10 @@ export function suggestAlerts(persona: string | null, topics: readonly string[])
   }
   return out;
 }
+
+/** Manage follows levels (543:8), safe in the browser. */
+export const FOLLOW_LEVEL_OPTIONS = [
+  { value: "all", label: "All updates" },
+  { value: "digest", label: "Digest only" },
+  { value: "none", label: "None" },
+] as const;

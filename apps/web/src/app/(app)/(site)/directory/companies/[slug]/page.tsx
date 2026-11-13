@@ -287,7 +287,11 @@ export default async function CompanyPage({
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href={session ? "/member/follows" : `/sign-in?next=${encodeURIComponent(base)}`}
+              href={
+                session
+                  ? `/member/follows?company=${c.slug}`
+                  : `/sign-in?next=${encodeURIComponent(`/member/follows?company=${c.slug}`)}`
+              }
               className={buttonClasses({ variant: "outline" })}
             >
               <Icon name="plus" size={16} />

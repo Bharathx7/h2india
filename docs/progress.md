@@ -96,6 +96,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | Step | What it delivers | Status |
 |---|---|---|
 | 7.1 | Member onboarding | Built 13 Nov 2026 (branch `step/7.1-member-onboarding`, on top of `step/6.x-decisions`, not merged): persona (531:9), topics and states (531:101) and suggested follows and alerts (531:178), each skippable; persona, topics and states on the member profile and mirrored as follows; members who haven't finished or skipped go there from /member. Browser test written, not yet run (servers stopped). You: approve the persona and topic lists |
+| 7.2 | Home feed, follows and saved items | Built 13 Nov 2026 (branch `step/7.2-feed-follows-saved`, on top of 7.1, not merged): feed of articles, tenders, schemes, grants, events, jobs and followed companies' products, newest first, each saying why it is there, filtered by type (532:9, empty 532:629); Saved items with tabs, search, sort and remove (541:8, 541:643, 541:796); Manage follows with levels All updates / Digest only / None, search to add companies (543:8, 550:8). Save and Follow buttons across the site now save or follow when the member page opens (never on prefetch). Unfollowing keeps saved items. Integration tests pass; browser test written, not yet run (servers stopped). Hydrogen 101 and upcoming events on the feed's side come in 7.5 |
 | 7.2 | Home feed, follows and saved items | Not started |
 | 7.3 | Alerts engine | Not started |
 | 7.4 | Profile and preferences | Not started |

@@ -51,6 +51,8 @@ export const follows = core.table(
     targetId: text("target_id").notNull(),
     label: text("label").notNull(),
     href: text("href"),
+    /** Manage follows (543:8): all (feed and in-app), digest (feed and weekly email), none (feed only). */
+    level: text("level").notNull().default("all"),
     createdAt: utc("created_at")
       .notNull()
       .default(sql`now()`),
@@ -92,4 +94,32 @@ export const alerts = core.table(
     deletedAt: utc("deleted_at"),
   },
   (t) => [index("alerts_owner").on(t.userId), index("alerts_index").on(t.indexUid, t.active)],
+);
+
+/**
+ * Saved items (step 7.2; 541:8): anything saved from any page, private to the member. Title, meta and link are kept
+ * so the list reads without joins; unfollowing never removes saved items.
+ */
+export const savedItems = core.table(
+  "saved_items",
+  {
+    id: id(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    /** article, product, tender, scheme, grant, event, job, company */
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    title: text("title").notNull(),
+    href: text("href").notNull(),
+    /** "News · 28 Oct 2026" */
+    meta: text("meta"),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [
+    uniqueIndex("saved_items_one").on(t.userId, t.targetType, t.targetId),
+    index("saved_items_owner").on(t.userId, t.createdAt),
+  ],
 );
