@@ -22,5 +22,5 @@ sed \
   -e "s#^S3_SECRET_KEY=.*#S3_SECRET_KEY=$S3#" \
   h2india.env.example > h2india.env
 chmod 600 h2india.env
-grep -q change-me h2india.env && { echo "Some change-me values are left in h2india.env; edit them."; exit 1; }
+grep -v '^#' h2india.env | grep -q change-me && { echo "Some change-me values are left in h2india.env; edit them."; exit 1; }
 echo "h2india.env created (permissions 600)."
