@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, primaryKey, text, uuid } from "drizzle-orm/pg-core";
+import { integer, jsonb, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 import { id, timestamps, utc } from "../columns";
 import { users } from "./auth";
 import { core } from "./core";
@@ -27,6 +27,10 @@ export const newsletterSends = core.table("newsletter_sends", {
   opens: integer("opens"),
   clicks: integer("clicks"),
   lastTestAt: utc("last_test_at"),
+  /** Chart of the week (648:312): a tracker chart's key, or null for none. */
+  chart: text("chart"),
+  /** The sponsor slot (648:312), always labelled Sponsored; null for none. */
+  sponsor: jsonb("sponsor").$type<{ name: string; headline: string; text: string; url: string }>(),
   updatedBy: uuid("updated_by").references(() => users.id),
   ...timestamps,
 });

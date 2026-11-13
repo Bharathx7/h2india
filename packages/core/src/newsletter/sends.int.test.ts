@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor, type Actor } from "../authz/actor";
 import { runDeadlines } from "../clocks/clocks";
 import { makeUser, useTestEnv } from "../testing/factory";
-import { saveSend, scheduleSend, sendBatch, sendFor, NewsletterSendError } from "./sends";
+import { saveSend, scheduleSend, sendBatch, sendFor, sendStats, NewsletterSendError } from "./sends";
 
 // Step 11.3 DONE WHEN: a scheduled issue sends at the set IST time to confirmed subscribers only (and each once).
 const url = process.env.TEST_DATABASE_URL;
@@ -83,6 +83,15 @@ describe.skipIf(!url || !mail)("newsletter sends", () => {
     expect(ids).not.toContain(gone?.id);
     expect(total).toBe(ids.length);
     expect(await sendBatch(h.db, send?.id ?? "", content)).toBe(0);
+    // Stats (647:660): sent and delivered from the deliveries; opens and clicks wait for the provider (M6); a
+    // recipient who unsubscribes afterwards counts against this issue.
+    await h.db
+      .update(schema.newsletterSubscribers)
+      .set({ status: "unsubscribed", unsubscribedAt: new Date(Date.now() + 5000) })
+      .where(eq(schema.newsletterSubscribers.id, confirmed?.id ?? ""));
+    const stats = await sendStats(h.db, issueId, new Date(Date.now() + 60_000));
+    expect(stats).toMatchObject({ status: "Sent", sent: ids.length, delivered: total, opens: null, clicks: null });
+    expect(stats?.unsubscribed).toBeGreaterThanOrEqual(1);
     await h.db
       .delete(schema.newsletterDeliveries)
       .where(inArray(schema.newsletterDeliveries.subscriberId, [confirmed?.id ?? ""]));

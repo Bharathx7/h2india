@@ -1,7 +1,9 @@
 import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { firstIssueDate } from "@h2india/core/newsletter";
-import { confirmedCount, sendFor } from "@h2india/core/newsletter/sends";
+import { confirmedCount, sendFor, type IssueContent } from "@h2india/core/newsletter/sends";
+
+type IssueSection = IssueContent["sections"][number];
 import { formatIstDateTime } from "@h2india/core/time";
 import { Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -9,7 +11,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import { SendSettings } from "@/admin/content/Controls";
-import { issueContent } from "@/admin/content/issue";
+import { issueContent, NEWSLETTER_CHARTS } from "@/admin/content/issue";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Newsletter composer (648:312), step 11.3: the issue as subscribers get it (auto-filled from the week's published
@@ -44,7 +46,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
   const db = getDb();
   const [send, audience] = await Promise.all([sendFor(db, id), confirmedCount(db)]);
   const at = send?.sendAt ?? (issue.sentOn ? new Date(issue.sentOn) : new Date());
-  const content = await issueContent(payload, issue, at);
+  const content = await issueContent(payload, issue, at, { chart: send?.chart ?? null });
   const status = send?.status ?? "Draft";
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
@@ -73,26 +75,50 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
                 <p className="type-body-sm">{send.editorNote}</p>
               </div>
             ) : null}
-            {content.sections.map((s) => (
-              <div key={s.heading} className="flex flex-col gap-2">
-                <p className="flex items-center justify-between type-eyebrow text-secondary">
-                  {s.heading}
-                  <span className="rounded-pill bg-subtle px-2 py-0.5 type-caption normal-case">Auto-filled</span>
-                </p>
-                {s.items.length ? (
-                  s.items.map((i) => (
-                    <div key={i.href} className="border-t border-default pt-2">
-                      <p className="type-label text-link">{i.title}</p>
-                      <p className="type-caption text-secondary">{i.meta}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="type-caption text-secondary">
-                    Nothing this week. The section is left out of the email.
-                  </p>
-                )}
+            {content.sections
+              .filter((s) => !s.late)
+              .map((s) => (
+                <PreviewSection key={s.heading} section={s} />
+              ))}
+            {content.chart ? (
+              <div className="flex flex-col gap-2">
+                <p className="type-eyebrow text-secondary">Chart of the week</p>
+                <p className="type-label">{content.chart.title}</p>
+                <ul className="flex flex-col gap-1">
+                  {content.chart.bars.map((b) => {
+                    const max = Math.max(...(content.chart?.bars.map((x) => x.value) ?? [1]), 1);
+                    return (
+                      <li
+                        key={b.label}
+                        className="grid grid-cols-[120px_minmax(0,1fr)_48px] items-center gap-2 type-caption"
+                      >
+                        <span className="truncate">{b.label}</span>
+                        <span
+                          className="h-2.5 rounded-pill bg-accent"
+                          style={{ width: `${String(Math.max(2, Math.round((b.value / max) * 100)))}%` }}
+                        />
+                        <span className="text-right">{b.value.toLocaleString("en-IN")}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="type-caption text-secondary">{content.chart.source}</p>
               </div>
-            ))}
+            ) : null}
+            {send?.sponsor ? (
+              <div className="flex flex-col gap-1 rounded-card bg-mint p-4">
+                <p className="type-eyebrow text-secondary">Sponsored</p>
+                <p className="type-label">
+                  {send.sponsor.name} · {send.sponsor.headline}
+                </p>
+                {send.sponsor.text ? <p className="type-caption">{send.sponsor.text}</p> : null}
+              </div>
+            ) : null}
+            {content.sections
+              .filter((s) => s.late)
+              .map((s) => (
+                <PreviewSection key={s.heading} section={s} />
+              ))}
             <p className="type-caption text-secondary">
               You get this because you subscribed to India H₂ Weekly. Manage preferences · Unsubscribe
             </p>
@@ -100,6 +126,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
         </section>
         <section className="self-start rounded-card border border-default bg-page p-5">
           <SendSettings
+            charts={NEWSLETTER_CHARTS}
             issueId={id}
             status={status}
             audience={audience}
@@ -109,10 +136,33 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
               preview: send?.preview ?? "",
               editorNote: send?.editorNote ?? "",
               sendAt: local(send?.sendAt ?? firstIssueDate()), // A172: Mondays at 8:00 AM IST,
+              chart: send?.chart ?? "",
+              sponsor: send?.sponsor ?? { name: "", headline: "", text: "", url: "" },
             }}
           />
         </section>
       </div>
     </AdminShell>
+  );
+}
+
+function PreviewSection({ section: s }: { section: IssueSection }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="flex items-center justify-between type-eyebrow text-secondary">
+        {s.heading}
+        <span className="rounded-pill bg-subtle px-2 py-0.5 type-caption normal-case">Auto-filled</span>
+      </p>
+      {s.items.length ? (
+        s.items.map((i) => (
+          <div key={i.href} className="border-t border-default pt-2">
+            <p className="type-label text-link">{i.title}</p>
+            <p className="type-caption text-secondary">{i.meta}</p>
+          </div>
+        ))
+      ) : (
+        <p className="type-caption text-secondary">Nothing this week. The section is left out of the email.</p>
+      )}
+    </div>
   );
 }

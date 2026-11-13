@@ -72,6 +72,9 @@ export interface SendForm {
   editorNote: string;
   /** yyyy-mm-ddThh:mm in IST */
   sendAt: string;
+  /** Chart of the week: a tracker view's key, or "" for none. */
+  chart: string;
+  sponsor: { name: string; headline: string; text: string; url: string };
 }
 
 export async function saveSendAction(issueId: string, f: SendForm): Promise<R> {
@@ -123,7 +126,7 @@ export async function testAction(issueId: string, f: SendForm, to: string): Prom
   });
   try {
     await saveSend(getDb(), actor, { issueId, ...f });
-    await sendTest(getDb(), actor, issueId, to, await issueContent(payload, issue, new Date()));
+    await sendTest(getDb(), actor, issueId, to, await issueContent(payload, issue, new Date(), { chart: f.chart }));
   } catch (error) {
     return fail(error);
   }

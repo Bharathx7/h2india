@@ -1,7 +1,7 @@
 import type { ChosenDeadline } from "@h2india/config/clocks";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { parseServerEnv } from "@h2india/config";
-import { renderNewsletterIssue, type IssueSection } from "@h2india/emails";
+import { renderNewsletterIssue, type IssueChart, type IssueSection } from "@h2india/emails";
 import { and, desc, eq, notInArray, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
@@ -13,6 +13,8 @@ import { manageLink, unsubscribeHeaders, unsubscribeUrl } from "./index";
 // Sending India H₂ Weekly (step 11.3). The issue is written in the CMS; this keeps its subject, preview and editor's
 // note, schedules the send for an IST time (a deadline, so it survives restarts), and sends to confirmed subscribers
 // only, in batches, each at most once, with the one-click unsubscribe headers. Editors need content.edit.
+
+export type { IssueChart };
 
 const s = schema.newsletterSends;
 const d = schema.newsletterDeliveries;
@@ -42,7 +44,14 @@ export async function confirmedCount(db: Executor) {
 export async function saveSend(
   db: Database,
   actor: Actor,
-  input: { issueId: string; subject: string; preview: string; editorNote: string },
+  input: {
+    issueId: string;
+    subject: string;
+    preview: string;
+    editorNote: string;
+    chart?: string | null;
+    sponsor?: IssueSponsor | null;
+  },
 ) {
   assertCan(actor, "content.edit");
   const existing = await sendFor(db, input.issueId);
@@ -52,6 +61,8 @@ export async function saveSend(
     subject: input.subject.trim().slice(0, 200),
     preview: input.preview.trim().slice(0, 200),
     editorNote: input.editorNote.trim().slice(0, 1000),
+    ...(input.chart !== undefined ? { chart: input.chart?.trim() || null } : {}),
+    ...(input.sponsor !== undefined ? { sponsor: cleanSponsor(input.sponsor) } : {}),
     updatedBy: actor.userId,
     updatedAt: new Date(),
   };
@@ -136,6 +147,31 @@ export interface IssueContent {
   title: string;
   masthead: string;
   sections: IssueSection[];
+  /** Chart of the week, from the India Hydrogen Tracker, with its source and as-of date. */
+  chart?: IssueChart | null;
+}
+
+export interface IssueSponsor {
+  name: string;
+  headline: string;
+  text: string;
+  url: string;
+}
+
+/** A sponsor slot needs a name, a headline and an https link; anything less is no sponsor. */
+export function cleanSponsor(x: IssueSponsor | null): IssueSponsor | null {
+  if (!x) return null;
+  const v = {
+    name: x.name.trim().slice(0, 80),
+    headline: x.headline.trim().slice(0, 120),
+    text: x.text.trim().slice(0, 240),
+    url: x.url.trim(),
+  };
+  if (!v.name && !v.headline && !v.url) return null;
+  if (!v.name || !v.headline) throw new NewsletterSendError("A sponsor needs a name and a headline");
+  if (!/^https:\/\/\S+\.\S+/.test(v.url))
+    throw new NewsletterSendError("Give the sponsor's link, starting with https://");
+  return v;
 }
 
 function render(
@@ -152,6 +188,8 @@ function render(
     preview: row.preview,
     editorNote: row.editorNote,
     sections: content.sections,
+    chart: content.chart ?? null,
+    sponsor: row.sponsor ?? null,
     ...links,
   });
 }
@@ -210,4 +248,53 @@ export async function sendTest(
   const mail = await render(row, content, { manageUrl: "#", unsubscribeUrl: "#" }, `[Test] ${row.subject}`);
   await deliverEmail({ template: "email.newsletter_issue", event: "newsletter.test", userId: actor.userId, to, mail });
   await db.update(s).set({ lastTestAt: now }).where(eq(s.id, row.id));
+}
+
+export interface SendStats {
+  status: string;
+  sentAt: Date | null;
+  /** People it went to (one delivery row each). */
+  sent: number;
+  /** Emails handed to the mail service without an error. */
+  delivered: number;
+  /** As the email provider reports them (M6); null until it does. */
+  opens: number | null;
+  clicks: number | null;
+  /** Recipients who unsubscribed after this issue and before the next one went. */
+  unsubscribed: number;
+}
+
+/** How an issue did (Stats, 647:660). Counts only; nobody's address is shown. */
+export async function sendStats(db: Executor, issueId: string, now = new Date()): Promise<SendStats | null> {
+  const row = await sendFor(db, issueId);
+  if (!row) return null;
+  const [sent] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(d)
+    .where(eq(d.sendId, row.id));
+  let unsubscribed = 0;
+  if (row.sentAt) {
+    const [next] = await db
+      .select({ at: sql<Date | null>`min(${s.sentAt})` })
+      .from(s)
+      .where(sql`${s.sentAt} > ${row.sentAt}`);
+    const until = next?.at ? new Date(next.at) : now;
+    const [u] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(d)
+      .innerJoin(subs, eq(subs.id, d.subscriberId))
+      .where(
+        and(eq(d.sendId, row.id), sql`${subs.unsubscribedAt} >= ${row.sentAt}`, sql`${subs.unsubscribedAt} < ${until}`),
+      );
+    unsubscribed = u?.n ?? 0;
+  }
+  return {
+    status: row.status,
+    sentAt: row.sentAt,
+    sent: sent?.n ?? 0,
+    delivered: row.delivered,
+    opens: row.opens,
+    clicks: row.clicks,
+    unsubscribed,
+  };
 }

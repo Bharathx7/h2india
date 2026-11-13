@@ -16,7 +16,11 @@ export async function POST(request: Request) {
       .findByID({ collection: "newsletter-issues", id: Number(send.issueId), depth: 0, overrideAccess: true })
       .catch(() => null);
     if (!issue) continue;
-    sent += await sendBatch(db, send.id, await issueContent(payload, issue, send.sendAt ?? new Date()));
+    sent += await sendBatch(
+      db,
+      send.id,
+      await issueContent(payload, issue, send.sendAt ?? new Date(), { chart: send.chart }),
+    );
   }
   return Response.json({ sent });
 }

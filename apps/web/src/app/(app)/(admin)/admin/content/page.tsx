@@ -440,6 +440,14 @@ export default async function ContentPage({
                     <td className="px-2 py-3 text-right type-mono">{send?.opens ?? "—"}</td>
                     <td className="px-2 py-3 text-right type-mono">{send?.clicks ?? "—"}</td>
                     <td className="px-4 py-3 text-right">
+                      {st === "Sent" ? (
+                        <Link
+                          href={`/admin/content/newsletter/${String(d.id)}/stats`}
+                          className={cx(buttonClasses({ variant: "ghost", size: "sm" }), "mr-2")}
+                        >
+                          Stats<span className="sr-only"> {d.title}</span>
+                        </Link>
+                      ) : null}
                       <Link
                         href={`/admin/content/newsletter/${String(d.id)}`}
                         className={buttonClasses({ variant: "outline", size: "sm" })}

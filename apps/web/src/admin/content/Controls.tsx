@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, Icon, Input, StatusBadge, Textarea } from "@h2india/ui";
+import { Alert, Button, Icon, Input, Select, StatusBadge, Textarea } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
@@ -46,7 +46,9 @@ export function SendSettings({
   status,
   audience,
   lastTest,
+  charts,
 }: {
+  charts: { value: string; label: string }[];
   issueId: string;
   start: SendForm;
   status: string;
@@ -113,6 +115,52 @@ export function SendSettings({
           }}
         />
       </label>
+      <label className="flex flex-col gap-1.5">
+        <span className="type-label">Chart of the week</span>
+        <Select
+          value={f.chart}
+          disabled={locked}
+          onChange={(e) => {
+            setF({ ...f, chart: e.target.value });
+          }}
+        >
+          <option value="">No chart</option>
+          {charts.map((c) => (
+            <option key={c.value} value={c.value}>
+              India Hydrogen Tracker · {c.label}
+            </option>
+          ))}
+        </Select>
+        <span className="type-caption text-secondary">
+          Drawn from published tracker records, with the source and date.
+        </span>
+      </label>
+      <fieldset className="flex flex-col gap-2">
+        <legend className="type-label">Sponsor slot</legend>
+        <span className="type-caption text-secondary">
+          Readers always see “Sponsored” above it. Leave empty for none.
+        </span>
+        {(
+          [
+            ["name", "Sponsor", 80],
+            ["headline", "Headline", 120],
+            ["text", "One line about it", 240],
+            ["url", "Link (https://)", 400],
+          ] as const
+        ).map(([k, label, max]) => (
+          <Input
+            key={k}
+            aria-label={`Sponsor ${label.toLowerCase()}`}
+            placeholder={label}
+            maxLength={max}
+            disabled={locked}
+            value={f.sponsor[k]}
+            onChange={(e) => {
+              setF({ ...f, sponsor: { ...f.sponsor, [k]: e.target.value } });
+            }}
+          />
+        ))}
+      </fieldset>
       <p className="type-body-sm">
         Segment: <span className="type-label">All confirmed subscribers · {audience.toLocaleString("en-IN")}</span>
       </p>

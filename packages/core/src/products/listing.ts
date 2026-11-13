@@ -1,5 +1,5 @@
 import { schema, type Executor } from "@h2india/db";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 import type { AttributeDef } from "../catalogue/attributes";
 import { cardChips, formatValue, leadTimeLabel, type ListingQuery } from "./rules";
 import { supplierNotSuspended } from "./suspension";
@@ -228,4 +228,38 @@ export async function listProducts(db: Executor, scope: ListingScope, q: Listing
     };
   });
   return { items, total: matching.length, facets };
+}
+
+/**
+ * Listings that went live in a window, for the newsletter's New listings (648:312): name, supplier and link only,
+ * never a price. Verified suppliers that aren't suspended; samples only when sample content is on.
+ */
+export async function newListings(
+  db: Executor,
+  input: { since: Date; until: Date; includeSample: boolean; limit?: number },
+): Promise<{ name: string; href: string; supplier: string }[]> {
+  const p = schema.products;
+  const cp = schema.companyProfiles;
+  const org = schema.organisations;
+  const rows = await db
+    .select({ slug: p.slug, name: p.name, supplier: cp.tradeName, sample: p.sample })
+    .from(p)
+    .innerJoin(org, eq(org.id, p.organisationId))
+    .innerJoin(cp, eq(cp.organisationId, p.organisationId))
+    .where(
+      and(
+        eq(p.status, "Live"),
+        isNull(p.deletedAt),
+        eq(org.verification, "Verified"),
+        supplierNotSuspended(p.organisationId),
+        gte(p.publishedAt, input.since),
+        lt(p.publishedAt, input.until),
+      ),
+    )
+    .orderBy(desc(p.publishedAt))
+    .limit((input.limit ?? 3) * 3);
+  return rows
+    .filter((r) => input.includeSample || !r.sample)
+    .slice(0, input.limit ?? 3)
+    .map((r) => ({ name: r.name, href: productHref(r.slug), supplier: r.supplier }));
 }

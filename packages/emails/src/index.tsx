@@ -209,7 +209,7 @@ export function renderJobLive(appUrl: string, input: Parameters<typeof jobLiveMe
 }
 
 import { NewsletterIssue, type NewsletterIssueProps } from "./newsletter/Issue";
-export type { IssueSection, NewsletterIssueProps } from "./newsletter/Issue";
+export type { IssueChart, IssueSection, NewsletterIssueProps } from "./newsletter/Issue";
 
 export async function renderNewsletterIssue(props: NewsletterIssueProps & { subject: string }): Promise<RenderedEmail> {
   const element = <NewsletterIssue {...props} />;
