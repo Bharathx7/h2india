@@ -247,6 +247,15 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Team changes go through `inviteMember()`/`acceptInvitation()` (invited email only), `changeMemberRole()` and `removeMember()` (never the last admin). Storefront edits go through `saveStorefrontDraft()` → `publishStorefront()` → `decideStorefront()`; the public profile changes only on approval.
 - Supplier analytics events come only from `recordEvent()` (via the `ViewBeacon` component, `/api/v1/events` or a server action): never record a person, and keep operators and the supplier's own team out. Read figures only with `supplierAnalytics()`.
 
+## Buyer workspace (Stage 9)
+
+- Buyer pages call `requireBuyer()` and render in `BuyerWorkspace` (`apps/web/src/buyer/shell.tsx`); actions get the company from `buyerOf()`, never from the form. Core lives in `@h2india/core/buyer`.
+- The onboarding checklist is `buildBuyerChecklist(buyerFacts())`: derived from records only.
+- Company settings change only through `@h2india/core/buyer/settings` (company.manage, audited); people and roles through the team functions in `supplier/team.ts` (team.manage), shared by buyers and suppliers through `teamActor()`.
+- A second GSTIN must share the company's PAN; only a verified GSTIN can be the default; a GSTIN a delivery site bills to can't be removed.
+- Approval rules are stored now and enforced only when ordering opens (A162). Project lists never carry a price.
+- Every new buyer-owned table gets a case in `authz/authz.int.test.ts` and `buyer/buyer.int.test.ts`.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.

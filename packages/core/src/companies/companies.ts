@@ -143,9 +143,10 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
         .returning({ id: o.id });
       if (!org) throw new Error("organisation insert returned nothing");
       organisationId = org.id;
-      for (const c of checked) {
+      for (const [i, c] of checked.entries()) {
         await tx.insert(g).values({
           organisationId,
+          isDefault: i === 0,
           gstin: c.gstin,
           stateCode: c.gstin.slice(0, 2),
           place: c.record ? `${c.record.city}, ${stateOf(c.gstin)}` : stateOf(c.gstin),

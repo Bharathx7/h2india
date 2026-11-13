@@ -4,6 +4,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approveJoinRequest, requestToJoin } from "../companies/join-requests";
 import { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "../companies/repo";
 import { pendingClaims } from "../companies/claims";
+import { createList, projectLists } from "../buyer/lists";
+import { addDelegation, delegationsOf, deliverySitesOf, saveDeliverySite } from "../buyer/settings";
 import { listCompanyProducts, listCompanyQuestions } from "../products/company";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
@@ -99,6 +101,26 @@ describe.skipIf(!url)("authorisation", () => {
       await expect(approveJoinRequest({ adminId: data.b.admin.id, requestId: request.id })).rejects.toMatchObject({
         code: "NOT_ALLOWED",
       });
+    });
+
+    it("delivery sites, delegations and project lists (step 9.1)", async () => {
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      await saveDeliverySite(h.db, a, data.a.org.id, { name: "Plant", address: "Plot 1", contacts: [] });
+      await addDelegation(h.db, a, data.a.org.id, {
+        fromUserId: data.a.admin.id,
+        toUserId: data.a.requester.id,
+        startsOn: new Date(),
+        endsOn: new Date(Date.now() + 7 * 86_400_000),
+      });
+      await createList(h.db, a, data.a.org.id, "Pilot");
+      expect(await deliverySitesOf(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      expect(await delegationsOf(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      expect(await projectLists(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      await expect(
+        saveDeliverySite(h.db, b, data.a.org.id, { name: "X", address: "Y", contacts: [] }),
+      ).rejects.toThrow();
+      await expect(createList(h.db, b, data.a.org.id, "X")).rejects.toThrow();
     });
   });
 

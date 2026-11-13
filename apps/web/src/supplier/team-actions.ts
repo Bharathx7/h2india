@@ -16,13 +16,29 @@ import { getDb } from "@h2india/core";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
+import { loadActor } from "@h2india/core/authz";
 import { supplierActor } from "./actions";
+
+/** The company whose team this person manages: their supplier company, else their buyer company. */
+async function teamActor() {
+  const session = await getSession();
+  if (!session) throw new Error("Sign in again.");
+  const db = getDb();
+  const actor = await loadActor(db, session.user.id);
+  const seats = [...actor.companies.entries()];
+  const pick =
+    seats.find(([, s]) => s.permissions.has("team.manage") && (s.kind === "supplier" || s.kind === "both")) ??
+    seats.find(([, s]) => s.permissions.has("team.manage")) ??
+    seats[0];
+  if (!pick) throw new Error("This account has no company.");
+  return { db, actor, supplier: { organisationId: pick[0] } };
+}
 
 // Team and permissions, invitations and the storefront (step 8.7). Core checks team.manage / storefront.manage.
 
 type Result = { ok: true } | { ok: false; error: string };
 
-async function run(work: () => Promise<unknown>, path: string): Promise<Result> {
+async function run(work: () => Promise<unknown>, path: string, also?: string): Promise<Result> {
   try {
     await work();
   } catch (error) {
@@ -34,23 +50,28 @@ async function run(work: () => Promise<unknown>, path: string): Promise<Result> 
     throw error;
   }
   revalidatePath(path);
+  revalidatePath(also ?? "/buyer/company");
   return { ok: true };
 }
 
 export async function inviteMemberAction(email: string, role: string) {
-  const { db, actor, supplier } = await supplierActor();
+  const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
-  return run(() => inviteMember(db, actor, supplier.organisationId, { email, role, context }), "/supplier/team");
+  return run(
+    () => inviteMember(db, actor, supplier.organisationId, { email, role, context }),
+    "/supplier/team",
+    "/buyer/company",
+  );
 }
 
 export async function revokeInvitationAction(id: string) {
-  const { db, actor, supplier } = await supplierActor();
+  const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
   return run(() => revokeInvitation(db, actor, supplier.organisationId, id, context), "/supplier/team");
 }
 
 export async function changeRoleAction(userId: string, role: string) {
-  const { db, actor, supplier } = await supplierActor();
+  const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
   return run(
     () => changeMemberRole(db, actor, { organisationId: supplier.organisationId, userId, role }, context),
@@ -59,13 +80,13 @@ export async function changeRoleAction(userId: string, role: string) {
 }
 
 export async function removeMemberAction(userId: string) {
-  const { db, actor, supplier } = await supplierActor();
+  const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
   return run(() => removeMember(db, actor, supplier.organisationId, userId, context), "/supplier/team");
 }
 
 export async function answerJoinRequestAction(requestId: string, approve: boolean) {
-  const { actor } = await supplierActor();
+  const { actor } = await teamActor();
   const context = await requestContext();
   return run(
     () =>

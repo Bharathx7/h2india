@@ -119,7 +119,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 9.1 | Buyer workspace: dashboard, onboarding, company settings and project lists | Not started |
+| 9.1 | Buyer workspace: dashboard, onboarding, company settings and project lists | Built 13 Nov 2026 (branch `step/9.1-buyer-workspace`, on top of 8.8, not merged): buyer shell (Request a quote in the top bar; Orders and Payments hidden while `transactions` is off); onboarding checklist (553:8) worked out from records (GSTIN, delivery site, colleagues, approval rules, first RFQ), then the dashboard (554:8; quote and order figures fill in from 9.2 and Stage 10); Company settings (574:8 to 576:662): profile, GSTINs (same PAN, checked in the background, default only once verified), delivery sites with receiving contacts, users and roles (team controls from 8.7, order limits), approval rules and delegation (stored, enforced in Stage 10, A162), passkey policy and sign-out of sessions; Notifications links to the person's own choices. Saved lists (78:2628) shared in the company, with Request quotes for selected and Compare; no price. Int tests: checklist follows records, only a buyer Admin can invite, change roles or remove (at the API), second GSTIN states, company B can't read or change A's sites, delegations, settings or lists. You: check the screens against the frames |
 | 9.2 | RFQ and quote records and their statuses | Not started |
 | 9.3 | The RFQ wizard | Not started |
 | 9.4 | Moderation and distribution | Not started |

@@ -47,6 +47,7 @@ export async function teamView(db: Executor, scope: Scope, organisationId: strin
       name: u.name,
       email: u.email,
       role: m.role,
+      orderLimitPaise: m.orderLimitPaise,
       passkey: sql<boolean>`exists (select 1 from core.passkeys pk where pk.user_id = ${u.id})`,
       lastActive: sql<Date | null>`(select max(s.updated_at) from core.sessions s where s.user_id = ${u.id})`,
     })

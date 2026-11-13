@@ -8,6 +8,7 @@
     "./time": "./src/time.ts",
     "./alerts": "./src/alerts/index.ts",
     "./supplier": "./src/supplier/index.ts",
+    "./buyer": "./src/buyer/index.ts",
     "./supplier/rules": "./src/supplier/verification-rules.ts",
     "./alerts/rules": "./src/alerts/rules.ts",
     "./auth": "./src/sign-in/auth.ts",

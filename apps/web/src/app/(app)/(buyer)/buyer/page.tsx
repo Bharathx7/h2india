@@ -1,11 +1,190 @@
-import { PRODUCT_NAME } from "@h2india/core";
+import { getDb } from "@h2india/core";
+import { buyerChecklist } from "@h2india/core/buyer";
+import { companyRoles } from "@h2india/core/supplier";
+import { listAlerts } from "@h2india/core/members";
+import { buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
+import { buildFeed } from "@/member/feed";
 
-export default function Page() {
+// Buyer home (step 9.1): the onboarding checklist (553:8; phones 555:15) until all five steps are done, then the
+// dashboard (554:8; phones 555:445; first use 554:483). Quote, order and spend figures fill in from steps 9.2 to 10.
+export const metadata: Metadata = { title: "Buyer · H2 India", robots: { index: false } };
+export const dynamic = "force-dynamic";
+
+const LINK: Record<string, { href: string; label: string; primary?: boolean }> = {
+  gstin: { href: "/buyer/company?section=gstins", label: "Add GSTIN" },
+  site: { href: "/buyer/company?section=sites", label: "Add a site" },
+  colleagues: { href: "/buyer/company?section=users", label: "Invite colleagues", primary: true },
+  rules: { href: "/buyer/company?section=rules", label: "Set rules" },
+  rfq: { href: "/rfq/new", label: "Request a quote" },
+};
+
+export default async function BuyerHome() {
+  const page = await requireBuyer("/buyer");
+  const db = getDb();
+  const b = page.buyer;
+  const [checklist, roles, alerts, feed] = await Promise.all([
+    buyerChecklist(db, b.organisationId),
+    companyRoles(db, b.organisationId),
+    listAlerts(db, page.userId),
+    buildFeed(page.userId),
+  ]);
+  if (!checklist.complete) {
+    const next = checklist.items.findIndex((i) => i.state === "todo");
+    return (
+      <BuyerWorkspace page={page} current="/buyer">
+        <div>
+          <h1 className="type-h2">Set up {b.legalName} on H2 India</h1>
+          <p className="type-body-sm text-secondary">
+            Finish these steps so your team can request quotes, approve and place orders.
+          </p>
+        </div>
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <section aria-labelledby="progress" className="rounded-card border border-default bg-page">
+            <div className="flex flex-col gap-2 border-b border-default p-5">
+              <div className="flex items-baseline justify-between">
+                <h2 id="progress" className="type-h3">
+                  {checklist.done} of {checklist.total} done
+                </h2>
+                <span className="type-label text-secondary">
+                  {Math.round((checklist.done / checklist.total) * 100)}%
+                </span>
+              </div>
+              <div
+                role="progressbar"
+                aria-labelledby="progress"
+                aria-valuemin={0}
+                aria-valuemax={checklist.total}
+                aria-valuenow={checklist.done}
+                className="h-1.5 overflow-hidden rounded-pill bg-subtle"
+              >
+                <div
+                  className="h-full rounded-pill bg-accent"
+                  style={{ width: `${String((checklist.done / checklist.total) * 100)}%` }}
+                />
+              </div>
+            </div>
+            <ol>
+              {checklist.items.map((item, i) => {
+                const link = LINK[item.key];
+                return (
+                  <li
+                    key={item.key}
+                    className="grid items-center gap-3 border-b border-default p-5 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
+                  >
+                    <span
+                      className={cx(
+                        "flex size-7 items-center justify-center rounded-pill type-label",
+                        item.state === "done"
+                          ? "bg-accent"
+                          : i === next
+                            ? "bg-inverse text-inverse"
+                            : "border-[1.5px] border-control text-secondary",
+                      )}
+                    >
+                      {item.state === "done" ? <Icon name="check" size={16} /> : i + 1}
+                    </span>
+                    <h3 className="type-label">{item.title}</h3>
+                    <p className="type-body-sm text-body">{item.detail}</p>
+                    <span className="flex justify-end">
+                      {item.state === "done" ? (
+                        item.badge === "GST verified" ? (
+                          <VerifiedBadge kind="gst" />
+                        ) : item.key === "site" ? (
+                          <Link href="/buyer/company?section=sites" className="type-label">
+                            Edit
+                          </Link>
+                        ) : null
+                      ) : item.badge ? (
+                        <StatusBadge status={item.badge} tone="progress" />
+                      ) : link ? (
+                        <Link
+                          href={link.href}
+                          className={buttonClasses({ variant: i === next ? "primary" : "outline", size: "sm" })}
+                        >
+                          {link.label}
+                        </Link>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <p className="p-5 type-caption text-secondary">You can hide this checklist once all 5 steps are done.</p>
+          </section>
+          <aside className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
+            <h2 className="type-h4">Roles you can give colleagues</h2>
+            <dl className="flex flex-col gap-3">
+              {roles.map((r) => (
+                <div key={r.name}>
+                  <dt className="type-label">{r.name}</dt>
+                  <dd className="type-caption text-secondary">{r.description}</dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        </div>
+      </BuyerWorkspace>
+    );
+  }
+  const opportunities = feed.items.filter((x) => x.kind === "tender" || x.kind === "scheme").slice(0, 2);
   return (
-    <main className="mx-auto max-w-3xl p-10">
-      <p className="type-eyebrow text-secondary">{PRODUCT_NAME}</p>
-      <h1 className="type-h1 mt-2">Buyer workspace</h1>
-      <p className="type-body mt-4">Placeholder. Figma page 13. Built in Stages 9 and 10.</p>
-    </main>
+    <BuyerWorkspace page={page} current="/buyer">
+      <div>
+        <h1 className="type-h2">Dashboard</h1>
+        <p className="type-body-sm text-secondary">{[b.legalName, b.city, b.state].filter(Boolean).join(" · ")}</p>
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+          <h2 className="type-h4">Recent activity</h2>
+          <p className="type-body-sm text-body">
+            Quotes, approvals and deliveries show here as your team uses H2 India.
+          </p>
+          <Link href="/rfq/new" className={buttonClasses({ size: "sm" }) + " self-start"}>
+            Request a quote
+          </Link>
+        </section>
+        <div className="flex flex-col gap-6">
+          <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+            <h2 className="type-h4">Saved search alerts</h2>
+            {alerts.length ? (
+              <ul className="flex flex-col gap-2">
+                {alerts.slice(0, 3).map((a) => (
+                  <li key={a.id} className="type-body-sm">
+                    {a.label}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="type-body-sm text-body">No alerts yet.</p>
+            )}
+            <Link href="/buyer/alerts" className="inline-flex items-center gap-1.5 type-label text-link">
+              Manage alerts
+              <Icon name="arrow-right" size={16} />
+            </Link>
+          </section>
+          {opportunities.length ? (
+            <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+              <h2 className="type-h4">Tenders and schemes for you</h2>
+              {opportunities.map((o) => (
+                <div key={o.key} className="border-t border-default pt-3">
+                  <p className="type-eyebrow text-secondary">{o.kind}</p>
+                  <Link href={o.href} className="type-label hover:underline">
+                    {o.title}
+                  </Link>
+                  <p className="type-caption text-secondary">{o.meta}</p>
+                </div>
+              ))}
+              <Link href="/opportunities" className="inline-flex items-center gap-1.5 type-label text-link">
+                See all opportunities
+                <Icon name="arrow-right" size={16} />
+              </Link>
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </BuyerWorkspace>
   );
 }

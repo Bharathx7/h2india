@@ -17,3 +17,4 @@ export * from "./brands";
 export * from "./claims";
 export * from "./members";
 export * from "./supplier";
+export * from "./buyer";

@@ -87,6 +87,8 @@ export const organisationGstins = core.table(
     portalStatus: text("portal_status").notNull().default("Pending"),
     legalName: text("legal_name"),
     checkedAt: utc("checked_at"),
+    /** Orders are billed to the default GSTIN unless the buyer chooses another (574:638). */
+    isDefault: boolean("is_default").notNull().default(false),
     ...timestamps,
   },
   (t) => [index("organisation_gstins_organisation_idx").on(t.organisationId)],
