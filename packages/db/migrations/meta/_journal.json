@@ -169,6 +169,13 @@
       "when": 1794549455873,
       "tag": "0023_catalogue_refuelling_links",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794549978378,
+      "tag": "0024_products",
+      "breakpoints": true
     }
   ]
 }

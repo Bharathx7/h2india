@@ -204,10 +204,14 @@ describe.skipIf(!url)("catalogue taxonomy", () => {
     await seedCatalogueSamples(h.db);
     await seedCatalogueSamples(h.db);
     const c = schema.catalogueCategories;
+    const [electrolysers] = await h.db
+      .select()
+      .from(c)
+      .where(and(eq(c.slug, "electrolysers"), isNull(c.parentId), isNull(c.deletedAt)));
     const pem = await h.db
       .select()
       .from(c)
-      .where(and(eq(c.slug, "pem"), isNull(c.deletedAt)));
+      .where(and(eq(c.slug, "pem"), eq(c.parentId, electrolysers?.id ?? ""), isNull(c.deletedAt)));
     expect(pem).toHaveLength(1);
     expect(pem[0]?.sample).toBe(true);
   });

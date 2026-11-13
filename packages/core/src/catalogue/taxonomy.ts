@@ -156,6 +156,22 @@ export async function filterableAttributes(db: Executor, categoryId: string): Pr
   return (await categorySchema(db, categoryId)).filter((d) => d.filterable);
 }
 
+/**
+ * The schema a product in this category fills in, and a listing filters on (step 6.3): a sub-category's parent
+ * attributes first, then its own. Sample attributes only with sample content on (F9).
+ */
+export async function effectiveSchema(
+  db: Executor,
+  categoryId: string,
+  opts: { includeSample: boolean },
+): Promise<AttributeDef[]> {
+  const row = await categoryRow(db, categoryId);
+  const own = await liveAttributes(db, categoryId);
+  const parent = row.parentId ? await liveAttributes(db, row.parentId) : [];
+  const keys = new Set(own.map((a) => a.key));
+  return [...parent.filter((a) => !keys.has(a.key)), ...own].filter((a) => opts.includeSample || !a.sample).map(toDef);
+}
+
 async function categoryRow(db: Executor, id: string) {
   const [row] = await db
     .select()

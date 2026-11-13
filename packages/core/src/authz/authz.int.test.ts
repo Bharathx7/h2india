@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approveJoinRequest, requestToJoin } from "../companies/join-requests";
 import { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "../companies/repo";
+import { listCompanyProducts } from "../products/company";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
 import { can } from "./can";
@@ -50,6 +51,22 @@ describe.skipIf(!url)("authorisation", () => {
     it("invitations", async () => {
       const b = await loadActor(h.db, data.b.admin.id);
       expect(await listInvitations(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+    });
+
+    it("products (step 6.3)", async () => {
+      const [category] = await h.db.select().from(schema.catalogueCategories).limit(1);
+      await h.db.insert(schema.products).values({
+        organisationId: data.a.org.id,
+        categoryId: category?.id ?? "",
+        slug: `alpha-draft-${String(Date.now())}`,
+        name: "Alpha draft product",
+      });
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      expect((await listCompanyProducts(h.db, scopeFor(a), data.a.org.id)).map((p) => p.name)).toContain(
+        "Alpha draft product",
+      );
+      expect(await listCompanyProducts(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
     });
 
     it("join requests", async () => {

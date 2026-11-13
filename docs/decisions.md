@@ -219,6 +219,12 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A111 | "pay only after delivery" on the marketplace landing (390:7501) | You | Step 6.2 | Kept as drawn | Open | Payments are switched off (Batch 6 on hold); confirm the line, or it changes to "request quotes from up to 5 suppliers". |
 | A112 | Landing search and chips (390:7576) | You | Step 6.2 | The search box says "Search hydrogen products" (the drawn "1,500+" is a sample count) and searches products. The "Verified suppliers only" and "Made in India" chips join with the listing filters (6.3) | Open | |
 | A113 | Top suppliers on class and application pages | You | Step 6.2 | Until listings exist, directory profiles that name the class's categories, verified first. "Ranked by verified listings and reply time" applies from 8.3 and 9 | Open | |
+| A114 | Where listing filters and counts are worked out (step 6.3) | You | Step 6.3 | In the database (core `listProducts`), not the search engine: exact, no background job, plenty for launch volumes. Revisit with real volumes in step 12.5 | Open | The playbook suggests Meilisearch facets; the index still holds product attributes for global search. |
+| A115 | Products table before the supplier editor | You | Step 6.3 | `core.products` is made now (listings need it): one supplier organisation, one category, attributes checked against the schema, a price only for fixed-price items (the database refuses a price on a quote-only product), statuses Draft · In review · Live · Paused. The supplier's editor and review stay in 8.3 | Open | |
+| A116 | How many products in compare | You | Step 6.5 | 3 (COMPARE_LIMIT), as the flows show; the compare bar reads "Compare 2 of 3" | Open | The table frame's bar says "Compare 3 of 5" (392:5787). |
+| A117 | Category intro text | You | Step 6.3 | Not shown: categories have no description field yet (the PEM frame draws one paragraph). Add it to admin Catalogue if wanted | Open | |
+| A118 | Save to list on cards | You | Step 7.2 | Goes to /member/saved (sign-in first when signed out), as A71, until lists arrive | Open | |
+| A119 | Sub-category schema | You | Step 6.3 | A sub-category's products fill in its parent category's attributes, then its own; filters and the table use the same | Open | Electrolysers' attributes apply to PEM. |
 
 ## Design-system notes (Stage 2)
 
@@ -275,6 +281,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 5.4 built. Added A62 to A67 (addresses, alerts, closing-soon window, applicant groups, checker rules, sample awardees), open with safe defaults; M25 still open, so no scheme has rules.
 - 13 Nov 2026: Step 5.10 built. Added A99 to A102 (indexing switch, hy-gen redirects, 500 reference, maintenance access), open with safe defaults; M14 still open.
 - 13 Nov 2026: Step 5.9 built. Added A94 to A98 (bot challenge, cookie categories and analytics, issue pages, manage link, one-click unsubscribe), open with safe defaults; M10 still open.
+- 13 Nov 2026: Step 6.3 built. Added A114 to A119, open with safe defaults.
 - 13 Nov 2026: Step 6.2 built with the F4 safe default (one template). Added A109 to A113, open with safe defaults.
 - 13 Nov 2026: Step 6.1 built. You chose A104 (Comparable toggle) and A105 (Ports & shipping hidden; it turned out to be drawn on 390:7668, so it is open again). Added A103, A106 to A108, open with safe defaults.
 - 13 Nov 2026: Step 5.8 built. Added A87 to A93 (grievance lookup, grievance handling, team names, pricing figures, legal text, audience figures, careers and help feedback), open with safe defaults; M2, C1, C3, M10 and M16 still open.

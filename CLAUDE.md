@@ -203,6 +203,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Application pages are one template; their words and figures are the `application-pages` CMS collection (figures need a source and as-of date). Categories join applications in admin Catalogue.
 - Server pages use `LiveSection` (`components/LiveSection.tsx`) instead of `AsyncSection`, so the error state has Try again.
 
+## Products and listings (step 6.3)
+
+- Products live in `core.products` (A115). Public reads go through `listProducts()` (`@h2india/core/products`): live, non-sample unless the flag is on, filtered and counted in the database (A114). A company's own products only through `listCompanyProducts(scope)`.
+- Listing state is the address: `parseListing()` and `listingSearch()` in `@h2india/core/products/rules`. Filters come only from the category's filterable attributes (`effectiveSchema()`: parent's attributes, then the sub-category's).
+- The price rule is `canShowPrice()`: only the product page of a fixed-price item. `ProductCard`, listing rows and `ProductCard` data have no price at all; the database refuses a price on a quote-only product.
+- Compare selection: `useCompare()` (`marketplace/compare.ts`), up to `COMPARE_LIMIT`.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
