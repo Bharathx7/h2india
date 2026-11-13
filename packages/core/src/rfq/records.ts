@@ -8,7 +8,7 @@ import { inScope, type Scope } from "../authz/scope";
 import { cancelDeadline, completeDeadline, onDeadline, startClock, startDeadline } from "../clocks/clocks";
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
-import { sendQuoteReceived, sendRfqChecked, sendRfqReceived } from "./notices";
+import { sendQuoteReceived, sendRfqChecked, sendRfqReceived, tellSuppliers } from "./notices";
 import { quoteFigures, scheduleProblem, type PaymentLine } from "./totals";
 import {
   MAX_RFQ_SUPPLIERS,
@@ -494,6 +494,7 @@ export async function extendOfferDeadline(
   to: Date,
   context?: RequestContext,
   now = new Date(),
+  why?: string,
 ) {
   assertCan(actor, "rfq.create", { organisationId });
   const row = await ownRfq(db, organisationId, rfqId);
@@ -520,6 +521,12 @@ export async function extendOfferDeadline(
       context,
     });
   });
+  await tell(() =>
+    tellSuppliers(db, rfqId, {
+      event: "rfq.deadline_extended",
+      title: `${row.reference}: quotes are now due ${to.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}${why ? ` (${why})` : ""}`,
+    }),
+  );
 }
 
 /**
@@ -531,7 +538,14 @@ export async function closeRfq(
   actor: Actor,
   organisationId: string,
   rfqId: string,
-  input: { reason: "closed" | "declined all" | "accepted"; keepQuoteId?: string },
+  input: {
+    reason: "closed" | "declined all" | "accepted";
+    keepQuoteId?: string;
+    /** Why, as the supplier sees it (566:776, 566:1011). */
+    why?: string;
+    /** For the buyer's team only (Close RFQ) or for the suppliers (Decline all). */
+    note?: string;
+  },
   context?: RequestContext,
 ) {
   assertCan(actor, "rfq.create", { organisationId });
@@ -544,9 +558,13 @@ export async function closeRfq(
     { from: row.status, to: "Closed" },
     {
       context,
-      reason: input.reason,
+      reason: input.why ? `${input.reason}: ${input.why}` : input.reason,
+      metadata: input.note ? { note: input.note } : undefined,
       also: async (tx) => {
-        await tx.update(r).set({ closedAt: new Date(), closeReason: input.reason }).where(eq(r.id, rfqId));
+        await tx
+          .update(r)
+          .set({ closedAt: new Date(), closeReason: input.why ? `${input.reason}: ${input.why}` : input.reason })
+          .where(eq(r.id, rfqId));
         await cancelDeadline(tx, { type: OFFER, subjectType: "rfq", subjectId: rfqId });
         const open = await tx
           .select({ id: q.id, status: q.status, organisationId: q.organisationId })
@@ -568,6 +586,53 @@ export async function closeRfq(
         // Drafts nobody sent are left as they are; the RFQ is closed so they can't be sent.
       },
     },
+  );
+  if (input.reason !== "accepted")
+    await tell(() =>
+      tellSuppliers(db, rfqId, {
+        event: input.reason === "declined all" ? "rfq.declined_all" : "rfq.closed",
+        title:
+          input.reason === "declined all"
+            ? `${row.reference}: the buyer declined all quotes${input.why ? ` (${input.why})` : ""}${input.note ? `. "${input.note}"` : ""}`
+            : `${row.reference} is closed${input.why ? `: ${input.why}` : ""}`,
+      }),
+    );
+}
+
+/** Ask a supplier for a revised quote (566:892). Their current quote stays on the comparison until they send one. */
+export async function requestRevision(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  rfqId: string,
+  input: { quoteId: string; aspects: string[]; message: string },
+  context?: RequestContext,
+) {
+  assertCan(actor, "rfq.create", { organisationId });
+  const row = await ownRfq(db, organisationId, rfqId);
+  if (row.status !== "Quotes received") throw new RfqError("Only an RFQ with quotes can ask for a revision");
+  if (!input.message.trim()) throw new RfqError("Write a message to the supplier");
+  const [quote] = await db
+    .select()
+    .from(q)
+    .where(and(eq(q.id, input.quoteId), eq(q.rfqId, rfqId)));
+  if (!quote || (quote.status !== "Sent" && quote.status !== "Revised"))
+    throw new RfqError("This supplier's quote can't be revised now");
+  await audit(db, {
+    actorId: actor.userId,
+    action: "rfq.revision_requested",
+    resourceType: "quote",
+    resourceId: quote.id,
+    companyId: organisationId,
+    after: { aspects: input.aspects, message: input.message.trim().slice(0, 1000) },
+    context,
+  });
+  await tell(() =>
+    tellSuppliers(db, rfqId, {
+      event: "rfq.revision_requested",
+      organisationIds: [quote.organisationId],
+      title: `${row.reference}: the buyer asks for a revised quote${input.aspects.length ? ` (${input.aspects.join(", ").toLowerCase()})` : ""}. "${input.message.trim().slice(0, 140)}"`,
+    }),
   );
 }
 
@@ -905,6 +970,9 @@ export async function buyerRfqs(db: Executor, scope: Scope, organisationId: stri
       suppliers: sql<number>`(select count(*)::int from core.rfq_suppliers x where x.rfq_id = core.rfqs.id)`,
       quoted: sql<number>`(select count(*)::int from core.quotes x where x.rfq_id = core.rfqs.id and x.sent_version is not null and x.status not in ('Withdrawn'))`,
       createdByName: sql<string>`(select u.name from core.users u where u.id = core.rfqs.created_by)`,
+      category: sql<
+        string | null
+      >`(select c.label from core.catalogue_categories c where c.id = core.rfqs.category_id)`,
     })
     .from(r)
     .where(and(inScope(scope, r.organisationId), eq(r.organisationId, organisationId), isNull(r.deletedAt)))
@@ -939,7 +1007,12 @@ export async function buyerRfq(db: Executor, scope: Scope, organisationId: strin
       .where(eq(schema.rfqModerationDecisions.rfqId, rfqId))
       .orderBy(desc(schema.rfqModerationDecisions.at)),
   ]);
-  return { rfq: row, items, suppliers, quotes, decisions };
+  const history = await db
+    .select({ to: schema.statusHistory.toStatus, at: schema.statusHistory.at })
+    .from(schema.statusHistory)
+    .where(and(eq(schema.statusHistory.entityType, "rfq"), eq(schema.statusHistory.entityId, rfqId)))
+    .orderBy(asc(schema.statusHistory.at));
+  return { rfq: row, items, suppliers, quotes, decisions, history };
 }
 
 /**

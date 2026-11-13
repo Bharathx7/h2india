@@ -229,3 +229,30 @@ export async function sendQuoteReceived(db: Executor, quoteId: string) {
     },
   });
 }
+
+/**
+ * An in-app note to everyone who can quote at each chosen supplier (or one supplier): the deadline moved, the RFQ
+ * closed, quotes were declined, or the buyer asks for a revised quote. No email is drawn for these (A167).
+ */
+export async function tellSuppliers(
+  db: Executor,
+  rfqId: string,
+  input: { event: string; title: string; organisationIds?: string[] },
+) {
+  const recipients = await db
+    .select({ organisationId: schema.rfqSuppliers.organisationId })
+    .from(schema.rfqSuppliers)
+    .where(eq(schema.rfqSuppliers.rfqId, rfqId));
+  const ids = recipients
+    .map((x) => x.organisationId)
+    .filter((id) => !input.organisationIds || input.organisationIds.includes(id));
+  for (const organisationId of ids)
+    for (const person of await quoters(db, organisationId))
+      await notify({
+        event: input.event,
+        topic: "rfq.received",
+        userId: person.id,
+        scope: organisationId,
+        inApp: { category: "quotes", icon: "file-text", title: input.title, href: `/supplier/rfqs/${rfqId}` },
+      });
+}

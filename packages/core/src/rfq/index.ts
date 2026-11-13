@@ -5,3 +5,4 @@ export * from "./records";
 export * from "./match";
 export * from "./notices";
 export * from "./moderation";
+export * from "./compare";

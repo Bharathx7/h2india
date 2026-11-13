@@ -18,6 +18,7 @@ import {
   moveQuote,
   moveRfq,
   quoteVersion,
+  requestRevision,
   returnRfq,
   RfqError,
   saveQuoteDraft,
@@ -298,6 +299,45 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     expect(await quoteStatus(q3.quoteId)).toBe("Not selected");
   });
 
+  it("Decline all closes the RFQ and tells every supplier; a revision request reaches one", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const id = await draft([sup(0).org.id, sup(1).org.id]);
+    await submitRfq(h.db, admin, buyer.org.id, id);
+    await approveRfq(h.db, moderator, id);
+    const a = await loadActor(h.db, sup(0).admin.id);
+    const quote = await saveQuoteDraft(h.db, a, sup(0).org.id, id, quoteInput(415_000_000n));
+    await sendQuote(h.db, a, sup(0).org.id, quote.quoteId);
+    await requestRevision(h.db, admin, buyer.org.id, id, {
+      quoteId: quote.quoteId,
+      aspects: ["Lead time"],
+      message: "Can you do 15 weeks?",
+    });
+    const asked = await h.db
+      .select()
+      .from(schema.notifications)
+      .where(eq(schema.notifications.event, "rfq.revision_requested"));
+    expect(asked.filter((n) => n.href === `/supplier/rfqs/${id}`).map((n) => n.userId)).toEqual([sup(0).admin.id]);
+    await closeRfq(h.db, admin, buyer.org.id, id, {
+      reason: "declined all",
+      why: "Prices are above budget",
+      note: "Budget cut this quarter.",
+    });
+    expect(await status(id)).toBe("Closed");
+    expect(await quoteStatus(quote.quoteId)).toBe("Not selected");
+    const told = await h.db
+      .select()
+      .from(schema.notifications)
+      .where(eq(schema.notifications.event, "rfq.declined_all"));
+    const people = told
+      .filter((n) => n.href === `/supplier/rfqs/${id}`)
+      .map((n) => n.userId)
+      .sort();
+    expect(people).toEqual([sup(0).admin.id, sup(1).admin.id].sort());
+    expect(told.find((n) => n.userId === sup(0).admin.id && n.href === `/supplier/rfqs/${id}`)?.title).toMatch(
+      "Prices are above budget",
+    );
+  });
+
   it("refuses a forbidden move, at run time too", async () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const id = await draft([sup(0).org.id]);
@@ -332,6 +372,12 @@ describe.skipIf(!url)("RFQs and quotes", () => {
         ),
       );
     expect(open.map((d) => d.dueAt.getTime())).toEqual([later.getTime()]);
+    // Each supplier is told about the new deadline (in-app).
+    const told = await h.db
+      .select()
+      .from(schema.notifications)
+      .where(eq(schema.notifications.event, "rfq.deadline_extended"));
+    expect(told.some((n) => n.userId === sup(0).admin.id && n.href === `/supplier/rfqs/${id}`)).toBe(true);
     // A Requester of another company can't extend it.
     const outsider = await loadActor(h.db, other.admin.id);
     await expect(
