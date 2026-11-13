@@ -178,3 +178,29 @@ export const payoutBankAccounts = core.table(
   },
   (t) => [index("payout_bank_accounts_org").on(t.organisationId, t.createdAt)],
 );
+
+/**
+ * A storefront change (590:8 "Publish changes", step 8.7). Until a lighter review is decided, every published change
+ * goes through the Listings queue (playbook default). Status: In review, Approved, Needs changes. The live storefront
+ * stays as it is until approval.
+ */
+export const storefrontRevisions = core.table(
+  "storefront_revisions",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    status: text("status").notNull().default("In review"),
+    /** The changed profile: summary, categories, website, and the storefront sections. */
+    data: jsonb("data").$type<Record<string, unknown>>().notNull(),
+    note: text("note"),
+    submittedBy: uuid("submitted_by").references(() => users.id),
+    submittedAt: utc("submitted_at")
+      .notNull()
+      .default(sql`now()`),
+    decidedBy: uuid("decided_by").references(() => users.id),
+    decidedAt: utc("decided_at"),
+  },
+  (t) => [index("storefront_revisions_queue").on(t.status, t.submittedAt)],
+);

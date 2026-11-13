@@ -150,6 +150,7 @@ export async function renderAlertDigest(subject: string, props: AlertDigestProps
 import {
   bankChangedMessage,
   documentExpiringMessage,
+  invitationMessage,
   listingApprovedMessage,
   listingNeedsChangesMessage,
   needsChangesMessage,
@@ -174,4 +175,7 @@ export function renderListingApproved(appUrl: string, input: Parameters<typeof l
 }
 export function renderBankChanged(appUrl: string, input: Parameters<typeof bankChangedMessage>[0]) {
   return renderNotice(appUrl, bankChangedMessage(input));
+}
+export function renderInvitation(appUrl: string, input: Parameters<typeof invitationMessage>[0]) {
+  return renderNotice(appUrl, invitationMessage(input));
 }

@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, isNull, ne } from "drizzle-orm";
+import { storefrontFacts } from "./storefront";
 import { TIER_1 } from "./verification-rules";
 
 // Onboarding checklist (584:8; phones 585:15), step 8.1. Every item is worked out from the supplier's records, never
@@ -83,7 +84,7 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
     documents: { uploaded: uploaded.size, verified: verified.size, needed: tier1.length },
     companyComplete: Boolean(org?.legalName && org.state && gst),
     bank: bank ? { last4: bank.last4, nameMatches: bank.match === true, verified: bank.status === "Active" } : null,
-    storefront: null,
+    storefront: await storefrontFacts(db, organisationId),
     products: { total: items.length, submitted: items.filter((p) => p.status !== "Draft").length },
     review: review?.status === "Approved" ? "approved" : review?.status === "Submitted" ? "submitted" : "none",
   };

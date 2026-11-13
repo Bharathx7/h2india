@@ -166,3 +166,41 @@ export function bankChangedMessage(d: {
     button: { label: "Review the change", href: d.url },
   };
 }
+
+/** Invitation (673:155), step 8.7. Words as drawn. */
+export function invitationMessage(d: {
+  name: string;
+  email: string;
+  inviter: string;
+  inviterRole: string;
+  company: string;
+  companyLine: string;
+  role: string;
+  roleText: string;
+  expires: string;
+  acceptUrl: string;
+  workspace: "supplier" | "buyer";
+}): Message {
+  return {
+    subject: `${d.inviter} invited you to ${d.company} on H2 India`,
+    preview: `Join as ${/^[AEIOU]/i.test(d.role) ? "an" : "a"} ${d.role}. The invitation expires on ${d.expires.replace(/ \d{4}$/, "")}.`,
+    reason: `You're getting this because ${d.inviter} invited ${d.email}.`,
+    eyebrow: `Invitation · ${d.company}`,
+    headline: `Join ${d.company} on H2 India`,
+    paragraphs: [
+      `Hi ${first(d.name || d.email.split("@")[0] || "there")}, ${d.inviter}, ${/^[AEIOU]/i.test(d.inviterRole) ? "an" : "a"} ${d.inviterRole.toLowerCase()} at ${d.company}, invited you to the company's ${d.workspace} workspace.`,
+    ],
+    rows: [
+      { label: "Invited by", value: `${d.inviter} · ${d.inviterRole}` },
+      { label: "Company", value: d.companyLine },
+      {
+        label: "Your role",
+        value: `${d.role}: ${d.roleText.replace(/\.$/, "").replace(/^./, (c) => c.toLowerCase())}`,
+      },
+      { label: "Expires", value: d.expires },
+    ],
+    note: "You'll sign in with a code sent to this email. After that we'll offer to set up a passkey so you can skip codes.",
+    button: { label: "Accept invitation", href: d.acceptUrl },
+    links: [{ label: "Not expecting this? You can ignore this email", href: d.acceptUrl.replace(/\/invite\/.*/, "/") }],
+  };
+}

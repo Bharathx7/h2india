@@ -88,6 +88,35 @@ export default async function CompanyPage({
             <h2 className="type-h3 text-primary">About {c.name}</h2>
             <p className="type-body text-body">{c.summary ?? `${c.name} hasn't added a description yet.`}</p>
           </section>
+          {c.storefront.capabilities || c.storefront.industries?.length || c.storefront.locations?.length ? (
+            <section className="flex flex-col gap-3">
+              <h2 className="type-h3 text-primary">Capabilities</h2>
+              {c.storefront.capabilities ? <p className="type-body text-body">{c.storefront.capabilities}</p> : null}
+              {c.storefront.capacity || c.storefront.leadTime ? (
+                <p className="type-body-sm text-secondary">
+                  {[c.storefront.capacity, c.storefront.leadTime].filter(Boolean).join(" · ")}
+                </p>
+              ) : null}
+              {c.storefront.industries?.length ? (
+                <ul className="flex flex-wrap gap-2" aria-label="Industries served">
+                  {c.storefront.industries.map((x) => (
+                    <li key={x} className="rounded-pill border-[1.5px] border-control px-3 py-1 type-label-sm">
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {c.storefront.locations?.length ? (
+                <ul className="flex flex-col gap-1" aria-label="Locations">
+                  {c.storefront.locations.map((l) => (
+                    <li key={`${l.name}${l.city}`} className="type-body-sm text-body">
+                      {[l.name, [l.city, l.state].filter(Boolean).join(", "), l.kind].filter(Boolean).join(" · ")}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+          ) : null}
           <section className="flex flex-col gap-3 rounded-card border border-default p-5">
             <h2 className="type-h4 text-primary">At a glance</h2>
             <dl className="grid gap-3 sm:grid-cols-2">

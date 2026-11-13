@@ -3,6 +3,7 @@
 import { getDb } from "@h2india/core";
 import { ForbiddenError, loadActor } from "@h2india/core/authz";
 import { assignRevision, decideRevision, ProductError } from "@h2india/core/products";
+import { decideStorefront, StorefrontError } from "@h2india/core/supplier";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -58,4 +59,21 @@ export async function bulkApproveAction(ids: string[]): Promise<number> {
   }
   revalidatePath("/admin/queues/listings");
   return done;
+}
+
+/** Storefront changes (590:8 Publish changes) use the Listings queue until a lighter review is decided (A160). */
+export async function decideStorefrontAction(
+  id: string,
+  approve: boolean,
+  note: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await decideStorefront(getDb(), await actor(), { id, approve, note, context: await requestContext() });
+  } catch (error) {
+    if (error instanceof StorefrontError) return { ok: false, error: error.message };
+    if (error instanceof ForbiddenError) return { ok: false, error: "You can see this but not decide it." };
+    throw error;
+  }
+  revalidatePath("/admin/queues/listings");
+  return { ok: true };
 }

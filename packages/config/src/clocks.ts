@@ -47,6 +47,7 @@ export const CLOCKS = {
     duration: { workingDays: 2 },
     source: "How fees work 272:4636",
   },
+  teamInvitation: { label: "A team invitation expires", duration: { days: 14 }, source: "Invitation email 673:155" },
   bankChangeHold: { label: "Payouts held after a bank change", duration: { hours: 72 }, source: "588:1179 (C5)" },
   dataRightsDue: { label: "Data-rights request due", duration: { days: 30 }, source: "Compliance 660:1786" },
 } as const satisfies Record<string, ClockRule>;

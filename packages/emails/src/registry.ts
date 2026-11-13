@@ -129,7 +129,7 @@ export const TEMPLATES = {
     name: "Invitation",
     frame: "673:155",
     step: "8.7, 9.1",
-    built: false,
+    built: true,
   },
   "email.verification_status": {
     channel: "email",

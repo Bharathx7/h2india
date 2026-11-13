@@ -1,4 +1,4 @@
-import { schema, type Database, type Executor } from "@h2india/db";
+import { schema, type Database, type Executor, type StorefrontData } from "@h2india/db";
 import { and, desc, eq } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
@@ -308,6 +308,8 @@ export interface CompanyProfileView {
   claimed: boolean;
   verified: boolean;
   sample: boolean;
+  /** The approved storefront sections (step 8.7). */
+  storefront: StorefrontData;
 }
 
 /** A public company profile (481:8), pre-seeded ones included; sample ones only with sample content on. */
@@ -338,5 +340,6 @@ export async function companyProfile(
     claimed: row.p.claimStatus !== "Unclaimed",
     verified: row.org.verification === "Verified",
     sample: row.p.sample,
+    storefront: row.p.storefront,
   };
 }

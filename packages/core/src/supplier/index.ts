@@ -6,4 +6,6 @@ export * from "./verification";
 export * from "./verification-rules";
 export { useRegistry, type RegistryAdapter } from "./adapters/registry";
 export * from "./bank";
+export * from "./team";
+export * from "./storefront";
 export { useBankAdapter, type BankAdapter } from "./adapters/bank";

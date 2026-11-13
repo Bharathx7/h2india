@@ -2,12 +2,14 @@ import { getDb } from "@h2india/core";
 import { can } from "@h2india/core/authz";
 import { clockDuration } from "@h2india/core/clocks";
 import { listingQueue } from "@h2india/core/products";
+import { storefrontQueue } from "@h2india/core/supplier";
 import { formatIstDateTime } from "@h2india/core/time";
 import { cx, EmptyState } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { QueueTable, type QueueRow } from "./QueueTable";
+import { StorefrontDecision } from "./StorefrontDecision";
 
 // Queues · Listings (629:367), step 8.3: every new listing and listing change waiting for a decision, oldest first.
 // Age turns amber at the queueAmber clock and red at queueRed (System settings 707:793). The other queues are 11.2.
@@ -33,10 +35,11 @@ export default async function ListingsQueuePage({
   const { userId, actor } = await requireOperator("queues.view", "/admin/queues/listings");
   const db = getDb();
   const view = VIEWS.find((v) => v.key === sp.view)?.key ?? "all";
-  const [rows, amber, red] = await Promise.all([
+  const [rows, amber, red, storefronts] = await Promise.all([
     listingQueue(db, actor, { view: view === "late" ? "all" : view, q: sp.q?.trim(), kind: sp.kind || undefined }),
     clockDuration(db, "queueAmber"),
     clockDuration(db, "queueRed"),
+    storefrontQueue(db, actor),
   ]);
   const now = new Date().getTime();
   const lines: QueueRow[] = rows
@@ -120,6 +123,44 @@ export default async function ListingsQueuePage({
           </EmptyState>
         </div>
       )}
+      {storefronts.length ? (
+        <section aria-labelledby="storefronts" className="flex flex-col gap-3">
+          <h2 id="storefronts" className="type-h3">
+            Storefront changes
+          </h2>
+          <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
+            {storefronts.map((s) => (
+              <li key={s.r.id} className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_360px]">
+                <div>
+                  <p className="type-label">{s.company ?? "Company"}</p>
+                  <p className="type-caption text-secondary">
+                    Sent {formatIstDateTime(s.r.submittedAt)}
+                    {s.slug ? (
+                      <>
+                        {" · "}
+                        <Link href={`/directory/companies/${s.slug}`} className="underline">
+                          Live profile
+                        </Link>
+                      </>
+                    ) : null}
+                  </p>
+                  <dl className="mt-2 grid gap-1 type-caption">
+                    {Object.entries(s.r.data)
+                      .filter(([, v]) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length))
+                      .map(([k, v]) => (
+                        <div key={k} className="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
+                          <dt className="text-secondary">{k}</dt>
+                          <dd>{typeof v === "string" ? v : JSON.stringify(v)}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                </div>
+                {canDecide ? <StorefrontDecision id={s.r.id} /> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <p className="type-caption text-secondary">
         Showing all {lines.length} · amber after {hours(amber)} h, red after {hours(red)} h
       </p>
