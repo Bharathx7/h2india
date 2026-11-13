@@ -117,4 +117,39 @@ describe.skipIf(!url)("RFQ moderation", () => {
     expect(row?.status).toBe("Closed");
     expect(row?.closeReason).toBe("rejected");
   });
+  it("let H2 India suggest suppliers: goes to moderation with none chosen; the moderator adds verified ones (A164)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const { id } = await createRfq(h.db, admin, buyer.org.id, {
+      title: "Compressors, suggest suppliers",
+      items: [{ description: "Diaphragm compressor", quantity: 2 }],
+      deliverySiteId: siteId,
+      offerDeadline: new Date(Date.now() + 10 * DAY),
+      supplierIds: [],
+      suggestSuppliers: true,
+    });
+    expect(await submitRfq(h.db, admin, buyer.org.id, id)).toBe("In moderation");
+    await expect(approveRfq(h.db, moderator, id)).rejects.toThrow("Add at least one supplier");
+    const unverified = await makeCompany(h.db, "Not verified supplier", "supplier");
+    await expect(approveRfq(h.db, moderator, id, undefined, new Date(), [unverified.org.id])).rejects.toThrow(
+      "verified suppliers only",
+    );
+    const picked = suppliers.map((s) => s.org.id);
+    await approveRfq(h.db, moderator, id, undefined, new Date(), picked);
+    const sent = await h.db.select().from(schema.rfqSuppliers).where(eq(schema.rfqSuppliers.rfqId, id));
+    expect(sent.map((x) => x.organisationId).sort()).toEqual([...picked].sort());
+    const told = await h.db.select().from(schema.notifications).where(eq(schema.notifications.event, "rfq.received"));
+    expect(told.filter((n) => n.href === `/supplier/rfqs/${id}`).length).toBe(picked.length);
+  });
+
+  it("a moderator can't add suppliers to an RFQ whose buyer chose their own", async () => {
+    const id = await submitted();
+    const extra = await makeCompany(h.db, "Extra verified", "supplier");
+    await h.db
+      .update(schema.organisations)
+      .set({ verification: "Verified" })
+      .where(eq(schema.organisations.id, extra.org.id));
+    await expect(approveRfq(h.db, moderator, id, undefined, new Date(), [extra.org.id])).rejects.toThrow(
+      "chose their own",
+    );
+  });
 });

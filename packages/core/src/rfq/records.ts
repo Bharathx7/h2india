@@ -132,6 +132,8 @@ export interface RfqDraftInput {
   items?: RfqItemInput[];
   /** Supplier companies (at most 5, verified only). */
   supplierIds?: string[];
+  /** Let H2 India suggest suppliers (398:9635): the moderator adds up to 5 in all. */
+  suggestSuppliers?: boolean;
 }
 
 async function ownRfq(ex: Executor, organisationId: string, id: string) {
@@ -166,6 +168,7 @@ async function writeDraft(tx: Executor, rfqId: string, organisationId: string, i
   if (input.paymentTerms !== undefined) set.paymentTerms = input.paymentTerms?.trim() || null;
   if (input.attachments !== undefined) set.attachments = input.attachments;
   if (input.source !== undefined) set.source = input.source;
+  if (input.suggestSuppliers !== undefined) set.suggestSuppliers = input.suggestSuppliers;
   if (input.deliverySiteId !== undefined) {
     if (input.deliverySiteId) {
       const [site] = await tx
@@ -266,7 +269,8 @@ export async function draftProblems(ex: Executor, rfqId: string, now: Date = new
   const e: Record<string, string> = {};
   if (!row.title.trim()) e.title = "Give the request a title";
   if (!items.length) e.items = "Say what you need and how many";
-  if (!suppliers.length) e.suppliers = "Choose at least one supplier";
+  if (!suppliers.length && !row.suggestSuppliers)
+    e.suppliers = "Choose at least one supplier, or let H2 India suggest them";
   if (suppliers.length > MAX_RFQ_SUPPLIERS) e.suppliers = `Choose up to ${String(MAX_RFQ_SUPPLIERS)} suppliers`;
   if (!row.deliverySiteId) e.deliverySite = "Choose where to deliver";
   if (!row.offerDeadline) e.offerDeadline = "Set an offer deadline";
@@ -312,7 +316,8 @@ export async function submitRfq(
     throw new RfqError("A supplier you chose is no longer verified. Choose another", {
       suppliers: "Choose verified suppliers only",
     });
-  if (needsModeration(count)) {
+  // H2 India picks suppliers in moderation when asked to suggest them, whatever the count.
+  if (needsModeration(count) || row.suggestSuppliers) {
     await moveRfq(
       db,
       actor.userId,
@@ -355,13 +360,17 @@ export async function deleteRfqDraft(db: Database, actor: Actor, organisationId:
 
 // ------------------------------------------------------------------------------------------------ moderation
 
-/** Approve a checked RFQ (632:1138): it goes to every chosen supplier. */
+/**
+ * Approve a checked RFQ (632:1138): it goes to every chosen supplier. When the buyer let H2 India suggest suppliers,
+ * the moderator's picks (verified only, up to 5 in all) are added first and recorded on the decision.
+ */
 export async function approveRfq(
   db: Database,
   actor: Actor,
   rfqId: string,
   context?: RequestContext,
   now = new Date(),
+  addSupplierIds: string[] = [],
 ) {
   assertCan(actor, "queues.edit");
   if (!actor.userId) throw new RfqError("Sign in again");
@@ -370,6 +379,13 @@ export async function approveRfq(
   if (!row) throw new RfqError("No such RFQ");
   if (row.offerDeadline && row.offerDeadline.getTime() <= now.getTime())
     throw new RfqError("The offer deadline has passed. Return it so the buyer can set a new one");
+  const chosen = (await db.select({ o: rs.organisationId }).from(rs).where(eq(rs.rfqId, rfqId))).map((x) => x.o);
+  const added = [...new Set(addSupplierIds)].filter((x) => !chosen.includes(x));
+  if (added.length && !row.suggestSuppliers) throw new RfqError("The buyer chose their own suppliers");
+  if (chosen.length + added.length > MAX_RFQ_SUPPLIERS)
+    throw new RfqError(`Up to ${String(MAX_RFQ_SUPPLIERS)} suppliers in all`);
+  if ((await verifiedSuppliers(db, added)).length !== added.length) throw new RfqError("Add verified suppliers only");
+  if (!chosen.length && !added.length) throw new RfqError("Add at least one supplier before approving");
   await moveRfq(
     db,
     moderatorId,
@@ -377,8 +393,15 @@ export async function approveRfq(
     { from: "In moderation", to: "Sent" },
     {
       context,
+      ...(added.length ? { reason: `H2 India added ${String(added.length)} suggested supplier(s)` } : {}),
       also: async (tx) => {
-        await tx.insert(schema.rfqModerationDecisions).values({ rfqId, decision: "Approved", moderatorId });
+        if (added.length) await tx.insert(rs).values(added.map((organisationId) => ({ rfqId, organisationId })));
+        await tx.insert(schema.rfqModerationDecisions).values({
+          rfqId,
+          decision: "Approved",
+          moderatorId,
+          ...(added.length ? { note: `Suggested suppliers added: ${String(added.length)}` } : {}),
+        });
         await completeDeadline(tx, { type: "rfqModeration", subjectType: "rfq", subjectId: rfqId });
         await sendToSuppliers(tx, row, now);
       },

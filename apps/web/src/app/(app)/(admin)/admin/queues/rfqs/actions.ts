@@ -33,12 +33,17 @@ async function run(work: () => Promise<unknown>, id?: string): Promise<R> {
   return { ok: true };
 }
 
-export async function decideRfqAction(id: string, outcome: "approve" | "changes" | "reject", text: string): Promise<R> {
+export async function decideRfqAction(
+  id: string,
+  outcome: "approve" | "changes" | "reject",
+  text: string,
+  addSuppliers: string[] = [],
+): Promise<R> {
   const { actor } = await operator();
   const context = await requestContext();
   const db = getDb();
   return run(() => {
-    if (outcome === "approve") return approveRfq(db, actor, id, context);
+    if (outcome === "approve") return approveRfq(db, actor, id, context, new Date(), addSuppliers);
     if (outcome === "changes") return returnRfq(db, actor, id, { reasons: [text], note: text }, context);
     return rejectRfq(db, actor, id, { reason: text }, context);
   }, id);

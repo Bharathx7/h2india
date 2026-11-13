@@ -1,12 +1,13 @@
 import { getDb } from "@h2india/core";
 import { can } from "@h2india/core/authz";
-import { moderationDetail } from "@h2india/core/rfq";
+import { matchSuppliers, MAX_RFQ_SUPPLIERS, moderationDetail } from "@h2india/core/rfq";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
 import { Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { showSample } from "@/cms/sample";
 import { AssignButton, RfqDecision } from "../Decision";
 
 // Moderation · RFQ (632:1138), step 9.4: what the buyer sent, the seriousness checklist, the decision and the audit
@@ -22,6 +23,14 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
   const item = d.items[0];
   const failed = d.checks.filter((c) => !c.ok).length;
   const open = d.rfq.status === "In moderation";
+  // "Let H2 India suggest suppliers" (A164): verified suppliers that fit, for the moderator to add.
+  const chosen = new Set(d.suppliers.map((s) => s.organisationId));
+  const candidates =
+    open && d.rfq.suggestSuppliers
+      ? (
+          await matchSuppliers(getDb(), { categoryId: d.rfq.categoryId, includeSample: showSample(), limit: 12 })
+        ).filter((m) => !chosen.has(m.organisationId))
+      : [];
   const rows: [string, string][] = [
     [
       "Item",
@@ -42,7 +51,15 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
     ["Needed by", d.rfq.requiredBy ? formatIstDate(d.rfq.requiredBy) : "Not given"],
     ["Offer deadline", d.rfq.offerDeadline ? formatIstDateTime(d.rfq.offerDeadline) : "Not given"],
     ["Note", d.rfq.requirements ?? "—"],
-    ["Suppliers", d.suppliers.map((s) => s.name).join(" · ")],
+    [
+      "Suppliers",
+      [
+        d.suppliers.map((s) => s.name).join(" · "),
+        d.rfq.suggestSuppliers ? "The buyer asked H2 India to suggest suppliers" : "",
+      ]
+        .filter(Boolean)
+        .join(" · ") || "None chosen",
+    ],
     ["Contact", d.email],
   ];
   return (
@@ -118,7 +135,24 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Decision</h2>
             {open && can(actor, "queues.edit") ? (
-              <RfqDecision id={d.rfq.id} buyer={d.submitter.split(/\s+/)[0] ?? d.submitter} next={d.next} />
+              <RfqDecision
+                id={d.rfq.id}
+                buyer={d.submitter.split(/\s+/)[0] ?? d.submitter}
+                next={d.next}
+                suggest={
+                  d.rfq.suggestSuppliers
+                    ? {
+                        slots: Math.max(0, MAX_RFQ_SUPPLIERS - chosen.size),
+                        chosen: chosen.size,
+                        candidates: candidates.map((m) => ({
+                          id: m.organisationId,
+                          name: m.name,
+                          detail: [m.place, ...m.reasons].filter(Boolean).join(" · "),
+                        })),
+                      }
+                    : null
+                }
+              />
             ) : (
               <p className="type-body-sm text-body">
                 {d.decisions[0]

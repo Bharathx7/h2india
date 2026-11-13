@@ -12,6 +12,7 @@ import {
   Input,
   Select,
   StatusBadge,
+  Switch,
   Textarea,
   VerifiedBadge,
 } from "@h2india/ui";
@@ -212,7 +213,8 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
   const next = () => {
     const e =
       step === 1 ? stepOneErrors(s, specs) : step === 3 ? stepThreeErrors(s, Boolean(setup.buyer), setup.today) : {};
-    if (step === 2 && !s.supplierIds.length) e.suppliers = "Choose at least one supplier";
+    if (step === 2 && !s.supplierIds.length && !s.suggest)
+      e.suppliers = "Choose at least one supplier, or let H2 India suggest them";
     setErrors(e);
     if (Object.keys(e).length) return;
     setStep(step + 1);
@@ -529,10 +531,27 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                 {matches === null
                   ? "Finding verified suppliers…"
                   : matches.length
-                    ? `We matched ${String(matches.length)} verified ${matches.length === 1 ? "supplier" : "suppliers"} to your request. Pick up to 5.`
+                    ? `We matched ${String(matches.length)} verified ${matches.length === 1 ? "supplier" : "suppliers"} to your specs. Pick up to 5, or let H2 India suggest them.`
                     : "No verified supplier lists this category yet. Try a broader category."}
               </p>
-              <StatusBadge status={`${String(count)} of 5 selected`} tone="success" />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <StatusBadge status={`${String(count)} of 5 selected`} tone="success" />
+                <Switch
+                  label="Let H2 India suggest suppliers"
+                  checked={s.suggest}
+                  onCheckedChange={(on) => {
+                    set({ suggest: on });
+                  }}
+                />
+              </div>
+              {s.suggest ? (
+                <p className="rounded-card bg-mint p-3 type-body-sm">
+                  H2 India will add verified suppliers that fit, up to 5 in all, when it checks your request
+                  {count
+                    ? `. Your ${count === 1 ? "choice stays" : `${String(count)} choices stay`} on the list.`
+                    : "."}
+                </p>
+              ) : null}
               {errors.suppliers ? <p className="type-caption text-error">{errors.suppliers}</p> : null}
               <ul className="flex flex-col gap-3">
                 {(matches ?? []).map((m) => {
@@ -731,6 +750,9 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                   to: 2,
                   rows: [
                     [`Selected (${String(count)})`, s.supplierIds.map((id) => s.supplierNames[id] ?? "").join(" · ")],
+                    ...(s.suggest
+                      ? [["Suggested by H2 India", "Added when your request is checked"] as [string, string]]
+                      : []),
                   ],
                 },
                 {
@@ -830,7 +852,14 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
           {[
             ["Category", s.categoryLabel || "Not chosen yet"],
             ["Request", s.title ? `${s.quantity || "?"} × ${s.title}` : "Not written yet"],
-            ["Suppliers", count ? `${String(count)} of 5 selected` : "Not chosen yet"],
+            [
+              "Suppliers",
+              count
+                ? `${String(count)} of 5 selected${s.suggest ? " · H2 India suggests more" : ""}`
+                : s.suggest
+                  ? "H2 India suggests them"
+                  : "Not chosen yet",
+            ],
             [
               "Delivery",
               s.deliveryState

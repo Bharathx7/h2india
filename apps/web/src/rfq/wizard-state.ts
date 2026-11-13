@@ -20,6 +20,8 @@ export interface WizardState {
   attachments: WizardFile[];
   supplierIds: string[];
   supplierNames: Record<string, string>;
+  /** Let H2 India suggest suppliers (398:9635, A164). */
+  suggest: boolean;
   deliveryState: string;
   siteId: string;
   requiredBy: string;
@@ -42,6 +44,7 @@ export const EMPTY_WIZARD: WizardState = {
   attachments: [],
   supplierIds: [],
   supplierNames: {},
+  suggest: false,
   deliveryState: "",
   siteId: "",
   requiredBy: "",

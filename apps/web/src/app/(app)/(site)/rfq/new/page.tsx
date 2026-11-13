@@ -91,6 +91,7 @@ export default async function RequestQuotePage({
         requirements: d.rfq.requirements ?? "",
         supplierIds: d.suppliers.map((x) => x.rs.organisationId),
         supplierNames: Object.fromEntries(d.suppliers.map((x) => [x.rs.organisationId, x.name ?? x.legalName])),
+        suggest: d.rfq.suggestSuppliers,
         siteId: d.rfq.deliverySiteId ?? "",
         requiredBy: day(d.rfq.requiredBy),
         offerDeadline: day(d.rfq.offerDeadline),

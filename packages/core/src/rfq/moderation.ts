@@ -152,7 +152,10 @@ export async function moderationDetail(db: Executor, actor: Actor, rfqId: string
   const [items, suppliers, decisions, trail, checks, neighbours] = await Promise.all([
     db.select().from(schema.rfqItems).where(eq(schema.rfqItems.rfqId, rfqId)).orderBy(asc(schema.rfqItems.position)),
     db
-      .select({ name: sql<string>`coalesce(${schema.companyProfiles.tradeName}, ${schema.organisations.legalName})` })
+      .select({
+        organisationId: schema.rfqSuppliers.organisationId,
+        name: sql<string>`coalesce(${schema.companyProfiles.tradeName}, ${schema.organisations.legalName})`,
+      })
       .from(schema.rfqSuppliers)
       .innerJoin(schema.organisations, eq(schema.organisations.id, schema.rfqSuppliers.organisationId))
       .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, schema.rfqSuppliers.organisationId))

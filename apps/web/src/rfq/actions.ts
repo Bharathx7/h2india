@@ -61,6 +61,7 @@ function toDraft(s: WizardState): RfqDraftInput {
         ]
       : [],
     supplierIds: s.supplierIds,
+    suggestSuppliers: s.suggest,
   };
 }
 
