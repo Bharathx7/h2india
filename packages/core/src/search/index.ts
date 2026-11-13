@@ -20,5 +20,5 @@ export { logSearchMiss } from "./misses";
 export type { MissSource } from "./misses";
 export { indexChangeSql, nudgeIndexer, pruneSearchOutbox, queueIndexChange, syncSearch } from "./outbox";
 export type { DocumentLoader, SyncReport } from "./outbox";
-export { cleanQuery, countMatches, MAX_QUERY, searchIndex, suggest } from "./query";
+export { cleanQuery, countMatches, filteredSearch, matchingRecords, MAX_QUERY, searchIndex, suggest } from "./query";
 export type { SearchHit, SearchPage, Suggestions, SuggestionGroup } from "./query";

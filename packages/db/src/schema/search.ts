@@ -26,8 +26,13 @@ export const searchOutbox = core.table(
     processedAt: utc("processed_at"),
     attempts: integer("attempts").notNull().default(0),
     lastError: text("last_error"),
+    /** Step 7.3: set once alerts have been matched against this change (null while waiting, after it is applied). */
+    alertsAt: utc("alerts_at"),
   },
   (t) => [
+    index("search_outbox_alerts_idx")
+      .on(t.seq)
+      .where(sql`${t.processedAt} IS NOT NULL AND ${t.alertsAt} IS NULL`),
     index("search_outbox_waiting_idx")
       .on(t.seq)
       .where(sql`${t.processedAt} IS NULL`),

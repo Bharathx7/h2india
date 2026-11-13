@@ -10,6 +10,7 @@ import {
   renderSubmissionReceived,
   renderGrievance,
   renderWebinarRegistered,
+  renderAlertDigest,
   renderSignInCode,
   renderVerifyEmail,
 } from "./index";
@@ -173,6 +174,63 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           url: `${appUrl}/events/submit`,
         }),
       );
+    case "email.tender_alert_digest":
+      return email(
+        renderAlertDigest("5 tenders match your alert · BPCL compressor package closes tomorrow", {
+          appUrl,
+          eyebrow: "Tender alert · daily digest",
+          headline: "5 tenders match your alert",
+          intro:
+            "Equipment, electrolysers, production, EPC and refuelling tenders in all states. We check each one against the issuer's portal before we send it.",
+          items: [
+            {
+              over: "BPCL · Madhya Pradesh",
+              title: "Hydrogen compressor package, Bina refinery",
+              reference: "BPCL/BINA/2026/118",
+              due: "Bid due 12 Nov 2026 · 1 day left",
+              soon: true,
+              href: `${appUrl}/opportunities/tenders`,
+            },
+            {
+              over: "IOCL · Haryana",
+              title: "Supply of a 10 MW PEM electrolyser, Panipat refinery",
+              reference: "IOCL/PR/GH2/2026-27/09",
+              due: "Bid due 21 Nov 2026 · 10 days left",
+              href: `${appUrl}/opportunities/tenders`,
+            },
+          ],
+          viewLabel: "View tender",
+          all: { label: "See all open tenders", href: `${appUrl}/opportunities/tenders` },
+          manageHref: `${appUrl}/member/alerts`,
+          offHref: `${appUrl}/alerts/off`,
+          reason: "You're getting this because you set up a daily tender alert.",
+          preview: "SECI green ammonia, IOCL 10 MW electrolyser and 2 more.",
+        }),
+      );
+    case "whatsapp.tender_alert_instant":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.tender_alert_instant"]({
+          issuer: "IOCL",
+          change: "extended the bid due date",
+          title: "Supply of a 10 MW PEM electrolyser, Panipat refinery",
+          reference: "IOCL/PR/GH2/2026-27/09",
+          due: "21 Nov 2026",
+          alert: "electrolysers in all states",
+        }),
+      };
+    case "whatsapp.scheme_alert":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.scheme_alert"]({
+          scheme: "SIGHT programme Component II",
+          what: "Mode 2A Tranche II bids",
+          due: "15 Nov 2026",
+          where: "the SECI e-tender portal",
+          left: "5 days",
+          alert: "production incentives",
+        }),
+      };
     case "whatsapp.webinar_registration":
       return {
         kind: "text",

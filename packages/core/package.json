@@ -5,6 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./time": "./src/time.ts",
+    "./alerts": "./src/alerts/index.ts",
+    "./alerts/rules": "./src/alerts/rules.ts",
     "./auth": "./src/sign-in/auth.ts",
     "./sign-in": "./src/sign-in/rules.ts",
     "./companies": "./src/companies/index.ts",

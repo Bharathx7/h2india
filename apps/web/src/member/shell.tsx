@@ -16,11 +16,22 @@ export async function requireMember(path: string): Promise<string> {
 }
 
 /** The member workspace shell (Workspace sidebar and top bar v2) around a page (Figma page 12). */
-export async function MemberShell({
+export function MemberShell(props: { userId: string; current: string; children: ReactNode }) {
+  return <WorkspaceShell area="member" {...props} />;
+}
+
+/** The same shell for the buyer workspace (Figma page 13), used by buyer Alerts (79:3425) until Stage 9. */
+export function BuyerShell(props: { userId: string; current: string; children: ReactNode }) {
+  return <WorkspaceShell area="buyer" {...props} />;
+}
+
+async function WorkspaceShell({
+  area,
   userId,
   current,
   children,
 }: {
+  area: "member" | "buyer";
   userId: string;
   current: string;
   children: ReactNode;
@@ -33,12 +44,12 @@ export async function MemberShell({
   ]);
   return (
     <WorkspaceFrame
-      area="member"
-      groups={WORKSPACE_NAV.member}
+      area={area}
+      groups={WORKSPACE_NAV[area]}
       current={current}
       user={shell.user}
       welcome={shell.welcome}
-      home="/member"
+      home={`/${area}`}
       bell={{ unread, items: toRows(bell) }}
     >
       <div className="flex flex-col gap-6 p-4 md:p-8">{children}</div>

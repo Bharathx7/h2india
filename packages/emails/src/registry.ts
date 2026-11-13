@@ -57,7 +57,7 @@ export const TEMPLATES = {
     name: "Tender alert digest",
     frame: "665:307",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "email.sign_in_code": {
     channel: "email",
@@ -234,7 +234,7 @@ export const TEMPLATES = {
     name: "Tender alert",
     frame: "668:152",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "whatsapp.order_confirmed": {
     channel: "whatsapp",
@@ -258,7 +258,7 @@ export const TEMPLATES = {
     name: "Scheme alert",
     frame: "676:351",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "whatsapp.webinar_registration": {
     channel: "whatsapp",
@@ -422,6 +422,26 @@ export const APPROVED_TEXT = {
   /** 676:459, template webinar_reminder: header "Starts in {{1}}", footer "H2 India webinars". */
   "whatsapp.webinar_reminder": (input: { name: string; title: string; time: string }) =>
     `Hi ${input.name}, ${input.title} starts at ${input.time} IST today. Join from your phone or laptop with the link below.`,
+  /** 668:152, template tender_alert_instant: header "Tender alert", footer "Manage alerts on H2 India". */
+  "whatsapp.tender_alert_instant": (input: {
+    issuer: string;
+    change: string;
+    title: string;
+    reference: string;
+    due: string;
+    alert: string;
+  }) =>
+    `${input.issuer} ${input.change}: ${input.title} (${input.reference}). Bid due ${input.due}. This matches your alert for ${input.alert}.`,
+  /** 676:351, template scheme_alert_instant: header "Scheme deadline", footer "Manage alerts on H2 India". */
+  "whatsapp.scheme_alert": (input: {
+    scheme: string;
+    what: string;
+    due: string;
+    where: string;
+    left: string;
+    alert: string;
+  }) =>
+    `${input.scheme}: ${input.what} are due ${input.due} on ${input.where}. ${input.left} left. This matches your alert for ${input.alert}.`,
 } satisfies Partial<Record<TemplateId, (input: never) => string>>;
 
 export type TextTemplateId = keyof typeof APPROVED_TEXT;

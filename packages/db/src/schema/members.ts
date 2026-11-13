@@ -88,12 +88,47 @@ export const alerts = core.table(
     frequency: text("frequency").notNull().default("weekly"),
     active: boolean("active").notNull().default(true),
     lastSentAt: utc("last_sent_at"),
+    /** The last time a new record matched (534:8 "Last matched 2 days ago"). */
+    lastMatchedAt: utc("last_matched_at"),
+    /** When the member paused it (534:8 "Paused by you on 1 Nov 2026"); null while on. */
+    pausedAt: utc("paused_at"),
     createdAt: utc("created_at")
       .notNull()
       .default(sql`now()`),
     deletedAt: utc("deleted_at"),
   },
   (t) => [index("alerts_owner").on(t.userId), index("alerts_index").on(t.indexUid, t.active)],
+);
+
+/**
+ * One record matched to one alert (step 7.3). Unique on (alert, record), so a record is never sent twice to the same
+ * alert, however often it is updated. What the message shows is copied from the search document when it matched.
+ * sentAt is set when it went out (alone for instant alerts, or in a digest); every send is also in core.deliveries.
+ */
+export const alertSends = core.table(
+  "alert_sends",
+  {
+    id: id(),
+    alertId: uuid("alert_id")
+      .notNull()
+      .references(() => alerts.id),
+    recordId: text("record_id").notNull(),
+    title: text("title").notNull(),
+    meta: text("meta").notNull().default(""),
+    href: text("href").notNull(),
+    /** Fields the messages need: issuer, reference, due date, states. */
+    detail: jsonb("detail").$type<Record<string, string>>().notNull().default({}),
+    matchedAt: utc("matched_at")
+      .notNull()
+      .default(sql`now()`),
+    sentAt: utc("sent_at"),
+  },
+  (t) => [
+    uniqueIndex("alert_sends_once").on(t.alertId, t.recordId),
+    index("alert_sends_waiting")
+      .on(t.alertId)
+      .where(sql`${t.sentAt} IS NULL`),
+  ],
 );
 
 /**

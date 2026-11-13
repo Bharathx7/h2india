@@ -137,3 +137,11 @@ export { APPROVED_TEXT, TEMPLATES } from "./registry";
 export type { Channel, TemplateEntry, TemplateId, TextTemplateId } from "./registry";
 export { renderSample } from "./samples";
 export type { Sample } from "./samples";
+
+// Alerts (step 7.3): Tender alert digest 665:307, for every alert type.
+import { AlertDigest, type AlertDigestProps } from "./alerts/AlertDigest";
+export type { AlertDigestItem, AlertDigestProps } from "./alerts/AlertDigest";
+
+export async function renderAlertDigest(subject: string, props: AlertDigestProps): Promise<RenderedEmail> {
+  return renderElement(subject, <AlertDigest {...props} />);
+}

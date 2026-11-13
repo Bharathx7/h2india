@@ -4,6 +4,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { schemeStatus } from "@/cms/records/status";
+import { getDb } from "@h2india/core";
+import { recordAlert } from "@h2india/core/alerts";
+import { memberHref } from "@/opportunities/parts";
+import { getSession } from "@/server/auth";
 import { ShareButton } from "@/news/client";
 import { dayMonthYear } from "@/news/format";
 import { StoryCard, wrap } from "@/news/parts";
@@ -21,8 +25,8 @@ import {
 import type { Topic } from "@/payload-types";
 
 // Scheme detail (416:1354; phones 417:1794; next round expected 421:4769, step 5.4). Every scheme links to its official
-// source and shows when it was last checked; applications happen on the official portal, never here. "Set alert for
-// next round" (421:5274) comes with alerts in step 7.3.
+// source and shows when it was last checked; applications happen on the official portal, never here. "Don't miss the
+// next round" sets an alert on this scheme (421:5274, step 7.3).
 
 type Params = Promise<{ slug: string }>;
 
@@ -64,12 +68,14 @@ export default async function SchemePage({ params }: { params: Params }) {
   const now = new Date();
   const status = schemeStatus({ nextDeadline: s.nextDeadline, override: s.statusOverride }, now);
   const topics = (s.topics ?? []).filter((t): t is Topic => typeof t === "object");
-  const [tenders, news] = await Promise.all([
+  const session = await getSession().catch(() => null);
+  const [tenders, news, alert] = await Promise.all([
     tendersForSchemes([s.id], 2),
     newsForTopics(
       topics.map((t) => t.id),
       3,
     ),
+    session ? recordAlert(getDb(), session.user.id, "schemes", String(s.id)) : null,
   ]);
   const states = stateValues(s);
   const eyebrow = [
@@ -322,6 +328,27 @@ export default async function SchemePage({ params }: { params: Params }) {
 
         <aside className="flex flex-col gap-4 lg:w-80 lg:shrink-0">
           <div className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+            <h2 className="type-h4 text-primary">Don't miss the next round</h2>
+            <p className="type-body-sm text-secondary">
+              You'll also see updates in your workspace under Saved and alerts.
+            </p>
+            {alert?.active ? (
+              <>
+                <Alert tone="success" title="Alert set">
+                  We'll email you when {s.runBy} issues the next {s.name} round or declares results.
+                </Alert>
+                <Link href="/member/alerts" className={cx(buttonClasses({ variant: "outline" }), "w-full")}>
+                  Manage alerts
+                </Link>
+              </>
+            ) : (
+              <Link
+                href={memberHref(Boolean(session), `/member/alerts?scheme=${s.slug}`)}
+                className={cx(buttonClasses({ variant: "primary" }), "w-full")}
+              >
+                Set alert for next round
+              </Link>
+            )}
             <Link href="/opportunities/eligibility" className={cx(buttonClasses({ variant: "outline" }), "w-full")}>
               Check eligibility
             </Link>

@@ -12,9 +12,16 @@ import { isSearchIndex, type SearchIndexUid } from "./indexes";
 const { searchOutbox: o } = schema;
 
 /** Queues index changes inside the caller's transaction. */
-export async function queueIndexChange(ex: Executor, indexUid: SearchIndexUid, recordIds: (string | number)[]) {
+export async function queueIndexChange(
+  ex: Executor,
+  indexUid: SearchIndexUid,
+  recordIds: (string | number)[],
+  opts: { alerts?: boolean } = {},
+) {
   if (!recordIds.length) return;
-  await ex.insert(o).values(recordIds.map((id) => ({ indexUid, recordId: String(id) })));
+  // A refresh (statuses that follow the date) changes nothing a person did, so alerts skip it (step 7.3).
+  const alertsAt = opts.alerts === false ? new Date() : null;
+  await ex.insert(o).values(recordIds.map((id) => ({ indexUid, recordId: String(id), alertsAt })));
 }
 
 /**
@@ -103,5 +110,5 @@ export async function syncSearch(db: Executor, load: DocumentLoader): Promise<Sy
 
 /** Applied rows are kept a week for checking, then removed by housekeeping. */
 export async function pruneSearchOutbox(db: Executor): Promise<void> {
-  await db.delete(o).where(sql`${o.processedAt} < now() - interval '7 days'`);
+  await db.delete(o).where(sql`${o.processedAt} < now() - interval '7 days' and ${o.alertsAt} is not null`);
 }

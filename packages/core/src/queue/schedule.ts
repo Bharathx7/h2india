@@ -1,5 +1,6 @@
 import { schema } from "@h2india/db";
 import { sql } from "drizzle-orm";
+import { runAlerts, sendDigests } from "../alerts/engine";
 import { pruneAuditLog } from "../audit";
 import { runDeadlines } from "../clocks/clocks";
 // Registers the webinar reminder handler in the worker (step 5.7).
@@ -40,6 +41,10 @@ export const SCHEDULES: Scheduled[] = [
   // 00:05 IST every day: record statuses follow the date (Closing soon, Closed), so their result rows are rebuilt.
   { id: "search-refresh", pattern: "35 18 * * *", run: () => callWeb("/api/internal/search-sync?refresh=records") },
   { id: "search-outbox-prune", every: 60 * MINUTE, run: () => pruneSearchOutbox(getDb()) },
+  // Step 7.3: match changes the search worker applied against alerts, then send instant alerts.
+  { id: "alerts-run", every: MINUTE, run: () => runAlerts(getDb()) },
+  // 07:00 IST every day: daily digests; on Mondays the weekly ones too (665:307 "Sent 7:00 AM IST").
+  { id: "alerts-digests", pattern: "30 1 * * *", run: () => sendDigests(getDb()) },
   // Step 3.9: WhatsApp held by quiet hours, and failed emails due for a retry.
   { id: "notify-due", every: MINUTE, run: () => sendDueDeliveries() },
   { id: "files-sweep", every: 15 * MINUTE, run: () => sweepFiles(enqueueFileCheck) },

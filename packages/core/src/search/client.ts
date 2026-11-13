@@ -26,7 +26,8 @@ function settingsFor(uid: SearchIndexUid) {
   const def = SEARCH_INDEXES[uid];
   return {
     searchableAttributes: def.searchableAttributes,
-    filterableAttributes: def.filterableAttributes,
+    // id too, so alerts can ask whether a just-changed record matches a saved search (step 7.3).
+    filterableAttributes: [...def.filterableAttributes, "id"],
     sortableAttributes: def.sortableAttributes,
     synonyms: synonymsSetting(),
     typoTolerance: { enabled: true },

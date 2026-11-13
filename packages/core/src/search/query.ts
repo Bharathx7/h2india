@@ -132,3 +132,38 @@ export async function countMatches(query: string, uids: SearchIndexUid[]): Promi
   );
   return Object.fromEntries(uids.map((uid, i) => [uid, results[i]?.estimatedTotalHits ?? 0]));
 }
+
+/**
+ * One index with filters (Meilisearch filter expressions, built only by the alert rules), for alerts (step 7.3): the
+ * preview in Create alert (534:587) and the check whether just-changed records match a saved search.
+ */
+export async function filteredSearch(
+  uid: SearchIndexUid,
+  query: string,
+  filter: string[],
+  opts: { limit?: number; fields?: string[] } = {},
+): Promise<{ hits: SearchHit[]; total: number }> {
+  const res = await withIndexes(() =>
+    searchClient()
+      .index<SearchDocument>(indexName(uid))
+      .search(cleanQuery(query), {
+        matchingStrategy: MATCHING,
+        filter,
+        limit: opts.limit ?? 3,
+        attributesToRetrieve: opts.fields ?? ["*"],
+      }),
+  );
+  return { hits: res.hits as unknown as SearchHit[], total: res.estimatedTotalHits };
+}
+
+/** Which of these record ids match the saved search, with their documents. */
+export async function matchingRecords(
+  uid: SearchIndexUid,
+  query: string,
+  filter: string[],
+  ids: string[],
+): Promise<SearchHit[]> {
+  if (!ids.length) return [];
+  const list = ids.map((id) => JSON.stringify(id)).join(", ");
+  return (await filteredSearch(uid, query, [...filter, `id IN [${list}]`], { limit: ids.length })).hits;
+}

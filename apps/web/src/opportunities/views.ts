@@ -1,3 +1,4 @@
+import { daysLeft, daysUntil } from "@h2india/core/time";
 import { experienceFits, isStudentRole, salaryLabel } from "@h2india/core/opportunities/rules";
 import type { BadgeTone } from "@h2india/ui";
 import { STATE_OPTIONS } from "../cms/records/states";
@@ -6,9 +7,10 @@ import { dayMonthYear, istDayKey } from "../news/format";
 import type { Grant, Job, Tender } from "../payload-types";
 
 // Tenders, grants and jobs as the step 5.5 pages show them (453:9 home, 455:1621 tenders, 462:4609 grants, 464:6071
-// jobs). Pure: no CMS access, so the filters and labels are unit-tested. Statuses come from the dates, in India time.
+// jobs). daysLeft() lives in @h2india/core/time (shared with alert messages) and is re-exported here.
+// Pure: no CMS access, so the filters and labels are unit-tested. Statuses come from the dates, in India time.
 
-const DAY = 86_400_000;
+export { daysLeft, daysUntil };
 
 export const stateLabel = (value: string) => STATE_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
@@ -18,17 +20,6 @@ export function toneOf(status: string): BadgeTone {
   if (["Open", "Results declared", "Extended", "Announced", "Live"].includes(status)) return "success";
   if (["Closed", "Awarded", "Expired"].includes(status)) return "neutral";
   return "progress";
-}
-
-/** Calendar days until a deadline in India time, as drawn: due 15 Nov, seen on 10 Nov, is "5 days left"; 0 on the day. */
-export function daysUntil(iso: string, now: Date): number {
-  const day = (d: Date) => Date.parse(`${istDayKey(d.toISOString())}T00:00:00Z`);
-  return Math.max(0, Math.round((day(new Date(iso)) - day(now)) / DAY));
-}
-
-export function daysLeft(iso: string, now: Date): string {
-  const days = daysUntil(iso, now);
-  return days <= 0 ? "closes today" : `${String(days)} ${days === 1 ? "day" : "days"} left`;
 }
 
 /** "12 Nov" (cards and rows within the year, as drawn). */

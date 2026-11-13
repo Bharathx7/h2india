@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (new URL(request.url).searchParams.get("refresh") === "records") {
     for (const uid of DATED) {
       const ids = (await allDocuments(payload, uid)).map((d) => d.id);
-      await queueIndexChange(getDb(), uid, ids);
+      await queueIndexChange(getDb(), uid, ids, { alerts: false });
     }
   }
   const report = await syncSearch(getDb(), (uid, ids) => loadDocuments(payload, uid, ids));
