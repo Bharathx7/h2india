@@ -4,8 +4,8 @@ Step 1.7 (ADR 0006, `docs/server.md`). One Docker image runs everything; the ser
 
 | Address                    | What                                 | Container (port on 127.0.0.1) |
 | -------------------------- | ------------------------------------ | ----------------------------- |
-| `h2india.deecodes.io`      | Website, buyer/supplier/member, APIs | `web-public` (3100)           |
-| `adminh2india.deecodes.io` | `/admin` and the CMS (`/cms`)        | `web-admin` (3101)            |
+| `h2india.deecodes.io`      | Website, buyer/supplier/member, APIs | `web-public` (3210)           |
+| `adminh2india.deecodes.io` | `/admin` and the CMS (`/cms`)        | `web-admin` (3211)            |
 
 Both web containers run the same image with their own `APP_URL`. Operators sign in on the admin domain separately;
 a passkey made on one domain doesn't work on the other.
@@ -53,8 +53,8 @@ dc run --rm tools pnpm db:migrate
 # 4. The apps
 dc up -d web-public web-admin worker
 dc ps                                  # all "running" or "healthy"
-curl -sI http://127.0.0.1:3100 | head -1   # HTTP/1.1 200
-curl -sI http://127.0.0.1:3101/sign-in | head -1
+curl -sI http://127.0.0.1:3210 | head -1   # HTTP/1.1 200
+curl -sI http://127.0.0.1:3211/sign-in | head -1
 
 # 5. nginx and HTTPS
 sudo mv /tmp/h2india-proxy.conf /tmp/h2india-files.conf /etc/nginx/snippets/
@@ -106,4 +106,4 @@ Copy `/srv/h2india/backups` and the `h2india_miniodata` volume off the server to
 - Maintenance page: set `FLAG_MAINTENANCE=true` in `h2india.env`, then `dc up -d web-public`. Admin stays open.
 - Sample content stays off in production (`FLAG_SAMPLE_CONTENT=false`). Search engines stay blocked until Launch 1
   (`FLAG_SEARCH_INDEXING=false`).
-- Never expose ports 3100 to 3102 or 8025 in the firewall; only 22, 80 and 443 are open.
+- Never expose ports 3210 to 3212 or 8025 in the firewall; only 22, 80 and 443 are open.

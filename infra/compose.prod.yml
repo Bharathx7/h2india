@@ -22,7 +22,7 @@ services:
     <<: *app
     environment:
       APP_URL: ${PUBLIC_URL:?set PUBLIC_URL}
-    ports: ["127.0.0.1:${PUBLIC_PORT:-3100}:3000"]
+    ports: ["127.0.0.1:${PUBLIC_PORT:-3210}:3000"]
 
   # The admin and the CMS. Same image; its own APP_URL so sign-in, passkeys and Payload use the admin domain.
   # Search indexing is always off here.
@@ -31,7 +31,7 @@ services:
     environment:
       APP_URL: ${ADMIN_URL:?set ADMIN_URL}
       FLAG_SEARCH_INDEXING: "false"
-    ports: ["127.0.0.1:${ADMIN_PORT:-3101}:3000"]
+    ports: ["127.0.0.1:${ADMIN_PORT:-3211}:3000"]
 
   worker:
     <<: *app
@@ -100,7 +100,7 @@ services:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set in h2india.env}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set in h2india.env}
       MC_HOST_local: http://${S3_ACCESS_KEY}:${S3_SECRET_KEY}@localhost:9000
-    ports: ["127.0.0.1:${FILES_PORT:-3102}:9000"]
+    ports: ["127.0.0.1:${FILES_PORT:-3212}:9000"]
     volumes: [miniodata:/data]
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
