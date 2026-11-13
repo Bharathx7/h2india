@@ -26,6 +26,7 @@
     "./files": "./src/files/index.ts",
     "./clocks": "./src/clocks/index.ts",
     "./admin": "./src/admin/overview.ts",
+    "./queues": "./src/queues/index.ts",
     "./queue": "./src/queue/index.ts",
     "./notify": "./src/notify/index.ts",
     "./importing": "./src/importing/index.ts",

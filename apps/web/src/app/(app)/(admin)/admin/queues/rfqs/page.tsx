@@ -63,7 +63,7 @@ export default async function RfqQueuePage({ searchParams }: { searchParams: Pro
           Everything waiting for a decision. Age turns amber close to the SLA and red once it&apos;s passed.
         </p>
       </div>
-      <QueueTabs current="rfqs" counts={{ rfqs: rows.length }} />
+      <QueueTabs current="rfqs" actor={actor} />
       <div className="flex flex-wrap items-center gap-2">
         <span className="type-label">Views</span>
         {VIEWS.map((v) => (

@@ -20,3 +20,4 @@ export * from "./supplier";
 export * from "./buyer";
 export * from "./rfq";
 export * from "./messages";
+export * from "./queues";

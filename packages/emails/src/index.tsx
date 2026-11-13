@@ -195,3 +195,15 @@ export function renderBankChanged(appUrl: string, input: Parameters<typeof bankC
 export function renderInvitation(appUrl: string, input: Parameters<typeof invitationMessage>[0]) {
   return renderNotice(appUrl, invitationMessage(input));
 }
+
+import { changesNeededMessage, eventLiveMessage, jobLiveMessage } from "./queues/messages";
+
+export function renderEventLive(appUrl: string, input: Parameters<typeof eventLiveMessage>[0]) {
+  return renderNotice(appUrl, eventLiveMessage(input));
+}
+export function renderChangesNeeded(appUrl: string, input: Parameters<typeof changesNeededMessage>[0]) {
+  return renderNotice(appUrl, changesNeededMessage(input));
+}
+export function renderJobLive(appUrl: string, input: Parameters<typeof jobLiveMessage>[0]) {
+  return renderNotice(appUrl, jobLiveMessage(input));
+}

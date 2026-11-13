@@ -271,6 +271,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 ## Admin back office (Stage 11)
 
 - Admin pages call `requireOperator(permission, path)` and render in `AdminShell`; the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.
+- Moderation decisions go through `decideItem()` (`@h2india/core/queues`): it claims, refuses a second decision and runs `apply` (the CMS change and the message) once; never change a queued item from a page without it. Moderators never edit the item itself; they return it with reasons.
 - `money.view` (and other names shared with company permissions) can't be checked with `can(actor, p)` without a company: for operator areas read `actor.operator.has(p)`.
 
 ## Server and deploys (step 1.7)

@@ -1,6 +1,9 @@
 import { parseServerEnv } from "@h2india/config";
 import {
+  renderChangesNeeded,
+  renderEventLive,
   renderGrievance,
+  renderJobLive,
   renderSubmissionReceived,
   renderWebinarRegistered,
   renderWebinarReminder,
@@ -102,5 +105,37 @@ export async function sendGrievance(to: Recipient, d: GrievanceDetails): Promise
     userId: to.userId ?? null,
     to: to.email,
     mail: await renderGrievance(appUrl(), d),
+  });
+}
+
+/** Moderation outcomes (step 11.2): sent to the person who submitted, once, after the decision is recorded. */
+export async function sendEventLive(to: Recipient, input: Parameters<typeof renderEventLive>[1]): Promise<void> {
+  await deliverEmail({
+    template: "email.event_live",
+    event: "queue.event_live",
+    userId: to.userId ?? null,
+    to: to.email,
+    mail: await renderEventLive(appUrl(), input),
+  });
+}
+export async function sendChangesNeeded(
+  to: Recipient,
+  input: Parameters<typeof renderChangesNeeded>[1],
+): Promise<void> {
+  await deliverEmail({
+    template: "email.changes_needed",
+    event: "queue.changes_needed",
+    userId: to.userId ?? null,
+    to: to.email,
+    mail: await renderChangesNeeded(appUrl(), input),
+  });
+}
+export async function sendJobLive(to: Recipient, input: Parameters<typeof renderJobLive>[1]): Promise<void> {
+  await deliverEmail({
+    template: "email.job_live",
+    event: "queue.job_live",
+    userId: to.userId ?? null,
+    to: to.email,
+    mail: await renderJobLive(appUrl(), input),
   });
 }

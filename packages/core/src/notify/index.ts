@@ -20,7 +20,10 @@ export type { Category, NotifyChannel, Topic, TopicName } from "./topics";
 export { sendTestMessage } from "./test-send";
 export { sendReportCopy } from "./reports";
 export {
+  sendChangesNeeded,
+  sendEventLive,
   sendGrievance,
+  sendJobLive,
   sendSubmissionReceived,
   sendWebinarRegistered,
   sendWebinarReminder,
