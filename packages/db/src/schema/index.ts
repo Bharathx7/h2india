@@ -15,3 +15,4 @@ export * from "./catalogue";
 export * from "./products";
 export * from "./brands";
 export * from "./claims";
+export * from "./members";

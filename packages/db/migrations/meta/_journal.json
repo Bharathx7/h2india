@@ -211,6 +211,13 @@
       "when": 1794557944283,
       "tag": "0029_decisions_a105_a108_a141",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794558275169,
+      "tag": "0030_members_follows_alerts",
+      "breakpoints": true
     }
   ]
 }

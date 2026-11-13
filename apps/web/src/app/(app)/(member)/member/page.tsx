@@ -1,11 +1,15 @@
-import { PRODUCT_NAME } from "@h2india/core";
+import { getDb } from "@h2india/core";
+import { needsOnboarding } from "@h2india/core/members";
+import { redirect } from "next/navigation";
+import { getSession } from "@/server/auth";
+import { MemberHome } from "./MemberHome";
 
-export default function Page() {
-  return (
-    <main className="mx-auto max-w-3xl p-10">
-      <p className="type-eyebrow text-secondary">{PRODUCT_NAME}</p>
-      <h1 className="type-h1 mt-2">Member workspace</h1>
-      <p className="type-body mt-4">Placeholder. Figma page 12. Built in Stage 7.</p>
-    </main>
-  );
+// The member home (step 7.2). A member who hasn't finished or skipped onboarding (step 7.1) goes there first.
+export const dynamic = "force-dynamic";
+
+export default async function MemberPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+  const session = await getSession();
+  if (!session) redirect("/sign-in?next=/member");
+  if (await needsOnboarding(getDb(), session.user.id)) redirect("/member/welcome");
+  return <MemberHome userId={session.user.id} searchParams={searchParams} />;
 }
