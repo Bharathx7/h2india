@@ -35,7 +35,9 @@ services:
 
   worker:
     <<: *app
-    command: ["pnpm", "--filter", "@h2india/worker", "start"]
+    # Runs from source with tsx, as in development: the esbuild bundle (dist) leaves the shared packages' own
+    # dependencies (meilisearch and others) unresolvable from apps/worker under pnpm's strict node_modules.
+    command: ["pnpm", "--filter", "@h2india/worker", "exec", "tsx", "src/index.ts"]
     environment:
       APP_URL: ${PUBLIC_URL:?set PUBLIC_URL}
       INTERNAL_WEB_URL: http://web-public:3000
