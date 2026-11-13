@@ -69,6 +69,8 @@ export default buildConfig({
   secret: createHmac("sha256", env.AUTH_SECRET).update("payload").digest("hex"),
   admin: {
     user: Editors.slug,
+    // The CMS looks like the rest of H2 India (A175): always the light theme, styled from our tokens in custom.css.
+    theme: "light",
     meta: { titleSuffix: " · H2 India CMS" },
     // No Gravatar look-ups: initials only.
     avatar: "default",

@@ -1,4 +1,198 @@
-/* H2 India look for the CMS (A26): the brand typeface; Payload keeps its own layout and colours. */
-:root {
-  --font-body: "Inter", system-ui, sans-serif;
+/*
+ * The CMS in the H2 India look (A175): our fonts, colours, radii and buttons, from the design tokens. Payload keeps its
+ * layout; every colour here is one of our tokens, so the CMS changes when the tokens do. Light theme only.
+ */
+@import "tailwindcss/theme" layer(theme);
+@import "@h2india/ui/tokens.css";
+
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  color-scheme: light;
+  --font-body: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Surfaces and text: Payload's elevation scale mapped to our ink scale. */
+  --theme-bg: var(--background-color-subtle);
+  --theme-input-bg: var(--background-color-page);
+  --theme-text: var(--text-color-primary);
+  --theme-border-color: var(--border-color-default);
+  --theme-elevation-0: var(--background-color-page);
+  --theme-elevation-50: var(--color-ink-50);
+  --theme-elevation-100: var(--color-ink-50);
+  --theme-elevation-150: var(--color-ink-200);
+  --theme-elevation-200: var(--color-ink-200);
+  --theme-elevation-250: var(--color-ink-300);
+  --theme-elevation-300: var(--color-ink-300);
+  --theme-elevation-350: var(--color-ink-400);
+  --theme-elevation-400: var(--color-ink-400);
+  --theme-elevation-450: var(--color-ink-500);
+  --theme-elevation-500: var(--color-ink-500);
+  --theme-elevation-550: var(--color-ink-500);
+  --theme-elevation-600: var(--color-ink-700);
+  --theme-elevation-650: var(--color-ink-700);
+  --theme-elevation-700: var(--color-ink-700);
+  --theme-elevation-750: var(--color-ink-900);
+  --theme-elevation-800: var(--color-ink-900);
+  --theme-elevation-850: var(--color-ink-900);
+  --theme-elevation-900: var(--color-ink-900);
+  --theme-elevation-950: var(--color-ink-900);
+  --theme-elevation-1000: var(--color-ink-900);
+
+  /* States. */
+  --theme-success-50: var(--color-success-subtle);
+  --theme-success-100: var(--color-success-subtle);
+  --theme-success-150: var(--color-fresh-200);
+  --theme-success-200: var(--color-fresh-300);
+  --theme-success-400: var(--color-fresh-500);
+  --theme-success-500: var(--color-success);
+  --theme-success-600: var(--color-success);
+  --theme-success-800: var(--color-fresh-700);
+  --theme-error-50: var(--color-error-subtle);
+  --theme-error-100: var(--color-error-subtle);
+  --theme-error-150: var(--color-error-subtle);
+  --theme-error-200: var(--color-error-subtle);
+  --theme-error-300: var(--color-error);
+  --theme-error-400: var(--color-error);
+  --theme-error-500: var(--color-error);
+  --theme-error-600: var(--color-error);
+  --theme-error-750: var(--color-error);
+  --theme-error-800: var(--color-error);
+  --theme-error-950: var(--color-error);
+  --theme-warning-150: var(--color-warning-subtle);
+  --theme-warning-650: var(--color-warning);
+  --theme-warning-800: var(--color-warning);
+
+  /* Shape. */
+  --style-radius-s: var(--radius-control);
+  --style-radius-m: var(--radius-card);
+  --style-radius-l: var(--radius-modal);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--background-color-subtle);
+  color: var(--text-color-primary);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Buttons as in Figma "Button v2": pills; primary is accent green with ink text (never white on green). */
+.btn {
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+}
+.btn--style-primary {
+  --color: var(--text-color-primary);
+  --bg-color: var(--background-color-accent);
+  --hover-bg: var(--background-color-accent);
+  --hover-color: var(--text-color-primary);
+  box-shadow: none;
+}
+.btn--style-primary:hover {
+  box-shadow: var(--shadow-soft);
+}
+.btn--style-primary.btn--disabled {
+  --bg-color: var(--color-ink-200);
+  --color: var(--text-color-secondary);
+}
+.btn--style-secondary {
+  --color: var(--text-color-primary);
+  --bg-color: var(--background-color-page);
+  --btn-border: 1px solid var(--border-color-control);
+  --hover-color: var(--text-color-primary);
+  --hover-btn-border: 1px solid var(--border-color-focus);
+}
+.btn--style-pill,
+.btn--style-subtle {
+  --bg-color: var(--background-color-page);
+  --color: var(--text-color-primary);
+  --hover-bg: var(--background-color-subtle);
+  --btn-border: 1px solid var(--border-color-control);
+}
+
+/* Fields as in Figma "Input": white boxes, 1.5 px borders, the control radius, ink focus. */
+input,
+textarea,
+select,
+.react-select .rs__control {
+  border-radius: var(--radius-control) !important;
+}
+.field-type input,
+.field-type textarea,
+.react-select .rs__control {
+  border: 1.5px solid var(--border-color-input) !important;
+  background: var(--background-color-page) !important;
+  box-shadow: none !important;
+}
+.field-type input:focus,
+.field-type textarea:focus,
+.react-select .rs__control--is-focused {
+  border-color: var(--border-color-focus) !important;
+  outline: none;
+}
+.field-label {
+  color: var(--text-color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* The sidebar as in the admin back office (626:8): ink, white text, mint for the current page. */
+.nav {
+  background: var(--background-color-inverse) !important;
+  border-right: 0 !important;
+}
+.nav,
+.nav a,
+.nav-group__toggle,
+.nav-group__label,
+.nav__link-label {
+  color: var(--text-color-inverse) !important;
+}
+.nav a:hover,
+.nav__link:hover {
+  background: var(--color-ink-700) !important;
+  border-radius: var(--radius-control);
+}
+.nav__link.active,
+.nav__link--active,
+.nav a[aria-current="page"] {
+  background: var(--background-color-page) !important;
+  color: var(--text-color-primary) !important;
+  border-radius: var(--radius-control);
+}
+.nav__link.active *,
+.nav a[aria-current="page"] * {
+  color: var(--text-color-primary) !important;
+}
+.nav svg {
+  color: var(--color-icon-inverse);
+}
+
+/* Header bar, cards, tables and pills in the product look. */
+.app-header {
+  background: var(--background-color-page);
+  border-bottom: 1px solid var(--border-color-default);
+}
+.card,
+.collection-list .table,
+.table table {
+  background: var(--background-color-page);
+  border-radius: var(--radius-card);
+}
+.table th {
+  background: var(--background-color-subtle);
+  color: var(--text-color-secondary);
+}
+.pill {
+  border-radius: var(--radius-pill);
+}
+a {
+  color: var(--text-color-link);
 }

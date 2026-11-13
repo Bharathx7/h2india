@@ -5,6 +5,7 @@ import { handleServerFunctions, RootLayout } from "@payloadcms/next/layouts";
 import type { ServerFunctionClient } from "payload";
 import type { ReactNode } from "react";
 import { importMap } from "./cms/importMap.js";
+import { fontVariables } from "../(app)/fonts";
 import "./custom.css";
 
 const serverFunction: ServerFunctionClient = async function (args) {
@@ -14,7 +15,12 @@ const serverFunction: ServerFunctionClient = async function (args) {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+    <RootLayout
+      config={config}
+      importMap={importMap}
+      serverFunction={serverFunction}
+      htmlProps={{ className: fontVariables }}
+    >
       {children}
     </RootLayout>
   );
