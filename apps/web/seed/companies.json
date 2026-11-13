@@ -117,5 +117,13 @@
     "kind": "supplier",
     "types": ["Manufacturer"],
     "categories": ["Electrolysers"]
+  },
+  {
+    "key": "deccan-process-safety",
+    "legal_name": "Deccan Process Safety Private Limited",
+    "trade_name": "Deccan Process Safety",
+    "kind": "supplier",
+    "types": ["Services"],
+    "categories": ["Testing & certification"]
   }
 ]

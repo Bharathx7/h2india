@@ -19,6 +19,7 @@ import { JsonLd } from "@/seo/jsonld";
 import { absolute } from "@/seo/site";
 import { getSession } from "@/server/auth";
 import { AskQuestion, CompareSave, QuoteForm, ReportListing } from "./ProductActions";
+import { ServiceView } from "./ServiceView";
 
 // The product page (quote-only 393:7030, phones 395:9807; fixed price 393:8021, phones 395:10162), step 6.4. A price
 // shows only for a fixed-price item, from core (canShowPrice); Add to cart and Buy now render only with the
@@ -82,6 +83,10 @@ export default async function ProductPage({
   const company = session ? (await identityOf(db, session.user.id)).company : null;
   const transactions = isEnabled("transactions");
   const ref = { id: p.id, slug: p.slug, name: p.name, supplier: p.supplier.name, category: p.category.slug };
+  const stateNames = STATE_OPTIONS.filter((s) => s.value !== "all-india").map((s) => s.label);
+  if (p.serviceDetails) {
+    return <ServiceView p={p} states={stateNames} signedIn={Boolean(session)} company={company} />;
+  }
   const tabs = TABS.filter(([id]) => {
     if (id === "installation") return p.installation.length > 0;
     if (id === "certificates") return p.certificates.length > 0;

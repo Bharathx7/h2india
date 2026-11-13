@@ -23,7 +23,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
-import { useCompare } from "./compare";
+import { saveCompareAction } from "@/app/(app)/(site)/marketplace/compare/actions";
+import { useCompare, useCompareSync } from "./compare";
 
 // Category and sub-category listing (392:4896 grid, 392:5787 table, 392:6656 no results; phones 395:9321 list and
 // 395:9617 filters sheet), step 6.3. Every change rewrites the address (listingSearch), so a shared link reproduces
@@ -45,6 +46,7 @@ export interface ListingProps {
 
 export function Listing(props: ListingProps) {
   const router = useRouter();
+  useCompareSync(props.signedIn, saveCompareAction);
   const [pending, start] = useTransition();
   const [sheet, setSheet] = useState(false);
   const go = (change: Partial<ListingQuery>, keepPage = false) => {

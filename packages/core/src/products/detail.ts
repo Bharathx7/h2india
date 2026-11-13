@@ -1,4 +1,11 @@
-import { schema, type Database, type Executor, type ProductCertificate, type ProductFact } from "@h2india/db";
+import {
+  schema,
+  type Database,
+  type Executor,
+  type ProductCertificate,
+  type ProductFact,
+  type ServiceDetails,
+} from "@h2india/db";
 import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { AttributeDef } from "../catalogue/attributes";
@@ -63,6 +70,11 @@ export interface ProductDetail {
     liveProducts: number;
   };
   madeInIndia: boolean;
+  /** Services only (400:11134). */
+  serviceDetails: ServiceDetails | null;
+  paused: boolean;
+  /** The provider's verification, for the "hasn't finished verification" notice (400:11597). */
+  providerStatus: "Verified" | "Pending" | "Unverified";
 }
 
 const initials = (name: string) =>
@@ -113,10 +125,18 @@ export async function productDetail(
     .innerJoin(schema.organisations, eq(schema.organisations.id, p.organisationId))
     .innerJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, p.organisationId))
     .where(
-      and(eq(p.slug, slug), eq(p.status, "Live"), isNull(p.deletedAt), isNull(cat.deletedAt), isNull(cat.hiddenAt)),
+      and(
+        eq(p.slug, slug),
+        inArray(p.status, ["Live", "Paused"]),
+        isNull(p.deletedAt),
+        isNull(cat.deletedAt),
+        isNull(cat.hiddenAt),
+      ),
     )
     .limit(1);
   if (!row || (row.p.sample && !opts.includeSample)) return null;
+  // A paused service stays visible with its notice and can't take requests (400:11797); a paused product doesn't.
+  if (row.p.status === "Paused" && row.cat.classId !== "services") return null;
   const parent = row.cat.parentId
     ? (await db.select().from(cat).where(eq(cat.id, row.cat.parentId)).limit(1))[0]
     : undefined;
@@ -215,6 +235,10 @@ export async function productDetail(
       liveProducts: live.length,
     },
     madeInIndia: row.p.madeInIndia,
+    serviceDetails: row.cat.classId === "services" ? (row.p.service ?? {}) : null,
+    paused: row.p.status === "Paused",
+    providerStatus:
+      row.org.verification === "Verified" ? "Verified" : row.org.verification === "Pending" ? "Pending" : "Unverified",
   };
 }
 

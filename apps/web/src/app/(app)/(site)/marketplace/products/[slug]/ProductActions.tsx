@@ -5,7 +5,8 @@ import { Button, buttonClasses, cx, FormField, Icon, Input, Modal, Select, Switc
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useFormGuard } from "@/lib/form-guard";
-import { useCompare } from "@/marketplace/compare";
+import { useCompare, useCompareSync } from "@/marketplace/compare";
+import { saveCompareAction } from "../../compare/actions";
 import { askQuestionAction, reportListingAction } from "./actions";
 
 // The product page's buttons and dialogs (393:7160, 402:12544, 402:12601, 755:15048, 755:15165), step 6.4.
@@ -50,6 +51,7 @@ export function QuoteForm({ product, states }: { product: ProductRef; states: st
 
 export function CompareSave({ product, signedIn }: { product: ProductRef; signedIn: boolean }) {
   const compare = useCompare();
+  useCompareSync(signedIn, saveCompareAction);
   const [note, setNote] = useState<string | null>(null);
   const on = compare.has(product.id);
   return (

@@ -20,6 +20,7 @@
     "./catalogue": "./src/catalogue/classes.ts",
     "./catalogue/attributes": "./src/catalogue/attributes.ts",
     "./catalogue/taxonomy": "./src/catalogue/index.ts",
+    "./brands": "./src/brands/index.ts",
     "./products": "./src/products/index.ts",
     "./products/rules": "./src/products/rules.ts",
     "./products/rules-client": "./src/products/rules-client.ts",

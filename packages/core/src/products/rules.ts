@@ -29,8 +29,8 @@ export function canShowPrice(input: {
   );
 }
 
-/** Products in one comparison (step 6.5: the flows show three). A setting, so it can change without code. */
-export const COMPARE_LIMIT = 3;
+/** Products in one comparison (step 6.5): 5, as the compare frames say ("You can compare up to 5", 91:9); A116. */
+export const COMPARE_LIMIT = 5;
 
 // ----------------------------------------------------------------------------- listing query (step 6.3)
 

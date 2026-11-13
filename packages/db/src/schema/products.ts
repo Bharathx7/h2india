@@ -20,6 +20,20 @@ export interface ProductCertificate {
   issuer?: string;
 }
 
+/** What a service page shows (400:11134): set only for listings in the Services class. */
+export interface ServiceDetails {
+  statesServed?: string[];
+  accreditations?: { name: string; url?: string }[];
+  scope?: string;
+  deliverables?: string[];
+  standards?: string[];
+  facts?: ProductFact[];
+  references?: { eyebrow: string; title: string; text: string; href?: string }[];
+  faqs?: { question: string; answer: string }[];
+  /** "Usually replies in 2 working days" appears only once reply times are measured (RFQs, step 9). */
+  proposalHint?: string;
+}
+
 export interface ProductDocument {
   label: string;
   fileId: string;
@@ -44,6 +58,8 @@ export const products = core.table(
     slug: text("slug").notNull(),
     name: text("name").notNull(),
     brand: text("brand"),
+    /** The brand record (step 6.5), when the maker is listed under Brands. */
+    brandId: uuid("brand_id"),
     model: text("model"),
     /** The grey line under the name in tables, for example "Containerised · 40 ft". */
     variant: text("variant"),
@@ -84,6 +100,8 @@ export const products = core.table(
     /** Service in India (393:7643), for example "Pune · Vadodara · Chennai". */
     serviceCities: text("service_cities"),
     serviceNote: text("service_note"),
+    /** Services only (400:11134). */
+    service: jsonb("service").$type<ServiceDetails>(),
     status: text("status").notNull().default("Draft"),
     publishedAt: utc("published_at"),
     sample: boolean("sample").notNull().default(false),

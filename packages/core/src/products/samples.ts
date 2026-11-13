@@ -151,3 +151,123 @@ export async function seedProductSamples(db: Executor, now = new Date()): Promis
   }
   return `products: ${String(added)} sample products added${skipped.length ? `; skipped ${skipped.join(", ")}` : ""}`;
 }
+
+/**
+ * Sample brands (401:12097, 401:12561) and the sample service (400:11134), step 6.5, flagged sample (F9). Two of the
+ * Nordwasser dealers have their letter recorded as checked, so the page shows both kinds of dealer.
+ */
+export async function seedBrandAndServiceSamples(db: Executor): Promise<string> {
+  const out: string[] = [];
+  const b = schema.brands;
+  const ensureBrand = async (v: typeof b.$inferInsert) => {
+    const [found] = await db.select().from(b).where(eq(b.slug, v.slug)).limit(1);
+    if (found) return found;
+    const [made] = await db.insert(b).values(v).returning();
+    out.push(v.name);
+    return made;
+  };
+  const nordwasser = await ensureBrand({
+    slug: "nordwasser",
+    name: "Nordwasser",
+    origin: "Germany",
+    ownerName: "Nordwasser GmbH",
+    description:
+      "Nordwasser makes PEM stacks, drying and purification modules for electrolysers from 100 kW to 20 MW. Its Indian dealers handle sales, commissioning and spares.",
+    sample: true,
+  });
+  await ensureBrand({ slug: "arctos-cryogenics", name: "Arctos Cryogenics", origin: "Norway", sample: true });
+  const org = async (key: string) =>
+    (
+      await db
+        .select({ id: schema.companyProfiles.organisationId })
+        .from(schema.companyProfiles)
+        .where(eq(schema.companyProfiles.importKey, key))
+        .limit(1)
+    )[0]?.id;
+  if (nordwasser) {
+    const dealers: [string, string, string | null, string, boolean][] = [
+      ["sahyadri-electrolysers", "West and South India", null, "2027-03-31", true],
+      ["godavari-green-power", "all India", null, "2026-12-31", true],
+      ["pranava-h2", "", "spares and service only", "2027-06-30", false],
+    ];
+    for (const [key, regions, scope, until, checked] of dealers) {
+      const id = await org(key);
+      if (!id) continue;
+      await db
+        .insert(schema.brandDealers)
+        .values({
+          brandId: nordwasser.id,
+          organisationId: id,
+          regions: regions || null,
+          scope,
+          letterValidUntil: until,
+          verifiedAt: checked ? new Date() : null,
+        })
+        .onConflictDoNothing();
+    }
+    await db
+      .update(schema.products)
+      .set({ brandId: nordwasser.id, brand: "Nordwasser" })
+      .where(and(eq(schema.products.sample, true), eq(schema.products.slug, "pem-stack-module-500-kw")));
+  }
+
+  const provider = await org("deccan-process-safety");
+  const [testing] = await db
+    .select()
+    .from(schema.catalogueCategories)
+    .where(
+      and(eq(schema.catalogueCategories.slug, "testing-certification"), isNull(schema.catalogueCategories.parentId)),
+    )
+    .limit(1);
+  const slug = "hydrogen-safety-hazop-and-qra-studies";
+  const [exists] = await db
+    .select({ id: schema.products.id })
+    .from(schema.products)
+    .where(eq(schema.products.slug, slug))
+    .limit(1);
+  if (provider && testing && !exists) {
+    await db.insert(schema.products).values({
+      organisationId: provider,
+      categoryId: testing.id,
+      slug,
+      name: "Hydrogen safety: HAZOP and QRA studies",
+      summary:
+        "HAZOP, HAZID and quantitative risk assessment for electrolyser plants, storage, compression and refuelling stations, led by chartered process-safety engineers.",
+      status: "Live",
+      publishedAt: new Date(),
+      sample: true,
+      service: {
+        statesServed: ["Gujarat", "Maharashtra", "Odisha", "Tamil Nadu", "Rajasthan", "Karnataka"],
+        accreditations: [{ name: "ISO/IEC 17020 · NABCB" }, { name: "ISO 9001:2015 · TÜV India" }],
+        scope:
+          "Study planning, node definition, a facilitated HAZOP workshop with your team, bow-tie analysis of top events, consequence modelling (jet fire, explosion overpressure) and QRA against Indian and international risk criteria.",
+        deliverables: [
+          "HAZOP worksheets and action register",
+          "QRA report with individual and societal risk contours",
+          "Hazardous area classification drawing",
+          "Recommendations close-out tracker",
+        ],
+        standards: ["IEC 61882 (HAZOP)", "ISO 19880-1", "ISO/TR 15916", "IS/IEC 60079-10-1", "PESO Gas Cylinder Rules"],
+        facts: [
+          { label: "Typical duration", value: "2–4", unit: "weeks", note: "From receiving P&IDs" },
+          { label: "Workshop", value: "3", unit: "days", note: "On site or online" },
+          {
+            label: "Team",
+            value: "2 + 1",
+            unit: "engineers",
+            note: "Chartered process-safety lead, QRA analyst, scribe",
+          },
+          { label: "Software", value: "PHAST, Safeti", unit: "", note: "Licensed" },
+        ],
+        faqs: [
+          {
+            question: "How long does a HAZOP study take?",
+            answer: "Usually 2–4 weeks from receiving P&IDs, including one site visit and a 3-day workshop.",
+          },
+        ],
+      },
+    });
+    out.push("HAZOP and QRA service");
+  }
+  return `brands and services: ${out.length ? out.join(", ") : "nothing new"}`;
+}

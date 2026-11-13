@@ -183,6 +183,13 @@
       "when": 1794550754029,
       "tag": "0025_product_detail",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794551449905,
+      "tag": "0026_brands_compare_services",
+      "breakpoints": true
     }
   ]
 }

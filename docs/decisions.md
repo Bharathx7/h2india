@@ -221,7 +221,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A113 | Top suppliers on class and application pages | You | Step 6.2 | Until listings exist, directory profiles that name the class's categories, verified first. "Ranked by verified listings and reply time" applies from 8.3 and 9 | Open | |
 | A114 | Where listing filters and counts are worked out (step 6.3) | You | Step 6.3 | In the database (core `listProducts`), not the search engine: exact, no background job, plenty for launch volumes. Revisit with real volumes in step 12.5 | Open | The playbook suggests Meilisearch facets; the index still holds product attributes for global search. |
 | A115 | Products table before the supplier editor | You | Step 6.3 | `core.products` is made now (listings need it): one supplier organisation, one category, attributes checked against the schema, a price only for fixed-price items (the database refuses a price on a quote-only product), statuses Draft · In review · Live · Paused. The supplier's editor and review stay in 8.3 | Open | |
-| A116 | How many products in compare | You | Step 6.5 | 3 (COMPARE_LIMIT), as the flows show; the compare bar reads "Compare 2 of 3" | Open | The table frame's bar says "Compare 3 of 5" (392:5787). |
+| A116 | How many products in compare | You | Step 6.5 | 5 (COMPARE_LIMIT), as the compare frames say ("You can compare up to 5 products from one category", 91:9; "Compare 3 of 5", 392:5787) | Open | The playbook says the flows show three; the frames say five. |
 | A117 | Category intro text | You | Step 6.3 | Not shown: categories have no description field yet (the PEM frame draws one paragraph). Add it to admin Catalogue if wanted | Open | |
 | A118 | Save to list on cards | You | Step 7.2 | Goes to /member/saved (sign-in first when signed out), as A71, until lists arrive | Open | |
 | A119 | Sub-category schema | You | Step 6.3 | A sub-category's products fill in its parent category's attributes, then its own; filters and the table use the same | Open | Electrolysers' attributes apply to PEM. |
@@ -232,6 +232,11 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A124 | The verification popover (393:7270) | You | Step 8.2 | The page shows the Verified supplier badge only; the checks with their dates arrive with verification tiers (8.2) | Open | |
 | A125 | Product video and photos (298:26882, 302:31945) | You | M9, 8.3 | An icon placeholder; no video until the media host is chosen (M9) and suppliers upload (8.3) | Open | |
 | A126 | Datasheets on live products | You | Step 6.4 | Anyone may open a datasheet attached to a live product, through fileLink() (5-minute link); drafts' files stay private | Open | |
+| A127 | Services | You | Step 6.5 | A service is a listing in the Services class with service details (states served, accreditations, scope, deliverables, standards, team and duration, FAQ). Request a proposal goes to the quote request (9.3) with scope, site state and start date; a paused service stays visible with its notice and the request is disabled | Open | "Usually replies in 2 working days" and Reference projects show once reply times and tracker links exist. |
+| A128 | Who confirms an authorised-dealer claim | You | Step 6.5 | An operator with verification.edit (Supplier verifier, Super admin) records the checked letter and its valid-until date (`recordDealerEvidence`, audited); only then, and only while the letter is valid, does the dealer show Verified. Others are listed as "Not yet checked". The Verification desk screen comes with 8.2 | Open | Playbook watch-out. |
+| A129 | Where brands come from | You | Step 6.5 | Brand records (name, origin, owner, description) and their dealers are added by import or the catalogue team until a brand admin screen exists; products link to a brand | Open | |
+| A130 | Attach P&IDs on Request a proposal (400:11134) | You | Step 9.3 | Not built: the attachment joins the quote request wizard | Open | |
+| A131 | Compare selection for signed-in people | You | Step 6.5 | Kept in the browser and copied to the server (compare_lists) whenever it changes; the compare page uses the server copy when the address has no products | Open | |
 
 ## Design-system notes (Stage 2)
 
@@ -288,6 +293,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 5.4 built. Added A62 to A67 (addresses, alerts, closing-soon window, applicant groups, checker rules, sample awardees), open with safe defaults; M25 still open, so no scheme has rules.
 - 13 Nov 2026: Step 5.10 built. Added A99 to A102 (indexing switch, hy-gen redirects, 500 reference, maintenance access), open with safe defaults; M14 still open.
 - 13 Nov 2026: Step 5.9 built. Added A94 to A98 (bot challenge, cookie categories and analytics, issue pages, manage link, one-click unsubscribe), open with safe defaults; M10 still open.
+- 13 Nov 2026: Step 6.5 built. A116 now follows the frames (5). Added A127 to A131, open with safe defaults.
 - 13 Nov 2026: Step 6.4 built. Added A120 to A126, open with safe defaults.
 - 13 Nov 2026: Step 6.3 built. Added A114 to A119, open with safe defaults.
 - 13 Nov 2026: Step 6.2 built with the F4 safe default (one template). Added A109 to A113, open with safe defaults.

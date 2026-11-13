@@ -13,3 +13,4 @@ export * from "./events";
 export * from "./grievances";
 export * from "./catalogue";
 export * from "./products";
+export * from "./brands";

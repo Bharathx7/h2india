@@ -4,7 +4,7 @@
 import config from "../src/payload.config";
 import { getDb } from "@h2india/core";
 import { seedCatalogueSamples } from "@h2india/core/catalogue/taxonomy";
-import { seedProductSamples } from "@h2india/core/products";
+import { seedBrandAndServiceSamples, seedProductSamples } from "@h2india/core/products";
 import { importCompanies } from "@h2india/core/companies";
 import { formatReport } from "@h2india/core/importing";
 import { readFile } from "node:fs/promises";
@@ -566,6 +566,7 @@ async function main(): Promise<number> {
   problems += companies.counts.error;
   console.log(await seedCatalogueSamples(getDb()));
   console.log(await seedProductSamples(getDb()));
+  console.log(await seedBrandAndServiceSamples(getDb()));
 
   for (const type of CONTENT) {
     const rows = (await rowsOf(type)).map((r) => (publish ? r : { ...r, publish: "no" }));

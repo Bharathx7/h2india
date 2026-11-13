@@ -211,6 +211,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Compare selection: `useCompare()` (`marketplace/compare.ts`), up to `COMPARE_LIMIT`.
 - The product page reads `productDetail()`; its price comes only from there (`canShowPrice`, GST from the supplier's rate). Add to cart and Buy now render only when `isEnabled("transactions")`.
 - Ask a question and Report this listing go through `askQuestion()` and `reportListing()` after `checkForm()`.
+- Services are products in the Services class with `service` details; a paused service stays visible and can't take a request. Compare: `compareProducts()` (one category, no price). Brands: `@h2india/core/brands`; a dealer is Verified only through `recordDealerEvidence()` while the letter is valid.
 
 ## Server and deploys (step 1.7)
 

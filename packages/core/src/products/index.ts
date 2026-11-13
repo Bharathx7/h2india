@@ -4,3 +4,4 @@ export * from "./rules";
 export * from "./samples";
 export * from "./company";
 export * from "./detail";
+export * from "./compare";
