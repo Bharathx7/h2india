@@ -24,6 +24,7 @@ import { callWeb } from "../internal";
 import { pruneSearchOutbox } from "../search/outbox";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
+import { rollUpYesterdayReports } from "../admin/system";
 
 // The schedule runner (step 3.8): housekeeping and the deadline tick, as BullMQ job schedulers on the clocks queue.
 // Every job reads its work from the database, so a missed run (worker down, Redis flushed) is caught up by the next.
@@ -57,6 +58,8 @@ export const SCHEDULES: Scheduled[] = [
   { id: "alerts-digests", pattern: "30 1 * * *", run: () => sendDigests(getDb()) },
   // 00:20 IST every day: supplier analytics roll-up of the day before (step 8.8).
   { id: "analytics-rollup", pattern: "50 18 * * *", run: () => rollUpYesterday(getDb()) },
+  // Reports (step 11.8): yesterday's figures at 00:40 IST, so reports never read live tables.
+  { id: "reports-rollup", pattern: "10 19 * * *", run: () => rollUpYesterdayReports(getDb()) },
   // Step 8.4: datasheets a Redis outage left waiting.
   { id: "datasheet-sweep", every: 5 * MINUTE, run: () => sweepExtractions() },
   // 06:00 IST every day (673:221 "Sent 6:05 AM IST"): documents past expiry pause their badges; notices go ahead.

@@ -216,7 +216,7 @@ describe.skipIf(!url)("clocks", () => {
 
   it("runs every scheduled housekeeping job", async () => {
     // These call the web app, which the end-to-end tests cover (the search ones in search.spec.ts).
-    const web = new Set(["cms-publish-due", "report-leads-prune", "search-sync", "search-refresh"]);
+    const web = new Set(["cms-publish-due", "report-leads-prune", "search-sync", "search-refresh", "newsletter-send"]);
     for (const s of SCHEDULES.filter((x) => !web.has(x.id))) await runScheduled(s.id);
     await expect(runScheduled("nope")).rejects.toThrow("No schedule");
   });

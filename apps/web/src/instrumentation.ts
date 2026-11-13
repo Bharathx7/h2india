@@ -6,6 +6,10 @@ export async function register() {
   parseServerEnv();
   parseClientEnv();
   readFlags();
+  // Switches changed in System settings (step 11.8) reach this server within 30 seconds.
+  const { refreshFlagOverrides } = await import("@h2india/core/admin/system");
+  await refreshFlagOverrides();
+  setInterval(() => void refreshFlagOverrides(), 30_000).unref();
 }
 
 /**

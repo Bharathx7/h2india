@@ -1,4 +1,5 @@
 import { isEnabled } from "@h2india/config";
+import { refreshFlagsSoon } from "@h2india/core/admin/system";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Gives every request an ID (step 3.6). The audit log stores it, and the response returns it in X-Request-Id, so a
@@ -15,6 +16,8 @@ const MAINTENANCE_OPEN = ["/maintenance", "/admin", "/cms", "/api", "/sign-in", 
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 export function proxy(request: NextRequest) {
+  // Switches changed in System settings (step 11.8): re-read at most every 30 seconds, in the background.
+  refreshFlagsSoon();
   // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.
   const { pathname } = request.nextUrl;
   // View as user (657:486) is read-only: no form, server action or API call can write. Only ending it is allowed.

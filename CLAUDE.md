@@ -274,6 +274,10 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Moderation decisions go through `decideItem()` (`@h2india/core/queues`): it claims, refuses a second decision and runs `apply` (the CMS change and the message) once; never change a queued item from a page without it. Moderators never edit the item itself; they return it with reasons.
 - Newsletter issues are sent only through `@h2india/core/newsletter/sends` (`scheduleSend()` starts a `newsletterSend` deadline; `sendBatch()` sends to confirmed subscribers, each once, with unsubscribe headers). Core renders the email; the web app only builds `IssueContent` (`admin/content/issue.ts`).
 - Search synonyms and boosted results are the settings `SEARCH_SYNONYMS` and `SEARCH_BOOSTS`; change them only with `saveSynonyms()`/`saveBoosts()` (they apply to the live indexes, and `ensureIndexes()` keeps them).
+- Switches changed in System settings are the setting `FLAG_OVERRIDES`, changed only with `switchFlag()` (money switches become a proposal for a second operator, `decideProposal()`); servers re-read them every 30 seconds and `isEnabled()` prefers them. Clocks change only with `setClock()`.
+- Reports read `report_daily` (rolled up nightly by `rollUpReports()`), never live tables.
+- Users are suspended only with `suspendUser()`/`suspendCompany()`; View as only through `startViewAs()` (read-only: the proxy refuses every write while the cookie is set). Admin screens use `operatorSession()`, never the viewed person.
+- Data-rights erasure runs only through `erasurePlan()` then `eraseForRequest()` (`@h2india/core/compliance`): add every new table holding personal data to its STEPS.
 - `money.view` (and other names shared with company permissions) can't be checked with `can(actor, p)` without a company: for operator areas read `actor.operator.has(p)`.
 
 ## Server and deploys (step 1.7)

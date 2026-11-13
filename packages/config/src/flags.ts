@@ -37,7 +37,30 @@ export function readFlags(source: Record<string, string | undefined> = process.e
   return flags;
 }
 
+/**
+ * Switches changed in admin System settings (step 11.8), refreshed from the database every 30 seconds by the server.
+ * They win over the environment. Tests that pass their own `source` never see them.
+ */
+let overrides: Partial<Record<FlagName, boolean>> = {};
+
+export function setFlagOverrides(next: Partial<Record<FlagName, boolean>>): void {
+  overrides = { ...next };
+}
+
+/** Flags an operator may switch in System settings; the rest stay in the environment (devPages, sampleContent). */
+export const ADMIN_FLAGS = [
+  "maintenance",
+  "comingSoon",
+  "searchIndexing",
+  "transactions",
+  "payLater",
+  "letterOfCredit",
+] as const;
+/** Switching these needs a second operator to approve (they open or close money flows). */
+export const TWO_PERSON_FLAGS: readonly FlagName[] = ["transactions", "payLater", "letterOfCredit"];
+
 export function isEnabled(name: FlagName, source?: Record<string, string | undefined>): boolean {
+  if (source === undefined && overrides[name] !== undefined) return overrides[name];
   return readFlags(source)[name];
 }
 
