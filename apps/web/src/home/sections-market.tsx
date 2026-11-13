@@ -2,7 +2,7 @@ import { Button, CategoryTile, EmptyState, Icon, type IconName } from "@h2india/
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { catalogue } from "@/marketplace/data";
-import { applicationHref, categoryHref, classHref, popularCategories } from "@/marketplace/views";
+import { applicationHref, categoryHref, classHref, HOME_APPLICATIONS, popularCategories } from "@/marketplace/views";
 import { Section, SectionTitle } from "./parts";
 
 // Home sections 06 to 08 (377:4917; phones 381:5845).
@@ -45,15 +45,17 @@ export async function Marketplace() {
       </div>
       <h3 className="type-h4 text-primary">Browse by application</h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
-        {cat.applications.map((a) => (
-          <CategoryTile
-            key={a.id}
-            title={a.shortLabel}
-            detail={a.examples || undefined}
-            href={applicationHref(a.id)}
-            icon={ICONS[a.id] ?? "zap"}
-          />
-        ))}
+        {cat.applications
+          .filter((a) => HOME_APPLICATIONS.includes(a.id))
+          .map((a) => (
+            <CategoryTile
+              key={a.id}
+              title={a.shortLabel}
+              detail={a.examples || undefined}
+              href={applicationHref(a.id)}
+              icon={ICONS[a.id] ?? "zap"}
+            />
+          ))}
       </div>
     </Section>
   );

@@ -78,5 +78,25 @@
   {
     "from": "/webinars",
     "to": "/events/webinars"
+  },
+  {
+    "from": "/compare",
+    "to": "/marketplace/compare"
+  },
+  {
+    "from": "/brands",
+    "to": "/marketplace/brands"
+  },
+  {
+    "from": "/brands/:slug",
+    "to": "/marketplace/brands/:slug"
+  },
+  {
+    "from": "/applications/:slug",
+    "to": "/marketplace/applications/:slug"
+  },
+  {
+    "from": "/marketplace/p/:slug",
+    "to": "/marketplace/products/:slug"
   }
 ]

@@ -41,6 +41,12 @@ describe("price display rule", () => {
     expect(canShowPrice({ surface: "pdp", pricing: "quote" })).toBe(false);
     expect(canShowPrice({ surface: "pdp", pricing: "fixed", price: null })).toBe(false);
   });
+  it("shows an indicative range only on the product page (A141)", () => {
+    expect(canShowPrice({ surface: "pdp", pricing: "indicative", price: 400000000 })).toBe(true);
+    for (const surface of ["card", "search", "filter", "compare", "listing-table"] as const) {
+      expect(canShowPrice({ surface, pricing: "indicative", price: 400000000 })).toBe(false);
+    }
+  });
   it.each<PriceSurface>(["card", "search", "filter", "compare", "listing-table"])("never on %s", (surface) => {
     expect(canShowPrice({ surface, pricing: "fixed", price: 1250000 })).toBe(false);
   });

@@ -74,10 +74,10 @@ describe.skipIf(!url)("catalogue taxonomy", () => {
     const systems = tree[0]?.categories.filter((c) => !c.label.startsWith("Test")).map((c) => c.label) ?? [];
     expect(systems.slice(0, 3)).toEqual(["Electrolysers", "Fuel cell systems", "Compression systems"]);
 
+    // All seven applications show since A105.
     const apps = await catalogueApplications(h.db);
-    expect(apps).toHaveLength(6);
-    expect(apps.map((a) => a.id)).not.toContain("ports-shipping");
-    expect(await catalogueApplications(h.db, { includeHidden: true })).toHaveLength(7);
+    expect(apps.map((a) => a.id)).toContain("ports-shipping");
+    expect(apps).toHaveLength(7);
 
     const compression = tree[0]?.categories.find((c) => c.slug === "compression-systems");
     const diaphragm = compression?.children.find((c) => c.slug === "diaphragm");

@@ -15,6 +15,10 @@ export const PRODUCT_TRANSITIONS: Record<ProductStatus, readonly ProductStatus[]
 /** Where a price could appear. Only the product page of a fixed-price item may show one (playbook step 6.4). */
 export type PriceSurface = "pdp" | "card" | "search" | "filter" | "compare" | "listing-table";
 
+/**
+ * The price rule (playbook step 6.4, A141): a figure shows only on the product page, and only for a fixed-price item
+ * (its price) or an indicative item (the supplier's range, passed as its lower end). Never on any other surface.
+ */
 export function canShowPrice(input: {
   surface: PriceSurface;
   pricing: string;
@@ -22,7 +26,7 @@ export function canShowPrice(input: {
 }): boolean {
   return (
     input.surface === "pdp" &&
-    input.pricing === "fixed" &&
+    (input.pricing === "fixed" || input.pricing === "indicative") &&
     input.price !== null &&
     input.price !== undefined &&
     Number(input.price) > 0

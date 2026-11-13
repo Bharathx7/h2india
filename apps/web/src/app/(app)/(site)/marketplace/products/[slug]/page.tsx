@@ -158,7 +158,14 @@ export default async function ProductPage({
                   <p className="pt-2 type-body-sm text-body">Price set by the supplier, ex-works.</p>
                 </div>
               ) : (
-                <h2 className="type-h3 text-primary">Price on request</h2>
+                <div className="flex flex-col gap-1">
+                  <h2 className="type-h3 text-primary">Price on request</h2>
+                  {p.indicative ? (
+                    <p className="type-body-sm text-body">
+                      Indicative range from the supplier: {p.indicative}. The final price depends on site and scope.
+                    </p>
+                  ) : null}
+                </div>
               )}
               <ul className="flex flex-col gap-2 type-body-sm text-body">
                 {p.leadTime ? <Fact icon="truck">Lead time: {p.leadTime}</Fact> : null}

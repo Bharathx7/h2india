@@ -50,7 +50,8 @@ test("every redirect is a 301 to a page that exists", async ({ request }) => {
     const res = await request.get(r.from, { maxRedirects: 0 });
     expect(res.status(), r.from).toBe(301);
     expect(new URL(res.headers().location ?? "", "http://x").pathname, r.from).toBe(r.to);
-    expect((await request.get(r.to)).status(), r.to).toBe(200);
+    // A pattern row (/brands/:slug, A147) has no single page to open; its 301 and target pattern are checked above.
+    if (!r.to.includes(":")) expect((await request.get(r.to)).status(), r.to).toBe(200);
   }
 });
 

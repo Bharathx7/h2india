@@ -70,11 +70,14 @@ export const products = core.table(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
-    /** quote (Request a quote) or fixed (a price on the product page, step 6.4). */
+    /** quote (Request a quote), fixed (a price on the product page) or indicative (a range on the product page, A141). */
     pricing: text("pricing").notNull().default("quote"),
     /** Fixed-price items only, in paise. Never read outside the product page's price rule. */
     pricePaise: bigint("price_paise", { mode: "bigint" }),
     priceCurrency: char("price_currency", { length: 3 }),
+    /** Indicative items only (A141): the supplier's rough range, shown on the product page only, in paise. */
+    indicativeMinPaise: bigint("indicative_min_paise", { mode: "bigint" }),
+    indicativeMaxPaise: bigint("indicative_max_paise", { mode: "bigint" }),
     /** GST on a fixed price, in basis points (1800 = 18%), entered by the supplier with the price. */
     gstRateBps: integer("gst_rate_bps"),
     /** Minimum order, in units (393:8151 "Minimum order: 2 units"). */

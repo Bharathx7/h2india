@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { person } from "@/directory/data";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { absolute } from "@/seo/site";
 
 // A person's profile (756:12711), step 6.6: only with their consent recorded (M24). No email or phone, ever.
 type Params = Promise<{ slug: string }>;
@@ -53,6 +54,15 @@ export default async function PersonPage({ params }: { params: Params }) {
       </Link>
       <p className="type-caption text-secondary">
         We pass your message on; {p.name} decides whether to reply. Their email and phone stay private.
+      </p>
+      <p className="type-caption text-secondary">
+        Is this you? You can ask us to change or remove this profile at any time.{" "}
+        <Link
+          href={`/legal/grievance-officer?type=Privacy&page=${encodeURIComponent(absolute(`/directory/people/${p.slug}`))}`}
+          className="underline"
+        >
+          Ask to change or remove it
+        </Link>
       </p>
     </main>
   );

@@ -60,3 +60,13 @@ export function popularCategories(cat: PublicCatalogue): PublicCategory[] {
   const all = allCategories(cat);
   return POPULAR.map((slug) => all.find((c) => c.slug === slug)).filter((c): c is PublicCategory => Boolean(c));
 }
+
+/** The six application tiles the home page draws (850:209); the marketplace landing and menu show all of them (A105). */
+export const HOME_APPLICATIONS = [
+  "production",
+  "storage-transport",
+  "refuelling-mobility",
+  "fuel-cells-power",
+  "industrial-use",
+  "safety-testing",
+];

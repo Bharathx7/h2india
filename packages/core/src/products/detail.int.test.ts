@@ -56,6 +56,15 @@ describe.skipIf(!url)("product page", () => {
         minOrder: 2,
       },
       { ...base, slug: `draft-${tag}`, name: "Draft detector", status: "Draft" },
+      {
+        ...base,
+        slug: `indicative-${tag}`,
+        name: "Indicative system",
+        pricing: "indicative",
+        priceCurrency: "INR",
+        indicativeMinPaise: 400000000n,
+        indicativeMaxPaise: 550000000n,
+      },
     ]);
   });
   afterAll(async () => {
@@ -79,6 +88,24 @@ describe.skipIf(!url)("product page", () => {
     });
     expect(p?.minOrder).toBe(2);
     expect(p?.specs[0]?.rows[0]?.condition).toBe("0 to 4% by volume");
+  });
+
+  it("shows a supplier's indicative range on the product page, and the database keeps ranges sane (A141)", async () => {
+    const p = await productDetail(h.db, `indicative-${tag}`, { includeSample: false });
+    expect(p).toMatchObject({ pricing: "indicative", price: null, indicative: "₹40,00,000 – ₹55,00,000" });
+    const [anyProduct] = await h.db.select().from(schema.products).limit(1);
+    const bad = (extra: Record<string, unknown>) =>
+      h.db.insert(schema.products).values({
+        organisationId: anyProduct?.organisationId ?? "",
+        categoryId: anyProduct?.categoryId ?? "",
+        slug: `bad-${randomBytes(3).toString("hex")}`,
+        name: "Bad",
+        ...extra,
+      });
+    await expect(
+      bad({ pricing: "indicative", priceCurrency: "INR", indicativeMinPaise: 5n, indicativeMaxPaise: 1n }),
+    ).rejects.toThrow();
+    await expect(bad({ pricing: "quote", indicativeMinPaise: 5n, indicativeMaxPaise: 9n })).rejects.toThrow();
   });
 
   it("doesn't show drafts", async () => {

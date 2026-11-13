@@ -54,8 +54,10 @@ export interface ProductDetail {
   warranty: { months: number; note: string | null } | null;
   service: { cities: string; note: string | null } | null;
   applications: { id: string; label: string }[];
-  pricing: "quote" | "fixed";
+  pricing: "quote" | "fixed" | "indicative";
   price: ProductPrice | null;
+  /** Indicative items (A141): "₹40,00,000 – ₹55,00,000", on the product page only. */
+  indicative: string | null;
   supplier: {
     organisationId: string;
     name: string;
@@ -219,8 +221,16 @@ export async function productDetail(
     warranty: row.p.warrantyMonths !== null ? { months: row.p.warrantyMonths, note: row.p.warrantyNote } : null,
     service: row.p.serviceCities ? { cities: row.p.serviceCities, note: row.p.serviceNote } : null,
     applications: apps.filter((a) => a.hiddenAt === null).map((a) => ({ id: a.id, label: a.label })),
-    pricing: fixed ? "fixed" : "quote",
+    pricing: fixed ? "fixed" : row.p.pricing === "indicative" ? "indicative" : "quote",
     price,
+    indicative:
+      row.p.indicativeMinPaise !== null &&
+      row.p.indicativeMaxPaise !== null &&
+      canShowPrice({ surface: "pdp", pricing: row.p.pricing, price: row.p.indicativeMinPaise })
+        ? row.p.indicativeMinPaise === row.p.indicativeMaxPaise
+          ? Money.format(row.p.indicativeMinPaise)
+          : `${Money.format(row.p.indicativeMinPaise)} – ${Money.format(row.p.indicativeMaxPaise)}`
+        : null,
     supplier: {
       organisationId: row.org.id,
       name: row.profile.tradeName,

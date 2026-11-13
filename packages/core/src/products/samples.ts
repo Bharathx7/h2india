@@ -5,7 +5,8 @@ import { effectiveSchema } from "../catalogue/taxonomy";
 import { queueIndexChange } from "../search/outbox";
 
 // Sample products for local and staging (steps 6.3 and 6.4, F9): the PEM electrolysers in the sub-category table
-// (392:5787) with the Electrolysers attributes drawn on its filter panel (392:5007). Flagged sample, so production never
+// (392:5787). The Electrolysers attributes are launch data since A108 (migration 0029); the list below only fills
+// them in on databases made before it. Flagged sample, so production never
 // shows them. Every product is checked against its category's schema like a real one. Safe to run again.
 
 const ELECTROLYSER_ATTRIBUTES = [
@@ -30,7 +31,7 @@ const ELECTROLYSER_ATTRIBUTES = [
     group: "Performance",
     test: "At rated load, beginning of life",
   },
-  { key: "purity", label: "Purity", type: "choice", options: ["99.9%", "99.99%", "99.999%"], group: "Gas quality" },
+  { key: "purity", label: "Purity", type: "choice", options: ["99.9%", "99.97%", "99.999%"], group: "Gas quality" },
   {
     key: "readiness",
     label: "Readiness",
@@ -120,7 +121,7 @@ export async function seedProductSamples(db: Executor, now = new Date()): Promis
       rated_power: power,
       output_pressure: pressure,
       specific_energy: energy,
-      purity: pressure >= 35 ? "99.999%" : "99.99%",
+      purity: pressure >= 35 ? "99.999%" : "99.97%",
       readiness: power <= 50 ? "TRL 7–8 · demonstration" : "TRL 9 · commercial",
     };
     const checked = checkAttributeValues(defs, attributes);

@@ -33,8 +33,8 @@ test("the landing shows the live catalogue and no price", async ({ page }) => {
     await expect(classes.getByRole("link", { name: new RegExp(`^.*${name}`) }).first()).toBeVisible();
   }
   await expect(page.getByRole("link", { name: /Green hydrogen production/ })).toBeVisible();
-  // Ports & shipping is stored hidden (A105).
-  await expect(page.getByRole("link", { name: /Ports & shipping/ })).toHaveCount(0);
+  // Ports & shipping shows on the landing, as drawn (A105).
+  await expect(page.getByRole("main").getByRole("link", { name: /Ports & shipping/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Tanks & cylinders/ }).first()).toHaveAttribute(
     "href",
     "/marketplace/components/tanks-cylinders",
@@ -63,7 +63,6 @@ test("every class and application page renders from its template, without a pric
     await expect(page.getByRole("link", { name: "Request a quote" }).last()).toBeVisible();
     await noPrice(page);
   }
-  expect((await page.goto("/marketplace/applications/ports-shipping"))?.status()).toBe(404);
   expect(await seriousIssues(page)).toEqual([]);
 });
 
