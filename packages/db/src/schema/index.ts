@@ -23,3 +23,4 @@ export * from "./messages";
 export * from "./queues";
 export * from "./newsletter-sends";
 export * from "./view-as";
+export * from "./data-rights";

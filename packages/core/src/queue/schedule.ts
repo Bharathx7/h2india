@@ -12,6 +12,7 @@ import "../events/reminders";
 import "../supplier/bank";
 import "../rfq/records";
 import "../newsletter/sends";
+import "../compliance/escalation";
 import { expireJoinRequests } from "../companies/join-requests";
 import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";

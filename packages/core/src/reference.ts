@@ -11,7 +11,7 @@ export const REFERENCE_TYPES = {
   R: "Return",
   PO: "Purchase order",
   GRV: "Grievance",
-  DRR: "Delivery receipt",
+  DRR: "Data-rights request",
   EV: "Event",
   SUP: "Support request",
   JOB: "Job post",

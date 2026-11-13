@@ -27,6 +27,7 @@
     "./clocks": "./src/clocks/index.ts",
     "./admin": "./src/admin/overview.ts",
     "./admin/users": "./src/admin/users.ts",
+    "./compliance": "./src/compliance/index.ts",
     "./queues": "./src/queues/index.ts",
     "./newsletter/sends": "./src/newsletter/sends.ts",
     "./queue": "./src/queue/index.ts",
