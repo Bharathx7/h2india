@@ -13,7 +13,7 @@ export const SUPER_ADMIN = "Super admin";
 
 export class OperatorRoleError extends Error {
   constructor(
-    readonly code: "NO_SUCH_ROLE" | "NO_SUCH_USER" | "LAST_SUPER_ADMIN",
+    readonly code: "NO_SUCH_ROLE" | "NO_SUCH_USER" | "LAST_SUPER_ADMIN" | "SUPER_ADMIN_EXISTS",
     message: string,
   ) {
     super(message);
@@ -66,6 +66,41 @@ export async function grantOperatorRole(
       reason: input.reason ?? null,
       context,
     });
+  });
+}
+
+/**
+ * The first Super admin on a new server (step 1.7). There is nobody yet who could grant the role, so this is run once
+ * from the server's command line and refuses as soon as any Super admin exists; from then on roles change only through
+ * grantOperatorRole(). The person signs in afterwards with an email code. Audited with no actor.
+ */
+export async function bootstrapSuperAdmin(
+  ex: Executor,
+  input: { email: string; name: string },
+): Promise<{ userId: string; created: boolean }> {
+  const email = input.email.trim().toLowerCase();
+  return ex.transaction(async (tx) => {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('operator_role.super_admin'))`);
+    const role = await operatorRole(tx, SUPER_ADMIN);
+    const [existing] = await tx.select({ id: or.userId }).from(or).where(eq(or.roleId, role.id)).limit(1);
+    if (existing) throw new OperatorRoleError("SUPER_ADMIN_EXISTS", "A Super admin already exists");
+    const [found] = await tx.select({ id: u.id }).from(u).where(eq(u.email, email));
+    const user =
+      found ??
+      (await tx.insert(u).values({ email, name: input.name.trim(), emailVerified: true }).returning({ id: u.id }))[0];
+    if (!user) throw new OperatorRoleError("NO_SUCH_USER", "Could not create the person");
+    const before = await rolesOf(tx, user.id);
+    await tx.insert(or).values({ userId: user.id, roleId: role.id, grantedBy: null }).onConflictDoNothing();
+    await audit(tx, {
+      actorId: null,
+      action: "operator_role.bootstrap",
+      resourceType: "user",
+      resourceId: user.id,
+      before: { roles: before },
+      after: { roles: [...before, role.name].sort() },
+      reason: "First Super admin on a new server",
+    });
+    return { userId: user.id, created: !found };
   });
 }
 

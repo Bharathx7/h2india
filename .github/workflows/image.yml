@@ -1,0 +1,66 @@
+# Step 1.7: builds the one production image (Dockerfile) and pushes it to GitHub Container Registry, tagged with the
+# commit. The server only pulls images; nothing is built there (docs/runbooks/deploy.md). Throwaway values only, as CI.
+name: Image
+
+on:
+  push:
+    # The server branch until steps 5.2 to 5.10 are merged; then main only.
+    branches: [main, step/1.7-server]
+  workflow_dispatch:
+
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    name: Build and push
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # next build renders some pages, so it needs the same throwaway PostgreSQL and Redis as CI, with migrations applied.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: h2india
+          POSTGRES_PASSWORD: change-me-postgres
+          POSTGRES_DB: h2india
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U h2india" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env.local
+      - name: Migrations for the build database
+        run: pnpm db:migrate
+      - run: rm .env.local
+      - name: Sign in to the registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Build
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker build --network host -t "$IMAGE:${GITHUB_SHA::12}" .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Push
+        run: |
+          docker push "$IMAGE:${GITHUB_SHA::12}"
+          echo "### Image" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$IMAGE:${GITHUB_SHA::12}\`" >> "$GITHUB_STEP_SUMMARY"

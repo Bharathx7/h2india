@@ -188,6 +188,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Redirects live in `apps/web/src/seo/redirects.json` (301, followed by `seo.spec.ts`); every target must be a real page.
 - Unknown addresses render `app/global-not-found.tsx`; a missing record calls `notFound()`. Public errors render `(site)/error.tsx` with the digest as the reference, logged with the request ID by `instrumentation.ts`.
 
+## Server and deploys (step 1.7)
+
+- Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
+- `web-public` (h2india.deecodes.io) and `web-admin` (adminh2india.deecodes.io) are the same image with their own `APP_URL`; nginx decides which paths each domain serves. A new admin-only top-level path needs adding to the admin `location` in `infra/nginx/h2india.conf`.
+- The worker reaches the web app through `INTERNAL_WEB_URL`; `/api/internal/*` is blocked from outside.
+- The first Super admin is made once with `pnpm admin:bootstrap`; after that only through `grantOperatorRole()`.
+
 ## Companies and Join (step 3.3)
 
 - GSTIN checks go through `packages/core/src/companies/adapters/gstin` only. The fake answers until M4; test numbers are in `docs/runbooks/test-gstins.md`.

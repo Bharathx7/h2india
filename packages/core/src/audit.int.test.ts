@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { audit, exportAuditCsv, mask, pruneAuditLog, readAuditLog } from "./audit";
 import { loadActor } from "./authz/actor";
-import { grantOperatorRole, revokeOperatorRole } from "./authz/grants";
+import { bootstrapSuperAdmin, grantOperatorRole, revokeOperatorRole } from "./authz/grants";
 import { changeMemberRole } from "./companies/repo";
 import { defineSetting, getSetting, setSetting } from "./settings";
 import { makeUser, twoCompanies, useTestEnv } from "./testing/factory";
@@ -236,6 +236,12 @@ describe.skipIf(!url)("audit log", () => {
     await expect(revokeOperatorRole(h.db, bossActor, { userId: boss.id, role: "Super admin" })).rejects.toMatchObject({
       code: "LAST_SUPER_ADMIN",
     });
+    // The server's first-Super-admin command works only while there is none (step 1.7).
+    const email = `second-${crypto.randomUUID()}@example.test`;
+    await expect(bootstrapSuperAdmin(h.db, { email, name: "Second Boss" })).rejects.toMatchObject({
+      code: "SUPER_ADMIN_EXISTS",
+    });
+    expect(await h.db.select().from(schema.users).where(eq(schema.users.email, email))).toEqual([]);
   });
 
   it("lets operators with Users access read the log and export it; the export is audited", async () => {

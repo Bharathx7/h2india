@@ -69,7 +69,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 
 | ID | Question | Owner | Blocks | Safe default until answered | Status | Answer and date |
 |---|---|---|---|---|---|---|
-| M1 | Final domain for H2 India, and what happens to hydro.deecodes.io (redirects, existing accounts and data) | You | Stage 0 (Batch 0) | — | Open |  |
+| M1 | Final domain for H2 India, and what happens to hydro.deecodes.io (redirects, existing accounts and data) | You | Stage 0 (Batch 0) | — | Partly answered | Founder, 13 Nov 2026: the server runs at h2india.deecodes.io (site, workspaces, APIs; files at files.h2india.deecodes.io) and adminh2india.deecodes.io (admin and CMS), docs/server.md. Still open: whether a different final domain comes later (passkeys are tied to the domain), and hydro.deecodes.io. |
 | M2 | Legal entity, GSTIN, registered address, grievance officer's name and contact, and final legal texts (terms, privacy, cookies, editorial, corrections, sponsored content) | You and lawyer | Stage 5 (Batch 2) | — | Open |  |
 | M3 | Payment partner (Razorpay or Cashfree are named in the notes), whether bank-transfer funds can be held per order, the payee name buyers will see, and whether the word "escrow" may be used | You and partner | Stage 0 for Stage 10 (Batch 0) | — | Parked | Batch 6 on hold (founder, 11 Nov 2026). |
 | M4 | Provider for GSTIN, PAN, CIN and bank-account (test deposit) checks | You | Stage 3 (Batch 1) | — | Open |  |

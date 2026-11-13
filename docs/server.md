@@ -1,9 +1,11 @@
 # Server plan: VPS with two domains
 
-Status: **Draft, not started** (13 Nov 2026). Nothing in the code has been changed for this yet.
+Status: **Built, not yet deployed** (13 Nov 2026, branch `step/1.7-server`). Commands: `docs/runbooks/deploy.md`.
 
-- **Domain A**: website, workspaces (buyer, supplier, member) and backend (APIs).
-- **Domain B**: admin (`/admin` and the CMS).
+- **Domain A**: `h2india.deecodes.io`: website, workspaces (buyer, supplier, member) and backend (APIs). Files at `files.h2india.deecodes.io`.
+- **Domain B**: `adminh2india.deecodes.io`: admin (`/admin` and the CMS).
+
+Answers given (13 Nov 2026): deploy the step 5.10 code; the founder runs the server commands; host nginx with certbot (as hy-gen); email decided later, so mail is caught by an internal Mailpit (M6 open); production starts without sample content. Change from the plan below: on domain A, `/admin` and `/cms` redirect to domain B instead of a 404, so operators who type them land in the right place.
 
 ## What the code does today
 

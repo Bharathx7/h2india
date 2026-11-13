@@ -9,7 +9,7 @@ const SAFE_ID = /^[A-Za-z0-9._-]{8,64}$/;
 /** Better Auth's session cookie (prefix "h2"; "__Secure-" in production). */
 const signedIn = (request: NextRequest) => request.cookies.getAll().some((c) => c.name.endsWith("h2.session_token"));
 
-const MAINTENANCE_OPEN = ["/maintenance", "/cms", "/api", "/sign-in", "/sign-out", "/newsletter", "/_next"];
+const MAINTENANCE_OPEN = ["/maintenance", "/admin", "/cms", "/api", "/sign-in", "/sign-out", "/newsletter", "/_next"];
 
 export function proxy(request: NextRequest) {
   // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.

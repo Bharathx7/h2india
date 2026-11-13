@@ -12,6 +12,9 @@ const optionalUrl = z.preprocess((v) => (v === "" ? undefined : v), z.url().opti
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   APP_URL: url,
+  /** Where the worker reaches the web app for scheduled work (step 1.7), e.g. http://web-public:3000 inside Docker.
+   * Falls back to APP_URL. Links in messages always use APP_URL. */
+  INTERNAL_WEB_URL: optionalUrl,
   AUTH_SECRET: secret(32),
   // Google sign-in (step 3.2). Without both values the Google button reports that it is not set up yet.
   GOOGLE_CLIENT_ID: optionalText(),
