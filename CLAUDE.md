@@ -268,6 +268,11 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - In a single-table Drizzle select, `${table.column}` inside a raw `sql` subquery is printed unqualified and binds to the subquery's own table. Write the outer column out (`core.rfqs.id`) or join so Drizzle qualifies it.
 - The offer deadline and quote validity are `CHOSEN_DEADLINES` started with `startDeadline()` at the chosen time; moving one cancels and starts it again.
 
+## Admin back office (Stage 11)
+
+- Admin pages call `requireOperator(permission, path)` and render in `AdminShell`; the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.
+- `money.view` (and other names shared with company permissions) can't be checked with `can(actor, p)` without a company: for operator areas read `actor.operator.has(p)`.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.

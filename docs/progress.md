@@ -150,7 +150,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 11.1 | Admin shell and overview | Not started |
+| 11.1 | Admin shell and overview | Built 13 Nov 2026 (branch `step/11.1-admin-overview`, on top of 9.9, not merged): the admin sidebar (Manage, Commerce, System) shows only the areas the operator's role allows, with counts on Queues and Verification; Orders and Money stay hidden while `transactions` is off. Overview (626:8) shows the tiles this operator may see (suppliers pending review, products pending review, RFQs in moderation, RFQs unanswered over 24 h, content submissions, corrections requests), each with the oldest item's age against the 24 and 48 hour clocks and a link to its queue, and the week's publishing calendar (articles scheduled, published, in review or in legal check, and newsletter issues) with previous and next week. Orders awaiting acceptance waits for Stage 10. Below 1024 px the page shows Use a larger screen (627:1001). Tests: a Content editor sees Content and Queues but not Money; Overview counts match the queues; SLA badges. You: list your first operators and their roles |
 | 11.2 | Queues and moderation | Not started |
 | 11.3 | Content operations: newsletter, data quality, media, authors, search | Not started |
 | 11.4 | Users, operator roles, view-as and the audit log | Not started |
