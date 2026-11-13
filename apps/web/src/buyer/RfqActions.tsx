@@ -1,9 +1,21 @@
 "use client";
 
-import { Alert, Button, Checkbox, Icon, Input, Modal, Radio, RadioGroup, Select, Textarea } from "@h2india/ui";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  FormField,
+  Icon,
+  Input,
+  Modal,
+  Radio,
+  RadioGroup,
+  Select,
+  Textarea,
+} from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { closeAction, declineAllAction, extendAction, revisionAction } from "./rfq-actions";
+import { closeAction, declineAllAction, editRfqAction, extendAction, revisionAction } from "./rfq-actions";
 
 // RFQ actions (564:9): Extend offer deadline (564:577), Close RFQ (566:776), Ask for a revised quote (566:892) and
 // Decline all quotes (566:1011). Words as drawn.
@@ -429,6 +441,143 @@ export function AskRevision({
           Their current quote stays on the comparison until they send a revised one. They have until the offer deadline,{" "}
           {deadline}.
         </p>
+      </Modal>
+    </>
+  );
+}
+
+/** Edit RFQ after sending (564:383): quantity, needed by and specification, with what changed for the suppliers. */
+export function EditRfq({
+  id,
+  reference,
+  subtitle,
+  version,
+  suppliers,
+  quoted,
+  start,
+}: {
+  id: string;
+  reference: string;
+  subtitle: string;
+  version: number;
+  suppliers: number;
+  quoted: number;
+  start: { quantity: number; unit: string; requiredBy: string; requirements: string };
+}) {
+  const a = useAct();
+  const [open, setOpen] = useState(false);
+  const [quantity, setQuantity] = useState(String(start.quantity));
+  const [requiredBy, setRequiredBy] = useState(start.requiredBy);
+  const [spec, setSpec] = useState(start.requirements);
+  const [what, setWhat] = useState("");
+  const next = version + 1;
+  const all = suppliers === 1 ? "the supplier" : `all ${String(suppliers)} suppliers`;
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <Icon name="pencil" size={16} />
+        Edit RFQ
+      </Button>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        width={480}
+        title={`Edit ${reference}`}
+        description={subtitle}
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={a.pending || !what.trim()}
+              onClick={() => {
+                a.go(
+                  () =>
+                    editRfqAction(id, {
+                      quantity: Number(quantity),
+                      requiredBy: requiredBy || null,
+                      requirements: spec,
+                      whatChanged: what,
+                    }),
+                  () => {
+                    setOpen(false);
+                    setWhat("");
+                  },
+                );
+              }}
+            >
+              Save as version {next}
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <Alert
+            tone="warning"
+            title={
+              quoted
+                ? `${String(quoted)} ${quoted === 1 ? "supplier has" : "suppliers have"} already quoted`
+                : "Suppliers will be told"
+            }
+          >
+            Saving creates version {next} of this RFQ and tells {all} what changed.
+          </Alert>
+          {a.error ? <Alert tone="error" title={a.error} live /> : null}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormField label="Quantity" required helper={start.unit}>
+              <Input
+                type="number"
+                min={1}
+                step={1}
+                inputMode="numeric"
+                value={quantity}
+                onChange={(e) => {
+                  setQuantity(e.target.value);
+                }}
+              />
+            </FormField>
+            <FormField label="Needed by">
+              <Input
+                type="date"
+                value={requiredBy}
+                onChange={(e) => {
+                  setRequiredBy(e.target.value);
+                }}
+              />
+            </FormField>
+          </div>
+          <FormField label="Specification">
+            <Textarea
+              rows={4}
+              maxLength={1000}
+              showCount
+              value={spec}
+              onChange={(e) => {
+                setSpec(e.target.value);
+              }}
+            />
+          </FormField>
+          <FormField label="What changed (shown to suppliers)" required>
+            <Input
+              maxLength={200}
+              value={what}
+              onChange={(e) => {
+                setWhat(e.target.value);
+              }}
+            />
+          </FormField>
+        </div>
       </Modal>
     </>
   );

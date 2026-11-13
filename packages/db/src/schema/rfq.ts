@@ -52,6 +52,8 @@ export const rfqs = core.table(
     closedAt: utc("closed_at"),
     /** Why it closed: accepted, declined all, closed by the buyer. */
     closeReason: text("close_reason"),
+    /** Edit RFQ after sending (564:383): each saved edit is a new version, told to the suppliers. */
+    version: integer("version").notNull().default(1),
     ...timestamps,
     ...softDelete,
   },
@@ -243,4 +245,29 @@ export const quotePaymentLines = core.table(
     position: integer("position").notNull().default(0),
   },
   (t) => [index("quote_payment_lines_version").on(t.versionId, t.position)],
+);
+
+/**
+ * An edit to a sent RFQ (564:383): version 2 onward, with what changed in the buyer's words (shown to suppliers) and
+ * the fields before and after. Append-only.
+ */
+export const rfqRevisions = core.table(
+  "rfq_revisions",
+  {
+    id: id(),
+    rfqId: uuid("rfq_id")
+      .notNull()
+      .references(() => rfqs.id),
+    version: integer("version").notNull(),
+    whatChanged: text("what_changed").notNull(),
+    before: jsonb("before").$type<Record<string, unknown>>().notNull(),
+    after: jsonb("after").$type<Record<string, unknown>>().notNull(),
+    changedBy: uuid("changed_by")
+      .notNull()
+      .references(() => users.id),
+    at: utc("at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [uniqueIndex("rfq_revisions_version").on(t.rfqId, t.version)],
 );

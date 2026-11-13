@@ -639,6 +639,115 @@ export async function requestRevision(
   );
 }
 
+/** What a buyer may change after sending (564:383). */
+export interface RfqEdit {
+  quantity: number;
+  /** Needed on site by: a date (YYYY-MM-DD, India) or null. */
+  requiredBy: string | null;
+  requirements: string;
+  /** Shown to suppliers. */
+  whatChanged: string;
+}
+
+export const SPEC_MAX = 1000;
+export const WHAT_CHANGED_MAX = 200;
+
+/** Problems with an edit, in the words on 564:383, or null. Pure. */
+export function rfqEditProblem(e: RfqEdit): string | null {
+  if (!Number.isInteger(e.quantity) || e.quantity < 1) return "Enter a quantity of 1 or more";
+  if (e.requirements.length > SPEC_MAX) return `Keep the specification under ${String(SPEC_MAX)} characters`;
+  if (!e.whatChanged.trim()) return "Say what changed: suppliers see this";
+  if (e.whatChanged.length > WHAT_CHANGED_MAX) return `Keep what changed under ${String(WHAT_CHANGED_MAX)} characters`;
+  if (e.requiredBy !== null && !/^\d{4}-\d{2}-\d{2}$/.test(e.requiredBy)) return "Choose a date";
+  return null;
+}
+
+/**
+ * Edit an RFQ after it is sent (564:383): saves a new version of the request with what changed, keeps the earlier
+ * one in rfq_revisions, and tells every supplier it went to. Quotes already sent stay as they are; suppliers may
+ * revise. Only while the RFQ is open.
+ */
+export async function editSentRfq(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  rfqId: string,
+  edit: RfqEdit,
+  context?: RequestContext,
+  now = new Date(),
+): Promise<{ version: number }> {
+  assertCan(actor, "rfq.create", { organisationId });
+  const userId = actor.userId;
+  if (!userId) throw new RfqError("Sign in again");
+  const problem = rfqEditProblem(edit);
+  if (problem) throw new RfqError(problem);
+  const row = await ownRfq(db, organisationId, rfqId);
+  if (row.status !== "Sent" && row.status !== "Quotes received") throw new RfqError("Only an open RFQ can be edited");
+  const [item] = await db.select().from(ri).where(eq(ri.rfqId, rfqId)).orderBy(asc(ri.position)).limit(1);
+  const requiredBy = edit.requiredBy ? new Date(`${edit.requiredBy}T00:00:00+05:30`) : null;
+  const before = {
+    quantity: item?.quantity ?? null,
+    requiredBy: row.requiredBy?.toISOString() ?? null,
+    requirements: row.requirements ?? "",
+  };
+  const after = {
+    quantity: edit.quantity,
+    requiredBy: requiredBy?.toISOString() ?? null,
+    requirements: edit.requirements.trim(),
+  };
+  if (JSON.stringify(before) === JSON.stringify(after)) throw new RfqError("Nothing changed");
+  const version = row.version + 1;
+  await db.transaction(async (tx) => {
+    const done = await tx
+      .update(r)
+      .set({ version, requiredBy, requirements: after.requirements || null, updatedAt: now })
+      .where(and(eq(r.id, rfqId), eq(r.version, row.version)))
+      .returning({ id: r.id });
+    if (!done.length) throw new RfqError("This RFQ may have changed. Refresh to see it.");
+    if (item) await tx.update(ri).set({ quantity: edit.quantity }).where(eq(ri.id, item.id));
+    await tx.insert(schema.rfqRevisions).values({
+      rfqId,
+      version,
+      whatChanged: edit.whatChanged.trim(),
+      before,
+      after,
+      changedBy: userId,
+      at: now,
+    });
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "rfq.edited",
+      resourceType: "rfq",
+      resourceId: rfqId,
+      companyId: organisationId,
+      before: { version: row.version, ...before },
+      after: { version, ...after },
+      reason: edit.whatChanged.trim(),
+      context,
+    });
+  });
+  await tell(() =>
+    tellSuppliers(db, rfqId, {
+      event: "rfq.edited",
+      title: `${row.reference} changed (version ${String(version)}): ${edit.whatChanged.trim()}`,
+    }),
+  );
+  return { version };
+}
+
+/** The versions of an RFQ after the first, newest first, for the buyer and the suppliers it went to. */
+export async function rfqRevisions(db: Executor, rfqId: string) {
+  return db
+    .select({
+      version: schema.rfqRevisions.version,
+      whatChanged: schema.rfqRevisions.whatChanged,
+      at: schema.rfqRevisions.at,
+    })
+    .from(schema.rfqRevisions)
+    .where(eq(schema.rfqRevisions.rfqId, rfqId))
+    .orderBy(desc(schema.rfqRevisions.version));
+}
+
 /**
  * Accept a quote (569:9), step 9.8. Ordering is part of Launch 2: with the transactions flag off this refuses on the
  * server whatever calls it (C8). With it on, the quote becomes Accepted, the RFQ closes, every other open quote becomes

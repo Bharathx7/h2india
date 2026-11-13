@@ -2,7 +2,7 @@
 
 import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
-import { markThreadRead, MessageError, postMessage, threadMessages } from "@h2india/core/messages";
+import { markThreadRead, MessageError, postMessage, rfqThread, threadMessages } from "@h2india/core/messages";
 import { getSession } from "@/server/auth";
 
 // Messages (step 9.7): send and poll. Core decides who may see a thread; a thread someone may not see doesn't exist.
@@ -49,4 +49,23 @@ export async function pollAction(threadId: string, after: string | null): Promis
   if (!r) return [];
   if (r.messages.length) await markThreadRead(db, a, threadId);
   return r.messages.map(wire);
+}
+
+/** Opens (or starts) the conversation about an RFQ with one company, for the drawer on the RFQ page (561:252). */
+export async function openRfqThreadAction(
+  rfqId: string,
+  supplierId: string,
+): Promise<{ ok: true; threadId: string; messages: WireMessage[] } | { ok: false; error: string }> {
+  const a = await actor();
+  const db = getDb();
+  try {
+    const thread = await rfqThread(db, a, { rfqId, supplierId });
+    const r = await threadMessages(db, a, thread.id);
+    if (!r) return { ok: false, error: "No such conversation" };
+    await markThreadRead(db, a, thread.id);
+    return { ok: true, threadId: thread.id, messages: r.messages.map(wire) };
+  } catch (error) {
+    if (error instanceof MessageError) return { ok: false, error: error.message };
+    throw error;
+  }
 }

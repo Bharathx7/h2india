@@ -1,11 +1,12 @@
 import { getDb, Money } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
-import { supplierRfq } from "@h2india/core/rfq";
+import { rfqRevisions, supplierRfq } from "@h2india/core/rfq";
 import { describeSchedule, PAYMENT_PRESETS } from "@h2india/core/rfq/totals";
 import { formatIstDate, formatIstDateTime, formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MessageDrawer } from "@/messages/MessageDrawer";
 import { notFound } from "next/navigation";
 import type { QuoteForm } from "@/supplier/rfq/actions";
 import { DeclineRfq, MarkViewed, QuoteBuilder, WithdrawQuote } from "@/supplier/rfq/QuotePanel";
@@ -33,6 +34,8 @@ export default async function SupplierRfqPage({
   const s = page.supplier;
   const d = await supplierRfq(getDb(), scopeFor(page.actor), s.organisationId, id);
   if (!d) notFound();
+  // supplierRfq already proved this supplier received the RFQ, so its versions may be shown.
+  const revisions = await rfqRevisions(getDb(), d.rfq.id);
   const canQuote = s.seat.permissions.has("quote.send");
   const item = d.items[0];
   const quote = d.quote;
@@ -101,6 +104,20 @@ export default async function SupplierRfqPage({
           {d.checked ? " · checked by H2 India" : ""}
           {d.rfq.offerDeadline ? ` · due ${formatIstDateTime(d.rfq.offerDeadline)}` : ""}
         </p>
+        {revisions.length ? (
+          <div className="flex flex-col gap-1 rounded-card bg-warning p-3" role="note">
+            <p className="type-label">
+              The buyer changed this RFQ: version {revisions[0]?.version}. Check your quote still fits.
+            </p>
+            <ul className="flex flex-col gap-0.5">
+              {revisions.map((v) => (
+                <li key={v.version} className="type-caption text-body">
+                  Version {v.version} · {formatIstDateTime(v.at)} · {v.whatChanged}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
         <section className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
@@ -144,13 +161,18 @@ export default async function SupplierRfqPage({
               </div>
             ) : null}
           </dl>
-          <Link
-            href={`/supplier/messages?rfq=${d.rfq.id}`}
-            className={buttonClasses({ variant: "outline", size: "sm" }) + " self-start"}
-          >
-            <Icon name="message-square" size={14} />
-            Message the buyer
-          </Link>
+          <span className="self-start">
+            <MessageDrawer
+              rfqId={d.rfq.id}
+              supplierId={s.organisationId}
+              withName={d.buyer}
+              ownName={s.legalName}
+              organisationId={s.organisationId}
+              about={`${d.rfq.reference} · ${d.rfq.title}`}
+              inboxHref={`/supplier/messages?rfq=${d.rfq.id}`}
+              label="Message the buyer"
+            />
+          </span>
         </section>
         <section className="flex flex-col gap-4 self-start rounded-card border border-default bg-page p-5">
           {building ? (

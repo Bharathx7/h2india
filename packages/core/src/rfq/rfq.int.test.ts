@@ -15,7 +15,9 @@ import {
   closeRfq,
   createRfq,
   declineRfq,
+  editSentRfq,
   extendOfferDeadline,
+  rfqRevisions,
   markViewed,
   milestoneAmounts,
   moveQuote,
@@ -435,5 +437,37 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     await expect(
       extendOfferDeadline(h.db, outsider, buyer.org.id, id, new Date(Date.now() + 30 * DAY)),
     ).rejects.toThrow();
+  });
+  it("editing a sent RFQ saves version 2, keeps what changed, tells the suppliers; others can't edit it (564:383)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const id = await draft([sup(1).org.id]);
+    await submitRfq(h.db, admin, buyer.org.id, id);
+    const edit = {
+      quantity: 3,
+      requiredBy: "2027-03-01",
+      requirements: "500 bar outlet, water-cooled heads, skid-mounted",
+      whatChanged: "Added water-cooled heads and a skid",
+    };
+    expect(await editSentRfq(h.db, admin, buyer.org.id, id, edit)).toEqual({ version: 2 });
+    const [row] = await h.db.select().from(schema.rfqs).where(eq(schema.rfqs.id, id));
+    expect(row?.version).toBe(2);
+    expect(row?.requirements).toBe(edit.requirements);
+    const [item] = await h.db.select().from(schema.rfqItems).where(eq(schema.rfqItems.rfqId, id));
+    expect(item?.quantity).toBe(3);
+    expect((await rfqRevisions(h.db, id)).map((x) => [x.version, x.whatChanged])).toEqual([
+      [2, "Added water-cooled heads and a skid"],
+    ]);
+    const told = await h.db.select().from(schema.notifications).where(eq(schema.notifications.event, "rfq.edited"));
+    expect(told.some((n) => n.userId === sup(1).admin.id && n.title.includes("version 2"))).toBe(true);
+    // Saving the same values again changes nothing; "what changed" is required.
+    await expect(editSentRfq(h.db, admin, buyer.org.id, id, edit)).rejects.toThrow("Nothing changed");
+    await expect(
+      editSentRfq(h.db, admin, buyer.org.id, id, { ...edit, quantity: 4, whatChanged: " " }),
+    ).rejects.toThrow("Say what changed");
+    const outsider = await loadActor(h.db, other.admin.id);
+    await expect(editSentRfq(h.db, outsider, buyer.org.id, id, { ...edit, quantity: 5 })).rejects.toThrow();
+    // A draft isn't edited this way.
+    const second = await draft([sup(1).org.id]);
+    await expect(editSentRfq(h.db, admin, buyer.org.id, second, edit)).rejects.toThrow("Only an open RFQ");
   });
 });

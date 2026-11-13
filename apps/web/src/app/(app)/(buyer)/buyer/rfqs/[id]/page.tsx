@@ -10,8 +10,9 @@ import { Breadcrumbs, buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AskRevision, CloseRfq, DeclineAll, ExtendDeadline } from "@/buyer/RfqActions";
+import { AskRevision, CloseRfq, DeclineAll, EditRfq, ExtendDeadline } from "@/buyer/RfqActions";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
+import { MessageDrawer } from "@/messages/MessageDrawer";
 
 // RFQ detail and quote comparison (560:8; phones 562:8), step 9.6: header with the badge and Extend deadline, the
 // suppliers' statuses, the comparison with the best value in each row highlighted, the request summary and timeline,
@@ -164,6 +165,22 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
         </div>
         {open && canAct ? (
           <div className="flex flex-wrap items-center gap-2">
+            <EditRfq
+              id={d.rfq.id}
+              reference={d.rfq.reference}
+              subtitle={d.rfq.title}
+              version={d.rfq.version}
+              suppliers={d.suppliers.length}
+              quoted={quotes.length}
+              start={{
+                quantity: item?.quantity ?? 1,
+                unit: item?.unit ?? "units",
+                requiredBy: d.rfq.requiredBy
+                  ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d.rfq.requiredBy)
+                  : "",
+                requirements: d.rfq.requirements ?? "",
+              }}
+            />
             <ExtendDeadline
               id={d.rfq.id}
               reference={d.rfq.reference}
@@ -284,13 +301,15 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
                 {quotes.map((x) => (
                   <td key={x.quote.id} className="border-l border-default p-4">
                     <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/buyer/messages?rfq=${d.rfq.id}&supplier=${x.quote.organisationId}`}
-                        className={buttonClasses({ variant: "outline", size: "sm" })}
-                      >
-                        <Icon name="message-square" size={14} />
-                        Message
-                      </Link>
+                      <MessageDrawer
+                        rfqId={d.rfq.id}
+                        supplierId={x.quote.organisationId}
+                        withName={x.name}
+                        ownName={b.legalName}
+                        organisationId={b.organisationId}
+                        about={`${d.rfq.reference} · ${d.rfq.title}`}
+                        inboxHref={`/buyer/messages?rfq=${d.rfq.id}&supplier=${x.quote.organisationId}`}
+                      />
                       {open && canAct && (x.quote.status === "Sent" || x.quote.status === "Revised") ? (
                         <Link
                           href={`/buyer/rfqs/${d.rfq.id}/accept/${x.quote.id}`}

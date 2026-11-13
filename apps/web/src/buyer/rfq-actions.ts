@@ -4,7 +4,15 @@ import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
 import { buyerOf } from "@h2india/core/buyer";
 import { FlagOffError } from "@h2india/config";
-import { acceptQuote, closeRfq, extendOfferDeadline, requestRevision, RfqError } from "@h2india/core/rfq";
+import {
+  acceptQuote,
+  closeRfq,
+  editSentRfq,
+  extendOfferDeadline,
+  requestRevision,
+  RfqError,
+  type RfqEdit,
+} from "@h2india/core/rfq";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -46,6 +54,13 @@ export async function extendAction(id: string, day: string, time: string, why: s
   if (Number.isNaN(to.getTime())) return { ok: false as const, error: "Choose a date and time" };
   const context = await requestContext();
   return run(id, () => extendOfferDeadline(db, actor, org, id, to, context, new Date(), why));
+}
+
+/** Edit RFQ after sending (564:383): a new version, told to every supplier. */
+export async function editRfqAction(id: string, edit: RfqEdit) {
+  const { db, actor, org } = await buyer();
+  const context = await requestContext();
+  return run(id, () => editSentRfq(db, actor, org, id, edit, context));
 }
 
 export async function closeAction(id: string, why: string, note: string) {
