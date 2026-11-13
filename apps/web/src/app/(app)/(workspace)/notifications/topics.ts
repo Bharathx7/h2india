@@ -56,6 +56,18 @@ export const TOPIC_LABELS: Record<TopicName, { group: string; label: string; hin
       hint: "A day before and an hour before events you registered for.",
       locked: [],
     },
+    "rfq.received": {
+      group: "RFQs and quotes",
+      label: "A buyer sends you an RFQ",
+      hint: "Only for categories you list",
+      locked: [],
+    },
+    "rfq.checked": {
+      group: "RFQs and quotes",
+      label: "H2 India checks your RFQ",
+      hint: "Approved, or returned for changes",
+      locked: [],
+    },
     "company.verification": {
       group: "Company",
       label: "Verification and listing reviews",
@@ -78,6 +90,7 @@ export const TOPIC_LABELS: Record<TopicName, { group: string; label: string; hin
 
 const BY_AREA: Record<WorkspaceArea, TopicName[]> = {
   buyer: [
+    "rfq.checked",
     "quote.sent",
     "quote.expiring",
     "order.approval_needed",
@@ -88,7 +101,14 @@ const BY_AREA: Record<WorkspaceArea, TopicName[]> = {
     "team.requests",
     "account.security",
   ],
-  supplier: ["order.status_changed", "message.received", "company.verification", "team.requests", "account.security"],
+  supplier: [
+    "rfq.received",
+    "order.status_changed",
+    "message.received",
+    "company.verification",
+    "team.requests",
+    "account.security",
+  ],
   member: ["alert.matches", "follow.updates", "event.reminders", "account.security"],
   admin: ["account.security"],
 };

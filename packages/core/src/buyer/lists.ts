@@ -22,7 +22,7 @@ export async function projectLists(db: Executor, scope: Scope, organisationId: s
     .select({
       id: l.id,
       name: l.name,
-      count: sql<number>`(select count(*)::int from core.project_list_items x where x.list_id = ${l.id})`,
+      count: sql<number>`(select count(*)::int from core.project_list_items x where x.list_id = core.project_lists.id)`,
     })
     .from(l)
     .where(and(inScope(scope, l.organisationId), eq(l.organisationId, organisationId), isNull(l.deletedAt)))

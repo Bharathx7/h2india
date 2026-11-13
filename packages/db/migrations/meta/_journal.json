@@ -309,6 +309,13 @@
       "when": 1794568884289,
       "tag": "0043_rfq_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1794570084783,
+      "tag": "0044_rfq_moderator",
+      "breakpoints": true
     }
   ]
 }

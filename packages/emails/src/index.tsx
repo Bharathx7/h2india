@@ -157,6 +157,18 @@ import {
   verifiedMessage,
 } from "./supplier/messages";
 export type { ExpiringDocument, ListingDetails } from "./supplier/messages";
+import { rfqApprovedMessage, rfqReceivedMessage, rfqReturnedMessage } from "./rfq/messages";
+export type { RfqReceived, RfqReturned } from "./rfq/messages";
+
+export function renderRfqReceived(appUrl: string, input: Parameters<typeof rfqReceivedMessage>[0]) {
+  return renderNotice(appUrl, rfqReceivedMessage(input));
+}
+export function renderRfqReturned(appUrl: string, input: Parameters<typeof rfqReturnedMessage>[0]) {
+  return renderNotice(appUrl, rfqReturnedMessage(input));
+}
+export function renderRfqApproved(appUrl: string, input: Parameters<typeof rfqApprovedMessage>[0]) {
+  return renderNotice(appUrl, rfqApprovedMessage(input));
+}
 
 export function renderDocumentExpiring(appUrl: string, input: Parameters<typeof documentExpiringMessage>[0]) {
   return renderNotice(appUrl, documentExpiringMessage(input));

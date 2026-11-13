@@ -73,7 +73,7 @@ export const TEMPLATES = {
     name: "RFQ received",
     frame: "671:482",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "email.rfq_returned": {
     channel: "email",
@@ -81,7 +81,7 @@ export const TEMPLATES = {
     name: "RFQ returned",
     frame: "671:554",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "email.payment_received": {
     channel: "email",
@@ -218,7 +218,7 @@ export const TEMPLATES = {
     name: "RFQ received",
     frame: "668:44",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "whatsapp.payment_reminder_buyer": {
     channel: "whatsapp",
@@ -461,6 +461,16 @@ export const APPROVED_TEXT = {
     alert: string;
   }) =>
     `${input.scheme}: ${input.what} are due ${input.due} on ${input.where}. ${input.left} left. This matches your alert for ${input.alert}.`,
+  /** 668:44, template rfq_received_supplier: header "New RFQ: {{1}}", footer "H2 India RFQ alerts", button View and quote. */
+  "whatsapp.rfq_received_supplier": (input: {
+    name: string;
+    buyerType: string;
+    item: string;
+    quantity: string;
+    state: string;
+    due: string;
+  }) =>
+    `Hi ${input.name}, a ${input.buyerType} wants a quote for ${input.item}, quantity ${input.quantity}, delivered to ${input.state}. Send your quote by ${input.due}.`,
 } satisfies Partial<Record<TemplateId, (input: never) => string>>;
 
 export type TextTemplateId = keyof typeof APPROVED_TEXT;

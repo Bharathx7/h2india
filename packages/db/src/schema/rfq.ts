@@ -45,6 +45,8 @@ export const rfqs = core.table(
       .default(sql`'{}'::uuid[]`),
     /** Where the RFQ started: product, category, compare, list, header, cart. */
     source: text("source"),
+    /** The H2 India moderator who picked it up (Assign to me, 629:1148). */
+    moderatorId: uuid("moderator_id").references(() => users.id),
     submittedAt: utc("submitted_at"),
     sentAt: utc("sent_at"),
     closedAt: utc("closed_at"),

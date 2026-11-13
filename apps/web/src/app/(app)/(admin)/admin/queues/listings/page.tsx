@@ -8,6 +8,7 @@ import { cx, EmptyState } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { QueueTabs } from "../QueueTabs";
 import { QueueTable, type QueueRow } from "./QueueTable";
 import { StorefrontDecision } from "./StorefrontDecision";
 
@@ -70,11 +71,7 @@ export default async function ListingsQueuePage({
           Everything waiting for a decision. Age turns amber close to the SLA and red once it&apos;s passed.
         </p>
       </div>
-      <nav aria-label="Queues" className="flex gap-6 border-b border-default">
-        <span aria-current="page" className="-mb-px border-b-2 border-inverse py-3 type-label">
-          Listings <span className="text-secondary">{rows.length}</span>
-        </span>
-      </nav>
+      <QueueTabs current="listings" counts={{ listings: rows.length }} />
       <div className="flex flex-wrap items-center gap-2">
         <span className="type-label">Views</span>
         {VIEWS.map((v) => (

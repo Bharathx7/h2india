@@ -8,6 +8,7 @@ import { inScope, type Scope } from "../authz/scope";
 import { cancelDeadline, completeDeadline, onDeadline, startClock, startDeadline } from "../clocks/clocks";
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
+import { sendRfqChecked, sendRfqReceived } from "./notices";
 import { quoteFigures, scheduleProblem, type PaymentLine } from "./totals";
 import {
   MAX_RFQ_SUPPLIERS,
@@ -89,6 +90,15 @@ export async function moveQuote(
     transitions: quoteTransitions,
     ...ctx,
   });
+}
+
+/** Notices go after the change is saved; a failed send never undoes it (the notify log shows the failure). */
+async function tell(work: () => Promise<void>) {
+  try {
+    await work();
+  } catch (error) {
+    console.error("rfq notice failed", error);
+  }
 }
 
 const OFFER: ChosenDeadline = "rfqOfferDeadline";
@@ -328,6 +338,7 @@ export async function submitRfq(
       },
     },
   );
+  await tell(() => sendRfqReceived(db, rfqId));
   return "Sent";
 }
 
@@ -370,6 +381,9 @@ export async function approveRfq(
       },
     },
   );
+  const suppliers = (await db.select({ id: rs.id }).from(rs).where(eq(rs.rfqId, rfqId))).length;
+  await tell(() => sendRfqReceived(db, rfqId));
+  await tell(() => sendRfqChecked(db, rfqId, { approved: true, suppliers }));
 }
 
 /** Return an RFQ to the buyer with reasons (they edit and send it again). */
@@ -403,6 +417,70 @@ export async function returnRfq(
       },
     },
   );
+  await tell(() => sendRfqChecked(db, rfqId, { approved: false, reasons, note: input.note?.trim() || null }));
+}
+
+/** Reject an RFQ that isn't a real request (632:1138): it closes and goes to no supplier. */
+export async function rejectRfq(
+  db: Database,
+  actor: Actor,
+  rfqId: string,
+  input: { reason: string },
+  context?: RequestContext,
+) {
+  assertCan(actor, "queues.edit");
+  if (!actor.userId) throw new RfqError("Sign in again");
+  const moderatorId = actor.userId;
+  const reason = input.reason.trim();
+  if (!reason) throw new RfqError("Say why it is rejected");
+  const [row] = await db.select().from(r).where(eq(r.id, rfqId));
+  if (!row) throw new RfqError("No such RFQ");
+  await moveRfq(
+    db,
+    moderatorId,
+    row,
+    { from: "In moderation", to: "Closed" },
+    {
+      context,
+      reason,
+      also: async (tx) => {
+        await tx
+          .insert(schema.rfqModerationDecisions)
+          .values({ rfqId, decision: "Rejected", reasons: [reason], moderatorId });
+        await tx.update(r).set({ closedAt: new Date(), closeReason: "rejected" }).where(eq(r.id, rfqId));
+        await completeDeadline(tx, { type: "rfqModeration", subjectType: "rfq", subjectId: rfqId });
+      },
+    },
+  );
+}
+
+/** Assign to me (629:1148), or reassign. */
+export async function assignModerator(
+  db: Database,
+  actor: Actor,
+  rfqId: string,
+  moderatorId: string | null,
+  context?: RequestContext,
+) {
+  assertCan(actor, "queues.edit");
+  const [row] = await db
+    .select()
+    .from(r)
+    .where(and(eq(r.id, rfqId), eq(r.status, "In moderation")));
+  if (!row) throw new RfqError("This RFQ isn't waiting for moderation");
+  await db.transaction(async (tx) => {
+    await tx.update(r).set({ moderatorId }).where(eq(r.id, rfqId));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "rfq.moderation.assigned",
+      resourceType: "rfq",
+      resourceId: rfqId,
+      companyId: row.organisationId,
+      before: { moderatorId: row.moderatorId },
+      after: { moderatorId },
+      context,
+    });
+  });
 }
 
 // ------------------------------------------------------------------------------------------------ buyer: after sending
@@ -823,9 +901,9 @@ export async function buyerRfqs(db: Executor, scope: Scope, organisationId: stri
   return db
     .select({
       rfq: r,
-      suppliers: sql<number>`(select count(*)::int from core.rfq_suppliers x where x.rfq_id = ${r.id})`,
-      quoted: sql<number>`(select count(*)::int from core.quotes x where x.rfq_id = ${r.id} and x.sent_version is not null and x.status not in ('Withdrawn'))`,
-      createdByName: sql<string>`(select name from core.users u where u.id = ${r.createdBy})`,
+      suppliers: sql<number>`(select count(*)::int from core.rfq_suppliers x where x.rfq_id = core.rfqs.id)`,
+      quoted: sql<number>`(select count(*)::int from core.quotes x where x.rfq_id = core.rfqs.id and x.sent_version is not null and x.status not in ('Withdrawn'))`,
+      createdByName: sql<string>`(select u.name from core.users u where u.id = core.rfqs.created_by)`,
     })
     .from(r)
     .where(and(inScope(scope, r.organisationId), eq(r.organisationId, organisationId), isNull(r.deletedAt)))

@@ -201,6 +201,9 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     const v1 = await quoteVersion(h.db, scopeFor(admin), reader, first.quoteId, 1);
     expect(v1?.version.totalPaise).toBe(986_480_000n);
     expect(v1?.lines[0]?.unitPricePaise).toBe(415_000_000n);
+    // The buyer's list counts suppliers and sent quotes (557:8 "Quotes received 1/3").
+    const listed = (await buyerRfqs(h.db, scopeFor(admin), buyer.org.id)).find((x) => x.rfq.id === id);
+    expect([listed?.suppliers, listed?.quoted]).toEqual([3, 1]);
     // Revised → Revised (v3).
     await saveQuoteDraft(h.db, a, sup(0).org.id, id, quoteInput(400_000_000n, { changeNote: "Price matched." }));
     expect((await sendQuote(h.db, a, sup(0).org.id, first.quoteId)).status).toBe("Revised");

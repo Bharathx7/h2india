@@ -184,5 +184,7 @@ describe.skipIf(!url)("buyer workspace", () => {
     expect(cards.map((c) => c.name)).toEqual(["Type IV cylinder"]);
     expect(cards[0]?.leadTime).toBe("6–8 weeks");
     expect(JSON.stringify(cards)).not.toMatch(/price|paise/i);
+    // The chip count on 78:2628 counts the list's own products.
+    expect((await projectLists(h.db, scopeFor(admin), a.org.id)).find((l) => l.id === list?.id)?.count).toBe(1);
   });
 });

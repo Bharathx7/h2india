@@ -6,7 +6,7 @@ export type RfqStatus = (typeof RFQ_STATUSES)[number];
 
 export const rfqTransitions = {
   Draft: ["In moderation", "Sent"], // Sent directly only when one supplier is chosen
-  "In moderation": ["Sent", "Returned"],
+  "In moderation": ["Sent", "Returned", "Closed"], // Closed: rejected by moderation (632:1138)
   Returned: ["Draft"], // the buyer edits, then submits again
   Sent: ["Quotes received", "Closed"],
   "Quotes received": ["Closed"], // closed by accepting, declining all, or Close RFQ

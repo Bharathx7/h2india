@@ -85,6 +85,19 @@ export const TOPICS = {
     locked: ["email"],
   },
   // Not drawn (A11): supplier verification and listing reviews (steps 8.2, 8.3), sent to the company's admins.
+  // RFQs (step 9.4): a supplier's new RFQs (671:482 "Turn off RFQ emails", WhatsApp 668:44) and a buyer's RFQ checks.
+  "rfq.received": {
+    group: "RFQs and quotes",
+    label: "A buyer sends you an RFQ",
+    hint: "Only for categories you list",
+    defaults: on,
+  },
+  "rfq.checked": {
+    group: "RFQs and quotes",
+    label: "H2 India checks your RFQ",
+    hint: "Approved, or returned for changes",
+    defaults: { email: true, whatsapp: false, in_app: true },
+  },
   "company.verification": {
     group: "Company",
     label: "Verification and listing reviews",
