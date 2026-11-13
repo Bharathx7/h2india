@@ -163,6 +163,8 @@ export interface WorkspaceShellProps {
   settingsHref?: string;
   logoutHref: string;
   homeHref?: string;
+  /** The top bar's main button, for example the supplier's Add product (584:961). */
+  action?: ReactNode;
   children: ReactNode;
 }
 
@@ -180,6 +182,7 @@ export function WorkspaceShell({
   settingsHref,
   logoutHref,
   homeHref = "/",
+  action,
   children,
 }: WorkspaceShellProps) {
   const [drawer, setDrawer] = useState(false);
@@ -240,6 +243,7 @@ export function WorkspaceShell({
               <span className="truncate type-body text-secondary">{searchPlaceholder}</span>
             </button>
             <div className="ml-auto flex items-center gap-2 md:ml-0 md:gap-4">
+              {action ? <div className="hidden md:block">{action}</div> : null}
               {helpHref ? (
                 <a
                   href={helpHref}

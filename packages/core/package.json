@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./time": "./src/time.ts",
     "./alerts": "./src/alerts/index.ts",
+    "./supplier": "./src/supplier/index.ts",
     "./alerts/rules": "./src/alerts/rules.ts",
     "./auth": "./src/sign-in/auth.ts",
     "./sign-in": "./src/sign-in/rules.ts",

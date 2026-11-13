@@ -239,6 +239,13 @@
       "when": 1794561159943,
       "tag": "0033_learning_and_job_applications",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794562166587,
+      "tag": "0034_supplier_reviews",
+      "breakpoints": true
     }
   ]
 }

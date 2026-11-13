@@ -17,6 +17,8 @@ export function WorkspaceFrame(props: {
   welcome: string;
   home: string;
   bell: { unread: number; items: Row[] };
+  searchPlaceholder?: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -49,7 +51,10 @@ export function WorkspaceFrame(props: {
       user={props.user}
       welcome={props.welcome}
       // The admin top bar searches the back office (636:599); the others keep the shell's default.
-      searchPlaceholder={props.area === "admin" ? "Search suppliers, listings, RFQs, users" : undefined}
+      searchPlaceholder={
+        props.searchPlaceholder ?? (props.area === "admin" ? "Search suppliers, listings, RFQs, users" : undefined)
+      }
+      action={props.action}
       // Workspace top bar v2 (194:1191) has a help button: the help centre.
       helpHref="/help"
       profileHref={props.home}

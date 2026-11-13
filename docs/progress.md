@@ -106,7 +106,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 8.1 | Supplier dashboard and onboarding checklist | Not started |
+| 8.1 | Supplier dashboard and onboarding checklist | Built 13 Nov 2026 (branch `step/8.1-supplier-dashboard`, on top of 7.6, not merged): supplier shell (sidebar v2 supplier variant, Add product in the top bar, Orders hidden while transactions are off); onboarding checklist (584:8) worked out from records: company and GSTIN, bank account (8.6), storefront basics (8.7), first product (8.3), Submit for review (new `supplier_reviews`, decided in 8.2); the dashboard (584:961) once all five are done, with the attention list, Live listings tile and Mentioned in news. RFQ, quote and order widgets arrive with Stages 9 and 10. Tests pass. You: confirm the checklist order (A155) |
 | 8.2 | Verification documents, tiers and badges | Not started |
 | 8.3 | Products, product editor and listing review | Not started |
 | 8.4 | Datasheet reader and review | Not started |

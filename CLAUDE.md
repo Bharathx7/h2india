@@ -234,6 +234,12 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A member's profile saves only through `saveProfile()`; the people directory shows members only from `listedMembers()` (opted in, signed-in visitors only, M24). Preferences go through `saveMemberPreferences()` and are the choices `notify()` reads. Download my data is `exportMemberData()`: add every new member-owned table to it.
 - Hydrogen 101 progress is written only by `ChapterTracker`/`Quiz` through `learning-actions.ts` (chapters checked against the CMS). Job Apply links go through `/opportunities/jobs/<slug>/apply`, which records the click for a signed-in member (A70); nothing goes to the employer.
 
+## Supplier workspace (Stage 8)
+
+- Supplier pages call `requireSupplier()` and render in `SupplierShell` (`apps/web/src/supplier/shell.tsx`); server actions get the company from `supplierActor()`, never from the form. Core lives in `@h2india/core/supplier`.
+- The onboarding checklist is `buildChecklist(supplierFacts())`: derived from records only. A step that adds a supplier record adds it to `supplierFacts()`.
+- Every new supplier-owned table gets a case in `supplier/supplier.int.test.ts` proving supplier B can't read or change supplier A's rows.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
