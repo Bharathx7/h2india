@@ -203,6 +203,14 @@ export const TEMPLATES = {
     step: "11.2",
     built: true,
   },
+  "email.newsletter_issue": {
+    channel: "email",
+    key: "newsletter_issue",
+    name: "India H₂ Weekly issue",
+    frame: "648:312",
+    step: "11.3",
+    built: true,
+  },
   "email.changes_needed": {
     channel: "email",
     key: "changes_needed",

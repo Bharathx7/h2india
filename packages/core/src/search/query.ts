@@ -114,8 +114,21 @@ export async function searchIndex<T extends SearchHit = SearchHit>(
         attributesToRetrieve: opts.fields ?? ["*"],
       }),
   );
+  // Boosted results (step 11.3) go first on the first page.
+  let hits = res.hits as unknown as T[];
+  if ((opts.page ?? 1) <= 1) {
+    const { boostsFor } = await import("./manage");
+    const boosts = await boostsFor(q, uid);
+    if (boosts.length) {
+      const index = searchClient().index<SearchDocument>(indexName(uid));
+      const pinned = (await Promise.all(boosts.map((b) => index.getDocument(b.documentId).catch(() => null)))).filter(
+        (d): d is NonNullable<typeof d> => d !== null,
+      ) as unknown as T[];
+      hits = [...pinned, ...hits.filter((h) => !pinned.some((p) => p.id === h.id))];
+    }
+  }
   return {
-    hits: res.hits as unknown as T[],
+    hits,
     total: res.totalHits,
     page: res.page,
     totalPages: res.totalPages,

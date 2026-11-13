@@ -22,3 +22,4 @@ export { indexChangeSql, nudgeIndexer, pruneSearchOutbox, queueIndexChange, sync
 export type { DocumentLoader, SyncReport } from "./outbox";
 export { cleanQuery, countMatches, filteredSearch, matchingRecords, MAX_QUERY, searchIndex, suggest } from "./query";
 export type { SearchHit, SearchPage, Suggestions, SuggestionGroup } from "./query";
+export * from "./manage";

@@ -272,6 +272,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 - Admin pages call `requireOperator(permission, path)` and render in `AdminShell`; the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.
 - Moderation decisions go through `decideItem()` (`@h2india/core/queues`): it claims, refuses a second decision and runs `apply` (the CMS change and the message) once; never change a queued item from a page without it. Moderators never edit the item itself; they return it with reasons.
+- Newsletter issues are sent only through `@h2india/core/newsletter/sends` (`scheduleSend()` starts a `newsletterSend` deadline; `sendBatch()` sends to confirmed subscribers, each once, with unsubscribe headers). Core renders the email; the web app only builds `IssueContent` (`admin/content/issue.ts`).
+- Search synonyms and boosted results are the settings `SEARCH_SYNONYMS` and `SEARCH_BOOSTS`; change them only with `saveSynonyms()`/`saveBoosts()` (they apply to the live indexes, and `ensureIndexes()` keeps them).
 - `money.view` (and other names shared with company permissions) can't be checked with `can(actor, p)` without a company: for operator areas read `actor.operator.has(p)`.
 
 ## Server and deploys (step 1.7)

@@ -64,6 +64,7 @@ export const CLOCKS = {
 export const CHOSEN_DEADLINES = {
   rfqOfferDeadline: { label: "RFQ offer deadline", source: "RFQ wizard step 3 398:10059" },
   quoteValidity: { label: "Quote valid until", source: "Quote builder 617:8" },
+  newsletterSend: { label: "Newsletter issue send time", source: "Newsletter composer 648:312" },
 } as const;
 export type ChosenDeadline = keyof typeof CHOSEN_DEADLINES;
 

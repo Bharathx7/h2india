@@ -207,3 +207,11 @@ export function renderChangesNeeded(appUrl: string, input: Parameters<typeof cha
 export function renderJobLive(appUrl: string, input: Parameters<typeof jobLiveMessage>[0]) {
   return renderNotice(appUrl, jobLiveMessage(input));
 }
+
+import { NewsletterIssue, type NewsletterIssueProps } from "./newsletter/Issue";
+export type { IssueSection, NewsletterIssueProps } from "./newsletter/Issue";
+
+export async function renderNewsletterIssue(props: NewsletterIssueProps & { subject: string }): Promise<RenderedEmail> {
+  const element = <NewsletterIssue {...props} />;
+  return { subject: props.subject, html: await render(element), text: await render(element, { plainText: true }) };
+}

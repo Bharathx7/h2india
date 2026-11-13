@@ -22,14 +22,14 @@ export function indexName(uid: SearchIndexUid, prefix = process.env.SEARCH_INDEX
 }
 
 /** The settings every index carries: its fields, the synonyms, typo tolerance (on, Meilisearch's defaults). */
-function settingsFor(uid: SearchIndexUid) {
+function settingsFor(uid: SearchIndexUid, groups?: string[][]) {
   const def = SEARCH_INDEXES[uid];
   return {
     searchableAttributes: def.searchableAttributes,
     // id too, so alerts can ask whether a just-changed record matches a saved search (step 7.3).
     filterableAttributes: [...def.filterableAttributes, "id"],
     sortableAttributes: def.sortableAttributes,
-    synonyms: synonymsSetting(),
+    synonyms: synonymsSetting(groups),
     typoTolerance: { enabled: true },
   };
 }
@@ -37,10 +37,13 @@ function settingsFor(uid: SearchIndexUid) {
 /** Creates any missing index and applies the settings. Safe to run again; the engine skips unchanged settings. */
 export async function ensureIndexes(uids: readonly SearchIndexUid[] = SEARCH_INDEX_UIDS): Promise<void> {
   const ms = searchClient();
+  // Synonyms edited in Search management (step 11.3) are kept; a deploy doesn't reset them to the code's list.
+  const { currentSynonyms } = await import("./manage");
+  const groups = await currentSynonyms();
   for (const uid of uids) {
     const name = indexName(uid);
     await ms.createIndex(name, { primaryKey: "id" }).waitTask();
-    await ms.index(name).updateSettings(settingsFor(uid)).waitTask();
+    await ms.index(name).updateSettings(settingsFor(uid, groups)).waitTask();
   }
 }
 

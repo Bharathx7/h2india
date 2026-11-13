@@ -21,3 +21,4 @@ export * from "./buyer";
 export * from "./rfq";
 export * from "./messages";
 export * from "./queues";
+export * from "./newsletter-sends";
