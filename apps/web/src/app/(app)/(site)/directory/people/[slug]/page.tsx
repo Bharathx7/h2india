@@ -7,7 +7,8 @@ import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
 import { absolute } from "@/seo/site";
 
-// A person's profile (756:12711), step 6.6: only with their consent recorded (M24). No email or phone, ever.
+// A person's profile (756:12711), step 6.6: only with their consent recorded (M24), or a member who chose to be listed
+// (step 7.4, seen only by signed-in visitors). No email or phone, ever.
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -43,6 +44,13 @@ export default async function PersonPage({ params }: { params: Params }) {
             {e}
           </span>
         ))}
+        {p.id < 0
+          ? (p.topics ?? []).map((t) => (
+              <span key={t} className="rounded-pill border-[1.5px] border-control px-3 py-1 type-label-sm">
+                {t}
+              </span>
+            ))
+          : null}
         {(p.availableFor ?? []).map((a) => (
           <StatusBadge key={a} status={`Available for ${a.toLowerCase()}`} tone="success" />
         ))}
@@ -55,15 +63,25 @@ export default async function PersonPage({ params }: { params: Params }) {
       <p className="type-caption text-secondary">
         We pass your message on; {p.name} decides whether to reply. Their email and phone stay private.
       </p>
-      <p className="type-caption text-secondary">
-        Is this you? You can ask us to change or remove this profile at any time.{" "}
-        <Link
-          href={`/legal/grievance-officer?type=Privacy&page=${encodeURIComponent(absolute(`/directory/people/${p.slug}`))}`}
-          className="underline"
-        >
-          Ask to change or remove it
-        </Link>
-      </p>
+      {p.id < 0 ? (
+        <p className="type-caption text-secondary">
+          Is this you? Change it or make it private in{" "}
+          <Link href="/member/profile" className="underline">
+            your profile
+          </Link>
+          .
+        </p>
+      ) : (
+        <p className="type-caption text-secondary">
+          Is this you? You can ask us to change or remove this profile at any time.{" "}
+          <Link
+            href={`/legal/grievance-officer?type=Privacy&page=${encodeURIComponent(absolute(`/directory/people/${p.slug}`))}`}
+            className="underline"
+          >
+            Ask to change or remove it
+          </Link>
+        </p>
+      )}
     </main>
   );
 }

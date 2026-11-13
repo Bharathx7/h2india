@@ -231,6 +231,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Alerts live in `@h2india/core/alerts`: filters are built only by `filterExpression()` from `ALERT_FILTER_FIELDS`; matching runs after search sync (`matchAlerts`, outbox `alerts_at`) and records each (alert, record) once in `core.alert_sends`. Never send an alert outside `sendAlerts()`; caps are the `alerts.limits` setting (A150).
 - Every alert email carries Turn off this alert (`alertOffUrl()`) and the one-click header; the page lives outside the Coming soon gate. Queue a search refresh that isn't a person's change with `queueIndexChange(…, { alerts: false })`.
 - "Days left" is `daysLeft()` from `@h2india/core/time` (re-exported by `opportunities/views.ts`).
+- A member's profile saves only through `saveProfile()`; the people directory shows members only from `listedMembers()` (opted in, signed-in visitors only, M24). Preferences go through `saveMemberPreferences()` and are the choices `notify()` reads. Download my data is `exportMemberData()`: add every new member-owned table to it.
 
 ## Server and deploys (step 1.7)
 

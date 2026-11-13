@@ -32,6 +32,14 @@ export const FILE_KINDS = {
   quote_attachment: { label: "Attachment", types: DOCS, maxMb: 10, visibility: "private", sensitive: false },
   datasheet: { label: "Datasheet", types: ["application/pdf"], maxMb: 20, visibility: "private", sensitive: false },
   // SVG is accepted but only a PNG made from it is kept (A21).
+  /** Member profile photo (545:8): "JPG or PNG, square, up to 2 MB." */
+  profile_photo: {
+    label: "Photo",
+    types: ["image/jpeg", "image/png"],
+    maxMb: 2,
+    visibility: "private",
+    sensitive: false,
+  },
   logo: {
     label: "Logo",
     types: ["image/png", "image/jpeg", "image/svg+xml"],

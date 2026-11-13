@@ -18,6 +18,8 @@ export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   quote_attachment: { who: "company", permission: ["rfq.create", "quote.send"] },
   datasheet: { who: "company", permission: ["product.manage"] },
   product_image: { who: "company", permission: ["product.manage"] },
+  // A member's own profile photo (545:8); only they (and support, users.view) can open it until M24 decides more.
+  profile_photo: { who: "signed-in" },
   // Company logo (company.manage) or an event or press submission by a signed-in person (Stage 5).
   logo: { who: "signed-in" },
   // Images with a press release by a signed-in person (step 5.7, 504:8).
@@ -43,6 +45,7 @@ export const READ_RULES: Record<
   quote_attachment: { company: "rfq.view", operator: "queues.view" },
   datasheet: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
   product_image: { company: "company.view", operator: "catalogue.view" },
+  profile_photo: { operator: "users.view" },
   logo: { company: "company.view", operator: "catalogue.view" },
   press_image: { operator: "content.view" },
   grievance_attachment: { operator: "compliance.view" },

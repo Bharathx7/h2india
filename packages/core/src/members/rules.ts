@@ -176,3 +176,65 @@ export const FOLLOW_LEVEL_OPTIONS = [
   { value: "digest", label: "Digest only" },
   { value: "none", label: "None" },
 ] as const;
+
+// ------------------------------------------------------------------------------------------------ profile (7.4)
+
+/** What each profile type adds (545:8 Research, 546:8 Student / Professional or expert / Enthusiast). */
+export interface ProfileFields {
+  location?: string;
+  /** Up to 80 characters; shows under the name. */
+  headline?: string;
+  /** Researcher */
+  affiliation?: string;
+  lab?: string;
+  links?: { title: string; url: string }[];
+  openToCollaboration?: boolean;
+  /** Student */
+  institution?: string;
+  programme?: string;
+  graduationYear?: number;
+  internships?: boolean;
+  /** Professional or expert */
+  organisation?: string;
+  role?: string;
+  speaking?: boolean;
+  consulting?: boolean;
+  /** Researcher and professional */
+  expertise?: string[];
+  photoFileId?: string;
+}
+
+export const HEADLINE_MAX = 80;
+
+/** The required field of each type's card (marked * on 545:8 and 546:8), or null. */
+export function requiredFieldOf(persona: string | null): keyof ProfileFields | null {
+  return persona === "researcher"
+    ? "affiliation"
+    : persona === "student"
+      ? "institution"
+      : persona === "professional"
+        ? "organisation"
+        : null;
+}
+
+/** Problems with a profile as the form shows them, by field. */
+export function profileProblems(input: { name: string; persona: string | null; fields: ProfileFields }) {
+  const problems: Record<string, string> = {};
+  if (!input.name.trim()) problems.name = "Enter your full name";
+  if ((input.fields.headline ?? "").length > HEADLINE_MAX) problems.headline = "Up to 80 characters";
+  const req = requiredFieldOf(input.persona);
+  const value = req ? input.fields[req] : undefined;
+  if (req && !(typeof value === "string" && value.trim())) {
+    problems[req] = `Enter your ${req === "affiliation" ? "affiliation" : req}`;
+  }
+  for (const l of input.fields.links ?? []) {
+    if (!/^https?:\/\/[^\s]+\.[^\s]+$/i.test(l.url.trim())) problems.links = "Each link needs a full web address";
+  }
+  return problems;
+}
+
+/** Graduation years offered (546:8): this year and the next six. */
+export function graduationYears(now: Date = new Date()): number[] {
+  const y = now.getFullYear();
+  return Array.from({ length: 7 }, (_, i) => y + i);
+}
