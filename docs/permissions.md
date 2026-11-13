@@ -103,3 +103,26 @@ Who may upload and open each kind of file (`packages/core/src/files/rules.ts`). 
 - A person who creates a company becomes its **Admin**.
 - A person whose join request is approved becomes a **Requester** (buyer) or **Viewer** (supplier) unless the admin picks another role.
 - Two-person approval (656:8) is added with payouts (Stage 10).
+
+## Who does what at launch (A172, 13 Nov 2026)
+
+Reporting line: Founder (Super admin) → Editor-in-chief → Content editor. Working hours Monday to Saturday, 9:30 AM to
+6:30 PM IST, minus holidays.
+
+| Queue     | Main                | Back-up           |
+| --------- | ------------------- | ----------------- |
+| Suppliers | Supplier verifier   | Super admin       |
+| Listings  | Catalogue moderator | Supplier verifier |
+| RFQs      | Operations          | Super admin       |
+| Content   | Editor-in-chief     | Content editor    |
+| Events    | Content editor      | Editor-in-chief   |
+| Jobs      | Content editor      | Operations        |
+| Comments  | Content editor      | Editor-in-chief   |
+
+First operators: the founder (the only Super admin), an Operations lead (Operations and Supplier verifier), an
+Editor-in-chief and a Content editor. A Catalogue moderator joins when listings pass about 50 a week; Finance with
+Launch 2. Every operator uses a passkey. The Content editor writes and edits but cannot publish; the Editor-in-chief
+reviews, does legal checks, publishes, and handles corrections and grievances.
+
+India H₂ Weekly goes out every Monday at 8:00 AM IST (the composer suggests it); schedule by Sunday evening after a
+test send.
