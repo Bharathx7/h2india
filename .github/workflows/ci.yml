@@ -12,6 +12,8 @@ concurrency:
 
 permissions:
   contents: read
+  # The secret scan reads the pull request's commits.
+  pull-requests: read
 
 jobs:
   checks:
