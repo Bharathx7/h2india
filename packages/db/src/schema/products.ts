@@ -3,7 +3,27 @@ import { bigint, boolean, char, index, integer, jsonb, text, uniqueIndex, uuid }
 import { authorship, id, softDelete, timestamps, utc } from "../columns";
 import { catalogueCategories } from "./catalogue";
 import { core } from "./core";
+import { users } from "./auth";
 import { organisations } from "./companies";
+
+export interface ProductFact {
+  label: string;
+  value: string;
+  unit?: string;
+  note?: string;
+}
+
+export interface ProductCertificate {
+  name: string;
+  number?: string;
+  validUntil?: string;
+  issuer?: string;
+}
+
+export interface ProductDocument {
+  label: string;
+  fileId: string;
+}
 
 /**
  * Products (step 6.3; the supplier's editor is step 8.3). A product belongs to one supplier organisation and one
@@ -39,9 +59,31 @@ export const products = core.table(
     /** Fixed-price items only, in paise. Never read outside the product page's price rule. */
     pricePaise: bigint("price_paise", { mode: "bigint" }),
     priceCurrency: char("price_currency", { length: 3 }),
+    /** GST on a fixed price, in basis points (1800 = 18%), entered by the supplier with the price. */
+    gstRateBps: integer("gst_rate_bps"),
+    /** Minimum order, in units (393:8151 "Minimum order: 2 units"). */
+    minOrder: integer("min_order"),
     leadTimeMinWeeks: integer("lead_time_min_weeks"),
     leadTimeMaxWeeks: integer("lead_time_max_weeks"),
     madeInIndia: boolean("made_in_india").notNull().default(false),
+    /** Application ids (browse by application) shown as chips under Overview (393:7370). */
+    applicationIds: text("application_ids")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    /** A product's own test condition per attribute, for example "At rated load (≈210 Nm³/h)" (393:7379). */
+    attributeNotes: jsonb("attribute_notes").$type<Record<string, string>>().notNull().default({}),
+    /** Installation facts (393:7505): label, value, unit, note. */
+    installation: jsonb("installation").$type<ProductFact[]>().notNull().default([]),
+    /** Compliance and certificates (393:7538). */
+    certificates: jsonb("certificates").$type<ProductCertificate[]>().notNull().default([]),
+    /** Downloads (393:7561): file ids from the files service, each with its label. */
+    documents: jsonb("documents").$type<ProductDocument[]>().notNull().default([]),
+    warrantyMonths: integer("warranty_months"),
+    warrantyNote: text("warranty_note"),
+    /** Service in India (393:7643), for example "Pune · Vadodara · Chennai". */
+    serviceCities: text("service_cities"),
+    serviceNote: text("service_note"),
     status: text("status").notNull().default("Draft"),
     publishedAt: utc("published_at"),
     sample: boolean("sample").notNull().default(false),
@@ -57,4 +99,54 @@ export const products = core.table(
     index("products_organisation").on(t.organisationId),
     index("products_attributes").using("gin", t.attributes),
   ],
+);
+
+/**
+ * Ask a technical question (402:12544), step 6.4. Kept for the supplier's messages (step 9.7), where it becomes the
+ * first message of a thread. The asker's email and phone are never shared; their company name only if they chose to.
+ */
+export const productQuestions = core.table(
+  "product_questions",
+  {
+    id: id(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    /** The supplier the question goes to (company-owned). */
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    askerId: uuid("asker_id")
+      .notNull()
+      .references(() => users.id),
+    question: text("question").notNull(),
+    /** The asker's company name, only when they chose to share it. */
+    sharedCompany: text("shared_company"),
+    status: text("status").notNull().default("Open"),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("product_questions_supplier").on(t.organisationId, t.createdAt)],
+);
+
+/** Report this listing (755:15048), step 6.4: goes to the Listings queue (step 11.2). The supplier never sees who. */
+export const listingReports = core.table(
+  "listing_reports",
+  {
+    id: id(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    /** incorrect-specs, counterfeit, misleading-certificate, prohibited, duplicate, other */
+    problem: text("problem").notNull(),
+    details: text("details").notNull(),
+    email: text("email"),
+    reporterId: uuid("reporter_id").references(() => users.id),
+    status: text("status").notNull().default("Received"),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("listing_reports_status").on(t.status, t.createdAt)],
 );

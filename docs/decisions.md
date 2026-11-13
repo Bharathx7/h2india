@@ -225,6 +225,13 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A117 | Category intro text | You | Step 6.3 | Not shown: categories have no description field yet (the PEM frame draws one paragraph). Add it to admin Catalogue if wanted | Open | |
 | A118 | Save to list on cards | You | Step 7.2 | Goes to /member/saved (sign-in first when signed out), as A71, until lists arrive | Open | |
 | A119 | Sub-category schema | You | Step 6.3 | A sub-category's products fill in its parent category's attributes, then its own; filters and the table use the same | Open | Electrolysers' attributes apply to PEM. |
+| A120 | What the fixed-price page shows at Launch 1 (step 6.4) | You | Step 6.4 | The price (excl. GST), the GST line and total when the supplier gave the GST rate, minimum order, and Request quote. Add to cart, Buy now, "Freight is added at checkout" and "Payment is held until you accept delivery" render only with the transactions flag on | Open | Playbook safe default. |
+| A121 | "Indicative range from …" on quote-only pages (393:7160) and offers in structured data | You | Step 6.4 | Left out: an indicative price is a price on a quote-only item. Product structured data has no offer while buying is off | Open | |
+| A122 | Ask a technical question before Messages (9.7) | You | Step 6.4 | Needs an account; saved for the supplier (product_questions) with the asker's company only if they chose to share it; no email to the supplier yet. Becomes the first message of a thread in step 9.7 | Open | |
+| A123 | Attachments on Ask a question and Report this listing (402:12544, 755:15048) | You | Step 6.4 | Not built yet: the forms send text only. Evidence uploads join with the Listings queue (11.2) | Open | |
+| A124 | The verification popover (393:7270) | You | Step 8.2 | The page shows the Verified supplier badge only; the checks with their dates arrive with verification tiers (8.2) | Open | |
+| A125 | Product video and photos (298:26882, 302:31945) | You | M9, 8.3 | An icon placeholder; no video until the media host is chosen (M9) and suppliers upload (8.3) | Open | |
+| A126 | Datasheets on live products | You | Step 6.4 | Anyone may open a datasheet attached to a live product, through fileLink() (5-minute link); drafts' files stay private | Open | |
 
 ## Design-system notes (Stage 2)
 
@@ -281,6 +288,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 5.4 built. Added A62 to A67 (addresses, alerts, closing-soon window, applicant groups, checker rules, sample awardees), open with safe defaults; M25 still open, so no scheme has rules.
 - 13 Nov 2026: Step 5.10 built. Added A99 to A102 (indexing switch, hy-gen redirects, 500 reference, maintenance access), open with safe defaults; M14 still open.
 - 13 Nov 2026: Step 5.9 built. Added A94 to A98 (bot challenge, cookie categories and analytics, issue pages, manage link, one-click unsubscribe), open with safe defaults; M10 still open.
+- 13 Nov 2026: Step 6.4 built. Added A120 to A126, open with safe defaults.
 - 13 Nov 2026: Step 6.3 built. Added A114 to A119, open with safe defaults.
 - 13 Nov 2026: Step 6.2 built with the F4 safe default (one template). Added A109 to A113, open with safe defaults.
 - 13 Nov 2026: Step 6.1 built. You chose A104 (Comparable toggle) and A105 (Ports & shipping hidden; it turned out to be drawn on 390:7668, so it is open again). Added A103, A106 to A108, open with safe defaults.

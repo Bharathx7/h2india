@@ -27,11 +27,19 @@ export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   delivery_photo: { who: "not-yet", until: "Stage 10 delivery link" },
 };
 
-export const READ_RULES: Record<FileKind, { company?: CompanyPermission; operator?: OperatorPermission }> = {
+export const READ_RULES: Record<
+  FileKind,
+  {
+    company?: CompanyPermission;
+    operator?: OperatorPermission;
+    /** Anyone may open it while it is attached to a live product (the product page's Downloads, step 6.4). */
+    listedOnLiveProduct?: boolean;
+  }
+> = {
   work_id: { operator: "users.view" },
   verification_document: { company: "verification.manage", operator: "verification.view" },
   quote_attachment: { company: "rfq.view", operator: "queues.view" },
-  datasheet: { company: "company.view", operator: "catalogue.view" },
+  datasheet: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
   product_image: { company: "company.view", operator: "catalogue.view" },
   logo: { company: "company.view", operator: "catalogue.view" },
   press_image: { operator: "content.view" },

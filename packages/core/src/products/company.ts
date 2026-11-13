@@ -12,3 +12,19 @@ export async function listCompanyProducts(db: Executor, scope: Scope, organisati
     .where(and(inScope(scope, p.organisationId), eq(p.organisationId, organisationId), isNull(p.deletedAt)))
     .orderBy(asc(p.name));
 }
+
+/** Questions buyers asked a supplier (402:12544); the supplier's Messages arrive in step 9.7. Company-owned. */
+export async function listCompanyQuestions(db: Executor, scope: Scope, organisationId: string) {
+  const q = schema.productQuestions;
+  return db
+    .select({
+      id: q.id,
+      productId: q.productId,
+      question: q.question,
+      sharedCompany: q.sharedCompany,
+      createdAt: q.createdAt,
+    })
+    .from(q)
+    .where(and(inScope(scope, q.organisationId), eq(q.organisationId, organisationId)))
+    .orderBy(asc(q.createdAt));
+}

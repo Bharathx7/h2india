@@ -144,6 +144,19 @@ function canRead(file: FileRow, actor: Actor, key?: string): boolean {
   return Boolean(rule.operator && can(actor, rule.operator));
 }
 
+/** A document of a live product's page (step 6.4): readable by anyone, only while the product is live. */
+async function onLiveProduct(file: FileRow): Promise<boolean> {
+  const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
+  if (!rule?.listedOnLiveProduct || file.attachedType !== "product" || !file.attachedId) return false;
+  const p = schema.products;
+  const [row] = await getDb()
+    .select({ id: p.id })
+    .from(p)
+    .where(and(eq(p.id, file.attachedId), eq(p.status, "Live"), isNull(p.deletedAt)))
+    .limit(1);
+  return Boolean(row);
+}
+
 async function load(id: string): Promise<FileRow> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new FileError("NOT_FOUND", "No such file");
   const [row] = await getDb().select().from(f).where(eq(f.id, id));
@@ -323,7 +336,9 @@ export async function fileLink(input: {
 }): Promise<{ url: string; expiresAt: Date }> {
   const file = await load(input.fileId);
   // Someone who may not see the file learns nothing about it, not even that it exists.
-  if (!canRead(file, input.actor, input.key)) throw new FileError("NOT_FOUND", "No such file");
+  if (!canRead(file, input.actor, input.key) && !(await onLiveProduct(file))) {
+    throw new FileError("NOT_FOUND", "No such file");
+  }
   if (file.status !== "Available" || !file.bucket || !file.objectKey || file.deletedAt) {
     throw new FileError("NOT_FOUND", "This file can't be opened");
   }

@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approveJoinRequest, requestToJoin } from "../companies/join-requests";
 import { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "../companies/repo";
-import { listCompanyProducts } from "../products/company";
+import { listCompanyProducts, listCompanyQuestions } from "../products/company";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
 import { can } from "./can";
@@ -67,6 +67,24 @@ describe.skipIf(!url)("authorisation", () => {
         "Alpha draft product",
       );
       expect(await listCompanyProducts(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+    });
+
+    it("product questions (step 6.4)", async () => {
+      const [product] = await h.db
+        .select()
+        .from(schema.products)
+        .where(eq(schema.products.organisationId, data.a.org.id))
+        .limit(1);
+      await h.db.insert(schema.productQuestions).values({
+        productId: product?.id ?? "",
+        organisationId: data.a.org.id,
+        askerId: data.b.requester.id,
+        question: "Can it run at 30% load for long periods?",
+      });
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      expect(await listCompanyQuestions(h.db, scopeFor(a), data.a.org.id)).toHaveLength(1);
+      expect(await listCompanyQuestions(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
     });
 
     it("join requests", async () => {
