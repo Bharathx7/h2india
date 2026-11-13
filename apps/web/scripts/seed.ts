@@ -2,6 +2,8 @@
 // again: rows are matched on their keys. With FLAG_SAMPLE_CONTENT off, sample content can't be published, so it
 // lands as drafts and stays hidden (A37).
 import config from "../src/payload.config";
+import { getDb } from "@h2india/core";
+import { seedCatalogueSamples } from "@h2india/core/catalogue/taxonomy";
 import { importCompanies } from "@h2india/core/companies";
 import { formatReport } from "@h2india/core/importing";
 import { readFile } from "node:fs/promises";
@@ -500,6 +502,7 @@ async function main(): Promise<number> {
   const companies = await importCompanies(await rowsOf("companies"), { apply: true, firstRow: 1, sample: true });
   console.log(formatReport(companies));
   problems += companies.counts.error;
+  console.log(await seedCatalogueSamples(getDb()));
 
   for (const type of CONTENT) {
     const rows = (await rowsOf(type)).map((r) => (publish ? r : { ...r, publish: "no" }));

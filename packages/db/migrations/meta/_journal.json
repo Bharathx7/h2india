@@ -148,6 +148,20 @@
       "when": 1794511751063,
       "tag": "0020_cookie_consents",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794546116090,
+      "tag": "0021_catalogue",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794546170654,
+      "tag": "0022_catalogue_seed",
+      "breakpoints": true
     }
   ]
 }

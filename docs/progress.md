@@ -83,7 +83,7 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 6.1 | Catalogue structure and attribute schemas | Not started |
+| 6.1 | Catalogue structure and attribute schemas | Built 13 Nov 2026 (branch `step/6.1-catalogue`, on top of 1.7, not merged): classes, categories and sub-categories, applications and attribute schemas as data (migration 0021, launch catalogue in 0022); `schemaFor()` checks product values with clear messages; admin Catalogue at /admin/catalogue (636:596) with Add attribute (637:417), edit, order, remove, add, rename, move, duplicate and hide categories, change history and the product form preview; sample sub-categories from `pnpm db:seed`. Decisions A103 to A108. You: name the missing Systems categories (A106), confirm Ports & shipping (A105), add the electrolyser attributes (A108) |
 | 6.2 | Marketplace landing, class and application pages | Not started |
 | 6.3 | Category listings and filters | Not started |
 | 6.4 | Product detail page | Not started |

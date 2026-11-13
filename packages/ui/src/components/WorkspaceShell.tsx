@@ -88,6 +88,13 @@ function SidebarBody({
   homeHref: string;
   compact: boolean;
 }) {
+  // One active item: the longest address that holds the current page, so Overview (/admin) is not lit on
+  // /admin/catalogue.
+  const matches = (href: string) => currentHref === href || currentHref.startsWith(`${href}/`);
+  const activeHref = groups
+    .flatMap((g) => g.items.map((item) => item.href))
+    .filter(matches)
+    .sort((a, b) => b.length - a.length)[0];
   return (
     <div data-surface="inverse" className="flex h-full flex-col gap-5 bg-inverse px-4 pt-7 pb-6">
       <div className={cx("flex items-center gap-2.5 pl-2", compact && "max-lg:hidden")}>
@@ -108,11 +115,7 @@ function SidebarBody({
               <ul className="flex flex-col gap-px">
                 {g.items.map((item) => (
                   <li key={item.href}>
-                    <SidebarItem
-                      item={item}
-                      active={currentHref === item.href || currentHref.startsWith(`${item.href}/`)}
-                      compact={compact}
-                    />
+                    <SidebarItem item={item} active={item.href === activeHref} compact={compact} />
                   </li>
                 ))}
               </ul>

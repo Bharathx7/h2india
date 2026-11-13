@@ -188,6 +188,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Redirects live in `apps/web/src/seo/redirects.json` (301, followed by `seo.spec.ts`); every target must be a real page.
 - Unknown addresses render `app/global-not-found.tsx`; a missing record calls `notFound()`. Public errors render `(site)/error.tsx` with the digest as the reference, logged with the request ID by `instrumentation.ts`.
 
+## Catalogue (step 6.1)
+
+- Classes, categories, sub-categories, applications and attribute schemas are data in `core.catalogue_*`; change them only through `@h2india/core/catalogue/taxonomy` (checks `catalogue.edit`, audits, writes the change history). The launch catalogue is migration 0022 (A103); never write categories or attributes in pages or seeds except the sample ones in `catalogue/samples.ts`.
+- Check product attribute values only with `checkAttributeValues()` / `schemaFor()` from `@h2india/core/catalogue/attributes`, built from `categorySchema()`. Filters use `filterable`, compare and the table view `comparable`, the spec table `displayGroup` and order.
+- An attribute's key never changes. Type and unit can't change, and the attribute can't be removed, once products use it (`productsUsingAttribute()`, filled in at step 8.3, A107).
+- Product search documents keep attribute values under `attributes` (already filterable), so a new filterable attribute needs no index change.
+- A scrolling table that holds Radix checkboxes needs `relative` on its scroll box, or their hidden inputs widen the page on phones.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.

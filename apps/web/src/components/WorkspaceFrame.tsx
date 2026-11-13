@@ -48,6 +48,10 @@ export function WorkspaceFrame(props: {
       currentHref={props.current}
       user={props.user}
       welcome={props.welcome}
+      // The admin top bar searches the back office (636:599); the others keep the shell's default.
+      searchPlaceholder={props.area === "admin" ? "Search suppliers, listings, RFQs, users" : undefined}
+      // Workspace top bar v2 (194:1191) has a help button: the help centre.
+      helpHref="/help"
       profileHref={props.home}
       logoutHref="/sign-out"
       homeHref="/"

@@ -1,0 +1,87 @@
+import { getDb } from "@h2india/core";
+import { can, loadActor } from "@h2india/core/authz";
+import { catalogueTree, categoryDetail, categoryHistory, type TreeClass } from "@h2india/core/catalogue/taxonomy";
+import { listNotifications, unreadCount } from "@h2india/core/notify";
+import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
+import { WorkspaceFrame } from "@/components/WorkspaceFrame";
+import { WORKSPACE_NAV } from "@/lib/workspace-nav";
+import { getSession } from "@/server/auth";
+import { shellFor } from "@/server/workspace";
+import { toRows } from "../../../(workspace)/notifications/rows";
+import { CatalogueView, type CatalogueData } from "./CatalogueView";
+import { categoryMeta, historyLine } from "./format";
+
+// Admin Catalogue · Taxonomy (636:596) with Add attribute (637:417), step 6.1. Operators with catalogue.view see it;
+// catalogue.edit can change it. Others get a plain 404, so the screen's existence isn't revealed.
+export const metadata: Metadata = { title: "Catalogue · H2 India admin", robots: { index: false } };
+
+/** The category opened first: the one in the address, else the first with attributes (Diaphragm at launch). */
+function pick(tree: TreeClass[], wanted: string | undefined): string | null {
+  const all = tree.flatMap((c) => c.categories.flatMap((cat) => [cat, ...cat.children]));
+  if (wanted && all.some((c) => c.id === wanted)) return wanted;
+  const diaphragm = tree
+    .find((c) => c.id === "systems")
+    ?.categories.find((c) => c.slug === "compression-systems")
+    ?.children.find((c) => c.slug === "diaphragm");
+  return diaphragm?.id ?? all[0]?.id ?? null;
+}
+
+export default async function CataloguePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; state?: string }>;
+}) {
+  const session = await getSession();
+  if (!session) redirect("/sign-in?next=/admin/catalogue");
+  const db = getDb();
+  const actor = await loadActor(db, session.user.id);
+  if (!can(actor, "catalogue.view")) notFound();
+  const { category, state } = await searchParams;
+
+  const [shell, unread, bell, tree] = await Promise.all([
+    shellFor(session.user.id),
+    unreadCount(db, session.user.id),
+    listNotifications(db, session.user.id, { limit: 5 }),
+    catalogueTree(db, actor),
+  ]);
+  const selectedId = pick(tree, category);
+  const [detail, history] = selectedId
+    ? await Promise.all([categoryDetail(db, actor, selectedId), categoryHistory(db, actor, selectedId, 3)])
+    : [null, []];
+
+  // ?state= shows the designed loading, empty and error states in development (playbook step 2.5).
+  const demo = process.env.NODE_ENV !== "production" || process.env.FLAG_DEV_PAGES === "true" ? state : undefined;
+  const data: CatalogueData = {
+    tree,
+    canEdit: can(actor, "catalogue.edit"),
+    category: detail
+      ? {
+          ...detail,
+          meta: categoryMeta({
+            liveProducts: detail.liveProducts,
+            attributes: detail.attributes.length,
+            lastChange: detail.lastChange,
+          }),
+          history: history.map(historyLine),
+        }
+      : null,
+  };
+
+  return (
+    <WorkspaceFrame
+      area="admin"
+      groups={WORKSPACE_NAV.admin}
+      current="/admin/catalogue"
+      user={shell.user}
+      welcome="Catalogue"
+      home="/admin"
+      bell={{ unread, items: toRows(bell) }}
+    >
+      <CatalogueView
+        data={data}
+        demoState={demo === "loading" || demo === "empty" || demo === "error" ? demo : undefined}
+      />
+    </WorkspaceFrame>
+  );
+}

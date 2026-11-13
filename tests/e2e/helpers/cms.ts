@@ -4,7 +4,10 @@ import { newEmail, withDb } from "./sign-in";
 
 // Step 4: an operator with a CMS role, and small helpers for the CMS REST API at /api/cms.
 
-export async function signInOperator(page: Page, role: "Content editor" | "Editor-in-chief" | "Super admin") {
+export async function signInOperator(
+  page: Page,
+  role: "Content editor" | "Editor-in-chief" | "Super admin" | "Catalogue moderator",
+) {
   const email = newEmail(role.toLowerCase().replace(/\W+/g, "-"));
   await signInNew(page, email);
   await withDb((db) =>

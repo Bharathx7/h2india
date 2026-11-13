@@ -11,3 +11,4 @@ export * from "./newsletter";
 export * from "./search";
 export * from "./events";
 export * from "./grievances";
+export * from "./catalogue";
