@@ -111,3 +111,47 @@ export function rfqApprovedMessage(d: {
     button: { label: "View your RFQ", href: d.viewUrl },
   };
 }
+
+export interface QuoteReceived {
+  name: string;
+  buyerCompany: string;
+  reference: string;
+  /** "Diaphragm compressors" */
+  item: string;
+  /** "diaphragm compressors (2 units)" */
+  itemLong: string;
+  supplier: string;
+  /** "verified supplier, Chennai" */
+  supplierLine: string;
+  quotes: number;
+  suppliers: number;
+  /** "24 Nov 2026, 6:00 PM IST" */
+  validUntil: string;
+  deliverTo: string;
+  revised: boolean;
+  compareUrl: string;
+  rfqUrl: string;
+}
+
+/** Quote received (665:9), to the buyer when a supplier sends or revises a quote. No price in the email. */
+export function quoteReceivedMessage(d: QuoteReceived): Message {
+  return {
+    subject: `${d.revised ? "Revised quote" : "New quote"} for ${d.reference} from ${d.supplier}`,
+    preview: `${String(d.quotes)} of ${String(d.suppliers)} suppliers have quoted. This one is valid until ${d.validUntil.replace(/ \d{4}.*$/, "")}.`,
+    reason: `You're getting this because you posted ${d.reference} for ${d.buyerCompany}.`,
+    eyebrow: `${d.reference} · ${d.item}`,
+    headline: d.revised ? `${d.supplier} revised their quote` : `${d.supplier} sent you a quote`,
+    paragraphs: [
+      `Hi ${first(d.name)}, you now have ${String(d.quotes)} ${d.quotes === 1 ? "quote" : "quotes"} for ${d.itemLong}. Compare them side by side before you choose.`,
+    ],
+    rows: [
+      { label: "Supplier", value: `${d.supplier} · ${d.supplierLine}` },
+      { label: "Quotes in", value: `${String(d.quotes)} of ${String(d.suppliers)} suppliers` },
+      { label: "This quote is valid until", value: d.validUntil },
+      { label: "Deliver to", value: d.deliverTo },
+    ].filter((r) => r.value),
+    note: "Prices and terms are in your workspace, where you can compare them line by line.",
+    button: { label: "Compare quotes", href: d.compareUrl },
+    links: [{ label: "View the RFQ", href: d.rfqUrl }],
+  };
+}

@@ -177,6 +177,9 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     ).toBeNull();
     expect((await sendQuote(h.db, a, sup(0).org.id, first.quoteId)).status).toBe("Sent");
     expect(await status(id)).toBe("Quotes received");
+    // Quote received (665:9) reaches the buyer who wrote the RFQ.
+    const told = await h.db.select().from(schema.notifications).where(eq(schema.notifications.event, "quote.received"));
+    expect(told.some((n) => n.userId === buyer.admin.id && n.href === `/buyer/rfqs/${id}`)).toBe(true);
 
     // A revision needs a What changed note, then keeps v1 readable.
     await saveQuoteDraft(h.db, a, sup(0).org.id, id, quoteInput(402_000_000n, { leadTimeWeeks: 14 }));

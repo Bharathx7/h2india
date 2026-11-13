@@ -157,8 +157,12 @@ import {
   verifiedMessage,
 } from "./supplier/messages";
 export type { ExpiringDocument, ListingDetails } from "./supplier/messages";
-import { rfqApprovedMessage, rfqReceivedMessage, rfqReturnedMessage } from "./rfq/messages";
-export type { RfqReceived, RfqReturned } from "./rfq/messages";
+import { quoteReceivedMessage, rfqApprovedMessage, rfqReceivedMessage, rfqReturnedMessage } from "./rfq/messages";
+export type { QuoteReceived, RfqReceived, RfqReturned } from "./rfq/messages";
+
+export function renderQuoteReceived(appUrl: string, input: Parameters<typeof quoteReceivedMessage>[0]) {
+  return renderNotice(appUrl, quoteReceivedMessage(input));
+}
 
 export function renderRfqReceived(appUrl: string, input: Parameters<typeof rfqReceivedMessage>[0]) {
   return renderNotice(appUrl, rfqReceivedMessage(input));

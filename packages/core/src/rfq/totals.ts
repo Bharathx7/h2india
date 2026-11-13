@@ -49,6 +49,33 @@ export interface PaymentLine {
 /** Triggers a payment line can use (the schedules drawn on 560:8 and 617:8). */
 export const PAYMENT_TRIGGERS = ["Advance", "On confirmation", "Before dispatch", "On receipt", "Retention"] as const;
 
+/** The schedules a supplier picks from in the quote builder (617:8), as drawn on 560:8 and 617:8. */
+export const PAYMENT_PRESETS: { label: string; lines: PaymentLine[] }[] = [
+  {
+    label: "30% with order, 70% before dispatch",
+    lines: [
+      { percentBps: 3000, trigger: "On confirmation" },
+      { percentBps: 7000, trigger: "Before dispatch" },
+    ],
+  },
+  {
+    label: "50% on confirmation, 50% before dispatch",
+    lines: [
+      { percentBps: 5000, trigger: "On confirmation" },
+      { percentBps: 5000, trigger: "Before dispatch" },
+    ],
+  },
+  {
+    label: "10% advance, 80% on receipt, 10% retention",
+    lines: [
+      { percentBps: 1000, trigger: "Advance" },
+      { percentBps: 8000, trigger: "On receipt" },
+      { percentBps: 1000, trigger: "Retention" },
+    ],
+  },
+  { label: "100% before dispatch", lines: [{ percentBps: 10000, trigger: "Before dispatch" }] },
+];
+
 /** Problems with a payment schedule, or null: whole lines that add up to 100%. */
 export function scheduleProblem(lines: PaymentLine[]): string | null {
   if (!lines.length) return "Add a payment schedule";

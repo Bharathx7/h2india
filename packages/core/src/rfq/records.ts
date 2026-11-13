@@ -8,7 +8,7 @@ import { inScope, type Scope } from "../authz/scope";
 import { cancelDeadline, completeDeadline, onDeadline, startClock, startDeadline } from "../clocks/clocks";
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
-import { sendRfqChecked, sendRfqReceived } from "./notices";
+import { sendQuoteReceived, sendRfqChecked, sendRfqReceived } from "./notices";
 import { quoteFigures, scheduleProblem, type PaymentLine } from "./totals";
 import {
   MAX_RFQ_SUPPLIERS,
@@ -846,6 +846,7 @@ export async function sendQuote(
         await moveRfq(tx, actor.userId, rfq, { from: "Sent", to: "Quotes received" }, { reason: "First quote" });
     },
   });
+  await tell(() => sendQuoteReceived(db, quoteId));
   return { status: move.to, version: version.version };
 }
 
@@ -982,15 +983,77 @@ export async function supplierRfqs(db: Executor, scope: Scope, supplierId: strin
     .select({
       rfq: r,
       recipient: rs,
-      buyer: schema.organisations.legalName,
+      buyer: sql<string>`coalesce(${schema.companyProfiles.tradeName}, ${schema.organisations.legalName})`,
+      buyerCity: schema.companyProfiles.city,
+      quantity: sql<string>`(select concat(i.quantity, ' ', case when i.quantity = 1 then rtrim(i.unit, 's') else i.unit end) from core.rfq_items i where i.rfq_id = ${r.id} order by i.position limit 1)`,
       quote: { id: q.id, status: q.status, sentVersion: q.sentVersion, reference: q.reference },
+      validUntil: sql<Date | null>`(select v.valid_until from core.quote_versions v where v.quote_id = ${q.id} and v.version = ${q.sentVersion})`,
     })
     .from(rs)
     .innerJoin(r, eq(r.id, rs.rfqId))
     .innerJoin(schema.organisations, eq(schema.organisations.id, r.organisationId))
+    .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, r.organisationId))
     .leftJoin(q, and(eq(q.rfqId, r.id), eq(q.organisationId, supplierId)))
     .where(and(inScope(scope, rs.organisationId), eq(rs.organisationId, supplierId), sql`${r.sentAt} is not null`))
     .orderBy(desc(r.sentAt));
+}
+
+/** One RFQ for a supplier it was sent to (617:8): what the buyer needs, and this supplier's quote with every version. */
+export async function supplierRfq(db: Executor, scope: Scope, supplierId: string, rfqId: string) {
+  const [row] = await db
+    .select({
+      rfq: r,
+      recipient: rs,
+      buyer: sql<string>`coalesce(${schema.companyProfiles.tradeName}, ${schema.organisations.legalName})`,
+      buyerCity: schema.companyProfiles.city,
+      site: sql<
+        string | null
+      >`(select concat_ws(', ', d.address, d.city, d.state, d.pincode) from core.delivery_sites d where d.id = ${r.deliverySiteId})`,
+      checked: sql<boolean>`exists (select 1 from core.rfq_moderation_decisions m where m.rfq_id = ${r.id} and m.decision = 'Approved')`,
+    })
+    .from(rs)
+    .innerJoin(r, eq(r.id, rs.rfqId))
+    .innerJoin(schema.organisations, eq(schema.organisations.id, r.organisationId))
+    .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, r.organisationId))
+    .where(
+      and(
+        inScope(scope, rs.organisationId),
+        eq(rs.organisationId, supplierId),
+        eq(rs.rfqId, rfqId),
+        sql`${r.sentAt} is not null`,
+      ),
+    );
+  if (!row) return null;
+  const items = await db.select().from(ri).where(eq(ri.rfqId, rfqId)).orderBy(asc(ri.position));
+  const files = row.rfq.attachments.length
+    ? await db
+        .select({ id: schema.files.id, name: schema.files.name })
+        .from(schema.files)
+        .where(and(inArray(schema.files.id, row.rfq.attachments), eq(schema.files.status, "Available")))
+    : [];
+  const [quote] = await db
+    .select()
+    .from(q)
+    .where(and(eq(q.rfqId, rfqId), eq(q.organisationId, supplierId)));
+  const versions = quote ? await db.select().from(qv).where(eq(qv.quoteId, quote.id)).orderBy(asc(qv.version)) : [];
+  const ids = versions.map((v) => v.id);
+  const [lines, schedule] = ids.length
+    ? await Promise.all([
+        db.select().from(ql).where(inArray(ql.versionId, ids)).orderBy(asc(ql.position)),
+        db.select().from(qp).where(inArray(qp.versionId, ids)).orderBy(asc(qp.position)),
+      ])
+    : [[], []];
+  return {
+    ...row,
+    items,
+    files,
+    quote: quote ?? null,
+    versions: versions.map((v) => ({
+      ...v,
+      lines: lines.filter((l) => l.versionId === v.id),
+      schedule: schedule.filter((p) => p.versionId === v.id),
+    })),
+  };
 }
 
 /** Whether this person may see this RFQ as its buyer or one of its suppliers. */

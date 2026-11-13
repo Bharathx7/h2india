@@ -38,12 +38,14 @@ export const READ_RULES: Record<
     operator?: OperatorPermission;
     /** Anyone may open it while it is attached to a live product (the product page's Downloads, step 6.4). */
     listedOnLiveProduct?: boolean;
+    /** The other side of an RFQ may open it: suppliers it was sent to, and the buyer of a sent quote (step 9.5). */
+    sharedOnRfq?: boolean;
   }
 > = {
   work_id: { operator: "users.view" },
   claim_letter: { operator: "verification.view" },
   verification_document: { company: "verification.manage", operator: "verification.view" },
-  quote_attachment: { company: "rfq.view", operator: "queues.view" },
+  quote_attachment: { company: "rfq.view", operator: "queues.view", sharedOnRfq: true },
   datasheet: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
   product_image: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
   profile_photo: { operator: "users.view" },

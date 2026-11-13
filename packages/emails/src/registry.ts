@@ -25,7 +25,7 @@ export const TEMPLATES = {
     name: "Quote received",
     frame: "665:9",
     step: "9.5",
-    built: false,
+    built: true,
   },
   "email.order_confirmed_pay_now": {
     channel: "email",

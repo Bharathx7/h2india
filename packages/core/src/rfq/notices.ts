@@ -1,9 +1,9 @@
 import { parseServerEnv } from "@h2india/config";
 import { schema, type Executor } from "@h2india/db";
-import { renderRfqApproved, renderRfqReceived, renderRfqReturned } from "@h2india/emails";
+import { renderQuoteReceived, renderRfqApproved, renderRfqReceived, renderRfqReturned } from "@h2india/emails";
 import { and, eq, sql } from "drizzle-orm";
 import { notify } from "../notify/notify";
-import { formatIstDate } from "../time";
+import { formatIstDate, formatIstTime } from "../time";
 
 // RFQ notices (step 9.4). When an RFQ goes out, everyone at each chosen supplier who can quote gets RFQ received
 // (email 671:482, WhatsApp 668:44, in-app); the buyer who wrote it gets Your RFQ is live or Your RFQ needs a few details
@@ -22,6 +22,7 @@ async function rfqFacts(db: Executor, rfqId: string) {
         string | null
       >`(select p.types[1] from core.company_profiles p where p.organisation_id = core.rfqs.organisation_id)`,
       creator: sql<string>`(select u.name from core.users u where u.id = core.rfqs.created_by)`,
+      buyerName: sql<string>`(select coalesce(p.trade_name, o.legal_name) from core.organisations o left join core.company_profiles p on p.organisation_id = o.id where o.id = core.rfqs.organisation_id)`,
     })
     .from(r)
     .where(eq(r.id, rfqId));
@@ -154,6 +155,77 @@ export async function sendRfqChecked(
       icon: outcome.approved ? "check-circle" : "pencil",
       title: outcome.approved ? `${f.rfq.reference} went to suppliers` : `${f.rfq.reference} needs a few details`,
       href: outcome.approved ? `/buyer/rfqs/${rfqId}` : `/rfq/new?draft=${rfqId}`,
+    },
+  });
+}
+
+/** Quote received (665:9), to the buyer who wrote the RFQ, when a supplier sends or revises a quote. */
+export async function sendQuoteReceived(db: Executor, quoteId: string) {
+  const [q] = await db.select().from(schema.quotes).where(eq(schema.quotes.id, quoteId));
+  if (!q?.sentVersion) return;
+  const f = await rfqFacts(db, q.rfqId);
+  if (!f) return;
+  const [version] = await db
+    .select()
+    .from(schema.quoteVersions)
+    .where(and(eq(schema.quoteVersions.quoteId, quoteId), eq(schema.quoteVersions.version, q.sentVersion)));
+  const [supplier] = await db
+    .select({
+      name: sql<string>`coalesce(${schema.companyProfiles.tradeName}, ${schema.organisations.legalName})`,
+      city: schema.companyProfiles.city,
+      verified: schema.organisations.verification,
+    })
+    .from(schema.organisations)
+    .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, schema.organisations.id))
+    .where(eq(schema.organisations.id, q.organisationId));
+  const counts = await db
+    .select({
+      suppliers: sql<number>`(select count(*)::int from core.rfq_suppliers x where x.rfq_id = ${q.rfqId})`,
+      quotes: sql<number>`(select count(*)::int from core.quotes x where x.rfq_id = ${q.rfqId} and x.sent_version is not null and x.status <> 'Withdrawn')`,
+    })
+    .from(sql`(select 1) as one`);
+  const site = await db
+    .select({ line: sql<string>`concat_ws(', ', d.name, d.city, d.state)` })
+    .from(sql`core.delivery_sites d`)
+    .where(sql`d.id = ${f.rfq.deliverySiteId}`);
+  const item = f.item?.description ?? f.rfq.title;
+  const qty = f.item
+    ? `${String(f.item.quantity)} ${f.item.quantity === 1 ? f.item.unit.replace(/s$/, "") : f.item.unit}`
+    : "";
+  const url = `${appUrl()}/buyer/rfqs/${q.rfqId}`;
+  await notify({
+    event: "quote.received",
+    topic: "quote.sent",
+    userId: f.rfq.createdBy,
+    scope: f.rfq.organisationId,
+    email: {
+      template: "email.quote_received_buyer",
+      mail: await renderQuoteReceived(appUrl(), {
+        name: f.creator,
+        buyerCompany: f.buyerName,
+        reference: f.rfq.reference,
+        item: f.category ?? item,
+        itemLong: `${item.charAt(0).toLowerCase()}${item.slice(1)}${qty ? ` (${qty})` : ""}`,
+        supplier: supplier?.name ?? "A supplier",
+        supplierLine: [supplier?.verified === "Verified" ? "verified supplier" : null, supplier?.city]
+          .filter(Boolean)
+          .join(", "),
+        quotes: counts[0]?.quotes ?? 1,
+        suppliers: counts[0]?.suppliers ?? 1,
+        validUntil: version?.validUntil
+          ? `${formatIstDate(version.validUntil)}, ${formatIstTime(version.validUntil)} IST`
+          : "",
+        deliverTo: site[0]?.line ?? f.state ?? "",
+        revised: q.sentVersion > 1,
+        compareUrl: url,
+        rfqUrl: url,
+      }),
+    },
+    inApp: {
+      category: "quotes",
+      icon: "file-text",
+      title: `${supplier?.name ?? "A supplier"} ${q.sentVersion > 1 ? "revised their quote" : "sent a quote"} for ${f.rfq.reference}`,
+      href: `/buyer/rfqs/${q.rfqId}`,
     },
   });
 }

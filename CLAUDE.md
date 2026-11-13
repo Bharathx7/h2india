@@ -259,6 +259,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A sent quote version is never changed; revising saves a new version. Buyers read only sent versions (`quoteVersion()`), suppliers see an RFQ only once `sentAt` is set.
 - Quote figures come only from `quoteFigures()` (GST per line, freight with its own rate); payment schedules are basis points that add to 10000 (`scheduleProblem()`).
 - The RFQ wizard (`apps/web/src/rfq`) saves only through `saveRfqDraft`/`sendRfq`; the supplier picker reads `matchSuppliers()` (verified only). A signed-out draft lives in local storage under `LOCAL_DRAFT_KEY` and is picked up on `/rfq/new` after sign-in.
+- Supplier RFQ pages read `supplierRfqs()`/`supplierRfq()` and save quotes only through `apps/web/src/supplier/rfq/actions.ts` (company from `supplierActor()`). Never show a commission, TCS or TDS figure until C1 and C3 are decided.
+- RFQ files are `quote_attachment` with `sharedOnRfq`: suppliers an RFQ was sent to may open its attachments, and the buyer may open a sent quote's documents (`onSharedRfq()` in `files.ts`).
 - RFQ moderation is `approveRfq()`/`returnRfq()`/`rejectRfq()` (queues.edit); notices go through `rfq/notices.ts` only after the status change succeeds, so each supplier is told once.
 - In a single-table Drizzle select, `${table.column}` inside a raw `sql` subquery is printed unqualified and binds to the subquery's own table. Write the outer column out (`core.rfqs.id`) or join so Drizzle qualifies it.
 - The offer deadline and quote validity are `CHOSEN_DEADLINES` started with `startDeadline()` at the chosen time; moving one cancels and starts it again.
