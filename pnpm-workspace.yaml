@@ -10,3 +10,7 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - prettier@3.10.0
   - bullmq@6.7.4
+# Security fixes the audit asks for: dompurify through Payload's code editor, happy-dom in tests.
+overrides:
+  dompurify: ">=3.4.17"
+  happy-dom: ">=21.0.4"
