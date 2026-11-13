@@ -147,8 +147,14 @@ export async function renderAlertDigest(subject: string, props: AlertDigestProps
 }
 
 // Supplier verification (step 8.2): Verification status 673:221 and its variants.
-import { documentExpiringMessage, needsChangesMessage, verifiedMessage } from "./supplier/messages";
-export type { ExpiringDocument } from "./supplier/messages";
+import {
+  documentExpiringMessage,
+  listingApprovedMessage,
+  listingNeedsChangesMessage,
+  needsChangesMessage,
+  verifiedMessage,
+} from "./supplier/messages";
+export type { ExpiringDocument, ListingDetails } from "./supplier/messages";
 
 export function renderDocumentExpiring(appUrl: string, input: Parameters<typeof documentExpiringMessage>[0]) {
   return renderNotice(appUrl, documentExpiringMessage(input));
@@ -158,4 +164,10 @@ export function renderVerified(appUrl: string, input: Parameters<typeof verified
 }
 export function renderVerificationChanges(appUrl: string, input: Parameters<typeof needsChangesMessage>[0]) {
   return renderNotice(appUrl, needsChangesMessage(input));
+}
+export function renderListingNeedsChanges(appUrl: string, input: Parameters<typeof listingNeedsChangesMessage>[0]) {
+  return renderNotice(appUrl, listingNeedsChangesMessage(input));
+}
+export function renderListingApproved(appUrl: string, input: Parameters<typeof listingApprovedMessage>[0]) {
+  return renderNotice(appUrl, listingApprovedMessage(input));
 }

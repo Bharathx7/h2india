@@ -240,6 +240,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - The onboarding checklist is `buildChecklist(supplierFacts())`: derived from records only. A step that adds a supplier record adds it to `supplierFacts()`.
 - Every new supplier-owned table gets a case in `supplier/supplier.int.test.ts` proving supplier B can't read or change supplier A's rows.
 - Badges are granted and revoked only through `grantBadge()`/`revokeBadge()` (operators, recorded evidence, audited); `organisations.verification = "Verified"` follows the Verified supplier badge and is set only by `syncCompanyVerified()`. Company-records checks go through `supplier/adapters/registry.ts`.
+- Supplier listings change only through `saveProduct()` (drafts and submissions; a live listing's reviewed fields go to `product_revisions`), `setListingStatus()` and `decideRevision()` (operators, `queues.edit`). `REVIEWED_FIELDS` and `INSTANT_FIELDS` in `products/rules.ts` decide what needs review. Admin screens use `requireOperator()` and `AdminShell` (`apps/web/src/admin/shell.tsx`).
 
 ## Server and deploys (step 1.7)
 

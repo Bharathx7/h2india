@@ -79,3 +79,61 @@ export function needsChangesMessage(d: {
     button: { label: "Fix it in Verification", href: d.statusUrl },
   };
 }
+
+// Listing needs changes (673:287) and Listing approved (831:1006), step 8.3. Words as drawn.
+
+export interface ListingDetails {
+  name: string;
+  company: string;
+  product: string;
+  /** "PE-250" (the model) or the product name when there is none. */
+  code: string;
+  category: string;
+  editUrl: string;
+  liveUrl: string;
+}
+
+export function listingNeedsChangesMessage(d: ListingDetails & { changes: string[]; live: boolean }): Message {
+  const n = d.changes.length;
+  const words = `${String(n)} ${n === 1 ? "change" : "changes"}`;
+  return {
+    subject: `${words} needed: ${d.product}`,
+    preview: d.live ? "The live version stays up while you fix this." : "Fix these and send it back for review.",
+    reason: `You're getting this because you manage ${d.company}'s catalogue.`,
+    eyebrow: `Listing ${d.code} · needs changes`,
+    headline: `Your listing needs ${words}`,
+    paragraphs: [
+      `Hi ${first(d.name)}, the catalogue team reviewed ${d.product}.${d.live ? " The live version stays up while you fix this." : ""}`,
+    ],
+    rows: [
+      { label: "Product", value: d.code === d.product ? d.product : `${d.product} · ${d.code}` },
+      { label: "Category", value: d.category },
+      ...d.changes.map((c, i) => ({ label: `Change ${String(i + 1)}`, value: c })),
+    ],
+    button: { label: "Edit listing", href: d.editUrl },
+    links: [{ label: "Preview as buyer", href: d.liveUrl }],
+  };
+}
+
+export function listingApprovedMessage(
+  d: ListingDetails & { checkedAgainst: string | null; reviewed: string },
+): Message {
+  return {
+    subject: `Approved: ${d.code === d.product ? d.product : `${d.code} ${d.product}`} is live on H2 India`,
+    preview: "Buyers can now find it in search and on your storefront, and send you RFQs.",
+    reason: "You're getting this because you list products on H2 India.",
+    eyebrow: `Listing · ${d.code}`,
+    headline: "Your listing is live",
+    paragraphs: [
+      `Hi ${first(d.name)}, we checked ${d.product}${d.checkedAgainst ? " against its datasheet" : ""} and approved it. It now shows in search, in its category and on your storefront.`,
+    ],
+    rows: [
+      { label: "Product", value: d.product },
+      ...(d.checkedAgainst ? [{ label: "Checked against", value: d.checkedAgainst }] : []),
+      { label: "Status", value: "Live" },
+      { label: "Reviewed", value: `${d.reviewed} by the H2 India catalogue team` },
+    ],
+    button: { label: "View your listing", href: d.liveUrl },
+    links: [{ label: "Edit listing", href: d.editUrl }],
+  };
+}

@@ -145,7 +145,7 @@ export const TEMPLATES = {
     name: "Listing needs changes",
     frame: "673:287",
     step: "8.3",
-    built: false,
+    built: true,
   },
   "email.submission_received": {
     channel: "email",
@@ -193,7 +193,7 @@ export const TEMPLATES = {
     name: "Listing approved",
     frame: "831:1006",
     step: "8.3",
-    built: false,
+    built: true,
   },
   "email.event_live": {
     channel: "email",

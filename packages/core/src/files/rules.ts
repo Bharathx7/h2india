@@ -44,7 +44,7 @@ export const READ_RULES: Record<
   verification_document: { company: "verification.manage", operator: "verification.view" },
   quote_attachment: { company: "rfq.view", operator: "queues.view" },
   datasheet: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
-  product_image: { company: "company.view", operator: "catalogue.view" },
+  product_image: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },
   profile_photo: { operator: "users.view" },
   logo: { company: "company.view", operator: "catalogue.view" },
   press_image: { operator: "content.view" },

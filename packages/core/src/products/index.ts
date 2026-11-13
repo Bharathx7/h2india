@@ -5,3 +5,4 @@ export * from "./samples";
 export * from "./company";
 export * from "./detail";
 export * from "./compare";
+export * from "./editor";

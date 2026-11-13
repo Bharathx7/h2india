@@ -2,15 +2,115 @@ import { formatNumber, type AttributeDef } from "../catalogue/attributes";
 
 // Product rules (steps 6.3 and 6.4). Pure, so pages, the browser and tests share them.
 
-export const PRODUCT_STATUSES = ["Draft", "In review", "Live", "Paused"] as const;
+/** Listing statuses (step 8.3; 598:8 tabs). Archived listings leave every list but stay in the records. */
+export const PRODUCT_STATUSES = [
+  "Draft",
+  "In review",
+  "Needs changes",
+  "Rejected",
+  "Live",
+  "Paused",
+  "Archived",
+] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
 export const PRODUCT_TRANSITIONS: Record<ProductStatus, readonly ProductStatus[]> = {
-  Draft: ["In review"],
-  "In review": ["Live", "Draft"],
-  Live: ["Paused"],
-  Paused: ["Live", "Draft"],
+  Draft: ["In review", "Archived"],
+  "In review": ["Live", "Needs changes", "Rejected"],
+  "Needs changes": ["In review", "Archived"],
+  Rejected: ["Archived"],
+  Live: ["Paused", "Archived"],
+  Paused: ["Live", "Archived"],
+  Archived: [],
 };
+
+/** A live listing's change under review (632:695). */
+export const REVISION_TRANSITIONS = {
+  Draft: ["In review"],
+  "In review": ["Approved", "Needs changes", "Rejected"],
+  "Needs changes": ["In review"],
+  Approved: [],
+  Rejected: [],
+} as const;
+
+/** The tabs on Products (598:8). */
+export const PRODUCT_TABS = [
+  { key: "all", label: "All", statuses: null },
+  { key: "live", label: "Live", statuses: ["Live"] },
+  { key: "in-review", label: "In review", statuses: ["In review"] },
+  { key: "needs-changes", label: "Needs changes", statuses: ["Needs changes"] },
+  { key: "rejected", label: "Rejected", statuses: ["Rejected"] },
+  { key: "drafts", label: "Drafts", statuses: ["Draft"] },
+  { key: "paused", label: "Paused", statuses: ["Paused"] },
+] as const;
+
+/**
+ * What goes back to review (602:281): "Changes to specs, certificates or category are checked again before they go
+ * live. Price, lead time and stock changes go live straight away."
+ */
+export const REVIEWED_FIELDS = [
+  "categoryId",
+  "name",
+  "model",
+  "brand",
+  "variant",
+  "summary",
+  "attributes",
+  "attributeNotes",
+  "certifications",
+  "certificates",
+  "documents",
+  "images",
+  "madeInIndia",
+] as const;
+export const INSTANT_FIELDS = [
+  "pricing",
+  "pricePaise",
+  "priceCurrency",
+  "gstRateBps",
+  "indicativeMinPaise",
+  "indicativeMaxPaise",
+  "leadTimeMinWeeks",
+  "leadTimeMaxWeeks",
+  "minOrder",
+  "stock",
+  "stockQty",
+  "sku",
+] as const;
+
+/** The status a supplier sees: a live listing with a change under review shows the change's status. */
+export function shownStatus(productStatus: string, revisionStatus: string | null): string {
+  if (
+    (productStatus === "Live" || productStatus === "Paused") &&
+    (revisionStatus === "In review" || revisionStatus === "Needs changes")
+  ) {
+    return revisionStatus;
+  }
+  return productStatus;
+}
+
+/** "spec change", "category change", "certificate added" (629:367), from what differs. */
+export function changeKind(changed: readonly string[]): string {
+  if (changed.includes("categoryId")) return "category change";
+  if (changed.includes("certificates") || changed.includes("documents")) return "certificate added";
+  return "spec change";
+}
+
+/** Stock and lead time as the Products list shows it: "Made to order · 14–16 weeks" or "40 in stock · Ships in 3 days". */
+export function stockLine(p: {
+  stock: string;
+  stockQty: number | null;
+  leadTimeMinWeeks: number | null;
+  leadTimeMaxWeeks: number | null;
+}): { line: string; sub: string } {
+  const lead =
+    p.leadTimeMinWeeks || p.leadTimeMaxWeeks
+      ? `${String(p.leadTimeMinWeeks ?? p.leadTimeMaxWeeks)}${p.leadTimeMaxWeeks && p.leadTimeMaxWeeks !== p.leadTimeMinWeeks ? `–${String(p.leadTimeMaxWeeks)}` : ""} weeks`
+      : "";
+  if (p.stock === "in_stock")
+    return { line: `${String(p.stockQty ?? 0)} in stock`, sub: lead ? `Ships in ${lead}` : "" };
+  return { line: lead ? "Made to order" : "Not set", sub: lead };
+}
 
 /** Where a price could appear. Only the product page of a fixed-price item may show one (playbook step 6.4). */
 export type PriceSurface = "pdp" | "card" | "search" | "filter" | "compare" | "listing-table";
