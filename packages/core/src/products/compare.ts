@@ -35,6 +35,9 @@ export type CompareResult =
       groups: { group: string; rows: CompareRow[] }[];
     };
 
+/** Missing values say so instead of a blank (Doc 1 §9.4). */
+export const NOT_PROVIDED = "Not provided";
+
 const row = (label: string, values: string[]): CompareRow => ({
   label,
   values,
@@ -93,7 +96,7 @@ export async function compareProducts(
   ];
   const groups: { group: string; rows: CompareRow[] }[] = [];
   for (const d of defs) {
-    const values = ordered.map((r) => formatValue(d, r.p.attributes[d.key]) ?? "—");
+    const values = ordered.map((r) => formatValue(d, r.p.attributes[d.key]) ?? NOT_PROVIDED);
     const g = groups.find((x) => x.group === d.displayGroup) ?? { group: d.displayGroup, rows: [] };
     if (!groups.includes(g)) groups.push(g);
     g.rows.push(row(d.label, values));
@@ -104,7 +107,7 @@ export async function compareProducts(
       rows: [
         row(
           "Technology",
-          ordered.map((r) => (r.cat.parentId ? r.cat.label : "—")),
+          ordered.map((r) => (r.cat.parentId ? r.cat.label : NOT_PROVIDED)),
         ),
       ],
     });
@@ -114,11 +117,11 @@ export async function compareProducts(
     rows: [
       row(
         "Lead time",
-        ordered.map((r) => leadTimeLabel(r.p.leadTimeMinWeeks, r.p.leadTimeMaxWeeks) ?? "—"),
+        ordered.map((r) => leadTimeLabel(r.p.leadTimeMinWeeks, r.p.leadTimeMaxWeeks) ?? NOT_PROVIDED),
       ),
       row(
         "Certificates",
-        ordered.map((r) => r.p.certifications.join(", ") || "—"),
+        ordered.map((r) => r.p.certifications.join(", ") || NOT_PROVIDED),
       ),
       // How to buy, never the price itself (step 6.5: compare never shows price).
       row(
@@ -127,7 +130,7 @@ export async function compareProducts(
       ),
       row(
         "Ships from",
-        ordered.map((r) => [r.city, r.state].filter(Boolean).join(", ") || "—"),
+        ordered.map((r) => [r.city, r.state].filter(Boolean).join(", ") || NOT_PROVIDED),
       ),
     ],
   });

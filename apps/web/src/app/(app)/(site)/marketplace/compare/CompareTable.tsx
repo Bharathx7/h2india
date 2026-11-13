@@ -57,6 +57,17 @@ export function CompareTable({
         <Button
           variant="outline"
           size="sm"
+          className="print:hidden"
+          onClick={() => {
+            window.print();
+          }}
+        >
+          Export to PDF
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="print:hidden"
           onClick={() => {
             go([]);
           }}
@@ -68,10 +79,15 @@ export function CompareTable({
         role="region"
         tabIndex={0}
         aria-label="Comparison"
-        className="relative overflow-x-auto rounded-card border border-default"
+        // Scrolls inside itself so the product headers stay in view (Doc 1 §9.4); prints in full.
+        className="relative max-h-[80vh] overflow-auto rounded-card border border-default print:max-h-none print:overflow-visible"
       >
         <div role="table" aria-label={`Compare ${result.category.label.toLowerCase()}`} className="min-w-max">
-          <div role="row" className="grid" style={width}>
+          <div
+            role="row"
+            className="sticky top-0 z-10 grid bg-page shadow-soft print:static print:shadow-none"
+            style={width}
+          >
             <div role="columnheader" className="flex flex-col gap-1 border-r border-default p-4">
               <span className="type-label-lg text-primary">
                 {cols.length} {cols.length === 1 ? "product" : "products"}

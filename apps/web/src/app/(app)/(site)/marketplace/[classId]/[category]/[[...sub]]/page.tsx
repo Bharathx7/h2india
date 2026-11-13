@@ -1,7 +1,7 @@
 import { getDb } from "@h2india/core";
 import { effectiveSchema } from "@h2india/core/catalogue/taxonomy";
 import { listProducts } from "@h2india/core/products";
-import { parseListing } from "@h2india/core/products/rules";
+import { activeFilters, defaultViewFor, listingSearch, parseListing } from "@h2india/core/products/rules";
 import { buttonClasses, cx, Icon, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -59,7 +59,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const includeSample = showSample();
   const db = getDb();
   const defs = await effectiveSchema(db, (sub ?? category).id, { includeSample });
-  const query = parseListing(search, defs);
+  const query = parseListing(search, defs, { defaultView: defaultViewFor(klass.id) });
   const scopeCategories = sub
     ? [{ id: sub.id, slug: sub.slug, label: sub.label, parentId: category.id }]
     : [
@@ -71,6 +71,30 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
     guidesFor([category.label], 1),
     getSession(),
   ]);
+  // No results (Doc 1 §9.2): which single filter to drop to find products, the nearest matches, and a quote request
+  // carrying the filters.
+  let noResults:
+    | { suggestions: { label: string; href: string; count: number }[]; nearest: typeof result.items; rfqHref: string }
+    | undefined;
+  if (result.total === 0) {
+    const subLabels = Object.fromEntries(category.children.map((c) => [c.slug, c.label]));
+    const tries = await Promise.all(
+      activeFilters(query, defs, subLabels).map(async (f) => {
+        const relaxed = { ...query, ...f.without, page: 1 };
+        const r = await listProducts(db, { categories: scopeCategories, defs, includeSample }, relaxed);
+        return { label: f.label, relaxed, total: r.total, items: r.items };
+      }),
+    );
+    const found = tries.filter((t) => t.total > 0).sort((a, b) => b.total - a.total);
+    const base = sub ? categoryHref(sub, category) : categoryHref(category);
+    noResults = {
+      suggestions: found
+        .slice(0, 4)
+        .map((t) => ({ label: t.label, href: `${base}${listingSearch(t.relaxed)}`, count: t.total })),
+      nearest: found[0]?.items.slice(0, 3) ?? [],
+      rfqHref: `/rfq/new?category=${encodeURIComponent((sub ?? category).slug)}&filters=${encodeURIComponent(listingSearch(query).slice(1))}`,
+    };
+  }
   const title = titleOf(category, sub);
   const basePath = sub ? categoryHref(sub, category) : categoryHref(category);
   const total = result.total;
@@ -144,6 +168,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
             eyebrow={`${klass.label} · ${category.label}`}
             categorySlug={category.slug}
             signedIn={Boolean(session)}
+            noResults={forced === "empty" ? undefined : noResults}
           />
         )}
       </div>

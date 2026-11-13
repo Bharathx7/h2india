@@ -42,6 +42,12 @@ export interface ListingProps {
   eyebrow: string;
   categorySlug: string;
   signedIn: boolean;
+  /** When nothing matches (Doc 1 §9.2): filters whose removal finds products, the nearest matches, a pre-filled RFQ. */
+  noResults?: {
+    suggestions: { label: string; href: string; count: number }[];
+    nearest: Card[];
+    rfqHref: string;
+  };
 }
 
 export function Listing(props: ListingProps) {
@@ -153,55 +159,96 @@ export function Listing(props: ListingProps) {
         </p>
 
         {props.items.length === 0 ? (
-          <section aria-label="Products" data-state="empty" className="rounded-card border border-default bg-subtle">
-            <EmptyState
-              kind="no-results"
-              title="No products match these filters"
-              action={
-                <Button
-                  onClick={() => {
-                    go(CLEAR);
-                  }}
-                  variant="primary"
-                >
-                  Clear filters
-                </Button>
-              }
-            >
-              Try fewer filters or a wider range, or send a request and let suppliers come to you.
-            </EmptyState>
+          <section aria-label="Products" data-state="empty" className="flex flex-col gap-6">
+            <div className="rounded-card border border-default bg-subtle">
+              <EmptyState
+                kind="no-results"
+                title="No products match these filters"
+                action={
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <Button
+                      onClick={() => {
+                        go(CLEAR);
+                      }}
+                      variant="primary"
+                    >
+                      Clear filters
+                    </Button>
+                    {props.noResults ? (
+                      <Link href={props.noResults.rfqHref} className={buttonClasses({ variant: "outline" })}>
+                        Request quotes for these specs
+                      </Link>
+                    ) : null}
+                  </div>
+                }
+              >
+                Try fewer filters or a wider range, or send a request and let suppliers come to you.
+              </EmptyState>
+              {props.noResults?.suggestions.length ? (
+                <ul aria-label="Try removing" className="flex flex-col gap-1 px-6 pb-6 text-center">
+                  {props.noResults.suggestions.map((sug) => (
+                    <li key={sug.href} className="type-body-sm text-body">
+                      Remove{" "}
+                      <Link href={sug.href} className="type-label text-link underline">
+                        {sug.label}
+                      </Link>{" "}
+                      to see {sug.count.toLocaleString("en-IN")} {sug.count === 1 ? "product" : "products"}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+            {props.noResults?.nearest.length ? (
+              <div className="flex flex-col gap-3">
+                <h2 className="type-h4 text-primary">Nearest matches</h2>
+                <ProductGrid {...props} items={props.noResults.nearest} label="Nearest matches" />
+              </div>
+            ) : null}
           </section>
         ) : q.view === "table" ? (
-          <ProductTable {...props} />
+          <>
+            <div className="hidden lg:block">
+              <ProductTable {...props} />
+            </div>
+            <div className="lg:hidden">
+              <ProductGrid {...props} items={props.items} />
+            </div>
+          </>
         ) : (
-          <ul aria-label="Products" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {props.items.map((p) => (
-              <li key={p.id} className="flex">
-                <ProductCard
-                  className="w-full"
-                  name={p.name}
-                  href={p.href}
-                  eyebrow={[props.eyebrow, p.subLabel].filter(Boolean).join(" · ")}
-                  supplier={p.supplier.name}
-                  supplierVerified={p.supplier.verified}
-                  chips={p.chips}
-                  leadTime={p.leadTime}
-                  actions={<CardActions product={p} category={props.categorySlug} signedIn={props.signedIn} />}
-                  renderLink={({ href, className, children }) => (
-                    <Link href={href} className={className}>
-                      {children}
-                    </Link>
-                  )}
-                />
-              </li>
-            ))}
-          </ul>
+          <ProductGrid {...props} items={props.items} />
         )}
 
         <Pager {...props} go={go} />
       </div>
       <CompareBar />
     </div>
+  );
+}
+
+function ProductGrid(props: ListingProps & { label?: string }) {
+  return (
+    <ul aria-label={props.label ?? "Products"} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {props.items.map((p) => (
+        <li key={p.id} className="flex">
+          <ProductCard
+            className="w-full"
+            name={p.name}
+            href={p.href}
+            eyebrow={[props.eyebrow, p.subLabel].filter(Boolean).join(" · ")}
+            supplier={p.supplier.name}
+            supplierVerified={p.supplier.verified}
+            chips={p.chips}
+            leadTime={p.leadTime}
+            actions={<CardActions product={p} category={props.categorySlug} signedIn={props.signedIn} />}
+            renderLink={({ href, className, children }) => (
+              <Link href={href} className={className}>
+                {children}
+              </Link>
+            )}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -533,10 +580,11 @@ function ProductTable(props: ListingProps) {
       role="region"
       tabIndex={0}
       aria-label="Products as a table"
-      className="relative overflow-x-auto rounded-card border border-default"
+      // Scrolls inside itself so the header and the sideways scrollbar stay in view (Doc 1 §9.2).
+      className="relative max-h-[75vh] overflow-auto rounded-card border border-default"
     >
       <table className="w-full min-w-200 border-collapse">
-        <thead className="bg-subtle type-caption text-secondary">
+        <thead className="sticky top-0 z-10 bg-subtle type-caption text-secondary">
           <tr>
             <th scope="col" className={cx(th, "w-10 pl-3")}>
               <span className="sr-only">Compare</span>
@@ -557,8 +605,11 @@ function ProductTable(props: ListingProps) {
                 {d.label}
               </th>
             ))}
-            <th scope="col" className={cx(th, "pr-3")}>
+            <th scope="col" className={th}>
               Lead time
+            </th>
+            <th scope="col" className={cx(th, "pr-3")}>
+              <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
@@ -594,7 +645,24 @@ function ProductTable(props: ListingProps) {
                     {p.values[d.key] ?? "—"}
                   </td>
                 ))}
-                <td className="py-3 pr-3 pl-2 align-middle whitespace-nowrap">{p.leadTime ?? "—"}</td>
+                <td className="px-2 py-3 align-middle whitespace-nowrap">{p.leadTime ?? "—"}</td>
+                <td className="py-3 pr-3 pl-2 align-middle">
+                  <span className="flex items-center gap-2">
+                    <Link
+                      href={props.signedIn ? "/member/saved" : `/sign-in?next=${encodeURIComponent("/member/saved")}`}
+                      aria-label={`Save ${p.name} to a list`}
+                      className="flex size-8 items-center justify-center rounded-pill border border-control hover:border-focus"
+                    >
+                      <Icon name="heart" size={16} />
+                    </Link>
+                    <Link
+                      href={`/rfq/new?product=${p.slug}`}
+                      className={cx(buttonClasses({ variant: "outline", size: "sm" }), "whitespace-nowrap")}
+                    >
+                      Request quote<span className="sr-only"> for {p.name}</span>
+                    </Link>
+                  </span>
+                </td>
               </tr>
             );
           })}

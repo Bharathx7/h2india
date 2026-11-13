@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { AttributeDef } from "../catalogue/attributes";
 import {
+  activeFilters,
   canShowPrice,
   cardChips,
+  defaultViewFor,
   formatValue,
   leadTimeLabel,
   listingSearch,
@@ -85,6 +87,19 @@ describe("listing address", () => {
   it("falls back to safe defaults", () => {
     const q = parseListing({ sort: "price", per: "1000", page: "-3", lead: "99" }, DEFS);
     expect(q).toMatchObject({ sort: "relevance", perPage: 24, page: 1, leadWeeks: null });
+  });
+});
+
+describe("default view and filter removal", () => {
+  it("opens Systems and Components as a table, keeps the address short, and names each filter to remove", () => {
+    const q = parseListing({ verified: "1", "min.rated_power": "500" }, DEFS, { defaultView: "table" });
+    expect(q.view).toBe("table");
+    expect(listingSearch(q)).not.toContain("view=");
+    expect(listingSearch(q, { view: "grid" })).toContain("view=grid");
+    expect(defaultViewFor("systems")).toBe("table");
+    expect(defaultViewFor("services")).toBe("grid");
+    expect(activeFilters(q, DEFS).map((f) => f.label)).toEqual(["Rated power at least 500 kW", "Verified only"]);
+    expect(activeFilters(q, DEFS)[1]?.without).toEqual({ verified: false });
   });
 });
 

@@ -67,6 +67,8 @@ export interface ListingQuery {
   leadWeeks: number | null;
   sort: Sort;
   view: "grid" | "table";
+  /** The view this category opens in: table on desktop for Systems and Components (Doc 1 §9.2), grid otherwise. */
+  defaultView: "grid" | "table";
   page: number;
   perPage: number;
 }
@@ -86,7 +88,12 @@ const num = (v: string) => {
  *   ?sub=pem&a.lubrication=Oil-free&min.flow_rate=100&max.flow_rate=500&cert=ISO 22734&verified=1&india=1
  *   &state=Maharashtra&lead=12&sort=lead-time&view=table&page=2&per=48
  */
-export function parseListing(params: Params, defs: readonly AttributeDef[]): ListingQuery {
+export function parseListing(
+  params: Params,
+  defs: readonly AttributeDef[],
+  opts: { defaultView?: "grid" | "table" } = {},
+): ListingQuery {
+  const defaultView = opts.defaultView ?? "grid";
   const choices: ListingQuery["choices"] = {};
   const ranges: ListingQuery["ranges"] = {};
   for (const d of defs) {
@@ -115,7 +122,8 @@ export function parseListing(params: Params, defs: readonly AttributeDef[]): Lis
     state: one(params.state).slice(0, 60),
     leadWeeks: lead ? Number(lead.value) : null,
     sort,
-    view: one(params.view) === "table" ? "table" : "grid",
+    view: one(params.view) === "table" ? "table" : one(params.view) === "grid" ? "grid" : defaultView,
+    defaultView,
     page: Math.max(1, Math.min(500, Math.floor(Number(one(params.page)) || 1))),
     perPage: (PER_PAGE as readonly number[]).includes(per) ? per : PER_PAGE[0],
   };
@@ -137,11 +145,55 @@ export function listingSearch(q: ListingQuery, change: Partial<ListingQuery> = {
   if (next.state) out.append("state", next.state);
   if (next.leadWeeks !== null) out.append("lead", String(next.leadWeeks));
   if (next.sort !== "relevance") out.append("sort", next.sort);
-  if (next.view !== "grid") out.append("view", next.view);
+  if (next.view !== next.defaultView) out.append("view", next.view);
   if (next.perPage !== PER_PAGE[0]) out.append("per", String(next.perPage));
   if (next.page > 1) out.append("page", String(next.page));
   const s = out.toString();
   return s ? `?${s}` : "";
+}
+
+/** Doc 1 §9.2: Systems and Components open as a table on desktop; phones always get the list. */
+export const defaultViewFor = (classId: string): "grid" | "table" =>
+  classId === "systems" || classId === "components" ? "table" : "grid";
+
+export interface ActiveFilter {
+  label: string;
+  /** The query change that removes just this filter. */
+  without: Partial<ListingQuery>;
+}
+
+/** Every filter in use, each with the change that drops it: for "Remove … to see N products" (no results, Doc 1). */
+export function activeFilters(
+  q: ListingQuery,
+  defs: readonly Pick<AttributeDef, "key" | "label" | "unit">[],
+  subLabels: Record<string, string> = {},
+): ActiveFilter[] {
+  const label = (key: string) => defs.find((d) => d.key === key)?.label ?? key;
+  const out: ActiveFilter[] = [];
+  for (const s of q.sub) out.push({ label: subLabels[s] ?? s, without: { sub: q.sub.filter((x) => x !== s) } });
+  for (const [key, values] of Object.entries(q.choices)) {
+    const rest = Object.fromEntries(Object.entries(q.choices).filter(([k]) => k !== key));
+    out.push({ label: `${label(key)}: ${values.join(", ")}`, without: { choices: rest } });
+  }
+  for (const [key, r] of Object.entries(q.ranges)) {
+    const unit = defs.find((d) => d.key === key)?.unit;
+    const range =
+      r.min !== undefined && r.max !== undefined
+        ? `${formatNumber(r.min)}–${formatNumber(r.max)}`
+        : r.min !== undefined
+          ? `at least ${formatNumber(r.min)}`
+          : `up to ${formatNumber(r.max ?? 0)}`;
+    const rest = Object.fromEntries(Object.entries(q.ranges).filter(([k]) => k !== key));
+    out.push({ label: `${label(key)} ${range}${unit ? ` ${unit}` : ""}`, without: { ranges: rest } });
+  }
+  for (const c of q.certifications)
+    out.push({ label: c, without: { certifications: q.certifications.filter((x) => x !== c) } });
+  if (q.verified) out.push({ label: "Verified only", without: { verified: false } });
+  if (q.madeInIndia) out.push({ label: "Made in India", without: { madeInIndia: false } });
+  if (q.state) out.push({ label: q.state, without: { state: "" } });
+  if (q.leadWeeks !== null)
+    out.push({ label: `Lead time up to ${String(q.leadWeeks)} weeks`, without: { leadWeeks: null } });
+  return out;
 }
 
 export const hasFilters = (q: ListingQuery) =>
