@@ -9,12 +9,15 @@ import { glossaryTerms } from "@/cms/knowledge/library";
 import { allChapters, getChapter } from "@/knowledge/data";
 import { Quiz } from "@/knowledge/Quiz";
 import { Crumbs, wrap } from "@/opportunities/parts";
-import { siteViewer } from "@/server/site";
+import { getSession } from "@/server/auth";
+import { ChapterTracker } from "@/knowledge/ChapterTracker";
+import { getDb } from "@h2india/core";
+import { learningProgress } from "@h2india/core/members";
 import type { Glossary } from "@/payload-types";
 
 // A Hydrogen 101 chapter (471:1876; phones 473:3145, step 5.6): the course outline, the chapter, its key terms, the
-// quiz and previous and next. Progress ("2 of 10 chapters done", Mark chapter as done) is saved with member accounts
-// in step 7.5 (A74); until then signed-out readers are invited to sign in to keep it.
+// quiz and previous and next. A signed-in member's progress is saved (step 7.5): "4 of 10 chapters done", ticks in
+// the outline, Mark chapter as done; signed-out readers are invited to sign in to keep it.
 
 type Params = Promise<{ slug: string }>;
 
@@ -31,8 +34,16 @@ export const dynamic = "force-dynamic";
 
 export default async function ChapterPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const [chapter, chapters, viewer] = await Promise.all([getChapter(slug), allChapters(), siteViewer()]);
+  const [chapter, chapters, session] = await Promise.all([
+    getChapter(slug),
+    allChapters(),
+    getSession().catch(() => null),
+  ]);
   if (!chapter) notFound();
+  const viewer = Boolean(session);
+  const progress = session ? await learningProgress(getDb(), session.user.id) : [];
+  const doneIds = new Set(progress.filter((p) => p.status === "done").map((p) => p.chapterId));
+  const doneCount = chapters.filter((c) => doneIds.has(String(c.id))).length;
   const glossary = await glossaryTerms(await getPayload({ config }));
   const at = chapters.findIndex((c) => c.id === chapter.id);
   const previous = at > 0 ? chapters[at - 1] : undefined;
@@ -63,7 +74,26 @@ export default async function ChapterPage({ params }: { params: Params }) {
           className="rounded-card border border-default p-4 lg:sticky lg:top-24 lg:w-64 lg:shrink-0"
         >
           <p className="type-h4 text-primary">Hydrogen 101</p>
-          {viewer ? null : (
+          {viewer ? (
+            <div className="flex flex-col gap-1.5 pt-2">
+              <div
+                role="progressbar"
+                aria-label="Chapters done"
+                aria-valuemin={0}
+                aria-valuemax={chapters.length}
+                aria-valuenow={doneCount}
+                className="h-1.5 overflow-hidden rounded-pill bg-subtle"
+              >
+                <div
+                  className="h-full rounded-pill bg-accent"
+                  style={{ width: `${String(chapters.length ? (doneCount / chapters.length) * 100 : 0)}%` }}
+                />
+              </div>
+              <p className="type-caption text-secondary">
+                {doneCount} of {chapters.length} chapters done
+              </p>
+            </div>
+          ) : (
             <p className="pt-1 type-caption text-secondary">
               <Link href={`/sign-in?next=/knowledge/hydrogen-101/${chapter.slug}`} className="text-link underline">
                 Sign in
@@ -84,7 +114,14 @@ export default async function ChapterPage({ params }: { params: Params }) {
                       on ? "bg-mint type-label text-primary" : "text-body hover:bg-subtle",
                     )}
                   >
-                    <span className="w-5 shrink-0 type-spec text-secondary">{String(c.order).padStart(2, "0")}</span>
+                    {doneIds.has(String(c.id)) ? (
+                      <span className="flex w-5 shrink-0 text-success">
+                        <Icon name="check-circle" size={16} />
+                        <span className="sr-only">Done: </span>
+                      </span>
+                    ) : (
+                      <span className="w-5 shrink-0 type-spec text-secondary">{String(c.order).padStart(2, "0")}</span>
+                    )}
                     {c.title.split(":")[0]}
                   </Link>
                 </li>
@@ -131,7 +168,8 @@ export default async function ChapterPage({ params }: { params: Params }) {
               </ul>
             </section>
           ) : null}
-          {quiz.length ? <Quiz questions={quiz} /> : null}
+          {quiz.length ? <Quiz questions={quiz} chapter={viewer ? chapter.slug : undefined} /> : null}
+          {viewer ? <ChapterTracker slug={chapter.slug} done={doneIds.has(String(chapter.id))} /> : null}
           <nav aria-label="Previous and next chapter" className="grid gap-3 sm:grid-cols-2">
             {previous ? (
               <Link

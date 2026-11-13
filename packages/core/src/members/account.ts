@@ -127,23 +127,26 @@ export async function exportMemberData(db: Executor, userId: string) {
     .from(u)
     .where(eq(u.id, userId));
   if (!person) throw new Error("No such account");
-  const [profile, follows, saved, alerts, registrations, newsletter, choices, settings] = await Promise.all([
-    db.select().from(mp).where(eq(mp.userId, userId)),
-    db.select().from(schema.follows).where(eq(schema.follows.userId, userId)),
-    db.select().from(schema.savedItems).where(eq(schema.savedItems.userId, userId)),
-    db.select().from(schema.alerts).where(eq(schema.alerts.userId, userId)).orderBy(desc(schema.alerts.createdAt)),
-    db.select().from(schema.webinarRegistrations).where(eq(schema.webinarRegistrations.userId, userId)),
-    db
-      .select({
-        email: schema.newsletterSubscribers.email,
-        status: schema.newsletterSubscribers.status,
-        topics: schema.newsletterSubscribers.topics,
-      })
-      .from(schema.newsletterSubscribers)
-      .where(eq(schema.newsletterSubscribers.email, person.email.toLowerCase())),
-    getChoices(db, userId),
-    getNotifySettings(db, userId),
-  ]);
+  const [profile, follows, saved, alerts, registrations, newsletter, choices, settings, learning, applications] =
+    await Promise.all([
+      db.select().from(mp).where(eq(mp.userId, userId)),
+      db.select().from(schema.follows).where(eq(schema.follows.userId, userId)),
+      db.select().from(schema.savedItems).where(eq(schema.savedItems.userId, userId)),
+      db.select().from(schema.alerts).where(eq(schema.alerts.userId, userId)).orderBy(desc(schema.alerts.createdAt)),
+      db.select().from(schema.webinarRegistrations).where(eq(schema.webinarRegistrations.userId, userId)),
+      db
+        .select({
+          email: schema.newsletterSubscribers.email,
+          status: schema.newsletterSubscribers.status,
+          topics: schema.newsletterSubscribers.topics,
+        })
+        .from(schema.newsletterSubscribers)
+        .where(eq(schema.newsletterSubscribers.email, person.email.toLowerCase())),
+      getChoices(db, userId),
+      getNotifySettings(db, userId),
+      db.select().from(schema.learningProgress).where(eq(schema.learningProgress.userId, userId)),
+      db.select().from(schema.jobApplications).where(eq(schema.jobApplications.userId, userId)),
+    ]);
   const p = profile[0];
   return {
     exportedAt: new Date().toISOString(),
@@ -180,6 +183,18 @@ export async function exportMemberData(db: Executor, userId: string) {
       cancelled: r.cancelledAt?.toISOString() ?? null,
     })),
     newsletter,
+    hydrogen101: learning.map((l) => ({
+      chapter: l.chapterId,
+      status: l.status,
+      seconds: l.secondsSpent,
+      quiz: l.quiz,
+    })),
+    jobApplications: applications.map((j) => ({
+      job: j.role,
+      company: j.company,
+      status: j.status,
+      applied: j.appliedAt.toISOString(),
+    })),
     notificationChoices: choices,
     quietHours: settings,
   };
@@ -199,6 +214,8 @@ export function exportCsv(data: MemberExport): string {
   for (const a of data.alerts) add("alerts", a.name, a);
   for (const r of data.eventRegistrations) add("event registrations", r.event, r);
   for (const n of data.newsletter) add("newsletter", n.email, n);
+  for (const l of data.hydrogen101) add("hydrogen 101", l.chapter, l);
+  for (const j of data.jobApplications) add("job applications", j.job, j);
   add("notification choices", "", data.notificationChoices);
   add("quiet hours", "", data.quietHours);
   const cell = (v: string) =>

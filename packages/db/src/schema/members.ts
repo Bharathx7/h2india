@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, jsonb, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { id, utc } from "../columns";
 import { users } from "./auth";
 import { core } from "./core";
@@ -157,4 +157,60 @@ export const savedItems = core.table(
     uniqueIndex("saved_items_one").on(t.userId, t.targetType, t.targetId),
     index("saved_items_owner").on(t.userId, t.createdAt),
   ],
+);
+
+/**
+ * Hydrogen 101 progress (step 7.5; 725:8, signed-in chapter 471:1876): one row per member and chapter. A chapter is
+ * done when the member reaches its end or marks it done. Time is counted while the page is visible; the quiz keeps
+ * the first answer to each question (question number → right or wrong).
+ */
+export const learningProgress = core.table(
+  "learning_progress",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    /** The chapter's CMS id. */
+    chapterId: text("chapter_id").notNull(),
+    /** in_progress, done */
+    status: text("status").notNull().default("in_progress"),
+    secondsSpent: integer("seconds_spent").notNull().default(0),
+    quiz: jsonb("quiz").$type<Record<string, boolean>>().notNull().default({}),
+    startedAt: utc("started_at")
+      .notNull()
+      .default(sql`now()`),
+    lastSeenAt: utc("last_seen_at")
+      .notNull()
+      .default(sql`now()`),
+    doneAt: utc("done_at"),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.chapterId] })],
+);
+
+/**
+ * Job applications (step 7.5; 725:1038). Applications happen on the employer's site (A70), so a row is the member's
+ * click on Apply, with a status only the member sets and only the member sees. Nothing here goes to an employer.
+ */
+export const jobApplications = core.table(
+  "job_applications",
+  {
+    id: id(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    jobSlug: text("job_slug").notNull(),
+    role: text("role").notNull(),
+    company: text("company").notNull(),
+    location: text("location").notNull().default(""),
+    closesAt: utc("closes_at"),
+    /** Applied, Interviewing, Closed (725:1038) */
+    status: text("status").notNull().default("Applied"),
+    appliedAt: utc("applied_at")
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: utc("updated_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [uniqueIndex("job_applications_once").on(t.userId, t.jobSlug), index("job_applications_owner").on(t.userId)],
 );

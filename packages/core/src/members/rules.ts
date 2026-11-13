@@ -238,3 +238,6 @@ export function graduationYears(now: Date = new Date()): number[] {
   const y = now.getFullYear();
   return Array.from({ length: 7 }, (_, i) => y + i);
 }
+
+/** "Your status" on Job applications (725:1038): the member's own note on a job they applied for (A154). */
+export const APPLICATION_STATUSES = ["Applied", "Interviewing", "Closed"] as const;

@@ -6,3 +6,4 @@ export * from "./saved";
 export * from "./account";
 export * from "./directory";
 export * from "./preferences";
+export * from "./learning";

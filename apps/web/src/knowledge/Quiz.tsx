@@ -1,10 +1,11 @@
 "use client";
 
 import { Button, cx, Radio, RadioGroup } from "@h2india/ui";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { quizAnswerAction } from "@/member/learning-actions";
 
-// "Check your understanding" (471:1876): one question at a time, checked in the browser. Saving progress comes with
-// member accounts (step 7.5).
+// "Check your understanding" (471:1876): one question at a time, checked in the browser. For a signed-in member the
+// first answer to each question counts towards their quiz score (step 7.5).
 
 export interface QuizQuestion {
   question: string;
@@ -14,7 +15,14 @@ export interface QuizQuestion {
   explanation?: string | null;
 }
 
-export function Quiz({ questions }: { questions: QuizQuestion[] }) {
+export function Quiz({
+  questions,
+  chapter,
+}: {
+  questions: QuizQuestion[];
+  /** Set for a signed-in member. */ chapter?: string;
+}) {
+  const answered = useRef(new Set<number>());
   const [index, setIndex] = useState(0);
   const [choice, setChoice] = useState("");
   const [checked, setChecked] = useState(false);
@@ -64,6 +72,10 @@ export function Quiz({ questions }: { questions: QuizQuestion[] }) {
             disabled={!choice}
             onClick={() => {
               setChecked(true);
+              if (chapter && !answered.current.has(index)) {
+                answered.current.add(index);
+                void quizAnswerAction(chapter, index, Number(choice) === q.answer);
+              }
             }}
           >
             Check answer

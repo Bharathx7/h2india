@@ -232,6 +232,13 @@
       "when": 1794559238065,
       "tag": "0032_alerts_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794561159943,
+      "tag": "0033_learning_and_job_applications",
+      "breakpoints": true
     }
   ]
 }

@@ -192,7 +192,7 @@ export function JobPage({
                   <span className={cx(buttonClasses({ variant: "primary" }), "w-full")}>Apply on company site ↗</span>
                 ) : (
                   <a
-                    href={j.sourceUrl}
+                    href={`/opportunities/jobs/${j.slug}/apply`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={cx(buttonClasses({ variant: "primary" }), "w-full")}

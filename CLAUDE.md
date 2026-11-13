@@ -232,6 +232,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Every alert email carries Turn off this alert (`alertOffUrl()`) and the one-click header; the page lives outside the Coming soon gate. Queue a search refresh that isn't a person's change with `queueIndexChange(…, { alerts: false })`.
 - "Days left" is `daysLeft()` from `@h2india/core/time` (re-exported by `opportunities/views.ts`).
 - A member's profile saves only through `saveProfile()`; the people directory shows members only from `listedMembers()` (opted in, signed-in visitors only, M24). Preferences go through `saveMemberPreferences()` and are the choices `notify()` reads. Download my data is `exportMemberData()`: add every new member-owned table to it.
+- Hydrogen 101 progress is written only by `ChapterTracker`/`Quiz` through `learning-actions.ts` (chapters checked against the CMS). Job Apply links go through `/opportunities/jobs/<slug>/apply`, which records the click for a signed-in member (A70); nothing goes to the employer.
 
 ## Server and deploys (step 1.7)
 
