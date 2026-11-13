@@ -144,6 +144,13 @@ export default async function SupplierRfqPage({
               </div>
             ) : null}
           </dl>
+          <Link
+            href={`/supplier/messages?rfq=${d.rfq.id}`}
+            className={buttonClasses({ variant: "outline", size: "sm" }) + " self-start"}
+          >
+            <Icon name="message-square" size={14} />
+            Message the buyer
+          </Link>
         </section>
         <section className="flex flex-col gap-4 self-start rounded-card border border-default bg-page p-5">
           {building ? (

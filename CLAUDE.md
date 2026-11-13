@@ -262,6 +262,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Supplier RFQ pages read `supplierRfqs()`/`supplierRfq()` and save quotes only through `apps/web/src/supplier/rfq/actions.ts` (company from `supplierActor()`). Never show a commission, TCS or TDS figure until C1 and C3 are decided.
 - RFQ files are `quote_attachment` with `sharedOnRfq`: suppliers an RFQ was sent to may open its attachments, and the buyer may open a sent quote's documents (`onSharedRfq()` in `files.ts`).
 - The buyer comparison reads each supplier's latest sent version with `quoteVersion()` and highlights only through `compareQuotes()`; buyer RFQ actions go through `apps/web/src/buyer/rfq-actions.ts` and tell suppliers with `tellSuppliers()`.
+- Messages go only through `@h2india/core/messages` (`rfqThread()`, `postMessage()`, `threadMessages()`); a thread exists only for its two companies (`sideIn()`). Message files use `sharedOnRfq` like RFQ files. No email for new messages until M21.
 - RFQ moderation is `approveRfq()`/`returnRfq()`/`rejectRfq()` (queues.edit); notices go through `rfq/notices.ts` only after the status change succeeds, so each supplier is told once.
 - In a single-table Drizzle select, `${table.column}` inside a raw `sql` subquery is printed unqualified and binds to the subquery's own table. Write the outer column out (`core.rfqs.id`) or join so Drizzle qualifies it.
 - The offer deadline and quote validity are `CHOSEN_DEADLINES` started with `startDeadline()` at the chosen time; moving one cancels and starts it again.

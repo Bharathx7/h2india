@@ -19,3 +19,4 @@ export * from "./members";
 export * from "./supplier";
 export * from "./buyer";
 export * from "./rfq";
+export * from "./messages";

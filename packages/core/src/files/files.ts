@@ -194,7 +194,20 @@ async function onSharedRfq(file: FileRow, actor: Actor): Promise<boolean> {
       ),
     )
     .limit(1);
-  return Boolean(asBuyer);
+  if (asBuyer) return true;
+  // A file sent in a message: both companies in the thread may open it (step 9.7).
+  const [inThread] = await db
+    .select({ id: schema.messages.id })
+    .from(schema.messages)
+    .innerJoin(schema.messageThreads, eq(schema.messageThreads.id, schema.messages.threadId))
+    .where(
+      and(
+        sql`${file.id}::uuid = any(${schema.messages.attachments})`,
+        sql`(${inArray(schema.messageThreads.buyerOrganisationId, companies)} or ${inArray(schema.messageThreads.supplierOrganisationId, companies)})`,
+      ),
+    )
+    .limit(1);
+  return Boolean(inThread);
 }
 
 async function load(id: string): Promise<FileRow> {

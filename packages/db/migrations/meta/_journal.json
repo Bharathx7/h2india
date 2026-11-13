@@ -316,6 +316,13 @@
       "when": 1794570084783,
       "tag": "0044_rfq_moderator",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1794571495248,
+      "tag": "0045_messages",
+      "breakpoints": true
     }
   ]
 }
