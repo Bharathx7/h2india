@@ -118,6 +118,12 @@ export function SignInFlow({ next, initialError }: { next: string; initialError?
   };
 
   const sendProblem = (detail: SignInErrorDetail): Problem => {
+    if (detail.code === SIGN_IN_ERROR.suspended) {
+      return {
+        title: "This account is suspended",
+        body: "To appeal, reply to the email we sent you or write to the grievance officer.",
+      };
+    }
     if (detail.code === SIGN_IN_ERROR.resendTooSoon) {
       return {
         title: "Please wait before asking again",

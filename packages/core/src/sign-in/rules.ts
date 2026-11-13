@@ -18,6 +18,7 @@ export const SIGN_IN_ERROR = {
   paused: "SIGN_IN_PAUSED",
   tooManyCodes: "TOO_MANY_CODES",
   resendTooSoon: "RESEND_TOO_SOON",
+  suspended: "ACCOUNT_SUSPENDED",
 } as const;
 
 export function normaliseEmail(email: string): string {

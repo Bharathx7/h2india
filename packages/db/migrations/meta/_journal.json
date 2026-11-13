@@ -337,6 +337,13 @@
       "when": 1794574797160,
       "tag": "0047_newsletter_sends",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794575545670,
+      "tag": "0048_users_suspend_view_as",
+      "breakpoints": true
     }
   ]
 }

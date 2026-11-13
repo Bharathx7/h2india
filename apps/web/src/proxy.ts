@@ -11,9 +11,19 @@ const signedIn = (request: NextRequest) => request.cookies.getAll().some((c) => 
 
 const MAINTENANCE_OPEN = ["/maintenance", "/admin", "/cms", "/api", "/sign-in", "/sign-out", "/newsletter", "/_next"];
 
+/** Requests that may change something. While viewing as someone (step 11.4) every one of them is refused here. */
+const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
 export function proxy(request: NextRequest) {
   // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.
   const { pathname } = request.nextUrl;
+  // View as user (657:486) is read-only: no form, server action or API call can write. Only ending it is allowed.
+  if (request.cookies.has("h2_view_as") && WRITES.has(request.method) && pathname !== "/api/view-as/end") {
+    return NextResponse.json(
+      { error: "You're viewing as someone, read-only. End it to make changes." },
+      { status: 403 },
+    );
+  }
   if (pathname === "/cms/logout") return NextResponse.redirect(new URL("/sign-out", request.url));
   if (pathname.startsWith("/cms") && !signedIn(request)) {
     return NextResponse.redirect(new URL("/sign-in?next=/cms", request.url));

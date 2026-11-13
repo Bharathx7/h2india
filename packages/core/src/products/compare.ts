@@ -3,6 +3,7 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { effectiveSchema } from "../catalogue/taxonomy";
 import { productHref } from "./listing";
 import { COMPARE_LIMIT, formatValue, leadTimeLabel } from "./rules";
+import { supplierNotSuspended } from "./suspension";
 
 // Compare (step 6.5; 91:9, phones 98:3084): up to COMPARE_LIMIT live products of one category side by side. Rows are
 // the category's comparable attributes by display group, then Supply (lead time, certificates, how to buy, ships from).
@@ -68,7 +69,9 @@ export async function compareProducts(
     .innerJoin(schema.catalogueClasses, eq(schema.catalogueClasses.id, cat.classId))
     .innerJoin(schema.organisations, eq(schema.organisations.id, p.organisationId))
     .innerJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, p.organisationId))
-    .where(and(inArray(p.id, wanted), eq(p.status, "Live"), isNull(p.deletedAt)));
+    .where(
+      and(inArray(p.id, wanted), eq(p.status, "Live"), isNull(p.deletedAt), supplierNotSuspended(p.organisationId)),
+    );
   const live = rows.filter((r) => opts.includeSample || !r.p.sample);
   if (!live.length) return { kind: "empty" };
   // Compare within one category: a sub-category counts as its parent category.

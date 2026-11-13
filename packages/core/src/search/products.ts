@@ -2,6 +2,7 @@ import { schema, type Executor } from "@h2india/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { productDocument, type SearchDocument } from "./documents";
 import { queueIndexChange } from "./outbox";
+import { supplierNotSuspended } from "../products/suspension";
 
 // Product search documents (A142, Doc 2 AC-SR-2): live products in visible categories. Built only through
 // productDocument(), which keeps the allowed fields and throws on anything price-like, so search never holds a price.
@@ -31,6 +32,7 @@ export async function productSearchDocuments(
     .where(
       and(
         eq(p.status, "Live"),
+        supplierNotSuspended(p.organisationId),
         isNull(p.deletedAt),
         isNull(cat.deletedAt),
         isNull(cat.hiddenAt),

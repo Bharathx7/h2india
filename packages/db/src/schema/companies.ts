@@ -20,6 +20,9 @@ export const organisations = core.table(
     registeredAddress: text("registered_address"),
     /** Verified · Unverified · Pending (a GSTIN check is still running) */
     verification: text("verification").notNull().default("Unverified"),
+    /** Suspended by an operator (step 11.4, G10): its listings leave the marketplace and search until lifted. */
+    suspendedAt: utc("suspended_at"),
+    suspendReason: text("suspend_reason"),
     createdBy: uuid("created_by").references(() => users.id),
     ...timestamps,
     ...softDelete,

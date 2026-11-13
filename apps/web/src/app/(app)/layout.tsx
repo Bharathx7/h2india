@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { fontVariables } from "./fonts";
 import "./globals.css";
+import { ViewAsBanner } from "@/components/ViewAsBanner";
 import { indexable, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/seo/site";
 
 // Defaults for every page (step 5.10): the canonical base, Open Graph and Twitter cards (the image is
@@ -23,7 +24,10 @@ export function generateMetadata(): Metadata {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-IN" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        <ViewAsBanner />
+        {children}
+      </body>
     </html>
   );
 }

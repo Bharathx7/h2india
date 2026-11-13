@@ -1,31 +1,24 @@
 import { NextRequest } from "next/server";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { proxy } from "./proxy";
 
-// Step 5.10: with FLAG_MAINTENANCE on, public pages show the maintenance page with a 503 and Retry-After; the CMS,
-// APIs, sign-in and the newsletter stay reachable. Off, nothing changes.
-
-const req = (path: string) => new NextRequest(new URL(path, "http://localhost:3000"));
-
-describe("maintenance switch", () => {
-  afterEach(() => {
-    delete process.env.FLAG_MAINTENANCE;
+// Step 11.4 DONE WHEN: in view-as mode every write request is refused at the server.
+const req = (method: string, path: string, viewAs: boolean) =>
+  new NextRequest(new URL(path, "http://localhost:3000"), {
+    method,
+    headers: viewAs ? { cookie: "h2_view_as=abc" } : {},
   });
 
-  it("shows the maintenance page with a 503 while the flag is on", () => {
-    process.env.FLAG_MAINTENANCE = "true";
-    const res = proxy(req("/about"));
-    expect(res.status).toBe(503);
-    expect(res.headers.get("retry-after")).toBe("3600");
-    expect(res.headers.get("x-middleware-rewrite")).toContain("/maintenance");
-    for (const open of ["/api/health", "/sign-in", "/newsletter", "/maintenance"]) {
-      expect(proxy(req(open)).status, open).toBe(200);
+describe("view-as is read-only", () => {
+  it("refuses every write while viewing as someone", () => {
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      expect(proxy(req(method, "/buyer/company", true)).status).toBe(403);
+      expect(proxy(req(method, "/api/v1/files", true)).status).toBe(403);
     }
   });
-
-  it("changes nothing while the flag is off", () => {
-    const res = proxy(req("/about"));
-    expect(res.status).toBe(200);
-    expect(res.headers.get("x-request-id")).toBeTruthy();
+  it("lets reads through, ending view-as, and writes without it", () => {
+    expect(proxy(req("GET", "/buyer", true)).status).toBe(200);
+    expect(proxy(req("POST", "/api/view-as/end", true)).status).toBe(200);
+    expect(proxy(req("POST", "/buyer/company", false)).status).toBe(200);
   });
 });

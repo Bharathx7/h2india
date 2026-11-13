@@ -167,7 +167,14 @@ export async function productDetail(
     db
       .select({ id: p.id })
       .from(p)
-      .where(and(eq(p.organisationId, row.p.organisationId), eq(p.status, "Live"), isNull(p.deletedAt))),
+      .where(
+        and(
+          eq(p.organisationId, row.p.organisationId),
+          eq(p.status, "Live"),
+          isNull(p.deletedAt),
+          supplierNotSuspended(p.organisationId),
+        ),
+      ),
   ]);
 
   const fixed = row.p.pricing === "fixed";
@@ -267,7 +274,15 @@ export async function similarProducts(
     .from(p)
     .innerJoin(schema.organisations, eq(schema.organisations.id, p.organisationId))
     .innerJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, p.organisationId))
-    .where(and(eq(p.categoryId, categoryId), eq(p.status, "Live"), isNull(p.deletedAt), ne(p.id, product.id)))
+    .where(
+      and(
+        eq(p.categoryId, categoryId),
+        eq(p.status, "Live"),
+        isNull(p.deletedAt),
+        supplierNotSuspended(p.organisationId),
+        ne(p.id, product.id),
+      ),
+    )
     .limit(limit * 3);
   return rows
     .filter((r) => opts.includeSample || !r.p.sample)
@@ -287,6 +302,7 @@ export async function similarProducts(
 
 export { QUESTION_MAX, REPORT_PROBLEMS } from "./rules-client";
 import { QUESTION_MAX, REPORT_PROBLEMS } from "./rules-client";
+import { supplierNotSuspended } from "./suspension";
 
 type Result = { ok: true } | { ok: false; errors: Record<string, string> };
 
@@ -295,7 +311,7 @@ async function liveProduct(db: Executor, slug: string) {
   const [row] = await db
     .select({ id: p.id, organisationId: p.organisationId })
     .from(p)
-    .where(and(eq(p.slug, slug), eq(p.status, "Live"), isNull(p.deletedAt)))
+    .where(and(eq(p.slug, slug), eq(p.status, "Live"), isNull(p.deletedAt), supplierNotSuspended(p.organisationId)))
     .limit(1);
   return row ?? null;
 }
@@ -394,7 +410,14 @@ export async function storefrontProducts(db: Executor, organisationId: string, o
     .from(p)
     .innerJoin(cat, eq(cat.id, p.categoryId))
     .innerJoin(schema.catalogueClasses, eq(schema.catalogueClasses.id, cat.classId))
-    .where(and(eq(p.organisationId, organisationId), eq(p.status, "Live"), isNull(p.deletedAt)));
+    .where(
+      and(
+        eq(p.organisationId, organisationId),
+        eq(p.status, "Live"),
+        isNull(p.deletedAt),
+        supplierNotSuspended(p.organisationId),
+      ),
+    );
   const out = [];
   for (const r of rows.filter((x) => opts.includeSample || !x.p.sample)) {
     const defs = await effectiveSchema(db, r.cat.id, opts);

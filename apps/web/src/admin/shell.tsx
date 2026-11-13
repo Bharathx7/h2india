@@ -9,14 +9,15 @@ import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
-import { getSession } from "@/server/auth";
+import { operatorSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
 // so its existence isn't revealed.
 
 export async function requireOperator(permission: Permission, path: string): Promise<{ userId: string; actor: Actor }> {
-  const session = await getSession();
+  // The operator's own session: admin screens never take on a viewed person (step 11.4).
+  const session = await operatorSession();
   if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
   const actor = await loadActor(getDb(), session.user.id);
   if (!can(actor, permission)) notFound();

@@ -2,6 +2,7 @@ import { schema, type Executor } from "@h2india/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { AttributeDef } from "../catalogue/attributes";
 import { cardChips, formatValue, leadTimeLabel, type ListingQuery } from "./rules";
+import { supplierNotSuspended } from "./suspension";
 
 // Category listings (step 6.3, 392:4896, 392:5787). Live products of a category (and its sub-categories), filtered
 // by the URL query, with a count beside every filter value. The database is the truth: filters and counts are worked
@@ -92,7 +93,14 @@ async function liveRows(db: Executor, scope: ListingScope): Promise<Row[]> {
     .from(p)
     .innerJoin(org, eq(org.id, p.organisationId))
     .innerJoin(cp, eq(cp.organisationId, p.organisationId))
-    .where(and(inArray(p.categoryId, ids), eq(p.status, "Live"), isNull(p.deletedAt)));
+    .where(
+      and(
+        inArray(p.categoryId, ids),
+        eq(p.status, "Live"),
+        isNull(p.deletedAt),
+        supplierNotSuspended(p.organisationId),
+      ),
+    );
   return rows
     .filter((r) => scope.includeSample || !r.sample)
     .map((r) => ({
