@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=../../.env.local src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --packages=external --alias:@h2india/core=../../packages/core/src --alias:@h2india/config=../../packages/config/src --alias:@h2india/db=../../packages/db/src/index.ts --alias:@h2india/emails=../../packages/emails/src",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --packages=external --alias:@h2india/core=../../packages/core/src --alias:@h2india/config=../../packages/config/src --alias:@h2india/db=../../packages/db/src/index.ts --alias:@h2india/emails=../../packages/emails/src --alias:@h2india/ui=../../packages/ui/src",
     "start": "node --env-file-if-exists=../../.env.local dist/index.js",
     "typecheck": "tsc -p tsconfig.json"
   },
@@ -14,10 +14,13 @@
     "@aws-sdk/s3-request-presigner": "3.1166.0",
     "@h2india/config": "workspace:*",
     "@h2india/core": "workspace:*",
+    "@react-email/components": "1.0.12",
     "bullmq": "6.7.4",
     "drizzle-orm": "0.45.4",
+    "meilisearch": "0.63.0",
     "nodemailer": "10.5.0",
     "pg": "8.23.1",
+    "react": "19.3.1",
     "sharp": "0.35.5",
     "uuidv7": "1.2.1",
     "zod": "4.6.7"
