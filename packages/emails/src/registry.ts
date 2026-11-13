@@ -334,6 +334,14 @@ export const TEMPLATES = {
     step: "3.5",
     built: true,
   },
+  "email.claim_code": {
+    channel: "email",
+    key: "claim_code",
+    name: "Claim this profile code",
+    frame: null,
+    step: "6.7",
+    built: true,
+  },
   "email.recovery_approval": {
     channel: "email",
     key: "recovery_approval",

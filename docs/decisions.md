@@ -242,6 +242,10 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | A134 | Directory filters without data | You | Step 6.6 | Value-chain stage, GST verified and Certificates checked aren't shown until profiles carry them; Follow on cards arrives with follows (7.2); "Usually replies within …" with RFQs (9) | Open | |
 | A135 | Start-up spotlight extras | You | Step 6.6 | The page lists profiles typed Start-up. The weekly featured story, the DPIIT recognised badge and the stage filter arrive when editors start the series and profiles carry the data; Apply to be featured goes to Contact | Open | |
 | A136 | Associations' article and event counts (498:8) | You | Step 6.6 | Not shown until associations are linked to articles and events | Open | |
+| A137 | Which claim methods, and who approves (step 6.7) | You | Step 6.7 | Two methods: a 6-digit code to an email on the company's own domain (from the profile's website), or GSTIN and an authorisation letter signed by a director. Every claim then waits for an operator with verification.edit; approval makes the claimant an Admin, marks the profile Claimed, closes other pending claims, and is audit-logged | Open | The design says a matching email lets the person "manage the profile straight away" (493:8); the playbook watch-out says every approval needs an operator, so the safer rule is built. |
+| A138 | The authorisation letter file | You | Step 6.7 | A new file kind, claim_letter: PDF, JPG or PNG up to 10 MB, private, sensitive; any signed-in person may upload one, only verification operators may open it | Open | |
+| A139 | Profile tabs without data (481:8, 487:3188 to 489:20429) | You | Step 6.7 | Overview shows the profile's own fields; Capabilities, locations, key customers, government programmes and the dated checks list arrive with the storefront editor (8.7) and verification (8.2). Projects and Events show their empty states until the tracker and events link to companies; Contact shows location and website to signed-in people only | Open | |
+| A140 | Where operators decide claims | You | Step 6.7 | An interim Verification page in admin lists pending claims with their evidence and Approve or Reject with a reason (not drawn, A11); the Suppliers queue (11.2) replaces it | Open | |
 
 ## Design-system notes (Stage 2)
 
@@ -298,6 +302,7 @@ Small calls made while building the design system. None changes a Figma value; e
 - 12 Nov 2026: Step 5.4 built. Added A62 to A67 (addresses, alerts, closing-soon window, applicant groups, checker rules, sample awardees), open with safe defaults; M25 still open, so no scheme has rules.
 - 13 Nov 2026: Step 5.10 built. Added A99 to A102 (indexing switch, hy-gen redirects, 500 reference, maintenance access), open with safe defaults; M14 still open.
 - 13 Nov 2026: Step 5.9 built. Added A94 to A98 (bot challenge, cookie categories and analytics, issue pages, manage link, one-click unsubscribe), open with safe defaults; M10 still open.
+- 13 Nov 2026: Step 6.7 built. Added A137 to A140, open with safe defaults.
 - 13 Nov 2026: Step 6.6 built with the M7 and M24 safe defaults. Added A132 to A136, open.
 - 13 Nov 2026: Step 6.5 built. A116 now follows the frames (5). Added A127 to A131, open with safe defaults.
 - 13 Nov 2026: Step 6.4 built. Added A120 to A126, open with safe defaults.

@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approveJoinRequest, requestToJoin } from "../companies/join-requests";
 import { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "../companies/repo";
+import { pendingClaims } from "../companies/claims";
 import { listCompanyProducts, listCompanyQuestions } from "../products/company";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
@@ -85,6 +86,11 @@ describe.skipIf(!url)("authorisation", () => {
       const b = await loadActor(h.db, data.b.admin.id);
       expect(await listCompanyQuestions(h.db, scopeFor(a), data.a.org.id)).toHaveLength(1);
       expect(await listCompanyQuestions(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+    });
+
+    it("profile claims (step 6.7): only operators see them", async () => {
+      const b = await loadActor(h.db, data.b.admin.id);
+      await expect(pendingClaims(h.db, b)).rejects.toThrow("Not allowed");
     });
 
     it("join requests", async () => {

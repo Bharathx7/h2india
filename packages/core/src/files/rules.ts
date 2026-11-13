@@ -13,6 +13,7 @@ export type UploadRule =
 export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   // A person who lost their work email is signed out (528:534). Limited per IP address instead.
   work_id: { who: "anyone" },
+  claim_letter: { who: "anyone" },
   verification_document: { who: "company", permission: ["verification.manage"] },
   quote_attachment: { who: "company", permission: ["rfq.create", "quote.send"] },
   datasheet: { who: "company", permission: ["product.manage"] },
@@ -37,6 +38,7 @@ export const READ_RULES: Record<
   }
 > = {
   work_id: { operator: "users.view" },
+  claim_letter: { operator: "verification.view" },
   verification_document: { company: "verification.manage", operator: "verification.view" },
   quote_attachment: { company: "rfq.view", operator: "queues.view" },
   datasheet: { company: "company.view", operator: "catalogue.view", listedOnLiveProduct: true },

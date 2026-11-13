@@ -374,3 +374,29 @@ export async function reportListing(
   });
   return { ok: true };
 }
+
+/** A supplier's live products as cards (the Products tab, 482:8), no price. */
+export async function storefrontProducts(db: Executor, organisationId: string, opts: { includeSample: boolean }) {
+  const p = schema.products;
+  const cat = schema.catalogueCategories;
+  const rows = await db
+    .select({ p, cat, klass: schema.catalogueClasses.label })
+    .from(p)
+    .innerJoin(cat, eq(cat.id, p.categoryId))
+    .innerJoin(schema.catalogueClasses, eq(schema.catalogueClasses.id, cat.classId))
+    .where(and(eq(p.organisationId, organisationId), eq(p.status, "Live"), isNull(p.deletedAt)));
+  const out = [];
+  for (const r of rows.filter((x) => opts.includeSample || !x.p.sample)) {
+    const defs = await effectiveSchema(db, r.cat.id, opts);
+    out.push({
+      id: r.p.id,
+      href: productHref(r.p.slug),
+      name: r.p.name,
+      eyebrow: `${r.klass} · ${r.cat.label}`,
+      chips: cardChips(defs, r.p.attributes, r.p.certifications),
+      leadTime: leadTimeLabel(r.p.leadTimeMinWeeks, r.p.leadTimeMaxWeeks),
+      certificates: r.p.certificates,
+    });
+  }
+  return out;
+}

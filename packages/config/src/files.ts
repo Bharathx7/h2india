@@ -27,6 +27,8 @@ export const FILE_KINDS = {
     sensitive: true,
   },
   work_id: { label: "Work ID", types: DOCS, maxMb: 10, visibility: "private", sensitive: true },
+  /** The authorisation letter on Claim this profile (493:784): signed by a director. Seen only by verification. */
+  claim_letter: { label: "Authorisation letter", types: DOCS, maxMb: 10, visibility: "private", sensitive: true },
   quote_attachment: { label: "Attachment", types: DOCS, maxMb: 10, visibility: "private", sensitive: false },
   datasheet: { label: "Datasheet", types: ["application/pdf"], maxMb: 20, visibility: "private", sensitive: false },
   // SVG is accepted but only a PNG made from it is kept (A21).

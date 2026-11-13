@@ -14,3 +14,4 @@ export * from "./grievances";
 export * from "./catalogue";
 export * from "./products";
 export * from "./brands";
+export * from "./claims";

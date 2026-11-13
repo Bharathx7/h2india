@@ -31,6 +31,7 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
         renderSignInCode({ appUrl, code: "482913", name: "Ravi", expiresIn: "10 minutes", expiresAt: "8:51 AM IST" }),
       );
     case "email.recovery_code":
+    case "email.claim_code":
       return email(
         renderSignInCode({
           appUrl,

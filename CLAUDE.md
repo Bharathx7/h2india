@@ -219,6 +219,11 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - People are the `people` CMS collection and are read only with `consentRecorded` (M24); never show a person's email or phone, and keep person pages out of the sitemap. Associations are the `associations` collection.
 - On pages where `?state=` is a real filter (directory, people), the designed states are forced with `?ui=` (companies accepts `?state=loading|error|empty`).
 
+## Company profiles and claims (step 6.7)
+
+- A profile is read with `companyProfile()`; its storefront with `storefrontProducts()`. Contact details only for signed-in people.
+- Claims go only through `startEmailClaim()`/`confirmEmailClaim()` (code to an email on the profile's website domain), `submitGstinClaim()`, and `decideClaim()` (verification.edit, audited). Every claim needs an operator (A137); a claimed profile offers a join request instead.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
