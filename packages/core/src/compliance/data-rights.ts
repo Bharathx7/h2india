@@ -227,6 +227,13 @@ const STEPS: Step[] = [
     where: (id) => eq(schema.jobApplications.userId, id),
   },
   {
+    table: "queue_saved_views",
+    action: "delete",
+    why: "Saved queue views (operators)",
+    target: schema.queueSavedViews,
+    where: (id) => eq(schema.queueSavedViews.userId, id),
+  },
+  {
     table: "notifications",
     action: "delete",
     why: "In-app notifications",

@@ -190,3 +190,97 @@ export async function supplierQueue(db: Executor, actor: Actor) {
     .where(eq(r.status, "Submitted"))
     .orderBy(r.submittedAt);
 }
+
+// ------------------------------------------------------------------------------------------------ field comments
+
+const fc = schema.queueFieldComments;
+const QUEUE_KEYS: readonly string[] = QUEUES.map((q) => q.key);
+
+/**
+ * A moderator's comment on one field (633:8, "added a field comment"): internal, never sent to the submitter. Only
+ * while the item is still waiting for a decision. Audit-logged.
+ */
+export async function addFieldComment(
+  db: Database,
+  actor: Actor,
+  input: { queue: QueueKey; subjectId: string; field: string; note: string },
+  context?: RequestContext,
+) {
+  assertCan(actor, "queues.edit");
+  const userId = actor.userId;
+  if (!userId) throw new QueueError("Sign in again");
+  if (!QUEUE_KEYS.includes(input.queue)) throw new QueueError("No such queue");
+  const note = input.note.trim();
+  const field = input.field.trim().slice(0, 80);
+  if (!note) throw new QueueError("Write the comment");
+  if (note.length > 500) throw new QueueError("Keep the comment under 500 characters");
+  if (!field) throw new QueueError("Choose a field");
+  const [claim] = await db
+    .select({ decidedAt: c.decidedAt })
+    .from(c)
+    .where(and(eq(c.queue, input.queue), eq(c.subjectId, input.subjectId)));
+  if (claim?.decidedAt) throw new QueueError("This item has been decided");
+  await db.transaction(async (tx) => {
+    await tx.insert(fc).values({ queue: input.queue, subjectId: input.subjectId, field, note, authorId: userId });
+    await audit(tx, {
+      actorId: userId,
+      action: "queue.field_comment",
+      resourceType: input.queue,
+      resourceId: input.subjectId,
+      after: { field, note },
+      context,
+    });
+  });
+}
+
+/** The comments on an item, oldest first, with who wrote them. */
+export async function fieldComments(db: Executor, queue: QueueKey, subjectId: string) {
+  return db
+    .select({ id: fc.id, field: fc.field, note: fc.note, at: fc.at, author: schema.users.name })
+    .from(fc)
+    .innerJoin(schema.users, eq(schema.users.id, fc.authorId))
+    .where(and(eq(fc.queue, queue), eq(fc.subjectId, subjectId)))
+    .orderBy(fc.at);
+}
+
+// ------------------------------------------------------------------------------------------------ saved views
+
+const sv = schema.queueSavedViews;
+export const SAVED_VIEWS_MAX = 10;
+
+/** Save view: the operator's own named view of a queue (the view and the search). Saving a name again replaces it. */
+export async function saveQueueView(
+  db: Database,
+  actor: Actor,
+  input: { queue: QueueKey; name: string; view: string; search: string },
+) {
+  assertCan(actor, "queues.view");
+  const userId = actor.userId;
+  if (!userId) throw new QueueError("Sign in again");
+  if (!QUEUE_KEYS.includes(input.queue)) throw new QueueError("No such queue");
+  const name = input.name.trim().slice(0, 40);
+  if (!name) throw new QueueError("Name the view");
+  const mine = await queueViews(db, userId, input.queue);
+  if (mine.length >= SAVED_VIEWS_MAX && !mine.some((v) => v.name === name))
+    throw new QueueError(`Keep up to ${String(SAVED_VIEWS_MAX)} views; delete one first`);
+  const values = { view: input.view.slice(0, 20), search: input.search.trim().slice(0, 100) };
+  await db
+    .insert(sv)
+    .values({ userId, queue: input.queue, name, ...values })
+    .onConflictDoUpdate({ target: [sv.userId, sv.queue, sv.name], set: values });
+}
+
+export async function queueViews(db: Executor, userId: string, queue: QueueKey) {
+  return db
+    .select({ id: sv.id, name: sv.name, view: sv.view, search: sv.search })
+    .from(sv)
+    .where(and(eq(sv.userId, userId), eq(sv.queue, queue)))
+    .orderBy(sv.createdAt);
+}
+
+/** Delete one of the operator's own views. */
+export async function deleteQueueView(db: Database, actor: Actor, id: string) {
+  const userId = actor.userId;
+  if (!userId) throw new QueueError("Sign in again");
+  await db.delete(sv).where(and(eq(sv.id, id), eq(sv.userId, userId)));
+}

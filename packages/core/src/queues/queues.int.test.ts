@@ -4,7 +4,16 @@ import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor, type Actor } from "../authz/actor";
 import { makeUser, useTestEnv } from "../testing/factory";
-import { claimItem, decideItem, QueueError } from "./index";
+import {
+  addFieldComment,
+  claimItem,
+  decideItem,
+  deleteQueueView,
+  fieldComments,
+  QueueError,
+  queueViews,
+  saveQueueView,
+} from "./index";
 
 // Step 11.2 DONE WHEN: two operators cannot decide the same item; every decision sends its message once (the message
 // is part of apply, which runs once, after the decision is recorded; if it fails the decision is undone).
@@ -96,5 +105,34 @@ describe.skipIf(!url)("queue claims and decisions", () => {
 
   it("refuses operators without queues.edit", async () => {
     await expect(claimItem(h.db, viewer, { queue: "events", subjectId: subject() })).rejects.toThrow();
+  });
+  it("field comments stay internal to moderators, need queues.edit, and stop once decided (633:8)", async () => {
+    const id = subject();
+    await addFieldComment(h.db, a, { queue: "content", subjectId: id, field: "Body", note: '"first" is fine' });
+    const list = await fieldComments(h.db, "content", id);
+    expect(list.map((x) => [x.field, x.note])).toEqual([["Body", '"first" is fine']]);
+    await expect(
+      addFieldComment(h.db, viewer, { queue: "content", subjectId: id, field: "Body", note: "x" }),
+    ).rejects.toThrow();
+    await expect(
+      addFieldComment(h.db, a, { queue: "content", subjectId: id, field: "Body", note: " " }),
+    ).rejects.toThrow(QueueError);
+    await decideItem(h.db, a, { queue: "content", subjectId: id, decision: "approve" }, tick);
+    await expect(
+      addFieldComment(h.db, a, { queue: "content", subjectId: id, field: "Body", note: "late" }),
+    ).rejects.toThrow("decided");
+  });
+
+  it("saved views belong to one operator; saving a name again replaces it", async () => {
+    await saveQueueView(h.db, viewer, { queue: "events", name: "Late Pune", view: "late", search: "pune" });
+    await saveQueueView(h.db, viewer, { queue: "events", name: "Late Pune", view: "late", search: "pune expo" });
+    const mine = await queueViews(h.db, viewer.userId ?? "", "events");
+    expect(mine.map((v) => [v.name, v.view, v.search])).toEqual([["Late Pune", "late", "pune expo"]]);
+    expect(await queueViews(h.db, a.userId ?? "", "events")).toEqual([]);
+    // Another operator can't delete it.
+    await deleteQueueView(h.db, a, mine[0]?.id ?? "");
+    expect((await queueViews(h.db, viewer.userId ?? "", "events")).length).toBe(1);
+    await deleteQueueView(h.db, viewer, mine[0]?.id ?? "");
+    expect(await queueViews(h.db, viewer.userId ?? "", "events")).toEqual([]);
   });
 });

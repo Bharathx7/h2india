@@ -1,12 +1,13 @@
 import { can } from "@h2india/core/authz";
-import { QUEUES } from "@h2india/core/queues";
+import { getDb } from "@h2india/core";
+import { fieldComments, QUEUES } from "@h2india/core/queues";
 import { formatIstDateTime } from "@h2india/core/time";
 import { Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { itemDetail, queueItems } from "@/admin/queues/data";
-import { Claim, Moderate } from "@/admin/queues/Moderate";
+import { Claim, FieldComment, Moderate } from "@/admin/queues/Moderate";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Moderation · Content (633:8), Event (633:567) and Job (633:1059), step 11.2: what was sent, the checks, the decision
@@ -36,11 +37,12 @@ export default async function ModerationPage({ params }: { params: Promise<{ que
   const { userId, actor } = await requireOperator("queues.view", `/admin/queues/${key}/${id}`);
   const d = await itemDetail(actor, queue.key, id);
   if (!d) notFound();
-  const all = await queueItems(actor, queue.key);
+  const [all, comments] = await Promise.all([queueItems(actor, queue.key), fieldComments(getDb(), queue.key, id)]);
   const mine = all.find((x) => x.id === id);
   const next = all.find((x) => x.id !== id)?.id ?? null;
   const failed = d.checks.filter((c) => !c.ok).length;
   const open = Boolean(mine);
+  const canEdit = can(actor, "queues.edit");
   const person = d.submitter?.name.split(/\s+/)[0] ?? "the sender";
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
@@ -88,7 +90,21 @@ export default async function ModerationPage({ params }: { params: Promise<{ que
                 .map(([k, v]) => (
                   <div key={k} className="contents">
                     <dt className="type-body-sm text-secondary">{k}</dt>
-                    <dd className="type-body-sm whitespace-pre-wrap">{v}</dd>
+                    <dd className="flex flex-col gap-2">
+                      <span className="type-body-sm whitespace-pre-wrap">{v}</span>
+                      {comments
+                        .filter((c) => c.field === k)
+                        .map((c) => (
+                          <span key={c.id} className="flex items-start gap-2 rounded-input bg-warning p-2 type-caption">
+                            <Icon name="message-square" size={14} className="mt-0.5" />
+                            <span>
+                              <span className="type-label">{c.author}:</span> {c.note}
+                              <span className="text-secondary"> · {formatIstDateTime(c.at)}</span>
+                            </span>
+                          </span>
+                        ))}
+                      {open && canEdit ? <FieldComment queue={queue.key} id={id} field={k} /> : null}
+                    </dd>
                   </div>
                 ))}
             </dl>

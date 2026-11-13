@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { index, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { id, utc } from "../columns";
 import { users } from "./auth";
 import { core } from "./core";
@@ -27,4 +27,46 @@ export const queueClaims = core.table(
     decidedAt: utc("decided_at"),
   },
   (t) => [uniqueIndex("queue_claims_item").on(t.queue, t.subjectId)],
+);
+
+/**
+ * A moderator's comment on one field of a queued item (633:8): internal, for the next moderator, never sent to the
+ * submitter. Append-only.
+ */
+export const queueFieldComments = core.table(
+  "queue_field_comments",
+  {
+    id: id(),
+    queue: text("queue").notNull(),
+    subjectId: text("subject_id").notNull(),
+    /** The field's label as shown on the moderation screen, for example "Body". */
+    field: text("field").notNull(),
+    note: text("note").notNull(),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id),
+    at: utc("at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("queue_field_comments_item").on(t.queue, t.subjectId)],
+);
+
+/** An operator's saved view of a queue (Save view): a name and the filters (view and search). */
+export const queueSavedViews = core.table(
+  "queue_saved_views",
+  {
+    id: id(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    queue: text("queue").notNull(),
+    name: text("name").notNull(),
+    view: text("view").notNull().default("all"),
+    search: text("search").notNull().default(""),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [uniqueIndex("queue_saved_views_name").on(t.userId, t.queue, t.name)],
 );

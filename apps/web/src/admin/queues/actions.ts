@@ -4,7 +4,16 @@ import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
 import { sendChangesNeeded, sendEventLive, sendJobLive } from "@h2india/core/notify";
-import { claimItem, decideItem, QueueError, type Decision, type QueueKey } from "@h2india/core/queues";
+import {
+  addFieldComment,
+  claimItem,
+  decideItem,
+  deleteQueueView,
+  QueueError,
+  saveQueueView,
+  type Decision,
+  type QueueKey,
+} from "@h2india/core/queues";
 import { revalidatePath } from "next/cache";
 import { getPayload } from "payload";
 import { absolute } from "@/seo/site";
@@ -168,6 +177,37 @@ export async function decideAction(queue: QueueKey, id: string, decision: Decisi
   } catch (error) {
     return failure(error);
   }
+  revalidatePath(`/admin/queues/${queue}`);
+  return { ok: true };
+}
+
+/** A moderator's comment on one field (633:8): internal, never sent to the submitter. */
+export async function commentAction(queue: QueueKey, id: string, field: string, note: string): Promise<R> {
+  const { actor } = await operator();
+  try {
+    await addFieldComment(getDb(), actor, { queue, subjectId: id, field, note }, await requestContext());
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath(`/admin/queues/${queue}/${id}`);
+  return { ok: true };
+}
+
+/** Save view: the current view and search under a name, for this operator only. */
+export async function saveViewAction(queue: QueueKey, name: string, view: string, search: string): Promise<R> {
+  const { actor } = await operator();
+  try {
+    await saveQueueView(getDb(), actor, { queue, name, view, search });
+  } catch (error) {
+    return failure(error);
+  }
+  revalidatePath(`/admin/queues/${queue}`);
+  return { ok: true };
+}
+
+export async function deleteViewAction(queue: QueueKey, id: string): Promise<R> {
+  const { actor } = await operator();
+  await deleteQueueView(getDb(), actor, id);
   revalidatePath(`/admin/queues/${queue}`);
   return { ok: true };
 }

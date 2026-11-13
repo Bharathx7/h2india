@@ -379,6 +379,13 @@
       "when": 1794583505883,
       "tag": "0053_newsletter_chart_sponsor",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1794583715603,
+      "tag": "0054_queue_comments_views",
+      "breakpoints": true
     }
   ]
 }

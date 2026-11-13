@@ -1,14 +1,14 @@
 import { getDb } from "@h2india/core";
 import { can } from "@h2india/core/authz";
 import { clockDuration } from "@h2india/core/clocks";
-import { QUEUES } from "@h2india/core/queues";
+import { QUEUES, queueViews } from "@h2india/core/queues";
 import { formatIstDateTime } from "@h2india/core/time";
 import { buttonClasses, cx, EmptyState, Skeleton, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { queueItems } from "@/admin/queues/data";
-import { Claim } from "@/admin/queues/Moderate";
+import { Claim, DeleteView, SaveView } from "@/admin/queues/Moderate";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
@@ -41,10 +41,11 @@ export default async function QueuePage({
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("queues.view", `/admin/queues/${key}`);
   const db = getDb();
-  const [items, amber, red] = await Promise.all([
+  const [items, amber, red, saved] = await Promise.all([
     queueItems(actor, queue.key),
     clockDuration(db, "queueAmber"),
     clockDuration(db, "queueRed"),
+    queueViews(db, userId, queue.key),
   ]);
   const view = VIEWS.find((v) => v.key === sp.view)?.key ?? "all";
   const now = new Date().getTime();
@@ -91,6 +92,27 @@ export default async function QueuePage({
             {v.label}
           </Link>
         ))}
+        {saved.map((v) => {
+          const here = view === v.view && (sp.q?.trim() ?? "") === v.search;
+          return (
+            <span
+              key={v.id}
+              className={cx(
+                "inline-flex h-9 items-center gap-1 rounded-pill border-[1.5px] pr-1 pl-3 type-label",
+                here ? "border-transparent bg-mint" : "border-control bg-page",
+              )}
+            >
+              <Link
+                href={`/admin/queues/${key}?${new URLSearchParams({ view: v.view, ...(v.search ? { q: v.search } : {}) }).toString()}`}
+                aria-current={here ? "page" : undefined}
+              >
+                {v.name}
+              </Link>
+              <DeleteView queue={queue.key} id={v.id} name={v.name} />
+            </span>
+          );
+        })}
+        <SaveView queue={queue.key} view={view} search={sp.q?.trim() ?? ""} />
       </div>
       <form method="get" className="flex flex-wrap gap-3">
         <input type="hidden" name="view" value={view} />
