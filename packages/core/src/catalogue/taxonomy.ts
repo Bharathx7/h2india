@@ -75,6 +75,8 @@ export interface CategoryDetail {
   lastChange: CategoryChange | null;
   /** Display groups to offer in the dialog: the drawn three, then any others this category uses. */
   groups: string[];
+  /** The applications it is listed under (browse by application, step 6.2). */
+  applicationIds: string[];
 }
 
 export class CatalogueError extends Error {
@@ -178,10 +180,14 @@ export async function categoryDetail(
     .where(and(eq(cat.id, categoryId), isNull(cat.deletedAt)))
     .limit(1);
   if (!row) return null;
-  const [attributes, parent, [last]] = await Promise.all([
+  const [attributes, parent, [last], links] = await Promise.all([
     liveAttributes(db, categoryId),
     row.c.parentId ? categoryRow(db, row.c.parentId) : Promise.resolve(null),
     categoryHistory(db, actor, categoryId, 1),
+    db
+      .select()
+      .from(schema.catalogueCategoryApplications)
+      .where(eq(schema.catalogueCategoryApplications.categoryId, categoryId)),
   ]);
   const used = [...new Set(attributes.map((a) => a.displayGroup))];
   return {
@@ -203,6 +209,7 @@ export async function categoryDetail(
     })),
     lastChange: last ?? null,
     groups: [...DISPLAY_GROUPS, ...used.filter((g) => !(DISPLAY_GROUPS as readonly string[]).includes(g))],
+    applicationIds: links.map((l) => l.applicationId),
   };
 }
 
@@ -799,4 +806,43 @@ export async function catalogueApplications(
     examples: r.examples,
     hidden: r.hiddenAt !== null,
   }));
+}
+
+/** Which applications a category is listed under (step 6.2). Replaces the whole set; recorded in the history. */
+export async function setCategoryApplications(
+  db: Database,
+  actor: Actor,
+  categoryId: string,
+  applicationIds: string[],
+  opts: { context?: RequestContext; now?: Date } = {},
+): Promise<Result<null>> {
+  assertCan(actor, "catalogue.edit");
+  const now = opts.now ?? new Date();
+  const links = schema.catalogueCategoryApplications;
+  return db.transaction(async (tx): Promise<Result<null>> => {
+    const row = await categoryRow(tx, categoryId);
+    const all = await tx.select().from(app);
+    const wanted = [...new Set(applicationIds)];
+    if (wanted.some((id) => !all.some((a) => a.id === id))) return { ok: false, errors: { _: "Choose from the list" } };
+    const before = (await tx.select().from(links).where(eq(links.categoryId, categoryId))).map((l) => l.applicationId);
+    if (before.length === wanted.length && before.every((id) => wanted.includes(id))) return { ok: true, value: null };
+    await tx.delete(links).where(eq(links.categoryId, categoryId));
+    if (wanted.length) await tx.insert(links).values(wanted.map((applicationId) => ({ categoryId, applicationId })));
+    const names = all.filter((a) => wanted.includes(a.id)).map((a) => a.shortLabel);
+    await record(tx, {
+      actor,
+      categoryId,
+      summary: names.length
+        ? `listed ${row.label} under ${names.join(", ")}`
+        : `took ${row.label} out of every application`,
+      action: "catalogue.category.applications",
+      resourceType: "catalogue_category",
+      resourceId: categoryId,
+      before: { applicationIds: before },
+      after: { applicationIds: wanted },
+      context: opts.context,
+      now,
+    });
+    return { ok: true, value: null };
+  });
 }

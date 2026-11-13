@@ -3,3 +3,4 @@
 export * from "./attributes";
 export * from "./samples";
 export * from "./taxonomy";
+export * from "./public";

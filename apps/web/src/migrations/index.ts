@@ -15,6 +15,7 @@ import * as migration_20261112_183156_events_drop_format from './20261112_183156
 import * as migration_20261112_190010_trust_pages from './20261112_190010_trust_pages';
 import * as migration_20261112_193125_newsletter_issues from './20261112_193125_newsletter_issues';
 import * as migration_20261112_201854_maintenance from './20261112_201854_maintenance';
+import * as migration_20261113_055110_application_pages from './20261113_055110_application_pages';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20261112_201854_maintenance.up,
     down: migration_20261112_201854_maintenance.down,
-    name: '20261112_201854_maintenance'
+    name: '20261112_201854_maintenance',
+  },
+  {
+    up: migration_20261113_055110_application_pages.up,
+    down: migration_20261113_055110_application_pages.down,
+    name: '20261113_055110_application_pages'
   },
 ];

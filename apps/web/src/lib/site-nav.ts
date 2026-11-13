@@ -1,4 +1,5 @@
 import { APPLICATIONS, PRODUCT_CLASSES } from "@h2india/core/catalogue";
+import type { PublicCatalogue } from "@h2india/core/catalogue/taxonomy";
 import type { FooterColumn, MegaSection, SiteLinks } from "@h2india/ui";
 
 // Site header, mega menus and footer from Figma (Site header 25:635, Mega menu 369:7387, Footer v2 153:179).
@@ -186,6 +187,34 @@ export const MEGA_MENUS: MegaSection[] = [
     },
   },
 ];
+
+/**
+ * The Marketplace menu from the live catalogue (step 6.2): every class with its category count and its first eight
+ * categories, and the visible applications. The site layout calls this on each request, so a category an operator
+ * adds or hides in admin Catalogue shows or disappears in the menu at once.
+ */
+export function menusWithCatalogue(cat: PublicCatalogue): MegaSection[] {
+  return MEGA_MENUS.map((m) =>
+    m.id !== "marketplace"
+      ? m
+      : {
+          ...m,
+          classes: cat.classes.map((c) => ({
+            id: c.id,
+            label: c.label,
+            href: `/marketplace/${c.id}`,
+            count: c.categories.length,
+            categories: c.categories
+              .slice(0, 8)
+              .map((x) => ({ label: x.label, href: `/marketplace/${c.id}/${x.slug}` })),
+          })),
+          applications: cat.applications.map((a) => ({
+            label: a.shortLabel,
+            href: `/marketplace/applications/${a.id}`,
+          })),
+        },
+  );
+}
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {

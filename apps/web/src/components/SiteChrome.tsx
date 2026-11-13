@@ -1,6 +1,6 @@
 "use client";
 
-import { SiteFooter, SiteHeader, type SiteUser } from "@h2india/ui";
+import { SiteFooter, SiteHeader, type MegaSection, type SiteUser } from "@h2india/ui";
 import type { ReactNode } from "react";
 import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS } from "@/lib/site-nav";
 import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
@@ -23,10 +23,13 @@ const FOOTER_TOPICS: Record<string, string> = {
 export function SiteChrome({
   user,
   operator = false,
+  menus = MEGA_MENUS,
   children,
 }: {
   user: SiteUser | null;
   operator?: boolean;
+  /** The mega menus with the live catalogue (menusWithCatalogue); the fixed lists otherwise. */
+  menus?: MegaSection[];
   children: ReactNode;
 }) {
   const search = useHeaderSearch();
@@ -39,7 +42,7 @@ export function SiteChrome({
         Skip to content
       </a>
       <SiteHeader
-        sections={MEGA_MENUS}
+        sections={menus}
         links={SITE_LINKS}
         tagline="India's hydrogen ecosystem platform"
         user={user}

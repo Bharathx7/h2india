@@ -2,13 +2,14 @@
 
 import { ATTRIBUTE_TYPE_LABEL, formatAllowedValues, type AttributeDef } from "@h2india/core/catalogue/attributes";
 import type { TreeClass } from "@h2india/core/catalogue/taxonomy";
-import { Button, ConfirmDialog, FormField, Input, Modal, Select, Skeleton } from "@h2india/ui";
+import { Button, Checkbox, ConfirmDialog, FormField, Input, Modal, Select, Skeleton } from "@h2india/ui";
 import { useEffect, useState, useTransition } from "react";
 import {
   addCategoryAction,
   fullHistoryAction,
   moveCategoryAction,
   renameCategoryAction,
+  setCategoryApplicationsAction,
   setCategoryHiddenAction,
 } from "./actions";
 import type { HistoryLine } from "./format";
@@ -455,4 +456,67 @@ function FormError({ message }: { message?: string }) {
       {message}
     </p>
   ) : null;
+}
+
+/** Choose applications (not drawn, A11): where the category appears under Browse by application (step 6.2). */
+export function ApplicationsDialog(props: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  category: { id: string; label: string; applicationIds: string[] };
+  applications: { id: string; label: string; hidden: boolean }[];
+  onDone: Done;
+}) {
+  const [chosen, setChosen] = useState<string[]>(props.category.applicationIds);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const submit = () => {
+    start(async () => {
+      const r = await setCategoryApplicationsAction(props.category.id, chosen);
+      if (!r.ok) {
+        setError(Object.values(r.errors)[0] ?? "Something went wrong. Try again.");
+        return;
+      }
+      props.onOpenChange(false);
+      props.onDone(`Applications saved for ${props.category.label}`);
+    });
+  };
+  return (
+    <Modal
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      width={480}
+      title={`Applications for ${props.category.label}`}
+      description="Buyers browsing these applications see this category on the application page."
+      footer={
+        <>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              props.onOpenChange(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={submit} disabled={pending}>
+            Save
+          </Button>
+        </>
+      }
+    >
+      <FormError message={error ?? undefined} />
+      <fieldset className="flex flex-col gap-3">
+        <legend className="sr-only">Applications</legend>
+        {props.applications.map((a) => (
+          <Checkbox
+            key={a.id}
+            checked={chosen.includes(a.id)}
+            onCheckedChange={(v) => {
+              setChosen((c) => (v === true ? [...c, a.id] : c.filter((x) => x !== a.id)));
+            }}
+            label={a.hidden ? `${a.label} (hidden)` : a.label}
+          />
+        ))}
+      </fieldset>
+    </Modal>
+  );
 }

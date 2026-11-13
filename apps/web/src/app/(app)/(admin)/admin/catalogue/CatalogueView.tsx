@@ -32,6 +32,7 @@ import {
 import { AttributeDialog } from "./AttributeDialog";
 import {
   AddCategoryDialog,
+  ApplicationsDialog,
   HideCategoryDialog,
   HistoryDialog,
   HistoryList,
@@ -48,6 +49,7 @@ import type { HistoryLine } from "./format";
 export interface CatalogueData {
   tree: TreeClass[];
   canEdit: boolean;
+  applications: { id: string; label: string; hidden: boolean }[];
   category: (CategoryDetail & { meta: string; history: HistoryLine[] }) | null;
 }
 
@@ -56,7 +58,7 @@ type Dialog =
   | { kind: "edit-attribute"; attribute: AttributeRow }
   | { kind: "remove-attribute"; attribute: AttributeRow }
   | { kind: "add-category"; classId: string; parentId: string | null }
-  | { kind: "rename" | "move" | "hide" | "history" | "preview" };
+  | { kind: "rename" | "move" | "hide" | "history" | "preview" | "applications" };
 
 const href = (id: string) => `/admin/catalogue?category=${id}`;
 
@@ -151,6 +153,15 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
                     {c.sample ? <StatusBadge status="Sample" tone="warning" /> : null}
                   </div>
                   <p className="mt-1 type-caption text-secondary">{c.meta}</p>
+                  {c.parentId === null ? (
+                    <p className="mt-1 type-caption text-secondary">
+                      Applications:{" "}
+                      {data.applications
+                        .filter((a) => c.applicationIds.includes(a.id))
+                        .map((a) => a.label)
+                        .join(", ") || "none yet"}
+                    </p>
+                  ) : null}
                 </div>
                 <Button
                   variant="ghost"
@@ -336,6 +347,16 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
       {c && dialog?.kind === "hide" ? (
         <HideCategoryDialog key={opened} open onOpenChange={close} category={c} onDone={done} />
       ) : null}
+      {c && dialog?.kind === "applications" ? (
+        <ApplicationsDialog
+          key={opened}
+          open
+          onOpenChange={close}
+          category={c}
+          applications={data.applications}
+          onDone={done}
+        />
+      ) : null}
       {c && dialog?.kind === "history" ? <HistoryDialog key={opened} open onOpenChange={close} category={c} /> : null}
       {c && dialog?.kind === "preview" ? (
         <PreviewDialog open onOpenChange={close} label={c.label} attributes={c.attributes} />
@@ -357,7 +378,7 @@ const inputOf = (a: AttributeRow): AttributeInput => ({
   testCondition: a.testCondition ?? "",
 });
 
-type MenuAction = "duplicate" | "move" | "history" | "hide" | "show" | "rename" | "add-sub";
+type MenuAction = "duplicate" | "move" | "history" | "hide" | "show" | "rename" | "add-sub" | "applications";
 
 /** Menu · Category actions (296:9777), plus Rename and Add sub-category (A11). */
 function CategoryMenu(props: { label: string; hidden: boolean; topLevel: boolean; onAction: (a: MenuAction) => void }) {
@@ -401,6 +422,16 @@ function CategoryMenu(props: { label: string; hidden: boolean; topLevel: boolean
             }}
           >
             Move to another main group
+          </MenuItem>
+        ) : null}
+        {props.topLevel ? (
+          <MenuItem
+            icon="layout-template"
+            onSelect={() => {
+              props.onAction("applications");
+            }}
+          >
+            Choose applications
           </MenuItem>
         ) : null}
         <MenuItem

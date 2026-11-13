@@ -196,6 +196,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Product search documents keep attribute values under `attributes` (already filterable), so a new filterable attribute needs no index change.
 - A scrolling table that holds Radix checkboxes needs `relative` on its scroll box, or their hidden inputs widen the page on phones.
 
+## Marketplace pages (step 6.2)
+
+- Public catalogue reads go through `apps/web/src/marketplace/data.ts` (`catalogue()` = `publicCatalogue()`: no hidden categories, sample only with the flag); addresses and count words are pure in `marketplace/views.ts`. Home tiles and the Marketplace menu (`menusWithCatalogue()`) read the same data.
+- Product counts are live listings only and are left out while they are 0 (A109). Never show a frame's sample counts.
+- Application pages are one template; their words and figures are the `application-pages` CMS collection (figures need a source and as-of date). Categories join applications in admin Catalogue.
+- Server pages use `LiveSection` (`components/LiveSection.tsx`) instead of `AsyncSection`, so the error state has Try again.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.

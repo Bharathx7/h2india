@@ -429,9 +429,70 @@ async function seedTrust(payload: Payload, publish: boolean): Promise<string> {
   for (const h of data.help) {
     const related = (h.related ?? []).map((r) => ids.get(r)).filter((x): x is number => x !== undefined);
     const id = ids.get(String(h.slug));
-    if (related.length && id) await payload.update({ collection: "help-articles", id, data: { related } });
+    // A draft stays a draft: without draft: true the update would publish it, and sample content can't be published
+    // where samples are hidden.
+    if (related.length && id)
+      await payload.update({ collection: "help-articles", id, data: { related }, draft: !publish });
   }
   return `Company and help: ${String(created)} records created${out.length ? `, ${out.join(", ")} set` : ""}`;
+}
+
+/**
+ * The Refuelling & mobility application page (754:14685), step 6.2, sample (F9): the frame's words and figures with
+ * its source line. The fourth drawn figure (products on H2 India) is a live count, not an editor figure.
+ */
+async function seedApplicationPages(payload: Payload, publish: boolean): Promise<string> {
+  const found = await payload.find({
+    collection: "application-pages",
+    where: { application: { equals: "refuelling-mobility" } },
+    draft: true,
+    limit: 1,
+    depth: 0,
+  });
+  if (found.docs.length) return "application pages: 0 created";
+  const mobility = await payload.find({
+    collection: "topics",
+    where: { slug: { equals: "mobility" } },
+    limit: 1,
+    depth: 0,
+  });
+  await payload.create({
+    collection: "application-pages",
+    data: {
+      application: "refuelling-mobility",
+      title: "Hydrogen refuelling stations and mobility",
+      intro:
+        "Everything you need to build and run a hydrogen refuelling station in India, from compressors to dispensers, plus the schemes, tenders and pilots driving demand.",
+      figures: [
+        { value: "18", label: "refuelling stations tracked · 7 operating" },
+        { value: "70", label: "vehicles funded under mobility pilots" },
+        { value: "21", label: "pilots tracked, 2 on highway corridors" },
+      ],
+      figuresSource: "India Hydrogen Tracker and the scheme pages",
+      figuresAsOf: "2026-11-10",
+      chain: {
+        title: "What goes into a refuelling station",
+        note: "Each block opens its category. Gas flows left to right.",
+        steps: [
+          { label: "H₂ supply", note: "Tube trailer, pipeline or on-site electrolyser" },
+          { label: "Compressor", category: "compression-systems" },
+          { label: "Storage cascade", category: "tanks-cylinders" },
+          { label: "Chiller", note: "Precooling units" },
+          { label: "Dispenser", category: "dispensers" },
+          { label: "Safety", category: "sensors-detectors" },
+        ],
+      },
+      topics: mobility.docs.map((t) => t.id),
+      cta: {
+        title: "Planning a station?",
+        text: "Send one request and get quotes from verified suppliers for the whole package.",
+      },
+      sample: true,
+      _status: publish ? "published" : "draft",
+    },
+    draft: !publish,
+  });
+  return "application pages: 1 created";
 }
 
 /** Sample past issues for the newsletter archive (445:5885, 446:6106), step 5.9. Sending arrives with step 11.3. */
@@ -521,6 +582,7 @@ async function main(): Promise<number> {
   console.log(await seedSight(payload));
   console.log(await seedTrust(payload, publish));
   console.log(await seedNewsletterIssues(payload, publish));
+  console.log(await seedApplicationPages(payload, publish));
   return problems > 0 ? 1 : 0;
 }
 

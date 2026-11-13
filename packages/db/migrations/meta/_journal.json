@@ -162,6 +162,13 @@
       "when": 1794546170654,
       "tag": "0022_catalogue_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794549455873,
+      "tag": "0023_catalogue_refuelling_links",
+      "breakpoints": true
     }
   ]
 }

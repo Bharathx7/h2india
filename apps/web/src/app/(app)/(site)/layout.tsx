@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { SiteChrome } from "@/components/SiteChrome";
 import { ComingSoon } from "@/home/ComingSoon";
+import { menusWithCatalogue } from "@/lib/site-nav";
+import { catalogue } from "@/marketplace/data";
 import { comingSoonFor, siteViewer } from "@/server/site";
 
 // Public pages (Stage 5): the site header and footer around each page. While the comingSoon flag is on, visitors get
@@ -10,7 +12,11 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   const prelaunch = await comingSoonFor(viewer);
   if (prelaunch) return <ComingSoon launchLine={prelaunch.launchLine} />;
   return (
-    <SiteChrome user={viewer?.user ?? null} operator={viewer?.operator ?? false}>
+    <SiteChrome
+      user={viewer?.user ?? null}
+      operator={viewer?.operator ?? false}
+      menus={menusWithCatalogue(await catalogue())}
+    >
       {children}
     </SiteChrome>
   );

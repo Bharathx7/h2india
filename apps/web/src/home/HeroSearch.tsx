@@ -22,8 +22,8 @@ const SCOPES = [
 const POPULAR = [
   { label: "Electrolysers", href: "/marketplace/systems/electrolysers" },
   { label: "Fuel cells", href: "/marketplace/systems/fuel-cell-systems" },
-  { label: "Storage tanks", href: "/marketplace/tanks-cylinders" },
-  { label: "Refuelling stations", href: "/marketplace/systems/refuelling-stations" },
+  { label: "Storage tanks", href: "/marketplace/components/tanks-cylinders" },
+  { label: "Refuelling stations", href: "/marketplace/systems/refuelling-stations-modules" },
   { label: "SIGHT scheme", href: "/opportunities/schemes/sight" },
 ];
 

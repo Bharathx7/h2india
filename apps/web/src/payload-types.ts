@@ -98,6 +98,7 @@ export interface Config {
     'legal-pages': LegalPage;
     'help-articles': HelpArticle;
     'team-members': TeamMember;
+    'application-pages': ApplicationPage;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -141,6 +142,7 @@ export interface Config {
     'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
     'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    'application-pages': ApplicationPagesSelect<false> | ApplicationPagesSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -3335,6 +3337,86 @@ export interface TeamMember {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * The page for each browse-by-application entry (754:14685).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "application-pages".
+ */
+export interface ApplicationPage {
+  id: number;
+  application:
+    | 'production'
+    | 'storage-transport'
+    | 'refuelling-mobility'
+    | 'fuel-cells-power'
+    | 'industrial-use'
+    | 'ports-shipping'
+    | 'safety-testing';
+  /**
+   * The page heading (H1).
+   */
+  title: string;
+  intro: string;
+  /**
+   * Up to four headline figures, for example 18 · refuelling stations tracked.
+   */
+  figures?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Where the figures come from.
+   */
+  figuresSource?: string | null;
+  figuresAsOf?: string | null;
+  /**
+   * What goes into it: blocks left to right, each opening its category.
+   */
+  chain?: {
+    title?: string | null;
+    note?: string | null;
+    steps?:
+      | {
+          label: string;
+          /**
+           * The category's address word, for example compression-systems.
+           */
+          category?: string | null;
+          /**
+           * Shown instead of the category for a block with no category (H₂ supply).
+           */
+          note?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Schemes, tenders, events and news on these topics are listed on the page.
+   */
+  topics?: (number | Topic)[] | null;
+  /**
+   * The buyer's guide card.
+   */
+  guide?: (number | null) | Guide;
+  cta?: {
+    /**
+     * For example Planning a station?
+     */
+    title?: string | null;
+    text?: string | null;
+  };
+  /**
+   * Sample content (F9).
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3481,6 +3563,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'team-members';
         value: number | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'application-pages';
+        value: number | ApplicationPage;
       } | null)
     | ({
         relationTo: 'authors';
@@ -4970,6 +5056,50 @@ export interface TeamMembersSelect<T extends boolean = true> {
   linkedin?: T;
   founder?: T;
   bio?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "application-pages_select".
+ */
+export interface ApplicationPagesSelect<T extends boolean = true> {
+  application?: T;
+  title?: T;
+  intro?: T;
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  figuresSource?: T;
+  figuresAsOf?: T;
+  chain?:
+    | T
+    | {
+        title?: T;
+        note?: T;
+        steps?:
+          | T
+          | {
+              label?: T;
+              category?: T;
+              note?: T;
+              id?: T;
+            };
+      };
+  topics?: T;
+  guide?: T;
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
   sample?: T;
   updatedAt?: T;
   createdAt?: T;

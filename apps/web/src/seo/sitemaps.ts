@@ -1,3 +1,5 @@
+import { catalogue } from "@/marketplace/data";
+import { allCategories, applicationHref, categoryHref, classHref } from "@/marketplace/views";
 import config from "@payload-config";
 import { getPayload, type Where } from "payload";
 import { publicWhere } from "@/cms/sample";
@@ -77,7 +79,7 @@ const PAGES = [
   ...LEGAL_PAGES.map((p) => p.href),
 ];
 
-export const SITEMAP_TYPES = ["pages", ...Object.keys(COLLECTIONS)] as const;
+export const SITEMAP_TYPES = ["pages", "marketplace", ...Object.keys(COLLECTIONS)] as const;
 
 async function fromCollection(source: Source): Promise<Entry[]> {
   const res = await (
@@ -95,8 +97,20 @@ async function fromCollection(source: Source): Promise<Entry[]> {
     .map((d) => ({ loc: absolute(source.href(d.slug ?? "")), lastmod: d.updatedAt }));
 }
 
+/** The marketplace from the live catalogue (step 6.2): landing, classes, applications and categories. */
+async function marketplaceEntries(): Promise<Entry[]> {
+  const cat = await catalogue();
+  return [
+    "/marketplace",
+    ...cat.classes.map((c) => classHref(c.id)),
+    ...cat.applications.map((a) => applicationHref(a.id)),
+    ...allCategories(cat).flatMap((c) => [categoryHref(c), ...c.children.map((s) => categoryHref(s, c))]),
+  ].map((p) => ({ loc: absolute(p) }));
+}
+
 export async function sitemapEntries(type: string): Promise<Entry[] | null> {
   if (type === "pages") return PAGES.map((p) => ({ loc: absolute(p) }));
+  if (type === "marketplace") return marketplaceEntries();
   const sources = COLLECTIONS[type];
   if (!sources) return null;
   return (await Promise.all(sources.map(fromCollection))).flat();

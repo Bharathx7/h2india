@@ -1,6 +1,12 @@
 import { getDb } from "@h2india/core";
 import { can, loadActor } from "@h2india/core/authz";
-import { catalogueTree, categoryDetail, categoryHistory, type TreeClass } from "@h2india/core/catalogue/taxonomy";
+import {
+  catalogueApplications,
+  catalogueTree,
+  categoryDetail,
+  categoryHistory,
+  type TreeClass,
+} from "@h2india/core/catalogue/taxonomy";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -39,11 +45,12 @@ export default async function CataloguePage({
   if (!can(actor, "catalogue.view")) notFound();
   const { category, state } = await searchParams;
 
-  const [shell, unread, bell, tree] = await Promise.all([
+  const [shell, unread, bell, tree, applications] = await Promise.all([
     shellFor(session.user.id),
     unreadCount(db, session.user.id),
     listNotifications(db, session.user.id, { limit: 5 }),
     catalogueTree(db, actor),
+    catalogueApplications(db, { includeHidden: true }),
   ]);
   const selectedId = pick(tree, category);
   const [detail, history] = selectedId
@@ -55,6 +62,7 @@ export default async function CataloguePage({
   const data: CatalogueData = {
     tree,
     canEdit: can(actor, "catalogue.edit"),
+    applications: applications.map((a) => ({ id: a.id, label: a.shortLabel, hidden: a.hidden })),
     category: detail
       ? {
           ...detail,

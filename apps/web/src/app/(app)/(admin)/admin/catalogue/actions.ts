@@ -13,6 +13,7 @@ import {
   moveCategory,
   removeAttribute,
   renameCategory,
+  setCategoryApplications,
   setCategoryHidden,
   updateAttribute,
 } from "@h2india/core/catalogue/taxonomy";
@@ -98,6 +99,12 @@ export async function duplicateCategoryAction(categoryId: string) {
 
 export async function moveCategoryAction(categoryId: string, classId: string) {
   return run(async ({ db, actor, context }) => moveCategory(db, actor, categoryId, classId, { context }));
+}
+
+export async function setCategoryApplicationsAction(categoryId: string, applicationIds: string[]) {
+  return run(async ({ db, actor, context }) =>
+    setCategoryApplications(db, actor, categoryId, applicationIds, { context }),
+  );
 }
 
 /** See full history: every change to the category, newest first. */
