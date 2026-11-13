@@ -148,6 +148,7 @@ export async function renderAlertDigest(subject: string, props: AlertDigestProps
 
 // Supplier verification (step 8.2): Verification status 673:221 and its variants.
 import {
+  bankChangedMessage,
   documentExpiringMessage,
   listingApprovedMessage,
   listingNeedsChangesMessage,
@@ -170,4 +171,7 @@ export function renderListingNeedsChanges(appUrl: string, input: Parameters<type
 }
 export function renderListingApproved(appUrl: string, input: Parameters<typeof listingApprovedMessage>[0]) {
   return renderNotice(appUrl, listingApprovedMessage(input));
+}
+export function renderBankChanged(appUrl: string, input: Parameters<typeof bankChangedMessage>[0]) {
+  return renderNotice(appUrl, bankChangedMessage(input));
 }

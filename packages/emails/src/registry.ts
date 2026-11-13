@@ -302,6 +302,22 @@ export const TEMPLATES = {
     built: false,
   },
   // Not drawn (M21; wording A9): built from the screens' own copy in the steps that needed them.
+  "email.bank_account_changed": {
+    channel: "email",
+    key: "bank_account_changed",
+    name: "Payout bank account changed",
+    frame: null,
+    step: "8.6",
+    built: true,
+  },
+  "sms.bank_account_changed": {
+    channel: "sms",
+    key: "bank_account_changed",
+    name: "Payout bank account changed",
+    frame: null,
+    step: "8.6",
+    built: true,
+  },
   "email.verify_email": {
     channel: "email",
     key: "verify_email",
@@ -416,6 +432,9 @@ export const APPROVED_TEXT = {
   "sms.otp_sign_in": (input: { code: string }) =>
     `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
   "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+  /** Not drawn (step 8.6, A159): wording from 588:1179, to register with the provider (M5). */
+  "sms.bank_account_changed": (input: { company: string; last4: string; until: string }) =>
+    `${input.company}'s payout bank account on H2 India was changed to the account ending ${input.last4}. Payouts are held until ${input.until} IST. Didn't make this change? Cancel it in your account. -H2 India`,
   /** 676:405, template webinar_registered: header "You're registered", footer "H2 India webinars". */
   "whatsapp.webinar_registration": (input: { name: string; title: string; date: string; time: string }) =>
     `Hi ${input.name}, you're registered for ${input.title}. ${input.date}, ${input.time} IST, online. We'll send the join link 1 hour before, and the replay afterwards.`,

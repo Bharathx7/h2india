@@ -274,6 +274,13 @@
       "when": 1794565831062,
       "tag": "0038_product_imports",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1794566289435,
+      "tag": "0039_payout_bank_accounts",
+      "breakpoints": true
     }
   ]
 }

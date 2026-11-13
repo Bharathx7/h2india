@@ -645,18 +645,35 @@ export async function verificationDesk(db: Executor, actor: Actor, tab: DeskTab,
       .select({ organisationId: schema.supplierReviews.organisationId, at: schema.supplierReviews.submittedAt })
       .from(schema.supplierReviews)
       .where(eq(schema.supplierReviews.status, "Submitted"));
-    const ids = [...new Set([...reviews.map((r) => r.organisationId), ...docs.map((x) => x.organisationId)])];
+    const banks = await db
+      .select({
+        organisationId: schema.payoutBankAccounts.organisationId,
+        last4: schema.payoutBankAccounts.accountLast4,
+        holdUntil: schema.payoutBankAccounts.holdUntil,
+      })
+      .from(schema.payoutBankAccounts)
+      .where(eq(schema.payoutBankAccounts.status, "Held"));
+    const ids = [
+      ...new Set([
+        ...reviews.map((r) => r.organisationId),
+        ...banks.map((x) => x.organisationId),
+        ...docs.map((x) => x.organisationId),
+      ]),
+    ];
     const names = ids.length ? await base.where(inArray(o.id, ids)) : [];
     return ids.map((id) => {
       const mine = docs.filter((x) => x.organisationId === id);
       const review = reviews.some((r) => r.organisationId === id);
+      const bank = banks.find((x) => x.organisationId === id);
       return {
         organisationId: id,
         name: names.find((n) => n.organisationId === id)?.name ?? "",
-        tag: review ? "Review" : "Re-upload",
+        tag: review ? "Review" : bank ? "Bank change" : "Re-upload",
         line: review
           ? "Submitted for review"
-          : `${mine.map((x) => documentTitle(x)).join(", ")} uploaded · waiting for a check`,
+          : bank
+            ? `New payout bank account ending ${bank.last4} · name matched · payouts on hold until ${bank.holdUntil ? formatIstDate(bank.holdUntil) : ""}`
+            : `${mine.map((x) => documentTitle(x)).join(", ")} uploaded · waiting for a check`,
       };
     });
   }

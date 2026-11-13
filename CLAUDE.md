@@ -243,6 +243,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Supplier listings change only through `saveProduct()` (drafts and submissions; a live listing's reviewed fields go to `product_revisions`), `setListingStatus()` and `decideRevision()` (operators, `queues.edit`). `REVIEWED_FIELDS` and `INSTANT_FIELDS` in `products/rules.ts` decide what needs review. Admin screens use `requireOperator()` and `AdminShell` (`apps/web/src/admin/shell.tsx`).
 - The datasheet engine is called only by the worker (`runImportJob` on the imports queue) through `adapters/datasheet`; extracted values reach a listing only after the supplier's check and `valueProblem()`.
 - Spreadsheet imports go through `startImport()` → worker `runProductImport()`: rows become drafts only, matched on the supplier's SKU (`products_sku`). CSV files use the `product_import` kind; never read a CSV in a page.
+- The payout bank account changes only through `addBankAccount()` → `confirmBankAccount()` (passkey step-up from `sign-in/step-up.ts`) → the `bankChangeHold` deadline; never read or log `accountCipher` outside `supplier/bank.ts`. There is no way to shorten a hold.
 
 ## Server and deploys (step 1.7)
 

@@ -7,6 +7,8 @@ import { pruneAuditLog } from "../audit";
 import { runDeadlines } from "../clocks/clocks";
 // Registers the webinar reminder handler in the worker (step 5.7).
 import "../events/reminders";
+// Registers the end of a payout bank change hold (step 8.6).
+import "../supplier/bank";
 import { expireJoinRequests } from "../companies/join-requests";
 import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";

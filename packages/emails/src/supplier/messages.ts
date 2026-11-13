@@ -137,3 +137,32 @@ export function listingApprovedMessage(
     links: [{ label: "Edit listing", href: d.editUrl }],
   };
 }
+
+/** Payout bank account changed (step 8.6, not drawn; A159): the wording of 588:1179. Sent to every admin. */
+export function bankChangedMessage(d: {
+  name: string;
+  company: string;
+  changedBy: string;
+  newLast4: string;
+  oldLast4: string;
+  holdUntil: string;
+  url: string;
+}): Message {
+  return {
+    subject: `Payout bank account changed: ${d.company}`,
+    preview: `Payouts are on hold until ${d.holdUntil} IST.`,
+    reason: `You're getting this because you're an admin of ${d.company}. Security notices can't be turned off.`,
+    eyebrow: "Payouts · bank account changed",
+    headline: "Your payout bank account was changed",
+    paragraphs: [
+      `Hi ${first(d.name)}, ${d.changedBy || "someone at your company"} changed the payout account to the account ending ${d.newLast4}, confirmed with a passkey. Payouts are on hold until ${d.holdUntil} IST.`,
+      `Didn't make this change? Cancel it now and payouts stay with the account ending ${d.oldLast4}.`,
+    ],
+    rows: [
+      { label: "New account", value: `ending ${d.newLast4}` },
+      { label: "Previous account", value: `ending ${d.oldLast4}` },
+      { label: "Payouts on hold until", value: `${d.holdUntil} IST` },
+    ],
+    button: { label: "Review the change", href: d.url },
+  };
+}

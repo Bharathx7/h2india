@@ -139,3 +139,42 @@ export const verificationChecks = core.table(
   },
   (t) => [uniqueIndex("verification_checks_one").on(t.organisationId, t.check)],
 );
+
+/**
+ * The payout bank account (step 8.6; 588:222). The full account number is stored only encrypted; pages, emails, logs
+ * and the audit log see the last four digits. Status: Pending (checked, waiting for the passkey), Held (confirmed;
+ * payouts held until holdUntil), Active, Failed (the check didn't match), Cancelled, Replaced.
+ */
+export const payoutBankAccounts = core.table(
+  "payout_bank_accounts",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    holderName: text("holder_name").notNull(),
+    accountLast4: text("account_last4").notNull(),
+    /** AES-256-GCM, for the payout provider (Launch 2). Never logged. */
+    accountCipher: text("account_cipher").notNull(),
+    ifsc: text("ifsc").notNull(),
+    branch: text("branch"),
+    status: text("status").notNull().default("Pending"),
+    /** "Test deposit of ₹1" or "Name match" (M4). */
+    checkMethod: text("check_method"),
+    /** The name the bank returned. */
+    bankName: text("bank_name"),
+    nameMatches: jsonb("name_matches").$type<boolean>(),
+    failReason: text("fail_reason"),
+    checkedAt: utc("checked_at"),
+    confirmedAt: utc("confirmed_at"),
+    holdUntil: utc("hold_until"),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: utc("updated_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("payout_bank_accounts_org").on(t.organisationId, t.createdAt)],
+);

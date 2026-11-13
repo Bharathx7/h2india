@@ -67,11 +67,22 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
   const tier1 = TIER_1 as readonly string[];
   const uploaded = new Set(docs.filter((x) => tier1.includes(x.type) && x.status !== "Rejected").map((x) => x.type));
   const verified = new Set(docs.filter((x) => tier1.includes(x.type) && x.status === "Verified").map((x) => x.type));
+  const banks = await db
+    .select({
+      status: schema.payoutBankAccounts.status,
+      last4: schema.payoutBankAccounts.accountLast4,
+      match: schema.payoutBankAccounts.nameMatches,
+    })
+    .from(schema.payoutBankAccounts)
+    .where(eq(schema.payoutBankAccounts.organisationId, organisationId))
+    .orderBy(desc(schema.payoutBankAccounts.createdAt));
+  const bank =
+    banks.find((x) => x.status === "Active") ?? banks.find((x) => x.status === "Pending" || x.status === "Held");
   return {
     gstin: gst ?? null,
     documents: { uploaded: uploaded.size, verified: verified.size, needed: tier1.length },
     companyComplete: Boolean(org?.legalName && org.state && gst),
-    bank: null,
+    bank: bank ? { last4: bank.last4, nameMatches: bank.match === true, verified: bank.status === "Active" } : null,
     storefront: null,
     products: { total: items.length, submitted: items.filter((p) => p.status !== "Draft").length },
     review: review?.status === "Approved" ? "approved" : review?.status === "Submitted" ? "submitted" : "none",

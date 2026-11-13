@@ -1,6 +1,7 @@
 import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api";
 import { getDb } from "../db";
 import { normaliseEmail, SIGN_IN, SIGN_IN_ERROR } from "./rules";
+import { recordPasskeyStepUp } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
 
 // The sign-in rules Better Auth does not have (ADR 0003, decision A2), run around its email-code routes:
@@ -88,7 +89,15 @@ async function limitLinks(email: string) {
   }
 }
 
+/** A passkey sign-in that succeeded (step 8.6 step-up). */
+const PASSKEY = "/passkey/verify-authentication";
+
 export const afterSignIn = createAuthMiddleware(async (ctx) => {
+  if (ctx.path === PASSKEY) {
+    const userId = ctx.context.newSession?.user.id;
+    if (userId && !isAPIError(ctx.context.returned)) await recordPasskeyStepUp(getDb(), userId);
+    return;
+  }
   if (ctx.path !== VERIFY) return;
   const email = emailOf(ctx);
   if (!email) return;
