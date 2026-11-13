@@ -4,6 +4,7 @@ import { identityOf } from "@h2india/core/authz";
 import { productDetail, similarProducts, type ProductDetail } from "@h2india/core/products";
 import { buttonClasses, cx, EmptyState, Icon, ProductCard, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
+import { ViewBeacon } from "@/components/ViewBeacon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -96,6 +97,7 @@ export default async function ProductPage({
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+      <ViewBeacon type="listing_viewed" productId={p.id} />
       <JsonLd data={productLd(p)} />
       <section className={cx(wrap, "flex flex-col gap-6 pt-6 pb-12")}>
         <Crumbs

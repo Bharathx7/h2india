@@ -6,6 +6,7 @@ import { publicBadges } from "@h2india/core/supplier";
 import { formatIstDate } from "@h2india/core/time";
 import { Alert, buttonClasses, cx, EmptyState, Icon, ProductCard, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
+import { ViewBeacon } from "@/components/ViewBeacon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -298,6 +299,7 @@ export default async function CompanyPage({
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+      <ViewBeacon type="profile_viewed" organisationId={c.organisationId} />
       <div className={cx(wrap, "flex flex-col gap-6 py-8 pb-16")}>
         <Crumbs items={[{ label: "Directory", href: "/directory/companies" }, { label: c.name }]} />
         {!c.claimed ? (

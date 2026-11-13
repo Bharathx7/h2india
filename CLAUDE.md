@@ -245,6 +245,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Spreadsheet imports go through `startImport()` → worker `runProductImport()`: rows become drafts only, matched on the supplier's SKU (`products_sku`). CSV files use the `product_import` kind; never read a CSV in a page.
 - The payout bank account changes only through `addBankAccount()` → `confirmBankAccount()` (passkey step-up from `sign-in/step-up.ts`) → the `bankChangeHold` deadline; never read or log `accountCipher` outside `supplier/bank.ts`. There is no way to shorten a hold.
 - Team changes go through `inviteMember()`/`acceptInvitation()` (invited email only), `changeMemberRole()` and `removeMember()` (never the last admin). Storefront edits go through `saveStorefrontDraft()` → `publishStorefront()` → `decideStorefront()`; the public profile changes only on approval.
+- Supplier analytics events come only from `recordEvent()` (via the `ViewBeacon` component, `/api/v1/events` or a server action): never record a person, and keep operators and the supplier's own team out. Read figures only with `supplierAnalytics()`.
 
 ## Server and deploys (step 1.7)
 

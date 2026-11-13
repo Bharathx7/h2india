@@ -1,6 +1,8 @@
 "use server";
 
 import { getDb } from "@h2india/core";
+import { loadActor } from "@h2india/core/authz";
+import { recordSaveBySlug } from "@h2india/core/supplier";
 import { companyProfile } from "@h2india/core/companies";
 import { follow, removeSaved, saveItem, setFollowLevel, unfollow } from "@h2india/core/members";
 import { topicLabel, TOPICS, STATES } from "@h2india/core/members/rules";
@@ -23,6 +25,11 @@ export async function saveFromLinkAction(type: string, key: string): Promise<{ o
   const item = await resolveSave(type, key);
   if (!item) return { ok: false };
   await saveItem(getDb(), userId, item);
+  // A saved listing counts for the supplier's analytics (step 8.8); no person is recorded.
+  if (item.targetType === "product") {
+    const db = getDb();
+    await recordSaveBySlug(db, await loadActor(db, userId), key);
+  }
   revalidatePath("/member/saved");
   return { ok: true, title: item.title };
 }

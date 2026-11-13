@@ -2,6 +2,7 @@ import { schema } from "@h2india/db";
 import { sql } from "drizzle-orm";
 import { runAlerts, sendDigests } from "../alerts/engine";
 import { sweepExtractions } from "../products/jobs";
+import { rollUpYesterday } from "../supplier/analytics";
 import { expireDocuments, sendExpiryNotices } from "../supplier/verification";
 import { pruneAuditLog } from "../audit";
 import { runDeadlines } from "../clocks/clocks";
@@ -49,6 +50,8 @@ export const SCHEDULES: Scheduled[] = [
   { id: "alerts-run", every: MINUTE, run: () => runAlerts(getDb()) },
   // 07:00 IST every day: daily digests; on Mondays the weekly ones too (665:307 "Sent 7:00 AM IST").
   { id: "alerts-digests", pattern: "30 1 * * *", run: () => sendDigests(getDb()) },
+  // 00:20 IST every day: supplier analytics roll-up of the day before (step 8.8).
+  { id: "analytics-rollup", pattern: "50 18 * * *", run: () => rollUpYesterday(getDb()) },
   // Step 8.4: datasheets a Redis outage left waiting.
   { id: "datasheet-sweep", every: 5 * MINUTE, run: () => sweepExtractions() },
   // 06:00 IST every day (673:221 "Sent 6:05 AM IST"): documents past expiry pause their badges; notices go ahead.

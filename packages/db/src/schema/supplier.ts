@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { bigserial, date, index, integer, jsonb, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { id, utc } from "../columns";
 import { users } from "./auth";
 import { organisations } from "./companies";
@@ -203,4 +203,43 @@ export const storefrontRevisions = core.table(
     decidedAt: utc("decided_at"),
   },
   (t) => [index("storefront_revisions_queue").on(t.status, t.submittedAt)],
+);
+
+/**
+ * First-party events for supplier analytics (step 8.8; 814:12112). No person is recorded: only what happened, to which
+ * listing or company, and the viewer's company state when a signed-in buyer's company has one. Operators and the
+ * supplier's own team are never counted. Types: listing_viewed, profile_viewed, saved, compared, quote_requested.
+ */
+export const analyticsEvents = core.table(
+  "analytics_events",
+  {
+    seq: bigserial("seq", { mode: "number" }).primaryKey(),
+    type: text("type").notNull(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    productId: uuid("product_id"),
+    viewerState: text("viewer_state"),
+    at: utc("at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("analytics_events_org").on(t.organisationId, t.at)],
+);
+
+/** The nightly roll-up (IST days): one row per company, product (or none), day, type and viewer state. */
+export const analyticsDaily = core.table(
+  "analytics_daily",
+  {
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    /** "" for the storefront (not a product). */
+    productId: text("product_id").notNull().default(""),
+    day: date("day").notNull(),
+    type: text("type").notNull(),
+    viewerState: text("viewer_state").notNull().default(""),
+    count: integer("count").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.organisationId, t.productId, t.day, t.type, t.viewerState] })],
 );

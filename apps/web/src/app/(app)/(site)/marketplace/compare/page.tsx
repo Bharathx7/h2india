@@ -4,6 +4,7 @@ import { compareProducts, getCompareList } from "@h2india/core/products";
 import { COMPARE_LIMIT } from "@h2india/core/products/rules";
 import { buttonClasses, cx, EmptyState, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
+import { ViewBeacon } from "@/components/ViewBeacon";
 import Link from "next/link";
 import { showSample } from "@/cms/sample";
 import { LiveSection } from "@/components/LiveSection";
@@ -41,6 +42,7 @@ export default async function ComparePage({
 
   return (
     <main id="main" className={cx(wrap, "flex flex-col gap-6 py-8 pb-16 [&_:is(h1,h2,h3)]:text-wrap")}>
+      {result.kind === "ok" ? <ViewBeacon type="compared" productIds={ids} /> : null}
       <Crumbs
         items={[
           ...(result.kind === "ok"
