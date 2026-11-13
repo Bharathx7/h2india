@@ -268,6 +268,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - In a single-table Drizzle select, `${table.column}` inside a raw `sql` subquery is printed unqualified and binds to the subquery's own table. Write the outer column out (`core.rfqs.id`) or join so Drizzle qualifies it.
 - The offer deadline and quote validity are `CHOSEN_DEADLINES` started with `startDeadline()` at the chosen time; moving one cancels and starts it again.
 
+## Native content screens (step 4.6)
+
+- Editors work in `/admin/content` with our components; `/cms` stays as the advanced editor (images in rich text, embeds, live updates).
+- Every native content read and save runs as the signed-in editor from `cmsSession()` (`admin/cms/session.ts`) with `overrideAccess: false`, so CMS access rules and hooks apply. Never save content with `overrideAccess: true` from a page.
+- Articles use `ArticleEditor` and change status only through `moveArticleAction()` → `transitionArticle()`. Other content uses `RecordForm`, drawn from the collection's fields by `describeFields()`; a new collection shows up by adding it to `CONTENT_GROUPS` (`admin/cms/registry.ts`), a single-document setting to `SETTING_SLUGS`.
+- Publishing, unpublishing and setting changes are audited in `record-actions.ts`.
+
 ## Admin back office (Stage 11)
 
 - Admin pages call `requireOperator(permission, path)` and render in `AdminShell`; the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.

@@ -12,20 +12,22 @@ import { RECORD_COLLECTIONS } from "@/cms/records/collections";
 import { possibleUpdates, RED_DAYS, STALE_DAYS, staleRecords } from "@/cms/records/quality";
 import { TRACKER_SLUGS } from "@/cms/tracker/options";
 import { ARTICLE_TYPES, WORKFLOW } from "@/cms/types";
+import { CONTENT_GROUPS } from "@/admin/cms/registry";
 
 // Content (step 11.3): Articles, Records, Newsletter (647:8), Media, Authors and Data quality (646:9, 646:733).
 // Articles, records, media and authors are edited in the CMS; this shows their counts and opens them there.
 export const metadata: Metadata = { title: "Content · H2 India admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-const TABS = [
+const TABS: readonly { key: string; label: string; href?: string }[] = [
   { key: "articles", label: "Articles" },
   { key: "records", label: "Records" },
   { key: "newsletter", label: "Newsletter" },
-  { key: "media", label: "Media" },
-  { key: "authors", label: "Authors" },
+  { key: "media", label: "Media", href: "/admin/content/media" },
+  { key: "authors", label: "Authors", href: "/admin/content/authors" },
+  { key: "calendar", label: "Calendar", href: "/admin/content/calendar" },
   { key: "quality", label: "Data quality" },
-] as const;
+];
 
 const LABEL: Record<string, string> = {
   schemes: "Scheme",
@@ -42,7 +44,7 @@ export default async function ContentPage({
 }) {
   const sp = await searchParams;
   const { userId } = await requireOperator("content.view", "/admin/content");
-  const tab = TABS.find((t) => t.key === sp.tab)?.key ?? "quality";
+  const tab = TABS.find((t) => t.key === sp.tab && !t.href)?.key ?? "quality";
   const payload = await getPayload({ config });
   const db = getDb();
   const count = async (collection: "articles" | "media" | "authors" | "newsletter-issues") =>
@@ -69,12 +71,6 @@ export default async function ContentPage({
     media,
     authors,
     quality: stale.length + updates.length,
-  };
-  const CMS: Record<string, string> = {
-    articles: "/cms/collections/articles",
-    records: "/cms",
-    media: "/cms/collections/media",
-    authors: "/cms/collections/authors",
   };
 
   let body: React.ReactNode;
@@ -462,20 +458,49 @@ export default async function ContentPage({
       </>
     );
   } else {
+    const groups = await Promise.all(
+      CONTENT_GROUPS.map(async (g) => ({
+        label: g.label,
+        items: await Promise.all(
+          g.slugs.map(async (slug) => ({
+            slug,
+            label: payload.collections[slug].config.labels.plural as string,
+            count: (await payload.count({ collection: slug, overrideAccess: true })).totalDocs,
+          })),
+        ),
+      })),
+    );
     body = (
-      <div className="rounded-card border border-default bg-page">
-        <EmptyState
-          icon="newspaper"
-          title={`${counts[tab]?.toLocaleString("en-IN") ?? "0"} ${TABS.find((t) => t.key === tab)?.label.toLowerCase() ?? ""}`}
-          action={
-            <Link href={CMS[tab] ?? "/cms"} className={buttonClasses({})}>
-              Open in the CMS
-            </Link>
-          }
-        >
-          These are written and edited in the CMS, with the editorial workflow and its checks.
-        </EmptyState>
-      </div>
+      <>
+        {groups.map((g) => (
+          <section key={g.label} className="flex flex-col gap-3">
+            <h2 className="type-h5">{g.label}</h2>
+            <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {g.items.map((c) => (
+                <li key={c.slug}>
+                  <Link
+                    href={`/admin/content/${c.slug}`}
+                    className="flex items-center justify-between gap-3 rounded-card border border-default bg-page p-4 hover:border-focus"
+                  >
+                    <span className="type-label">{c.label}</span>
+                    <span className="type-mono text-secondary">{c.count.toLocaleString("en-IN")}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        <section className="flex flex-col gap-3">
+          <h2 className="type-h5">Site settings</h2>
+          <Link
+            href="/admin/content/settings"
+            className="flex w-fit items-center gap-2 rounded-card border border-default bg-page p-4 type-label hover:border-focus"
+          >
+            <Icon name="sliders" size={16} />
+            Home figures, company details, pricing, tracker pages and more
+          </Link>
+        </section>
+      </>
     );
   }
 
@@ -496,13 +521,13 @@ export default async function ContentPage({
         </div>
         <div className="flex gap-2">
           {tab === "newsletter" ? (
-            <Link href="/cms/collections/newsletter-issues/create" className={buttonClasses({})}>
+            <Link href="/admin/content/newsletter-issues/new" className={buttonClasses({})}>
               <Icon name="plus" size={16} />
               New issue
             </Link>
           ) : (
             <>
-              <Link href="/cms" className={buttonClasses({ variant: "outline" })}>
+              <Link href="/admin/content?tab=records" className={buttonClasses({ variant: "outline" })}>
                 <Icon name="plus" size={16} />
                 New record
               </Link>
@@ -518,7 +543,7 @@ export default async function ContentPage({
         {TABS.map((t) => (
           <Link
             key={t.key}
-            href={`/admin/content?tab=${t.key}`}
+            href={t.href ?? `/admin/content?tab=${t.key}`}
             aria-current={t.key === tab ? "page" : undefined}
             className={cx(
               "-mb-px border-b-2 py-3 whitespace-nowrap type-label",

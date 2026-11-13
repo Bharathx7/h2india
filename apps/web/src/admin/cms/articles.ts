@@ -1,9 +1,7 @@
 import config from "@payload-config";
-import { getDb } from "@h2india/core";
-import { loadActor } from "@h2india/core/authz";
 import { getPayload } from "payload";
 import type { Actor as WorkflowActor } from "@/cms/workflow";
-import { operatorSession } from "@/server/auth";
+import { cmsSession } from "./session";
 import { lexicalToBlocks, type BodyBlock } from "./body";
 
 // The H2 India article editor's data (step 4.6): the article as our form, the choices for its pickers, and the editor
@@ -59,23 +57,12 @@ const s = (v: unknown) => (typeof v === "string" ? v : "");
 
 /** The signed-in operator as the workflow sees them: their content permissions and their editor record. */
 export async function editorActor(): Promise<{ actor: WorkflowActor; canEdit: boolean; canPublish: boolean } | null> {
-  const session = await operatorSession();
-  if (!session) return null;
-  const actor = await loadActor(getDb(), session.user.id);
-  const permissions = [...actor.operator].filter((p) => p.startsWith("content."));
-  const payload = await getPayload({ config });
-  const editor = (
-    await payload.find({
-      collection: "editors",
-      where: { h2UserId: { equals: session.user.id } },
-      limit: 1,
-      overrideAccess: true,
-    })
-  ).docs[0];
+  const cms = await cmsSession();
+  if (!cms) return null;
   return {
-    actor: { editorId: editor?.id ?? null, h2UserId: session.user.id, permissions },
-    canEdit: permissions.includes("content.edit"),
-    canPublish: permissions.includes("content.publish"),
+    actor: { editorId: cms.user.id, h2UserId: cms.userId, permissions: cms.user.permissions },
+    canEdit: cms.can("content.edit"),
+    canPublish: cms.can("content.publish"),
   };
 }
 

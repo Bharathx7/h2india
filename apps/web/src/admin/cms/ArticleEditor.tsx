@@ -289,6 +289,87 @@ function BlockEditor({ block, onChange }: { block: BodyBlock; onChange: (b: Body
   }
 }
 
+/** The body as blocks: add, move, remove and edit each one. Used by the article editor and every rich-text field. */
+export function BodyEditor({ blocks, onChange }: { blocks: BodyBlock[]; onChange: (b: BodyBlock[]) => void }) {
+  const setBlock = (i: number, b: BodyBlock | null) => {
+    onChange(b ? blocks.map((x, j) => (j === i ? b : x)) : blocks.filter((_, j) => j !== i));
+  };
+  const move = (i: number, d: -1 | 1) => {
+    const j = i + d;
+    if (j < 0 || j >= blocks.length) return;
+    const next = [...blocks];
+    [next[i], next[j]] = [next[j] as BodyBlock, next[i] as BodyBlock];
+    onChange(next);
+  };
+  return (
+    <>
+      <p className="type-caption text-secondary">
+        Use **bold**, *italic* and [link text](https://…) inside a block. Glossary terms are linked automatically.
+      </p>
+      <ol className="flex flex-col gap-3">
+        {blocks.map((b, i) => (
+          <li key={i} className="flex flex-col gap-2 rounded-input border border-default p-3">
+            <span className="flex items-center justify-between gap-2">
+              <span className="type-caption text-secondary">
+                {BLOCKS.find((x) => x.kind === b.kind)?.label ?? "Other block"}
+              </span>
+              <span className="flex gap-1">
+                <IconButton
+                  icon="chevron-up"
+                  label={`Move block ${String(i + 1)} up`}
+                  size="sm"
+                  disabled={i === 0}
+                  onClick={() => {
+                    move(i, -1);
+                  }}
+                />
+                <IconButton
+                  icon="chevron-down"
+                  label={`Move block ${String(i + 1)} down`}
+                  size="sm"
+                  disabled={i === blocks.length - 1}
+                  onClick={() => {
+                    move(i, 1);
+                  }}
+                />
+                <IconButton
+                  icon="trash"
+                  label={`Remove block ${String(i + 1)}`}
+                  size="sm"
+                  onClick={() => {
+                    setBlock(i, null);
+                  }}
+                />
+              </span>
+            </span>
+            <BlockEditor
+              block={b}
+              onChange={(nb) => {
+                setBlock(i, nb);
+              }}
+            />
+          </li>
+        ))}
+      </ol>
+      <div className="flex flex-wrap gap-2">
+        {BLOCKS.map((x) => (
+          <Button
+            key={x.kind}
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              onChange([...blocks, newBlock(x.kind)]);
+            }}
+          >
+            <Icon name="plus" size={14} />
+            {x.label}
+          </Button>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export function ArticleEditor({
   initial,
   meta,
@@ -313,16 +394,6 @@ export function ArticleEditor({
   const set = <K extends keyof ArticleForm>(k: K, v: ArticleForm[K]) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
-  };
-  const setBlock = (i: number, b: BodyBlock | null) => {
-    set("body", b ? form.body.map((x, j) => (j === i ? b : x)) : form.body.filter((_, j) => j !== i));
-  };
-  const move = (i: number, d: -1 | 1) => {
-    const j = i + d;
-    if (j < 0 || j >= form.body.length) return;
-    const next = [...form.body];
-    [next[i], next[j]] = [next[j] as BodyBlock, next[i] as BodyBlock];
-    set("body", next);
   };
 
   const status = meta?.workflow ?? "Draft";
@@ -554,69 +625,12 @@ export function ArticleEditor({
           </Card>
 
           <Card title="Body">
-            <p className="type-caption text-secondary">
-              Use **bold**, *italic* and [link text](https://…) inside a block. Glossary terms are linked automatically.
-            </p>
-            <ol className="flex flex-col gap-3">
-              {form.body.map((b, i) => (
-                <li key={i} className="flex flex-col gap-2 rounded-input border border-default p-3">
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="type-caption text-secondary">
-                      {BLOCKS.find((x) => x.kind === b.kind)?.label ?? "Other block"}
-                    </span>
-                    <span className="flex gap-1">
-                      <IconButton
-                        icon="chevron-up"
-                        label={`Move block ${String(i + 1)} up`}
-                        size="sm"
-                        disabled={i === 0}
-                        onClick={() => {
-                          move(i, -1);
-                        }}
-                      />
-                      <IconButton
-                        icon="chevron-down"
-                        label={`Move block ${String(i + 1)} down`}
-                        size="sm"
-                        disabled={i === form.body.length - 1}
-                        onClick={() => {
-                          move(i, 1);
-                        }}
-                      />
-                      <IconButton
-                        icon="trash"
-                        label={`Remove block ${String(i + 1)}`}
-                        size="sm"
-                        onClick={() => {
-                          setBlock(i, null);
-                        }}
-                      />
-                    </span>
-                  </span>
-                  <BlockEditor
-                    block={b}
-                    onChange={(nb) => {
-                      setBlock(i, nb);
-                    }}
-                  />
-                </li>
-              ))}
-            </ol>
-            <div className="flex flex-wrap gap-2">
-              {BLOCKS.map((x) => (
-                <Button
-                  key={x.kind}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    set("body", [...form.body, newBlock(x.kind)]);
-                  }}
-                >
-                  <Icon name="plus" size={14} />
-                  {x.label}
-                </Button>
-              ))}
-            </div>
+            <BodyEditor
+              blocks={form.body}
+              onChange={(b) => {
+                set("body", b);
+              }}
+            />
           </Card>
 
           <Card title="Sources">
