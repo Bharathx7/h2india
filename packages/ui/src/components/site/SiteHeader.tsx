@@ -13,8 +13,10 @@ import type { MegaSection, SiteLinks, SiteUser } from "./types";
 
 /* Figma "Site header" (25:635, frames 372:15391 to 372:16409): top strip, main bar (logo, search trigger,
    actions) and section nav with six mega menus. Logged in swaps Sign in and List your company for
-   notifications, the workspace switcher and the avatar. Sticky, never shrinks (Home motion spec 781:7247);
-   the Header shadow appears once the page scrolls. Desktop from 1024 px; below that the mobile header and
+   notifications, the workspace switcher and the avatar. The Header shadow appears once the page scrolls.
+   Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026: on desktop, once the page
+   has scrolled past the top strip and section nav, only the main bar stays at the top; both rows come back at the
+   top of the page, while a menu is open and while keyboard focus is in the header. Desktop from 1024 px; below that the mobile header and
    full-screen menu (decision M17). The language selector stays hidden (decision M15). */
 
 export interface SiteHeaderProps {
@@ -26,8 +28,19 @@ export interface SiteHeaderProps {
   tagline?: string;
 }
 
-function Desktop({ sections, links, user, onOpenSearch, tagline }: SiteHeaderProps) {
+function Desktop({
+  sections,
+  links,
+  user,
+  onOpenSearch,
+  tagline,
+  collapsed,
+  onMenuChange,
+}: SiteHeaderProps & { collapsed: boolean; onMenuChange: (open: boolean) => void }) {
   const [open, setOpen] = useState<string | null>(null);
+  useEffect(() => {
+    onMenuChange(open !== null);
+  }, [open, onMenuChange]);
   const navRef = useRef<HTMLDivElement>(null);
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
   const panelId = useId();
@@ -61,7 +74,7 @@ function Desktop({ sections, links, user, onOpenSearch, tagline }: SiteHeaderPro
 
   return (
     <div className="hidden lg:block">
-      <div className="bg-subtle">
+      <div className={cx("bg-subtle", collapsed && "hidden")}>
         <div className="mx-auto flex h-9 max-w-300 items-center justify-between px-6">
           <p className="type-caption text-secondary">{tagline}</p>
           <ul className="flex items-center gap-6">
@@ -163,7 +176,7 @@ function Desktop({ sections, links, user, onOpenSearch, tagline }: SiteHeaderPro
           )}
         </div>
       </div>
-      <div ref={navRef} onBlur={onBlur} className="relative border-t border-default">
+      <div ref={navRef} onBlur={onBlur} className={cx("relative border-t border-default", collapsed && "hidden")}>
         <nav aria-label="Main" className="mx-auto flex h-12 max-w-300 items-center gap-1 px-3">
           {sections.map((s) => (
             <button
@@ -338,11 +351,19 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
   );
 }
 
+/** Desktop top strip (h-9) plus section nav (1 px border and h-12): scrolled past these, only the main bar stays. */
+const COLLAPSE_AFTER_PX = 36 + 1 + 48;
+
 export function SiteHeader(props: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
+  const [pastRows, setPastRows] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const collapsed = pastRows && !focusWithin && !menuOpen;
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 0);
+      setPastRows(window.scrollY > COLLAPSE_AFTER_PX);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -370,14 +391,25 @@ export function SiteHeader(props: SiteHeaderProps) {
     };
   }, [props]);
   return (
-    <header
-      className={cx(
-        "sticky top-0 z-40 border-b border-default bg-page transition-shadow duration-(--motion-duration-base)",
-        scrolled && "shadow-ink-header",
-      )}
-    >
-      <Desktop {...props} />
-      <Mobile {...props} />
-    </header>
+    <>
+      <header
+        onFocus={() => {
+          setFocusWithin(true);
+        }}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setFocusWithin(false);
+        }}
+        className={cx(
+          // Desktop: fixed, with the spacer below holding its full height, so hiding rows never moves the page.
+          "sticky top-0 z-40 border-b border-default bg-page transition-shadow duration-(--motion-duration-base) lg:fixed lg:inset-x-0",
+          scrolled && "shadow-ink-header",
+        )}
+      >
+        <Desktop {...props} collapsed={collapsed} onMenuChange={setMenuOpen} />
+        <Mobile {...props} />
+      </header>
+      {/* The desktop header's full height: 36 + 76 + 1 + 48 + 1 (bottom border) = 162 px. */}
+      <div aria-hidden="true" className="hidden lg:block lg:h-40.5" />
+    </>
   );
 }
