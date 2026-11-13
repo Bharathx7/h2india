@@ -297,10 +297,11 @@ test("a company posts a job: draft, preview, submit; it shows only after an edit
 
   await page.goto("/opportunities/jobs");
   await page.getByRole("link", { name: `Commissioning engineer ${t}` }).click();
-  await expect(page.getByRole("link", { name: /Apply on company site/ })).toHaveAttribute(
-    "href",
-    "https://careers.example.org/commissioning",
-  );
+  // Apply goes through /apply, which records the click for a signed-in member and sends on to the employer (A70).
+  const apply = page.getByRole("link", { name: /Apply on company site/ });
+  await expect(apply).toHaveAttribute("href", /\/opportunities\/jobs\/[^/]+\/apply$/);
+  const hop = await page.request.get((await apply.getAttribute("href")) ?? "", { maxRedirects: 0 });
+  expect(hop.headers().location).toBe("https://careers.example.org/commissioning");
   const ld = await page.locator('script[type="application/ld+json"]').first().textContent();
   expect(JSON.parse(ld ?? "{}")).toMatchObject({ "@type": "JobPosting", title: `Commissioning engineer ${t}` });
 });

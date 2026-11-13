@@ -22,7 +22,7 @@ test("a new member picks a persona, topics and states, and lands on the home", a
   await expect(page.getByText("1 topic and 1 state selected")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: "Suggested for you" })).toBeVisible();
-  await expect(page.getByText("Research calls and grants")).toBeVisible();
+  await expect(page.getByText("Research calls and grants").first()).toBeVisible();
   await page.getByRole("button", { name: "Go to my feed" }).click();
   await expect(page).toHaveURL(/\/member$/);
   await expect(page.getByText(/Electrolysers/).first()).toBeVisible();

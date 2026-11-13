@@ -20,16 +20,16 @@ test("every response carries a request ID for the audit log, and a safe incoming
   expect(unsafe.headers()["x-request-id"]).not.toBe("<script>");
 });
 
-// /sign-in is the real page since step 3.2; the workspaces are still placeholders.
-for (const [path, title] of [
-  ["/sign-in", "Sign in to H2 India"],
-  ["/buyer", "Buyer workspace"],
-  ["/supplier", "Supplier workspace"],
-  ["/member", "Member workspace"],
-  ["/admin", "Admin back office"],
-] as const) {
-  test(`route group ${path} loads its page`, async ({ page }) => {
+// /sign-in is the real page since step 3.2. The workspaces (built in Stages 7 to 11) ask a signed-out visitor to sign
+// in and bring them back afterwards.
+test("route group /sign-in loads its page", async ({ page }) => {
+  await page.goto("/sign-in");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
+});
+for (const path of ["/buyer", "/supplier", "/member", "/admin"] as const) {
+  test(`route group ${path} asks a signed-out visitor to sign in`, async ({ page }) => {
     await page.goto(path);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+    await expect(page).toHaveURL(new RegExp(`/sign-in\\?next=(%2F|/)${path.slice(1)}`));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
   });
 }

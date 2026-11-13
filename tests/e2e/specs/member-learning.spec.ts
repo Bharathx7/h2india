@@ -23,7 +23,10 @@ test("finishing a chapter shows on the chapter page and on Hydrogen 101", async 
   const first = page.locator("main a[href^='/knowledge/hydrogen-101/']").first();
   test.skip((await first.count()) === 0, "no chapters published");
   await first.click();
-  await page.getByRole("button", { name: "Mark chapter as done" }).click();
+  // Reaching the end marks it done; a short chapter is at its end at once, so the button may already be gone.
+  const mark = page.getByRole("button", { name: "Mark chapter as done" });
+  await expect(mark.or(page.getByText("Chapter done"))).toBeVisible();
+  if (await mark.isVisible()) await mark.click();
   await expect(page.getByText("Chapter done")).toBeVisible();
   await page.reload();
   await expect(page.getByText(/1 of \d+ chapters done/)).toBeVisible();

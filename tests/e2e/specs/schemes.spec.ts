@@ -52,7 +52,9 @@ test("a scheme page shows its official source, last-checked date and status; the
 
   await page.goto(`/opportunities/schemes?state=odisha&benefit=Capital+subsidy&q=${t}#all`);
   await expect(page.getByRole("heading", { name: "All schemes" })).toBeVisible();
-  await expect(page.getByRole("article").filter({ hasText: t })).toHaveCount(1);
+  // Open schemes also show under "Open now"; the filtered list is All schemes.
+  const all = page.locator("section").filter({ has: page.getByRole("heading", { name: "All schemes" }) });
+  await expect(all.getByRole("article").filter({ hasText: t })).toHaveCount(1);
   await page.goto(`/opportunities/schemes?state=odisha&benefit=Grant&q=${t}#all`);
   await expect(page.getByText("No schemes match these filters")).toBeVisible();
 

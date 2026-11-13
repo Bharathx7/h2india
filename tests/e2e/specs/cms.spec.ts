@@ -183,8 +183,8 @@ test("records: status follows the dates, verification is recorded, stale records
       verification?: { at?: string };
     };
   expect((await read()).status).toBe("Closing soon");
-  // Nobody touches it: at the deadline it is closed.
-  await expect.poll(async () => (await read()).status, { timeout: 10_000 }).toBe("Closed");
+  // Nobody touches it: at the deadline bids close and it is under evaluation until results are declared (step 5.5).
+  await expect.poll(async () => (await read()).status, { timeout: 10_000 }).toBe("Under evaluation");
 
   const verified = await cms(page.request, "POST", `tenders/${String(id)}/verify`, { note: "Checked the portal." });
   expect(verified.status).toBe(200);

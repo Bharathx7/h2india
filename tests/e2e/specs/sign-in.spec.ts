@@ -171,9 +171,10 @@ test("after signing in you come back to the page you were on, but never to anoth
 
   await page.goto("/sign-out");
   await withDb((db) => db.query("DELETE FROM core.sign_in_throttle WHERE key = $1", [`sign-in:gap:${email}`]));
-  await page.goto("/sign-in?next=/member%3Ftab%3Dsaved");
+  // A public page with a query (the member home itself first offers onboarding, step 7.1).
+  await page.goto("/sign-in?next=/opportunities/tenders%3Fstate%3Dgujarat");
   await enterCode(page, await requestCode(page, email));
-  await expect(page).toHaveURL(/\/member\?tab=saved$/);
+  await expect(page).toHaveURL(/\/opportunities\/tenders\?state=gujarat$/);
 });
 
 test("Google sends you to Google, or explains when it is not set up here", async ({ page, isMobile }) => {

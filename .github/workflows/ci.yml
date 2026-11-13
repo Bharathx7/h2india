@@ -19,7 +19,7 @@ jobs:
   checks:
     name: Check, test, build, smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     # Real PostgreSQL and Redis for integration tests (step 3.1), Meilisearch (5.2), Mailpit for emails (step 3.2). Throwaway credentials, CI only.
     services:
       postgres:

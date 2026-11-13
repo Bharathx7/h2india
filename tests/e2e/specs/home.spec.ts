@@ -249,6 +249,7 @@ test("newsletter sign-up on the Coming soon page: invalid, sent, confirmed, topi
   await page.goto(COMING_SOON);
   const again = page.getByRole("form", { name: "Get India H₂ Weekly" });
   await again.getByLabel("Your work email").fill(email);
+  await page.waitForTimeout(1200); // a form sent faster than a person types is refused (step 5.9)
   await again.getByRole("button", { name: "Get India H₂ Weekly" }).click();
   await expect(page.getByTestId("newsletter-already")).toContainText("You're already subscribed");
   await newestMail(page, email, "Change your India H₂ Weekly topics", after);

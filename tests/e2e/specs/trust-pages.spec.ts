@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { cms, signInOperator } from "../helpers/cms";
+import { asEditorInChief, cms, publishedLegalPage, signInOperator } from "../helpers/cms";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 5.8 DONE WHEN: a grievance gets a GRV ticket and the acknowledgement email, and its status shows only for the
@@ -108,8 +108,9 @@ test("contact and partnership messages reach the queue with a reference", async 
   await editor.close();
 });
 
-test("legal pages, help search and the company pages", async ({ page }) => {
+test("legal pages, help search and the company pages", async ({ page, browser }, info) => {
   test.setTimeout(120_000);
+  await asEditorInChief(browser, info, (request) => publishedLegalPage(request, "terms", "Terms of use"));
   await page.goto("/legal/terms");
   await expect(page.getByRole("heading", { level: 1, name: "Terms of use" })).toBeVisible();
   await expect(page.getByText(/Last updated .* · Version \d/)).toBeVisible();

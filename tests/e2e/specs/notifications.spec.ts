@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { signInNew } from "../helpers/join";
@@ -158,10 +159,17 @@ test("/dev/messages lists every template and sends a built one to you", async ({
   await signInNew(page, email);
   await page.goto("/dev/messages");
   await expect(page.getByRole("heading", { name: "Message templates" })).toBeVisible();
-  await expect(page.getByRole("row")).toHaveCount(48); // header + 35 designed + 12 undrawn
+  await expect(page.getByRole("row")).toHaveCount(templateCount() + 1); // every template in the registry, plus the header
   const row = page.getByRole("row", { name: /Sign-in code email sign_in_code 671:428/ });
   await row.getByRole("button", { name: "Send to me" }).click();
   await expect(row.getByRole("status")).toHaveText(`Sent to ${email}`);
   await page.goto("/notifications");
   await expect(page.getByRole("main").getByText("Test sent: Sign-in code")).toBeVisible();
 });
+
+/** How many templates the registry holds (packages/emails/src/registry.ts), so the list is checked against it. */
+function templateCount(): number {
+  const src = readFileSync(new URL("../../../packages/emails/src/registry.ts", import.meta.url), "utf8");
+  const block = src.slice(src.indexOf("export const TEMPLATES"), src.indexOf("export const APPROVED_TEXT"));
+  return (block.match(/^ {2}"[a-z]+\.[a-z0-9_]+": \{/gm) ?? []).length;
+}

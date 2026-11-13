@@ -12,7 +12,13 @@ test.beforeEach(async ({ context }, info) => {
 
 test("a catalogue moderator opens the Listings queue", async ({ page }) => {
   await signInOperator(page, "Catalogue moderator");
+  // Queues opens on its first tab, Suppliers (627:8, step 11.2); Listings is one of the tabs.
   await page.goto("/admin/queues");
+  await expect(page).toHaveURL(/\/admin\/queues\/suppliers$/);
+  await page
+    .getByRole("link", { name: /^Listings/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/admin\/queues\/listings$/);
   await expect(page.getByRole("heading", { level: 1, name: "Queues" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Past SLA" })).toBeVisible();

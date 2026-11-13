@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { signInOperator } from "../helpers/cms";
+import { asEditorInChief, publishedIssue, signInOperator } from "../helpers/cms";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 5.9 DONE WHEN: the cookie banner records a choice and analytics load only after consent, never for
@@ -63,9 +63,11 @@ test("the cookie banner records a choice; analytics wait for consent and skip op
 
 test("newsletter sign-up: check your inbox, confirm, already subscribed, one-click unsubscribe", async ({
   page,
+  browser,
 }, info) => {
   test.setTimeout(150_000);
   await ownIp(page.context(), info);
+  await asEditorInChief(browser, info, publishedIssue);
   await page.goto("/newsletter");
   await expect(page.getByRole("heading", { level: 1, name: "Newsletters" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Read issue/ }).first()).toBeVisible();
