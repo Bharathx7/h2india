@@ -2,3 +2,4 @@
 export * from "./transitions";
 export * from "./totals";
 export * from "./records";
+export * from "./match";
