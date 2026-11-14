@@ -135,6 +135,8 @@ export async function decideAction(queue: QueueKey, id: string, decision: Decisi
           venue: v.format === "Online" ? null : venue,
           city: v.format === "Online" ? null : city,
           registrationUrl: v.link ?? null,
+          // The organiser's page is the link they submitted (checkEvent requires it).
+          sourceUrl: v.link ?? "",
           description: v.description ?? null,
           _status: "published",
         } as never,

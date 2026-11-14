@@ -135,7 +135,7 @@ export function buildChecklist(f: SupplierFacts): Checklist {
   const storefront: ChecklistItem = {
     key: "storefront",
     title: "Storefront basics",
-    state: s?.hasLogo && s.hasAbout ? "done" : "todo",
+    state: s?.hasLogo && s.hasAbout ? (s.published ? "done" : "checking") : "todo",
     detail: parts.length
       ? `${parts.join(", ").replace(/, ([^,]*)$/, " and $1")} added`
       : "Add your logo, about and locations",

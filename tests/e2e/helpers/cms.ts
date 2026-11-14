@@ -62,6 +62,11 @@ export async function newAuthor(request: APIRequestContext, name = "Kavita Rao")
   return res.body.doc?.id ?? 0;
 }
 
+/** A browser context for an operator: the back office is desktop only (627:1001), even in the phone project. */
+export function backOfficeContext(browser: Browser) {
+  return browser.newContext({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
+}
+
 /**
  * Content some public-page tests read, published by an Editor-in-chief in a separate browser so the visitor's own
  * session is untouched. CI starts from an empty database, so a test that shows published content makes it first.
@@ -101,6 +106,30 @@ export async function publishedLegalPage(request: APIRequestContext, slug: "term
   const res = existing
     ? await cms(request, "PATCH", `legal-pages/${String(existing.id)}`, data)
     : await cms(request, "POST", "legal-pages", data);
+  expect(res.status, JSON.stringify(res.body.errors)).toBeLessThan(300);
+}
+
+/** A published help article with this title (the help centre is empty in a fresh database). */
+export async function publishedHelpArticle(request: APIRequestContext, title: string) {
+  // Sample articles (local seed data) can't be published, so look only at real ones.
+  const found = await cms(
+    request,
+    "GET",
+    `help-articles?where[title][equals]=${encodeURIComponent(title)}&where[sample][not_equals]=true&limit=1`,
+  );
+  const existing = (found.body as unknown as { docs?: { id: number; _status?: string }[] }).docs?.[0];
+  if (existing?._status === "published") return;
+  const data = {
+    _status: "published",
+    title,
+    slug: `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-e2e`,
+    category: "account",
+    intro: "Placeholder text for the browser tests.",
+    sections: [{ heading: "Test section", text: "Placeholder text for the browser tests." }],
+  };
+  const res = existing
+    ? await cms(request, "PATCH", `help-articles/${String(existing.id)}`, data)
+    : await cms(request, "POST", "help-articles", data);
   expect(res.status, JSON.stringify(res.body.errors)).toBeLessThan(300);
 }
 

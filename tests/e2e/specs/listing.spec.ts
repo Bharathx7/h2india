@@ -92,14 +92,23 @@ test("filters update results and counts, and the address reproduces the view", a
   await expect(page.getByRole("link", { name: `Pump A ${tag}` })).toHaveCount(0);
 });
 
-test("the table shows comparable attributes as columns, and no results offers Clear filters", async ({ page }) => {
+test("the table shows comparable attributes as columns, and no results offers Clear filters", async ({
+  page,
+  isMobile,
+}) => {
   const tag = Math.random().toString(36).slice(2, 8);
   const path = await setUp(tag);
   await page.goto(`${path}?view=table`);
   const table = page.getByRole("region", { name: "Products as a table" });
-  await expect(table.getByRole("columnheader", { name: "Flow" })).toBeVisible();
-  await expect(table.getByRole("columnheader", { name: "Seal" })).toHaveCount(0);
-  await expect(table.getByRole("row", { name: new RegExp(`Pump B ${tag}`) })).toContainText("400 L/min");
+  if (isMobile) {
+    // The table is a desktop view (392:5787); phones keep the list (395:9321).
+    await expect(table).toBeHidden();
+    await expect(page.getByRole("list", { name: "Products" }).locator(":scope > li")).toHaveCount(3);
+  } else {
+    await expect(table.getByRole("columnheader", { name: "Flow" })).toBeVisible();
+    await expect(table.getByRole("columnheader", { name: "Seal" })).toHaveCount(0);
+    await expect(table.getByRole("row", { name: new RegExp(`Pump B ${tag}`) })).toContainText("400 L/min");
+  }
   await noPrice(page);
   expect(
     (await new AxeBuilder({ page }).include("main").analyze()).violations

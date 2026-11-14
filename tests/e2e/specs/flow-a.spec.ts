@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { signInOperator } from "../helpers/cms";
+import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { freshGstin, reachCompanyStep, typeGstin } from "../helpers/join";
+import { signInExisting } from "../helpers/rfq";
 import { enterCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
 
 // Flow A (Figma page 18, 365:23; playbook step 9.9): a buyer from search to an accepted-quote decision. Home search →
@@ -43,7 +44,8 @@ async function setUp(tag: string) {
       ]);
       const user = (
         await db.query<{ id: string }>(
-          `INSERT INTO core.users (id, email, name, email_verified) VALUES (gen_random_uuid(), $1, $2, true) RETURNING id`,
+          // A supplier who joined through the app has a profile type, so sign-in returns them to the page they asked for.
+          `INSERT INTO core.users (id, email, name, email_verified, profile_type) VALUES (gen_random_uuid(), $1, $2, true, 'supplier') RETURNING id`,
           [email, `Quoter ${String(i + 1)}`],
         )
       ).rows[0]?.id;
@@ -66,9 +68,7 @@ async function setUp(tag: string) {
 async function quote(browser: Browser, email: string, unitPrice: string, lead: string) {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.goto("/sign-in?next=/supplier/rfqs");
-  await enterCode(page, await requestCode(page, email));
-  await page.goto("/supplier/rfqs?tab=quote");
+  await signInExisting(page, email, "/supplier/rfqs?tab=quote");
   await page
     .getByRole("link", { name: /Write quote/ })
     .first()
@@ -135,17 +135,19 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
   await page.getByLabel("Required on site by").fill(new Date(Date.now() + 120 * 86_400_000).toISOString().slice(0, 10));
   await page.getByLabel("Offer deadline").fill(new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10));
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByRole("button", { name: "Sign in to send" })).toBeVisible();
-
-  // 4 Sign in, join a buyer company, add a delivery site; the draft is still there.
-  await page.goto("/sign-in?next=/join");
+  // 4 Sign in to send (the draft stays in this browser), join a buyer company, add a delivery site.
+  await page.getByRole("checkbox", { name: "Your contact details are shared only with suppliers who quote." }).check();
+  await page.getByRole("button", { name: "Sign in to send" }).click();
+  await page.waitForURL(/\/sign-in/);
   await enterCode(page, await requestCode(page, buyerEmail));
+  // A new person is offered a passkey ("Not now") and then Join H2 India, as in signInNew().
   const notNow = page.getByRole("button", { name: "Not now" });
-  if (await notNow.isVisible().catch(() => false)) await notNow.click();
+  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 India" }))).toBeVisible();
+  if (await notNow.isVisible()) await notNow.click();
   await reachCompanyStep(page, "Buyer company", "Ravi Kulkarni");
   await typeGstin(page, freshGstin());
-  await page.getByLabel("Company name").fill(`Greenfield ${tag}`);
-  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Create company" }).click();
+  await expect(page.getByText("is set up as a buyer company.", { exact: false })).toBeVisible();
   await page.goto("/buyer/company?section=sites");
   await page.getByRole("button", { name: "Add a delivery site" }).click();
   await page.getByLabel("Site name").fill("Talegaon plant");
@@ -160,12 +162,15 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByText("Your contact details are shared only with suppliers who quote.").click();
+  // The consent ticked before sign-in came back with the draft.
+  await expect(
+    page.getByRole("checkbox", { name: "Your contact details are shared only with suppliers who quote." }),
+  ).toBeChecked();
   await page.getByRole("button", { name: /Send RFQ to 2 suppliers/ }).click();
   await expect(page.getByRole("heading", { name: "Your request is in moderation" })).toBeVisible();
 
   // 6 An operator approves it.
-  const op = await browser.newContext();
+  const op = await backOfficeContext(browser);
   const opPage = await op.newPage();
   await signInOperator(opPage, "Super admin");
   await opPage.goto("/admin/queues/rfqs");
@@ -174,6 +179,20 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
     .first()
     .click();
   await opPage.getByRole("button", { name: "Approve and send" }).click();
+  // Wait for the approval to land before closing the operator's browser.
+  await expect
+    .poll(
+      () =>
+        withDb(async (db) => {
+          const r = await db.query<{ status: string }>(
+            `SELECT status FROM core.rfqs WHERE title = $1 AND status <> 'Draft'`,
+            [`2 × diaphragm compressors ${tag}`],
+          );
+          return r.rows[0]?.status;
+        }),
+      { timeout: 20_000 },
+    )
+    .toBe("Sent");
   await op.close();
 
   // 7 Two suppliers quote; the buyer gets Quote received.

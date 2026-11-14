@@ -111,7 +111,7 @@ export default async function ProductPage({
             { label: p.name },
           ]}
         />
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,600px)_minmax(0,1fr)] lg:gap-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,600px)_minmax(0,1fr)] lg:gap-12">
           <div className="flex flex-col gap-3">
             <div
               className="flex aspect-[4/3] items-center justify-center rounded-card bg-subtle"
@@ -222,7 +222,12 @@ export default async function ProductPage({
         </ul>
       </nav>
 
-      <div className={cx(wrap, "grid gap-12 py-12 lg:grid-cols-[minmax(0,792px)_minmax(0,360px)] lg:justify-between")}>
+      <div
+        className={cx(
+          wrap,
+          "grid grid-cols-1 gap-12 py-12 lg:grid-cols-[minmax(0,792px)_minmax(0,360px)] lg:justify-between",
+        )}
+      >
         <div className="flex min-w-0 flex-col gap-12">
           <Block id="overview" title="Overview and applications">
             {p.summary ? <p className="type-body-lg text-body">{p.summary}</p> : null}

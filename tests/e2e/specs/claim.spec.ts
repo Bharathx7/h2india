@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signInOperator } from "../helpers/cms";
+import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { signInNew } from "../helpers/join";
 import { latestCode, newEmail, ownIp, withDb } from "../helpers/sign-in";
 
@@ -58,7 +58,7 @@ test("flow J: claim by company email, an operator approves, and the profile is c
   await expect(page.getByText("We're checking your claim")).toBeVisible();
 
   // An operator approves it.
-  const ops = await browser.newContext();
+  const ops = await backOfficeContext(browser);
   const opPage = await ops.newPage();
   await signInOperator(opPage, "Super admin");
   await opPage.goto("/admin/verification");

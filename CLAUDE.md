@@ -67,7 +67,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Numbers live in `SIGN_IN` (`@h2india/core/sign-in`, decision A2). Never repeat them in pages.
 - After sign-in, send people only to `safeReturnPath(next)`.
 - Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
-- A test that needs an existing person signs in with `signInExisting()` (`tests/e2e/helpers/rfq.ts`), which waits out the passkey offer and the redirect; rows inserted by SQL give `id` with `gen_random_uuid()` (ids are made in the app, not by the database).
+- A test that needs an existing person signs in with `signInExisting()` (`tests/e2e/helpers/rfq.ts`), which waits out the passkey offer and the redirect; rows inserted by SQL give `id` with `gen_random_uuid()` (ids are made in the app, not by the database), and users made by SQL set `profile_type`, or sign-in sends them to Join.
+- Operators in browser tests use `backOfficeContext(browser)` (the back office is desktop only, also in the phone project), and a test waits for a decision to be saved (poll the database) before closing the operator's browser.
 
 ## Authorisation (step 3.4)
 
@@ -172,6 +173,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Grievances go through `raiseGrievance()` and `moveGrievance()` (`@h2india/core/grievances`): GRV reference, two clocks, status changes through `changeStatus()`. The status lookup needs the ticket and the email together (`findGrievance()`) and returns only the steps.
 - Contact, partnership and advertising forms post through `submitContent()` like step 5.7 (CON-, PE-, ADV-).
 - Scrollable table wrappers need `tabIndex={0}`, `role="region"` and a label (axe "scrollable-region-focusable").
+- A `grid` that sets columns only from a breakpoint (`md:grid-cols-…`) also needs `grid-cols-1`, or a wide child widens the page on phones and covers buttons.
 
 ## Newsletter, consent and form protection (step 5.9)
 

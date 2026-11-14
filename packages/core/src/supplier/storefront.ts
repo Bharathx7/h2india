@@ -235,14 +235,31 @@ export async function decideStorefront(
   });
 }
 
-/** For the checklist's Storefront basics (584:8): logo, about, locations on the live storefront. */
+/**
+ * For the checklist's Storefront basics (584:8): logo, about, locations on the live storefront. Until a storefront has
+ * the basics live, changes sent for review count too (published: false), so the step reads "being checked" and a new
+ * supplier can submit for review while H2 India checks the storefront.
+ */
 export async function storefrontFacts(db: Executor, organisationId: string) {
   const [p] = await db.select().from(prof).where(eq(prof.organisationId, organisationId));
   if (!p) return null;
-  return {
+  const live = {
     hasLogo: Boolean(p.storefront.logoFileId),
     hasAbout: Boolean(p.storefront.about ?? p.summary),
     locations: p.storefront.locations?.length ?? 0,
     published: true,
   };
+  if (live.hasLogo && live.hasAbout) return live;
+  const [rev] = await db
+    .select({ data: r.data })
+    .from(r)
+    .where(and(eq(r.organisationId, organisationId), eq(r.status, "In review")))
+    .orderBy(desc(r.submittedAt))
+    .limit(1);
+  if (!rev) return live;
+  const d = rev.data as StorefrontForm;
+  const hasLogo = live.hasLogo || Boolean(d.logoFileId);
+  const hasAbout = live.hasAbout || Boolean(d.about);
+  if (!hasLogo || !hasAbout) return live;
+  return { hasLogo, hasAbout, locations: d.locations?.length ?? live.locations, published: false };
 }

@@ -42,7 +42,7 @@ function Section({ id, title, text, children }: { id: string; title: string; tex
   return (
     <section
       id={id}
-      className="grid scroll-mt-24 gap-4 rounded-card border border-default bg-page p-5 md:grid-cols-[220px_minmax(0,1fr)] md:p-6"
+      className="grid scroll-mt-24 grid-cols-1 gap-4 rounded-card border border-default bg-page p-5 md:grid-cols-[220px_minmax(0,1fr)] md:p-6"
     >
       <div>
         <h2 className="type-h4">{title}</h2>
@@ -375,7 +375,7 @@ export function ProductEditor({
             }}
           />
         </Field>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field label="Model">
             <Input
               value={f.model}
@@ -448,7 +448,7 @@ export function ProductEditor({
         {groups.map((g) => (
           <fieldset key={g} className="flex flex-col gap-3">
             <legend className="mb-1 type-eyebrow text-secondary">{g}</legend>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {defs
                 .filter((d) => d.displayGroup === g)
                 .map((d) => (
@@ -606,7 +606,7 @@ export function ProductEditor({
           </RadioGroup>
         </fieldset>
         {f.pricing === "fixed" ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Price (₹, before GST)" required error={errors.pricePaise}>
               <Input
                 inputMode="decimal"
@@ -630,7 +630,7 @@ export function ProductEditor({
           </div>
         ) : null}
         {f.pricing === "indicative" ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Lowest (₹)" required error={errors.indicativeMinPaise}>
               <Input
                 inputMode="decimal"
@@ -653,7 +653,7 @@ export function ProductEditor({
             </Field>
           </div>
         ) : null}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field
             label="Lead time (weeks)"
             required
@@ -693,7 +693,7 @@ export function ProductEditor({
             />
           </Field>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Field label="Stock" required hint="Made to order products show lead time instead of stock.">
             <Select
               value={f.stock}

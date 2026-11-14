@@ -54,4 +54,18 @@ describe("onboarding checklist (584:8)", () => {
     expect(canSubmitForReview(ready)).toBe(true);
     expect(buildChecklist({ ...base, review: "approved" }).items[4]?.state).toBe("done");
   });
+
+  it("counts a storefront sent for review as being checked, so a new supplier can submit", () => {
+    const c = buildChecklist({
+      ...base,
+      gstin: { number: "x", status: "Pending" },
+      companyComplete: true,
+      documents: { uploaded: 2, verified: 0, needed: 2 },
+      bank: { last4: "1", nameMatches: true, verified: false },
+      storefront: { hasLogo: true, hasAbout: true, locations: 0, published: false },
+      products: { total: 1, submitted: 1 },
+    });
+    expect(c.items[2]?.state).toBe("checking");
+    expect(canSubmitForReview(c)).toBe(true);
+  });
 });
