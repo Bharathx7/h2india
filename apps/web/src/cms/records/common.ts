@@ -1,21 +1,16 @@
 import { audit, getDb } from "@h2india/core";
-import { GST_STATES } from "@h2india/core/companies/client";
 import { APIError, type CollectionConfig, type Endpoint, type Field } from "payload";
 import { canDelete, canEdit, editorOf } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
+import { searchHooks } from "../../search/hooks";
+import { STATE_OPTIONS } from "./states";
 
 // What every record shares (step 4.3, A30, A31): an official source and documents, "last verified" with who and a
 // note (Records not verified for 30 days move to Data quality), owner, states, topics, a sample flag (F9), drafts and
 // versions. Content editors publish record changes (A30).
 
-export const STATE_OPTIONS = [
-  { label: "All India", value: "all-india" },
-  ...[...new Set(Object.values(GST_STATES))]
-    .filter((s) => s !== "Other Territory" && s !== "Centre Jurisdiction")
-    .sort()
-    .map((s) => ({ label: s, value: s.toLowerCase().replace(/[^a-z0-9]+/g, "-") })),
-];
+export { STATE_OPTIONS };
 
 /** Date fields shown and entered in India time (deadlines have a time: a tender closing "2 Dec" closes at an hour). */
 export function istDate(name: string, label: string, required = false): Field {
@@ -156,6 +151,8 @@ export function recordCollection(input: {
     access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
     endpoints: [verifyEndpoint(input.slug)],
     hooks: {
+      // Search (step 5.2): saves and deletes queue an index change in the same transaction.
+      ...searchHooks,
       afterRead: [
         ({ doc }) => {
           const d = doc as Record<string, unknown>;

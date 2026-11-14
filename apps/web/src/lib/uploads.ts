@@ -37,6 +37,7 @@ const SHORT: Record<string, string> = {
   "image/png": "PNG",
   "image/webp": "WebP",
   "image/svg+xml": "SVG",
+  "text/csv": "CSV",
 };
 const BY_EXTENSION: Record<string, FileType> = {
   pdf: "application/pdf",
@@ -45,6 +46,7 @@ const BY_EXTENSION: Record<string, FileType> = {
   png: "image/png",
   webp: "image/webp",
   svg: "image/svg+xml",
+  csv: "text/csv",
 };
 
 /** The type the browser reports, or one from the extension when it reports none. The server checks the bytes. */

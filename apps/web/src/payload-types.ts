@@ -75,6 +75,7 @@ export interface Config {
     jobs: Job;
     events: Event;
     'source-changes': SourceChange;
+    submissions: Submission;
     chapters: Chapter;
     guides: Guide;
     glossary: Glossary;
@@ -93,6 +94,13 @@ export interface Config {
     'tracker-hubs': TrackerHub;
     'tracker-changes': TrackerChange;
     'early-listings': EarlyListing;
+    'newsletter-issues': NewsletterIssue;
+    'legal-pages': LegalPage;
+    'help-articles': HelpArticle;
+    'team-members': TeamMember;
+    'application-pages': ApplicationPage;
+    people: Person;
+    associations: Association;
     authors: Author;
     topics: Topic;
     tags: Tag;
@@ -113,6 +121,7 @@ export interface Config {
     jobs: JobsSelect<false> | JobsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'source-changes': SourceChangesSelect<false> | SourceChangesSelect<true>;
+    submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
     chapters: ChaptersSelect<false> | ChaptersSelect<true>;
     guides: GuidesSelect<false> | GuidesSelect<true>;
     glossary: GlossarySelect<false> | GlossarySelect<true>;
@@ -131,6 +140,13 @@ export interface Config {
     'tracker-hubs': TrackerHubsSelect<false> | TrackerHubsSelect<true>;
     'tracker-changes': TrackerChangesSelect<false> | TrackerChangesSelect<true>;
     'early-listings': EarlyListingsSelect<false> | EarlyListingsSelect<true>;
+    'newsletter-issues': NewsletterIssuesSelect<false> | NewsletterIssuesSelect<true>;
+    'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
+    'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    'application-pages': ApplicationPagesSelect<false> | ApplicationPagesSelect<true>;
+    people: PeopleSelect<false> | PeopleSelect<true>;
+    associations: AssociationsSelect<false> | AssociationsSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -147,13 +163,25 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'tracker-methodology': TrackerMethodology;
+    'tracker-overview': TrackerOverview;
     'home-figures': HomeFigure;
     prelaunch: Prelaunch;
+    'sight-tracker': SightTracker;
+    'trust-settings': TrustSetting;
+    pricing: Pricing;
+    'audience-faqs': AudienceFaq;
+    maintenance: Maintenance;
   };
   globalsSelect: {
     'tracker-methodology': TrackerMethodologySelect<false> | TrackerMethodologySelect<true>;
+    'tracker-overview': TrackerOverviewSelect<false> | TrackerOverviewSelect<true>;
     'home-figures': HomeFiguresSelect<false> | HomeFiguresSelect<true>;
     prelaunch: PrelaunchSelect<false> | PrelaunchSelect<true>;
+    'sight-tracker': SightTrackerSelect<false> | SightTrackerSelect<true>;
+    'trust-settings': TrustSettingsSelect<false> | TrustSettingsSelect<true>;
+    pricing: PricingSelect<false> | PricingSelect<true>;
+    'audience-faqs': AudienceFaqsSelect<false> | AudienceFaqsSelect<true>;
+    maintenance: MaintenanceSelect<false> | MaintenanceSelect<true>;
   };
   locale: null;
   widgets: {
@@ -206,7 +234,63 @@ export interface Article {
    * Part of the address. Don't change it once published.
    */
   slug: string;
+  /**
+   * The lead story on the news home (428:473), or the featured piece on Insights (440:40).
+   */
+  featured?: boolean | null;
+  /**
+   * Who it's written for. Shown on Insights (440:40).
+   */
+  level?: ('Beginner' | 'Professional' | 'Expert') | null;
+  /**
+   * For the news home's state filter. Leave empty for national stories.
+   */
+  states?:
+    | (
+        | 'all-india'
+        | 'andaman-and-nicobar-islands'
+        | 'andhra-pradesh'
+        | 'arunachal-pradesh'
+        | 'assam'
+        | 'bihar'
+        | 'chandigarh'
+        | 'chhattisgarh'
+        | 'dadra-and-nagar-haveli-and-daman-and-diu'
+        | 'delhi'
+        | 'goa'
+        | 'gujarat'
+        | 'haryana'
+        | 'himachal-pradesh'
+        | 'jammu-and-kashmir'
+        | 'jharkhand'
+        | 'karnataka'
+        | 'kerala'
+        | 'ladakh'
+        | 'lakshadweep'
+        | 'madhya-pradesh'
+        | 'maharashtra'
+        | 'manipur'
+        | 'meghalaya'
+        | 'mizoram'
+        | 'nagaland'
+        | 'odisha'
+        | 'puducherry'
+        | 'punjab'
+        | 'rajasthan'
+        | 'sikkim'
+        | 'tamil-nadu'
+        | 'telangana'
+        | 'tripura'
+        | 'uttar-pradesh'
+        | 'uttarakhand'
+        | 'west-bengal'
+      )[]
+    | null;
   dek: string;
+  /**
+   * The side box on analysis pieces (437:3709).
+   */
+  whyItMatters?: string | null;
   heroImage?: (number | null) | Media;
   body: {
     root: {
@@ -235,6 +319,10 @@ export interface Article {
   sponsor?: {
     name?: string | null;
     logo?: (number | null) | Media;
+    /**
+     * “About the sponsor” in the side column (437:4387): what the company does.
+     */
+    about?: string | null;
     disclosure?: string | null;
   };
   /**
@@ -281,6 +369,62 @@ export interface Article {
         id?: string | null;
       }[]
     | null;
+  keyFacts?:
+    | {
+        /**
+         * For example Issuer, Bid due
+         */
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * For an event that unfolds through the day (an auction, a results day). Updates show newest first.
+   */
+  live?: {
+    status?: ('off' | 'live' | 'ended') | null;
+    summary?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    summaryAt?: string | null;
+    keyNumbers?:
+      | {
+          /**
+           * As readers see it, for example ₹49.20
+           */
+          value: string;
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    keyNumbersSource?: string | null;
+    meaning?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    updates?:
+      | {
+          at: string;
+          title: string;
+          text?: string | null;
+          document?: {
+            title?: string | null;
+            url?: string | null;
+            /**
+             * For example PDF · 3 pages · seci.co.in
+             */
+            note?: string | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+  };
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -296,8 +440,15 @@ export interface Article {
 export interface Topic {
   id: number;
   name: string;
+  /**
+   * The section's address, /news/<slug>. Don't change it once published.
+   */
   slug: string;
   description?: string | null;
+  /**
+   * Where the section sits in the news tabs and on the news home (428:473); lowest first.
+   */
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -508,7 +659,17 @@ export interface Scheme {
   /**
    * Leave empty: Open or Closing soon come from the deadline.
    */
-  statusOverride?: ('Closed' | 'Next round expected') | null;
+  statusOverride?: ('Announced' | 'Results declared' | 'Next round expected' | 'Closed') | null;
+  /**
+   * For example ₹13,050 crore for Component II.
+   */
+  outlay?: string | null;
+  benefitTypes?:
+    ('Capital subsidy' | 'Production incentive' | 'Viability gap funding' | 'Grant' | 'Tax or duty exemption')[] | null;
+  /**
+   * Shown in “At a glance” (416:1354). Applications always happen on the official portal.
+   */
+  howToApply?: string | null;
   summary: string;
   purpose?: string | null;
   tranches?:
@@ -521,6 +682,7 @@ export interface Scheme {
          * For example Results declared, Closing soon.
          */
         state?: string | null;
+        resultsUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -531,6 +693,16 @@ export interface Scheme {
       }[]
     | null;
   benefits?: string | null;
+  /**
+   * The figures under Benefits (416:1354), for example Year 1 · ₹4 / kg.
+   */
+  benefitRates?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
   timeline?:
     | {
         when: string;
@@ -566,6 +738,78 @@ export interface Scheme {
     | null;
   topics?: (number | Topic)[] | null;
   /**
+   * Who the official notice says can apply, in the checker's terms. Leave a list empty when the notice doesn't limit it. Never guess (M25).
+   */
+  eligibilityRules?: {
+    /**
+     * Only schemes with this ticked appear in the eligibility checker.
+     */
+    checked?: boolean | null;
+    organisations?:
+      | ('producer' | 'manufacturer' | 'startup' | 'research' | 'industrial' | 'state-agency' | 'transport' | 'other')[]
+      | null;
+    states?:
+      | (
+          | 'all-india'
+          | 'andaman-and-nicobar-islands'
+          | 'andhra-pradesh'
+          | 'arunachal-pradesh'
+          | 'assam'
+          | 'bihar'
+          | 'chandigarh'
+          | 'chhattisgarh'
+          | 'dadra-and-nagar-haveli-and-daman-and-diu'
+          | 'delhi'
+          | 'goa'
+          | 'gujarat'
+          | 'haryana'
+          | 'himachal-pradesh'
+          | 'jammu-and-kashmir'
+          | 'jharkhand'
+          | 'karnataka'
+          | 'kerala'
+          | 'ladakh'
+          | 'lakshadweep'
+          | 'madhya-pradesh'
+          | 'maharashtra'
+          | 'manipur'
+          | 'meghalaya'
+          | 'mizoram'
+          | 'nagaland'
+          | 'odisha'
+          | 'puducherry'
+          | 'punjab'
+          | 'rajasthan'
+          | 'sikkim'
+          | 'tamil-nadu'
+          | 'telangana'
+          | 'tripura'
+          | 'uttar-pradesh'
+          | 'uttarakhand'
+          | 'west-bengal'
+        )[]
+      | null;
+    activities?:
+      | (
+          | 'production'
+          | 'electrolysers'
+          | 'fuel-cells'
+          | 'storage'
+          | 'refuelling'
+          | 'industry'
+          | 'research'
+          | 'services'
+        )[]
+      | null;
+    sizes?: ('micro' | 'small' | 'medium' | 'large')[] | null;
+    dpiitOnly?: boolean | null;
+    stages?: ('idea' | 'pilot' | 'first-plant' | 'expanding')[] | null;
+    /**
+     * Shown with each match (750:8), for example “The minimum investment in the policy notice”.
+     */
+    checkNext?: string[] | null;
+  };
+  /**
    * From the dates; nobody needs to change it.
    */
   status?: string | null;
@@ -597,6 +841,11 @@ export interface Tender {
   issuer: string;
   tenderId: string;
   /**
+   * For example Solar Energy Corporation of India.
+   */
+  issuerName?: string | null;
+  issuerType?: ('SECI' | 'Public sector companies' | 'State agencies' | 'Ports' | 'Private') | null;
+  /**
    * For example Open tender · two-bid system.
    */
   mode?: string | null;
@@ -604,6 +853,20 @@ export interface Tender {
    * For example Systems › Electrolysers.
    */
   category?: string | null;
+  /**
+   * The tenders list filters on this (455:1621).
+   */
+  sector?:
+    | (
+        | 'Production'
+        | 'Ammonia and methanol'
+        | 'Electrolysers'
+        | 'Refuelling stations'
+        | 'EPC'
+        | 'Equipment'
+        | 'Services'
+      )
+    | null;
   states?:
     | (
         | 'all-india'
@@ -649,23 +912,47 @@ export interface Tender {
    * Or “Not disclosed”.
    */
   value?: string | null;
+  /**
+   * Leave empty when the value isn't published.
+   */
+  valueBand?: ('Under ₹10 crore' | '₹10–100 crore' | 'Over ₹100 crore') | null;
   emd?: string | null;
   documentFee?: string | null;
   /**
    * India time (IST).
    */
+  publishedAt?: string | null;
+  /**
+   * India time (IST).
+   */
   bidDueAt: string;
+  /**
+   * Fill in when a corrigendum moves the bid due date: the tender shows as Extended.
+   */
+  extendedFrom?: string | null;
+  /**
+   * Key facts (457:3222), for example Green ammonia producers with plants in India.
+   */
+  whoCanBid?: string | null;
   keyDates?:
     | {
         /**
          * Pre-bid meeting, Technical bid opening…
          */
         label: string;
-        at: string;
+        at?: string | null;
+        /**
+         * Instead of a date, or after it: “online”, “After technical evaluation”.
+         */
+        note?: string | null;
         id?: string | null;
       }[]
     | null;
   description: string;
+  /**
+   * Shows the tender on these schemes' pages and the SIGHT tracker (step 5.4).
+   */
+  schemes?: (number | Scheme)[] | null;
   eligibility?:
     | {
         condition: string;
@@ -698,19 +985,55 @@ export interface Tender {
      * India time (IST).
      */
     declaredAt?: string | null;
+    /**
+     * When only the month or year is public, for example Aug 2025.
+     */
+    dateLabel?: string | null;
     winners?:
       | {
           name: string;
           capacity?: string | null;
           price?: string | null;
+          /**
+           * For example Noida, Uttar Pradesh.
+           */
+          place?: string | null;
+          /**
+           * For example Green ammonia · Producer.
+           */
+          about?: string | null;
+          /**
+           * The company's profile address, when it has one.
+           */
+          profileSlug?: string | null;
           id?: string | null;
         }[]
       | null;
+    /**
+     * When there are many, for example 9 companies, incl. L&T Energy GreenTech.
+     */
+    winnersLine?: string | null;
+    /**
+     * For example 4,50,000 t/yr in total.
+     */
+    capacityLine?: string | null;
+    /**
+     * For example ₹52.25 per kg.
+     */
+    price?: string | null;
     /**
      * Number of bidders, or “Not public”.
      */
     bidders?: string | null;
     whatItMeans?: string | null;
+    /**
+     * “What it means” links here (460:4147).
+     */
+    analysis?: (number | null) | Article;
+    /**
+     * For example SECI e-reverse auction result, 8 Aug 2025.
+     */
+    source?: string | null;
   };
   topics?: (number | Topic)[] | null;
   /**
@@ -742,33 +1065,63 @@ export interface Grant {
    * Part of the address. Don't change it once published.
    */
   slug: string;
+  /**
+   * Short name: ANRF, MNRE, DST.
+   */
   funder: string;
   /**
-   * For example Up to ₹5,00,00,000.
+   * For example Anusandhan National Research Foundation.
+   */
+  funderName?: string | null;
+  /**
+   * For example Up to ₹1.5 crore per project, over 3 years.
    */
   amountPerProject?: string | null;
+  /**
+   * Under the title on cards; the amount is used when empty.
+   */
+  summary?: string | null;
   themes?:
-    | ('Electrolysers' | 'Storage' | 'Fuel cells' | 'Safety and standards' | 'Materials' | 'Transport' | 'Industry')[]
-    | null;
-  whoCanApply?:
     | (
-        | 'Green hydrogen producers'
-        | 'Electrolyser manufacturers'
-        | 'Project developers'
-        | 'Research institutions'
-        | 'Start-ups'
-        | 'Manufacturers'
-        | 'State agencies'
+        | 'Production'
+        | 'Storage and transport'
+        | 'Fuel cells'
+        | 'Materials and catalysts'
+        | 'Safety and testing'
+        | 'Applications'
       )[]
     | null;
+  whoCanApply?: ('Researchers' | 'Institutions' | 'Start-ups' | 'Companies' | 'Consortia')[] | null;
+  /**
+   * At a glance (463:5337), for example Researchers at recognised Indian institutions.
+   */
+  whoText?: string | null;
   /**
    * India time (IST).
    */
   deadline: string;
   /**
-   * Leave empty: it follows the deadline.
+   * Leave empty: it follows the deadline. Announced: dates are out, applications aren't.
    */
-  statusOverride?: 'Closed' | null;
+  statusOverride?: ('Announced' | 'Closed') | null;
+  /**
+   * The research areas drawn as chips, for example Low-iridium PEM anodes.
+   */
+  focusAreas?: string[] | null;
+  focusNote?: string | null;
+  /**
+   * Steps before the first future date show as done; the next one as current.
+   */
+  steps?:
+    | {
+        step: string;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown under the steps, for example An industry partner is optional.
+   */
   howToApply: string;
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
@@ -783,16 +1136,22 @@ export interface Grant {
         id?: string | null;
       }[]
     | null;
+  /**
+   * For example 2025 call.
+   */
+  pastCallLabel?: string | null;
+  pastCallUrl?: string | null;
   pastAwardees?:
     | {
         name: string;
         project?: string | null;
+        amount?: string | null;
         year?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Shown once the call closes, for example Q3 2027.
+   * Shown once the call closes, for example mid-2027. Announced calls show it too.
    */
   nextCallExpected?: string | null;
   states?:
@@ -866,16 +1225,32 @@ export interface Job {
    * Part of the address. Don't change it once published.
    */
   slug: string;
-  /**
-   * Links to the company profile in Stage 6.
-   */
   company: string;
+  function?:
+    | (
+        | 'Engineering'
+        | 'Operations and maintenance'
+        | 'Safety'
+        | 'Research'
+        | 'Policy and regulation'
+        | 'Sales and business development'
+      )
+    | null;
+  jobType?: ('Full-time' | 'Part-time' | 'Contract' | 'Internship') | null;
   /**
-   * For example Engineering · commissioning.
+   * The company's H2 India profile address, when it has one.
    */
-  function?: string | null;
+  companySlug?: string | null;
+  /**
+   * Under the name, for example Electrolyser manufacturer · Ratnagiri.
+   */
+  companyLine?: string | null;
   location: string;
   workMode?: ('On site' | 'Hybrid' | 'Remote') | null;
+  /**
+   * For example 60% travel.
+   */
+  locationNote?: string | null;
   states?:
     | (
         | 'all-india'
@@ -917,12 +1292,26 @@ export interface Job {
         | 'west-bengal'
       )[]
     | null;
-  experience?: ('0–2 years' | '3–6 years' | '7–10 years' | '10+ years') | null;
+  experience?:
+    | ('Students' | '0–2 years' | '2–4 years' | '3–6 years' | '4–8 years' | '5–8 years' | '6–10 years' | '10+ years')
+    | null;
   /**
-   * ₹ lakh a year, for example 12–16.
+   * ₹ lakh a year, for example 12–16; or as written, starting with ₹.
    */
   salaryBand?: string | null;
   description: string;
+  duties?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  needs?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
   skills?: string[] | null;
   howToApply: 'link' | 'email' | 'form';
   applyEmail?: string | null;
@@ -934,6 +1323,9 @@ export interface Job {
    * India time (IST).
    */
   closesAt: string;
+  /**
+   * Editors only (A69): pinned at the top of the jobs list.
+   */
   featured?: boolean | null;
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
@@ -949,6 +1341,16 @@ export interface Job {
       }[]
     | null;
   topics?: (number | Topic)[] | null;
+  /**
+   * Jobs companies post (467:7472) wait here as drafts. Publishing approves them.
+   */
+  post?: {
+    state?: ('Draft' | 'Submitted for review') | null;
+    reference?: string | null;
+    organisationId?: string | null;
+    submittedBy?: string | null;
+    submittedAt?: string | null;
+  };
   /**
    * From the dates; nobody needs to change it.
    */
@@ -979,7 +1381,8 @@ export interface Event {
    */
   slug: string;
   organiser: string;
-  format: 'Conference · in person' | 'Workshop · in person' | 'Expo · in person' | 'Webinar · online' | 'Hybrid';
+  eventType: 'Conference and expo' | 'Webinar' | 'Workshop and training' | 'Roundtable' | 'Site visit';
+  attendance: 'In person' | 'Online' | 'Hybrid';
   /**
    * India time (IST).
    */
@@ -992,6 +1395,10 @@ export interface Event {
    * Leave empty for online events.
    */
   venue?: string | null;
+  /**
+   * For example New Delhi. Used by the City filter.
+   */
+  city?: string | null;
   states?:
     | (
         | 'all-india'
@@ -1033,15 +1440,150 @@ export interface Event {
         | 'west-bengal'
       )[]
     | null;
+  /**
+   * For example 140 exhibitors · free trade visitor pass.
+   */
+  summaryLine?: string | null;
   tickets?: ('Free' | 'Paid') | null;
   /**
-   * For example ₹3,500 to ₹6,000.
+   * As the organiser sells them.
    */
   priceText?: string | null;
   registrationUrl?: string | null;
   description?: string | null;
+  /**
+   * For example The organiser · checked by H2 India.
+   */
+  listedBy?: string | null;
+  /**
+   * Editors only (F7): shown first with a Featured label.
+   */
+  featured?: boolean | null;
   sponsoredPlacement?: boolean | null;
   inNewsletter?: boolean | null;
+  agenda?:
+    | {
+        day?: string | null;
+        /**
+         * 10:30 AM
+         */
+        time: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  speakers?:
+    | {
+        name: string;
+        role?: string | null;
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  exhibitorCount?: number | null;
+  /**
+   * Webinars, for example H2 India editorial team.
+   */
+  host?: string | null;
+  exhibitors?:
+    | {
+        name: string;
+        stall?: string | null;
+        /**
+         * For example Electrolysers.
+         */
+        about?: string | null;
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Registration on H2 India (732:521). The join link is sent only to people who registered.
+   */
+  webinar?: {
+    learn?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Empty: no limit.
+     */
+    capacity?: number | null;
+    closed?: boolean | null;
+    /**
+     * The meeting link. Shown to registered people from 15 minutes before.
+     */
+    joinUrl?: string | null;
+    sponsor?: {
+      /**
+       * Leave empty when nobody paid for it.
+       */
+      name?: string | null;
+      disclosure?: string | null;
+      profileSlug?: string | null;
+    };
+    /**
+     * After the webinar: the replay page (733:22), for registered people only.
+     */
+    replay?: {
+      url?: string | null;
+      minutes?: number | null;
+      slidesUrl?: string | null;
+      /**
+       * For example PDF · 2.4 MB
+       */
+      slidesNote?: string | null;
+      chapters?:
+        | {
+            at: string;
+            title: string;
+            id?: string | null;
+          }[]
+        | null;
+      qa?:
+        | {
+            question: string;
+            answer: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  /**
+   * During the event (733:493): the page shows these while “Live now” is ticked.
+   */
+  live?: {
+    on?: boolean | null;
+    /**
+     * For example Day 2 of 3.
+     */
+    dayLabel?: string | null;
+    announcements?:
+      | {
+          /**
+           * Day 2
+           */
+          day: string;
+          company: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    updates?:
+      | {
+          at: string;
+          title: string;
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  coverage?: {
+    note?: string | null;
+    articles?: (number | Article)[] | null;
+  };
   /**
    * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
    */
@@ -1115,6 +1657,43 @@ export interface SourceChange {
   createdAt: string;
 }
 /**
+ * Events, press releases, corrections, pitches, contact messages and partnership and advertising enquiries from the public forms, newest first.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions".
+ */
+export interface Submission {
+  id: number;
+  reference: string;
+  kind: 'event' | 'press_release' | 'correction' | 'pitch' | 'contact' | 'partnership' | 'advertising';
+  status: 'Under review' | 'Published' | 'Needs changes' | 'Declined' | 'Answered';
+  title: string;
+  /**
+   * Everything the form asked, as sent.
+   */
+  details:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  /**
+   * File ids (logo, images), opened through the files service.
+   */
+  files?: string[] | null;
+  submittedBy?: string | null;
+  organisationId?: string | null;
+  reviewNote?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chapters".
  */
@@ -1129,6 +1708,7 @@ export interface Chapter {
   summary: string;
   readingMinutes?: number | null;
   heroImage?: (number | null) | Media;
+  heroCaption?: string | null;
   body: {
     root: {
       type: string;
@@ -1144,45 +1724,27 @@ export interface Chapter {
     };
     [k: string]: unknown;
   };
-  topics?: (number | Topic)[] | null;
+  keyTerms?: (number | Glossary)[] | null;
   /**
-   * Sample content (F9): never shown in production.
+   * Questions at the end of the chapter (471:1876). The answer is checked in the browser.
    */
-  sample?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "guides".
- */
-export interface Guide {
-  id: number;
-  title: string;
-  slug: string;
-  summary: string;
-  authors?: (number | Author)[] | null;
-  heroImage?: (number | null) | Media;
-  body: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Catalogue categories; linked to live products with the marketplace (Stage 6).
-   */
-  productCategories?: string[] | null;
+  quiz?:
+    | {
+        question: string;
+        options?:
+          | {
+              option: string;
+              id?: string | null;
+            }[]
+          | null;
+        answer: number;
+        /**
+         * Shown after they check.
+         */
+        explanation?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   topics?: (number | Topic)[] | null;
   /**
    * Sample content (F9): never shown in production.
@@ -1208,6 +1770,10 @@ export interface Glossary {
    */
   expansion?: string | null;
   /**
+   * Shown under the term (735:3810), for example Economics.
+   */
+  category?: ('Technology' | 'Economics' | 'Policy' | 'Safety' | 'Markets' | 'Units') | null;
+  /**
    * Other ways it's written; each is linked in articles too.
    */
   aliases?: string[] | null;
@@ -1230,6 +1796,15 @@ export interface Glossary {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * A formula, shown in a code box. Leave empty when there isn't one.
+   */
+  formula?: string | null;
+  formulaNote?: string | null;
+  /**
+   * Listed under Most searched on the glossary (735:3378).
+   */
+  popular?: boolean | null;
   related?: (number | Glossary)[] | null;
   standards?: (number | Standard)[] | null;
   /**
@@ -1255,7 +1830,7 @@ export interface Standard {
    * For example ISO 22734:2019.
    */
   code: string;
-  kind: 'Standard' | 'Regulation' | 'Rule' | 'Guideline';
+  kind: 'Standard' | 'Rule' | 'Notification' | 'Guideline' | 'Regulation';
   title: string;
   slug: string;
   /**
@@ -1263,6 +1838,15 @@ export interface Standard {
    */
   issuer: string;
   inForce?: ('In force' | 'Draft' | 'Withdrawn' | 'Superseded') | null;
+  /**
+   * Its date.
+   */
+  dated?: string | null;
+  /**
+   * For example office memorandum.
+   */
+  documentType?: string | null;
+  checkedAt?: string | null;
   summary: string;
   body?: {
     root: {
@@ -1279,11 +1863,71 @@ export interface Standard {
     };
     [k: string]: unknown;
   } | null;
+  scope?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  related?: (number | Standard)[] | null;
   /**
    * Equipment it applies to; linked to products in Stage 6.
    */
   appliesTo?: string[] | null;
   sourceUrl: string;
+  topics?: (number | Topic)[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides".
+ */
+export interface Guide {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  /**
+   * Who it's written for. Shown on Insights (440:40).
+   */
+  level?: ('Beginner' | 'Professional' | 'Expert') | null;
+  /**
+   * For example Plant engineers and procurement teams choosing a first electrolyser.
+   */
+  audience?: string | null;
+  learn?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  authors?: (number | Author)[] | null;
+  heroImage?: (number | null) | Media;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Catalogue categories; linked to live products with the marketplace (Stage 6).
+   */
+  productCategories?: string[] | null;
   topics?: (number | Topic)[] | null;
   /**
    * Sample content (F9): never shown in production.
@@ -1392,6 +2036,10 @@ export interface ReportLead {
    */
   consentText?: string | null;
   /**
+   * The version of those words.
+   */
+  consentVersion?: string | null;
+  /**
    * Set when a signed-in member downloaded it (never shared).
    */
   userId?: string | null;
@@ -1407,12 +2055,48 @@ export interface Video {
   title: string;
   slug: string;
   series?: string | null;
+  /**
+   * The row it sits in on Videos (273:22177).
+   */
+  kind?: ('Explainer' | '60-second explainer' | 'Interview' | 'Event highlight') | null;
+  /**
+   * The big video at the top of Videos.
+   */
+  featured?: boolean | null;
+  /**
+   * For example English with Hindi subtitles.
+   */
+  language?: string | null;
   description: string;
   /**
    * Where it's hosted (M9). Only the address is kept here.
    */
   url: string;
   durationMinutes?: number | null;
+  publishedOn?: string | null;
+  people?:
+    | {
+        name: string;
+        /**
+         * For example CTO, Hydrotek Systems · guest.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  chapters?:
+    | {
+        /**
+         * mm:ss
+         */
+        at: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Speaker on its own line ending with a colon.
+   */
   transcript?: string | null;
   thumbnail?: (number | null) | Media;
   topics?: (number | Topic)[] | null;
@@ -1437,10 +2121,38 @@ export interface Podcast {
   description: string;
   guests?: string[] | null;
   /**
+   * For example Spotify, Apple Podcasts and YouTube.
+   */
+  alsoOn?: string | null;
+  /**
    * Where it's hosted (M9). Only the address is kept here.
    */
   url: string;
   durationMinutes?: number | null;
+  publishedOn?: string | null;
+  people?:
+    | {
+        name: string;
+        /**
+         * For example CTO, Hydrotek Systems · guest.
+         */
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  chapters?:
+    | {
+        /**
+         * mm:ss
+         */
+        at: string;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Speaker on its own line ending with a colon.
+   */
   transcript?: string | null;
   topics?: (number | Topic)[] | null;
   /**
@@ -2186,6 +2898,42 @@ export interface TrackerPolicy {
   officialUrl: string;
   scheme?: (number | null) | Scheme;
   /**
+   * Two lines under the policy name on the state page. Our summary; the policy text decides.
+   */
+  summary?: string | null;
+  /**
+   * One row per incentive the policy text covers. Anything left out shows “Not specified” on Compare states.
+   */
+  incentives?:
+    | {
+        category:
+          | 'Capital subsidy'
+          | 'Power and wheeling'
+          | 'Land'
+          | 'Electricity duty'
+          | 'Mobility support'
+          | 'Equipment buyers'
+          | 'Other';
+        /**
+         * For example Producers.
+         */
+        for?: string | null;
+        summary: string;
+        id?: string | null;
+      }[]
+    | null;
+  nodalAgency?: {
+    /**
+     * For example Maharashtra Energy Development Agency.
+     */
+    name?: string | null;
+    /**
+     * For example MEDA.
+     */
+    short?: string | null;
+    url?: string | null;
+  };
+  /**
    * Part of the address. Don't change it once published.
    */
   slug: string;
@@ -2234,6 +2982,12 @@ export interface TrackerHub {
   name: string;
   kind: 'Hub' | 'Valley';
   description?: string | null;
+  /**
+   * For example Foundation set up; demonstrations starting.
+   */
+  status?: string | null;
+  lead?: string | null;
+  focus?: string | null;
   /**
    * For example Mundra, Kutch, Gujarat.
    */
@@ -2394,6 +3148,355 @@ export interface EarlyListing {
   createdAt: string;
 }
 /**
+ * Past issues shown in the newsletter archive. Sending arrives with step 11.3.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-issues".
+ */
+export interface NewsletterIssue {
+  id: number;
+  list: 'weekly' | 'tender-digest';
+  number: number;
+  sentOn: string;
+  readMinutes?: number | null;
+  title: string;
+  /**
+   * For example india-h2-weekly-4.
+   */
+  slug: string;
+  /**
+   * The three lines under the title in the archive.
+   */
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  sections?:
+    | {
+        heading:
+          | 'This week in Indian hydrogen'
+          | 'Opportunities closing this week'
+          | 'Number of the week'
+          | 'Explainer of the week'
+          | 'New on the marketplace'
+          | 'People and jobs'
+          | 'Events this month'
+          | 'Global to India';
+        body?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample content (F9).
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Terms, privacy, cookies, editorial, corrections and sponsored content (66:5004, 521:305…). Final texts come from our lawyers (M2). Each published change adds a version history row.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages".
+ */
+export interface LegalPage {
+  id: number;
+  slug: 'terms' | 'privacy' | 'cookies' | 'editorial-policy' | 'corrections' | 'sponsored-content';
+  title: string;
+  /**
+   * For example 1.1. People who accept the terms are recorded against this.
+   */
+  version: string;
+  effectiveOn: string;
+  /**
+   * Numbered in order; the Contents list is made from the headings.
+   */
+  sections?:
+    | {
+        heading: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Newest first: version, date and what changed.
+   */
+  history?:
+    | {
+        version: string;
+        date: string;
+        changed: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Help centre articles (96:1942, 278:23978).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles".
+ */
+export interface HelpArticle {
+  id: number;
+  title: string;
+  slug: string;
+  category: 'getting-started' | 'buying' | 'selling' | 'payments' | 'verification' | 'alerts' | 'account';
+  readMinutes?: number | null;
+  /**
+   * 1 to 6 puts it in Popular articles, in that order.
+   */
+  popular?: number | null;
+  /**
+   * 1 to 3 lists it on its category card.
+   */
+  featured?: number | null;
+  intro: string;
+  sections?:
+    | {
+        heading: string;
+        steps?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A paragraph instead of, or after, the steps.
+         */
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The grey box, for example What each role can do.
+   */
+  callout?: {
+    title?: string | null;
+    text?: string | null;
+  };
+  related?: (number | HelpArticle)[] | null;
+  /**
+   * Other words people search for, for example GST invoice, NEFT.
+   */
+  keywords?: string[] | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Management team and advisors (66:3923). Only people who agreed to be shown.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  group: 'Management' | 'Advisors';
+  order: number;
+  linkedin?: string | null;
+  /**
+   * Shown as Founder on the Media kit (741:6058).
+   */
+  founder?: boolean | null;
+  /**
+   * One line for the Media kit.
+   */
+  bio?: string | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * The page for each browse-by-application entry (754:14685).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "application-pages".
+ */
+export interface ApplicationPage {
+  id: number;
+  application:
+    | 'production'
+    | 'storage-transport'
+    | 'refuelling-mobility'
+    | 'fuel-cells-power'
+    | 'industrial-use'
+    | 'ports-shipping'
+    | 'safety-testing';
+  /**
+   * The page heading (H1).
+   */
+  title: string;
+  intro: string;
+  /**
+   * Up to four headline figures, for example 18 · refuelling stations tracked.
+   */
+  figures?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Where the figures come from.
+   */
+  figuresSource?: string | null;
+  figuresAsOf?: string | null;
+  /**
+   * What goes into it: blocks left to right, each opening its category.
+   */
+  chain?: {
+    title?: string | null;
+    note?: string | null;
+    steps?:
+      | {
+          label: string;
+          /**
+           * The category's address word, for example compression-systems.
+           */
+          category?: string | null;
+          /**
+           * Shown instead of the category for a block with no category (H₂ supply).
+           */
+          note?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Schemes, tenders, events and news on these topics are listed on the page.
+   */
+  topics?: (number | Topic)[] | null;
+  /**
+   * The buyer's guide card.
+   */
+  guide?: (number | null) | Guide;
+  cta?: {
+    /**
+     * For example Planning a station?
+     */
+    title?: string | null;
+    text?: string | null;
+  };
+  /**
+   * Sample content (F9).
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * People in the directory (756:12213). Only people who agreed to be listed (M24).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people".
+ */
+export interface Person {
+  id: number;
+  name: string;
+  slug: string;
+  /**
+   * For example CTO or Senior scientist.
+   */
+  role: string;
+  /**
+   * Leave empty for independents.
+   */
+  organisation?: string | null;
+  city?: string | null;
+  state?: string | null;
+  affiliation: 'Company' | 'Research institution' | 'Government or PSU' | 'Independent';
+  expertise?:
+    | (
+        | 'Electrolysers'
+        | 'Fuel cells'
+        | 'Storage and compression'
+        | 'Safety and approvals'
+        | 'Policy and finance'
+        | 'Research and testing'
+      )[]
+    | null;
+  /**
+   * The chips on the card, for example PEM electrolysers, Plant sizing.
+   */
+  topics?: string[] | null;
+  availableFor?: ('Speaking' | 'Consulting' | 'Research collaboration')[] | null;
+  bio?: string | null;
+  consentRecorded?: boolean | null;
+  /**
+   * Where and when they agreed, for example signed form 12 Nov 2026 (file in Drive: …).
+   */
+  consentEvidence?: string | null;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Industry bodies, alliances, chambers and government bodies (498:8).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "associations".
+ */
+export interface Association {
+  id: number;
+  name: string;
+  slug: string;
+  kind: 'industry' | 'alliance' | 'chamber' | 'government';
+  city?: string | null;
+  summary: string;
+  /**
+   * As the body states it, if it does.
+   */
+  memberCompanies?: number | null;
+  website: string;
+  /**
+   * Sample content (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -2448,6 +3551,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'source-changes';
         value: number | SourceChange;
+      } | null)
+    | ({
+        relationTo: 'submissions';
+        value: number | Submission;
       } | null)
     | ({
         relationTo: 'chapters';
@@ -2520,6 +3627,34 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'early-listings';
         value: number | EarlyListing;
+      } | null)
+    | ({
+        relationTo: 'newsletter-issues';
+        value: number | NewsletterIssue;
+      } | null)
+    | ({
+        relationTo: 'legal-pages';
+        value: number | LegalPage;
+      } | null)
+    | ({
+        relationTo: 'help-articles';
+        value: number | HelpArticle;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: number | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'application-pages';
+        value: number | ApplicationPage;
+      } | null)
+    | ({
+        relationTo: 'people';
+        value: number | Person;
+      } | null)
+    | ({
+        relationTo: 'associations';
+        value: number | Association;
       } | null)
     | ({
         relationTo: 'authors';
@@ -2596,7 +3731,11 @@ export interface ArticlesSelect<T extends boolean = true> {
   tags?: T;
   title?: T;
   slug?: T;
+  featured?: T;
+  level?: T;
+  states?: T;
   dek?: T;
+  whyItMatters?: T;
   heroImage?: T;
   body?: T;
   interviewee?:
@@ -2612,6 +3751,7 @@ export interface ArticlesSelect<T extends boolean = true> {
     | {
         name?: T;
         logo?: T;
+        about?: T;
         disclosure?: T;
       };
   sources?:
@@ -2641,6 +3781,54 @@ export interface ArticlesSelect<T extends boolean = true> {
         note?: T;
         by?: T;
         id?: T;
+      };
+  keyFacts?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  live?:
+    | T
+    | {
+        status?: T;
+        summary?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        summaryAt?: T;
+        keyNumbers?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+        keyNumbersSource?: T;
+        meaning?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        updates?:
+          | T
+          | {
+              at?: T;
+              title?: T;
+              text?: T;
+              document?:
+                | T
+                | {
+                    title?: T;
+                    url?: T;
+                    note?: T;
+                  };
+              id?: T;
+            };
       };
   seo?:
     | T
@@ -2681,6 +3869,9 @@ export interface SchemesSelect<T extends boolean = true> {
   nextDeadline?: T;
   deadlineNote?: T;
   statusOverride?: T;
+  outlay?: T;
+  benefitTypes?: T;
+  howToApply?: T;
   summary?: T;
   purpose?: T;
   tranches?:
@@ -2691,6 +3882,7 @@ export interface SchemesSelect<T extends boolean = true> {
         product?: T;
         capacity?: T;
         state?: T;
+        resultsUrl?: T;
         id?: T;
       };
   eligibility?:
@@ -2700,6 +3892,13 @@ export interface SchemesSelect<T extends boolean = true> {
         id?: T;
       };
   benefits?: T;
+  benefitRates?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
   timeline?:
     | T
     | {
@@ -2731,6 +3930,18 @@ export interface SchemesSelect<T extends boolean = true> {
         id?: T;
       };
   topics?: T;
+  eligibilityRules?:
+    | T
+    | {
+        checked?: T;
+        organisations?: T;
+        states?: T;
+        activities?: T;
+        sizes?: T;
+        dpiitOnly?: T;
+        stages?: T;
+        checkNext?: T;
+      };
   status?: T;
   owner?: T;
   verification?:
@@ -2754,21 +3965,30 @@ export interface TendersSelect<T extends boolean = true> {
   slug?: T;
   issuer?: T;
   tenderId?: T;
+  issuerName?: T;
+  issuerType?: T;
   mode?: T;
   category?: T;
+  sector?: T;
   states?: T;
   value?: T;
+  valueBand?: T;
   emd?: T;
   documentFee?: T;
+  publishedAt?: T;
   bidDueAt?: T;
+  extendedFrom?: T;
+  whoCanBid?: T;
   keyDates?:
     | T
     | {
         label?: T;
         at?: T;
+        note?: T;
         id?: T;
       };
   description?: T;
+  schemes?: T;
   eligibility?:
     | T
     | {
@@ -2797,16 +4017,25 @@ export interface TendersSelect<T extends boolean = true> {
     | T
     | {
         declaredAt?: T;
+        dateLabel?: T;
         winners?:
           | T
           | {
               name?: T;
               capacity?: T;
               price?: T;
+              place?: T;
+              about?: T;
+              profileSlug?: T;
               id?: T;
             };
+        winnersLine?: T;
+        capacityLine?: T;
+        price?: T;
         bidders?: T;
         whatItMeans?: T;
+        analysis?: T;
+        source?: T;
       };
   topics?: T;
   status?: T;
@@ -2831,11 +4060,23 @@ export interface GrantsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   funder?: T;
+  funderName?: T;
   amountPerProject?: T;
+  summary?: T;
   themes?: T;
   whoCanApply?: T;
+  whoText?: T;
   deadline?: T;
   statusOverride?: T;
+  focusAreas?: T;
+  focusNote?: T;
+  steps?:
+    | T
+    | {
+        step?: T;
+        at?: T;
+        id?: T;
+      };
   howToApply?: T;
   sourceUrl?: T;
   documents?:
@@ -2847,11 +4088,14 @@ export interface GrantsSelect<T extends boolean = true> {
         checkedAt?: T;
         id?: T;
       };
+  pastCallLabel?: T;
+  pastCallUrl?: T;
   pastAwardees?:
     | T
     | {
         name?: T;
         project?: T;
+        amount?: T;
         year?: T;
         id?: T;
       };
@@ -2881,12 +4125,28 @@ export interface JobsSelect<T extends boolean = true> {
   slug?: T;
   company?: T;
   function?: T;
+  jobType?: T;
+  companySlug?: T;
+  companyLine?: T;
   location?: T;
   workMode?: T;
+  locationNote?: T;
   states?: T;
   experience?: T;
   salaryBand?: T;
   description?: T;
+  duties?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  needs?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
   skills?: T;
   howToApply?: T;
   applyEmail?: T;
@@ -2904,6 +4164,15 @@ export interface JobsSelect<T extends boolean = true> {
         id?: T;
       };
   topics?: T;
+  post?:
+    | T
+    | {
+        state?: T;
+        reference?: T;
+        organisationId?: T;
+        submittedBy?: T;
+        submittedAt?: T;
+      };
   status?: T;
   owner?: T;
   verification?:
@@ -2926,17 +4195,119 @@ export interface EventsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   organiser?: T;
-  format?: T;
+  eventType?: T;
+  attendance?: T;
   startsAt?: T;
   endsAt?: T;
   venue?: T;
+  city?: T;
   states?: T;
+  summaryLine?: T;
   tickets?: T;
   priceText?: T;
   registrationUrl?: T;
   description?: T;
+  listedBy?: T;
+  featured?: T;
   sponsoredPlacement?: T;
   inNewsletter?: T;
+  agenda?:
+    | T
+    | {
+        day?: T;
+        time?: T;
+        title?: T;
+        id?: T;
+      };
+  speakers?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  exhibitorCount?: T;
+  host?: T;
+  exhibitors?:
+    | T
+    | {
+        name?: T;
+        stall?: T;
+        about?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  webinar?:
+    | T
+    | {
+        learn?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+        capacity?: T;
+        closed?: T;
+        joinUrl?: T;
+        sponsor?:
+          | T
+          | {
+              name?: T;
+              disclosure?: T;
+              profileSlug?: T;
+            };
+        replay?:
+          | T
+          | {
+              url?: T;
+              minutes?: T;
+              slidesUrl?: T;
+              slidesNote?: T;
+              chapters?:
+                | T
+                | {
+                    at?: T;
+                    title?: T;
+                    id?: T;
+                  };
+              qa?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+            };
+      };
+  live?:
+    | T
+    | {
+        on?: T;
+        dayLabel?: T;
+        announcements?:
+          | T
+          | {
+              day?: T;
+              company?: T;
+              text?: T;
+              id?: T;
+            };
+        updates?:
+          | T
+          | {
+              at?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
+  coverage?:
+    | T
+    | {
+        note?: T;
+        articles?: T;
+      };
   sourceUrl?: T;
   documents?:
     | T
@@ -2980,6 +4351,26 @@ export interface SourceChangesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions_select".
+ */
+export interface SubmissionsSelect<T extends boolean = true> {
+  reference?: T;
+  kind?: T;
+  status?: T;
+  title?: T;
+  details?: T;
+  contactName?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  files?: T;
+  submittedBy?: T;
+  organisationId?: T;
+  reviewNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chapters_select".
  */
 export interface ChaptersSelect<T extends boolean = true> {
@@ -2989,7 +4380,23 @@ export interface ChaptersSelect<T extends boolean = true> {
   summary?: T;
   readingMinutes?: T;
   heroImage?: T;
+  heroCaption?: T;
   body?: T;
+  keyTerms?: T;
+  quiz?:
+    | T
+    | {
+        question?: T;
+        options?:
+          | T
+          | {
+              option?: T;
+              id?: T;
+            };
+        answer?: T;
+        explanation?: T;
+        id?: T;
+      };
   topics?: T;
   sample?: T;
   updatedAt?: T;
@@ -3004,6 +4411,14 @@ export interface GuidesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   summary?: T;
+  level?: T;
+  audience?: T;
+  learn?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
   authors?: T;
   heroImage?: T;
   body?: T;
@@ -3022,9 +4437,13 @@ export interface GlossarySelect<T extends boolean = true> {
   term?: T;
   slug?: T;
   expansion?: T;
+  category?: T;
   aliases?: T;
   short?: T;
   body?: T;
+  formula?: T;
+  formulaNote?: T;
+  popular?: T;
   related?: T;
   standards?: T;
   autoLink?: T;
@@ -3045,8 +4464,18 @@ export interface StandardsSelect<T extends boolean = true> {
   slug?: T;
   issuer?: T;
   inForce?: T;
+  dated?: T;
+  documentType?: T;
+  checkedAt?: T;
   summary?: T;
   body?: T;
+  scope?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  related?: T;
   appliesTo?: T;
   sourceUrl?: T;
   topics?: T;
@@ -3125,6 +4554,7 @@ export interface ReportLeadsSelect<T extends boolean = true> {
   role?: T;
   sponsorConsent?: T;
   consentText?: T;
+  consentVersion?: T;
   userId?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3137,9 +4567,27 @@ export interface VideosSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   series?: T;
+  kind?: T;
+  featured?: T;
+  language?: T;
   description?: T;
   url?: T;
   durationMinutes?: T;
+  publishedOn?: T;
+  people?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  chapters?:
+    | T
+    | {
+        at?: T;
+        title?: T;
+        id?: T;
+      };
   transcript?: T;
   thumbnail?: T;
   topics?: T;
@@ -3159,8 +4607,24 @@ export interface PodcastsSelect<T extends boolean = true> {
   episode?: T;
   description?: T;
   guests?: T;
+  alsoOn?: T;
   url?: T;
   durationMinutes?: T;
+  publishedOn?: T;
+  people?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  chapters?:
+    | T
+    | {
+        at?: T;
+        title?: T;
+        id?: T;
+      };
   transcript?: T;
   topics?: T;
   sample?: T;
@@ -3460,6 +4924,22 @@ export interface TrackerPoliciesSelect<T extends boolean = true> {
   keyIncentives?: T;
   officialUrl?: T;
   scheme?: T;
+  summary?: T;
+  incentives?:
+    | T
+    | {
+        category?: T;
+        for?: T;
+        summary?: T;
+        id?: T;
+      };
+  nodalAgency?:
+    | T
+    | {
+        name?: T;
+        short?: T;
+        url?: T;
+      };
   slug?: T;
   source?:
     | T
@@ -3491,6 +4971,9 @@ export interface TrackerHubsSelect<T extends boolean = true> {
   name?: T;
   kind?: T;
   description?: T;
+  status?: T;
+  lead?: T;
+  focus?: T;
   location?: T;
   state?: T;
   latitude?: T;
@@ -3555,6 +5038,203 @@ export interface EarlyListingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-issues_select".
+ */
+export interface NewsletterIssuesSelect<T extends boolean = true> {
+  list?: T;
+  number?: T;
+  sentOn?: T;
+  readMinutes?: T;
+  title?: T;
+  slug?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages_select".
+ */
+export interface LegalPagesSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  version?: T;
+  effectiveOn?: T;
+  sections?:
+    | T
+    | {
+        heading?: T;
+        body?: T;
+        id?: T;
+      };
+  history?:
+    | T
+    | {
+        version?: T;
+        date?: T;
+        changed?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "help-articles_select".
+ */
+export interface HelpArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  readMinutes?: T;
+  popular?: T;
+  featured?: T;
+  intro?: T;
+  sections?:
+    | T
+    | {
+        heading?: T;
+        steps?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        text?: T;
+        id?: T;
+      };
+  callout?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
+  related?: T;
+  keywords?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  group?: T;
+  order?: T;
+  linkedin?: T;
+  founder?: T;
+  bio?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "application-pages_select".
+ */
+export interface ApplicationPagesSelect<T extends boolean = true> {
+  application?: T;
+  title?: T;
+  intro?: T;
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  figuresSource?: T;
+  figuresAsOf?: T;
+  chain?:
+    | T
+    | {
+        title?: T;
+        note?: T;
+        steps?:
+          | T
+          | {
+              label?: T;
+              category?: T;
+              note?: T;
+              id?: T;
+            };
+      };
+  topics?: T;
+  guide?: T;
+  cta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people_select".
+ */
+export interface PeopleSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  role?: T;
+  organisation?: T;
+  city?: T;
+  state?: T;
+  affiliation?: T;
+  expertise?: T;
+  topics?: T;
+  availableFor?: T;
+  bio?: T;
+  consentRecorded?: T;
+  consentEvidence?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "associations_select".
+ */
+export interface AssociationsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  kind?: T;
+  city?: T;
+  summary?: T;
+  memberCompanies?: T;
+  website?: T;
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
@@ -3583,6 +5263,7 @@ export interface TopicsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   description?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3735,6 +5416,39 @@ export interface TrackerMethodology {
   createdAt?: string | null;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-overview".
+ */
+export interface TrackerOverview {
+  id: number;
+  figures?:
+    | {
+        /**
+         * For example 8.62 lakh.
+         */
+        value: string;
+        /**
+         * t/yr of green H₂ production awarded
+         */
+        label: string;
+        /**
+         * For example SECI · SIGHT tranches.
+         */
+        source: string;
+        sourceUrl?: string | null;
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  dataAsOf?: string | null;
+  /**
+   * Sample figures (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * The figures on the home page. Every figure needs its source and the date it was true; readers see both.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3838,6 +5552,288 @@ export interface Prelaunch {
   createdAt?: string | null;
 }
 /**
+ * The SIGHT programme tracker page. Figures need their source.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sight-tracker".
+ */
+export interface SightTracker {
+  id: number;
+  intro: string;
+  verifiedAt?: string | null;
+  /**
+   * For example SECI, MNRE.
+   */
+  sourcesLine?: string | null;
+  figures?:
+    | {
+        /**
+         * As readers see it: 8.62 lakh
+         */
+        value: string;
+        label: string;
+        source: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Newest first, as on the page.
+   */
+  rounds?:
+    | {
+        /**
+         * II · Production
+         */
+        component: string;
+        mode?: string | null;
+        tranche?: string | null;
+        product: string;
+        offered?: string | null;
+        awarded?: string | null;
+        bidDue?: string | null;
+        result?: string | null;
+        status: 'Closing soon' | 'Open' | 'Announced' | 'Results declared' | 'Upcoming';
+        id?: string | null;
+      }[]
+    | null;
+  awardees?:
+    | {
+        company: string;
+        round: string;
+        group?: ('Electrolysers' | 'Green hydrogen' | 'Green ammonia' | 'Green methanol') | null;
+        capacity?: string | null;
+        priceOrIncentive?: string | null;
+        /**
+         * The company's H2 India profile slug, if it has one.
+         */
+        profileSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sources?:
+    | {
+        title: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample figures (F9): hidden where sample content is off.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Who runs H2 India, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-settings".
+ */
+export interface TrustSetting {
+  id: number;
+  /**
+   * The legal name, for example Example Ventures Private Limited (M2).
+   */
+  operatingCompany?: string | null;
+  gstin?: string | null;
+  registeredOffice?: string | null;
+  officeHours?: string | null;
+  /**
+   * Who runs H2 India (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.
+   */
+  disclosure?: string | null;
+  disclosureDate?: string | null;
+  grievanceOfficer?: {
+    name?: string | null;
+    designation?: string | null;
+    email?: string | null;
+  };
+  /**
+   * Named on Partner with H2 India (742:8) and the Media kit (741:6058).
+   */
+  partnerships?: {
+    name?: string | null;
+    role?: string | null;
+  };
+  boilerplate?: string | null;
+  /**
+   * The Download media kit (PDF) buttons are hidden until this is set.
+   */
+  mediaKitUrl?: string | null;
+  /**
+   * The four tiles on About (66:4251), each with its source and date.
+   */
+  aboutFigures?:
+    | {
+        value: string;
+        label: string;
+        source: string;
+        /**
+         * Oct 2026, 31 Oct 2026
+         */
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Our audience (741:5605) and Audience at a glance (741:6058): from our own analytics and lists, never rounded up.
+   */
+  audience?:
+    | {
+        value: string;
+        label: string;
+        source: string;
+        /**
+         * Oct 2026, 31 Oct 2026
+         */
+        asOf: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample figures and names (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The Pricing page (512:148). Prices, the launch offer and the rate card version are decisions C1, C3 and M16: enter them only when confirmed. Sections without prices say they're being finalised.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricing".
+ */
+export interface Pricing {
+  id: number;
+  /**
+   * Rate card version 1.0 · effective 1 December 2026 · all prices exclude GST
+   */
+  rateCardNote?: string | null;
+  plans?:
+    | {
+        /**
+         * Free listing, Growth…
+         */
+        name: string;
+        /**
+         * ₹0, ₹4,999, Custom
+         */
+        price: string;
+        /**
+         * always, a month, yearly contract
+         */
+        period?: string | null;
+        summary: string;
+        features?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        cta: string;
+        href: string;
+        highlight?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  commission?: {
+    /**
+     * ₹0
+     */
+    launchValue?: string | null;
+    /**
+     * until 30 June 2027 (C1)
+     */
+    launchNote?: string | null;
+    /**
+     * 3%
+     */
+    afterValue?: string | null;
+    /**
+     * of each order paid through H2 India
+     */
+    afterNote?: string | null;
+    /**
+     * Capped at … per order. GST is added…
+     */
+    afterDetail?: string | null;
+    examples?:
+      | {
+          order: string;
+          commission: string;
+          id?: string | null;
+        }[]
+      | null;
+    footnote?: string | null;
+  };
+  addOns?:
+    | {
+        name: string;
+        /**
+         * from ₹40,000
+         */
+        price: string;
+        /**
+         * a year
+         */
+        unit?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Sample prices (F9): never shown in production.
+   */
+  sample?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audience-faqs".
+ */
+export interface AudienceFaq {
+  id: number;
+  buyers?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  suppliers?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The times shown on the maintenance page. The page itself is switched on with FLAG_MAINTENANCE during the work.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance".
+ */
+export interface Maintenance {
+  id: number;
+  startedAt?: string | null;
+  backBy?: string | null;
+  statusUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tracker-methodology_select".
  */
@@ -3863,6 +5859,27 @@ export interface TrackerMethodologySelect<T extends boolean = true> {
         id?: T;
       };
   updateNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tracker-overview_select".
+ */
+export interface TrackerOverviewSelect<T extends boolean = true> {
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        sourceUrl?: T;
+        asOf?: T;
+        id?: T;
+      };
+  dataAsOf?: T;
+  sample?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -3919,6 +5936,205 @@ export interface PrelaunchSelect<T extends boolean = true> {
         note?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sight-tracker_select".
+ */
+export interface SightTrackerSelect<T extends boolean = true> {
+  intro?: T;
+  verifiedAt?: T;
+  sourcesLine?: T;
+  figures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        id?: T;
+      };
+  rounds?:
+    | T
+    | {
+        component?: T;
+        mode?: T;
+        tranche?: T;
+        product?: T;
+        offered?: T;
+        awarded?: T;
+        bidDue?: T;
+        result?: T;
+        status?: T;
+        id?: T;
+      };
+  awardees?:
+    | T
+    | {
+        company?: T;
+        round?: T;
+        group?: T;
+        capacity?: T;
+        priceOrIncentive?: T;
+        profileSlug?: T;
+        id?: T;
+      };
+  sources?:
+    | T
+    | {
+        title?: T;
+        url?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trust-settings_select".
+ */
+export interface TrustSettingsSelect<T extends boolean = true> {
+  operatingCompany?: T;
+  gstin?: T;
+  registeredOffice?: T;
+  officeHours?: T;
+  disclosure?: T;
+  disclosureDate?: T;
+  grievanceOfficer?:
+    | T
+    | {
+        name?: T;
+        designation?: T;
+        email?: T;
+      };
+  partnerships?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+      };
+  boilerplate?: T;
+  mediaKitUrl?: T;
+  aboutFigures?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
+      };
+  audience?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        source?: T;
+        asOf?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pricing_select".
+ */
+export interface PricingSelect<T extends boolean = true> {
+  rateCardNote?: T;
+  plans?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        period?: T;
+        summary?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        cta?: T;
+        href?: T;
+        highlight?: T;
+        id?: T;
+      };
+  commission?:
+    | T
+    | {
+        launchValue?: T;
+        launchNote?: T;
+        afterValue?: T;
+        afterNote?: T;
+        afterDetail?: T;
+        examples?:
+          | T
+          | {
+              order?: T;
+              commission?: T;
+              id?: T;
+            };
+        footnote?: T;
+      };
+  addOns?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        unit?: T;
+        text?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  sample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audience-faqs_select".
+ */
+export interface AudienceFaqsSelect<T extends boolean = true> {
+  buyers?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  suppliers?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance_select".
+ */
+export interface MaintenanceSelect<T extends boolean = true> {
+  startedAt?: T;
+  backBy?: T;
+  statusUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

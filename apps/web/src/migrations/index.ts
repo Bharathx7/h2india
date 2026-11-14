@@ -5,6 +5,18 @@ import * as migration_20261112_075241_knowledge from './20261112_075241_knowledg
 import * as migration_20261112_083201_tracker from './20261112_083201_tracker';
 import * as migration_20261112_084700_report_dates from './20261112_084700_report_dates';
 import * as migration_20261112_092925_home from './20261112_092925_home';
+import * as migration_20261112_150948_newsroom from './20261112_150948_newsroom';
+import * as migration_20261112_151557_newsroom_variants from './20261112_151557_newsroom_variants';
+import * as migration_20261112_155725_schemes from './20261112_155725_schemes';
+import * as migration_20261112_164411_opportunities from './20261112_164411_opportunities';
+import * as migration_20261112_175006_knowledge_pages from './20261112_175006_knowledge_pages';
+import * as migration_20261112_183145_events_submissions from './20261112_183145_events_submissions';
+import * as migration_20261112_183156_events_drop_format from './20261112_183156_events_drop_format';
+import * as migration_20261112_190010_trust_pages from './20261112_190010_trust_pages';
+import * as migration_20261112_193125_newsletter_issues from './20261112_193125_newsletter_issues';
+import * as migration_20261112_201854_maintenance from './20261112_201854_maintenance';
+import * as migration_20261113_055110_application_pages from './20261113_055110_application_pages';
+import * as migration_20261113_064225_directory_people_associations from './20261113_064225_directory_people_associations';
 
 export const migrations = [
   {
@@ -40,6 +52,66 @@ export const migrations = [
   {
     up: migration_20261112_092925_home.up,
     down: migration_20261112_092925_home.down,
-    name: '20261112_092925_home'
+    name: '20261112_092925_home',
+  },
+  {
+    up: migration_20261112_150948_newsroom.up,
+    down: migration_20261112_150948_newsroom.down,
+    name: '20261112_150948_newsroom',
+  },
+  {
+    up: migration_20261112_151557_newsroom_variants.up,
+    down: migration_20261112_151557_newsroom_variants.down,
+    name: '20261112_151557_newsroom_variants',
+  },
+  {
+    up: migration_20261112_155725_schemes.up,
+    down: migration_20261112_155725_schemes.down,
+    name: '20261112_155725_schemes',
+  },
+  {
+    up: migration_20261112_164411_opportunities.up,
+    down: migration_20261112_164411_opportunities.down,
+    name: '20261112_164411_opportunities',
+  },
+  {
+    up: migration_20261112_175006_knowledge_pages.up,
+    down: migration_20261112_175006_knowledge_pages.down,
+    name: '20261112_175006_knowledge_pages',
+  },
+  {
+    up: migration_20261112_183145_events_submissions.up,
+    down: migration_20261112_183145_events_submissions.down,
+    name: '20261112_183145_events_submissions',
+  },
+  {
+    up: migration_20261112_183156_events_drop_format.up,
+    down: migration_20261112_183156_events_drop_format.down,
+    name: '20261112_183156_events_drop_format',
+  },
+  {
+    up: migration_20261112_190010_trust_pages.up,
+    down: migration_20261112_190010_trust_pages.down,
+    name: '20261112_190010_trust_pages',
+  },
+  {
+    up: migration_20261112_193125_newsletter_issues.up,
+    down: migration_20261112_193125_newsletter_issues.down,
+    name: '20261112_193125_newsletter_issues',
+  },
+  {
+    up: migration_20261112_201854_maintenance.up,
+    down: migration_20261112_201854_maintenance.down,
+    name: '20261112_201854_maintenance',
+  },
+  {
+    up: migration_20261113_055110_application_pages.up,
+    down: migration_20261113_055110_application_pages.down,
+    name: '20261113_055110_application_pages',
+  },
+  {
+    up: migration_20261113_064225_directory_people_associations.up,
+    down: migration_20261113_064225_directory_people_associations.down,
+    name: '20261113_064225_directory_people_associations'
   },
 ];

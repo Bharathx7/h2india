@@ -123,7 +123,7 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
   }
   const legalName = (active[0]?.record?.legalName ?? input.name ?? "").trim();
   if (!legalName) throw new CompanyError("NAME_REQUIRED", "Enter the company name");
-  const verification = active.length > 0 ? "Verified" : checked.some((c) => c.pending) ? "Pending" : "Unverified";
+  const verification = active.length > 0 ? "GST verified" : checked.some((c) => c.pending) ? "Pending" : "Unverified";
   const first = active[0]?.record ?? null;
 
   let organisationId = "";
@@ -143,9 +143,10 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
         .returning({ id: o.id });
       if (!org) throw new Error("organisation insert returned nothing");
       organisationId = org.id;
-      for (const c of checked) {
+      for (const [i, c] of checked.entries()) {
         await tx.insert(g).values({
           organisationId,
+          isDefault: i === 0,
           gstin: c.gstin,
           stateCode: c.gstin.slice(0, 2),
           place: c.record ? `${c.record.city}, ${stateOf(c.gstin)}` : stateOf(c.gstin),

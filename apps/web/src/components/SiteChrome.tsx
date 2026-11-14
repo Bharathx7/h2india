@@ -1,13 +1,15 @@
 "use client";
 
-import { SiteFooter, SiteHeader, type SiteUser } from "@h2india/ui";
-import { useRouter } from "next/navigation";
+import { SiteFooter, SiteHeader, type MegaSection, type SiteUser } from "@h2india/ui";
 import type { ReactNode } from "react";
 import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS } from "@/lib/site-nav";
+import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { subscribeToNewsletter } from "@/server/public-forms";
+import { Analytics } from "@/consent/Analytics";
+import { CookieBanner } from "@/consent/CookieBanner";
 
 // The public site's header and footer (Site header 25:635, Footer v2 153:179) around every public page. The header's
-// search opens the search page (step 5.2 adds the overlay); the footer signs people up for India H₂ Weekly (A46).
+// search opens the search overlay (step 5.2); the footer signs people up for India H₂ Weekly (A46).
 
 /** The footer's topic chips (153:179) and the newsletter topics they stand for. */
 const FOOTER_TOPICS: Record<string, string> = {
@@ -18,8 +20,19 @@ const FOOTER_TOPICS: Record<string, string> = {
   Mobility: "mobility",
 };
 
-export function SiteChrome({ user, children }: { user: SiteUser | null; children: ReactNode }) {
-  const router = useRouter();
+export function SiteChrome({
+  user,
+  operator = false,
+  menus = MEGA_MENUS,
+  children,
+}: {
+  user: SiteUser | null;
+  operator?: boolean;
+  /** The mega menus with the live catalogue (menusWithCatalogue); the fixed lists otherwise. */
+  menus?: MegaSection[];
+  children: ReactNode;
+}) {
+  const search = useHeaderSearch();
   return (
     <>
       <a
@@ -29,14 +42,15 @@ export function SiteChrome({ user, children }: { user: SiteUser | null; children
         Skip to content
       </a>
       <SiteHeader
-        sections={MEGA_MENUS}
+        sections={menus}
         links={SITE_LINKS}
         tagline="India's hydrogen ecosystem platform"
         user={user}
         onOpenSearch={() => {
-          router.push("/search");
+          search.setOpen(true);
         }}
       />
+      <HeaderSearch search={search} />
       {children}
       <SiteFooter
         columns={FOOTER_COLUMNS}
@@ -46,10 +60,14 @@ export function SiteChrome({ user, children }: { user: SiteUser | null; children
             email,
             topics: topics.map((t) => FOOTER_TOPICS[t] ?? t),
             source: "footer",
+            // The footer form lives in @h2india/ui, so only the timing half of the form guard applies (step 5.9).
+            guard: { website: "", elapsedMs: Date.now() - performance.timeOrigin },
           });
           return result.status === "sent" || result.status === "already";
         }}
       />
+      <CookieBanner />
+      <Analytics operator={operator} />
     </>
   );
 }

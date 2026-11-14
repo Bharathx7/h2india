@@ -1,0 +1,2 @@
+ALTER TABLE "core"."rfqs" ADD COLUMN "moderator_id" uuid;--> statement-breakpoint
+ALTER TABLE "core"."rfqs" ADD CONSTRAINT "rfqs_moderator_id_users_id_fk" FOREIGN KEY ("moderator_id") REFERENCES "core"."users"("id") ON DELETE no action ON UPDATE no action;

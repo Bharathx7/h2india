@@ -80,7 +80,7 @@ export function formatIssueDay(date: Date): string {
     .replace(",", "");
 }
 
-type Purpose = "confirm" | "manage";
+type Purpose = "confirm" | "manage" | "unsubscribe";
 
 function sign(payload: string): string {
   return createHmac("sha256", parseServerEnv().AUTH_SECRET).update(`newsletter:${payload}`).digest("base64url");
@@ -145,6 +145,60 @@ export function manageLink(row: Pick<Subscriber, "id" | "linkNonce">, now = Date
   return pageLink(linkToken(row.id, "manage", row.linkNonce, now + MANAGE_DAYS * 86_400_000));
 }
 
+/**
+ * One-click unsubscribe (step 5.9, RFC 8058). The link never expires and survives new confirmation links (it is
+ * signed with the subscriber id, not the nonce), so an old issue's footer still works.
+ */
+export function unsubscribeToken(id: string): string {
+  return linkToken(id, "unsubscribe", "-", 0);
+}
+
+export function unsubscribeUrl(id: string): string {
+  return `${appUrl()}/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken(id))}`;
+}
+
+/** The headers every newsletter email carries, so mail apps show their own Unsubscribe button. */
+export function unsubscribeHeaders(id: string): Record<string, string> {
+  return {
+    "List-Unsubscribe": `<${appUrl()}/api/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken(id))}>`,
+    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  };
+}
+
+/** Unsubscribes the address behind an unsubscribe token. Safe to repeat; returns the masked address or null. */
+export async function unsubscribe(token: string, now = new Date()): Promise<string | null> {
+  const parts = token.split(".");
+  if (parts.length !== 5 || parts[1] !== "unsubscribe") return null;
+  const [id, purpose, expires, nonce, signature] = parts as [string, string, string, string, string];
+  const expected = Buffer.from(sign(`${id}.${purpose}.${expires}.${nonce}`));
+  const given = Buffer.from(signature);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
+  const db = getDb();
+  const [row] = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.id, id));
+  if (!row) return null;
+  if (row.status !== "unsubscribed") {
+    await db
+      .update(newsletterSubscribers)
+      .set({ status: "unsubscribed", unsubscribedAt: now })
+      .where(eq(newsletterSubscribers.id, id));
+    await audit(db, {
+      actorId: null,
+      action: "newsletter.unsubscribed",
+      resourceType: "newsletter_subscriber",
+      resourceId: id,
+      before: { status: row.status },
+      after: { status: "unsubscribed" },
+    });
+  }
+  return maskEmail(row.email);
+}
+
+/** "a••••@greenfieldh2.in" (448:7048, 448:7291). */
+export function maskEmail(email: string): string {
+  const [local = "", domain = ""] = email.split("@");
+  return `${local.slice(0, 1)}••••@${domain}`;
+}
+
 async function sendManage(row: Subscriber, now: Date) {
   await deliverEmail({
     template: "email.newsletter_manage",
@@ -176,6 +230,9 @@ export async function subscribe(input: {
   email: string;
   topics: readonly string[];
   source: string;
+  /** "Also send me" on the newsletter page (445:5885). */
+  tenderDigest?: boolean;
+  monthlyNote?: boolean;
   now?: Date;
 }): Promise<"sent" | "already"> {
   const email = input.email.trim().toLowerCase();
@@ -199,6 +256,8 @@ export async function subscribe(input: {
     email,
     status: "pending",
     topics,
+    tenderDigest: input.tenderDigest ?? false,
+    monthlyNote: input.monthlyNote ?? false,
     source: input.source,
     consentVersion: NEWSLETTER_CONSENT_VERSION,
     linkNonce: newNonce(),
@@ -260,12 +319,15 @@ export async function openLink(
       event: "newsletter.welcome",
       userId: null,
       to: row.email,
-      mail: await renderNewsletterWelcome({
-        appUrl: appUrl(),
-        manageUrl: manageLink(row, now.getTime()),
-        firstIssue: formatIssueDay(firstIssueDate(now)),
-        topics: row.topics.map(topicLabel),
-      }),
+      mail: {
+        ...(await renderNewsletterWelcome({
+          appUrl: appUrl(),
+          manageUrl: manageLink(row, now.getTime()),
+          firstIssue: formatIssueDay(firstIssueDate(now)),
+          topics: row.topics.map(topicLabel),
+        })),
+        headers: unsubscribeHeaders(row.id),
+      },
     });
   }
   return {

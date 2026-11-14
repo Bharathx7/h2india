@@ -11,6 +11,7 @@ export const colour = {
   body: c["text/body"],
   secondary: c["text/secondary"],
   link: c["text/link"],
+  warning: c["text/warning"],
   accent: c["bg/accent"],
 } as const;
 

@@ -46,9 +46,19 @@ export const POPULAR_CATEGORIES: CatalogueLink[] = [
     href: "/marketplace/systems/compression-systems",
     icon: "zap",
   },
-  { id: "tanks-cylinders", label: "Tanks & cylinders", href: "/marketplace/tanks-cylinders", icon: "zap" },
-  { id: "valves-regulators", label: "Valves & regulators", href: "/marketplace/valves-regulators", icon: "zap" },
-  { id: "sensors-detectors", label: "Sensors & detectors", href: "/marketplace/sensors-detectors", icon: "zap" },
+  { id: "tanks-cylinders", label: "Tanks & cylinders", href: "/marketplace/components/tanks-cylinders", icon: "zap" },
+  {
+    id: "valves-regulators",
+    label: "Valves & regulators",
+    href: "/marketplace/components/valves-regulators",
+    icon: "zap",
+  },
+  {
+    id: "sensors-detectors",
+    label: "Sensors & detectors",
+    href: "/marketplace/components/sensors-detectors",
+    icon: "zap",
+  },
 ];
 
 /** Browse by application (850:209). The playbook's seventh, ports and shipping, is not drawn yet (step 6.1). */

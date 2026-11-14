@@ -10,10 +10,33 @@ describe("record statuses from dates", () => {
     expect(tenderStatus(t, ist("2026-11-10T12:00"))).toBe("Open");
     expect(tenderStatus(t, ist("2026-11-14T12:00"))).toBe("Closing soon");
     expect(tenderStatus(t, ist("2026-11-20T14:59"))).toBe("Closing soon");
-    expect(tenderStatus(t, ist("2026-11-20T15:00"))).toBe("Closed");
+    // From the bid due minute it waits for the result (455:1621 "Under evaluation").
+    expect(tenderStatus(t, ist("2026-11-20T15:00"))).toBe("Under evaluation");
     expect(
       tenderStatus({ ...t, result: { declaredAt: ist("2026-12-08T10:00").toISOString() } }, ist("2026-12-09T10:00")),
     ).toBe("Awarded");
+  });
+
+  it("shows upcoming and extended tenders", () => {
+    const now = ist("2026-11-10T12:00");
+    const due = ist("2026-11-21T17:00").toISOString();
+    expect(tenderStatus({ bidDueAt: due, publishedAt: ist("2026-11-15T10:00").toISOString() }, now)).toBe("Upcoming");
+    expect(tenderStatus({ bidDueAt: due, extendedFrom: ist("2026-11-11T17:00").toISOString() }, now)).toBe("Extended");
+    // Closing soon wins over Extended (457:3222: extended from 5 Nov, badge Closing soon).
+    expect(
+      tenderStatus(
+        { bidDueAt: ist("2026-11-15T15:00").toISOString(), extendedFrom: ist("2026-11-05T15:00").toISOString() },
+        now,
+      ),
+    ).toBe("Closing soon");
+  });
+
+  it("announces grant calls until they close", () => {
+    const now = ist("2026-11-12T10:00");
+    expect(grantStatus({ deadline: ist("2027-01-31T17:00").toISOString(), override: "Announced" }, now)).toBe(
+      "Announced",
+    );
+    expect(grantStatus({ deadline: ist("2026-11-01T17:00").toISOString(), override: "Announced" }, now)).toBe("Closed");
   });
 
   it("handles schemes, grants, jobs and events", () => {

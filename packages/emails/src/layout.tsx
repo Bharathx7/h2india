@@ -12,10 +12,12 @@ export interface EmailLayoutProps {
   reason: string;
   /** Footer "Email preferences" link; defaults to the signed-in notification settings. */
   preferencesHref?: string;
+  /** More footer links after Email preferences, for example "Turn off this alert" (665:307). */
+  footerLinks?: { label: string; href: string }[];
   children: ReactNode;
 }
 
-export function EmailLayout({ appUrl, preview, reason, preferencesHref, children }: EmailLayoutProps) {
+export function EmailLayout({ appUrl, preview, reason, preferencesHref, footerLinks, children }: EmailLayoutProps) {
   return (
     <Html lang="en">
       <Head />
@@ -35,6 +37,14 @@ export function EmailLayout({ appUrl, preview, reason, preferencesHref, children
               <Link href={preferencesHref ?? `${appUrl}/notifications?tab=email`} style={{ color: colour.link }}>
                 Email preferences
               </Link>
+              {footerLinks?.map((l) => (
+                <span key={l.href}>
+                  {" · "}
+                  <Link href={l.href} style={{ color: colour.link }}>
+                    {l.label}
+                  </Link>
+                </span>
+              ))}
             </Text>
           </Section>
         </Container>

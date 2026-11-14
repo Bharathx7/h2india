@@ -34,6 +34,7 @@ import {
   TrackerFactories,
   TrackerHubs,
   TrackerMethodology,
+  TrackerOverview,
   TrackerPilots,
   TrackerPolicies,
   TrackerPrices,
@@ -41,6 +42,20 @@ import {
   TrackerStations,
 } from "./cms/tracker/collections";
 import { has } from "./cms/roles";
+import { SightTracker } from "./cms/records/sight";
+import { Submissions } from "./cms/submissions";
+import {
+  AudienceFaqs,
+  HelpArticles,
+  LegalPages,
+  Maintenance,
+  Pricing,
+  TeamMembers,
+  TrustSettings,
+} from "./cms/trust/collections";
+import { NewsletterIssues } from "./cms/newsletter/issues";
+import { ApplicationPages } from "./cms/marketplace/collections";
+import { Associations, People } from "./cms/directory/collections";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
 // database, editors signed in with their H2 India account, the editor at /cms.
@@ -54,6 +69,8 @@ export default buildConfig({
   secret: createHmac("sha256", env.AUTH_SECRET).update("payload").digest("hex"),
   admin: {
     user: Editors.slug,
+    // The CMS looks like the rest of H2 India (A175): always the light theme, styled from our tokens in custom.css.
+    theme: "light",
     meta: { titleSuffix: " · H2 India CMS" },
     // No Gravatar look-ups: initials only.
     avatar: "default",
@@ -72,6 +89,7 @@ export default buildConfig({
     Jobs,
     Events,
     SourceChanges,
+    Submissions,
     Chapters,
     Guides,
     Glossary,
@@ -90,13 +108,30 @@ export default buildConfig({
     TrackerHubs,
     TrackerChanges,
     EarlyListings,
+    NewsletterIssues,
+    LegalPages,
+    HelpArticles,
+    TeamMembers,
+    ApplicationPages,
+    People,
+    Associations,
     Authors,
     Topics,
     Tags,
     Media,
     Editors,
   ],
-  globals: [TrackerMethodology, HomeFigures, Prelaunch],
+  globals: [
+    TrackerMethodology,
+    TrackerOverview,
+    HomeFigures,
+    Prelaunch,
+    SightTracker,
+    TrustSettings,
+    Pricing,
+    AudienceFaqs,
+    Maintenance,
+  ],
   editor: lexicalEditor(),
   endpoints: [
     {

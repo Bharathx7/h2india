@@ -1,16 +1,21 @@
-import { APPLICATIONS, POPULAR_CATEGORIES, PRODUCT_CLASSES } from "@h2india/core/catalogue";
 import { Button, CategoryTile, EmptyState, Icon, type IconName } from "@h2india/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { catalogue } from "@/marketplace/data";
+import { applicationHref, categoryHref, classHref, HOME_APPLICATIONS, popularCategories } from "@/marketplace/views";
 import { Section, SectionTitle } from "./parts";
 
 // Home sections 06 to 08 (377:4917; phones 381:5845).
 
 /**
- * 06 Browse the marketplace (377:5143): the five classes, popular categories and browse by application, defined now
- * for Stage 6 (A43), without counts until there are listings. Phones show the classes and applications (381:5966).
+ * 06 Browse the marketplace (377:5143): the five classes, popular categories and browse by application, read from the
+ * live catalogue (step 6.2) so admin Catalogue changes show here at once; without counts until there are listings
+ * (A43, A109). Phones show the classes and applications (381:5966).
  */
-export function Marketplace() {
+export async function Marketplace() {
+  const cat = await catalogue();
+  // The home draws six popular categories (377:5217); the marketplace landing draws eight.
+  const popular = popularCategories(cat).slice(0, 6);
   return (
     <Section id="marketplace" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-24">
       <SectionTitle
@@ -21,11 +26,11 @@ export function Marketplace() {
         className="items-center text-center md:items-end md:text-left"
       />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
-        {PRODUCT_CLASSES.map((c) => (
+        {cat.classes.map((c) => (
           <CategoryTile
             key={c.id}
             title={c.label}
-            href={c.href}
+            href={classHref(c.id)}
             icon="zap"
             size="class"
             className="max-md:[&>span:first-child]:h-11"
@@ -34,19 +39,35 @@ export function Marketplace() {
       </div>
       <h3 className="hidden type-h4 text-primary md:block">Popular categories</h3>
       <div className="hidden gap-6 md:grid md:grid-cols-3 lg:grid-cols-6">
-        {POPULAR_CATEGORIES.map((c) => (
-          <CategoryTile key={c.id} title={c.label} href={c.href} icon={c.icon} />
+        {popular.map((c) => (
+          <CategoryTile key={c.id} title={c.label} href={categoryHref(c)} icon={ICONS[c.slug] ?? "zap"} />
         ))}
       </div>
       <h3 className="type-h4 text-primary">Browse by application</h3>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
-        {APPLICATIONS.map((a) => (
-          <CategoryTile key={a.id} title={a.label} detail={a.examples} href={a.href} icon={a.icon} />
-        ))}
+        {cat.applications
+          .filter((a) => HOME_APPLICATIONS.includes(a.id))
+          .map((a) => (
+            <CategoryTile
+              key={a.id}
+              title={a.shortLabel}
+              detail={a.examples || undefined}
+              href={applicationHref(a.id)}
+              icon={ICONS[a.id] ?? "zap"}
+            />
+          ))}
       </div>
     </Section>
   );
 }
+
+/** The icons drawn on the home tiles (377:5217, 850:209). */
+const ICONS: Record<string, IconName> = {
+  "storage-transport": "package",
+  "refuelling-mobility": "truck",
+  "industrial-use": "clipboard-check",
+  "safety-testing": "shield-check",
+};
 
 /**
  * 07 Featured products (379:3897). The catalogue arrives in Stage 6, so the module shows its empty state (A43); the

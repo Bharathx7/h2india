@@ -38,3 +38,19 @@ export function formatIstDayMonth(date: Date): string {
 export function istDate(date: Date): string {
   return isoDay.format(date);
 }
+
+const DAY = 86_400_000;
+
+/**
+ * Calendar days until a deadline in India time, as drawn: due 15 Nov, seen on 10 Nov, is "5 days left"; 0 on the day.
+ * The one copy for pages (opportunities/views.ts) and messages (alerts, step 7.3).
+ */
+export function daysUntil(iso: string, now: Date): number {
+  const day = (d: Date) => Date.parse(`${istDate(d)}T00:00:00Z`);
+  return Math.max(0, Math.round((day(new Date(iso)) - day(now)) / DAY));
+}
+
+export function daysLeft(iso: string, now: Date): string {
+  const days = daysUntil(iso, now);
+  return days <= 0 ? "closes today" : `${String(days)} ${days === 1 ? "day" : "days"} left`;
+}

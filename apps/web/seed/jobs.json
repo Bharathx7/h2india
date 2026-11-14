@@ -1,0 +1,218 @@
+[
+  {
+    "slug": "electrolyser-commissioning-engineer-konkan",
+    "role": "Electrolyser commissioning engineer",
+    "company": "Konkan Hydrogen Tech",
+    "location": "Ratnagiri, Maharashtra",
+    "states": ["maharashtra"],
+    "workMode": "On site",
+    "experience": "3–6 years",
+    "salaryBand": "12–18",
+    "function": "Engineering",
+    "jobType": "Full-time",
+    "postedAt": "-6d",
+    "closesAt": "+18d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/electrolyser-commissioning-engineer-konkan",
+    "publish": "yes",
+    "description": "You'll lead site commissioning of our 1–5 MW PEM electrolyser systems at customer plants across India, from mechanical completion to performance tests and handover. (Sample job.)",
+    "companySlug": "konkan-hydrogen-tech",
+    "companyLine": "Electrolyser manufacturer · Ratnagiri",
+    "locationNote": "60% travel",
+    "duties": [
+      {
+        "item": "Run pre-commissioning checks on stacks, power electronics and balance of plant"
+      },
+      {
+        "item": "Lead start-up and performance tests with the customer's team"
+      },
+      {
+        "item": "Train operators and write the handover file"
+      },
+      {
+        "item": "Feed site issues back to our design team in Ratnagiri"
+      }
+    ],
+    "needs": [
+      {
+        "item": "B.E. or B.Tech in chemical, electrical or instrumentation engineering"
+      },
+      {
+        "item": "3–6 years commissioning process or power plants"
+      },
+      {
+        "item": "Comfort with PLC and SCADA systems; hydrogen experience is a plus"
+      },
+      {
+        "item": "Willing to travel to sites for up to 60% of the time"
+      }
+    ],
+    "skills": ["Commissioning", "PEM electrolysers", "PLC / SCADA", "HAZOP", "Hydrogen safety"]
+  },
+  {
+    "slug": "hydrogen-safety-officer-kutch-process",
+    "role": "Hydrogen safety officer",
+    "company": "Kutch Process Engineers",
+    "location": "Gandhidham, Gujarat",
+    "states": ["gujarat"],
+    "workMode": "On site",
+    "experience": "5–8 years",
+    "salaryBand": "14–20",
+    "function": "Safety",
+    "jobType": "Full-time",
+    "postedAt": "-8d",
+    "closesAt": "+13d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/hydrogen-safety-officer-kutch-process",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch."
+  },
+  {
+    "slug": "process-engineer-green-ammonia-deccan",
+    "role": "Process engineer, green ammonia",
+    "company": "Deccan Ammonia Works",
+    "location": "Paradip, Odisha",
+    "states": ["odisha"],
+    "workMode": "On site",
+    "experience": "4–8 years",
+    "salaryBand": "15–22",
+    "function": "Engineering",
+    "jobType": "Full-time",
+    "postedAt": "-9d",
+    "closesAt": "+19d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/process-engineer-green-ammonia-deccan",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "companySlug": "deccan-ammonia-works"
+  },
+  {
+    "slug": "policy-analyst-hydrogen-clean-fuels",
+    "role": "Policy analyst, hydrogen",
+    "company": "Clean Fuels Policy Lab",
+    "location": "New Delhi, Delhi",
+    "states": ["delhi"],
+    "workMode": "Hybrid",
+    "experience": "2–4 years",
+    "function": "Policy and regulation",
+    "jobType": "Full-time",
+    "postedAt": "-10d",
+    "closesAt": "+8d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/policy-analyst-hydrogen-clean-fuels",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch."
+  },
+  {
+    "slug": "business-development-manager-electrolysers-konkan",
+    "role": "Business development manager, electrolysers",
+    "company": "Konkan Hydrogen Tech",
+    "location": "Mumbai, Maharashtra",
+    "states": ["maharashtra"],
+    "workMode": "Hybrid",
+    "experience": "6–10 years",
+    "function": "Sales and business development",
+    "jobType": "Full-time",
+    "postedAt": "-11d",
+    "closesAt": "+18d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/business-development-manager-electrolysers-konkan",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "companySlug": "konkan-hydrogen-tech"
+  },
+  {
+    "slug": "graduate-engineer-trainee-narmada",
+    "role": "Graduate engineer trainee (internship)",
+    "company": "Narmada Compression Works",
+    "location": "Vadodara, Gujarat",
+    "states": ["gujarat"],
+    "workMode": "On site",
+    "experience": "Students",
+    "salaryBand": "₹30,000 a month stipend",
+    "function": "Engineering",
+    "jobType": "Internship",
+    "postedAt": "-11d",
+    "closesAt": "+33d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/graduate-engineer-trainee-narmada",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch."
+  },
+  {
+    "slug": "stack-test-technician-konkan",
+    "role": "Stack test technician",
+    "company": "Konkan Hydrogen Tech",
+    "location": "Ratnagiri, Maharashtra",
+    "states": ["maharashtra"],
+    "workMode": "On site",
+    "experience": "0–2 years",
+    "salaryBand": "4–6",
+    "function": "Operations and maintenance",
+    "jobType": "Full-time",
+    "postedAt": "-40d",
+    "closesAt": "-3d 23:59",
+    "howToApply": "link",
+    "sourceUrl": "https://example.org/sample/jobs/stack-test-technician-konkan",
+    "publish": "yes",
+    "description": "Sample job from the step 5.5 designs. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "companySlug": "konkan-hydrogen-tech"
+  },
+  {
+    "company": "H2 India",
+    "companyLine": "India's hydrogen ecosystem platform",
+    "howToApply": "link",
+    "publish": "yes",
+    "jobType": "Full-time",
+    "states": ["maharashtra"],
+    "slug": "hydrogen-reporter-h2-india",
+    "role": "Hydrogen reporter",
+    "location": "Mumbai, Maharashtra",
+    "workMode": "Hybrid",
+    "experience": "2–4 years",
+    "function": "Research",
+    "postedAt": "-8d",
+    "closesAt": "+17d 23:59",
+    "sourceUrl": "https://example.org/sample/jobs/hydrogen-reporter-h2-india",
+    "description": "Report on India's hydrogen industry for the H2 India newsroom: tenders, projects, policy and the people behind them. (Sample job.)",
+    "skills": ["Reporting", "Energy", "Data"]
+  },
+  {
+    "company": "H2 India",
+    "companyLine": "India's hydrogen ecosystem platform",
+    "howToApply": "link",
+    "publish": "yes",
+    "jobType": "Full-time",
+    "states": ["maharashtra"],
+    "slug": "data-analyst-india-hydrogen-tracker",
+    "role": "Data analyst, India Hydrogen Tracker",
+    "location": "Pune, Maharashtra",
+    "workMode": "On site",
+    "experience": "0–2 years",
+    "function": "Research",
+    "postedAt": "-10d",
+    "closesAt": "+12d 23:59",
+    "sourceUrl": "https://example.org/sample/jobs/data-analyst-india-hydrogen-tracker",
+    "description": "Keep the India Hydrogen Tracker sourced and dated: projects, factories, stations and prices. (Sample job.)",
+    "skills": ["SQL", "Spreadsheets", "Research"]
+  },
+  {
+    "company": "H2 India",
+    "companyLine": "India's hydrogen ecosystem platform",
+    "howToApply": "link",
+    "publish": "yes",
+    "jobType": "Full-time",
+    "states": ["all-india"],
+    "slug": "supplier-success-manager-h2-india",
+    "role": "Supplier success manager",
+    "location": "Remote, India",
+    "workMode": "Remote",
+    "experience": "3–6 years",
+    "function": "Sales and business development",
+    "postedAt": "-16d",
+    "closesAt": "+7d 23:59",
+    "sourceUrl": "https://example.org/sample/jobs/supplier-success-manager-h2-india",
+    "description": "Help suppliers get verified and answer quote requests well. (Sample job.)",
+    "skills": ["Account management", "B2B", "Onboarding"]
+  }
+]

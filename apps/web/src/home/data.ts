@@ -9,6 +9,7 @@ import { STATE_OPTIONS } from "@/cms/records/common";
 import { schemeStatus, tenderStatus } from "@/cms/records/status";
 import { dayMonthYear, indianNumber } from "@/cms/tracker/format";
 import { typeBadge } from "@/cms/types";
+import { daysLeft, toneOf } from "@/opportunities/views";
 import type { Article, Event, HomeFigure, Scheme, Tender, Topic, TrackerHub } from "@/payload-types";
 
 // Each home module loads its own data (playbook step 5.1), so one failing query never blanks the page. Only published,
@@ -47,19 +48,8 @@ const ist = (iso: string, opts: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: IST, ...opts }).format(new Date(iso));
 
 /** "5 days left", "1 day left", "Closes today". */
-function daysLeft(iso: string, now: Date): string {
-  const days = Math.ceil((new Date(iso).getTime() - now.getTime()) / DAY);
-  return days <= 0 ? "closes today" : `${String(days)} ${days === 1 ? "day" : "days"} left`;
-}
 
 const stateLabel = (value: string) => STATE_OPTIONS.find((o) => o.value === value)?.label ?? value;
-
-function toneOf(status: string): CardStatus["tone"] {
-  if (status === "Closing soon") return "warning";
-  if (status === "Open") return "success";
-  if (status === "Closed" || status === "Awarded") return "neutral";
-  return "progress";
-}
 
 // ---------- 02 Trust strip
 
@@ -184,7 +174,7 @@ export async function loadTenders(now = new Date(), limit = 3): Promise<TenderVi
     depth: 0,
   });
   return res.docs.map((t: Tender) => {
-    const status = tenderStatus({ bidDueAt: t.bidDueAt, result: t.result ?? null }, now);
+    const status = tenderStatus(t, now);
     const page = `/opportunities/tenders/${t.slug}`;
     return {
       issuer: t.issuer,
@@ -345,8 +335,8 @@ export async function loadEvents(now = new Date(), limit = 4): Promise<EventView
     depth: 0,
   });
   return res.docs.map((e: Event) => {
-    const online = e.format.toLowerCase().includes("online");
-    const city = e.venue?.split(",").pop()?.trim() ?? "";
+    const online = e.attendance === "Online";
+    const city = e.city ?? e.venue?.split(",").pop()?.trim() ?? "";
     const where = online ? "Online" : city || "In person";
     const startDay = ist(e.startsAt, { year: "numeric", month: "2-digit", day: "2-digit" });
     const endDay = e.endsAt ? ist(e.endsAt, { year: "numeric", month: "2-digit", day: "2-digit" }) : startDay;
@@ -359,7 +349,7 @@ export async function loadEvents(now = new Date(), limit = 4): Promise<EventView
     return {
       day: ist(e.startsAt, { day: "numeric" }),
       month: ist(e.startsAt, { month: "short" }).toUpperCase(),
-      kind: `${e.format.split("·")[0]?.trim() ?? e.format} · ${where}`,
+      kind: `${e.eventType.split(" and ")[0] ?? e.eventType} · ${where}`,
       title: e.name,
       meta,
       href: `/events/${e.slug}`,

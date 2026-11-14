@@ -25,7 +25,7 @@ export const TEMPLATES = {
     name: "Quote received",
     frame: "665:9",
     step: "9.5",
-    built: false,
+    built: true,
   },
   "email.order_confirmed_pay_now": {
     channel: "email",
@@ -57,7 +57,7 @@ export const TEMPLATES = {
     name: "Tender alert digest",
     frame: "665:307",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "email.sign_in_code": {
     channel: "email",
@@ -73,7 +73,7 @@ export const TEMPLATES = {
     name: "RFQ received",
     frame: "671:482",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "email.rfq_returned": {
     channel: "email",
@@ -81,7 +81,7 @@ export const TEMPLATES = {
     name: "RFQ returned",
     frame: "671:554",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "email.payment_received": {
     channel: "email",
@@ -129,7 +129,7 @@ export const TEMPLATES = {
     name: "Invitation",
     frame: "673:155",
     step: "8.7, 9.1",
-    built: false,
+    built: true,
   },
   "email.verification_status": {
     channel: "email",
@@ -137,7 +137,7 @@ export const TEMPLATES = {
     name: "Verification status · document expiring",
     frame: "673:221",
     step: "8.2",
-    built: false,
+    built: true,
   },
   "email.listing_needs_changes": {
     channel: "email",
@@ -145,7 +145,7 @@ export const TEMPLATES = {
     name: "Listing needs changes",
     frame: "673:287",
     step: "8.3",
-    built: false,
+    built: true,
   },
   "email.submission_received": {
     channel: "email",
@@ -153,7 +153,7 @@ export const TEMPLATES = {
     name: "Submission received",
     frame: "673:352",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "email.newsletter_confirmation": {
     channel: "email",
@@ -177,7 +177,7 @@ export const TEMPLATES = {
     name: "Webinar registration",
     frame: "676:83",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "email.grievance_acknowledgement": {
     channel: "email",
@@ -185,7 +185,7 @@ export const TEMPLATES = {
     name: "Grievance acknowledgement",
     frame: "676:154",
     step: "5.8",
-    built: false,
+    built: true,
   },
   "email.listing_approved": {
     channel: "email",
@@ -193,7 +193,7 @@ export const TEMPLATES = {
     name: "Listing approved",
     frame: "831:1006",
     step: "8.3",
-    built: false,
+    built: true,
   },
   "email.event_live": {
     channel: "email",
@@ -201,7 +201,31 @@ export const TEMPLATES = {
     name: "Your event is live",
     frame: "831:1080",
     step: "11.2",
-    built: false,
+    built: true,
+  },
+  "email.newsletter_issue": {
+    channel: "email",
+    key: "newsletter_issue",
+    name: "India H₂ Weekly issue",
+    frame: "648:312",
+    step: "11.3",
+    built: true,
+  },
+  "email.changes_needed": {
+    channel: "email",
+    key: "changes_needed",
+    name: "Submission needs changes",
+    frame: "633:567",
+    step: "11.2",
+    built: true,
+  },
+  "email.job_live": {
+    channel: "email",
+    key: "job_live",
+    name: "Your job post is live",
+    frame: "633:1059",
+    step: "11.2",
+    built: true,
   },
   "email.passkey_reset_admin": {
     channel: "email",
@@ -218,7 +242,7 @@ export const TEMPLATES = {
     name: "RFQ received",
     frame: "668:44",
     step: "9.4",
-    built: false,
+    built: true,
   },
   "whatsapp.payment_reminder_buyer": {
     channel: "whatsapp",
@@ -234,7 +258,7 @@ export const TEMPLATES = {
     name: "Tender alert",
     frame: "668:152",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "whatsapp.order_confirmed": {
     channel: "whatsapp",
@@ -258,7 +282,7 @@ export const TEMPLATES = {
     name: "Scheme alert",
     frame: "676:351",
     step: "7.3",
-    built: false,
+    built: true,
   },
   "whatsapp.webinar_registration": {
     channel: "whatsapp",
@@ -266,7 +290,7 @@ export const TEMPLATES = {
     name: "Webinar registration",
     frame: "676:405",
     step: "5.7",
-    built: false,
+    built: true,
   },
   "whatsapp.webinar_reminder": {
     channel: "whatsapp",
@@ -274,7 +298,7 @@ export const TEMPLATES = {
     name: "Webinar reminder",
     frame: "676:459",
     step: "5.7",
-    built: false,
+    built: true,
   },
   // SMS · page 16
   "sms.otp_sign_in": {
@@ -302,6 +326,22 @@ export const TEMPLATES = {
     built: false,
   },
   // Not drawn (M21; wording A9): built from the screens' own copy in the steps that needed them.
+  "email.bank_account_changed": {
+    channel: "email",
+    key: "bank_account_changed",
+    name: "Payout bank account changed",
+    frame: null,
+    step: "8.6",
+    built: true,
+  },
+  "sms.bank_account_changed": {
+    channel: "sms",
+    key: "bank_account_changed",
+    name: "Payout bank account changed",
+    frame: null,
+    step: "8.6",
+    built: true,
+  },
   "email.verify_email": {
     channel: "email",
     key: "verify_email",
@@ -332,6 +372,14 @@ export const TEMPLATES = {
     name: "Account recovery code",
     frame: null,
     step: "3.5",
+    built: true,
+  },
+  "email.claim_code": {
+    channel: "email",
+    key: "claim_code",
+    name: "Claim this profile code",
+    frame: null,
+    step: "6.7",
     built: true,
   },
   "email.recovery_approval": {
@@ -408,6 +456,45 @@ export const APPROVED_TEXT = {
   "sms.otp_sign_in": (input: { code: string }) =>
     `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
   "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+  /** Not drawn (step 8.6, A159): wording from 588:1179, to register with the provider (M5). */
+  "sms.bank_account_changed": (input: { company: string; last4: string; until: string }) =>
+    `${input.company}'s payout bank account on H2 India was changed to the account ending ${input.last4}. Payouts are held until ${input.until} IST. Didn't make this change? Cancel it in your account. -H2 India`,
+  /** 676:405, template webinar_registered: header "You're registered", footer "H2 India webinars". */
+  "whatsapp.webinar_registration": (input: { name: string; title: string; date: string; time: string }) =>
+    `Hi ${input.name}, you're registered for ${input.title}. ${input.date}, ${input.time} IST, online. We'll send the join link 1 hour before, and the replay afterwards.`,
+  /** 676:459, template webinar_reminder: header "Starts in {{1}}", footer "H2 India webinars". */
+  "whatsapp.webinar_reminder": (input: { name: string; title: string; time: string }) =>
+    `Hi ${input.name}, ${input.title} starts at ${input.time} IST today. Join from your phone or laptop with the link below.`,
+  /** 668:152, template tender_alert_instant: header "Tender alert", footer "Manage alerts on H2 India". */
+  "whatsapp.tender_alert_instant": (input: {
+    issuer: string;
+    change: string;
+    title: string;
+    reference: string;
+    due: string;
+    alert: string;
+  }) =>
+    `${input.issuer} ${input.change}: ${input.title} (${input.reference}). Bid due ${input.due}. This matches your alert for ${input.alert}.`,
+  /** 676:351, template scheme_alert_instant: header "Scheme deadline", footer "Manage alerts on H2 India". */
+  "whatsapp.scheme_alert": (input: {
+    scheme: string;
+    what: string;
+    due: string;
+    where: string;
+    left: string;
+    alert: string;
+  }) =>
+    `${input.scheme}: ${input.what} are due ${input.due} on ${input.where}. ${input.left} left. This matches your alert for ${input.alert}.`,
+  /** 668:44, template rfq_received_supplier: header "New RFQ: {{1}}", footer "H2 India RFQ alerts", button View and quote. */
+  "whatsapp.rfq_received_supplier": (input: {
+    name: string;
+    buyerType: string;
+    item: string;
+    quantity: string;
+    state: string;
+    due: string;
+  }) =>
+    `Hi ${input.name}, a ${input.buyerType} wants a quote for ${input.item}, quantity ${input.quantity}, delivered to ${input.state}. Send your quote by ${input.due}.`,
 } satisfies Partial<Record<TemplateId, (input: never) => string>>;
 
 export type TextTemplateId = keyof typeof APPROVED_TEXT;

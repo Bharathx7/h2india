@@ -1,15 +1,127 @@
 [
   {
     "slug": "sight-green-hydrogen-production",
-    "name": "SIGHT programme: green hydrogen production incentive",
+    "name": "SIGHT programme: Component II, green hydrogen production incentive",
     "runBy": "SECI",
     "ministry": "MNRE",
     "whoCanApply": ["Green hydrogen producers", "Project developers"],
     "nextDeadline": "+5d 17:00",
     "summary": "Production incentive, up to ₹4 per kg in year one",
     "sourceUrl": "https://example.org/sample/sight-production",
-    "verification": { "at": "-2d" },
-    "publish": "yes"
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "states": ["all-india"],
+    "topics": "policy; green-ammonia",
+    "statusOverride": null,
+    "outlay": "₹13,050 crore for Component II, to FY 2029–30 (SIGHT total ₹17,490 crore)",
+    "benefitTypes": ["Production incentive"],
+    "howToApply": "Bid when SECI issues a Request for Selection (RfS) on its e-tender portal",
+    "purpose": "Component II pays a fixed incentive per kilogram to companies that produce green hydrogen, or derivatives such as green ammonia and methanol, in their first years of production. Sample text from the design (416:1354).",
+    "tranches": [
+      {
+        "mode": "Mode 1",
+        "tranche": "Tranche I",
+        "product": "Green hydrogen",
+        "capacity": "4,12,000 awarded of 4,50,000",
+        "state": "Results declared"
+      },
+      {
+        "mode": "Mode 1",
+        "tranche": "Tranche II",
+        "product": "Green hydrogen",
+        "capacity": "4,50,000 awarded",
+        "state": "Results declared"
+      },
+      {
+        "mode": "Mode 2A",
+        "tranche": "Tranche I",
+        "product": "Green ammonia",
+        "capacity": "7,24,000 awarded, 13 auctions",
+        "state": "Results declared"
+      },
+      {
+        "mode": "Mode 2A",
+        "tranche": "Tranche II",
+        "product": "Green ammonia",
+        "capacity": "Bids open",
+        "state": "Closing soon"
+      },
+      {
+        "mode": "Mode 2C",
+        "tranche": "Tranche I",
+        "product": "Green methanol",
+        "capacity": "5,00,000 offered",
+        "state": "Announced"
+      }
+    ],
+    "eligibility": [
+      {
+        "condition": "A company registered in India, bidding alone or as a consortium"
+      },
+      {
+        "condition": "Builds and operates a new plant in India; contract manufacturing is not allowed"
+      },
+      {
+        "condition": "Meets the net worth and bid security set in each RfS"
+      }
+    ],
+    "benefits": "Mode 1: an incentive per kilogram for three years, set by your bid and capped at:",
+    "benefitRates": [
+      {
+        "label": "Year 1",
+        "value": "₹4 / kg"
+      },
+      {
+        "label": "Year 2",
+        "value": "₹3 / kg"
+      },
+      {
+        "label": "Year 3",
+        "value": "₹2 / kg"
+      }
+    ],
+    "timeline": [
+      {
+        "when": "Jan 2024",
+        "what": "Mode 1 Tranche I: 4,12,000 t/yr awarded to 10 companies"
+      },
+      {
+        "when": "Jul–Aug 2025",
+        "what": "Mode 2A Tranche I: 7,24,000 t/yr of green ammonia across 13 auctions"
+      },
+      {
+        "when": "In 5 days",
+        "what": "Mode 2A Tranche II: bids due"
+      },
+      {
+        "when": "Next",
+        "what": "Next Mode 1 round: not yet announced"
+      }
+    ],
+    "documentsNeeded": [
+      {
+        "document": "Certificate of incorporation and board resolution"
+      },
+      {
+        "document": "Net worth certificate from a chartered accountant"
+      },
+      {
+        "document": "Bank guarantee for bid security (EMD)"
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Can a start-up bid?",
+        "answer": "Only if it meets the net worth and bid security in the RfS, alone or through a consortium. Sample answer."
+      },
+      {
+        "question": "When is the next round?",
+        "answer": "SECI announces each round with a new RfS. Sample answer."
+      }
+    ],
+    "deadlineNote": "Mode 2A Tranche II bids"
   },
   {
     "slug": "green-hydrogen-hubs-common-infrastructure",
@@ -18,11 +130,16 @@
     "ministry": "MNRE",
     "whoCanApply": ["State agencies", "Project developers"],
     "deadlineNote": "Guidelines expected Dec 2026",
-    "statusOverride": "Next round expected",
+    "statusOverride": "Announced",
     "summary": "Grant support for shared pipelines, storage and port facilities",
     "sourceUrl": "https://example.org/sample/hydrogen-hubs",
-    "verification": { "at": "-2d" },
-    "publish": "yes"
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "states": ["all-india"],
+    "benefitTypes": ["Capital subsidy"],
+    "topics": "policy"
   },
   {
     "slug": "gujarat-green-hydrogen-policy",
@@ -33,7 +150,135 @@
     "deadlineNote": "Applications accepted all year",
     "summary": "Concessional land and electricity duty exemption for producers",
     "sourceUrl": "https://example.org/sample/gujarat-policy",
-    "verification": { "at": "-2d" },
-    "publish": "yes"
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "benefitTypes": ["Capital subsidy", "Tax or duty exemption"],
+    "topics": "policy"
+  },
+  {
+    "slug": "green-hydrogen-rd-call-for-proposals",
+    "name": "Green hydrogen R&D scheme: call for proposals",
+    "runBy": "MNRE",
+    "whoCanApply": ["Research institutions"],
+    "states": ["all-india"],
+    "nextDeadline": "+33d 17:00",
+    "summary": "Grants for research on production, storage and safety",
+    "benefitTypes": ["Grant"],
+    "topics": "technology",
+    "sourceUrl": "https://example.org/sample/green-hydrogen-rd-call-for-proposals",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "uttar-pradesh-green-hydrogen-policy-2024",
+    "name": "Uttar Pradesh green hydrogen policy 2024",
+    "runBy": "UPNEDA",
+    "ministry": "Government of Uttar Pradesh",
+    "whoCanApply": ["Green hydrogen producers", "Manufacturers"],
+    "states": ["uttar-pradesh"],
+    "deadlineNote": "Applications accepted all year",
+    "summary": "Capital subsidy and stamp duty exemption for new plants",
+    "benefitTypes": ["Capital subsidy", "Tax or duty exemption"],
+    "topics": "policy",
+    "sourceUrl": "https://example.org/sample/uttar-pradesh-green-hydrogen-policy-2024",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "hydrogen-valley-innovation-clusters",
+    "name": "Hydrogen valley innovation clusters",
+    "runBy": "DST",
+    "whoCanApply": ["Research institutions", "Project developers"],
+    "states": ["all-india"],
+    "nextDeadline": "+4d 17:00",
+    "summary": "Grant for regional clusters linking production and use",
+    "benefitTypes": ["Grant"],
+    "topics": "projects",
+    "sourceUrl": "https://example.org/sample/hydrogen-valley-innovation-clusters",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "pilot-projects-hydrogen-in-shipping",
+    "name": "Pilot projects: hydrogen in shipping",
+    "runBy": "MoPSW",
+    "ministry": "Ministry of Ports, Shipping and Waterways",
+    "whoCanApply": ["Project developers", "State agencies"],
+    "states": ["all-india"],
+    "nextDeadline": "+7d 17:00",
+    "summary": "Grant for hydrogen-fuelled vessels and bunkering pilots",
+    "benefitTypes": ["Viability gap funding"],
+    "topics": "mobility",
+    "sourceUrl": "https://example.org/sample/pilot-projects-hydrogen-in-shipping",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "pilot-projects-hydrogen-in-transport",
+    "name": "Pilot projects: hydrogen in transport",
+    "runBy": "MNRE",
+    "whoCanApply": ["Project developers"],
+    "states": ["all-india"],
+    "statusOverride": "Results declared",
+    "deadlineNote": "Next round expected 2027",
+    "summary": "Support for hydrogen buses, trucks and refuelling stations",
+    "benefitTypes": ["Viability gap funding"],
+    "topics": "mobility",
+    "sourceUrl": "https://example.org/sample/pilot-projects-hydrogen-in-transport",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "pilot-projects-green-hydrogen-in-steel",
+    "name": "Pilot projects: green hydrogen in steel",
+    "runBy": "Ministry of Steel",
+    "whoCanApply": ["Manufacturers", "Project developers"],
+    "states": ["all-india"],
+    "nextDeadline": "+7d 17:00",
+    "summary": "Support for steel plants piloting hydrogen-based processes",
+    "benefitTypes": ["Viability gap funding"],
+    "topics": "technology",
+    "sourceUrl": "https://example.org/sample/pilot-projects-green-hydrogen-in-steel",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
+  },
+  {
+    "slug": "sight-electrolyser-manufacturing",
+    "name": "SIGHT programme: electrolyser manufacturing incentive",
+    "runBy": "SECI",
+    "ministry": "MNRE",
+    "whoCanApply": ["Electrolyser manufacturers"],
+    "states": ["all-india"],
+    "statusOverride": "Next round expected",
+    "deadlineNote": "Next round not announced",
+    "summary": "Incentive for building electrolyser factories in India · no open round",
+    "benefitTypes": ["Production incentive"],
+    "topics": "policy",
+    "sourceUrl": "https://example.org/sample/sight-electrolyser-manufacturing",
+    "verification": {
+      "at": "-2d"
+    },
+    "publish": "yes",
+    "purpose": "Sample scheme from the schemes design (411:9). Replace with the official details before launch."
   }
 ]

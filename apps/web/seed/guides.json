@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "compare-pem-alkaline-electrolysers",
+    "title": "How to compare PEM and alkaline electrolysers for an Indian site",
+    "level": "Professional",
+    "summary": "Most Indian sites trade off three things: power quality, water and how often the plant will ramp. This guide compares the two technologies on each, with the questions to put to suppliers.",
+    "audience": "Plant engineers and procurement teams choosing a first electrolyser for an Indian site.",
+    "learn": [
+      {
+        "point": "How each technology handles variable power"
+      },
+      {
+        "point": "Water, space and service needs"
+      },
+      {
+        "point": "Four questions to put to suppliers"
+      }
+    ],
+    "topics": "technology",
+    "authors": "arjun-sharma-sample",
+    "body": "Choosing between PEM (proton exchange membrane) and alkaline electrolysers is the first big decision for most Indian projects. Neither is better everywhere.\n\n## 1. Power and ramping\n\nPEM follows solar or wind output within seconds, so it suits plants running on variable renewable power. Alkaline prefers a steady load.\n\n## 2. Water and site\n\nBoth need demineralised water, roughly 10–15 litres per kilogram of hydrogen once treatment losses are included.\n\n## 3. What to ask suppliers\n\n1. What is the guaranteed stack life at my load profile?\n2. What is the specific energy (kWh/kg) at 30% and 100% load?\n3. Who services the stack in India, and how fast?\n4. Which parts are made in India, and which are imported?\n\n*Sample guide from the design (441:801). Replace it before launch.*"
+  },
+  {
+    "slug": "hydrogen-101-grey-blue-green",
+    "title": "Hydrogen 101: grey, blue and green, in plain words",
+    "level": "Beginner",
+    "summary": "What the colours mean, and why buyers in India care about the difference.",
+    "topics": "policy",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "peso-approvals-hydrogen-cylinders",
+    "title": "PESO approvals for hydrogen cylinders, step by step",
+    "level": "Beginner",
+    "summary": "The approvals a cylinder needs before it can be filled and moved in India.",
+    "topics": "policy",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "dm-water-for-electrolysers",
+    "title": "DM water for electrolysers: sizing the treatment skid",
+    "level": "Professional",
+    "summary": "How much water a plant needs, and how to size its treatment.",
+    "topics": "technology",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "storage-350-or-700-bar",
+    "title": "Storage at 350 or 700 bar: choosing for mobility pilots",
+    "level": "Professional",
+    "summary": "What changes in cost and safety between the two pressures.",
+    "topics": "mobility",
+    "authors": "arjun-sharma-sample",
+    "body": "Sample guide. Replace it before launch."
+  },
+  {
+    "slug": "hydrogen-compressors-buyers-guide",
+    "title": "Hydrogen compressors: a buyer's guide",
+    "level": "Professional",
+    "summary": "How the main compressor types compare, which specs matter, which Indian approvals apply and what to ask suppliers before you request quotes. (Sample guide.)",
+    "audience": "Plant engineers and procurement teams buying a compressor for a refuelling station or industrial site.",
+    "learn": [
+      {
+        "point": "How the main types differ"
+      },
+      {
+        "point": "Which specs to compare"
+      },
+      {
+        "point": "What to ask suppliers"
+      }
+    ],
+    "authors": "arjun-sharma-sample",
+    "productCategories": ["Compressors"],
+    "body": "## 1. What it is\n\nA compressor raises hydrogen from the pressure it leaves the electrolyser (usually 20–30 bar) to the pressure you store or dispense it at: 200–500 bar for storage, 350 bar for buses and trucks, 700 bar for cars.\n\n## 2. Technologies compared\n\nDiaphragm compressors keep the gas away from oil, so purity stays high. Piston compressors move large flows. Ionic liquid compressors have few moving parts.\n\n## 3. Questions to ask suppliers\n\n1. What is the specific energy at my inlet and outlet pressure?\n2. How often do diaphragms or seals need replacing?\n3. Who in India holds spares and services it?\n\n## 4. Indian standards and approvals\n\nPESO approves the pressure vessels and the storage installation. Ask for the supplier's approval letters."
+  },
+  {
+    "slug": "electrolysers-buyers-guide",
+    "title": "Electrolysers: a buyer's guide",
+    "level": "Professional",
+    "summary": "What to compare between alkaline, PEM and AEM electrolysers, and how to ask for comparable quotes. (Sample guide.)",
+    "audience": "Project developers and plant engineers choosing a first electrolyser.",
+    "learn": [
+      {
+        "point": "How the main types differ"
+      },
+      {
+        "point": "Which specs to compare"
+      },
+      {
+        "point": "What to ask suppliers"
+      }
+    ],
+    "authors": "arjun-sharma-sample",
+    "productCategories": ["Electrolysers"],
+    "body": "## 1. What it is\n\nAn electrolyser splits water into hydrogen and oxygen using electricity.\n\n## 2. Specs that matter\n\nCompare specific energy in kWh/kg, stack life and degradation, and the turndown range.\n\n## 3. Questions to ask suppliers\n\n1. What is the guaranteed stack life at my load profile?\n2. What does the balance of plant include?"
+  },
+  {
+    "slug": "fuel-cells-backup-power-buyers-guide",
+    "title": "Fuel cells for backup power: a buyer's guide",
+    "level": "Professional",
+    "summary": "How fuel cell backup compares with diesel gensets and batteries for telecom towers and data centres. (Sample guide.)",
+    "audience": "Operations teams for telecom towers, data centres and hospitals.",
+    "learn": [
+      {
+        "point": "How the main types differ"
+      },
+      {
+        "point": "Which specs to compare"
+      },
+      {
+        "point": "What to ask suppliers"
+      }
+    ],
+    "authors": "arjun-sharma-sample",
+    "productCategories": ["Fuel cells"],
+    "body": "## 1. What it is\n\nA fuel cell backup system runs on stored hydrogen when the grid fails.\n\n## 2. Specs that matter\n\nCompare rated power, run time per cylinder bank and start-up time.\n\n## 3. Questions to ask suppliers\n\n1. How is hydrogen resupplied at my sites?\n2. What does a service visit cost?"
+  }
+]

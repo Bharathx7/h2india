@@ -1,0 +1,103 @@
+[
+  {
+    "slug": "50-kw-pem-electrolyser-fertiliser-plant",
+    "title": "How a 50 kW PEM electrolyser runs at a fertiliser plant in Pune",
+    "series": "Hydrotek Systems",
+    "kind": "Explainer",
+    "featured": "yes",
+    "language": "English with Hindi subtitles",
+    "publishedOn": "-8d",
+    "durationMinutes": 14,
+    "description": "Hydrotek's plant team walks through a 50 kW PEM electrolyser running at a fertiliser plant near Pune: how the stack is sized, why the DM water skid matters, what the daily checks are and what it costs to run per kilogram of hydrogen. Sample video: replace before launch.",
+    "url": "https://example.org/sample/videos/pem-50kw.mp4",
+    "people": [
+      {
+        "name": "Anand Deshpande",
+        "role": "CTO, Hydrotek Systems"
+      },
+      {
+        "name": "H2 India editorial team",
+        "role": "Producer"
+      }
+    ],
+    "chapters": [
+      {
+        "at": "0:00",
+        "title": "Why PEM for a small plant"
+      },
+      {
+        "at": "2:40",
+        "title": "Stack and balance of plant"
+      },
+      {
+        "at": "5:15",
+        "title": "Water quality and the DM skid"
+      },
+      {
+        "at": "8:30",
+        "title": "Daily checks and safety"
+      },
+      {
+        "at": "11:20",
+        "title": "Running cost per kg of hydrogen"
+      }
+    ],
+    "transcript": "H2 India:\nWe're at a fertiliser plant near Pune. What did the site need to change?\nAnand Deshpande:\nIt needed a lot of hydrogen ever so slightly purer. The main addition was a demineralised water skid.\nH2 India:\nHow often do you check the stack?\nAnand Deshpande:\nEvery day for pressure and temperature, and a full inspection every quarter.",
+    "publish": "no"
+  },
+  {
+    "slug": "inside-type-iv-cylinder-line-gujarat",
+    "title": "Inside a Type IV cylinder line in Gujarat",
+    "series": "Polar Composites",
+    "kind": "Explainer",
+    "publishedOn": "-12d",
+    "durationMinutes": 11,
+    "description": "How carbon-fibre Type IV cylinders are wound, cured and tested. Sample video: replace before launch.",
+    "url": "https://example.org/sample/videos/type-iv.mp4",
+    "publish": "no"
+  },
+  {
+    "slug": "green-ammonia-in-kandla",
+    "title": "Green ammonia in Kandla: what the first tenders want",
+    "series": "H2 India",
+    "kind": "Interview",
+    "publishedOn": "-15d",
+    "durationMinutes": 18,
+    "description": "A port official explains the bunkering pilot and the land on offer. Sample video: replace before launch.",
+    "url": "https://www.youtube.com/watch?v=sample",
+    "publish": "no"
+  },
+  {
+    "slug": "what-is-lcoh-60-seconds",
+    "title": "What is LCOH?",
+    "series": "H2 India",
+    "kind": "60-second explainer",
+    "publishedOn": "-5d",
+    "durationMinutes": 1,
+    "description": "The levelised cost of hydrogen in one minute. Sample video: replace before launch.",
+    "url": "https://example.org/sample/videos/lcoh.mp4",
+    "publish": "no"
+  },
+  {
+    "slug": "pem-or-alkaline-60-seconds",
+    "title": "PEM or alkaline?",
+    "series": "H2 India",
+    "kind": "60-second explainer",
+    "publishedOn": "-6d",
+    "durationMinutes": 1,
+    "description": "The two main electrolysers in one minute. Sample video: replace before launch.",
+    "url": "https://example.org/sample/videos/pem-alkaline.mp4",
+    "publish": "no"
+  },
+  {
+    "slug": "india-energy-week-new-electrolysers",
+    "title": "India Energy Week: three new electrolyser launches",
+    "series": "Event highlights",
+    "kind": "Event highlight",
+    "publishedOn": "-20d",
+    "durationMinutes": 6,
+    "description": "Short summaries of the launches on the expo floor. Sample video: replace before launch.",
+    "url": "https://example.org/sample/videos/iew.mp4",
+    "publish": "no"
+  }
+]

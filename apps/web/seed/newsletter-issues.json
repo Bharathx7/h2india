@@ -1,0 +1,60 @@
+[
+  {
+    "number": 4,
+    "sentOn": "2026-11-09",
+    "title": "SECI opens green ammonia Tranche II, and 3 tenders close this week",
+    "highlights": [
+      "Green ammonia Mode 2A Tranche II: bids due 15 Nov",
+      "Number of the week: 7.24 lakh t/yr of green ammonia awarded",
+      "New on the marketplace: three PESO-approved compressors"
+    ],
+    "sections": [
+      {
+        "heading": "This week in Indian hydrogen",
+        "lines": [
+          "SECI opened bids for green ammonia under SIGHT Mode 2A Tranche II. Bids close 15 Nov.",
+          "PESO published draft rules on who can approve hydrogen refuelling stations.",
+          "Odisha signed a land deal for a 1 GW electrolyser park near Gopalpur.",
+          "IIT Madras reported a 1,000-hour test of an Indian-made AEM stack.",
+          "Two hydrogen buses began trial runs in Leh."
+        ]
+      },
+      {
+        "heading": "Number of the week",
+        "lines": [
+          "7.24 lakh t/yr of green ammonia awarded across 13 SECI auctions in SIGHT Mode 2A Tranche I. (Sample figure.)"
+        ]
+      }
+    ]
+  },
+  {
+    "number": 3,
+    "sentOn": "2026-11-02",
+    "title": "MNRE extends the hub deadline, and 5 tenders close this week",
+    "highlights": [
+      "State hydrogen hub proposals now due in December",
+      "Explainer: SIGHT in five minutes",
+      "Interview: why stack life matters more than price"
+    ]
+  },
+  {
+    "number": 2,
+    "sentOn": "2026-10-26",
+    "title": "What 13 ammonia auctions taught us, and 2 tenders close this week",
+    "highlights": [
+      "Prices from ₹51.80 to ₹55.75 per kg in the first four auctions",
+      "Supplier spotlight: Narmada Compression Works",
+      "Events: three webinars in November"
+    ]
+  },
+  {
+    "number": 1,
+    "sentOn": "2026-10-19",
+    "title": "Welcome to India H₂ Weekly, and 4 tenders close this week",
+    "highlights": [
+      "What to expect every Monday",
+      "Tenders: IOCL Panipat electrolyser bid date set",
+      "Number of the week: 3,000 MW of electrolyser capacity awarded"
+    ]
+  }
+]

@@ -95,6 +95,20 @@ signed link) and `public` (checked logos and product images). Support requests (
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `newsletter_subscribers` | India H₂ Weekly sign-ups: lower-cased email (unique), status (pending, confirmed, unsubscribed), topic keys, the two "Also send me" choices, where they signed up, the consent text version, a nonce so only the latest emailed link works, confirmed and unsubscribed times |
 
+## Catalogue (step 6.1)
+
+| Table                             | Holds                                                                                                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `catalogue_classes`               | The five classes (Systems, Components, Equipment, Services, Materials); the id is the URL word                                                                                                                |
+| `catalogue_categories`            | Categories (no parent) and sub-categories (parent set); two levels only; slug unique among siblings; hidden and sample flags; soft delete                                                                     |
+| `catalogue_applications`          | Browse by application: landing label, short label for the home tiles, examples, order, hidden                                                                                                                 |
+| `catalogue_category_applications` | Which categories belong to which application (filled by operators)                                                                                                                                            |
+| `catalogue_attributes`            | One attribute of a category's schema: fixed key, label, type (number, range, text, choice, boolean), unit, min and max, choices, hint, required, filterable, comparable, test condition, display group, order |
+| `catalogue_changes`               | The Change history lines on the Taxonomy screen (who, when, one sentence); the audit log keeps the values                                                                                                     |
+
+The launch catalogue comes from migration 0022 (A103). Product values are checked with `schemaFor()` in
+`packages/core/src/catalogue/attributes.ts`, built from these rows at runtime.
+
 ## Content (Stage 4, schema `cms`)
 
 Payload owns the `cms` schema (ADR 0004): one table per collection (`articles`, `authors`, `topics`, `tags`, `media`,

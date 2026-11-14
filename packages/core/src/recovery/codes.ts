@@ -33,6 +33,9 @@ export async function sendCode(input: {
   channel: "email" | "sms";
   to: string;
   name?: string;
+  /** Another code email that follows the same rules, for example Claim this profile (step 6.7). */
+  template?: "email.recovery_code" | "email.claim_code";
+  event?: string;
 }): Promise<void> {
   const db = getDb();
   const dest = destinationKey(input.to);
@@ -65,8 +68,8 @@ export async function sendCode(input: {
     expiresAt: `${formatIstTime(new Date(Date.now() + SIGN_IN.codeMinutes * 60_000))} IST`,
   });
   await deliverEmail({
-    template: "email.recovery_code",
-    event: "account.recovery_code",
+    template: input.template ?? "email.recovery_code",
+    event: input.event ?? "account.recovery_code",
     to: input.to,
     mail,
     security: true,

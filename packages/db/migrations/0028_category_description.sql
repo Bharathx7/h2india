@@ -1,0 +1,1 @@
+ALTER TABLE "core"."catalogue_categories" ADD COLUMN "description" text;

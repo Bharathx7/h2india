@@ -227,8 +227,11 @@ export function SchemeCard(s: {
   deadline: string;
   verified: string | null;
   href: string;
-  saveHref: string;
-  alertHref: string;
+  /** Save and alert need member accounts (Stage 7); the buttons show only when given. */
+  saveHref?: string;
+  alertHref?: string;
+  /** The arrow link's words; "Check eligibility" as drawn. */
+  actionLabel?: string;
 }) {
   const round =
     "inline-flex size-8 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus";
@@ -259,18 +262,81 @@ export function SchemeCard(s: {
       {s.verified ? <p className="type-caption text-secondary">Last verified {s.verified}</p> : null}
       <div className="flex items-center justify-between">
         <a href={s.href} className={cx(arrowLink, stretch)}>
-          Check eligibility
+          {s.actionLabel ?? "Check eligibility"}
           <Icon name="arrow-right" size={16} />
           <span className="sr-only">: {s.title}</span>
         </a>
-        <div className={cx(above, "flex items-center gap-2")}>
-          <a href={s.saveHref} className={round} aria-label={`Save ${s.title}`}>
-            <Icon name="heart" size={14} />
-          </a>
-          <a href={s.alertHref} className={round} aria-label={`Set an alert for ${s.title}`}>
-            <Icon name="bell" size={14} />
-          </a>
+        {s.saveHref || s.alertHref ? (
+          <div className={cx(above, "flex items-center gap-2")}>
+            {s.saveHref ? (
+              <a href={s.saveHref} className={round} aria-label={`Save ${s.title}`}>
+                <Icon name="heart" size={14} />
+              </a>
+            ) : null}
+            {s.alertHref ? (
+              <a href={s.alertHref} className={round} aria-label={`Set an alert for ${s.title}`}>
+                <Icon name="bell" size={14} />
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+/** Job card (464:6071): company, role, place and mode, experience and salary chips, posted and closing dates, Apply. */
+export function JobCard(j: {
+  company: string;
+  initials: string;
+  role: string;
+  where: string;
+  chips: string[];
+  dates: string;
+  href: string;
+  /** Featured jobs (A69) carry a visible label. */
+  featured?: boolean;
+}) {
+  return (
+    <article
+      data-reveal-item=""
+      className="group card-lift relative flex h-full flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-mint type-label-sm text-primary">
+            {j.initials}
+          </span>
+          <p className="truncate type-label-sm text-link">{j.company}</p>
         </div>
+        {j.featured ? <ContentLabel>Featured</ContentLabel> : null}
+      </div>
+      <h3 className="type-label-lg text-primary">
+        <a href={j.href} className={cx(stretch, "focus-visible:outline-none")}>
+          {j.role}
+        </a>
+      </h3>
+      <p className="type-body-sm text-secondary">{j.where}</p>
+      {j.chips.length ? (
+        <ul className="flex flex-wrap gap-2">
+          {j.chips.map((c) => (
+            <li
+              key={c}
+              className="inline-flex h-8 items-center rounded-pill border-[1.5px] border-control px-2.75 type-label text-primary"
+            >
+              {c}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <div className="mt-auto flex items-center justify-between gap-2">
+        <p className="type-caption text-secondary">{j.dates}</p>
+        <span
+          aria-hidden="true"
+          className="inline-flex h-8 shrink-0 items-center rounded-pill border border-control px-3.25 type-label text-primary group-hover:border-focus group-hover:bg-subtle"
+        >
+          Apply
+        </span>
       </div>
     </article>
   );
@@ -288,7 +354,8 @@ function ContentLabel({ children }: { children: string }) {
 
 /**
  * Article card v2 (152:241). "lead" is the home lead story (gradient plate), "standard" the grid and swipe card,
- * "compact" the list row without an image.
+ * "compact" the list row without an image, "hero" the news home's lead story with excerpt and byline (428:601), and
+ * "row" the list row with a small image tile (press releases 428:1247, section lists 430:1952).
  */
 export function ArticleCard({
   layout = "standard",
@@ -297,9 +364,11 @@ export function ArticleCard({
   href,
   readLabel,
   badge,
+  excerpt,
+  meta,
   className,
 }: {
-  layout?: "lead" | "standard" | "compact";
+  layout?: "lead" | "standard" | "compact" | "hero" | "row";
   /** "PROJECTS · 10 NOV 2026" */
   section: string;
   title: string;
@@ -308,8 +377,63 @@ export function ArticleCard({
   readLabel?: string;
   /** Sponsored or Press release. */
   badge?: string | null;
+  /** The standfirst, on the hero layout. */
+  excerpt?: string;
+  /** "By Ananya Rao", on the hero layout. */
+  meta?: string;
   className?: string;
 }) {
+  if (layout === "hero") {
+    return (
+      <article
+        data-reveal-item=""
+        className={cx(
+          "group card-lift relative flex flex-col overflow-hidden rounded-card border border-default bg-page",
+          className,
+        )}
+      >
+        <div className="flex h-50 w-full shrink-0 items-center justify-center bg-tint text-icon-primary md:h-75">
+          <Icon name="newspaper" size={52} />
+        </div>
+        <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
+          {badge ? <ContentLabel>{badge}</ContentLabel> : null}
+          <p className="type-eyebrow text-secondary">{section}</p>
+          <h3 className="type-h3 text-primary">{title}</h3>
+          {excerpt ? <p className="type-body text-body">{excerpt}</p> : null}
+          {meta ? <p className="type-caption text-secondary">{meta}</p> : null}
+          <a href={href} className={cx(arrowLink, stretch)}>
+            {readLabel ?? "Read"}
+            <Icon name="arrow-right" size={16} />
+            <span className="sr-only">: {title}</span>
+          </a>
+        </div>
+      </article>
+    );
+  }
+  if (layout === "row") {
+    return (
+      <article
+        data-reveal-item=""
+        className={cx(
+          "group card-lift relative flex items-start gap-4 rounded-card border border-default bg-page p-3 shadow-soft",
+          className,
+        )}
+      >
+        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-control bg-mint text-icon-primary max-md:h-16 max-md:w-20">
+          <Icon name="newspaper" size={24} />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {badge ? <ContentLabel>{badge}</ContentLabel> : null}
+          <p className="type-eyebrow text-secondary">{section}</p>
+          <h3 className="type-h4 text-primary group-hover:text-link-hover">
+            <a href={href} className={cx(stretch, "focus-visible:outline-none")}>
+              {title}
+            </a>
+          </h3>
+        </div>
+      </article>
+    );
+  }
   if (layout === "compact") {
     return (
       <article

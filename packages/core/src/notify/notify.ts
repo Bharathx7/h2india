@@ -2,7 +2,7 @@ import { schema } from "@h2india/db";
 import type { TemplateId, TextTemplateId } from "@h2india/emails/registry";
 import { eq } from "drizzle-orm";
 import { getDb } from "../db";
-import { deliverEmail, deliverWhatsApp, recordSkipped, type RenderedEmail } from "./channels";
+import { deliverEmail, deliverWhatsApp, recordSkipped, TemplateNotApprovedError, type RenderedEmail } from "./channels";
 import { createInApp, type InAppInput } from "./inapp";
 import { getChoices, getNotifySettings, quietUntil } from "./preferences";
 import { TOPICS, type TopicName } from "./topics";
@@ -77,10 +77,16 @@ export async function notify(input: NotifyInput, now: Date = new Date()) {
       });
       out.whatsapp = "Skipped";
     } else {
-      out.whatsapp = await deliverWhatsApp(
-        { ...input.whatsapp, to: person.mobile ?? "", event: input.event, userId: input.userId },
-        { sendAfter: quiet ?? undefined },
-      );
+      try {
+        out.whatsapp = await deliverWhatsApp(
+          { ...input.whatsapp, to: person.mobile ?? "", event: input.event, userId: input.userId },
+          { sendAfter: quiet ?? undefined },
+        );
+      } catch (error) {
+        // Not approved by the provider yet (A25): the refusal is logged; the other channels still go.
+        if (!(error instanceof TemplateNotApprovedError)) throw error;
+        out.whatsapp = "Skipped";
+      }
     }
   }
 

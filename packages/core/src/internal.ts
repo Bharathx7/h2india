@@ -16,7 +16,8 @@ export function isInternalKey(value: string | null): boolean {
 
 /** Calls an internal web endpoint from the worker; throws on failure so the job retries. */
 export async function callWeb(path: string): Promise<unknown> {
-  const res = await fetch(new URL(path, parseServerEnv().APP_URL), {
+  const env = parseServerEnv();
+  const res = await fetch(new URL(path, env.INTERNAL_WEB_URL ?? env.APP_URL), {
     method: "POST",
     headers: { "x-internal-key": internalKey() },
     signal: AbortSignal.timeout(30_000),

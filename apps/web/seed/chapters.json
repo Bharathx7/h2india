@@ -1,0 +1,128 @@
+[
+  {
+    "slug": "what-hydrogen-is",
+    "order": 1,
+    "title": "What hydrogen is and why it matters",
+    "summary": "Hydrogen is the lightest element and a way to carry energy. Here is why India is building an industry around it. (Sample chapter: replace before launch.)",
+    "readingMinutes": 8,
+    "body": "Hydrogen is a gas that stores energy. Burn it or use it in a fuel cell and the only by-product is water.\n\n## Why India cares\n\nIndia imports most of its oil and gas. Hydrogen made with Indian solar and wind power can replace some of those imports in refineries, fertiliser plants and steel works.\n\n## Where it is used today\n\nMost hydrogen in India is already used in refineries and ammonia plants. It is made from natural gas today.",
+    "publish": "no"
+  },
+  {
+    "slug": "grey-blue-green",
+    "order": 2,
+    "title": "Grey, blue and green: how hydrogen is made",
+    "summary": "The colour names describe how hydrogen is made and how much carbon dioxide that releases. (Sample chapter: replace before launch.)",
+    "readingMinutes": 10,
+    "body": "Hydrogen has no colour. The colours are labels for how it was made.\n\n## Grey\n\nMade from natural gas, releasing carbon dioxide.\n\n## Blue\n\nMade from natural gas, with most of the carbon dioxide captured.\n\n## Green\n\nMade by electrolysis with renewable power. India's Green Hydrogen Standard sets the emissions limit.",
+    "publish": "no"
+  },
+  {
+    "slug": "electrolysers",
+    "order": 3,
+    "title": "Electrolysers: alkaline, PEM, AEM and solid oxide",
+    "summary": "An electrolyser uses electricity to split water into hydrogen and oxygen. Four technologies matter in India today. (Sample chapter: replace before launch.)",
+    "readingMinutes": 12,
+    "body": "If the electricity comes from renewable sources, the hydrogen is green. Here is what each technology does well.\n\n## Alkaline\n\nThe oldest and cheapest per kilowatt. It uses a liquid potassium hydroxide electrolyte and works best on steady power.\n\n## PEM\n\nProton exchange membrane electrolysers use a solid membrane and platinum-group catalysts. They follow solar and wind swings within seconds.\n\n## AEM\n\nAnion exchange membrane electrolysers aim to combine alkaline's low-cost materials with PEM's compact design. The technology is still early.\n\n## Solid oxide\n\nSolid oxide electrolysers run at 600–850 °C. They are the most efficient when a plant has spare heat, but the least proven at scale.",
+    "publish": "no",
+    "heroCaption": "How an electrolyser cell works: water in, hydrogen and oxygen out. Diagram: H2 India",
+    "keyTerms": ["electrolyser-stack", "electrolysis", "electrolyte"],
+    "quiz": [
+      {
+        "question": "A solar plant's output changes every few minutes. Which electrolyser follows it most easily?",
+        "options": [
+          {
+            "option": "Alkaline"
+          },
+          {
+            "option": "PEM"
+          },
+          {
+            "option": "Solid oxide"
+          }
+        ],
+        "answer": 2,
+        "explanation": "PEM electrolysers ramp within seconds."
+      },
+      {
+        "question": "Which technology runs at 600–850 °C?",
+        "options": [
+          {
+            "option": "AEM"
+          },
+          {
+            "option": "PEM"
+          },
+          {
+            "option": "Solid oxide"
+          }
+        ],
+        "answer": 3,
+        "explanation": "Solid oxide cells need high heat."
+      }
+    ]
+  },
+  {
+    "slug": "storing-and-moving-hydrogen",
+    "order": 4,
+    "title": "Storing and moving hydrogen",
+    "summary": "Hydrogen is light and bulky. Compression, cylinders, pipelines and ammonia each move it differently. (Sample chapter: replace before launch.)",
+    "readingMinutes": 9,
+    "body": "Storing hydrogen means making it denser.\n\n## Compression\n\nMost hydrogen is stored as a compressed gas at 200 to 700 bar.\n\n## As ammonia\n\nAmmonia carries hydrogen in a liquid that is easier to ship.",
+    "publish": "no"
+  },
+  {
+    "slug": "fuel-cells",
+    "order": 5,
+    "title": "Fuel cells: turning hydrogen into power",
+    "summary": "A fuel cell turns hydrogen and air into electricity, heat and water. (Sample chapter: replace before launch.)",
+    "readingMinutes": 8,
+    "body": "Fuel cells run backup power, buses and trucks.\n\n## How it works\n\nHydrogen splits at the anode; the electrons do work in the circuit.",
+    "publish": "no"
+  },
+  {
+    "slug": "hydrogen-in-industry",
+    "order": 6,
+    "title": "Hydrogen in industry",
+    "summary": "Refineries, fertiliser plants and steel works use the most hydrogen. (Sample chapter: replace before launch.)",
+    "readingMinutes": 9,
+    "body": "Industry is where green hydrogen replaces grey hydrogen first.\n\n## Fertilisers\n\nAmmonia plants need hydrogen as a raw material.",
+    "publish": "no"
+  },
+  {
+    "slug": "hydrogen-in-mobility",
+    "order": 7,
+    "title": "Hydrogen in mobility",
+    "summary": "Buses, trucks and ships are testing hydrogen on Indian routes. (Sample chapter: replace before launch.)",
+    "readingMinutes": 8,
+    "body": "Hydrogen vehicles refuel in minutes and travel far.\n\n## Pilots in India\n\nBus and truck pilots run on set routes with their own refuelling.",
+    "publish": "no"
+  },
+  {
+    "slug": "safety-codes-and-approvals",
+    "order": 8,
+    "title": "Safety, codes and approvals",
+    "summary": "Who approves hydrogen equipment in India, and what the rules ask. (Sample chapter: replace before launch.)",
+    "readingMinutes": 10,
+    "body": "PESO approves pressure vessels and cylinders.\n\n## Approvals\n\nCheck which rule applies before you buy.",
+    "publish": "no"
+  },
+  {
+    "slug": "the-economics",
+    "order": 9,
+    "title": "The economics",
+    "summary": "What green hydrogen costs, and what brings the cost down. (Sample chapter: replace before launch.)",
+    "readingMinutes": 11,
+    "body": "Power is the biggest cost.\n\n## LCOH\n\nThe levelised cost of hydrogen spreads every cost over every kilogram.",
+    "publish": "no"
+  },
+  {
+    "slug": "indias-hydrogen-ecosystem",
+    "order": 10,
+    "title": "India's hydrogen ecosystem",
+    "summary": "The mission, the states and the companies, and how they fit together. (Sample chapter: replace before launch.)",
+    "readingMinutes": 9,
+    "body": "The National Green Hydrogen Mission sets targets and incentives.\n\n## States\n\nStates add land, power and tax incentives.",
+    "publish": "no"
+  }
+]

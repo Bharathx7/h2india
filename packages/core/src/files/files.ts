@@ -144,6 +144,72 @@ function canRead(file: FileRow, actor: Actor, key?: string): boolean {
   return Boolean(rule.operator && can(actor, rule.operator));
 }
 
+/** A document of a live product's page (step 6.4): readable by anyone, only while the product is live. */
+async function onLiveProduct(file: FileRow): Promise<boolean> {
+  const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
+  if (!rule?.listedOnLiveProduct || file.attachedType !== "product" || !file.attachedId) return false;
+  const p = schema.products;
+  const [row] = await getDb()
+    .select({ id: p.id })
+    .from(p)
+    .where(and(eq(p.id, file.attachedId), eq(p.status, "Live"), isNull(p.deletedAt)))
+    .limit(1);
+  return Boolean(row);
+}
+
+/**
+ * An RFQ file the other side may open (step 9.5): a buyer's attachment for people at a supplier the RFQ was sent to,
+ * and a supplier's quote document for people at the buyer once that version is sent. rfq.view in that company.
+ */
+async function onSharedRfq(file: FileRow, actor: Actor): Promise<boolean> {
+  const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
+  if (!rule?.sharedOnRfq) return false;
+  const companies = [...actor.companies.entries()]
+    .filter(([, seat]) => seat.permissions.has("rfq.view"))
+    .map(([id]) => id);
+  if (!companies.length) return false;
+  const db = getDb();
+  const [asSupplier] = await db
+    .select({ id: schema.rfqs.id })
+    .from(schema.rfqs)
+    .innerJoin(schema.rfqSuppliers, eq(schema.rfqSuppliers.rfqId, schema.rfqs.id))
+    .where(
+      and(
+        sql`${file.id}::uuid = any(${schema.rfqs.attachments})`,
+        sql`${schema.rfqs.sentAt} is not null`,
+        inArray(schema.rfqSuppliers.organisationId, companies),
+      ),
+    )
+    .limit(1);
+  if (asSupplier) return true;
+  const [asBuyer] = await db
+    .select({ id: schema.quotes.id })
+    .from(schema.quoteVersions)
+    .innerJoin(schema.quotes, eq(schema.quotes.id, schema.quoteVersions.quoteId))
+    .where(
+      and(
+        sql`${file.id}::uuid = any(${schema.quoteVersions.documents})`,
+        eq(schema.quoteVersions.state, "Sent"),
+        inArray(schema.quotes.buyerOrganisationId, companies),
+      ),
+    )
+    .limit(1);
+  if (asBuyer) return true;
+  // A file sent in a message: both companies in the thread may open it (step 9.7).
+  const [inThread] = await db
+    .select({ id: schema.messages.id })
+    .from(schema.messages)
+    .innerJoin(schema.messageThreads, eq(schema.messageThreads.id, schema.messages.threadId))
+    .where(
+      and(
+        sql`${file.id}::uuid = any(${schema.messages.attachments})`,
+        sql`(${inArray(schema.messageThreads.buyerOrganisationId, companies)} or ${inArray(schema.messageThreads.supplierOrganisationId, companies)})`,
+      ),
+    )
+    .limit(1);
+  return Boolean(inThread);
+}
+
 async function load(id: string): Promise<FileRow> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new FileError("NOT_FOUND", "No such file");
   const [row] = await getDb().select().from(f).where(eq(f.id, id));
@@ -323,7 +389,13 @@ export async function fileLink(input: {
 }): Promise<{ url: string; expiresAt: Date }> {
   const file = await load(input.fileId);
   // Someone who may not see the file learns nothing about it, not even that it exists.
-  if (!canRead(file, input.actor, input.key)) throw new FileError("NOT_FOUND", "No such file");
+  if (
+    !canRead(file, input.actor, input.key) &&
+    !(await onLiveProduct(file)) &&
+    !(await onSharedRfq(file, input.actor))
+  ) {
+    throw new FileError("NOT_FOUND", "No such file");
+  }
   if (file.status !== "Available" || !file.bucket || !file.objectKey || file.deletedAt) {
     throw new FileError("NOT_FOUND", "This file can't be opened");
   }

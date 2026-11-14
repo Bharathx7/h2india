@@ -28,6 +28,8 @@
     "db:migrate": "pnpm --filter @h2india/db migrate && pnpm --filter @h2india/web cms:migrate",
     "db:seed": "pnpm --filter @h2india/db seed && pnpm --filter @h2india/web seed",
     "db:reset": "pnpm --filter @h2india/db reset",
+    "search:reindex": "pnpm --filter @h2india/web search:reindex",
+    "admin:bootstrap": "tsx --env-file-if-exists=.env.local packages/core/scripts/bootstrap-admin.ts",
     "content:import": "node scripts/content-import.mjs",
     "import:glossary": "node scripts/content-import.mjs glossary",
     "import:articles": "node scripts/content-import.mjs articles",

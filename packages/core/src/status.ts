@@ -37,7 +37,9 @@ export interface ChangeStatus<T extends StatusTable> {
   also?: (tx: Executor) => Promise<void>;
 }
 
-export async function changeStatus<T extends StatusTable>(db: Database, change: ChangeStatus<T>): Promise<void> {
+/** Works on the database or inside a transaction (a deadline handler's): inside one it uses a savepoint. */
+export async function changeStatus<T extends StatusTable>(ex: Executor, change: ChangeStatus<T>): Promise<void> {
+  const db = ex as Database;
   const from = typeof change.from === "string" ? [change.from] : [...change.from];
   if (change.transitions) {
     const ok = from.every((f) => change.transitions?.[f]?.includes(change.to));

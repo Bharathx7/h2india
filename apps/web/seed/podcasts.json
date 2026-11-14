@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "scaling-electrolyser-factories-in-india",
+    "title": "Scaling electrolyser factories in India",
+    "show": "Hydrogen Leaders",
+    "episode": 14,
+    "publishedOn": "-11d",
+    "durationMinutes": 32,
+    "alsoOn": "Spotify, Apple Podcasts and YouTube",
+    "description": "Hydrotek Systems' CTO on what it takes to make electrolysers in India at scale: suppliers for membranes and catalysts, testing every stack before it ships, and why buyers keep asking about lead times. (Sample episode.)",
+    "url": "https://example.org/sample/podcast/ep14.mp3",
+    "people": [
+      {
+        "name": "Anand Deshpande",
+        "role": "CTO, Hydrotek Systems · guest"
+      },
+      {
+        "name": "H2 India editorial team",
+        "role": "Host"
+      }
+    ],
+    "chapters": [
+      {
+        "at": "00:00",
+        "title": "Introductions"
+      },
+      {
+        "at": "03:10",
+        "title": "From a 50 kW stack to a 1 MW container"
+      },
+      {
+        "at": "11:45",
+        "title": "Where the parts come from"
+      },
+      {
+        "at": "19:30",
+        "title": "Testing every stack before it leaves the factory"
+      },
+      {
+        "at": "26:05",
+        "title": "What buyers ask for, and what they should ask for"
+      }
+    ],
+    "transcript": "H2 India:\nWelcome to Hydrogen Leaders. Today we're talking about factories: what it takes to make electrolysers in India, at scale.\nAnand Deshpande:\nThanks for having me. The short answer is that the stack is the easy part. The hard part is everything around it.\nH2 India:\nWhat do you mean by everything around it?\nAnand Deshpande:\nPower electronics, gas cleaning, controls. That's where lead times come from.",
+    "publish": "no"
+  }
+]

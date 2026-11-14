@@ -3,6 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { approveJoinRequest, requestToJoin } from "../companies/join-requests";
 import { changeMemberRole, getOrganisation, listInvitations, listMembers, renameOrganisation } from "../companies/repo";
+import { pendingClaims } from "../companies/claims";
+import { createList, projectLists } from "../buyer/lists";
+import { addDelegation, delegationsOf, deliverySitesOf, saveDeliverySite } from "../buyer/settings";
+import { listCompanyProducts, listCompanyQuestions } from "../products/company";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
 import { can } from "./can";
@@ -52,12 +56,71 @@ describe.skipIf(!url)("authorisation", () => {
       expect(await listInvitations(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
     });
 
+    it("products (step 6.3)", async () => {
+      const [category] = await h.db.select().from(schema.catalogueCategories).limit(1);
+      await h.db.insert(schema.products).values({
+        organisationId: data.a.org.id,
+        categoryId: category?.id ?? "",
+        slug: `alpha-draft-${String(Date.now())}`,
+        name: "Alpha draft product",
+      });
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      expect((await listCompanyProducts(h.db, scopeFor(a), data.a.org.id)).map((p) => p.name)).toContain(
+        "Alpha draft product",
+      );
+      expect(await listCompanyProducts(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+    });
+
+    it("product questions (step 6.4)", async () => {
+      const [product] = await h.db
+        .select()
+        .from(schema.products)
+        .where(eq(schema.products.organisationId, data.a.org.id))
+        .limit(1);
+      await h.db.insert(schema.productQuestions).values({
+        productId: product?.id ?? "",
+        organisationId: data.a.org.id,
+        askerId: data.b.requester.id,
+        question: "Can it run at 30% load for long periods?",
+      });
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      expect(await listCompanyQuestions(h.db, scopeFor(a), data.a.org.id)).toHaveLength(1);
+      expect(await listCompanyQuestions(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+    });
+
+    it("profile claims (step 6.7): only operators see them", async () => {
+      const b = await loadActor(h.db, data.b.admin.id);
+      await expect(pendingClaims(h.db, b)).rejects.toThrow("Not allowed");
+    });
+
     it("join requests", async () => {
       const asker = await makeUser(h.db, "Asker");
       const request = await requestToJoin({ userId: asker.id, organisationId: data.a.org.id });
       await expect(approveJoinRequest({ adminId: data.b.admin.id, requestId: request.id })).rejects.toMatchObject({
         code: "NOT_ALLOWED",
       });
+    });
+
+    it("delivery sites, delegations and project lists (step 9.1)", async () => {
+      const a = await loadActor(h.db, data.a.admin.id);
+      const b = await loadActor(h.db, data.b.admin.id);
+      await saveDeliverySite(h.db, a, data.a.org.id, { name: "Plant", address: "Plot 1", contacts: [] });
+      await addDelegation(h.db, a, data.a.org.id, {
+        fromUserId: data.a.admin.id,
+        toUserId: data.a.requester.id,
+        startsOn: new Date(),
+        endsOn: new Date(Date.now() + 7 * 86_400_000),
+      });
+      await createList(h.db, a, data.a.org.id, "Pilot");
+      expect(await deliverySitesOf(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      expect(await delegationsOf(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      expect(await projectLists(h.db, scopeFor(b), data.a.org.id)).toEqual([]);
+      await expect(
+        saveDeliverySite(h.db, b, data.a.org.id, { name: "X", address: "Y", contacts: [] }),
+      ).rejects.toThrow();
+      await expect(createList(h.db, b, data.a.org.id, "X")).rejects.toThrow();
     });
   });
 

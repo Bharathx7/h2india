@@ -88,6 +88,13 @@ function SidebarBody({
   homeHref: string;
   compact: boolean;
 }) {
+  // One active item: the longest address that holds the current page, so Overview (/admin) is not lit on
+  // /admin/catalogue.
+  const matches = (href: string) => currentHref === href || currentHref.startsWith(`${href}/`);
+  const activeHref = groups
+    .flatMap((g) => g.items.map((item) => item.href))
+    .filter(matches)
+    .sort((a, b) => b.length - a.length)[0];
   return (
     <div data-surface="inverse" className="flex h-full flex-col gap-5 bg-inverse px-4 pt-7 pb-6">
       <div className={cx("flex items-center gap-2.5 pl-2", compact && "max-lg:hidden")}>
@@ -108,11 +115,7 @@ function SidebarBody({
               <ul className="flex flex-col gap-px">
                 {g.items.map((item) => (
                   <li key={item.href}>
-                    <SidebarItem
-                      item={item}
-                      active={currentHref === item.href || currentHref.startsWith(`${item.href}/`)}
-                      compact={compact}
-                    />
+                    <SidebarItem item={item} active={item.href === activeHref} compact={compact} />
                   </li>
                 ))}
               </ul>
@@ -160,6 +163,8 @@ export interface WorkspaceShellProps {
   settingsHref?: string;
   logoutHref: string;
   homeHref?: string;
+  /** The top bar's main button, for example the supplier's Add product (584:961). */
+  action?: ReactNode;
   children: ReactNode;
 }
 
@@ -177,6 +182,7 @@ export function WorkspaceShell({
   settingsHref,
   logoutHref,
   homeHref = "/",
+  action,
   children,
 }: WorkspaceShellProps) {
   const [drawer, setDrawer] = useState(false);
@@ -237,6 +243,7 @@ export function WorkspaceShell({
               <span className="truncate type-body text-secondary">{searchPlaceholder}</span>
             </button>
             <div className="ml-auto flex items-center gap-2 md:ml-0 md:gap-4">
+              {action ? <div className="hidden md:block">{action}</div> : null}
               {helpHref ? (
                 <a
                   href={helpHref}

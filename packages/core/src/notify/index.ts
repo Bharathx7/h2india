@@ -19,5 +19,16 @@ export { TOPICS } from "./topics";
 export type { Category, NotifyChannel, Topic, TopicName } from "./topics";
 export { sendTestMessage } from "./test-send";
 export { sendReportCopy } from "./reports";
+export {
+  sendChangesNeeded,
+  sendEventLive,
+  sendGrievance,
+  sendJobLive,
+  sendSubmissionReceived,
+  sendWebinarRegistered,
+  sendWebinarReminder,
+  sendWebinarReplay,
+} from "./events";
+export type { GrievanceDetails, SubmissionKind, WebinarDetails } from "./events";
 export { TEMPLATES } from "@h2india/emails/registry";
 export type { TemplateEntry, TemplateId } from "@h2india/emails/registry";

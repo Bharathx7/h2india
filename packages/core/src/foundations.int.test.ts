@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { audit } from "./audit";
-import { nextReference } from "./reference";
+import { formatReference, nextReference } from "./reference";
 import { changeStatus, StatusConflictError, TransitionNotAllowedError } from "./status";
 
 // Step 3.1 and 3.6 checks against a real PostgreSQL (TEST_DATABASE_URL).
@@ -49,7 +49,9 @@ describe.skipIf(!url)("database foundations", () => {
   it("starts each year and type at 0001, using the year in India time", async () => {
     // 31 Dec 2026 20:00 UTC is 1 Jan 2027 in India.
     expect(await nextReference(h.db, "RFQ", new Date("2026-12-31T20:00:00Z"))).toBe("RFQ-2027-0001");
-    expect(await nextReference(h.db, "Q", new Date("2026-06-01T00:00:00Z"))).toBe("Q-2026-0001");
+    // Quotes have no year (step 9.2): Q-1001, Q-1002 …
+    expect(await nextReference(h.db, "Q", new Date("2026-06-01T00:00:00Z"))).toMatch(/^Q-1\d{3,}$/);
+    expect(formatReference("Q", 2026, 1)).toBe("Q-1001");
   });
 
   it("changes a status with history and audit in one transaction", async () => {

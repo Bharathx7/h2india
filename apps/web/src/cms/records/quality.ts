@@ -5,8 +5,9 @@ import { RECORD_COLLECTIONS } from "./collections";
 // Data quality (646:9, 646:733; step 4.3): records nobody has verified for the configured age (30 days, red after 60,
 // A31), tracker records included (643:1330, step 4.5), and open possible updates. The admin screens come in step 11.3.
 
-export const STALE_DAYS = 30;
-export const RED_DAYS = 60;
+import { RED_DAYS, STALE_DAYS } from "./thresholds";
+
+export { RED_DAYS, STALE_DAYS };
 
 const CHECKED = [...RECORD_COLLECTIONS, ...TRACKER_SLUGS] as const;
 

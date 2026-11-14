@@ -7,6 +7,11 @@ import {
   renderJoinRequestToAdmin,
   renderRecovery,
   renderReportDownload,
+  renderSubmissionReceived,
+  renderGrievance,
+  renderWebinarRegistered,
+  renderAlertDigest,
+  renderDocumentExpiring,
   renderSignInCode,
   renderVerifyEmail,
 } from "./index";
@@ -28,6 +33,7 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
         renderSignInCode({ appUrl, code: "482913", name: "Ravi", expiresIn: "10 minutes", expiresAt: "8:51 AM IST" }),
       );
     case "email.recovery_code":
+    case "email.claim_code":
       return email(
         renderSignInCode({
           appUrl,
@@ -125,6 +131,141 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           days: 7,
         }),
       );
+    case "email.webinar_registration":
+      return email(
+        renderWebinarRegistered(appUrl, {
+          name: "Ravi Kulkarni",
+          title: "Electrolyser buying in India: what to check before you order",
+          date: "Thursday 26 Nov 2026",
+          time: "4:00 to 5:00 PM IST",
+          short: "26 Nov at 4 PM IST",
+          joinUrl: `${appUrl}/events/electrolyser-buying/join`,
+          host: "H2 India editorial team",
+          calendar: { google: appUrl, outlook: appUrl, ics: `${appUrl}/events/electrolyser-buying/ics` },
+        }),
+      );
+    case "email.grievance_acknowledgement":
+      return email(
+        renderGrievance(appUrl, {
+          name: "Suresh Natarajan",
+          reference: "GRV-2026-00318",
+          about: "Listing · Type IV cylinder, 350 bar · Hydrotek Systems",
+          raised: "10 Nov 2026, 9:40 PM IST",
+          acknowledged: "11 Nov 2026, 10:15 AM IST",
+          resolveBy: "25 Nov 2026",
+          teamLine: "our listings team is checking the certificate with the supplier",
+          officer:
+            "[Grievance officer], Grievance Officer, H2 India · grievance@[H2 India domain] · [Registered office address]",
+          signature: "[Grievance officer], Grievance Officer, H2 India",
+          statusUrl: `${appUrl}/legal/grievance-officer?ticket=GRV-2026-00318`,
+        }),
+      );
+    case "email.submission_received":
+      return email(
+        renderSubmissionReceived(appUrl, {
+          kind: "event",
+          name: "Rohan Mehta",
+          reference: "EV-2026-0412",
+          title: "Safe hydrogen storage workshop 2026",
+          rows: [
+            { label: "Event", value: "Safe hydrogen storage workshop 2026" },
+            { label: "Type and date", value: "Workshop · 10 Dec 2026" },
+            { label: "Place", value: "Ratnagiri, Maharashtra" },
+          ],
+          url: `${appUrl}/events/submit`,
+        }),
+      );
+    case "email.verification_status":
+      return email(
+        renderDocumentExpiring(appUrl, {
+          name: "Nikhil Desai",
+          company: "Hydrotek Systems",
+          companyLine: "Hydrotek Systems Private Limited · verified since 14 Mar 2026",
+          document: "ISO 22734 certificate",
+          scope: "PEM electrolysers",
+          expires: "23 Nov 2026",
+          days: 12,
+          others: "All valid. Next to expire: PESO licence, 30 Jun 2027",
+          uploadUrl: `${appUrl}/supplier/verification`,
+          statusUrl: `${appUrl}/supplier/verification`,
+        }),
+      );
+    case "email.tender_alert_digest":
+      return email(
+        renderAlertDigest("5 tenders match your alert · BPCL compressor package closes tomorrow", {
+          appUrl,
+          eyebrow: "Tender alert · daily digest",
+          headline: "5 tenders match your alert",
+          intro:
+            "Equipment, electrolysers, production, EPC and refuelling tenders in all states. We check each one against the issuer's portal before we send it.",
+          items: [
+            {
+              over: "BPCL · Madhya Pradesh",
+              title: "Hydrogen compressor package, Bina refinery",
+              reference: "BPCL/BINA/2026/118",
+              due: "Bid due 12 Nov 2026 · 1 day left",
+              soon: true,
+              href: `${appUrl}/opportunities/tenders`,
+            },
+            {
+              over: "IOCL · Haryana",
+              title: "Supply of a 10 MW PEM electrolyser, Panipat refinery",
+              reference: "IOCL/PR/GH2/2026-27/09",
+              due: "Bid due 21 Nov 2026 · 10 days left",
+              href: `${appUrl}/opportunities/tenders`,
+            },
+          ],
+          viewLabel: "View tender",
+          all: { label: "See all open tenders", href: `${appUrl}/opportunities/tenders` },
+          manageHref: `${appUrl}/member/alerts`,
+          offHref: `${appUrl}/alerts/off`,
+          reason: "You're getting this because you set up a daily tender alert.",
+          preview: "SECI green ammonia, IOCL 10 MW electrolyser and 2 more.",
+        }),
+      );
+    case "whatsapp.tender_alert_instant":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.tender_alert_instant"]({
+          issuer: "IOCL",
+          change: "extended the bid due date",
+          title: "Supply of a 10 MW PEM electrolyser, Panipat refinery",
+          reference: "IOCL/PR/GH2/2026-27/09",
+          due: "21 Nov 2026",
+          alert: "electrolysers in all states",
+        }),
+      };
+    case "whatsapp.scheme_alert":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.scheme_alert"]({
+          scheme: "SIGHT programme Component II",
+          what: "Mode 2A Tranche II bids",
+          due: "15 Nov 2026",
+          where: "the SECI e-tender portal",
+          left: "5 days",
+          alert: "production incentives",
+        }),
+      };
+    case "whatsapp.webinar_registration":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.webinar_registration"]({
+          name: "Ravi",
+          title: "Electrolyser buying in India: what to check before you order",
+          date: "Thursday 26 Nov 2026",
+          time: "4:00 to 5:00 PM",
+        }),
+      };
+    case "whatsapp.webinar_reminder":
+      return {
+        kind: "text",
+        text: APPROVED_TEXT["whatsapp.webinar_reminder"]({
+          name: "Ravi",
+          title: "Electrolyser buying in India: what to check before you order",
+          time: "4:00 PM",
+        }),
+      };
     case "email.test": {
       const element = (
         <Notice

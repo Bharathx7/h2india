@@ -30,6 +30,8 @@ import { auth, getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { clearDraftCookie, draftToken, ensureDraft, workspaceFor } from "@/server/join";
 
+import { currentTermsVersion } from "@/trust/terms";
+
 // Server side of the Join flow (step 3.3). Every rule lives in packages/core; these only connect the screens to it.
 
 export type Result<T = undefined> =
@@ -135,13 +137,25 @@ export async function submitDetails(details: Details): Promise<Result<string>> {
 
   const session = await getSession();
   if (session) {
-    await updateDraft(token, { email: session.user.email, fullName, jobRole: details.jobRole, termsAccepted: true });
+    await updateDraft(token, {
+      email: session.user.email,
+      fullName,
+      jobRole: details.jobRole,
+      termsAccepted: true,
+      termsVersion: await currentTermsVersion(),
+    });
     return nextAfterDetails(token, { id: session.user.id, email: session.user.email });
   }
 
   const email = normaliseEmail(details.email ?? "");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("EMAIL_REQUIRED");
-  await updateDraft(token, { email, fullName, jobRole: details.jobRole, termsAccepted: true });
+  await updateDraft(token, {
+    email,
+    fullName,
+    jobRole: details.jobRole,
+    termsAccepted: true,
+    termsVersion: await currentTermsVersion(),
+  });
   return sendLink(email);
 }
 

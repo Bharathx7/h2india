@@ -1,7 +1,9 @@
 import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api";
 import { getDb } from "../db";
 import { normaliseEmail, SIGN_IN, SIGN_IN_ERROR } from "./rules";
+import { recordPasskeyStepUp } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
+import { isSuspended } from "../admin/users";
 
 // The sign-in rules Better Auth does not have (ADR 0003, decision A2), run around its email-code routes:
 //  • a 15-minute pause for an email after 5 wrong codes, even with a new code (Figma 524:2036)
@@ -45,6 +47,14 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
   const email = emailOf(ctx);
   if (!email) return;
   const db = getDb();
+  // A suspended account can't sign in (653:568, step 11.4); appeals go to email until G10 is designed.
+  if (await isSuspended(db, email)) {
+    throw new APIError("FORBIDDEN", {
+      code: SIGN_IN_ERROR.suspended,
+      message:
+        "This account is suspended. To appeal, reply to the email we sent you or write to the grievance officer.",
+    });
+  }
   const pause = await readThrottle(db, key.paused(email));
   if (pause) throw pausedError(pause.expiresAt);
   if (ctx.path !== SEND) return;
@@ -88,7 +98,15 @@ async function limitLinks(email: string) {
   }
 }
 
+/** A passkey sign-in that succeeded (step 8.6 step-up). */
+const PASSKEY = "/passkey/verify-authentication";
+
 export const afterSignIn = createAuthMiddleware(async (ctx) => {
+  if (ctx.path === PASSKEY) {
+    const userId = ctx.context.newSession?.user.id;
+    if (userId && !isAPIError(ctx.context.returned)) await recordPasskeyStepUp(getDb(), userId);
+    return;
+  }
   if (ctx.path !== VERIFY) return;
   const email = emailOf(ctx);
   if (!email) return;

@@ -70,6 +70,39 @@ test("mega menus work by keyboard only and close on Escape and on focus leaving"
   await expect(panel).toBeHidden();
 });
 
+test("once scrolled, only the header's main bar stays; the full header returns at the top and with focus", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "desktop header");
+  await page.goto("/");
+  const header = page.locator("header").first();
+  const nav = page.getByRole("navigation", { name: "Main" });
+  const heightOf = () => header.evaluate((h) => Math.round(h.getBoundingClientRect().height));
+  const mainTop = () =>
+    page.evaluate(() => Math.round(document.querySelector("main")?.getBoundingClientRect().top ?? 0));
+  expect(await heightOf()).toBe(162);
+  await expect(nav).toBeVisible();
+
+  await page.mouse.wheel(0, 600);
+  await expect(nav).toBeHidden();
+  expect(await heightOf()).toBeLessThan(80);
+  await expect(page.getByRole("link", { name: "H2 India home" }).first()).toBeInViewport();
+  // Hiding rows never moves the page: content sits where the scroll put it.
+  const scrolled = await page.evaluate(() => Math.round(window.scrollY));
+  expect(await mainTop()).toBe(162 - scrolled);
+
+  // Keyboard focus in the header brings every row back, so all links stay reachable.
+  await page.getByRole("link", { name: "H2 India home" }).first().focus();
+  await expect(nav).toBeVisible();
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await expect(nav).toBeHidden();
+
+  await page.mouse.wheel(0, -2000);
+  await expect(nav).toBeVisible();
+  expect(await heightOf()).toBe(162);
+});
+
 test("all header links stay visible between 1024 and 1279 wide", async ({ page, isMobile }) => {
   test.skip(isMobile, "desktop widths");
   for (const width of [1024, 1100, 1279]) {

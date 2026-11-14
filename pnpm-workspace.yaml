@@ -5,6 +5,12 @@ packages:
 allowBuilds:
   esbuild: true
   simple-git-hooks: true
+  # Optional native speed-up for BullMQ's msgpackr; the plain JavaScript fallback is used instead (step 1.7).
+  msgpackr-extract: false
 minimumReleaseAgeExclude:
   - prettier@3.10.0
   - bullmq@6.7.4
+# Security fixes the audit asks for: dompurify through Payload's code editor, happy-dom in tests.
+overrides:
+  dompurify: ">=3.4.17"
+  happy-dom: ">=21.0.4"

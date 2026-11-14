@@ -1,7 +1,7 @@
 // Upload limits per kind of file (step 3.7, decisions A20 and A21). Configuration, shared by the upload zone in the
 // browser (hint text, first check) and the server and worker (the checks that count). Safe to import anywhere.
 
-export type FileType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/svg+xml";
+export type FileType = "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | "image/svg+xml" | "text/csv";
 
 export interface FileKindRule {
   /** Shown in messages, for example "Work ID". */
@@ -27,9 +27,27 @@ export const FILE_KINDS = {
     sensitive: true,
   },
   work_id: { label: "Work ID", types: DOCS, maxMb: 10, visibility: "private", sensitive: true },
+  /** The authorisation letter on Claim this profile (493:784): signed by a director. Seen only by verification. */
+  claim_letter: { label: "Authorisation letter", types: DOCS, maxMb: 10, visibility: "private", sensitive: true },
   quote_attachment: { label: "Attachment", types: DOCS, maxMb: 10, visibility: "private", sensitive: false },
   datasheet: { label: "Datasheet", types: ["application/pdf"], maxMb: 20, visibility: "private", sensitive: false },
   // SVG is accepted but only a PNG made from it is kept (A21).
+  /** Member profile photo (545:8): "JPG or PNG, square, up to 2 MB." */
+  profile_photo: {
+    label: "Photo",
+    types: ["image/jpeg", "image/png"],
+    maxMb: 2,
+    visibility: "private",
+    sensitive: false,
+  },
+  /** Import products from a CSV (272:4427): "Up to 500 rows". Read by the worker, never served. */
+  product_import: {
+    label: "CSV file",
+    types: ["text/csv"],
+    maxMb: 5,
+    visibility: "private",
+    sensitive: false,
+  },
   logo: {
     label: "Logo",
     types: ["image/png", "image/jpeg", "image/svg+xml"],
@@ -43,6 +61,24 @@ export const FILE_KINDS = {
     maxMb: 10,
     visibility: "public",
     sensitive: false,
+  },
+  /** Images with a press release (504:8): "JPG or PNG, up to 10 MB each, up to 5 images". */
+  press_image: {
+    label: "Image",
+    types: ["image/jpeg", "image/png"],
+    maxMb: 10,
+    maxCount: 5,
+    visibility: "public",
+    sensitive: false,
+  },
+  /** Attachments to a grievance (519:8): "PDF, JPG or PNG, up to 10 MB each, up to 5 files". Personal data. */
+  grievance_attachment: {
+    label: "Attachment",
+    types: DOCS,
+    maxMb: 10,
+    maxCount: 5,
+    visibility: "private",
+    sensitive: true,
   },
   delivery_photo: {
     label: "Photo",
@@ -64,6 +100,7 @@ const SHORT: Record<FileType, string> = {
   "image/png": "PNG",
   "image/webp": "WebP",
   "image/svg+xml": "SVG",
+  "text/csv": "CSV",
 };
 
 const EXTENSIONS: Record<FileType, string[]> = {
@@ -72,6 +109,7 @@ const EXTENSIONS: Record<FileType, string[]> = {
   "image/png": [".png"],
   "image/webp": [".webp"],
   "image/svg+xml": [".svg"],
+  "text/csv": [".csv"],
 };
 
 /** "PDF, JPG or PNG" */

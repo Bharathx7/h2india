@@ -1,3 +1,4 @@
+import { CONSENT_COOKIE, writeConsent } from "../../../packages/core/src/consent/cookies";
 import { expect, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
 import pg from "pg";
 
@@ -11,6 +12,12 @@ export async function ownIp(context: BrowserContext, info: TestInfo): Promise<vo
   await context.setExtraHTTPHeaders({
     "x-forwarded-for": `10.${String(salt)}.${String(n)}.${String(Date.now() % 250)}`,
   });
+  // A returning visitor who already chose "Reject optional", so the cookie banner (step 5.9) doesn't cover the page.
+  // consent.spec.ts tests the banner itself in a fresh context.
+  const base = info.project.use.baseURL ?? "http://localhost:3000";
+  await context.addCookies([
+    { name: CONSENT_COOKIE, value: writeConsent({ analytics: false, browserId: "e2etestbrowser" }), url: base },
+  ]);
 }
 
 export function newEmail(prefix: string): string {

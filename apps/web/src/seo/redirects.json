@@ -1,0 +1,102 @@
+[
+  {
+    "from": "/mission",
+    "to": "/about/mission"
+  },
+  {
+    "from": "/team",
+    "to": "/about/team"
+  },
+  {
+    "from": "/partnership",
+    "to": "/contact/partnerships"
+  },
+  {
+    "from": "/partnerships",
+    "to": "/contact/partnerships"
+  },
+  {
+    "from": "/newsletters",
+    "to": "/newsletter"
+  },
+  {
+    "from": "/terms",
+    "to": "/legal/terms"
+  },
+  {
+    "from": "/privacy",
+    "to": "/legal/privacy"
+  },
+  {
+    "from": "/cookies",
+    "to": "/legal/cookies"
+  },
+  {
+    "from": "/legal/editorial",
+    "to": "/legal/editorial-policy"
+  },
+  {
+    "from": "/legal/sponsored",
+    "to": "/legal/sponsored-content"
+  },
+  {
+    "from": "/legal/grievance",
+    "to": "/legal/grievance-officer"
+  },
+  {
+    "from": "/grievance",
+    "to": "/legal/grievance-officer"
+  },
+  {
+    "from": "/verification-criteria",
+    "to": "/verification"
+  },
+  {
+    "from": "/hydrogen-101",
+    "to": "/knowledge/hydrogen-101"
+  },
+  {
+    "from": "/glossary",
+    "to": "/knowledge/glossary"
+  },
+  {
+    "from": "/schemes",
+    "to": "/opportunities/schemes"
+  },
+  {
+    "from": "/tenders",
+    "to": "/opportunities/tenders"
+  },
+  {
+    "from": "/grants",
+    "to": "/opportunities/grants"
+  },
+  {
+    "from": "/jobs",
+    "to": "/opportunities/jobs"
+  },
+  {
+    "from": "/webinars",
+    "to": "/events/webinars"
+  },
+  {
+    "from": "/compare",
+    "to": "/marketplace/compare"
+  },
+  {
+    "from": "/brands",
+    "to": "/marketplace/brands"
+  },
+  {
+    "from": "/brands/:slug",
+    "to": "/marketplace/brands/:slug"
+  },
+  {
+    "from": "/applications/:slug",
+    "to": "/marketplace/applications/:slug"
+  },
+  {
+    "from": "/marketplace/p/:slug",
+    "to": "/marketplace/products/:slug"
+  }
+]

@@ -91,6 +91,61 @@ export function ConfirmDialog({
   );
 }
 
+/* Form modal, as drawn on Dialog · Add attribute (637:417), Ask a question (402:12544) and Watch a category
+   (275:23289): 640 px wide (full width less 16 px gutters on phones), 32 px padding, title and a round close
+   button, a line of explanation, the form, then the actions on the right. Scrolls inside when taller than the
+   window. Esc and the close button close it; focus returns to what opened it. */
+
+export interface ModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: ReactNode;
+  /** Buttons, right-aligned under the form. */
+  footer?: ReactNode;
+  children: ReactNode;
+  /** Width in px at desktop; the drawn form modals are 640. */
+  width?: 480 | 640;
+}
+
+export function Modal({ open, onOpenChange, title, description, footer, children, width = 640 }: ModalProps) {
+  const returnFocus = useReturnFocus(open);
+  return (
+    <RDialog.Root open={open} onOpenChange={onOpenChange}>
+      <RDialog.Portal>
+        <RDialog.Overlay className={SCRIM} />
+        <RDialog.Content
+          onCloseAutoFocus={returnFocus}
+          // Without a description Radix needs to be told there is none; with one it links it itself.
+          {...(description ? {} : { "aria-describedby": undefined })}
+          className={cx(
+            "fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto",
+            "rounded-modal bg-page p-6 shadow-ink-float md:p-8",
+            width === 640 ? "w-160" : "w-120",
+          )}
+        >
+          <div className="flex items-start gap-3">
+            <RDialog.Title className="flex-1 type-h3">{title}</RDialog.Title>
+            <RDialog.Close
+              aria-label="Close"
+              className="flex size-8 shrink-0 items-center justify-center rounded-pill border border-default text-icon-primary hover:bg-subtle"
+            >
+              <Icon name="x" size={16} />
+            </RDialog.Close>
+          </div>
+          {description ? (
+            <RDialog.Description asChild>
+              <div className="type-body text-body">{description}</div>
+            </RDialog.Description>
+          ) : null}
+          {children}
+          {footer ? <div className="flex flex-wrap items-center justify-end gap-2">{footer}</div> : null}
+        </RDialog.Content>
+      </RDialog.Portal>
+    </RDialog.Root>
+  );
+}
+
 /* Figma "Drawer" (22:341): right drawer for filters on tablet and mobile, quick views and review notes.
    400 px wide (full width on small phones); content is a slot. */
 

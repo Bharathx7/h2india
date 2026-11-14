@@ -614,6 +614,17 @@ export const TrackerPrices = trackerCollection({
   ],
 });
 
+/** The incentive rows on Compare states (751:7856), in the drawn order. */
+export const INCENTIVE_CATEGORIES = [
+  "Capital subsidy",
+  "Power and wheeling",
+  "Land",
+  "Electricity duty",
+  "Mobility support",
+  "Equipment buyers",
+  "Other",
+] as const;
+
 export const TrackerPolicies = trackerCollection({
   slug: "tracker-policies",
   labels: { singular: "State policy", plural: "State policies" },
@@ -667,6 +678,52 @@ export const TrackerPolicies = trackerCollection({
           : "Enter the full address, starting with https://",
     },
     { name: "scheme", label: "In the schemes hub", type: "relationship", relationTo: "schemes" },
+    // State pages (751:7362) and Compare states (751:7856), step 5.4.
+    {
+      name: "summary",
+      label: "Policy summary",
+      type: "textarea",
+      admin: {
+        description: "Two lines under the policy name on the state page. Our summary; the policy text decides.",
+      },
+    },
+    {
+      name: "incentives",
+      type: "array",
+      admin: {
+        description:
+          "One row per incentive the policy text covers. Anything left out shows “Not specified” on Compare states.",
+      },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "category", type: "select", required: true, options: [...INCENTIVE_CATEGORIES] },
+            { name: "for", label: "For", type: "text", admin: { description: "For example Producers." } },
+          ],
+        },
+        { name: "summary", type: "text", required: true },
+      ],
+    },
+    {
+      name: "nodalAgency",
+      label: "Nodal agency",
+      type: "group",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "name",
+              type: "text",
+              admin: { description: "For example Maharashtra Energy Development Agency." },
+            },
+            { name: "short", type: "text", admin: { description: "For example MEDA." } },
+          ],
+        },
+        { name: "url", label: "Official website", type: "text" },
+      ],
+    },
   ],
 });
 
@@ -690,6 +747,19 @@ export const TrackerHubs = trackerCollection({
       ],
     },
     { name: "description", type: "textarea" },
+    // The valley drawer on Hubs and valleys (751:8302), step 5.4.
+    {
+      type: "row",
+      fields: [
+        {
+          name: "status",
+          type: "text",
+          admin: { description: "For example Foundation set up; demonstrations starting." },
+        },
+        { name: "lead", label: "Lead organisation", type: "text" },
+      ],
+    },
+    { name: "focus", label: "Focus areas", type: "text" },
     ...placeFields,
   ],
 });
@@ -728,5 +798,63 @@ export const TrackerMethodology: GlobalConfig = {
       fields: [{ name: "text", type: "textarea", required: true }],
     },
     { name: "updateNote", label: "How often we update", type: "textarea", defaultValue: UPDATE_NOTE },
+  ],
+};
+
+/**
+ * The tracker overview's headline figures (796:7867, step 5.6): each with its source and as-of date, entered by an
+ * editor because some (offtake commitments, vehicles) aren't a sum of the records. Flagged sample until real (F9).
+ */
+export const TrackerOverview: GlobalConfig = {
+  slug: "tracker-overview",
+  label: "Tracker overview figures",
+  admin: { group: "Tracker" },
+  access: { read: () => true, update: canEdit },
+  versions: { max: 50 },
+  fields: [
+    {
+      name: "figures",
+      type: "array",
+      maxRows: 6,
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "value", type: "text", required: true, admin: { description: "For example 8.62 lakh." } },
+            {
+              name: "label",
+              type: "text",
+              required: true,
+              admin: { description: "t/yr of green H₂ production awarded" },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "source",
+              type: "text",
+              required: true,
+              admin: { description: "For example SECI · SIGHT tranches." },
+            },
+            { name: "sourceUrl", label: "Link", type: "text" },
+            {
+              name: "asOf",
+              label: "As of",
+              type: "date",
+              required: true,
+              admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
+            },
+          ],
+        },
+      ],
+    },
+    { name: "dataAsOf", label: "Data as of", type: "date", admin: { date: { pickerAppearance: "dayOnly" } } },
+    {
+      name: "sample",
+      type: "checkbox",
+      admin: { description: "Sample figures (F9): never shown in production." },
+    },
   ],
 };

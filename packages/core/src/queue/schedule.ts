@@ -1,7 +1,18 @@
 import { schema } from "@h2india/db";
 import { sql } from "drizzle-orm";
+import { runAlerts, sendDigests } from "../alerts/engine";
+import { sweepExtractions } from "../products/jobs";
+import { rollUpYesterday } from "../supplier/analytics";
+import { expireDocuments, sendExpiryNotices } from "../supplier/verification";
 import { pruneAuditLog } from "../audit";
 import { runDeadlines } from "../clocks/clocks";
+// Registers the webinar reminder handler in the worker (step 5.7).
+import "../events/reminders";
+// Registers the end of a payout bank change hold (step 8.6).
+import "../supplier/bank";
+import "../rfq/records";
+import "../newsletter/sends";
+import "../compliance/escalation";
 import { expireJoinRequests } from "../companies/join-requests";
 import { enqueueGstinCheck, pendingGstins } from "../companies/jobs";
 import { getDb } from "../db";
@@ -10,8 +21,10 @@ import { sweepFiles } from "../files/files";
 import { sendDueDeliveries } from "../notify/channels";
 import { pruneNotifications } from "../notify/inapp";
 import { callWeb } from "../internal";
+import { pruneSearchOutbox } from "../search/outbox";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
+import { rollUpYesterdayReports } from "../admin/system";
 
 // The schedule runner (step 3.8): housekeeping and the deadline tick, as BullMQ job schedulers on the clocks queue.
 // Every job reads its work from the database, so a missed run (worker down, Redis flushed) is caught up by the next.
@@ -31,6 +44,33 @@ export const SCHEDULES: Scheduled[] = [
   { id: "deadlines-tick", every: MINUTE, run: () => runDeadlines(getDb()) },
   // Step 4.2: articles scheduled for now are published by the web app, which runs the CMS.
   { id: "cms-publish-due", every: MINUTE, run: () => callWeb("/api/internal/publish-due") },
+  // Step 5.2: applies search changes a save's nudge missed (Redis down, worker restarting). The CMS lives in the web
+  // app, so the web app reads the records and writes the index. Unpublished content leaves search within a minute.
+  { id: "search-sync", every: MINUTE, run: () => callWeb("/api/internal/search-sync") },
+  // India H₂ Weekly issues whose send time has come (step 11.3), a batch a minute.
+  { id: "newsletter-send", every: MINUTE, run: () => callWeb("/api/internal/newsletter-send") },
+  // 00:05 IST every day: record statuses follow the date (Closing soon, Closed), so their result rows are rebuilt.
+  { id: "search-refresh", pattern: "35 18 * * *", run: () => callWeb("/api/internal/search-sync?refresh=records") },
+  { id: "search-outbox-prune", every: 60 * MINUTE, run: () => pruneSearchOutbox(getDb()) },
+  // Step 7.3: match changes the search worker applied against alerts, then send instant alerts.
+  { id: "alerts-run", every: MINUTE, run: () => runAlerts(getDb()) },
+  // 07:00 IST every day: daily digests; on Mondays the weekly ones too (665:307 "Sent 7:00 AM IST").
+  { id: "alerts-digests", pattern: "30 1 * * *", run: () => sendDigests(getDb()) },
+  // 00:20 IST every day: supplier analytics roll-up of the day before (step 8.8).
+  { id: "analytics-rollup", pattern: "50 18 * * *", run: () => rollUpYesterday(getDb()) },
+  // Reports (step 11.8): yesterday's figures at 00:40 IST, so reports never read live tables.
+  { id: "reports-rollup", pattern: "10 19 * * *", run: () => rollUpYesterdayReports(getDb()) },
+  // Step 8.4: datasheets a Redis outage left waiting.
+  { id: "datasheet-sweep", every: 5 * MINUTE, run: () => sweepExtractions() },
+  // 06:00 IST every day (673:221 "Sent 6:05 AM IST"): documents past expiry pause their badges; notices go ahead.
+  {
+    id: "verification-expiry",
+    pattern: "30 0 * * *",
+    run: async () => {
+      await expireDocuments(getDb());
+      await sendExpiryNotices(getDb());
+    },
+  },
   // Step 3.9: WhatsApp held by quiet hours, and failed emails due for a retry.
   { id: "notify-due", every: MINUTE, run: () => sendDueDeliveries() },
   { id: "files-sweep", every: 15 * MINUTE, run: () => sweepFiles(enqueueFileCheck) },

@@ -14,6 +14,7 @@ import { FeaturedProducts, Marketplace, PlatformFeatures } from "@/home/sections
 import { ChoosePath, FiguresSkeleton, ForYou, Hero, HowItWorks, LiveFigures, TrustStrip } from "@/home/sections-top";
 import { forcedState } from "@/lib/dev-state";
 import { siteViewer } from "@/server/site";
+import { JsonLd, organizationLd, websiteLd } from "@/seo/jsonld";
 
 // Home (Figma 365:27737): logged out 377:4917, logged in 379:4688, phones 381:5845, loading modules 381:12972, module
 // error and empty 381:13116, motion spec 781:7247. Every data section is its own server component with its own query,
@@ -39,6 +40,8 @@ export default async function HomePage({
   return (
     // Figma wraps headings line by line; the site-wide balanced wrapping would break them differently.
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
+      <JsonLd data={organizationLd()} />
+      <JsonLd data={websiteLd()} />
       <Hero />
       <Suspense fallback={null}>
         <TrustStrip fail={fail} />

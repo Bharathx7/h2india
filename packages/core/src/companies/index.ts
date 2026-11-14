@@ -27,3 +27,4 @@ export { companyRow, importCompanies, slugifyCompany } from "./import";
 export type { CompanyRow } from "./import";
 export { listedBrands } from "./brands";
 export type { ListedBrand } from "./brands";
+export * from "./claims";

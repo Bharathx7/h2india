@@ -1,7 +1,18 @@
 import type { CollectionConfig, Field } from "payload";
 import { canEdit, canView } from "../roles";
 import { istDate, recordCollection, slugField, sourceFields, statesField, topicsField } from "./common";
-import { eventStatus, grantStatus, jobStatus, schemeStatus, tenderStatus } from "./status";
+import { EXPERIENCE, JOB_FUNCTIONS, JOB_TYPES, WORK_MODES } from "@h2india/core/opportunities/rules";
+import {
+  eventStatus,
+  GRANT_STATUS_OVERRIDES,
+  grantStatus,
+  jobStatus,
+  SCHEME_STATUS_OVERRIDES,
+  schemeStatus,
+  tenderStatus,
+} from "./status";
+import { BENEFIT_TYPES, eligibilityRulesField } from "./eligibility";
+import { GRANT_APPLICANTS, GRANT_THEMES, ISSUER_TYPES, TENDER_CATEGORIES, VALUE_BANDS } from "./opportunities";
 
 // The five record types (step 4.3, A31) with fields from the admin editors (640:8 Scheme, 640:773 Tender, 643:8 Grant,
 // 643:778 Event, 645:8 Job) and the public pages (416:1354, 457:3222, 459:3621, 463:5337, 465:6591, 729:11207).
@@ -58,8 +69,21 @@ export const Schemes: CollectionConfig = recordCollection({
       name: "statusOverride",
       label: "Scheme status",
       type: "select",
-      options: ["Closed", "Next round expected"],
+      options: [...SCHEME_STATUS_OVERRIDES],
       admin: { description: "Leave empty: Open or Closing soon come from the deadline." },
+    },
+    {
+      type: "row",
+      fields: [
+        { name: "outlay", type: "text", admin: { description: "For example ₹13,050 crore for Component II." } },
+        { name: "benefitTypes", label: "Benefit type", type: "select", hasMany: true, options: BENEFIT_TYPES },
+      ],
+    },
+    {
+      name: "howToApply",
+      label: "How to apply",
+      type: "textarea",
+      admin: { description: "Shown in “At a glance” (416:1354). Applications always happen on the official portal." },
     },
     { name: "summary", label: "What applicants get", type: "textarea", required: true },
     { name: "purpose", type: "textarea" },
@@ -73,10 +97,22 @@ export const Schemes: CollectionConfig = recordCollection({
         { name: "product", type: "text" },
         { name: "capacity", type: "text" },
         { name: "state", type: "text", admin: { description: "For example Results declared, Closing soon." } },
+        { name: "resultsUrl", label: "Results link", type: "text" },
       ],
     },
     list("eligibility", "Who can apply (conditions)", "condition"),
     { name: "benefits", type: "textarea" },
+    {
+      name: "benefitRates",
+      label: "Benefit cards",
+      type: "array",
+      maxRows: 4,
+      admin: { description: "The figures under Benefits (416:1354), for example Year 1 · ₹4 / kg." },
+      fields: [
+        { name: "label", type: "text", required: true },
+        { name: "value", type: "text", required: true },
+      ],
+    },
     {
       name: "timeline",
       type: "array",
@@ -97,6 +133,7 @@ export const Schemes: CollectionConfig = recordCollection({
     },
     ...sourceFields("Official page"),
     topicsField,
+    eligibilityRulesField,
   ],
 });
 
@@ -105,7 +142,12 @@ export const Tenders: CollectionConfig = recordCollection({
   labels: { singular: "Tender", plural: "Tenders" },
   titleField: "title",
   status: (d) =>
-    tenderStatus({ bidDueAt: s(d, "bidDueAt"), result: d.result as { declaredAt?: string | null } | null }),
+    tenderStatus({
+      bidDueAt: s(d, "bidDueAt"),
+      publishedAt: s(d, "publishedAt"),
+      extendedFrom: s(d, "extendedFrom"),
+      result: d.result as { declaredAt?: string | null } | null,
+    }),
   fields: [
     { name: "title", type: "text", required: true },
     slugField("title"),
@@ -119,20 +161,65 @@ export const Tenders: CollectionConfig = recordCollection({
     {
       type: "row",
       fields: [
+        {
+          name: "issuerName",
+          label: "Issuer's full name",
+          type: "text",
+          admin: { description: "For example Solar Energy Corporation of India." },
+        },
+        { name: "issuerType", label: "Issuer type", type: "select", options: [...ISSUER_TYPES] },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
         { name: "mode", type: "text", admin: { description: "For example Open tender · two-bid system." } },
         { name: "category", type: "text", admin: { description: "For example Systems › Electrolysers." } },
       ],
+    },
+    {
+      name: "sector",
+      label: "Category (for the filters)",
+      type: "select",
+      options: [...TENDER_CATEGORIES],
+      admin: { description: "The tenders list filters on this (455:1621)." },
     },
     statesField,
     {
       type: "row",
       fields: [
         { name: "value", type: "text", admin: { description: "Or “Not disclosed”." } },
+        {
+          name: "valueBand",
+          label: "Value band",
+          type: "select",
+          options: [...VALUE_BANDS],
+          admin: { description: "Leave empty when the value isn't published." },
+        },
         { name: "emd", label: "EMD", type: "text" },
         { name: "documentFee", type: "text" },
       ],
     },
-    istDate("bidDueAt", "Bid due", true),
+    {
+      type: "row",
+      fields: [
+        istDate("publishedAt", "Published"),
+        istDate("bidDueAt", "Bid due", true),
+        {
+          ...istDate("extendedFrom", "Bid due before the extension"),
+          admin: {
+            date: { pickerAppearance: "dayAndTime", displayFormat: "d MMM yyyy, h:mm a" },
+            description: "Fill in when a corrigendum moves the bid due date: the tender shows as Extended.",
+          },
+        } as Field,
+      ],
+    },
+    {
+      name: "whoCanBid",
+      label: "Who can bid (one line)",
+      type: "text",
+      admin: { description: "Key facts (457:3222), for example Green ammonia producers with plants in India." },
+    },
     {
       name: "keyDates",
       label: "Other key dates",
@@ -144,10 +231,23 @@ export const Tenders: CollectionConfig = recordCollection({
           required: true,
           admin: { description: "Pre-bid meeting, Technical bid opening…" },
         },
-        { name: "at", type: "date", required: true, admin: { date: { pickerAppearance: "dayAndTime" } } },
+        { name: "at", type: "date", admin: { date: { pickerAppearance: "dayAndTime" } } },
+        {
+          name: "note",
+          type: "text",
+          admin: { description: "Instead of a date, or after it: “online”, “After technical evaluation”." },
+        },
       ],
     },
     { name: "description", label: "What this tender is for", type: "textarea", required: true },
+    {
+      name: "schemes",
+      label: "Under schemes",
+      type: "relationship",
+      relationTo: "schemes",
+      hasMany: true,
+      admin: { description: "Shows the tender on these schemes' pages and the SIGHT tracker (step 5.4)." },
+    },
     list("eligibility", "Who can bid", "condition"),
     ...sourceFields("Tender portal link"),
     {
@@ -166,16 +266,65 @@ export const Tenders: CollectionConfig = recordCollection({
       fields: [
         istDate("declaredAt", "Results declared"),
         {
+          name: "dateLabel",
+          label: "Result date as shown",
+          type: "text",
+          admin: { description: "When only the month or year is public, for example Aug 2025." },
+        },
+        {
           name: "winners",
           type: "array",
           fields: [
             { name: "name", type: "text", required: true },
             { name: "capacity", type: "text" },
             { name: "price", label: "Discovered price", type: "text" },
+            { name: "place", type: "text", admin: { description: "For example Noida, Uttar Pradesh." } },
+            { name: "about", type: "text", admin: { description: "For example Green ammonia · Producer." } },
+            {
+              name: "profileSlug",
+              label: "H2 India profile",
+              type: "text",
+              admin: { description: "The company's profile address, when it has one." },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "winnersLine",
+              label: "Winners (results table)",
+              type: "text",
+              admin: { description: "When there are many, for example 9 companies, incl. L&T Energy GreenTech." },
+            },
+            {
+              name: "capacityLine",
+              label: "Capacity (results table)",
+              type: "text",
+              admin: { description: "For example 4,50,000 t/yr in total." },
+            },
+            {
+              name: "price",
+              label: "Discovered price (results table)",
+              type: "text",
+              admin: { description: "For example ₹52.25 per kg." },
+            },
           ],
         },
         { name: "bidders", type: "text", admin: { description: "Number of bidders, or “Not public”." } },
         { name: "whatItMeans", label: "What it means", type: "textarea" },
+        {
+          name: "analysis",
+          label: "Our analysis",
+          type: "relationship",
+          relationTo: "articles",
+          admin: { description: "“What it means” links here (460:4147)." },
+        },
+        {
+          name: "source",
+          type: "text",
+          admin: { description: "For example SECI e-reverse auction result, 8 Aug 2025." },
+        },
       ],
     },
     topicsField,
@@ -198,38 +347,88 @@ export const Grants: CollectionConfig = recordCollection({
     {
       type: "row",
       fields: [
-        { name: "funder", type: "text", required: true },
+        { name: "funder", type: "text", required: true, admin: { description: "Short name: ANRF, MNRE, DST." } },
         {
-          name: "amountPerProject",
-          label: "Amount per project",
+          name: "funderName",
+          label: "Funder's full name",
           type: "text",
-          admin: { description: "For example Up to ₹5,00,00,000." },
+          admin: { description: "For example Anusandhan National Research Foundation." },
         },
       ],
     },
     {
-      name: "themes",
-      type: "select",
-      hasMany: true,
-      options: ["Electrolysers", "Storage", "Fuel cells", "Safety and standards", "Materials", "Transport", "Industry"],
+      type: "row",
+      fields: [
+        {
+          name: "amountPerProject",
+          label: "Amount per project",
+          type: "text",
+          admin: { description: "For example Up to ₹1.5 crore per project, over 3 years." },
+        },
+        {
+          name: "summary",
+          label: "Card line",
+          type: "text",
+          admin: { description: "Under the title on cards; the amount is used when empty." },
+        },
+      ],
     },
-    { name: "whoCanApply", label: "Who can apply", type: "select", hasMany: true, options: APPLICANTS },
+    { name: "themes", type: "select", hasMany: true, options: [...GRANT_THEMES] },
+    { name: "whoCanApply", label: "Who can apply", type: "select", hasMany: true, options: [...GRANT_APPLICANTS] },
+    {
+      name: "whoText",
+      label: "Who can apply (as written)",
+      type: "textarea",
+      admin: { description: "At a glance (463:5337), for example Researchers at recognised Indian institutions." },
+    },
     istDate("deadline", "Deadline", true),
     {
       name: "statusOverride",
       label: "Call status",
       type: "select",
-      options: ["Closed"],
-      admin: { description: "Leave empty: it follows the deadline." },
+      options: [...GRANT_STATUS_OVERRIDES],
+      admin: { description: "Leave empty: it follows the deadline. Announced: dates are out, applications aren't." },
     },
-    { name: "howToApply", label: "How to apply", type: "textarea", required: true },
+    {
+      name: "focusAreas",
+      label: "Themes (chips)",
+      type: "text",
+      hasMany: true,
+      admin: { description: "The research areas drawn as chips, for example Low-iridium PEM anodes." },
+    },
+    { name: "focusNote", label: "Themes note", type: "textarea" },
+    {
+      name: "steps",
+      label: "How to apply (steps)",
+      type: "array",
+      admin: { description: "Steps before the first future date show as done; the next one as current." },
+      fields: [
+        { name: "step", type: "text", required: true },
+        { name: "at", type: "date", admin: { date: { pickerAppearance: "dayOnly" } } },
+      ],
+    },
+    {
+      name: "howToApply",
+      label: "How to apply (note)",
+      type: "textarea",
+      required: true,
+      admin: { description: "Shown under the steps, for example An industry partner is optional." },
+    },
     ...sourceFields("Official link"),
+    {
+      type: "row",
+      fields: [
+        { name: "pastCallLabel", label: "Past call", type: "text", admin: { description: "For example 2025 call." } },
+        { name: "pastCallUrl", label: "Past call link", type: "text" },
+      ],
+    },
     {
       name: "pastAwardees",
       type: "array",
       fields: [
-        { name: "name", type: "text", required: true },
+        { name: "name", label: "Institution", type: "text", required: true },
         { name: "project", type: "text" },
+        { name: "amount", label: "Grant", type: "text" },
         { name: "year", type: "text" },
       ],
     },
@@ -237,7 +436,7 @@ export const Grants: CollectionConfig = recordCollection({
       name: "nextCallExpected",
       label: "When it's closed, next call expected",
       type: "text",
-      admin: { description: "Shown once the call closes, for example Q3 2027." },
+      admin: { description: "Shown once the call closes, for example mid-2027. Announced calls show it too." },
     },
     statesField,
     topicsField,
@@ -249,6 +448,7 @@ export const Jobs: CollectionConfig = recordCollection({
   labels: { singular: "Job", plural: "Jobs" },
   titleField: "role",
   status: (d) => jobStatus({ closesAt: s(d, "closesAt") }),
+  defaultColumns: ["role", "company", "post.state", "status", "updatedAt"],
   fields: [
     { name: "role", type: "text", required: true },
     slugField("role"),
@@ -259,32 +459,52 @@ export const Jobs: CollectionConfig = recordCollection({
           name: "company",
           type: "text",
           required: true,
-          admin: { description: "Links to the company profile in Stage 6." },
         },
-        { name: "function", type: "text", admin: { description: "For example Engineering · commissioning." } },
+        { name: "function", type: "select", options: [...JOB_FUNCTIONS] },
+        { name: "jobType", label: "Job type", type: "select", options: [...JOB_TYPES], defaultValue: "Full-time" },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "companySlug",
+          label: "Company profile",
+          type: "text",
+          admin: { description: "The company's H2 India profile address, when it has one." },
+        },
+        {
+          name: "companyLine",
+          label: "Company line",
+          type: "text",
+          admin: { description: "Under the name, for example Electrolyser manufacturer · Ratnagiri." },
+        },
       ],
     },
     {
       type: "row",
       fields: [
         { name: "location", type: "text", required: true },
-        { name: "workMode", type: "select", options: ["On site", "Hybrid", "Remote"], defaultValue: "On site" },
+        { name: "workMode", type: "select", options: [...WORK_MODES], defaultValue: "On site" },
+        { name: "locationNote", type: "text", admin: { description: "For example 60% travel." } },
       ],
     },
     statesField,
     {
       type: "row",
       fields: [
-        { name: "experience", type: "select", options: ["0–2 years", "3–6 years", "7–10 years", "10+ years"] },
+        { name: "experience", type: "select", options: EXPERIENCE.map((e) => e.value) },
         {
           name: "salaryBand",
           label: "Salary band (optional)",
           type: "text",
-          admin: { description: "₹ lakh a year, for example 12–16." },
+          admin: { description: "₹ lakh a year, for example 12–16; or as written, starting with ₹." },
         },
       ],
     },
-    { name: "description", type: "textarea", required: true },
+    { name: "description", label: "About the role", type: "textarea", required: true },
+    list("duties", "What you'll do", "item"),
+    list("needs", "What you'll need", "item"),
     { name: "skills", type: "text", hasMany: true },
     {
       name: "howToApply",
@@ -304,11 +524,47 @@ export const Jobs: CollectionConfig = recordCollection({
     },
     istDate("postedAt", "Posted"),
     istDate("closesAt", "Closes", true),
-    { name: "featured", label: "Featured job (paid)", type: "checkbox" },
+    {
+      name: "featured",
+      label: "Featured job",
+      type: "checkbox",
+      admin: { description: "Editors only (A69): pinned at the top of the jobs list." },
+    },
     ...sourceFields("Job page or company careers page"),
     topicsField,
+    {
+      name: "post",
+      label: "Posted by a company",
+      type: "group",
+      admin: {
+        position: "sidebar",
+        description: "Jobs companies post (467:7472) wait here as drafts. Publishing approves them.",
+      },
+      fields: [
+        {
+          name: "state",
+          type: "select",
+          options: ["Draft", "Submitted for review"],
+          admin: { readOnly: true },
+        },
+        { name: "reference", type: "text", index: true, admin: { readOnly: true } },
+        { name: "organisationId", type: "text", index: true, admin: { readOnly: true } },
+        { name: "submittedBy", type: "text", admin: { readOnly: true } },
+        { name: "submittedAt", type: "date", admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } } },
+      ],
+    },
   ],
 });
+
+/** Event types and attendance as on the events filters (729:10714) and Submit an event (501:8485). */
+export const EVENT_TYPES = [
+  "Conference and expo",
+  "Webinar",
+  "Workshop and training",
+  "Roundtable",
+  "Site visit",
+] as const;
+export const ATTENDANCE = ["In person", "Online", "Hybrid"] as const;
 
 export const Events: CollectionConfig = recordCollection({
   slug: "events",
@@ -323,30 +579,242 @@ export const Events: CollectionConfig = recordCollection({
       fields: [
         { name: "organiser", type: "text", required: true },
         {
-          name: "format",
+          name: "eventType",
+          label: "Type",
           type: "select",
           required: true,
-          options: ["Conference · in person", "Workshop · in person", "Expo · in person", "Webinar · online", "Hybrid"],
+          defaultValue: "Conference and expo",
+          options: [...EVENT_TYPES],
         },
+        { name: "attendance", type: "select", required: true, defaultValue: "In person", options: [...ATTENDANCE] },
       ],
     },
     {
       type: "row",
       fields: [istDate("startsAt", "Starts", true), istDate("endsAt", "Ends")],
     },
-    { name: "venue", type: "text", admin: { description: "Leave empty for online events." } },
+    {
+      type: "row",
+      fields: [
+        { name: "venue", type: "text", admin: { description: "Leave empty for online events." } },
+        { name: "city", type: "text", admin: { description: "For example New Delhi. Used by the City filter." } },
+      ],
+    },
     statesField,
+    {
+      name: "summaryLine",
+      label: "Card line",
+      type: "text",
+      admin: { description: "For example 140 exhibitors · free trade visitor pass." },
+    },
     {
       type: "row",
       fields: [
         { name: "tickets", type: "select", options: ["Free", "Paid"], defaultValue: "Free" },
-        { name: "priceText", label: "Price", type: "text", admin: { description: "For example ₹3,500 to ₹6,000." } },
+        { name: "priceText", label: "Tickets", type: "text", admin: { description: "As the organiser sells them." } },
       ],
     },
     { name: "registrationUrl", label: "Registration link", type: "text" },
-    { name: "description", type: "textarea" },
+    { name: "description", label: "About this event", type: "textarea" },
+    {
+      name: "listedBy",
+      label: "Listed by",
+      type: "text",
+      admin: { description: "For example The organiser · checked by H2 India." },
+    },
+    {
+      name: "featured",
+      type: "checkbox",
+      admin: { position: "sidebar", description: "Editors only (F7): shown first with a Featured label." },
+    },
     { name: "sponsoredPlacement", label: "Sponsored placement (shown with a “Sponsored” label)", type: "checkbox" },
     { name: "inNewsletter", label: "Show in the weekly newsletter", type: "checkbox" },
+    {
+      name: "agenda",
+      label: "Agenda highlights",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "day",
+              type: "date",
+              admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
+            },
+            { name: "time", type: "text", required: true, admin: { description: "10:30 AM" } },
+            { name: "title", type: "text", required: true },
+          ],
+        },
+      ],
+    },
+    {
+      name: "speakers",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "name", type: "text", required: true },
+            { name: "role", type: "text" },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        { name: "exhibitorCount", label: "Exhibitors in total", type: "number", min: 0 },
+        {
+          name: "host",
+          label: "Host",
+          type: "text",
+          admin: { description: "Webinars, for example H2 India editorial team." },
+        },
+      ],
+    },
+    {
+      name: "exhibitors",
+      label: "Exhibitors on H2 India",
+      type: "array",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "name", type: "text", required: true },
+            { name: "stall", type: "text" },
+            { name: "about", type: "text", admin: { description: "For example Electrolysers." } },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "webinar",
+      type: "group",
+      admin: {
+        condition: (d) => (d as { eventType?: string }).eventType === "Webinar",
+        description: "Registration on H2 India (732:521). The join link is sent only to people who registered.",
+      },
+      fields: [
+        list("learn", "What you'll learn", "point"),
+        {
+          type: "row",
+          fields: [
+            { name: "capacity", label: "Seats", type: "number", min: 1, admin: { description: "Empty: no limit." } },
+            { name: "closed", label: "Registration closed", type: "checkbox" },
+          ],
+        },
+        {
+          name: "joinUrl",
+          label: "Join link (private)",
+          type: "text",
+          admin: { description: "The meeting link. Shown to registered people from 15 minutes before." },
+        },
+        {
+          name: "sponsor",
+          type: "group",
+          fields: [
+            { name: "name", type: "text", admin: { description: "Leave empty when nobody paid for it." } },
+            { name: "disclosure", type: "textarea" },
+            { name: "profileSlug", label: "Company profile", type: "text" },
+          ],
+        },
+        {
+          name: "replay",
+          type: "group",
+          admin: { description: "After the webinar: the replay page (733:22), for registered people only." },
+          fields: [
+            { name: "url", label: "Recording address", type: "text" },
+            { name: "minutes", type: "number", min: 1 },
+            { name: "slidesUrl", label: "Slides link", type: "text" },
+            {
+              name: "slidesNote",
+              label: "Slides file",
+              type: "text",
+              admin: { description: "For example PDF · 2.4 MB" },
+            },
+            {
+              name: "chapters",
+              type: "array",
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    { name: "at", type: "text", required: true },
+                    { name: "title", type: "text", required: true },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "qa",
+              label: "Q&A summary",
+              type: "array",
+              fields: [
+                { name: "question", type: "text", required: true },
+                { name: "answer", type: "textarea", required: true },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "live",
+      label: "Live coverage",
+      type: "group",
+      admin: { description: "During the event (733:493): the page shows these while “Live now” is ticked." },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "on", label: "Live now", type: "checkbox" },
+            { name: "dayLabel", label: "Day", type: "text", admin: { description: "For example Day 2 of 3." } },
+          ],
+        },
+        {
+          name: "announcements",
+          label: "Key announcements",
+          type: "array",
+          fields: [
+            {
+              type: "row",
+              fields: [
+                { name: "day", type: "text", required: true, admin: { description: "Day 2" } },
+                { name: "company", type: "text", required: true },
+                { name: "text", type: "text", required: true },
+              ],
+            },
+          ],
+        },
+        {
+          name: "updates",
+          label: "Live updates",
+          type: "array",
+          fields: [
+            {
+              name: "at",
+              type: "date",
+              required: true,
+              admin: { date: { pickerAppearance: "dayAndTime", displayFormat: "d MMM, h:mm a" } },
+            },
+            { name: "title", type: "text", required: true },
+            { name: "text", type: "textarea" },
+          ],
+        },
+      ],
+    },
+    {
+      name: "coverage",
+      label: "H2 India coverage",
+      type: "group",
+      fields: [
+        { name: "note", type: "textarea" },
+        { name: "articles", type: "relationship", relationTo: "articles", hasMany: true },
+      ],
+    },
     ...sourceFields("Organiser's page"),
     topicsField,
   ],

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useFormGuard } from "@/lib/form-guard";
 import { PRODUCT_CLASSES } from "@h2india/core/catalogue";
 import { Alert, Button, Checkbox, cx, FormField, Icon, Input, Select } from "@h2india/ui";
 import { useState, type SyntheticEvent } from "react";
@@ -26,11 +28,12 @@ export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<SubscribeResult | null>(null);
+  const { trap, guard } = useFormGuard();
 
   const submit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    setResult(await subscribeToNewsletter({ email, topics, source: "coming-soon" }));
+    setResult(await subscribeToNewsletter({ email, topics, source: "coming-soon", guard: guard() }));
     setSending(false);
   };
 
@@ -50,7 +53,13 @@ export function NewsletterSignup() {
   }
   const invalid = result?.status === "invalid" ? result.message : undefined;
   return (
-    <form onSubmit={(e) => void submit(e)} noValidate className="flex flex-col gap-3" aria-label="Get India H₂ Weekly">
+    <form
+      onSubmit={(e) => void submit(e)}
+      noValidate
+      className="relative flex flex-col gap-3"
+      aria-label="Get India H₂ Weekly"
+    >
+      {trap}
       <div role="group" aria-label="Topics" className="flex flex-wrap gap-2">
         {TOPICS.map((t) => {
           const on = topics.includes(t.key);
@@ -97,9 +106,9 @@ export function NewsletterSignup() {
       ) : null}
       <p className="type-caption text-secondary">
         One email a week. Unsubscribe any time. See our{" "}
-        <a href="/legal/privacy" className="text-link underline underline-offset-4 hover:text-link-hover">
+        <Link href="/legal/privacy" className="text-link underline underline-offset-4 hover:text-link-hover">
           privacy policy
-        </a>
+        </Link>
         .
       </p>
     </form>
@@ -113,13 +122,14 @@ export function EarlyListingForm({ consentText }: { consentText: string }) {
   const [value, setValue] = useState(EMPTY);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<EarlyListingResult | null>(null);
+  const { trap, guard } = useFormGuard();
   const set = <K extends keyof EarlyListingInput>(key: K, v: EarlyListingInput[K]) => {
     setValue((all) => ({ ...all, [key]: v }));
   };
   const submit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    setResult(await requestEarlyListing(value));
+    setResult(await requestEarlyListing(value, guard()));
     setSending(false);
   };
   if (result?.ok) {
@@ -131,7 +141,13 @@ export function EarlyListingForm({ consentText }: { consentText: string }) {
   }
   const errors = result?.ok === false ? result.errors : {};
   return (
-    <form onSubmit={(e) => void submit(e)} noValidate className="flex flex-col gap-4" aria-label="Get listed early">
+    <form
+      onSubmit={(e) => void submit(e)}
+      noValidate
+      className="relative flex flex-col gap-4"
+      aria-label="Get listed early"
+    >
+      {trap}
       <div className="grid gap-3 md:grid-cols-2">
         <FormField label="Company" required error={errors.company}>
           <Input

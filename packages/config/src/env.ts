@@ -12,6 +12,9 @@ const optionalUrl = z.preprocess((v) => (v === "" ? undefined : v), z.url().opti
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   APP_URL: url,
+  /** Where the worker reaches the web app for scheduled work (step 1.7), e.g. http://web-public:3000 inside Docker.
+   * Falls back to APP_URL. Links in messages always use APP_URL. */
+  INTERNAL_WEB_URL: optionalUrl,
   AUTH_SECRET: secret(32),
   // Google sign-in (step 3.2). Without both values the Google button reports that it is not set up yet.
   GOOGLE_CLIENT_ID: optionalText(),
@@ -48,10 +51,16 @@ export const serverEnvSchema = z.object({
   EMAIL_FROM_SECURITY: optionalText(),
   // Where support requests are sent until the admin queue exists (decision A16).
   SUPPORT_EMAIL: z.email().default("support@h2india.local"),
+  // Bot challenge for public forms (step 5.9). The provider is not chosen yet; without both values the honeypot,
+  // timing and rate limits still apply and no challenge is asked.
+  BOT_CHALLENGE_SECRET: optionalText(),
+  BOT_CHALLENGE_VERIFY_URL: optionalUrl,
 });
 
 export const clientEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: url,
+  /** The analytics script, once the tool is chosen (M10). Loaded only after consent, never for operators. */
+  NEXT_PUBLIC_ANALYTICS_SRC: optionalUrl,
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

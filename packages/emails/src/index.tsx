@@ -2,7 +2,15 @@
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
 import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
+import {
+  submissionReceivedMessage,
+  webinarRegisteredMessage,
+  webinarReminderMessage,
+  webinarReplayMessage,
+  type WebinarDetails,
+} from "./events/messages";
 import { reportDownloadMessage } from "./knowledge/messages";
+import { grievanceMessage, type GrievanceDetails } from "./trust/messages";
 import {
   NewsletterConfirm,
   newsletterConfirmSubject,
@@ -81,6 +89,26 @@ export function renderNewsletterManage(props: NewsletterManageProps) {
 export { ISSUE_CONTENTS, ISSUE_SCHEDULE } from "./newsletter/Newsletter";
 
 /** The emailed copy of a gated report (step 4.4). */
+export function renderWebinarRegistered(appUrl: string, input: Parameters<typeof webinarRegisteredMessage>[0]) {
+  return renderNotice(appUrl, webinarRegisteredMessage(input));
+}
+export function renderWebinarReminder(appUrl: string, input: WebinarDetails, which: "day" | "hour") {
+  return renderNotice(appUrl, webinarReminderMessage(input, which));
+}
+export function renderWebinarReplay(appUrl: string, input: Parameters<typeof webinarReplayMessage>[0]) {
+  return renderNotice(appUrl, webinarReplayMessage(input));
+}
+export function renderSubmissionReceived(appUrl: string, input: Parameters<typeof submissionReceivedMessage>[0]) {
+  return renderNotice(appUrl, submissionReceivedMessage(input));
+}
+export type { SubmissionKind, WebinarDetails } from "./events/messages";
+
+/** Grievance acknowledgement (676:154, step 5.8). */
+export function renderGrievance(appUrl: string, input: GrievanceDetails) {
+  return renderNotice(appUrl, grievanceMessage(input));
+}
+export type { GrievanceDetails } from "./trust/messages";
+
 export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {
   return renderNotice(appUrl, reportDownloadMessage(input));
 }
@@ -109,3 +137,81 @@ export { APPROVED_TEXT, TEMPLATES } from "./registry";
 export type { Channel, TemplateEntry, TemplateId, TextTemplateId } from "./registry";
 export { renderSample } from "./samples";
 export type { Sample } from "./samples";
+
+// Alerts (step 7.3): Tender alert digest 665:307, for every alert type.
+import { AlertDigest, type AlertDigestProps } from "./alerts/AlertDigest";
+export type { AlertDigestItem, AlertDigestProps } from "./alerts/AlertDigest";
+
+export async function renderAlertDigest(subject: string, props: AlertDigestProps): Promise<RenderedEmail> {
+  return renderElement(subject, <AlertDigest {...props} />);
+}
+
+// Supplier verification (step 8.2): Verification status 673:221 and its variants.
+import {
+  bankChangedMessage,
+  documentExpiringMessage,
+  invitationMessage,
+  listingApprovedMessage,
+  listingNeedsChangesMessage,
+  needsChangesMessage,
+  verifiedMessage,
+} from "./supplier/messages";
+export type { ExpiringDocument, ListingDetails } from "./supplier/messages";
+import { quoteReceivedMessage, rfqApprovedMessage, rfqReceivedMessage, rfqReturnedMessage } from "./rfq/messages";
+export type { QuoteReceived, RfqReceived, RfqReturned } from "./rfq/messages";
+
+export function renderQuoteReceived(appUrl: string, input: Parameters<typeof quoteReceivedMessage>[0]) {
+  return renderNotice(appUrl, quoteReceivedMessage(input));
+}
+
+export function renderRfqReceived(appUrl: string, input: Parameters<typeof rfqReceivedMessage>[0]) {
+  return renderNotice(appUrl, rfqReceivedMessage(input));
+}
+export function renderRfqReturned(appUrl: string, input: Parameters<typeof rfqReturnedMessage>[0]) {
+  return renderNotice(appUrl, rfqReturnedMessage(input));
+}
+export function renderRfqApproved(appUrl: string, input: Parameters<typeof rfqApprovedMessage>[0]) {
+  return renderNotice(appUrl, rfqApprovedMessage(input));
+}
+
+export function renderDocumentExpiring(appUrl: string, input: Parameters<typeof documentExpiringMessage>[0]) {
+  return renderNotice(appUrl, documentExpiringMessage(input));
+}
+export function renderVerified(appUrl: string, input: Parameters<typeof verifiedMessage>[0]) {
+  return renderNotice(appUrl, verifiedMessage(input));
+}
+export function renderVerificationChanges(appUrl: string, input: Parameters<typeof needsChangesMessage>[0]) {
+  return renderNotice(appUrl, needsChangesMessage(input));
+}
+export function renderListingNeedsChanges(appUrl: string, input: Parameters<typeof listingNeedsChangesMessage>[0]) {
+  return renderNotice(appUrl, listingNeedsChangesMessage(input));
+}
+export function renderListingApproved(appUrl: string, input: Parameters<typeof listingApprovedMessage>[0]) {
+  return renderNotice(appUrl, listingApprovedMessage(input));
+}
+export function renderBankChanged(appUrl: string, input: Parameters<typeof bankChangedMessage>[0]) {
+  return renderNotice(appUrl, bankChangedMessage(input));
+}
+export function renderInvitation(appUrl: string, input: Parameters<typeof invitationMessage>[0]) {
+  return renderNotice(appUrl, invitationMessage(input));
+}
+
+import { changesNeededMessage, eventLiveMessage, jobLiveMessage } from "./queues/messages";
+
+export function renderEventLive(appUrl: string, input: Parameters<typeof eventLiveMessage>[0]) {
+  return renderNotice(appUrl, eventLiveMessage(input));
+}
+export function renderChangesNeeded(appUrl: string, input: Parameters<typeof changesNeededMessage>[0]) {
+  return renderNotice(appUrl, changesNeededMessage(input));
+}
+export function renderJobLive(appUrl: string, input: Parameters<typeof jobLiveMessage>[0]) {
+  return renderNotice(appUrl, jobLiveMessage(input));
+}
+
+import { NewsletterIssue, type NewsletterIssueProps } from "./newsletter/Issue";
+export type { IssueChart, IssueSection, NewsletterIssueProps } from "./newsletter/Issue";
+
+export async function renderNewsletterIssue(props: NewsletterIssueProps & { subject: string }): Promise<RenderedEmail> {
+  const element = <NewsletterIssue {...props} />;
+  return { subject: props.subject, html: await render(element), text: await render(element, { plainText: true }) };
+}

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, index, integer, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, jsonb, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { id, softDelete, timestamps, utc } from "../columns";
 import { users } from "./auth";
 import { core } from "./core";
@@ -20,6 +20,9 @@ export const organisations = core.table(
     registeredAddress: text("registered_address"),
     /** Verified · Unverified · Pending (a GSTIN check is still running) */
     verification: text("verification").notNull().default("Unverified"),
+    /** Suspended by an operator (step 11.4, G10): its listings leave the marketplace and search until lifted. */
+    suspendedAt: utc("suspended_at"),
+    suspendReason: text("suspend_reason"),
     createdBy: uuid("created_by").references(() => users.id),
     ...timestamps,
     ...softDelete,
@@ -62,6 +65,8 @@ export const companyProfiles = core.table(
     /** For example 51–200 (481:8 "51–200 employees"). */
     employees: text("employees"),
     /** Unclaimed · Claimed (step 6.7 adds the claim states). */
+    /** The published storefront (590:8, step 8.7): what the profile's About and Products tabs show beyond the basics. */
+    storefront: jsonb("storefront").$type<StorefrontData>().notNull().default({}),
     claimStatus: text("claim_status").notNull().default("Claimed"),
     sample: boolean("sample").notNull().default(false),
     ...timestamps,
@@ -85,6 +90,8 @@ export const organisationGstins = core.table(
     portalStatus: text("portal_status").notNull().default("Pending"),
     legalName: text("legal_name"),
     checkedAt: utc("checked_at"),
+    /** Orders are billed to the default GSTIN unless the buyer chooses another (574:638). */
+    isDefault: boolean("is_default").notNull().default(false),
     ...timestamps,
   },
   (t) => [index("organisation_gstins_organisation_idx").on(t.organisationId)],
@@ -174,8 +181,22 @@ export const joinDrafts = core.table(
     fullName: text("full_name"),
     jobRole: text("job_role"),
     termsAcceptedAt: utc("terms_accepted_at"),
+    termsVersion: text("terms_version"),
     expiresAt: utc("expires_at").notNull(),
     ...timestamps,
   },
   (t) => [index("join_drafts_expires_at_idx").on(t.expiresAt)],
 );
+
+/** The storefront's sections (590:8): banner and logo, about, capabilities, locations, contact. */
+export interface StorefrontData {
+  logoFileId?: string;
+  about?: string;
+  capabilities?: string;
+  capacity?: string;
+  leadTime?: string;
+  industries?: string[];
+  locations?: { name: string; city: string; state: string; kind: string }[];
+  contactEmail?: string;
+  contactPhone?: string;
+}

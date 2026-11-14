@@ -1,0 +1,1 @@
+ALTER TABLE "core"."rfqs" ADD COLUMN "suggest_suppliers" boolean DEFAULT false NOT NULL;

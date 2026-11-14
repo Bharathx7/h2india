@@ -7,11 +7,79 @@
     "mode": "Open tender · two-bid system",
     "category": "Production › Green ammonia",
     "states": ["all-india"],
-    "emd": "as per RfS",
-    "bidDueAt": "+5d 17:00",
-    "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
+    "emd": "Per tonne of capacity bid, as set in the RfS",
+    "bidDueAt": "+5d 15:00",
+    "description": "SECI is selecting companies to build green ammonia plants in India and supply named fertiliser plants for 10 years. SECI buys the ammonia at each winner's quoted price and sells it on; winners also get the SIGHT incentive for the first three years of supply. Sample from the step 5.5 designs. Replace with a real record before launch.",
     "sourceUrl": "https://example.org/sample/seci-green-ammonia",
-    "publish": "yes"
+    "publish": "yes",
+    "schemes": "sight-green-hydrogen-production",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "sector": "Production",
+    "publishedAt": "-51d 10:00",
+    "extendedFrom": "-5d 15:00",
+    "whoCanBid": "Green ammonia producers with plants in India",
+    "keyDates": [
+      {
+        "label": "Pre-bid meeting",
+        "at": "-36d 11:00",
+        "note": "online"
+      },
+      {
+        "label": "Technical bid opening",
+        "at": "+7d"
+      },
+      {
+        "label": "e-Reverse auction",
+        "note": "After technical evaluation; date to be notified"
+      }
+    ],
+    "value": "Not published. SECI buys at the price discovered in the auction.",
+    "documentFee": "Paid on the SECI e-tender portal",
+    "eligibility": [
+      {
+        "condition": "Companies registered in India, alone or as a consortium"
+      },
+      {
+        "condition": "Must build a new plant; contract manufacturing is not allowed"
+      },
+      {
+        "condition": "Ammonia must meet the Green Hydrogen Standard for India"
+      },
+      {
+        "condition": "Net worth and bid security as set in the RfS"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Request for Selection (RfS), Mode 2A Tranche II",
+        "url": "https://example.org/sample/seci-rfs",
+        "kind": "PDF"
+      },
+      {
+        "title": "Draft Green Ammonia Purchase Agreement",
+        "url": "https://example.org/sample/seci-gapa",
+        "kind": "PDF"
+      },
+      {
+        "title": "Corrigendum 2: bid date extension",
+        "url": "https://example.org/sample/seci-corrigendum-2",
+        "kind": "PDF"
+      }
+    ],
+    "corrigenda": [
+      {
+        "title": "Corrigendum 2",
+        "date": "-13d",
+        "change": "Bid due date extended by ten days"
+      },
+      {
+        "title": "Corrigendum 1",
+        "date": "-29d",
+        "change": "Delivery points updated after pre-bid questions"
+      }
+    ],
+    "topics": ["green-ammonia", "tenders-awards"]
   },
   {
     "slug": "iocl-10-mw-pem-electrolyser-panipat",
@@ -21,11 +89,19 @@
     "mode": "Open tender · two-bid system",
     "category": "Equipment › Electrolysers",
     "states": ["haryana"],
-    "emd": "as per RfS",
+    "emd": "₹62 lakh",
     "bidDueAt": "+11d 15:00",
     "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
     "sourceUrl": "https://example.org/sample/iocl-panipat-electrolyser",
-    "publish": "yes"
+    "publish": "yes",
+    "issuerName": "Indian Oil Corporation",
+    "issuerType": "Public sector companies",
+    "sector": "Electrolysers",
+    "publishedAt": "-30d 10:00",
+    "extendedFrom": "+1d 15:00",
+    "value": "₹62 crore",
+    "valueBand": "₹10–100 crore",
+    "whoCanBid": "Electrolyser makers and EPC firms"
   },
   {
     "slug": "dpa-green-hydrogen-bunkering-pilot-kandla",
@@ -35,10 +111,272 @@
     "mode": "Open tender · two-bid system",
     "category": "EPC › Ports",
     "states": ["gujarat"],
-    "emd": "as per RfS",
+    "emd": "₹24 lakh",
     "bidDueAt": "+18d 15:00",
     "description": "Sample tender from the home page design (377:4917). Replace with a real tender before launch.",
     "sourceUrl": "https://example.org/sample/dpa-bunkering-pilot",
-    "publish": "yes"
+    "publish": "yes",
+    "issuerName": "Deendayal Port Authority",
+    "issuerType": "Ports",
+    "sector": "EPC",
+    "publishedAt": "-20d 10:00",
+    "value": "₹24 crore",
+    "valueBand": "₹10–100 crore"
+  },
+  {
+    "slug": "seci-green-methanol-mode-2c-tranche-i",
+    "title": "Selection of green methanol producers, Mode 2C Tranche I",
+    "issuer": "SECI",
+    "tenderId": "SECI/C&P/HO/2026/0388",
+    "mode": "Open tender · two-bid system",
+    "category": "Production › Green methanol",
+    "states": ["all-india"],
+    "emd": "as per RfS",
+    "bidDueAt": "+40d 17:00",
+    "description": "Sample tender from the SIGHT tracker design (418:2079). Replace with a real tender before launch.",
+    "sourceUrl": "https://example.org/sample/seci-green-methanol",
+    "schemes": "sight-green-hydrogen-production",
+    "publish": "yes",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "sector": "Ammonia and methanol",
+    "publishedAt": "-10d 10:00",
+    "topics": ["green-ammonia", "tenders-awards"]
+  },
+  {
+    "slug": "bpcl-hydrogen-compressor-package-bina",
+    "title": "Hydrogen compressor package, Bina refinery",
+    "issuer": "BPCL",
+    "issuerName": "Bharat Petroleum Corporation",
+    "issuerType": "Public sector companies",
+    "tenderId": "BPCL/BINA/2026/118",
+    "mode": "Open tender · two-bid system",
+    "sector": "Equipment",
+    "category": "Equipment › Compression",
+    "states": ["madhya-pradesh"],
+    "bidDueAt": "+2d 15:00",
+    "description": "Supply, install and commission a hydrogen compressor package for the refinery's green hydrogen unit. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/bpcl-hydrogen-compressor-package-bina",
+    "publish": "yes",
+    "publishedAt": "-25d 10:00",
+    "value": "₹38 crore",
+    "emd": "₹38 lakh",
+    "valueBand": "₹10–100 crore"
+  },
+  {
+    "slug": "ntpc-leh-refuelling-station-om",
+    "title": "Operation and maintenance of the Leh refuelling station",
+    "issuer": "NTPC",
+    "issuerName": "NTPC Limited",
+    "issuerType": "Public sector companies",
+    "tenderId": "NTPC/HRS/2026/14",
+    "mode": "Open tender · two-bid system",
+    "sector": "Refuelling stations",
+    "category": "Refuelling › O&M",
+    "states": ["ladakh"],
+    "bidDueAt": "+22d 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/ntpc-leh-refuelling-station-om",
+    "publish": "yes",
+    "publishedAt": "-8d 10:00",
+    "valueBand": "Under ₹10 crore",
+    "value": "₹6 crore"
+  },
+  {
+    "slug": "geda-hydrogen-safety-consultants",
+    "title": "Empanelment of hydrogen safety consultants",
+    "issuer": "GEDA",
+    "issuerName": "Gujarat Energy Development Agency",
+    "issuerType": "State agencies",
+    "tenderId": "GEDA/H2/2026/07",
+    "mode": "Open tender · two-bid system",
+    "sector": "Services",
+    "category": "Services › Safety",
+    "states": ["gujarat"],
+    "bidDueAt": "+24d 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/geda-hydrogen-safety-consultants",
+    "publish": "yes",
+    "publishedAt": "-6d 10:00"
+  },
+  {
+    "slug": "csl-fuel-cell-system-hydrogen-ferry",
+    "title": "Fuel cell system for a hydrogen ferry",
+    "issuer": "Cochin Shipyard",
+    "issuerName": "Cochin Shipyard Limited",
+    "issuerType": "Public sector companies",
+    "tenderId": "CSL/FC/2026/02",
+    "mode": "Open tender · two-bid system",
+    "sector": "Equipment",
+    "category": "Equipment › Fuel cells",
+    "states": ["kerala"],
+    "bidDueAt": "+29d 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/csl-fuel-cell-system-hydrogen-ferry",
+    "publish": "yes",
+    "publishedAt": "-4d 10:00",
+    "valueBand": "₹10–100 crore",
+    "value": "₹18 crore"
+  },
+  {
+    "slug": "paradip-hub-common-infrastructure",
+    "title": "Common infrastructure for the Paradip green hydrogen hub",
+    "issuer": "Paradip Port",
+    "issuerName": "Paradip Port Authority",
+    "issuerType": "Ports",
+    "tenderId": "PPA/GH2/2026/01",
+    "mode": "Open tender · two-bid system",
+    "sector": "EPC",
+    "category": "EPC › Ports",
+    "states": ["odisha"],
+    "bidDueAt": "+45d 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/paradip-hub-common-infrastructure",
+    "publish": "yes",
+    "publishedAt": "+6d 10:00",
+    "valueBand": "Over ₹100 crore",
+    "value": "₹240 crore"
+  },
+  {
+    "slug": "seci-sight-component-i-tranche-iii",
+    "title": "Selection of electrolyser manufacturers, SIGHT Component I Tranche III",
+    "issuer": "SECI",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "tenderId": "SECI/C&P/HO/2026/0301",
+    "mode": "Open tender · two-bid system",
+    "sector": "Electrolysers",
+    "category": "Manufacturing › Electrolysers",
+    "states": ["all-india"],
+    "bidDueAt": "-10d 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/seci-sight-component-i-tranche-iii",
+    "publish": "yes",
+    "publishedAt": "-70d 10:00",
+    "schemes": "sight-green-hydrogen-production",
+    "topics": ["tenders-awards"]
+  },
+  {
+    "slug": "seci-green-ammonia-mode-2a-tranche-i-project-xii",
+    "title": "Selection of green ammonia producers, Mode 2A Tranche I, Project XII: Madhya Bharat Agro, Sagar",
+    "issuer": "SECI",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "tenderId": "SECI/C&P/HO/2024/0212",
+    "mode": "Open tender · two-bid system",
+    "sector": "Production",
+    "category": "Production › Green ammonia",
+    "states": ["all-india"],
+    "bidDueAt": "2025-06-26 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/seci-green-ammonia-mode-2a-tranche-i-project-xii",
+    "publish": "yes",
+    "publishedAt": "2024-06-07",
+    "whoCanBid": "Green ammonia producers with plants in India",
+    "keyDates": [
+      {
+        "label": "Pre-bid meeting",
+        "note": "June 2024 · online"
+      },
+      {
+        "label": "Technical bid opening",
+        "note": "July 2025"
+      },
+      {
+        "label": "e-Reverse auction",
+        "at": "2025-08-06T00:00:00+05:30"
+      }
+    ],
+    "result": {
+      "declaredAt": "2025-08-06",
+      "winners": [
+        {
+          "name": "Deccan Ammonia Works",
+          "place": "Paradip, Odisha",
+          "about": "Green ammonia · Producer",
+          "capacity": "60,000 t/yr for 10 years",
+          "price": "₹52.25 per kg",
+          "profileSlug": "deccan-ammonia-works"
+        }
+      ],
+      "price": "₹52.25 per kg",
+      "capacityLine": "60,000 t/yr for 10 years",
+      "bidders": "Not public",
+      "whatItMeans": "The price sits in the middle of the first four auctions. Supply to the Sagar plant is due to start within 36 months of the purchase agreement.",
+      "analysis": "results-latest-green-ammonia-auctions",
+      "source": "SECI e-reverse auction result (sample)"
+    },
+    "topics": ["green-ammonia", "tenders-awards"]
+  },
+  {
+    "slug": "seci-green-ammonia-mode-2a-tranche-i-second-award",
+    "title": "Mode 2A Tranche I: second award",
+    "issuer": "SECI",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "tenderId": "SECI/C&P/HO/2024/0213",
+    "mode": "Open tender · two-bid system",
+    "sector": "Production",
+    "category": "Production › Green ammonia",
+    "states": ["all-india"],
+    "bidDueAt": "2025-07-10 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/seci-green-ammonia-mode-2a-tranche-i-second-award",
+    "publish": "yes",
+    "publishedAt": "2024-06-07",
+    "result": {
+      "declaredAt": "2025-08-18",
+      "winners": [
+        {
+          "name": "Kutch Ammonia Works",
+          "place": "Mundra, Gujarat",
+          "about": "Green ammonia · Producer",
+          "capacity": "50,000 t/yr for 10 years",
+          "price": "₹51.89 per kg",
+          "profileSlug": "kutch-ammonia-works"
+        }
+      ],
+      "bidders": "Not public",
+      "analysis": "results-latest-green-ammonia-auctions"
+    },
+    "topics": ["green-ammonia", "tenders-awards"]
+  },
+  {
+    "slug": "seci-sight-component-i-tranche-ii",
+    "title": "SIGHT Component I Tranche II: electrolyser manufacturing",
+    "issuer": "SECI",
+    "issuerName": "Solar Energy Corporation of India",
+    "issuerType": "SECI",
+    "tenderId": "SECI/C&P/HO/2023/0144",
+    "mode": "Open tender · two-bid system",
+    "sector": "Electrolysers",
+    "category": "Manufacturing › Electrolysers",
+    "states": ["all-india"],
+    "bidDueAt": "2024-01-15 15:00",
+    "description": "Sample tender. Sample from the step 5.5 designs. Replace with a real record before launch.",
+    "sourceUrl": "https://example.org/sample/seci-sight-component-i-tranche-ii",
+    "publish": "yes",
+    "publishedAt": "2023-09-01",
+    "result": {
+      "declaredAt": "2024-03-20",
+      "dateLabel": "2024",
+      "winners": [
+        {
+          "name": "Pranava H2",
+          "capacity": "300 MW/yr",
+          "profileSlug": "pranava-h2"
+        },
+        {
+          "name": "GreenCell Power",
+          "profileSlug": "greencell-power"
+        }
+      ],
+      "winnersLine": "13 awards, incl. Pranava H2 (300 MW/yr)",
+      "capacityLine": "1,500 MW/yr in total",
+      "price": "Not public",
+      "bidders": "Not public",
+      "analysis": "sight-tranche-ii-explained"
+    },
+    "topics": ["tenders-awards"]
   }
 ]

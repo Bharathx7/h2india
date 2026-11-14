@@ -91,5 +91,39 @@
     "types": ["Developer"],
     "state": "Odisha",
     "categories": ["Green ammonia"]
+  },
+  {
+    "key": "sahyadri-electrolysers",
+    "legal_name": "Sahyadri Electrolysers Private Limited",
+    "trade_name": "Sahyadri Electrolysers",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "categories": ["Electrolysers", "Balance of plant"]
+  },
+  {
+    "key": "godavari-green-power",
+    "legal_name": "Godavari Green Power Private Limited",
+    "trade_name": "Godavari Green Power",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "categories": ["Electrolysers"]
+  },
+  {
+    "key": "kaveri-electrochem",
+    "legal_name": "Kaveri Electrochem Private Limited",
+    "trade_name": "Kaveri Electrochem",
+    "kind": "supplier",
+    "types": ["Manufacturer"],
+    "categories": ["Electrolysers"]
+  },
+  {
+    "key": "deccan-process-safety",
+    "legal_name": "Deccan Process Safety Private Limited",
+    "trade_name": "Deccan Process Safety",
+    "kind": "supplier",
+    "types": ["Services"],
+    "categories": ["Testing & certification"]
   }
 ]

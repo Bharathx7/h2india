@@ -75,7 +75,7 @@ export async function runGstinCheck(gstin: string, attempt: number): Promise<"do
       .from(g)
       .where(and(eq(g.organisationId, row.organisationId), ne(g.id, row.id)));
     const all = [status, ...others.map((x) => x.status)];
-    const verification = all.includes("Active") ? "Verified" : all.includes("Pending") ? "Pending" : "Unverified";
+    const verification = all.includes("Active") ? "GST verified" : all.includes("Pending") ? "Pending" : "Unverified";
     await tx
       .update(o)
       .set({

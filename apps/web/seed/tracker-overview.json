@@ -1,0 +1,42 @@
+{
+  "dataAsOf": "-2d",
+  "figures": [
+    {
+      "value": "8.62 lakh",
+      "label": "t/yr of green H₂ production awarded",
+      "source": "SECI · SIGHT tranches (sample)",
+      "sourceUrl": "https://example.org/sample/seci-sight",
+      "asOf": "-2d"
+    },
+    {
+      "value": "3,000 MW",
+      "label": "a year of electrolyser manufacturing awarded",
+      "source": "SECI (sample)",
+      "asOf": "-2d"
+    },
+    {
+      "value": "~8,000",
+      "label": "t/yr commissioned",
+      "source": "MNRE (sample)",
+      "asOf": "-270d"
+    },
+    {
+      "value": "5.5+ lakh",
+      "label": "t/yr of offtake commitments",
+      "source": "Company filings (sample)",
+      "asOf": "-40d"
+    },
+    {
+      "value": "3",
+      "label": "green hydrogen hubs",
+      "source": "MNRE (sample)",
+      "asOf": "-2d"
+    },
+    {
+      "value": "70",
+      "label": "vehicles in mobility pilots",
+      "source": "MNRE pilot list (sample)",
+      "asOf": "-2d"
+    }
+  ]
+}

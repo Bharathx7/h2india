@@ -15,3 +15,4 @@ export type { ChangeStatus, Transitions } from "./status";
 export { getDb } from "./db";
 export { callWeb, internalKey, isInternalKey } from "./internal";
 export { underLimit } from "./limits";
+export { checkForm, FORM_LIMITS, looksAutomated, type FormCheck, type FormGuard } from "./protect";

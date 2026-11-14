@@ -65,8 +65,8 @@ export {
 export type { PaginationProps, StepItem, StepStatus } from "./components/Navigation";
 
 // Overlays, tables and panels, search and dates
-export { ConfirmDialog, Drawer } from "./components/Overlays";
-export type { ConfirmDialogProps, DrawerProps } from "./components/Overlays";
+export { ConfirmDialog, Drawer, Modal } from "./components/Overlays";
+export type { ConfirmDialogProps, DrawerProps, ModalProps } from "./components/Overlays";
 export { DataTable } from "./components/DataTable";
 export type { Column, DataTableProps, SortDirection } from "./components/DataTable";
 export { FilterGroup, FilterPanel, NotificationCentre, RangeFilter, ReviewPanel } from "./components/Panels";
@@ -74,6 +74,13 @@ export type { NotificationItem, ReviewCheck, ReviewPanelProps } from "./componen
 export { DatePicker, formatDate, parseDate } from "./components/DatePicker";
 export { SearchSuggest } from "./components/SearchSuggest";
 export type { Suggestion, SuggestionGroup } from "./components/SearchSuggest";
+export { SearchOverlay } from "./components/SearchOverlay";
+export type {
+  SearchOverlayGroup,
+  SearchOverlayItem,
+  SearchOverlayProps,
+  SearchOverlayState,
+} from "./components/SearchOverlay";
 
 // Brand
 export { Logo } from "./brand/Logo";
@@ -94,6 +101,7 @@ export { SiteHeader } from "./components/site/SiteHeader";
 export type { SiteHeaderProps } from "./components/site/SiteHeader";
 export { MegaMenuPanel } from "./components/site/MegaMenu";
 export { SiteFooter } from "./components/site/SiteFooter";
+export { NewsletterBand, SignUpBox } from "./components/site/NewsletterBand";
 export type { FooterColumn, SiteFooterProps } from "./components/site/SiteFooter";
 export { AnnouncementBar, CookieBanner, readConsent } from "./components/site/Banners";
 export type { ConsentChoice } from "./components/site/Banners";
@@ -119,8 +127,15 @@ export {
   SchemeCard,
   StatFigure,
   TenderCard,
+  JobCard,
 } from "./components/cards/Cards";
 export type { CardStatus } from "./components/cards/Cards";
+export { OrgCard } from "./components/cards/OrgCard";
+export type { OrgCardProps } from "./components/cards/OrgCard";
+export { ProductCard } from "./components/cards/ProductCard";
+export { MapView } from "./components/MapView";
+export type { MapPoint, MapProvider, MapViewProps } from "./components/MapView";
+export type { ProductCardProps } from "./components/cards/ProductCard";
 export { HeroNetwork } from "./components/home/HeroNetwork";
 export { LogoMarquee } from "./components/home/LogoMarquee";
 export type { MarqueeBrand } from "./components/home/LogoMarquee";

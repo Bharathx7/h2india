@@ -19,6 +19,11 @@ export const users = core.table("users", {
   /** buyer | supplier | member: the path chosen in Join step 1. Null until the person has joined. */
   profileType: text("profile_type"),
   termsAcceptedAt: utc("terms_accepted_at"),
+  /** The Terms of use version accepted (step 5.8), or "unpublished" while the text waits for M2. */
+  termsVersion: text("terms_version"),
+  /** Suspended by an operator (653:568, step 11.4): sign-in refused and sessions ended until lifted. */
+  suspendedAt: utc("suspended_at"),
+  suspendReason: text("suspend_reason"),
   ...timestamps,
 });
 

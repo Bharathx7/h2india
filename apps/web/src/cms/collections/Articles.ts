@@ -6,6 +6,9 @@ import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
 import { ALWAYS_LEGAL, ARTICLE_TYPES, WORKFLOW } from "../types";
 import { RULES, transitionArticle, type Action } from "../workflow";
+import { searchHooks } from "../../search/hooks";
+import { articleSlugFree, keyFactsField, levelField, liveField, newsroomHooks, refuseSectionSlug } from "../newsroom";
+import { STATE_OPTIONS } from "../records/common";
 
 // Articles: the six types (A28) with their header variants (437:3709 to 437:4387), authors, topics, tags, sources and
 // SEO (639:8). Drafts and versions are kept and comparable. Only content.publish may publish (step 4.1); the editorial
@@ -90,7 +93,13 @@ export const Articles: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 2000 } }, maxPerDoc: 50 },
   access: { read: publicOrEditor, create: canEdit, update: canEdit, delete: canDelete, readVersions: canEdit },
-  hooks: { beforeChange: [guardPublishing, refuseSamplePublish] },
+  // Search (step 5.2): every save queues an index change; unpublishing removes the article from search.
+  // The newsroom pages refresh the moment an article changes (step 5.3).
+  hooks: {
+    beforeChange: [guardPublishing, refuseSamplePublish, refuseSectionSlug],
+    afterChange: [...searchHooks.afterChange, ...newsroomHooks.afterChange],
+    afterDelete: [...searchHooks.afterDelete, ...newsroomHooks.afterDelete],
+  },
   endpoints: [workflowEndpoint],
   fields: [
     {
@@ -137,9 +146,39 @@ export const Articles: CollectionConfig = {
       unique: true,
       index: true,
       hooks: { beforeValidate: [slugFrom("title")] },
+      validate: articleSlugFree,
       admin: { position: "sidebar", description: "Part of the address. Don't change it once published." },
     },
+    {
+      name: "featured",
+      type: "checkbox",
+      admin: {
+        position: "sidebar",
+        description: "The lead story on the news home (428:473), or the featured piece on Insights (440:40).",
+      },
+    },
+    levelField((d) => ["analysis", "explainer"].includes(String(d.type))),
+    {
+      name: "states",
+      type: "select",
+      hasMany: true,
+      options: STATE_OPTIONS,
+      admin: {
+        position: "sidebar",
+        description: "For the news home's state filter. Leave empty for national stories.",
+      },
+    },
     { name: "dek", label: "Standfirst", type: "textarea", required: true, maxLength: 300 },
+    {
+      name: "whyItMatters",
+      label: "Why this matters",
+      type: "textarea",
+      maxLength: 300,
+      admin: {
+        condition: (d) => (d as ArticleData).type === "analysis",
+        description: "The side box on analysis pieces (437:3709).",
+      },
+    },
     { name: "heroImage", type: "upload", relationTo: "media" },
     {
       name: "body",
@@ -182,6 +221,12 @@ export const Articles: CollectionConfig = {
             data.type !== "sponsored" || (typeof value === "string" && value.trim()) ? true : "Who paid for it?",
         },
         { name: "logo", type: "upload", relationTo: "media" },
+        {
+          name: "about",
+          type: "textarea",
+          maxLength: 300,
+          admin: { description: "“About the sponsor” in the side column (437:4387): what the company does." },
+        },
         {
           name: "disclosure",
           type: "textarea",
@@ -253,6 +298,8 @@ export const Articles: CollectionConfig = {
         { name: "by", type: "relationship", relationTo: "editors" },
       ],
     },
+    keyFactsField,
+    liveField,
     {
       name: "seo",
       label: "SEO",
