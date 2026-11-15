@@ -21,3 +21,6 @@ apps/web/src/fonts/
 apps/web/src/payload-types.ts
 apps/web/src/app/(payload)/cms/importMap.js
 apps/web/src/migrations/
+
+# Generated from code (pnpm privacy:inventory); a test compares it byte for byte
+docs/privacy/inventory.md

@@ -59,6 +59,14 @@ jobs:
           IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
           docker build --network host -t "$IMAGE:${GITHUB_SHA::12}" .
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          echo "TAG=${GITHUB_SHA::12}" >> "$GITHUB_ENV"
+      # Step 12.1: the image is not pushed if it holds a high or critical vulnerability that has a fix.
+      - name: Container scan
+        # The scanner's own image at a fixed version (its GitHub action's tags were tampered with in 2026). Pin it by
+        # digest once the version is reviewed.
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.57.1 image \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress "$IMAGE:$TAG"
       - name: Push
         run: |
           docker push "$IMAGE:${GITHUB_SHA::12}"

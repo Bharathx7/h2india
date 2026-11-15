@@ -72,3 +72,12 @@ describe("feature flags", () => {
     }).not.toThrow();
   });
 });
+
+describe("operator passkey flag (step 12.1)", () => {
+  it("is on in a production build unless switched off, and off in development", () => {
+    expect(readFlags({ NODE_ENV: "production" }).operatorPasskey).toBe(true);
+    expect(readFlags({ NODE_ENV: "production", FLAG_OPERATOR_PASSKEY: "false" }).operatorPasskey).toBe(false);
+    expect(readFlags({ NODE_ENV: "development" }).operatorPasskey).toBe(false);
+    expect(readFlags({ FLAG_OPERATOR_PASSKEY: "true" }).operatorPasskey).toBe(true);
+  });
+});

@@ -192,6 +192,13 @@ const STEPS: Step[] = [
     where: (id) => eq(schema.memberProfiles.userId, id),
   },
   {
+    table: "consent_records",
+    action: "delete",
+    why: "Consent choices (directory listing, marketing)",
+    target: schema.consentRecords,
+    where: (id) => eq(schema.consentRecords.userId, id),
+  },
+  {
     table: "follows",
     action: "delete",
     why: "Follows",
@@ -330,6 +337,35 @@ const STEPS: Step[] = [
       jobRole: null,
       emailVerified: false,
     }),
+  },
+  {
+    table: "compare_lists",
+    action: "delete",
+    why: "Products picked to compare",
+    target: schema.compareLists,
+    where: (id) => eq(schema.compareLists.userId, id),
+  },
+  {
+    table: "recovery_requests",
+    action: "mask",
+    why: "The recovery record stays for security; contact details and the new email and mobile go",
+    target: schema.recoveryRequests,
+    where: (id) => eq(schema.recoveryRequests.userId, id),
+    mask: () => ({ newMobile: null, newEmail: null, contactName: null, contactCompany: null, contactEmail: null }),
+  },
+  {
+    table: "view_as_grants",
+    action: "keep",
+    why: "Security record of an operator's read-only view; points to the masked account",
+    target: schema.viewAsGrants,
+    where: (id) => eq(schema.viewAsGrants.userId, id),
+  },
+  {
+    table: "data_rights_requests",
+    action: "keep",
+    why: "Proof the request was handled, kept by law",
+    target: schema.dataRightsRequests,
+    where: (id) => eq(schema.dataRightsRequests.userId, id),
   },
   {
     table: "audit_log",
@@ -494,3 +530,6 @@ export async function requestDetail(db: Executor, actor: Actor, id: string) {
   const [row] = await db.select().from(r).where(eq(r.id, id));
   return row ?? null;
 }
+
+/** The tables erasure covers; the privacy inventory test checks every personal table is among them (step 12.2). */
+export const ERASURE_TABLES: readonly string[] = STEPS.map((s) => s.table);

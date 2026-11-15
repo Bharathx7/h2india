@@ -1,6 +1,9 @@
 import { getDb } from "@h2india/core";
 import { viewAsGrant } from "@h2india/core/admin/users";
+import { isEnabled } from "@h2india/config";
 import { createAuth } from "@h2india/core/auth";
+import { setOperatorGate } from "@h2india/core/authz";
+import { isPasskeySession } from "@h2india/core/sign-in/step-up";
 import { nextCookies } from "better-auth/next-js";
 import { cookies, headers } from "next/headers";
 
@@ -13,6 +16,26 @@ export const VIEW_AS_COOKIE = "h2_view_as";
 async function realSession() {
   return auth.api.getSession({ headers: await headers() });
 }
+
+/**
+ * Operator permissions count only in a session made with a passkey (A172, review H2), when operatorPasskey is on (it
+ * is in production). Every permission check goes through loadActor(), so this covers pages, actions and the CMS.
+ */
+export async function passkeySignedIn(): Promise<boolean> {
+  const session = await realSession();
+  return session ? isPasskeySession(getDb(), session.session.id) : false;
+}
+
+setOperatorGate(async (userId) => {
+  if (!isEnabled("operatorPasskey")) return true;
+  try {
+    const session = await realSession();
+    return session?.user.id === userId && (await isPasskeySession(getDb(), session.session.id));
+  } catch {
+    // Outside a request (no headers): no session, so no operator access.
+    return false;
+  }
+});
 
 /**
  * The signed-in person for this request, or null. While an operator views as someone (657:486), pages see that person,

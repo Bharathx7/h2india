@@ -3,7 +3,7 @@
 import { addBankAccount, BankError, cancelBankChange, confirmBankAccount } from "@h2india/core/supplier";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "./actions";
+import { supplierActor } from "./actor";
 
 // Payout bank account (step 8.6). Core checks payout_bank.change, the passkey step-up and writes the audit log.
 

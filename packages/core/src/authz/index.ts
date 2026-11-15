@@ -1,6 +1,6 @@
 // Authorisation (step 3.4): permissions as data, can(), and the query scope.
 export * from "./catalogue";
-export { loadActor, VISITOR } from "./actor";
+export { hasOperatorRole, loadActor, setOperatorGate, VISITOR } from "./actor";
 export type { Actor, CompanySeat, PlatformRole } from "./actor";
 export { assertCan, can, ForbiddenError, withinLimit } from "./can";
 export type { Resource } from "./can";

@@ -1,6 +1,7 @@
 import { getDb } from "@h2india/core";
 import { adminAreas, adminCounts } from "@h2india/core/admin";
-import { can, loadActor, type Actor, type Permission } from "@h2india/core/authz";
+import { isEnabled } from "@h2india/config";
+import { can, hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
 import { buttonClasses, Icon, Logo, type WorkspaceNavGroup } from "@h2india/ui";
 import Link from "next/link";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
@@ -9,7 +10,7 @@ import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
-import { operatorSession } from "@/server/auth";
+import { operatorSession, passkeySignedIn } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
@@ -19,6 +20,9 @@ export async function requireOperator(permission: Permission, path: string): Pro
   // The operator's own session: admin screens never take on a viewed person (step 11.4).
   const session = await operatorSession();
   if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
+  // The back office needs a passkey sign-in (A172, review H2): an operator without one goes to the passkey step.
+  if (isEnabled("operatorPasskey") && !(await passkeySignedIn()) && (await hasOperatorRole(getDb(), session.user.id)))
+    redirect(`/sign-in/passkey?next=${encodeURIComponent(path)}`);
   const actor = await loadActor(getDb(), session.user.id);
   if (!can(actor, permission)) notFound();
   return { userId: session.user.id, actor };

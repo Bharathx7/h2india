@@ -97,6 +97,9 @@ jobs:
           E2E_START_SERVER: "1"
           # Ordering is on in local and staging with the simulated payment partner (A176); flows A, B and H use it.
           FLAG_TRANSACTIONS: "true"
+          # Browser tests sign operators in with email codes; the passkey rule (on in production) is proven in
+          # authz/gate.int.test.ts and the passkey step page by hand (step 12.1, review H2).
+          FLAG_OPERATOR_PASSKEY: "false"
           CI: "true"
           # The /dev pages (tokens, component gallery) are checked in CI, as on staging.
           FLAG_DEV_PAGES: "true"

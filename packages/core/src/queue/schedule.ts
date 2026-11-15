@@ -5,6 +5,7 @@ import { sweepExtractions } from "../products/jobs";
 import { rollUpYesterday } from "../supplier/analytics";
 import { expireDocuments, sendExpiryNotices } from "../supplier/verification";
 import { pruneAuditLog } from "../audit";
+import { runRetention } from "../compliance/retention";
 import { runDeadlines } from "../clocks/clocks";
 // Registers the webinar reminder handler in the worker (step 5.7).
 import "../events/reminders";
@@ -110,6 +111,9 @@ export const SCHEDULES: Scheduled[] = [
   { id: "audit-retention", pattern: "30 21 * * *", run: () => pruneAuditLog(getDb()) },
   // 03:15 IST every day: report leads are deleted 24 months after the download (A33). The web app runs the CMS.
   { id: "report-leads-prune", pattern: "45 21 * * *", run: () => callWeb("/api/internal/report-leads-prune") },
+  // 03:30 IST every day (step 12.2): personal data past its period. Reports only until periods are decided and
+  // privacy.retention.enforce is on; the report is the job's return value (kept with the completed job).
+  { id: "privacy-retention", pattern: "0 22 * * *", run: () => runRetention(getDb(), { apply: true }) },
 ];
 
 /** Registers (or updates) every schedule. Safe to call on every worker start. */

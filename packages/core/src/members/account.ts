@@ -2,6 +2,7 @@ import { schema, type Database, type Executor } from "@h2india/db";
 import { desc, eq } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { loadActor } from "../authz/actor";
+import { consentHistory, recordDirectoryConsent } from "../consent/records";
 import { attachFile } from "../files/files";
 import { getChoices, getNotifySettings } from "../notify/preferences";
 import { PERSONAS, profileProblems, TOPICS, type ProfileFields } from "./rules";
@@ -113,6 +114,7 @@ export async function saveProfile(db: Database, userId: string, input: ProfileIn
         after: { listed: input.listed },
         context,
       });
+      await recordDirectoryConsent(tx, { userId, granted: input.listed, persona });
     }
   });
 }
@@ -127,26 +129,38 @@ export async function exportMemberData(db: Executor, userId: string) {
     .from(u)
     .where(eq(u.id, userId));
   if (!person) throw new Error("No such account");
-  const [profile, follows, saved, alerts, registrations, newsletter, choices, settings, learning, applications] =
-    await Promise.all([
-      db.select().from(mp).where(eq(mp.userId, userId)),
-      db.select().from(schema.follows).where(eq(schema.follows.userId, userId)),
-      db.select().from(schema.savedItems).where(eq(schema.savedItems.userId, userId)),
-      db.select().from(schema.alerts).where(eq(schema.alerts.userId, userId)).orderBy(desc(schema.alerts.createdAt)),
-      db.select().from(schema.webinarRegistrations).where(eq(schema.webinarRegistrations.userId, userId)),
-      db
-        .select({
-          email: schema.newsletterSubscribers.email,
-          status: schema.newsletterSubscribers.status,
-          topics: schema.newsletterSubscribers.topics,
-        })
-        .from(schema.newsletterSubscribers)
-        .where(eq(schema.newsletterSubscribers.email, person.email.toLowerCase())),
-      getChoices(db, userId),
-      getNotifySettings(db, userId),
-      db.select().from(schema.learningProgress).where(eq(schema.learningProgress.userId, userId)),
-      db.select().from(schema.jobApplications).where(eq(schema.jobApplications.userId, userId)),
-    ]);
+  const [
+    profile,
+    follows,
+    saved,
+    alerts,
+    registrations,
+    newsletter,
+    choices,
+    settings,
+    learning,
+    applications,
+    consents,
+  ] = await Promise.all([
+    db.select().from(mp).where(eq(mp.userId, userId)),
+    db.select().from(schema.follows).where(eq(schema.follows.userId, userId)),
+    db.select().from(schema.savedItems).where(eq(schema.savedItems.userId, userId)),
+    db.select().from(schema.alerts).where(eq(schema.alerts.userId, userId)).orderBy(desc(schema.alerts.createdAt)),
+    db.select().from(schema.webinarRegistrations).where(eq(schema.webinarRegistrations.userId, userId)),
+    db
+      .select({
+        email: schema.newsletterSubscribers.email,
+        status: schema.newsletterSubscribers.status,
+        topics: schema.newsletterSubscribers.topics,
+      })
+      .from(schema.newsletterSubscribers)
+      .where(eq(schema.newsletterSubscribers.email, person.email.toLowerCase())),
+    getChoices(db, userId),
+    getNotifySettings(db, userId),
+    db.select().from(schema.learningProgress).where(eq(schema.learningProgress.userId, userId)),
+    db.select().from(schema.jobApplications).where(eq(schema.jobApplications.userId, userId)),
+    consentHistory(db, userId),
+  ]);
   const p = profile[0];
   return {
     exportedAt: new Date().toISOString(),
@@ -194,6 +208,13 @@ export async function exportMemberData(db: Executor, userId: string) {
       company: j.company,
       status: j.status,
       applied: j.appliedAt.toISOString(),
+    })),
+    consents: consents.map((c) => ({
+      purpose: c.purpose,
+      agreed: c.granted,
+      words: c.wording,
+      version: c.version,
+      at: c.at.toISOString(),
     })),
     notificationChoices: choices,
     quietHours: settings,

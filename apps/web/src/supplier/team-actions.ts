@@ -17,7 +17,7 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { loadActor } from "@h2india/core/authz";
-import { supplierActor } from "./actions";
+import { supplierActor } from "./actor";
 
 /** The company whose team this person manages: their supplier company, else their buyer company. */
 async function teamActor() {

@@ -1,5 +1,6 @@
 "use client";
 
+import { directoryConsentWording } from "@h2india/core/consent/wording";
 import { graduationYears, HEADLINE_MAX, PERSONAS, TOPICS, type ProfileFields } from "@h2india/core/members/rules";
 import { Alert, Button, Icon, IconButton, Input, Radio, RadioGroup, Select, Switch } from "@h2india/ui";
 import Link from "next/link";
@@ -522,10 +523,8 @@ export function ProfileForm({ start, savedOn }: { start: ProfileStart; savedOn: 
       <aside className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
         <h2 className="type-h4">Who can see this</h2>
         <Switch label="Public profile" checked={listed} onCheckedChange={setListed} />
-        <p className="type-body-sm text-body">
-          Public: signed-in members can see your name, headline, interests and{" "}
-          {persona === "researcher" ? "research" : "profile"} details. Your email and phone number are never shown.
-        </p>
+        {/* The recorded consent words (step 12.2): what is shown is what is kept. */}
+        <p className="type-body-sm text-body">{directoryConsentWording(persona)}</p>
         <p className="type-body-sm text-body">
           Private: only you can see this page. You can still follow, save and get alerts.
         </p>
