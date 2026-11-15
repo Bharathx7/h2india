@@ -345,6 +345,20 @@ const STEPS: Step[] = [
     target: schema.messages,
     where: (id) => eq(schema.messages.authorId, id),
   },
+  {
+    table: "carts",
+    action: "delete",
+    why: "The person's own cart (step 10.2)",
+    target: schema.carts,
+    where: (id) => eq(schema.carts.userId, id),
+  },
+  {
+    table: "orders",
+    action: "keep",
+    why: "Financial records are kept by law (playbook Section 8); placed by points to the masked account",
+    target: schema.orders,
+    where: (id) => eq(schema.orders.placedBy, id),
+  },
 ];
 
 /** Files the person uploaded for themselves (profile photos) are deleted; company files stay with the company. */

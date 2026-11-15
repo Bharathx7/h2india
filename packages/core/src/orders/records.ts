@@ -1,5 +1,6 @@
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { FlagOffError, requireFlag } from "@h2india/config";
 import { z } from "zod";
 import type { RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
@@ -88,6 +89,35 @@ export async function rateCardFor(ex: Executor, at: Date): Promise<RateCard> {
 export async function rateCardVersion(ex: Executor, version: string | null, at: Date): Promise<RateCard> {
   const cards = await getSetting(ex, RATE_CARDS);
   return cards.find((c) => c.version === version) ?? rateCardOn(cards, at) ?? SAMPLE_RATE_CARD;
+}
+
+// ------------------------------------------------------------------------------------------------ pilot (10.12)
+
+/**
+ * The Launch 2 pilot: with transactions on, only these companies may order or sell. Empty means every company (local
+ * and staging, A176). Changed in System settings like any setting (settings.edit, audited).
+ */
+export const PILOT_ORGANISATIONS = defineSetting<string[]>({
+  key: "transactions.pilotOrganisations",
+  description: "Companies in the transactions pilot (empty: every company)",
+  schema: z.array(z.uuid()),
+  fallback: [],
+});
+
+/** requireFlag("transactions") plus the pilot list, for every company taking part. */
+export async function requireTransactions(
+  ex: Executor,
+  organisationIds: string[],
+  flags?: Record<string, string | undefined>,
+) {
+  requireFlag("transactions", flags);
+  await requirePilot(ex, organisationIds);
+}
+
+/** Only the pilot list (the flag was checked by the caller). */
+export async function requirePilot(ex: Executor, organisationIds: string[]) {
+  const pilot = await getSetting(ex, PILOT_ORGANISATIONS);
+  if (pilot.length && organisationIds.some((id) => !pilot.includes(id))) throw new FlagOffError("transactions");
 }
 
 // ------------------------------------------------------------------------------------------------ milestones

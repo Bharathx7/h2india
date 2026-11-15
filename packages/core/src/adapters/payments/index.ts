@@ -87,4 +87,11 @@ function logged(p: PaymentPartner): PaymentPartner {
 }
 
 export type { PaymentPartner, SettlementLine, WebhookEvent, WebhookType } from "./types";
-export { simBankTransfer, simCompleteCheckout, simDueWebhooks, simMarkDelivered, type SimOutcome } from "./sim";
+export {
+  signSimWebhook,
+  simBankTransfer,
+  simCompleteCheckout,
+  simDueWebhooks,
+  simMarkDelivered,
+  type SimOutcome,
+} from "./sim";

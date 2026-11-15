@@ -21,6 +21,8 @@ import {
   ownOrder,
   paidForDispatch,
   rateCardFor,
+  requirePilot,
+  requireTransactions,
   tell,
   type NewOrder,
   type OrderRow,
@@ -179,7 +181,7 @@ export async function placeCartOrder(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   checkMethod(input.paymentMethod, opts.flags);
   const userId = must(actor.userId);
@@ -191,6 +193,7 @@ export async function placeCartOrder(
       .where(and(eq(schema.carts.organisationId, organisationId), eq(schema.carts.userId, userId)))
       .for("update");
     if (!cart?.supplierId) throw new OrderError("Your cart is empty");
+    await requirePilot(tx, [cart.supplierId]);
     const items = await tx
       .select({ item: schema.cartItems, product: schema.products })
       .from(schema.cartItems)
@@ -283,6 +286,7 @@ export async function orderFromQuote(
     .from(schema.quotePaymentLines)
     .where(eq(schema.quotePaymentLines.versionId, input.version.id))
     .orderBy(asc(schema.quotePaymentLines.position));
+  await requirePilot(tx, [input.buyerOrganisationId, input.quote.organisationId]);
   const userId = must(actor.userId);
   const route = await approvalRoute(tx, input.buyerOrganisationId, userId, input.version.totalPaise);
   let receiverName = input.receiverName ?? null;
@@ -350,7 +354,7 @@ export async function approveOrder(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined>; now?: Date } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.approve", { organisationId });
   const userId = must(actor.userId);
   const now = opts.now ?? new Date();
@@ -431,7 +435,7 @@ export async function rejectApproval(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.approve", { organisationId });
   if (!reason.trim()) throw new OrderError("Say why", { reason: "Say why you're not approving it" });
   const order = await ownOrder(db, organisationId, orderId, "buyer");
@@ -467,7 +471,7 @@ export async function supplierAccept(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
   const order = await ownOrder(db, organisationId, orderId, "supplier");
   if (order.status !== "Pending acceptance") throw new OrderError("This order isn't waiting for you");
@@ -513,7 +517,7 @@ export async function supplierDecline(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
   if (!(DECLINE_REASONS as readonly string[]).includes(input.reason))
     throw new OrderError("Choose a reason", { reason: "Choose why you're declining" });
@@ -562,7 +566,7 @@ export async function changeDispatchDate(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
   if (!input.reason.trim()) throw new OrderError("Say why", { reason: "Tell the buyer why the date moves" });
   const order = await ownOrder(db, organisationId, orderId, "supplier");
@@ -621,7 +625,7 @@ export async function dispatchOrder(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
   const errors: Record<string, string> = {};
   if (!input.invoiceNumber.trim()) errors.invoiceNumber = "Enter the GST invoice number";
@@ -863,7 +867,7 @@ export async function acceptDelivery(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   const order = await ownOrder(db, organisationId, orderId, "buyer");
   if (order.status !== "Delivered") throw new OrderError("This order isn't waiting for your acceptance");
@@ -908,7 +912,7 @@ export async function reportProblem(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   const errors: Record<string, string> = {};
   if (!(PROBLEM_REASONS as readonly string[]).includes(input.reason)) errors.reason = "Choose what went wrong";
@@ -1092,7 +1096,7 @@ export async function cancelOrder(
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   if (!reason.trim()) throw new OrderError("Say why", { reason: "Tell the supplier why you're cancelling" });
   const order = await ownOrder(db, organisationId, orderId, "buyer");

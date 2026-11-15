@@ -7,6 +7,8 @@ export {
   listOrders,
   milestonePlan,
   OrderError,
+  PILOT_ORGANISATIONS,
+  requireTransactions,
   orderDetail,
   orderFigures,
   RATE_CARDS,
@@ -26,6 +28,9 @@ export {
   receiveWebhook,
   reconcile,
   runPayouts,
+  simCheckoutFacts,
+  simFinishCheckout,
+  simTransferIn,
   startOnlinePayment,
   WebhookRejected,
 } from "./money";

@@ -145,6 +145,21 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     ).rejects.toBeInstanceOf(FlagOffError);
   });
 
+  it("with a pilot list, only listed companies can order (10.12)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    await h.db
+      .insert(schema.settings)
+      .values({ key: "transactions.pilotOrganisations", value: [other.org.id] })
+      .onConflictDoUpdate({ target: schema.settings.key, set: { value: [other.org.id] } });
+    try {
+      await expect(addToCart(h.db, admin, buyer.org.id, { productId, quantity: 1 }, ON)).rejects.toBeInstanceOf(
+        FlagOffError,
+      );
+    } finally {
+      await h.db.delete(schema.settings).where(eq(schema.settings.key, "transactions.pilotOrganisations"));
+    }
+  });
+
   it("a cart holds one supplier at a time and prices come from the product", async () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     await addToCart(h.db, admin, buyer.org.id, { productId, quantity: 2 }, ON);

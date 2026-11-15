@@ -7,6 +7,8 @@ import { pendingClaims } from "../companies/claims";
 import { createList, projectLists } from "../buyer/lists";
 import { addDelegation, delegationsOf, deliverySitesOf, saveDeliverySite } from "../buyer/settings";
 import { listCompanyProducts, listCompanyQuestions } from "../products/company";
+import { cancelOrder, listOrders, orderDetail } from "../orders";
+import { insertOrder } from "../orders/records";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
 import { can } from "./can";
@@ -121,6 +123,38 @@ describe.skipIf(!url)("authorisation", () => {
         saveDeliverySite(h.db, b, data.a.org.id, { name: "X", address: "Y", contacts: [] }),
       ).rejects.toThrow();
       await expect(createList(h.db, b, data.a.org.id, "X")).rejects.toThrow();
+    });
+
+    it("orders, their money and documents (step 10.1)", async () => {
+      const b = await loadActor(h.db, data.b.admin.id);
+      const supplier = await makeUser(h.db, "Authz supplier");
+      const [org] = await h.db
+        .insert(schema.organisations)
+        .values({ kind: "supplier", legalName: "Authz supplier" })
+        .returning();
+      if (!org) throw new Error("no supplier");
+      await h.db.insert(schema.memberships).values({ organisationId: org.id, userId: supplier.id, role: "Admin" });
+      const order = await h.db.transaction((tx) =>
+        insertOrder(tx, {
+          buyerOrganisationId: data.a.org.id,
+          supplierOrganisationId: org.id,
+          placedBy: data.a.admin.id,
+          source: "cart",
+          paymentMethod: "bank_transfer",
+          lines: [{ description: "Valve", quantity: 1, unitPricePaise: 100_00n, gstRateBps: 1800 }],
+          schedule: [],
+          needsApproval: false,
+        }),
+      );
+      expect(await orderDetail(scopeFor(b), h.db, order.id)).toBeNull();
+      expect(await listOrders(scopeFor(b), h.db, { organisationId: data.a.org.id, side: "buyer" })).toEqual([]);
+      await expect(
+        cancelOrder(h.db, b, data.a.org.id, order.id, "Not mine", undefined, { flags: { FLAG_TRANSACTIONS: "true" } }),
+      ).rejects.toThrow();
+      // The two sides of the order can read it.
+      const a = await loadActor(h.db, data.a.admin.id);
+      expect((await orderDetail(scopeFor(a), h.db, order.id))?.side).toBe("buyer");
+      expect((await orderDetail(scopeFor(await loadActor(h.db, supplier.id)), h.db, order.id))?.side).toBe("supplier");
     });
   });
 

@@ -6,7 +6,16 @@ import { assertCan } from "../authz/can";
 import { startClock } from "../clocks/clocks";
 import { orderLedgerProblems, post, monthlyIdentity } from "../ledger";
 import { nextReference } from "../reference";
-import { paymentPartner, simDueWebhooks, simMarkDelivered, type WebhookEvent } from "../adapters/payments";
+import {
+  paymentPartner,
+  signSimWebhook,
+  simBankTransfer,
+  simCompleteCheckout,
+  simDueWebhooks,
+  simMarkDelivered,
+  type SimOutcome,
+  type WebhookEvent,
+} from "../adapters/payments";
 import { nextPayoutRun, settle } from "./fees";
 import {
   calendar,
@@ -724,3 +733,35 @@ export async function openPayments(tx: Executor, order: OrderRow): Promise<"Awai
 }
 
 export { startClock };
+
+/** The simulator's pay page (/dev/pay/<paymentId>): what is being paid, for whom. Null for an unknown payment. */
+export async function simCheckoutFacts(db: Database, partnerPaymentId: string) {
+  const [row] = await db
+    .select({
+      orderId: o.id,
+      reference: o.reference,
+      buyerOrganisationId: o.buyerOrganisationId,
+      amountPaise: p.amountPaise,
+      method: p.method,
+      status: p.status,
+    })
+    .from(p)
+    .innerJoin(o, eq(o.id, p.orderId))
+    .where(eq(p.partnerPaymentId, partnerPaymentId));
+  return row ?? null;
+}
+
+/** The pay page's buttons: the simulated customer finishes, and the result arrives as a signed webhook. */
+export async function simFinishCheckout(db: Database, partnerPaymentId: string, outcome: SimOutcome) {
+  const ev = await simCompleteCheckout(db, partnerPaymentId, outcome);
+  if (!ev) return "pending" as const;
+  const raw = JSON.stringify(ev);
+  return receiveWebhook(db, raw, signSimWebhook(raw));
+}
+
+/** "Simulate a bank transfer" for an order's account (NEFT/RTGS arriving), through the same webhook pipeline. */
+export async function simTransferIn(db: Database, orderReference: string, amountPaise: bigint) {
+  const ev = await simBankTransfer(db, orderReference, amountPaise);
+  const raw = JSON.stringify(ev);
+  return receiveWebhook(db, raw, signSimWebhook(raw));
+}

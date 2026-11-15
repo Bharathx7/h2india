@@ -1,9 +1,8 @@
-import { requireFlag } from "@h2india/config";
 import { schema, type Database } from "@h2india/db";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
-import { OrderError, orderFigures } from "./records";
+import { OrderError, orderFigures, requireTransactions } from "./records";
 import { must } from "../must";
 
 // The cart (step 10.2, 80:5973): fixed-price items from one supplier at a time. Adding from another supplier asks
@@ -43,7 +42,7 @@ export async function addToCart(
   input: { productId: string; quantity: number; replace?: boolean },
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
-  requireFlag("transactions", opts.flags);
+  await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   if (!Number.isInteger(input.quantity) || input.quantity < 1) throw new OrderError("Enter a quantity");
   const [product] = await db
