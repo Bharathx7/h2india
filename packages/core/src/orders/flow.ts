@@ -3,7 +3,7 @@ import { parseServerEnv, requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
-import type { Actor } from "../authz/actor";
+import { VISITOR, type Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { cancelDeadline, completeDeadline, onDeadline, startClock } from "../clocks/clocks";
 import { passkeyConfirmedRecently } from "../sign-in/step-up";
@@ -1041,12 +1041,15 @@ export async function recordReceipt(
     code: string;
     condition: (typeof RECEIPT_CONDITIONS)[number];
     notes?: string;
-    photoFileIds?: string[];
+    /** Photos uploaded on the page without an account: each with the upload key that proves who sent it. */
+    photos?: { fileId: string; key: string }[];
     receivedBy?: string;
   },
 ) {
   if (!RECEIPT_CONDITIONS.includes(input.condition)) throw new OrderError("Choose the condition");
-  if ((input.photoFileIds?.length ?? 0) > MAX_RECEIPT_PHOTOS) throw new OrderError("Up to 5 photos");
+  if ((input.photos?.length ?? 0) > MAX_RECEIPT_PHOTOS) throw new OrderError("Up to 5 photos");
+  if (input.condition !== "Good" && !input.notes?.trim())
+    throw new OrderError("Say what's wrong", { notes: "Describe the damage or what's missing" });
   const result = await db.transaction(async (tx) => {
     const [link] = await tx
       .select()
@@ -1079,10 +1082,19 @@ export async function recordReceipt(
     const [order] = await tx.select().from(o).where(eq(o.id, link.orderId)).for("update");
     if (!order || order.status !== "Delivered") return { ok: false as const, state: "closed" };
     await tx.update(schema.deliveryLinks).set({ usedAt: new Date() }).where(eq(schema.deliveryLinks.id, link.id));
+    for (const p of input.photos ?? [])
+      await attachFile(tx, {
+        actor: VISITOR,
+        key: p.key,
+        fileId: p.fileId,
+        kind: "delivery_photo",
+        attachedType: "order",
+        attachedId: order.id,
+      });
     await receive(tx, order, {
       condition: input.condition,
       notes: input.notes ?? null,
-      photoFileIds: input.photoFileIds ?? [],
+      photoFileIds: (input.photos ?? []).map((p) => p.fileId),
       receivedBy: input.receivedBy ?? null,
       via: "link",
       recordedBy: null,

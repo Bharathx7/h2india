@@ -4,17 +4,18 @@ Built on 15 Nov 2026 after the Figma MCP limit for the View seat was reached. Ea
 read, the design system in `packages/ui` and the playbook. When Figma access returns, compare each at 1440 and 390 and
 fix the differences.
 
-| Screen                            | Frames                                                                     | Built from                                                            | Checked |
-| --------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------- |
-| Checkout · 3 Payment              | 80:6464, 134:10078                                                         | Delivery and Billing frames, playbook 10.2 ("nothing is charged now") |         |
-| Checkout · 4 Review               | 80:6687, 134:10179                                                         | Delivery and Billing frames                                           |         |
-| Checkout · phone steps            | 82:8912, 768:47559                                                         | the 1440 frames; one column on phones                                 |         |
-| Order placed                      | 79:5587, 82:9036                                                           | playbook 10.2                                                         |         |
-| My orders and its states          | 77:673, 81:8334, 128:9187, 128:9220, 128:9259                              | supplier pipeline 810:12156, 811:12517                                |         |
-| Buyer order detail, every state   | 77:1178, 81:8452, 807:14435, 330:26743, 339:27238, 721:24392               | supplier order frames 693:8, 811:12584, 813:12602                     |         |
-| Payment outcomes                  | 691:12, 691:336, 691:559, 691:788, 691:1014, 79:5968, 744:14558, 744:14692 | playbook 10.5 (shown as an alert on the order)                        |         |
-| Bank transfer and pay online      | 690:9, 690:422, 792:15399, 792:15743                                       | playbook 10.5 ("never the supplier's bank details")                   |         |
-| Accept or report, accept part     | 330:27033, 697:8                                                           | Report a problem 330:27342                                            |         |
-| Dispute and refund status (buyer) | 697:579, 700:8                                                             | supplier dispute 813:12602                                            |         |
-| Cancel order modal                | 330:27379                                                                  | Decline 275:23250                                                     |         |
-| Approve order                     | 806:14572, 806:14918, 744:29031                                            | playbook 10.3                                                         |         |
+| Screen                                  | Frames                                                                     | Built from                                                            | Checked |
+| --------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------- |
+| Checkout · 3 Payment                    | 80:6464, 134:10078                                                         | Delivery and Billing frames, playbook 10.2 ("nothing is charged now") |         |
+| Checkout · 4 Review                     | 80:6687, 134:10179                                                         | Delivery and Billing frames                                           |         |
+| Checkout · phone steps                  | 82:8912, 768:47559                                                         | the 1440 frames; one column on phones                                 |         |
+| Order placed                            | 79:5587, 82:9036                                                           | playbook 10.2                                                         |         |
+| My orders and its states                | 77:673, 81:8334, 128:9187, 128:9220, 128:9259                              | supplier pipeline 810:12156, 811:12517                                |         |
+| Buyer order detail, every state         | 77:1178, 81:8452, 807:14435, 330:26743, 339:27238, 721:24392               | supplier order frames 693:8, 811:12584, 813:12602                     |         |
+| Payment outcomes                        | 691:12, 691:336, 691:559, 691:788, 691:1014, 79:5968, 744:14558, 744:14692 | playbook 10.5 (shown as an alert on the order)                        |         |
+| Bank transfer and pay online            | 690:9, 690:422, 792:15399, 792:15743                                       | playbook 10.5 ("never the supplier's bank details")                   |         |
+| Accept or report, accept part           | 330:27033, 697:8                                                           | Report a problem 330:27342                                            |         |
+| Dispute and refund status (buyer)       | 697:579, 700:8                                                             | supplier dispute 813:12602                                            |         |
+| Cancel order modal                      | 330:27379                                                                  | Decline 275:23250                                                     |         |
+| Approve order                           | 806:14572, 806:14918, 744:29031                                            | playbook 10.3                                                         |         |
+| Delivery code page and Receipt recorded | 695:13, 695:110                                                            | playbook 10.9, SMS 668:232                                            |         |
