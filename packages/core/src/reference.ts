@@ -8,8 +8,9 @@ export const REFERENCE_TYPES = {
   ORD: "Order",
   RFQ: "Quote request",
   Q: "Quote",
-  R: "Return",
-  PO: "Purchase order",
+  R: "Refund", // R-2026-0031 (700:8)
+  PO: "Payout", // PO-2026-0118 (817:12613)
+  DSP: "Dispute",
   GRV: "Grievance",
   DRR: "Data-rights request",
   EV: "Event",

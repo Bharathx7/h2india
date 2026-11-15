@@ -25,3 +25,4 @@ export * from "./newsletter-sends";
 export * from "./view-as";
 export * from "./data-rights";
 export * from "./system";
+export * from "./orders";

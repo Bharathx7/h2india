@@ -23,6 +23,7 @@ import {
   type RfqMove,
   type RfqStatus,
 } from "./transitions";
+import { must } from "../must";
 
 // RFQ and quote records (step 9.2). Buyers work on their company's RFQs (rfq.create); suppliers see an RFQ only once
 // it is Sent to them, and answer with quote.send; H2 India moderates with queues.edit. Statuses move only through
@@ -820,6 +821,17 @@ export async function acceptQuote(
     },
   );
   await closeRfq(db, actor, organisationId, input.rfqId, { reason: "accepted", keepQuoteId: quote.id }, context);
+  // Accepting creates the order (10.1). Loaded here so the RFQ module doesn't load the order module up front.
+  const { afterQuoteOrder, orderFromQuote } = await import("../orders/flow");
+  const order = await db.transaction((tx) =>
+    orderFromQuote(tx, actor, {
+      buyerOrganisationId: organisationId,
+      quote,
+      version: must(version),
+      rfq: { deliverySiteId: row.deliverySiteId, billingGstinId: row.billingGstinId },
+    }),
+  );
+  await tell(() => afterQuoteOrder(db, order));
   const notChosen = others.filter((o) => o.id !== quote.id).map((o) => o.organisationId);
   await tell(() =>
     tellSuppliers(db, input.rfqId, {
@@ -835,6 +847,7 @@ export async function acceptQuote(
       title: `${row.reference}: the buyer accepted your quote (v${String(quote.sentVersion)})`,
     }),
   );
+  return order;
 }
 
 /** What each payment milestone comes to, in paise, adding up exactly to the total (569:9 payment schedule). */
