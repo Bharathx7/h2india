@@ -12,9 +12,11 @@ x-app: &app
     postgres: { condition: service_healthy }
     redis: { condition: service_healthy }
     meilisearch: { condition: service_healthy }
+  # Step 13.3: container logs go to the host's journal, which keeps them for 180 days (CERT-In Directions 2022;
+  # infra/logging/journald.conf). `docker compose logs` still works. Each line carries the container name as its tag.
   logging: &logging
-    driver: json-file
-    options: { max-size: "50m", max-file: "20" }
+    driver: journald
+    options: { tag: "h2india/{{.Name}}" }
 
 services:
   # The website, workspaces and APIs.

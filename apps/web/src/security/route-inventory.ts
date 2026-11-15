@@ -63,6 +63,7 @@ export const GUARDS: Record<string, Guard> = {
   can: { kind: "permission", who: "Holder of the named permission", scope: "Company passed to can()" },
   assertCan: { kind: "permission", who: "Holder of the named permission", scope: "Company passed to assertCan()" },
   isInternalKey: { kind: "internal", who: "Worker (internal key)", scope: "None (system job)" },
+  isHealthToken: { kind: "internal", who: "Outside uptime check (health token)", scope: "None (system checks)" },
   receiveWebhook: {
     kind: "webhook",
     who: "Payment provider (signed webhook)",

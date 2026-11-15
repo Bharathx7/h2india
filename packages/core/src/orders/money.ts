@@ -258,6 +258,12 @@ async function apply(tx: Executor, ev: WebhookEvent) {
           .update(schema.payouts)
           .set({ status: "Failed", failReason: ev.data.reason ?? "Failed at the bank", updatedAt: new Date() })
           .where(eq(schema.payouts.id, payout.id));
+        // Its releases go back to waiting, so a later run pays them once the bank account is put right (runbook
+        // payout-failed). Nothing was posted for this payout, so the ledger is untouched.
+        await tx
+          .update(schema.orderSettlements)
+          .set({ payoutId: null })
+          .where(eq(schema.orderSettlements.payoutId, payout.id));
         return;
       }
       await tx

@@ -177,11 +177,11 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 13.1 | Production environment | Not started |
-| 13.2 | Domain, certificates and email authentication | Not started |
-| 13.3 | Monitoring, alerting and logs | Not started |
-| 13.4 | Launch data: migration, real content and removing samples | Not started |
-| 13.5 | Runbooks, support and incident handling | Not started |
-| 13.6 | Launch 1 go-live (Gate 2) | Not started |
-| 13.7 | Launch 2: transactions for the pilot group (Gate 3) | Not started |
-| 13.8 | After launch: release rhythm, upgrades and keeping the design in sync | Not started |
+| 13.1 | Production environment | In place from step 1.7: one image built by CI, `infra/compose.prod.yml` behind the host's nginx on the existing server (ADR 0006, so no Terraform). Step 13.3 moved logs to the journal. You: confirm server size and that it's hosted in India (M13) |
+| 13.2 | Domain, certificates and email authentication | Certificates by certbot at deploy; HSTS two years (12.1). Email records to add once the provider is chosen: `docs/launch/email-domain.md` (M6). You: domain (M1), email provider (M6) |
+| 13.3 | Monitoring, alerting and logs | Built 15 Nov 2026 (branch `step/phase5-readiness`): alarms for symptoms people feel (stuck clocks, payment webhooks, unmatched payments, failed payouts, ledger identity, failed jobs and messages, sign-in pauses, queues) at `/api/health/deep` (token) and emailed to `OPS_ALERT_EMAIL` every five minutes; an outside Uptime workflow every 15 minutes with a synthetic search and RFQ draft; logs to the journal kept 200 days, nginx logs rotated 200 days; time-sync steps in `deploy.md`. You: name who is on call (A182), choose the status page (M26), set `PROD_URL` and `HEALTH_TOKEN`, run the forced-error test |
+| 13.4 | Launch data: migration, real content and removing samples | Partly built 15 Nov 2026: `pnpm launch:check [--launch 2]` fails on sample records (CMS and core), unpublished legal pages, placeholder company details, tracker figures without a source, switches that must be off, and Open decisions that block the launch. Not done: the hy-gen migration (M14) and loading launch content (M20) |
+| 13.5 | Runbooks, support and incident handling | Written 15 Nov 2026: eleven runbooks in `docs/runbooks/` on one template (README lists them); 20 help-centre drafts in `docs/help/drafts.md` for editors. Found and fixed: a failed payout left its releases stuck; they now go back to waiting for the next run. You: walk two runbooks on staging, name support hours and inbox, name who reports to CERT-In |
+| 13.6 | Launch 1 go-live (Gate 2) | Checklist written 15 Nov 2026 (`docs/launch/launch-1.md`), with the way back. Waits on Gate 2 |
+| 13.7 | Launch 2: transactions for the pilot group (Gate 3) | Checklist written 15 Nov 2026 (`docs/launch/launch-2.md`). Waits on M3, M11, C1, C3 and Gate 3 |
+| 13.8 | After launch: release rhythm, upgrades and keeping the design in sync | Rhythm written 15 Nov 2026 (`docs/launch/after-launch.md`) |

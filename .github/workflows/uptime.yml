@@ -1,0 +1,73 @@
+# Step 13.3: checks the live site from outside the server every 15 minutes: the key pages, the deep health check
+# (alarms: stuck clocks, payment webhooks, ledger, payouts, queues) and a synthetic search and RFQ draft. A failure
+# fails the run, which GitHub emails to the repository's watchers, and opens (or comments on) an "uptime" issue.
+# Set the repository variable PROD_URL and the secret HEALTH_TOKEN to turn it on; without PROD_URL it does nothing.
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    name: Live site
+    if: vars.PROD_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE: ${{ vars.PROD_URL }}
+    steps:
+      - name: Key pages answer within 5 seconds
+        run: |
+          fail=0
+          for path in / /search?q=hydrogen /sign-in /api/health; do
+            code=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" --max-time 10 "$BASE$path" || echo "000 10")
+            echo "$path $code"
+            set -- $code
+            if [ "$1" != "200" ] || [ "$(echo "$2 > 5" | bc)" = "1" ]; then fail=1; fi
+          done
+          exit $fail
+      - name: Deep health (alarms)
+        if: always()
+        env:
+          HEALTH_TOKEN: ${{ secrets.HEALTH_TOKEN }}
+        run: |
+          if [ -z "$HEALTH_TOKEN" ]; then echo "HEALTH_TOKEN not set: skipped"; exit 0; fi
+          code=$(curl -s -o health.json -w "%{http_code}" --max-time 20 -H "Authorization: Bearer $HEALTH_TOKEN" "$BASE/api/health/deep")
+          jq -r '.alarms[] | select(.ok == false) | "\(.severity)  \(.label): \(.value)  → \(.runbook)"' health.json || true
+          [ "$code" = "200" ]
+      - uses: actions/checkout@v7
+        if: always()
+      - uses: pnpm/action-setup@v6
+        if: always()
+      - uses: actions/setup-node@v7
+        if: always()
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Synthetic search and RFQ draft
+        if: always()
+        run: |
+          pnpm install --frozen-lockfile --filter @h2india/e2e...
+          pnpm --filter @h2india/e2e exec playwright install --with-deps chromium
+          E2E_BASE_URL="$BASE" pnpm --filter @h2india/e2e exec playwright test -c playwright.synthetic.config.ts
+      - name: Open or update the uptime issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh label create uptime --color B60205 --description "The live site failed its outside check" 2>/dev/null || true
+          run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          issue=$(gh issue list --label uptime --state open --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then gh issue comment "$issue" --body "Still failing: $run"
+          else gh issue create --label uptime --title "Live site check failing" --body "Failed run: $run. Follow the runbook the alarm names (docs/runbooks/)."; fi

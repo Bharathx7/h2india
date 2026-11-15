@@ -314,6 +314,13 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Retention periods are the `privacy.retention` setting; never hard-code a period. `pnpm privacy:retention` shows what a period would remove.
 - `a11y-routes.spec.ts` lists every page without a parameter; add new ones there.
 
+## Readiness (Stage 13)
+
+- Alarms live in `packages/core/src/ops/alarms.ts` (`alarmChecks()`); each names its runbook in `docs/runbooks/`. Alarm on symptoms people feel; tunable limits are the `ops.alarms` setting, money alarms fire on any difference.
+- `pnpm launch:check [--launch 2]` must pass on production before a launch. A new collection or table with a `sample` field is picked up automatically; a new must-have setting or page needs a check added to `apps/web/scripts/launch-check.ts`.
+- An Open decision blocks a launch only if its Blocks column names that launch or gate, or its safe default says "must answer before launch".
+- Container logs go to the journal (`infra/compose.prod.yml`); never switch back to size-capped json-file logs (CERT-In: 180 days).
+
 ## Data rules (playbook Section 8)
 
 - Money is whole **paise** in `bigint`, with a currency column. No floats. One formatting helper (₹48,79,400; lakh and crore).

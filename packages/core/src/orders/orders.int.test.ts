@@ -396,6 +396,24 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     ).toBeNull();
     await h.db.update(orgs).set({ suspendedAt: null }).where(eq(orgs.id, supplier.org.id));
     expect((await runPayouts(h.db, later)).length).toBeGreaterThanOrEqual(1);
+    // The bank rejects the payout: its releases go back to waiting and the next run pays them (runbook payout-failed).
+    const settledOn = async () =>
+      (await h.db.select().from(schema.orderSettlements).where(eq(schema.orderSettlements.orderId, order.id)))[0]
+        ?.payoutId ?? null;
+    const [first] = await h.db
+      .select()
+      .from(schema.payouts)
+      .where(eq(schema.payouts.id, must(await settledOn())));
+    const failed = JSON.stringify({
+      id: `simevt_fail_${must(first).id}`,
+      type: "payout.failed",
+      at: new Date().toISOString(),
+      data: { payoutId: must(first).partnerPayoutId, reason: "Account closed" },
+    });
+    expect(await receiveWebhook(h.db, failed, signSimWebhook(failed))).toBe("processed");
+    expect(await settledOn()).toBeNull();
+    expect((await runPayouts(h.db, later)).length).toBeGreaterThanOrEqual(1);
+    expect(await settledOn()).not.toBe(must(first).id);
     await deliverSimWebhooks(h.db, new Date(Date.now() + 60_000));
     expect(await status(order.id)).toBe("Closed");
 

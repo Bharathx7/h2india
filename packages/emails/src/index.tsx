@@ -11,6 +11,7 @@ import {
 } from "./events/messages";
 import { reportDownloadMessage } from "./knowledge/messages";
 import { grievanceMessage, type GrievanceDetails } from "./trust/messages";
+import { opsAlarmMessage, type OpsAlarmDetails } from "./ops/messages";
 import {
   NewsletterConfirm,
   newsletterConfirmSubject,
@@ -108,6 +109,11 @@ export function renderGrievance(appUrl: string, input: GrievanceDetails) {
   return renderNotice(appUrl, grievanceMessage(input));
 }
 export type { GrievanceDetails } from "./trust/messages";
+
+export function renderOpsAlarm(appUrl: string, input: OpsAlarmDetails) {
+  return renderNotice(appUrl, opsAlarmMessage(input));
+}
+export type { OpsAlarmDetails } from "./ops/messages";
 
 export function renderReportDownload(appUrl: string, input: Parameters<typeof reportDownloadMessage>[0]) {
   return renderNotice(appUrl, reportDownloadMessage(input));

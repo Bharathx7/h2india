@@ -6,6 +6,9 @@ import { rollUpYesterday } from "../supplier/analytics";
 import { expireDocuments, sendExpiryNotices } from "../supplier/verification";
 import { pruneAuditLog } from "../audit";
 import { runRetention } from "../compliance/retention";
+import { parseServerEnv } from "@h2india/config";
+import { sendOpsAlarm } from "../notify/events";
+import { tellOnCall } from "../ops/alarms";
 import { runDeadlines } from "../clocks/clocks";
 // Registers the webinar reminder handler in the worker (step 5.7).
 import "../events/reminders";
@@ -111,6 +114,12 @@ export const SCHEDULES: Scheduled[] = [
   { id: "audit-retention", pattern: "30 21 * * *", run: () => pruneAuditLog(getDb()) },
   // 03:15 IST every day: report leads are deleted 24 months after the download (A33). The web app runs the CMS.
   { id: "report-leads-prune", pattern: "45 21 * * *", run: () => callWeb("/api/internal/report-leads-prune") },
+  // Step 13.3: alarms checked every five minutes; OPS_ALERT_EMAIL hears when one starts failing and when all clear.
+  {
+    id: "ops-alarms",
+    every: 5 * MINUTE,
+    run: () => tellOnCall(getDb(), sendOpsAlarm, { to: parseServerEnv().OPS_ALERT_EMAIL }),
+  },
   // 03:30 IST every day (step 12.2): personal data past its period. Reports only until periods are decided and
   // privacy.retention.enforce is on; the report is the job's return value (kept with the completed job).
   { id: "privacy-retention", pattern: "0 22 * * *", run: () => runRetention(getDb(), { apply: true }) },
