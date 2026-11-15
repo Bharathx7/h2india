@@ -14,3 +14,7 @@ minimumReleaseAgeExclude:
 overrides:
   dompurify: ">=3.4.17"
   happy-dom: ">=21.0.4"
+  # drizzle-kit's loaders pin old esbuild releases whose Go binaries fail the image scan (Go stdlib CVEs).
+  "@esbuild-kit/core-utils>esbuild": "0.28.2"
+  "esbuild-register>esbuild": "0.28.2"
+  "drizzle-kit>esbuild": "0.28.2"

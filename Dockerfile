@@ -21,6 +21,10 @@ RUN cp .env.example .env.local && pnpm build && rm .env.local && rm -rf apps/web
 
 FROM base AS runtime
 ENV NODE_ENV=production
+# npm and corepack are only needed to install pnpm. Their bundled packages (brace-expansion, undici) carry known
+# vulnerabilities the image scan refuses, and nothing at run time uses them.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 COPY --from=build --chown=node:node /app /app
 USER node
 EXPOSE 3000
