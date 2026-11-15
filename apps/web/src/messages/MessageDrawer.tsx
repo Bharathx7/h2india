@@ -80,7 +80,12 @@ export function MessageDrawer({
               ownName={ownName}
             />
           ) : (
-            <div className="flex flex-col gap-3 p-6" aria-busy={pending} aria-label="Loading the conversation">
+            <div
+              className="flex flex-col gap-3 p-6"
+              role="status"
+              aria-busy={pending}
+              aria-label="Loading the conversation"
+            >
               <Skeleton kind="text" />
               <Skeleton kind="card" />
             </div>

@@ -5,6 +5,7 @@ export default function ContentLoading() {
   return (
     <div
       className="m-8 flex flex-col gap-2 rounded-card border border-default bg-page p-6"
+      role="status"
       aria-busy="true"
       aria-label="Loading content"
     >
