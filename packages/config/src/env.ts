@@ -17,6 +17,10 @@ export const serverEnvSchema = z.object({
   INTERNAL_WEB_URL: optionalUrl,
   AUTH_SECRET: secret(32),
   // Google sign-in (step 3.2). Without both values the Google button reports that it is not set up yet.
+  /** Who is told when an alarm starts failing (step 13.3): one address or several, comma-separated. Unset: nobody. */
+  OPS_ALERT_EMAIL: optionalText(),
+  /** Bearer token for /api/health/deep, used by the outside uptime check (step 13.3). Unset: the endpoint is off. */
+  HEALTH_TOKEN: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(24).optional()),
   GOOGLE_CLIENT_ID: optionalText(),
   GOOGLE_CLIENT_SECRET: optionalText(),
   // The header holding the visitor's IP. Behind the production proxy, set it to the header the proxy writes

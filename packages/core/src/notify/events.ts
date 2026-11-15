@@ -3,6 +3,7 @@ import {
   renderChangesNeeded,
   renderEventLive,
   renderGrievance,
+  renderOpsAlarm,
   renderJobLive,
   renderSubmissionReceived,
   renderWebinarRegistered,
@@ -138,4 +139,25 @@ export async function sendJobLive(to: Recipient, input: Parameters<typeof render
     to: to.email,
     mail: await renderJobLive(appUrl(), input),
   });
+}
+
+/** The operations alarm (step 13.3) to the on-call addresses: failing alarms, or an all-clear when the list is empty. */
+export async function sendOpsAlarm(
+  to: string[],
+  failing: { severity: "critical" | "warning"; label: string; value: string; runbook: string }[],
+): Promise<void> {
+  const at = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date());
+  const mail = await renderOpsAlarm(appUrl(), {
+    failing,
+    at: `${at} IST`,
+    healthUrl: new URL("/admin/settings", appUrl()).toString(),
+  });
+  for (const address of to) await deliverEmail({ template: "email.ops_alarm", event: "ops.alarm", to: address, mail });
 }

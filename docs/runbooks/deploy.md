@@ -89,6 +89,38 @@ dc up -d web-public web-admin worker
 **Roll back:** set the previous tag the same way and run `dc up -d web-public web-admin worker`. Migrations are not
 undone, so a rollback is only safe to a version that already worked with the current database.
 
+## Logs, time and monitoring (step 13.3, before Launch 1)
+
+1. **Logs, 180 days or more** (CERT-In Directions, 28 April 2022). Containers log to the journal
+   (`infra/compose.prod.yml`); keep it:
+
+   ```sh
+   sudo mkdir -p /etc/systemd/journald.conf.d
+   sudo cp infra/logging/journald.conf /etc/systemd/journald.conf.d/h2india.conf && sudo systemctl restart systemd-journald
+   sudo cp infra/logging/logrotate-nginx /etc/logrotate.d/nginx
+   journalctl --disk-usage          # check monthly; raise SystemMaxUse before it fills
+   journalctl CONTAINER_TAG=h2india/h2india-web-public-1 --since today   # one service's logs
+   ```
+
+   CERT-In also expects the logs to be kept in India: confirm the server (and any backup copy) is hosted in India.
+
+2. **Time**: CERT-In asks for clocks synchronised to NTP (NIC or NPL servers, or ones traceable to them).
+   `timedatectl` must say `System clock synchronized: yes`; if not, `sudo apt install chrony` and add
+   `server time.nplindia.org iburst` and `server samay1.nic.in iburst` to `/etc/chrony/chrony.conf`.
+
+3. **Outside checks**: in GitHub, set the repository variable `PROD_URL` (`https://h2india.deecodes.io`) and the secret
+   `HEALTH_TOKEN` (32 random characters; the same value as `HEALTH_TOKEN` in `h2india.env`). The Uptime workflow then
+   checks the site every 15 minutes and opens an `uptime` issue on failure. Make sure whoever answers alerts watches
+   the repository (Settings → Notifications) so failed runs reach their email and phone.
+
+4. **Alarms**: `curl -H "Authorization: Bearer $HEALTH_TOKEN" https://h2india.deecodes.io/api/health/deep | jq`
+   lists every alarm with its runbook. Limits for the non-money alarms are the `ops.alarms` setting.
+
+5. **Forced error test** (Done when): break the deep health on purpose (for example stop the worker for 15 minutes so
+   deadlines go overdue) and time how long the alert takes to reach the person on call. It must be under five
+   minutes from the next check; with checks every 15 minutes, a failure is seen within 15. If that is too slow, add an
+   uptime service (M26) pointed at `/api/health/deep` every minute.
+
 ## Backups (set up before real content)
 
 Nightly database dump into `/srv/h2india/backups`, kept 14 days (`crontab -e`):

@@ -13,7 +13,8 @@
     "cms:migration": "payload migrate:create",
     "cms:types": "payload generate:types && payload generate:importmap",
     "seed": "payload run scripts/seed.ts",
-    "search:reindex": "payload run scripts/search-reindex.ts"
+    "search:reindex": "payload run scripts/search-reindex.ts",
+    "launch:check": "payload run scripts/launch-check.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "1.7.20",

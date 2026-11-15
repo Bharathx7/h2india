@@ -18,6 +18,14 @@ export interface TemplateEntry {
 }
 
 export const TEMPLATES = {
+  "email.ops_alarm": {
+    channel: "email",
+    key: "ops_alarm",
+    name: "Operations alarm",
+    frame: null,
+    step: "13.3",
+    built: true,
+  },
   // Email · page 16
   "email.quote_received_buyer": {
     channel: "email",
