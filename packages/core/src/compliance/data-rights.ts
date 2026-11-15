@@ -346,6 +346,13 @@ const STEPS: Step[] = [
     where: (id) => eq(schema.messages.authorId, id),
   },
   {
+    table: "order_ratings",
+    action: "keep",
+    why: "Part of the order record; the rater points to the masked account",
+    target: schema.orderRatings,
+    where: (id) => eq(schema.orderRatings.ratedBy, id),
+  },
+  {
     table: "suspension_appeals",
     action: "keep",
     why: "The company's appeal record; the sender points to the masked account",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Button, FileRow, FileUpload, FormField, Icon, Input, Modal, Textarea, useToast } from "@h2india/ui";
+import { Alert, Button, cx, FileRow, FileUpload, FormField, Icon, Input, Modal, Textarea, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -12,6 +12,7 @@ import {
   cancelAction,
   escalateAction,
   payOnlineAction,
+  rateAction,
   rejectAction,
   reportProblemAction,
   requestDateAction,
@@ -528,5 +529,56 @@ export function RequestDate({
         </FormField>
       </Modal>
     </>
+  );
+}
+
+/** Rate this order (G12; built from the design system, A178): 1 to 5 and a comment the supplier sees. */
+export function RateOrder({ orderId, supplier }: { orderId: string; supplier: string }) {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const a = useAction();
+  return (
+    <section className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
+      <h2 className="type-h4">How did {supplier} do?</h2>
+      {a.error ? <Alert tone="error" title={a.error.title} live /> : null}
+      <div role="radiogroup" aria-label="Rating, 1 to 5" className="flex flex-wrap items-center gap-2">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={rating === n}
+            onClick={() => {
+              setRating(n);
+            }}
+            className={cx(
+              "flex size-11 items-center justify-center rounded-pill border type-label",
+              n === rating ? "border-selected bg-mint" : "border-control",
+            )}
+          >
+            {n}
+          </button>
+        ))}
+        <span className="type-caption text-secondary">1 poor · 5 excellent</span>
+      </div>
+      <FormField label="Comment (optional)">
+        <Textarea
+          rows={3}
+          maxLength={1000}
+          value={comment}
+          onChange={(e) => {
+            setComment(e.target.value);
+          }}
+        />
+      </FormField>
+      <Button
+        disabled={a.pending || rating === 0}
+        onClick={() => {
+          a.go(() => rateAction(orderId, rating, comment));
+        }}
+      >
+        Send rating
+      </Button>
+    </section>
   );
 }

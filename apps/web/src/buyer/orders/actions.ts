@@ -8,6 +8,7 @@ import {
   cancelOrder,
   escalateDispute,
   OrderError,
+  rateOrder,
   rejectApproval,
   reportProblem,
   requestDispatchDate,
@@ -152,6 +153,14 @@ export async function requestDateAction(orderId: string, date: string, reason: s
       { date: new Date(`${date}T00:00:00+05:30`), reason },
       await requestContext(),
     );
+    return undefined;
+  });
+}
+
+export async function rateAction(orderId: string, rating: number, comment: string) {
+  const m = await me();
+  return run(orderId, async () => {
+    await rateOrder(m.db, m.actor, m.buyer.organisationId, orderId, { rating, comment }, await requestContext());
     return undefined;
   });
 }
