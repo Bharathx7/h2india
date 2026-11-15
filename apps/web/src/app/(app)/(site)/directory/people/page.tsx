@@ -145,7 +145,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
               </div>
             }
           >
-            <ul className="grid gap-4 md:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {shown.map((p) => (
                 <li key={p.id} className="flex flex-col gap-3 rounded-card border border-default p-4">
                   <div className="flex items-start gap-3">

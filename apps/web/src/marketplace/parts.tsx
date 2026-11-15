@@ -85,7 +85,7 @@ const STEPS = [
 export function RfqBand() {
   return (
     <section aria-labelledby="rfq-title" className="py-12 md:py-16">
-      <div className={cx(wrap, "grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center")}>
+      <div className={cx(wrap, "grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center")}>
         <div className="flex flex-col items-start gap-4">
           <p className="type-eyebrow text-secondary">Request a quote</p>
           <h2 id="rfq-title" className="type-h2 text-primary">
@@ -99,7 +99,7 @@ export function RfqBand() {
             Request a quote
           </Link>
         </div>
-        <ol className="grid gap-4 md:grid-cols-3">
+        <ol className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <li key={s.title} className="flex flex-col gap-2 rounded-card border border-default p-4">
               <span className="flex size-7 items-center justify-center rounded-pill bg-mint type-spec text-primary">
@@ -124,7 +124,7 @@ export function GuideCards({ guides, state }: { guides: Guide[]; state?: AsyncSt
       label="Buyer's guides"
       state={state ?? (guides.length ? "ready" : "empty")}
       skeleton={
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <Skeleton kind="card" />
           <Skeleton kind="card" />
           <Skeleton kind="card" />
@@ -138,7 +138,7 @@ export function GuideCards({ guides, state }: { guides: Guide[]; state?: AsyncSt
         </div>
       }
     >
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {guides.map((g) => (
           <ArticleCard
             key={g.id}

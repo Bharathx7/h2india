@@ -527,7 +527,7 @@ export function ProductEditor({
         <div className="flex flex-col gap-2">
           <span className="type-label">Certificates named on the listing</span>
           {f.certificates.map((c, i) => (
-            <div key={String(i)} className="grid gap-2 md:grid-cols-[minmax(0,1fr)_160px_160px_auto]">
+            <div key={String(i)} className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_160px_160px_auto]">
               <Input
                 aria-label="Certificate"
                 placeholder="For example ISO 22734"

@@ -124,7 +124,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
           label="Organisations"
           state={forced ?? (result.total ? "ready" : "empty")}
           skeleton={
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
                 <Skeleton key={i} kind="card" />
               ))}
@@ -166,7 +166,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
               />
             ) : (
               <>
-                <ul className="grid gap-4 md:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {result.items.map((e) => (
                     <li key={e.id} className="flex">
                       <OrgCard
@@ -195,7 +195,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
                       Showing {n((query.page - 1) * query.perPage + 1)}–
                       {n(Math.min(result.total, query.page * query.perPage))} of {n(result.total)}
                     </p>
-                    <ol className="flex gap-1">
+                    <ol className="flex flex-wrap gap-1">
                       {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
                         <li key={p}>
                           <Link

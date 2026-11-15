@@ -315,7 +315,7 @@ export default async function ContentPage({
         {groups.map((g) => (
           <section key={g.label} className="flex flex-col gap-3">
             <h2 className="type-h5">{g.label}</h2>
-            <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
               {g.items.map((c) => (
                 <li key={c.slug}>
                   <Link

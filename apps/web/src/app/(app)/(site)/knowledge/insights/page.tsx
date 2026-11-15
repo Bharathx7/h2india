@@ -234,7 +234,7 @@ async function Results({
             />
           </div>
         </div>
-        <ul className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {list.items.map((a) => (
             <li key={`${a.kind}-${String(a.id)}`}>
               <StoryCard a={a} className="h-full" />
@@ -290,7 +290,7 @@ function Loading() {
       role="status"
       aria-busy="true"
       aria-label="Loading insights"
-      className={cx(wrap, "grid gap-4 pb-12 md:grid-cols-2 md:gap-6 lg:grid-cols-3")}
+      className={cx(wrap, "grid grid-cols-1 gap-4 pb-12 md:grid-cols-2 md:gap-6 lg:grid-cols-3")}
     >
       {Array.from({ length: 6 }, (_, i) => (
         <div

@@ -58,7 +58,7 @@ export function SupportRequestForm({ onSent }: { onSent: (sent: Sent) => void })
         Or send a support request
       </h2>
       {problem ? <Alert tone="error" title={problem} live /> : null}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <FormField label="Full name" error={errors.fullName}>
           <Input
             autoComplete="name"

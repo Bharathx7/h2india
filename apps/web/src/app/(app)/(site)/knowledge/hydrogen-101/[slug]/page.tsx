@@ -170,7 +170,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
           ) : null}
           {quiz.length ? <Quiz questions={quiz} chapter={viewer ? chapter.slug : undefined} /> : null}
           {viewer ? <ChapterTracker slug={chapter.slug} done={doneIds.has(String(chapter.id))} /> : null}
-          <nav aria-label="Previous and next chapter" className="grid gap-3 sm:grid-cols-2">
+          <nav aria-label="Previous and next chapter" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {previous ? (
               <Link
                 href={`/knowledge/hydrogen-101/${previous.slug}`}

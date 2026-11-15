@@ -59,7 +59,7 @@ export default async function ForBuyersPage() {
         />
       </Block>
       <Block id="why" title="Why buy on H2 India">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Feature
             icon="shield-check"
             title="Verified suppliers"
@@ -87,7 +87,7 @@ export default async function ForBuyersPage() {
         title="Categories you can source"
         lead="Equipment, components and services for every stage of a hydrogen project."
       >
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES.map((c) => (
             <li key={c.label}>
               <Link

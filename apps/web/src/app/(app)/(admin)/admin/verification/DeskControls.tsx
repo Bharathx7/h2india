@@ -153,7 +153,7 @@ export function GrantBadge({ organisationId }: { organisationId: string }) {
   const [evidence, setEvidence] = useState("");
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid gap-2 md:grid-cols-[200px_minmax(0,1fr)_auto]">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[200px_minmax(0,1fr)_auto]">
         <Select
           aria-label="Badge"
           value={kind}

@@ -79,8 +79,17 @@ work<Record<string, string>>(
 work(QUEUES.clocks, (job) => runScheduled(job.name), 1);
 
 await installSchedules();
+// Drill 3 (step 12.6): if Redis is flushed or replaced, the schedules vanish with it and every clock stops until the
+// worker restarts. Re-installing is idempotent, so check every five minutes; the deadlines themselves are in the
+// database and the next tick catches up whatever was missed.
+const reinstall = setInterval(() => {
+  installSchedules().catch((error: unknown) => {
+    console.error("Re-installing schedules failed", error);
+  });
+}, 5 * 60_000);
 
 const stop = async () => {
+  clearInterval(reinstall);
   await Promise.all(workers.map((w) => w.close()));
   process.exit(0);
 };

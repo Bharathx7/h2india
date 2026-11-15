@@ -288,7 +288,7 @@ const pageLink = (current: boolean) =>
 
 function Cards({ rows }: { rows: TenderRow[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {rows.map((r) => (
         <li key={r.id}>
           <TenderCard {...r.card} />

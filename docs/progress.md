@@ -164,14 +164,14 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 12.1 | Security review and automated scanning | Not started |
-| 12.2 | Privacy and DPDP readiness | Not started |
-| 12.3 | The full flow suite and regression | Not started |
-| 12.4 | Accessibility audit | Not started |
-| 12.5 | Speed and load | Not started |
-| 12.6 | Backup, restore and failure drills | Not started |
-| 12.7 | External penetration test | Not started |
-| 12.8 | Acceptance testing with pilot users | Not started |
+| 12.1 | Security review and automated scanning | Built 15 Nov 2026 (branch `step/phase4-hardening`): security headers and CSP from the proxy, HSTS two years, CodeQL and a Trivy image scan in CI (gitleaks and the dependency audit already ran). Route and action inventory with a test that every entry has a guard (`docs/security/routes.md`); a helper exported from a `"use server"` file moved out. ASVS L2 review and STRIDE threat model in `docs/security/`; High findings H1 (suspended people kept access) and H2 (operators without a passkey) fixed, M4 partly. Open: A180 (nonces), A181 (confirm the passkey rule), M2, M3, M5, M6. You: read the review, agree dates for the Medium findings, accept risks in writing |
+| 12.2 | Privacy and DPDP readiness | Built 15 Nov 2026: inventory in code (`compliance/inventory.ts`) with a test that fails on an unlisted personal column, written to `docs/privacy/inventory.md`; consent records with words and version for the directory and marketing choices (migration 0066); erasure covers four more tables; retention job reports nightly and acts only once periods are set (`pnpm privacy:retention`); breach procedure. You: lawyer reviews the inventory, periods and procedure; sign processor agreements |
+| 12.3 | The full flow suite and regression | Partly built 15 Nov 2026: the CI suite also runs every night at 02:00 IST with videos of failures, a summary, and an issue after two failed nights. Not done: flows F, I and J specs; visual comparison needs approved baselines; contract tests against real sandboxes wait on vendors (fakes until M4 to M10); the nightly run uses CI's own services, not staging |
+| 12.4 | Accessibility audit | Partly done 15 Nov 2026: axe on every page without a parameter at both widths (`a11y-routes.spec.ts`), skip link and 320 px reflow tests; four problems fixed, including `grid-cols-1` on 189 grids. Still to do: keyboard pass of flows A to J, a screen-reader flow (you), 200% zoom by hand (`docs/accessibility/audit.md`) |
+| 12.5 | Speed and load | Tools built 15 Nov 2026: Core Web Vitals spec on a throttled phone profile (`tests/e2e/perf`) and k6 scripts (`tests/load`). Not run: needs staging and k6 (`docs/performance/2026-11-15.md`). You: give M13 traffic numbers |
+| 12.6 | Backup, restore and failure drills | Partly done 15 Nov 2026: webhook replay passed (`pnpm drill:webhooks`); a Redis flush stopped every clock until a restart, fixed (the worker re-installs schedules every five minutes). Found: backups are nightly dumps, no point-in-time restore (M13). Drills 1, 2, 4 and 6 to run on staging (`docs/drills/2026-11-15.md`) |
+| 12.7 | External penetration test | Scope written 15 Nov 2026 (`docs/security/pentest-scope.md`): system, in-scope addresses and roles, test accounts, rules of engagement. You: choose the firm (M22), approve the scope, fill in dates and contacts |
+| 12.8 | Acceptance testing with pilot users | Task scripts per role written 15 Nov 2026 (`docs/uat/scripts.md`) and a results tracker (`docs/uat/results.md`). You: recruit the pilot group and run the sessions |
 
 ## Stage 13 · Production and live operations · Batch 5 (13.7: 6)
 

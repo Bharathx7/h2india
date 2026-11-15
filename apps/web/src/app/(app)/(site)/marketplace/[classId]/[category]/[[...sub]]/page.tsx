@@ -149,7 +149,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
             errorTitle="We couldn't load these products"
             errorText="Check your connection and try again. Your filters are kept."
             skeleton={
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }, (_, i) => (
                   <Skeleton key={i} kind="card" />
                 ))}

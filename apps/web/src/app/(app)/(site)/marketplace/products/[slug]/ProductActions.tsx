@@ -389,7 +389,7 @@ export function ReportListing({ product }: { product: ProductRef }) {
               <legend className="mb-2 type-label text-primary">
                 What&apos;s the problem? <span className="text-error">*</span>
               </legend>
-              <div className="grid gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {REPORT_PROBLEMS.map((p) => (
                   <label
                     key={p.value}

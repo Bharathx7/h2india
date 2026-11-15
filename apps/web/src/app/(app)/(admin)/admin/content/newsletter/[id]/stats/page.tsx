@@ -118,7 +118,7 @@ export default async function NewsletterStatsPage({ params }: { params: Promise<
         </div>
       ) : (
         <>
-          <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {tiles.map((t) => (
               <li key={t.label} className="flex flex-col gap-1 rounded-card bg-mint p-6">
                 <span className="type-display">{t.value}</span>

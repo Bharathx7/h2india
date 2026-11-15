@@ -78,7 +78,7 @@ export default async function GrievancePage({ params }: { params: Promise<{ id: 
               )
                 .filter(([, v]) => v)
                 .map(([k, v]) => (
-                  <div key={k} className="grid gap-1 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
+                  <div key={k} className="grid grid-cols-1 gap-1 py-3 md:grid-cols-[180px_minmax(0,1fr)]">
                     <dt className="type-caption text-secondary">{k}</dt>
                     <dd className="type-body-sm whitespace-pre-wrap">
                       {k === "Page or listing" && /^https?:\/\//.test(v) ? (

@@ -96,7 +96,7 @@ export function Onboarding({
             <p className="type-body text-body">
               Tell us a little about yourself so we can show you the right news, opportunities and people.
             </p>
-            <div role="radiogroup" aria-label="Your persona" className="grid gap-3 sm:grid-cols-2">
+            <div role="radiogroup" aria-label="Your persona" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {PERSONAS.map((p) => (
                 <button
                   key={p.value}

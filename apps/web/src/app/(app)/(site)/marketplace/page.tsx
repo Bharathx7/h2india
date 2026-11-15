@@ -93,7 +93,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
             <EmptyState title="The catalogue is being set up">Classes appear here once they are published.</EmptyState>
           }
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {cat.classes.map((c) => (
               <ClassTile key={c.id} c={c} />
             ))}
@@ -167,7 +167,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
 function Tiles({ count }: { count: number }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
         <Skeleton key={i} kind="card" />
       ))}

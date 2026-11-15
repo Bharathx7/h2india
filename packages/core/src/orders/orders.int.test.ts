@@ -386,6 +386,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
         must(settlement).tdsPaise,
     );
     const later = new Date(Date.now() + 10 * DAY);
+    // A suspended supplier isn't paid (review M4); the release waits until the suspension is lifted.
+    const orgs = schema.organisations;
+    await h.db.update(orgs).set({ suspendedAt: new Date() }).where(eq(orgs.id, supplier.org.id));
+    await runPayouts(h.db, later);
+    expect(
+      (await h.db.select().from(schema.orderSettlements).where(eq(schema.orderSettlements.orderId, order.id)))[0]
+        ?.payoutId,
+    ).toBeNull();
+    await h.db.update(orgs).set({ suspendedAt: null }).where(eq(orgs.id, supplier.org.id));
     expect((await runPayouts(h.db, later)).length).toBeGreaterThanOrEqual(1);
     await deliverSimWebhooks(h.db, new Date(Date.now() + 60_000));
     expect(await status(order.id)).toBe("Closed");

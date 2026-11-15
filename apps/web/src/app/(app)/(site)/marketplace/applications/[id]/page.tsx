@@ -152,14 +152,14 @@ export default async function ApplicationPage({ params }: { params: Params }) {
           </Card>
         ) : null}
 
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="flex flex-col gap-6">
             <Card
               title="Top suppliers"
               sub={`Verified suppliers with ${app.shortLabel.toLowerCase()} products on H2 India.`}
             >
               {suppliers.length ? (
-                <ul className="grid gap-3 md:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {suppliers.map((s) => (
                     <li key={s.id} className="flex items-center gap-3 rounded-control border border-default p-3">
                       <span

@@ -378,7 +378,7 @@ export function RoleMember({ roles }: { roles: string[] }) {
   return (
     <div className="flex flex-col gap-3">
       {msg ? <Alert tone={msg.tone} title={msg.text} live /> : null}
-      <div className="grid gap-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
         <Input
           aria-label="Email"
           placeholder="Their email"

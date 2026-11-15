@@ -91,7 +91,7 @@ export function ReportFlow({
                 <h2 id="also" className="type-h4 text-primary">
                   You might also want
                 </h2>
-                <ul className="grid gap-4 sm:grid-cols-2">
+                <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {others.map((o) => (
                     <li key={o.slug} className="flex gap-3">
                       <span aria-hidden="true" className="h-14 w-10 shrink-0 rounded-control bg-inverse" />

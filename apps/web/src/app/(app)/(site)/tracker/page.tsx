@@ -125,7 +125,7 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
       <TrackerHead title="India Hydrogen Tracker" asOf={asOf} active="" csvHref="/tracker/projects/csv" />
       <div className={cx(wrap, "flex flex-col gap-6 pb-16 pt-6")}>
         {overview?.figures?.length ? (
-          <ul className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {overview.figures.map((f) => (
               <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-4">
                 <span className="type-h2 text-primary">{f.value}</span>
@@ -146,7 +146,7 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
 
         <MapLayers layers={layers} />
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-2">
             <BarChart title="Capacity by status, t/yr" unit="" bars={byStatus} />
             <p className="type-caption text-secondary">

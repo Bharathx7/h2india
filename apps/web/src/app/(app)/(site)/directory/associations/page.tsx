@@ -70,7 +70,7 @@ export default async function AssociationsPage({
           </div>
         }
       >
-        <ul className="grid gap-4 md:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {shown.map((a) => (
             <li key={a.id} className="flex flex-col gap-3 rounded-card border border-default p-5">
               <div className="flex items-start gap-3">

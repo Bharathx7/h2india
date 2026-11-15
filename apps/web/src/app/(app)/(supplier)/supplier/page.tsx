@@ -94,7 +94,7 @@ export default async function SupplierHome() {
               {checklist.items.map((item, i) => (
                 <li
                   key={item.key}
-                  className="grid items-center gap-3 border-b border-default p-5 last:border-0 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
+                  className="grid grid-cols-1 items-center gap-3 border-b border-default p-5 last:border-0 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
                 >
                   <Step item={item} index={i === firstOpen ? 0 : i + 1} />
                   <h3 className="type-label text-primary">{item.title}</h3>
@@ -213,7 +213,7 @@ export default async function SupplierHome() {
           <p className="p-5 type-body-sm text-body">Nothing needs you right now.</p>
         )}
       </section>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-1 rounded-card bg-mint p-6">
           <p className="type-display text-primary">{counts.live}</p>
           <p className="type-label text-primary">Live listings</p>

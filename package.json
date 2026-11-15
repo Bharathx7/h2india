@@ -32,6 +32,7 @@
     "admin:bootstrap": "tsx --env-file-if-exists=.env.local packages/core/scripts/bootstrap-admin.ts",
     "privacy:retention": "tsx --env-file-if-exists=.env.local packages/core/scripts/privacy-retention.ts",
     "privacy:inventory": "tsx packages/core/scripts/privacy-inventory.ts",
+    "drill:webhooks": "tsx --env-file-if-exists=.env.local packages/core/scripts/drill-webhook-replay.ts",
     "content:import": "node scripts/content-import.mjs",
     "import:glossary": "node scripts/content-import.mjs glossary",
     "import:articles": "node scripts/content-import.mjs articles",

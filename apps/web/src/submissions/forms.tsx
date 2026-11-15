@@ -183,7 +183,7 @@ export function EventForm({ organiser }: { organiser: string }) {
         </FormField>
       </FormCard>
       <FormCard title="Date and place">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Start date" required error={f.errors.startDate}>
             <DatePicker
               placeholder="DD/MM/YYYY"
@@ -365,7 +365,7 @@ export function PressReleaseForm({ company, contact }: { company: string; contac
             f.set("embargo", on === true);
           }}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Embargo date" error={f.errors.embargoDate}>
             <DatePicker
               placeholder="DD/MM/YYYY"
@@ -433,7 +433,7 @@ export function PressReleaseForm({ company, contact }: { company: string; contac
         </FormField>
       </FormCard>
       <FormCard title="Media contact">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Name" required error={f.errors.contactName}>
             <Input
               value={f.text("contactName")}
@@ -604,7 +604,7 @@ export function PitchForm() {
       <ErrorSummary errors={f.errors} />
       <Limited result={f.result} />
       <FormCard title="About you">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Name" required error={f.errors.name}>
             <Input
               autoComplete="name"

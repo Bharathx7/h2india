@@ -108,7 +108,10 @@ export default async function FollowsPage({
           {mine.length ? (
             <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
               {mine.map((f) => (
-                <li key={f.id} className="grid items-center gap-3 p-4 md:grid-cols-[minmax(0,1fr)_200px_auto]">
+                <li
+                  key={f.id}
+                  className="grid grid-cols-1 items-center gap-3 p-4 md:grid-cols-[minmax(0,1fr)_200px_auto]"
+                >
                   <span className="flex flex-col">
                     {f.href ? (
                       <Link href={f.href} className="type-label text-primary hover:underline">

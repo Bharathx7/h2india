@@ -322,33 +322,36 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
         </Alert>
       ) : null}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[180px_minmax(0,1fr)_300px]">
-        <ol className="flex gap-3 overflow-x-auto lg:flex-col" aria-label="Steps">
-          {STEPS.map((label, i) => {
-            const n = i + 1;
-            const done = n < step;
-            return (
-              <li
-                key={label}
-                className="flex items-center gap-2 whitespace-nowrap"
-                aria-current={n === step ? "step" : undefined}
-              >
-                <span
-                  className={cx(
-                    "flex size-6 items-center justify-center rounded-pill type-caption",
-                    done
-                      ? "bg-accent"
-                      : n === step
-                        ? "bg-inverse text-inverse"
-                        : "border border-control text-secondary",
-                  )}
+        {/* Scrolls sideways on phones, so it takes focus and has a name (axe scrollable-region-focusable). */}
+        <div tabIndex={0} role="region" aria-label="Steps" className="overflow-x-auto lg:overflow-visible">
+          <ol className="flex gap-3 lg:flex-col">
+            {STEPS.map((label, i) => {
+              const n = i + 1;
+              const done = n < step;
+              return (
+                <li
+                  key={label}
+                  className="flex items-center gap-2 whitespace-nowrap"
+                  aria-current={n === step ? "step" : undefined}
                 >
-                  {done ? <Icon name="check" size={14} /> : n}
-                </span>
-                <span className={cx("type-body-sm", n === step ? "type-label" : "text-body")}>{label}</span>
-              </li>
-            );
-          })}
-        </ol>
+                  <span
+                    className={cx(
+                      "flex size-6 items-center justify-center rounded-pill type-caption",
+                      done
+                        ? "bg-accent"
+                        : n === step
+                          ? "bg-inverse text-inverse"
+                          : "border border-control text-secondary",
+                    )}
+                  >
+                    {done ? <Icon name="check" size={14} /> : n}
+                  </span>
+                  <span className={cx("type-body-sm", n === step ? "type-label" : "text-body")}>{label}</span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
 
         <section className="flex flex-col gap-5 rounded-card border border-default bg-page p-5 md:p-6">
           <h2 className="type-h3">
@@ -397,7 +400,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                   }}
                 />
               </Field>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Field label="Quantity" required error={errors.quantity}>
                   <Input
                     inputMode="numeric"
@@ -427,7 +430,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
               {specs.length ? (
                 <>
                   <p className="type-eyebrow text-secondary">Key specifications · from the category schema</p>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {specs.map((d) => (
                       <Field
                         key={d.key}
@@ -604,7 +607,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
 
           {step === 3 ? (
             <>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Field label="Delivery state" required error={errors.deliveryState}>
                   <Select
                     value={s.deliveryState}
@@ -784,7 +787,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                       Edit<span className="sr-only"> {b.title}</span>
                     </button>
                   </div>
-                  <dl className="grid gap-2 md:grid-cols-[150px_minmax(0,1fr)]">
+                  <dl className="grid grid-cols-1 gap-2 md:grid-cols-[150px_minmax(0,1fr)]">
                     {b.rows
                       .filter(([, v]) => v)
                       .map(([k, v]) => (

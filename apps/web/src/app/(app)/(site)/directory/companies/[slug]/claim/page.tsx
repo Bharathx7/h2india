@@ -92,7 +92,7 @@ export default async function ClaimPage({ params }: { params: Params }) {
           { label: "Review", status: step === 3 ? "current" : "upcoming" },
         ]}
       />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-4">{content}</div>
         <aside className="flex flex-col gap-4 self-start">
           <div className="flex flex-col gap-1 rounded-card border border-default p-4">

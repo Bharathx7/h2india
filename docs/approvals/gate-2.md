@@ -196,14 +196,15 @@ Not needed for Launch 1: G1, G2, G3, G4, G5, G6, G7, G8, G9, C1, C2, C3, M3, M11
 
 ## Stage 12 results
 
-| Check                                               | Result                                                  | Date        |
-| --------------------------------------------------- | ------------------------------------------------------- | ----------- |
-| Flows A, C, D, E, G, I, J together on staging       | Run locally; bugs fixed in 0086fb2. Staging run pending | 14 Nov 2026 |
-| Performance at volume (12.5)                        | Not run yet                                             |             |
-| Accessibility (axe, keyboard) on all Launch 1 pages | Not run yet                                             |             |
-| Security review and penetration test (M22)          | Not run yet                                             |             |
-| Backup and restore drill                            | Not run yet                                             |             |
-| Monitoring and alerts                               | Not run yet                                             |             |
+| Check                                               | Result                                                                                                                                                                                           | Date        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| Flows A, C, D, E, G, I, J together on staging       | Run locally; bugs fixed in 0086fb2. Staging run pending                                                                                                                                          | 14 Nov 2026 |
+| Performance at volume (12.5)                        | Tools ready (`tests/e2e/perf`, `tests/load`); to run on staging (`docs/performance/2026-11-15.md`)                                                                                               | 15 Nov 2026 |
+| Accessibility (axe, keyboard) on all Launch 1 pages | axe on every page without a parameter at 1440 and 390: 4 problems found and fixed, now clean. Keyboard pass of the flows and a screen-reader flow to do (`docs/accessibility/audit.md`)          | 15 Nov 2026 |
+| Security review and penetration test (M22)          | Review done (`docs/security/review-2026-11-15.md`): both High findings fixed; Medium findings M1 (A180), M2, M3, M5, M6 open, M4 partly fixed. Penetration test waits on M22                     | 15 Nov 2026 |
+| Privacy (12.2)                                      | Inventory with a schema check, consent records, retention job in report mode, breach procedure (`docs/privacy/`). Periods and processor agreements for the lawyer                                | 15 Nov 2026 |
+| Backup and restore drill                            | Webhook replay passed; Redis flush found a stopped-clocks problem (fixed). Backups are nightly dumps only: no point-in-time restore (M13). Other drills on staging (`docs/drills/2026-11-15.md`) | 15 Nov 2026 |
+| Monitoring and alerts                               | Not run yet                                                                                                                                                                                      |             |
 
 ## Sign-off
 

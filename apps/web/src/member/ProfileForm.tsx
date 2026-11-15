@@ -245,7 +245,7 @@ export function ProfileForm({ start, savedOn }: { start: ProfileStart; savedOn: 
               </span>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Full name" required error={problems.name}>
               <Input
                 value={name}
@@ -303,7 +303,7 @@ export function ProfileForm({ start, savedOn }: { start: ProfileStart; savedOn: 
 
         {persona === "researcher" ? (
           <Card title="Research" sub="Shown because your profile type is Researcher.">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field label="Affiliation" required error={problems.affiliation}>
                 <Input
                   value={f.affiliation ?? ""}
@@ -360,7 +360,7 @@ export function ProfileForm({ start, savedOn }: { start: ProfileStart; savedOn: 
                   </li>
                 ))}
               </ul>
-              <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_auto]">
                 <Input
                   aria-label="Link title"
                   placeholder="Title"

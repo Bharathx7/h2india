@@ -77,7 +77,7 @@ export function AddCategoryDialog(props: {
         }}
       >
         <FormError message={errors._} />
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField label="Class" error={errors.classId}>
             <Select
               value={classId}
@@ -373,7 +373,7 @@ export function HistoryList({ lines }: { lines: HistoryLine[] }) {
   return (
     <ul className="flex flex-col gap-2">
       {lines.map((l, i) => (
-        <li key={i} className="grid gap-1 md:grid-cols-[170px_1fr] md:gap-4">
+        <li key={i} className="grid grid-cols-1 gap-1 md:grid-cols-[170px_1fr] md:gap-4">
           <span className="type-spec text-secondary">{l.when}</span>
           <span className="type-body text-primary">{l.text}</span>
         </li>

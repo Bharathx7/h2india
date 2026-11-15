@@ -62,7 +62,7 @@ export default async function NewsletterPage({
               {shown.map((i) => (
                 <li
                   key={i.id}
-                  className="grid gap-3 border-b border-default py-6 md:grid-cols-[8rem_1fr_auto] md:gap-6"
+                  className="grid grid-cols-1 gap-3 border-b border-default py-6 md:grid-cols-[8rem_1fr_auto] md:gap-6"
                 >
                   <div>
                     <p className="type-spec text-secondary">{issueDay(i.sentOn)}</p>

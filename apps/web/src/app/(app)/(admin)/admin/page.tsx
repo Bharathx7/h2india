@@ -155,7 +155,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         </p>
       </div>
       {tiles.length ? (
-        <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {tiles.map((t) => (
             <li key={t.key} className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
               <h2 className="type-body-sm">{t.label}</h2>

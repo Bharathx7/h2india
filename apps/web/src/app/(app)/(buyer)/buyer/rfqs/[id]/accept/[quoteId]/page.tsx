@@ -85,7 +85,7 @@ export default async function AcceptQuotePage({ params }: { params: Promise<{ id
                 {v.version.sentAt ? `Quoted ${formatIstDate(v.version.sentAt)}` : ""}
               </span>
             </div>
-            <dl className="grid divide-y divide-default md:grid-cols-[160px_minmax(0,1fr)] md:divide-y-0">
+            <dl className="grid grid-cols-1 divide-y divide-default md:grid-cols-[160px_minmax(0,1fr)] md:divide-y-0">
               {(
                 [
                   [

@@ -44,7 +44,7 @@ export function ServiceView({
             You can still request a proposal. Their dated checks will show here once H2 India completes them.
           </Alert>
         ) : null}
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
           <div className="flex flex-col gap-4">
             <p className="type-eyebrow text-secondary">
               {[p.classLabel, p.category.label, p.sub?.label].filter(Boolean).join(" · ")}

@@ -43,7 +43,7 @@ export function OpportunitiesSkeleton() {
     <section aria-label="Opportunities this week" aria-busy="true" className="bg-mint">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-80 rounded-control shimmer" />
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {[0, 1].map((c) => (
             <div key={c} className="flex flex-col gap-4">
               {[0, 1, 2].map((r) => (
@@ -149,7 +149,7 @@ export function NewsSkeleton() {
     <section aria-label="Insights and news" aria-busy="true" className="bg-page">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-94 max-w-full rounded-control shimmer" />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
             <span key={i} className="block h-57 rounded-card shimmer" />
           ))}
@@ -394,7 +394,7 @@ export async function EventsLearning({ fail }: { fail: Fail }) {
               New webinars, summits and trainings show here as they are announced.
             </EmptyState>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {events.data.map((e, i) => (
                 <div key={e.href} className={i > 1 ? "max-md:hidden" : undefined}>
                   <EventCard {...e} />
@@ -448,7 +448,7 @@ export async function EventsLearning({ fail }: { fail: Fail }) {
             Knowledge home
           </HomeArrowLink>
         </div>
-        <div className="grid gap-5 md:grid-cols-3 md:gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
           {KNOWLEDGE.map((k) => (
             <FeatureCard key={k.eyebrow} eyebrow={k.eyebrow} title={k.title} href={k.href} className="lg:min-h-52.5">
               {k.text}

@@ -45,7 +45,7 @@ export function ImportUpload({
     };
   }, [checking, router]);
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
         <h2 className="type-h4">1. Download the template for a category</h2>
         <label className="flex flex-col gap-1.5">

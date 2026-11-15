@@ -193,7 +193,7 @@ export function StorefrontEditor({
                   }}
                 />
               </label>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="type-label">City</span>
                   <Input
@@ -276,7 +276,7 @@ export function StorefrontEditor({
                 />
                 <span className="self-end type-caption text-secondary">{(f.capabilities ?? "").length} / 600</span>
               </label>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="type-label">Yearly capacity</span>
                   <Input
@@ -331,7 +331,7 @@ export function StorefrontEditor({
             <>
               <h2 className="type-h3">Locations</h2>
               {(f.locations ?? []).map((l, i) => (
-                <div key={String(i)} className="grid gap-2 md:grid-cols-4">
+                <div key={String(i)} className="grid grid-cols-1 gap-2 md:grid-cols-4">
                   <Input
                     aria-label="Name"
                     placeholder="Ambattur plant"
@@ -408,7 +408,7 @@ export function StorefrontEditor({
                   }}
                 />
               </label>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="type-label">Sales email</span>
                   <Input

@@ -5,6 +5,11 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Step 12.3: the whole suite every night at 02:00 IST on a fresh database (the CI services and migrations), with videos of
+  # failures and a summary; two failed nights in a row open an issue (nightly-report below).
+  schedule:
+    - cron: "30 20 * * *"
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -97,6 +102,7 @@ jobs:
           E2E_START_SERVER: "1"
           # Ordering is on in local and staging with the simulated payment partner (A176); flows A, B and H use it.
           FLAG_TRANSACTIONS: "true"
+          E2E_VIDEO: ${{ github.event_name == 'schedule' && '1' || '' }}
           # Browser tests sign operators in with email codes; the passkey rule (on in production) is proven in
           # authz/gate.int.test.ts and the passkey step page by hand (step 12.1, review H2).
           FLAG_OPERATOR_PASSKEY: "false"
@@ -134,3 +140,45 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Dependency audit (fails on high or critical)
         run: pnpm audit --audit-level high
+
+  # Step 12.3: the nightly summary, and an issue when the suite fails two nights running.
+  nightly-report:
+    name: Nightly report
+    if: always() && github.event_name == 'schedule'
+    needs: [checks, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: playwright-report
+          path: report
+      - name: Summary
+        run: |
+          {
+            echo "### Nightly suite: ${{ needs.checks.result }}"
+            if [ -f report/playwright-report/results.json ]; then
+              jq -r '.stats | "Passed \(.expected), failed \(.unexpected), flaky \(.flaky), skipped \(.skipped), \(.duration/60000 | floor) minutes"' report/playwright-report/results.json
+              echo
+              jq -r '[.. | objects | select(has("specs")) | .specs[] | select(.ok == false) | "- \(.file): \(.title)"] | unique | .[]' report/playwright-report/results.json
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Open an issue after two failed nights
+        if: needs.checks.result == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          previous=$(gh run list --workflow ci.yml --event schedule --limit 2 --json conclusion --jq '.[1].conclusion // ""')
+          open=$(gh issue list --label nightly-failure --state open --json number --jq 'length')
+          if [ "$previous" = "failure" ] && [ "$open" = "0" ]; then
+            gh label create nightly-failure --color B60205 --description "The nightly suite failed twice in a row" 2>/dev/null || true
+            gh issue create --label nightly-failure \
+              --title "Nightly suite failed two nights running" \
+              --body "Latest run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. A failing test is a bug, not noise (step 12.3): fix it or link the issue that tracks it."
+          fi

@@ -580,7 +580,8 @@ export async function refund(
 
 /**
  * The payout run (11:00 and 16:00 IST): every release due by now, grouped per supplier, paid to the supplier's
- * Active bank account. A supplier with a bank change on hold (8.6) or no Active account waits for the next run.
+ * Active bank account. A supplier with a bank change on hold (8.6), no Active account or a suspension waits for the
+ * next run.
  */
 export async function runPayouts(db: Database, now: Date = new Date()) {
   const s = schema.orderSettlements;
@@ -597,7 +598,12 @@ export async function runPayouts(db: Database, now: Date = new Date()) {
     const accounts = await db.select().from(a).where(eq(a.organisationId, supplierId));
     const active = accounts.find((x) => x.status === "Active");
     const held = accounts.some((x) => x.status === "Held" && x.holdUntil && x.holdUntil > now);
-    if (!active || held) continue;
+    // A suspended company isn't paid while suspended (review M4); its releases wait for the run after it's lifted.
+    const [org] = await db
+      .select({ suspendedAt: schema.organisations.suspendedAt })
+      .from(schema.organisations)
+      .where(eq(schema.organisations.id, supplierId));
+    if (!active || held || org?.suspendedAt) continue;
     const amount = rows.reduce((t, r) => t + r.netPaise, 0n);
     if (amount <= 0n) continue;
     const payoutId = await db.transaction(async (tx) => {

@@ -149,7 +149,7 @@ export default async function SchemePage({ params }: { params: Params }) {
             <h2 id="glance" className="type-h4 text-primary">
               At a glance
             </h2>
-            <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
               {glance.map((g) => (
                 <div key={g.label} className="flex flex-col gap-0.5">
                   <dt className="type-eyebrow text-secondary">{g.label}</dt>
@@ -231,7 +231,7 @@ export default async function SchemePage({ params }: { params: Params }) {
             <Section id="benefits" title="Benefits">
               {s.benefits ? <p className="type-body text-body">{s.benefits}</p> : null}
               {(s.benefitRates ?? []).length ? (
-                <ul className="grid gap-3 sm:grid-cols-3">
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {(s.benefitRates ?? []).map((b) => (
                     <li key={b.id ?? b.label} className="flex flex-col gap-1 rounded-card bg-subtle p-4">
                       <span className="type-eyebrow text-secondary">{b.label}</span>
@@ -298,7 +298,7 @@ export default async function SchemePage({ params }: { params: Params }) {
 
           {tenders.length ? (
             <Section id="tenders" title="Related tenders">
-              <ul className="grid gap-4 md:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {tenders.map((t) => (
                   <li key={t.id}>
                     <TenderCard {...tenderView(t, now)} />
@@ -310,7 +310,7 @@ export default async function SchemePage({ params }: { params: Params }) {
 
           {news.length ? (
             <Section id="news" title="Related news">
-              <ul className="grid gap-4 md:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {news.map((a) => (
                   <li key={a.id}>
                     <StoryCard a={a} className="h-full" />

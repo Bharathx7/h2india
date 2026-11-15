@@ -195,7 +195,7 @@ export default async function TrackerView({ params, searchParams }: { params: Pa
             ))}
             <ViewToggleWithMap current={as} hrefFor={hrefFor} />
           </div>
-          <ul className="grid gap-3 sm:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {view.tiles(list, new Date()).map((t) => (
               <li key={t.label} className="flex flex-col gap-0.5 rounded-card bg-subtle px-4 py-3">
                 <span className="type-h4 text-primary">{t.value}</span>

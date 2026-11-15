@@ -139,7 +139,7 @@ export default async function ImportPage() {
                           {i.errors.slice(0, 10).map((e, n) => (
                             <li
                               key={String(n)}
-                              className="grid gap-3 type-body-sm md:grid-cols-[60px_120px_minmax(0,1fr)]"
+                              className="grid grid-cols-1 gap-3 type-body-sm md:grid-cols-[60px_120px_minmax(0,1fr)]"
                             >
                               <span className="type-spec text-secondary">Row {e.row}</span>
                               <span className="type-spec">{e.sku}</span>

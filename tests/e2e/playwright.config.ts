@@ -9,12 +9,19 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
-    ? [["html", { open: "never", outputFolder: "../../playwright-report" }], ["list"]]
+    ? [
+        ["html", { open: "never", outputFolder: "../../playwright-report" }],
+        // The nightly summary (step 12.3) reads passed, failed, flaky and duration from here.
+        ["json", { outputFile: "../../playwright-report/results.json" }],
+        ["list"],
+      ]
     : [["list"]],
   use: {
     baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    // The nightly run (step 12.3) keeps a video of every failed test.
+    video: process.env.E2E_VIDEO ? "retain-on-failure" : "off",
     // Animations make elements move; tests see the final state, as users with reduced motion do.
     reducedMotion: "reduce",
     // Locally you can use an installed Chrome instead of downloading Playwright's browser: PW_CHANNEL=chrome

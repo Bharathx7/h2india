@@ -251,7 +251,7 @@ function Field({
                       </span>
                     )}
                   </span>
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {fields.map((f) => (
                       <Field
                         key={f.name}
@@ -648,7 +648,7 @@ export function RecordForm({
           {cards.map((c) => (
             <section key={c.title} className="flex flex-col gap-4 rounded-card border border-default bg-page p-5">
               <h2 className="type-h4">{c.title}</h2>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {c.fields.map((f) => (
                   <div
                     key={f.name}

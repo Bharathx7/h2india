@@ -97,7 +97,7 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">What the buyer sent</h2>
-            <dl className="grid gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
+            <dl className="grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
               {rows.map(([k, v]) => (
                 <div key={k} className="contents">
                   <dt className="type-body-sm text-secondary">{k}</dt>

@@ -116,7 +116,7 @@ export default async function ClassPage({
           label={`Top suppliers in ${c.label}`}
           state={forced ?? (suppliers.length ? "ready" : "empty")}
           skeleton={
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Skeleton kind="card" />
               <Skeleton kind="card" />
               <Skeleton kind="card" />
@@ -130,7 +130,7 @@ export default async function ClassPage({
             </div>
           }
         >
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {suppliers.map((s) => (
               <OrgCard
                 key={s.id}

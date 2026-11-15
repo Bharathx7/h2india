@@ -127,7 +127,7 @@ export default async function ListingsQueuePage({
           </h2>
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
             {storefronts.map((s) => (
-              <li key={s.r.id} className="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_360px]">
+              <li key={s.r.id} className="grid grid-cols-1 gap-3 p-4 md:grid-cols-[minmax(0,1fr)_360px]">
                 <div>
                   <p className="type-label">{s.company ?? "Company"}</p>
                   <p className="type-caption text-secondary">

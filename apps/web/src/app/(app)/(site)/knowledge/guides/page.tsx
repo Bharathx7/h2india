@@ -28,7 +28,7 @@ export default async function GuidesPage() {
       </div>
       <div className={cx(wrap, "pb-16 pt-6")}>
         {guides.length ? (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {guides.map((g) => (
               <li key={g.id}>
                 <Link

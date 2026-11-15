@@ -65,7 +65,7 @@ Use what fits; don't wait for certainty.
 ### 3. Keep evidence
 
 Before changing anything else, save: the audit log entries (export from `/admin/users/audit`), nginx access logs, the
-app logs with request IDs, a database snapshot (`docs/runbooks/backup.md`), and copies of anything a vendor sends.
+app logs with request IDs, a database dump (`docs/runbooks/deploy.md`, Backups), and copies of anything a vendor sends.
 Never delete logs during an incident; `core.audit_log` can't be changed by design.
 
 ### 4. Assess

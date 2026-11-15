@@ -229,7 +229,7 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
 
 function Cards({ items, signedIn }: { items: GrantView[]; signedIn: boolean }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {items.map((g) => (
         <li key={g.id}>
           <SchemeCard

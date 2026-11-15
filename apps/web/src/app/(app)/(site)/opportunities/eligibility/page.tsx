@@ -246,7 +246,7 @@ function Results({
               <p className="type-body-sm text-primary">
                 {v.benefit} · {v.deadline}
               </p>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <p className="type-caption text-secondary">Why it matches</p>
                   <ul className="flex flex-col gap-1.5">

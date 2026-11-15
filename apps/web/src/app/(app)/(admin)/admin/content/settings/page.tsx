@@ -29,7 +29,7 @@ export default async function SettingsListPage() {
           Words and figures used across public pages. Every change is logged.
         </p>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((s) => (
           <li
             key={s.slug}
