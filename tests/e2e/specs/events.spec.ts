@@ -139,9 +139,7 @@ test("a full webinar shows the closed state; registering sends the confirmation"
   await expect(pb.getByText("Registration closed")).toBeVisible();
   await expect(pb.getByText("Full", { exact: true })).toBeVisible();
   await expect(pb.getByRole("button", { name: "Register" })).toHaveCount(0);
-  await pb.getByPlaceholder("name@company.in").fill(newEmail("late"));
-  await pb.getByRole("button", { name: "Email me the replay" }).click();
-  await expect(pb.getByText(/we've sent the replay link/)).toBeVisible({ timeout: 15_000 });
+  await submitOnceHydrated(pb, newEmail("late"), "Email me the replay");
   await b.close();
 
   const ics = await page.request.get(`/events/${slug}/ics`);
@@ -187,9 +185,7 @@ test("a replay opens only for people who registered and are signed in", async ({
   await signInNew(pm, email);
   await pm.goto(`/events/${slug}`);
   await expect(pm.locator("video")).toHaveCount(0);
-  await pm.getByPlaceholder("name@company.in").fill(email);
-  await pm.getByRole("button", { name: "Watch the replay" }).click();
-  await expect(pm.getByText(/we've sent the replay link/)).toBeVisible({ timeout: 15_000 });
+  await submitOnceHydrated(pm, email, "Watch the replay");
   await pm.reload();
   await expect(pm.locator("video source")).toHaveAttribute("src", "https://example.org/replay.mp4");
   await member.close();
@@ -246,3 +242,15 @@ test("events list, calendar and states", async ({ page }) => {
     if (state === "empty") await expect(page.getByText(/No events (match these filters|listed yet)/)).toBeVisible();
   }
 });
+
+/** The replay email box is a controlled input: text typed before the page hydrates is reset, and the empty form is
+ * refused. Fill and submit until the confirmation shows (never twice once it has). */
+async function submitOnceHydrated(p: Page, email: string, button: string) {
+  const sentText = p.getByText(/we've sent the replay link/);
+  await expect(async () => {
+    if (await sentText.isVisible()) return;
+    await p.getByPlaceholder("name@company.in").fill(email);
+    await p.getByRole("button", { name: button }).click();
+    await expect(sentText).toBeVisible({ timeout: 4_000 });
+  }).toPass({ timeout: 30_000 });
+}
