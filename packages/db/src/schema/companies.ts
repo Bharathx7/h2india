@@ -200,3 +200,29 @@ export interface StorefrontData {
   contactEmail?: string;
   contactPhone?: string;
 }
+
+/**
+ * An appeal against a company's suspension (G10): sent from the supplier workspace, decided in admin Users › Appeals.
+ * Status: Open · Lifted · Upheld. One open appeal per company at a time.
+ */
+export const suspensionAppeals = core.table(
+  "suspension_appeals",
+  {
+    id: id(),
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id),
+    sentBy: uuid("sent_by")
+      .notNull()
+      .references(() => users.id),
+    reason: text("reason").notNull(),
+    status: text("status").notNull().default("Open"),
+    decidedBy: uuid("decided_by").references(() => users.id),
+    decidedAt: utc("decided_at"),
+    note: text("note"),
+    createdAt: utc("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (t) => [index("suspension_appeals_org").on(t.organisationId, t.status)],
+);
