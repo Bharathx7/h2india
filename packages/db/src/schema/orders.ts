@@ -215,11 +215,17 @@ export const shipments = core.table("shipments", {
     .notNull()
     .default(sql`'{}'::uuid[]`),
   podAt: utc("pod_at"),
+  /** "Delivered on" and "Received by" on Upload proof of delivery (308:6627). */
+  deliveredOn: utc("delivered_on"),
+  receivedBy: text("received_by"),
   codeSentAt: utc("code_sent_at"),
   ...timestamps,
 });
 
-/** Changes to the promised dispatch date (344:27740, G8). Append-only. */
+/**
+ * The dispatch date: the buyer asks to change it (344:27740) and the supplier agrees or declines; agreed changes move
+ * the balance due date. The supplier may also move it (G8: the buyer is told). Status: Requested · Agreed · Declined.
+ */
 export const dispatchDateChanges = core.table("dispatch_date_changes", {
   id: id(),
   orderId: uuid("order_id")
@@ -228,9 +234,14 @@ export const dispatchDateChanges = core.table("dispatch_date_changes", {
   fromDate: utc("from_date"),
   toDate: utc("to_date").notNull(),
   reason: text("reason").notNull(),
+  /** buyer or supplier */
+  requestedBy: text("requested_by").notNull(),
+  status: text("status").notNull(),
   changedBy: uuid("changed_by")
     .notNull()
     .references(() => users.id),
+  decidedBy: uuid("decided_by").references(() => users.id),
+  decidedAt: utc("decided_at"),
   at: utc("at")
     .notNull()
     .default(sql`now()`),

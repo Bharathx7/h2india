@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { parseServerEnv, requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
-import { and, asc, eq, gt, isNull, lte, or, sql } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -22,11 +22,13 @@ import {
 import { heldOn, openPayments, orderAccount, refund, release } from "./money";
 import { noticeApprovalNeeded, noticeOrderPlaced, noticePaymentDue, noticeStatus } from "./notices";
 import {
+  DUE_ON,
   dueUnpaid,
   insertOrder,
   makeDue,
   moveOrder,
   o,
+  om,
   orderFigures,
   OrderError,
   ownOrder,
@@ -567,7 +569,9 @@ async function restock(tx: Executor, orderId: string) {
   }
 }
 
-/** Change dispatch date (344:27740, G8): the buyer is told; no penalty. */
+const DATE_OPEN: readonly string[] = ["Accepted", "Awaiting payment", "Ready to dispatch"];
+
+/** The supplier moves the dispatch date (G8): the buyer is told; no penalty. */
 export async function changeDispatchDate(
   db: Database,
   actor: Actor,
@@ -581,17 +585,20 @@ export async function changeDispatchDate(
   assertCan(actor, "order.manage", { organisationId });
   if (!input.reason.trim()) throw new OrderError("Say why", { reason: "Tell the buyer why the date moves" });
   const order = await ownOrder(db, organisationId, orderId, "supplier");
-  if (!["Accepted", "Awaiting payment", "Ready to dispatch"].includes(order.status))
-    throw new OrderError("The dispatch date can't change now");
+  if (!DATE_OPEN.includes(order.status)) throw new OrderError("The dispatch date can't change now");
   await db.transaction(async (tx) => {
     await tx.insert(schema.dispatchDateChanges).values({
       orderId: order.id,
       fromDate: order.dispatchBy,
       toDate: input.date,
-      reason: input.reason,
+      reason: input.reason.trim(),
+      requestedBy: "supplier",
+      status: "Agreed",
       changedBy: must(actor.userId),
+      decidedBy: actor.userId,
+      decidedAt: new Date(),
     });
-    await tx.update(o).set({ dispatchBy: input.date }).where(eq(o.id, order.id));
+    await moveDispatchDate(tx, order, input.date);
     await audit(tx, {
       actorId: actor.userId,
       action: "order.dispatch_date",
@@ -606,6 +613,108 @@ export async function changeDispatchDate(
   });
   await tell(() =>
     noticeStatus(db, order, "buyer", `${order.reference}: the supplier moved the dispatch date`, "calendar"),
+  );
+}
+
+/** Moves the dispatch date; a due "before dispatch" balance moves with it (344:27740). */
+async function moveDispatchDate(tx: Executor, order: OrderRow, date: Date) {
+  await tx.update(o).set({ dispatchBy: date }).where(eq(o.id, order.id));
+  const dispatchTriggers = Object.entries(DUE_ON)
+    .filter(([, m]) => m === "dispatch")
+    .map(([t]) => t);
+  await tx
+    .update(om)
+    .set({ dueAt: date })
+    .where(
+      and(eq(om.orderId, order.id), inArray(om.trigger, dispatchTriggers), inArray(om.status, ["Due", "Partly paid"])),
+    );
+}
+
+/** The buyer asks to change the dispatch date (344:27740): "If they agree, the balance due date moves with it." */
+export async function requestDispatchDate(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  orderId: string,
+  input: { date: Date; reason: string },
+  context?: RequestContext,
+  opts: { flags?: Record<string, string | undefined> } = {},
+) {
+  await requireTransactions(db, [organisationId], opts.flags);
+  assertCan(actor, "order.place", { organisationId });
+  if (!input.reason.trim()) throw new OrderError("Say why", { reason: "Tell the supplier why" });
+  const order = await ownOrder(db, organisationId, orderId, "buyer");
+  if (!DATE_OPEN.includes(order.status)) throw new OrderError("The dispatch date can't change now");
+  const [open] = await db
+    .select({ id: schema.dispatchDateChanges.id })
+    .from(schema.dispatchDateChanges)
+    .where(and(eq(schema.dispatchDateChanges.orderId, order.id), eq(schema.dispatchDateChanges.status, "Requested")));
+  if (open) throw new OrderError("You've already asked; wait for the supplier's answer");
+  await db.insert(schema.dispatchDateChanges).values({
+    orderId: order.id,
+    fromDate: order.dispatchBy,
+    toDate: input.date,
+    reason: input.reason.trim(),
+    requestedBy: "buyer",
+    status: "Requested",
+    changedBy: must(actor.userId),
+  });
+  await audit(db, {
+    actorId: actor.userId,
+    action: "order.dispatch_date_requested",
+    resourceType: "order",
+    resourceId: order.id,
+    companyId: organisationId,
+    after: { toDate: input.date.toISOString() },
+    reason: input.reason,
+    context,
+  });
+  await tell(() =>
+    noticeStatus(db, order, "supplier", `${order.reference}: the buyer asked to change the dispatch date`, "calendar"),
+  );
+}
+
+/** The supplier agrees to or declines the buyer's request. */
+export async function decideDispatchDate(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  requestId: string,
+  agree: boolean,
+  context?: RequestContext,
+) {
+  assertCan(actor, "order.manage", { organisationId });
+  const order = await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ r: schema.dispatchDateChanges, order: o })
+      .from(schema.dispatchDateChanges)
+      .innerJoin(o, eq(o.id, schema.dispatchDateChanges.orderId))
+      .where(and(eq(schema.dispatchDateChanges.id, requestId), eq(o.supplierOrganisationId, organisationId)))
+      .for("update");
+    if (!row || row.r.status !== "Requested") throw new OrderError("This request was already answered");
+    await tx
+      .update(schema.dispatchDateChanges)
+      .set({ status: agree ? "Agreed" : "Declined", decidedBy: actor.userId, decidedAt: new Date() })
+      .where(eq(schema.dispatchDateChanges.id, requestId));
+    if (agree && DATE_OPEN.includes(row.order.status)) await moveDispatchDate(tx, row.order, row.r.toDate);
+    await audit(tx, {
+      actorId: actor.userId,
+      action: agree ? "order.dispatch_date_agreed" : "order.dispatch_date_declined",
+      resourceType: "order",
+      resourceId: row.order.id,
+      companyId: organisationId,
+      context,
+    });
+    return row.order;
+  });
+  await tell(() =>
+    noticeStatus(
+      db,
+      order,
+      "buyer",
+      `${order.reference}: the supplier ${agree ? "agreed to" : "couldn't agree to"} the new dispatch date`,
+      "calendar",
+    ),
   );
 }
 
@@ -797,43 +906,68 @@ async function sendDeliveryCode(db: Database, order: OrderRow, issued: { token: 
 }
 
 /**
- * Upload proof of delivery (308:6627): the goods are at the buyer's gate. Sends the receiving contact the delivery
- * code (668:232); entering it confirms delivery.
+ * Upload proof of delivery (308:6627): "Once uploaded, the buyer has 5 working days to accept". The order is Delivered,
+ * the acceptance clock starts, and the receiving contact gets the code (668:232) to confirm what arrived (695:13).
  */
 export async function uploadProofOfDelivery(
   db: Database,
   actor: Actor,
   organisationId: string,
   orderId: string,
-  fileIds: string[],
+  input: { fileIds: string[]; deliveredOn: Date; receivedBy: string },
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
   await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
-  if (!fileIds.length)
-    throw new OrderError("Add the proof of delivery", { files: "Upload the signed delivery note or photos" });
+  const errors: Record<string, string> = {};
+  if (!input.fileIds.length) errors.files = "Upload the signed delivery note or POD";
+  if (!input.receivedBy.trim()) errors.receivedBy = "Say who received it";
+  if (input.deliveredOn.getTime() > Date.now() + 86_400_000)
+    errors.deliveredOn = "The delivery date can't be in the future";
+  if (Object.keys(errors).length) throw new OrderError("Check the highlighted fields", errors);
   const order = await ownOrder(db, organisationId, orderId, "supplier");
   if (order.status !== "Shipped") throw new OrderError("This order isn't in transit");
   const issued = await db.transaction(async (tx) => {
-    for (const fileId of fileIds)
+    for (const fileId of input.fileIds)
       await attachFile(tx, { actor, fileId, kind: "order_document", attachedType: "order", attachedId: order.id });
     await tx
       .update(schema.shipments)
-      .set({ podFileIds: fileIds, podAt: new Date(), updatedAt: new Date() })
+      .set({
+        podFileIds: input.fileIds,
+        podAt: new Date(),
+        deliveredOn: input.deliveredOn,
+        receivedBy: input.receivedBy.trim(),
+        updatedAt: new Date(),
+      })
       .where(eq(schema.shipments.orderId, order.id));
-    await audit(tx, {
-      actorId: actor.userId,
-      action: "order.proof_of_delivery",
-      resourceType: "order",
-      resourceId: order.id,
-      companyId: organisationId,
-      after: { files: fileIds.length },
-      context,
-    });
+    await moveOrder(
+      tx,
+      actor.userId,
+      order,
+      { from: "Shipped", to: "Delivered" },
+      {
+        context,
+        reason: `Proof of delivery uploaded; received by ${input.receivedBy.trim()}`,
+        also: async (t) => {
+          await t.update(o).set({ deliveredAt: input.deliveredOn }).where(eq(o.id, order.id));
+          await startClock(t, { clock: BUYER_CLOCK, subjectType: "order", subjectId: order.id });
+          await makeDue(t, order.id, "receipt");
+        },
+      },
+    );
     return issueDeliveryCode(tx, order.id);
   });
   await tell(() => sendDeliveryCode(db, order, issued));
+  await tell(() =>
+    noticeStatus(
+      db,
+      order,
+      "buyer",
+      `${order.reference} was delivered. Accept it or report a problem`,
+      "package-check",
+    ),
+  );
   return issued;
 }
 
@@ -842,7 +976,7 @@ export async function resendDeliveryCode(db: Database, actor: Actor, orderId: st
   if (!actor.operator.has("orders.edit")) throw new OrderError("Not allowed");
   if (!reason.trim()) throw new OrderError("Say why");
   const [order] = await db.select().from(o).where(eq(o.id, orderId));
-  if (!order || order.status !== "Shipped") throw new OrderError("This order isn't in transit");
+  if (!order || order.status !== "Delivered") throw new OrderError("This order isn't waiting for the delivery code");
   const issued = await db.transaction(async (tx) => {
     await audit(tx, {
       actorId: actor.userId,
@@ -884,8 +1018,8 @@ export const RECEIPT_CONDITIONS = ["Good", "Damaged", "Short"] as const;
 export const MAX_RECEIPT_PHOTOS = 5;
 
 /**
- * Record what arrived (695:110) with the code. Five wrong codes lock the link and alert Operations. Moves the order to
- * Delivered and starts the 5-working-day acceptance clock; on-receipt milestones fall due.
+ * Record what arrived (695:110) with the code: "Delivery code confirmed" (693:814 step 4). Five wrong codes lock the
+ * link and alert Operations. The buyer still accepts or reports a problem on the order.
  */
 export async function recordReceipt(
   db: Database,
@@ -930,7 +1064,7 @@ export async function recordReceipt(
       };
     }
     const [order] = await tx.select().from(o).where(eq(o.id, link.orderId)).for("update");
-    if (!order || order.status !== "Shipped") return { ok: false as const, state: "closed" };
+    if (!order || order.status !== "Delivered") return { ok: false as const, state: "closed" };
     await tx.update(schema.deliveryLinks).set({ usedAt: new Date() }).where(eq(schema.deliveryLinks.id, link.id));
     await receive(tx, order, {
       condition: input.condition,
@@ -949,12 +1083,9 @@ export async function recordReceipt(
         db,
         result.order,
         "buyer",
-        `${result.order.reference} was delivered. Accept it or report a problem`,
+        `${result.order.reference}: your receiving contact confirmed the delivery (${input.condition})`,
         "package-check",
       ),
-    );
-    await tell(() =>
-      noticeStatus(db, result.order, "supplier", `${result.order.reference} was delivered`, "package-check"),
     );
   }
   return result;
@@ -973,21 +1104,18 @@ async function receive(
     reason: string | null;
   },
 ) {
+  const [have] = await tx.select().from(schema.deliveryReceipts).where(eq(schema.deliveryReceipts.orderId, order.id));
+  if (have) throw new OrderError("The delivery was already confirmed");
   await tx.insert(schema.deliveryReceipts).values({ orderId: order.id, ...r });
-  await moveOrder(
-    tx,
-    r.recordedBy,
-    order,
-    { from: "Shipped", to: "Delivered" },
-    {
-      reason: r.reason ?? `Received: ${r.condition}`,
-      also: async (t) => {
-        await t.update(o).set({ deliveredAt: new Date() }).where(eq(o.id, order.id));
-        await startClock(t, { clock: BUYER_CLOCK, subjectType: "order", subjectId: order.id });
-        await makeDue(t, order.id, "receipt");
-      },
-    },
-  );
+  await audit(tx, {
+    actorId: r.recordedBy,
+    action: "order.receipt_recorded",
+    resourceType: "order",
+    resourceId: order.id,
+    companyId: order.buyerOrganisationId,
+    after: { condition: r.condition, via: r.via, photos: r.photoFileIds.length },
+    reason: r.reason ?? undefined,
+  });
 }
 
 /** G5 fallback: an operator confirms receipt with a reason (audited) when the code never arrived. */
@@ -1001,7 +1129,7 @@ export async function operatorConfirmReceipt(
   if (!input.reason.trim()) throw new OrderError("Say why");
   await db.transaction(async (tx) => {
     const [order] = await tx.select().from(o).where(eq(o.id, orderId)).for("update");
-    if (!order || order.status !== "Shipped") throw new OrderError("This order isn't in transit");
+    if (!order || order.status !== "Delivered") throw new OrderError("This order isn't waiting for the delivery code");
     await receive(tx, order, {
       condition: input.condition,
       notes: null,

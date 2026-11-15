@@ -118,7 +118,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       ON,
     );
     await dispatchOrder(h.db, sAdmin, supplier.org.id, orderId, undefined, ON);
-    return uploadProofOfDelivery(h.db, sAdmin, supplier.org.id, orderId, [await doc(supplier.admin.id)], undefined, ON);
+    return uploadProofOfDelivery(
+      h.db,
+      sAdmin,
+      supplier.org.id,
+      orderId,
+      { fileIds: [await doc(supplier.admin.id)], deliveredOn: new Date(), receivedBy: "Site stores" },
+      undefined,
+      ON,
+    );
   }
 
   async function placeOne(actor: Actor, qty = 2) {
@@ -321,8 +329,10 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const sent = await ship(order.id, sAdmin, "INV-1");
     const wrong = sent.code === "000000" ? "111111" : "000000";
     expect((await recordReceipt(h.db, { token: sent.token, code: wrong, condition: "Good" })).ok).toBe(false);
-    expect((await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Good" })).ok).toBe(true);
     expect(await status(order.id)).toBe("Delivered");
+    expect((await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Good" })).ok).toBe(true);
+    // Single use: the same code can't be used twice.
+    expect((await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Good" })).ok).toBe(false);
 
     // Accept: everything held is released, minus the fee and deductions, and paid out at the next run.
     await acceptDelivery(h.db, admin, buyer.org.id, order.id, undefined, ON);
