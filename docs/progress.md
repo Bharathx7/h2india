@@ -133,18 +133,18 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 
 | Step | What it delivers | Status |
 |---|---|---|
-| 10.1 | Order records, statuses and the timeline | Not started |
-| 10.2 | Cart and checkout: confirm, then pay | Not started |
-| 10.3 | Approval rules and approver review | Not started |
-| 10.4 | Payment-partner adapter, order accounts and webhooks | Not started |
-| 10.5 | Payment methods and outcomes | Not started |
-| 10.6 | The ledger and reconciliation | Not started |
-| 10.7 | Supplier orders: pipeline, accept or decline | Not started |
-| 10.8 | Milestone payments, due banners, payments and invoices | Not started |
-| 10.9 | Dispatch and the delivery code | Not started |
-| 10.10 | Acceptance, disputes, cancellations and refunds | Not started |
-| 10.11 | Fees, tax deductions, payouts and statements | Not started |
-| 10.12 | Prove flows B and H and prepare the pilot | Not started |
+| 10.1 | Order records, statuses and the timeline | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): order tables, the twelve statuses and allowed moves, Overdue from clocks, timeline and main action, history and audit on every change. Screens wait for the Figma frames. |
+| 10.2 | Cart and checkout: confirm, then pay | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): cart (one supplier), checkout priced on the server, stock and limit checks, approval routing; nothing charged at placing. Screens wait for the Figma frames. |
+| 10.3 | Approval rules and approver review | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): approval routing with second approver and delegation, no self-approval, fresh passkey required, expired quote blocked (G4). Screens wait for the Figma frames. |
+| 10.4 | Payment-partner adapter, order accounts and webhooks | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): payment-partner interface, simulated partner (order account, test checkout /dev/pay, signed webhooks processed once, refunds, payouts, settlement report), call log. Screens wait for the Figma frames. |
+| 10.5 | Payment methods and outcomes | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): online checkout and bank transfer into the order's own account, partial payments, retry limit; pay later and letter of credit refused while their flags are off. Screens wait for the Figma frames. |
+| 10.6 | The ledger and reconciliation | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): append-only double-entry ledger, balance checked at commit, monthly identity and per-order checks, nightly reconciliation. Screens wait for the Figma frames. |
+| 10.7 | Supplier orders: pipeline, accept or decline | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): supplier accept (rate card fixed, advance due) or decline with a reason; 48-hour clock, Overdue only (no automatic decline). Screens wait for the Figma frames. |
+| 10.8 | Milestone payments, due banners, payments and invoices | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): milestones from the quote schedule to the paisa; advance on acceptance, balance before dispatch. Screens wait for the Figma frames. |
+| 10.9 | Dispatch and the delivery code | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): dispatch checklist, single-use delivery link and code (five wrong codes lock it), receipt, operator fallback (G5). Screens wait for the Figma frames. |
+| 10.10 | Acceptance, disputes, cancellations and refunds | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): accept, accept part and dispute, operator decision with refund or release, cancellation safe default (Doc 4 rules not given). Screens wait for the Figma frames. |
+| 10.11 | Fees, tax deductions, payouts and statements | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): versioned rate card (sample figures, OPEN: M11, C1 to C3), fee cap, TCS, TDS, payout runs at 11:00 and 16:00 IST on working days. Screens wait for the Figma frames. |
+| 10.12 | Prove flows B and H and prepare the pilot | Core built 15 Nov 2026 (branch `step/10-orders-payments`, A176, simulated payment partner): pilot list of companies; integration test of the whole flow against the simulator. Screens wait for the Figma frames. |
 
 ## Stage 11 · Admin back office · Batch 5 (11.5, 11.6: 6)
 
