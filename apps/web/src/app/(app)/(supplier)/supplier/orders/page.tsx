@@ -55,9 +55,13 @@ export default async function SupplierOrdersPage({
             <span className="max-md:hidden"> Dispatch opens once the invoice, e-way bill and certificates are in.</span>
           </p>
         </div>
-        <a href="/supplier/orders/export" className={cx(buttonClasses({ variant: "outline" }), "max-md:hidden")}>
+        <Link
+          href="/supplier/orders/export"
+          prefetch={false}
+          className={cx(buttonClasses({ variant: "outline" }), "max-md:hidden")}
+        >
           Export CSV
-        </a>
+        </Link>
       </div>
       <LiveSection
         label="Orders"
