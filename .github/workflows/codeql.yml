@@ -1,5 +1,6 @@
 # Step 12.1: static analysis of the TypeScript on every change and weekly (new rules arrive between changes).
-# Results appear under Security → Code scanning; a high-severity alert on a pull request fails this check.
+# The repository is private without GitHub Advanced Security, so results aren't uploaded to Code scanning: they are
+# listed in the run summary, and any finding of high severity (7.0 or more) fails this check.
 name: CodeQL
 
 on:
@@ -15,7 +16,7 @@ concurrency:
 
 permissions:
   contents: read
-  security-events: write
+  actions: read
 
 jobs:
   analyze:
@@ -37,3 +38,28 @@ jobs:
       - uses: github/codeql-action/analyze@v4
         with:
           category: "/language:javascript-typescript"
+          upload: never
+          output: sarif
+      - name: Findings (fails on high)
+        run: |
+          f=$(ls sarif/*.sarif | head -1)
+          jq -r '
+            .runs[0] as $r
+            | [$r.tool.driver.rules[]?, $r.tool.extensions[]?.rules[]?] as $rules
+            | $r.results[]?
+            | . as $x
+            | (first(($rules[] | select(.id == $x.ruleId) | .properties["security-severity"] // empty), "0")) as $sev
+            | "\($sev)\t\($x.ruleId)\t\($x.locations[0].physicalLocation.artifactLocation.uri):\($x.locations[0].physicalLocation.region.startLine)\t\($x.message.text | split("\n")[0])"
+          ' "$f" | sort -rn > findings.tsv
+          {
+            echo "### CodeQL findings: $(wc -l < findings.tsv)"
+            echo
+            echo "| Severity | Rule | Where | What |"
+            echo "| --- | --- | --- | --- |"
+            awk -F'\t' '{ printf "| %s | %s | %s | %s |\n", $1, $2, $3, $4 }' findings.tsv
+          } >> "$GITHUB_STEP_SUMMARY"
+          high=$(awk -F'\t' '$1 + 0 >= 7' findings.tsv | wc -l)
+          if [ "$high" -gt 0 ]; then
+            echo "::error::$high high-severity CodeQL findings (see the summary)"
+            exit 1
+          fi
