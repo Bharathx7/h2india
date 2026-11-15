@@ -95,8 +95,8 @@ export const orders = core.table(
     dispatchBy: utc("dispatch_by"),
     acceptedAt: utc("accepted_at"),
     declinedAt: utc("declined_at"),
+    /** Free text, told to the buyer (693:8). */
     declineReason: text("decline_reason"),
-    declineNote: text("decline_note"),
     shippedAt: utc("shipped_at"),
     deliveredAt: utc("delivered_at"),
     buyerAcceptedAt: utc("buyer_accepted_at"),
@@ -285,6 +285,8 @@ export const disputes = core.table(
     status: text("status").notNull().default("Open"),
     reason: text("reason").notNull(),
     details: text("details").notNull(),
+    /** "What would fix it?" (330:27342). */
+    wantedFix: text("wanted_fix"),
     photoFileIds: uuid("photo_file_ids")
       .array()
       .notNull()

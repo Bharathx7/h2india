@@ -190,21 +190,3 @@ export const SUPPLIER_PIPELINE = [
   { key: "delivered", label: "Delivered", statuses: ["Delivered", "Disputed", "Accepted by buyer"] },
   { key: "done", label: "Closed", statuses: ["Closed", "Declined", "Cancelled"] },
 ] as const satisfies readonly { key: string; label: string; statuses: readonly OrderStatus[] }[];
-
-/** Decline reasons as on the decline modal (275:23250). */
-export const DECLINE_REASONS = [
-  "Out of stock",
-  "Can't meet the delivery date",
-  "Can't deliver to this location",
-  "Price has changed",
-  "Other",
-] as const;
-
-/** Problem reasons on Report a problem (330:27342). */
-export const PROBLEM_REASONS = [
-  "Damaged in transit",
-  "Short or missing items",
-  "Wrong item",
-  "Doesn't match the specification",
-  "Other",
-] as const;

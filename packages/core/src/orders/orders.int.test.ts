@@ -237,9 +237,17 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect((await orderDetail(scopeFor(sAdmin), h.db, order.id))?.side).toBe("supplier");
 
     await expect(
-      supplierDecline(h.db, sAdmin, supplier.org.id, order.id, { reason: "Other" }, undefined, ON),
-    ).rejects.toThrow("Add a note");
-    const accepted = await supplierAccept(h.db, sAdmin, supplier.org.id, order.id, {}, undefined, ON);
+      supplierDecline(h.db, sAdmin, supplier.org.id, order.id, { reason: " " }, undefined, ON),
+    ).rejects.toThrow("Give a reason");
+    const accepted = await supplierAccept(
+      h.db,
+      sAdmin,
+      supplier.org.id,
+      order.id,
+      { dispatchBy: new Date(Date.now() + 7 * DAY) },
+      undefined,
+      ON,
+    );
     expect(accepted.status).toBe("Awaiting payment");
 
     // The order's own account, never the supplier's bank.
@@ -309,7 +317,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const sAdmin = await loadActor(h.db, supplier.admin.id);
     const order = await placeOne(admin, 1);
-    await supplierAccept(h.db, sAdmin, supplier.org.id, order.id, {}, undefined, ON);
+    await supplierAccept(
+      h.db,
+      sAdmin,
+      supplier.org.id,
+      order.id,
+      { dispatchBy: new Date(Date.now() + 7 * DAY) },
+      undefined,
+      ON,
+    );
     const ev = await simBankTransfer(h.db, order.reference, 5_000_00n);
     const raw = JSON.stringify(ev);
     await receiveWebhook(h.db, raw, signSimWebhook(raw));
@@ -323,7 +339,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const sAdmin = await loadActor(h.db, supplier.admin.id);
     const order = await placeOne(admin);
-    await supplierAccept(h.db, sAdmin, supplier.org.id, order.id, {}, undefined, ON);
+    await supplierAccept(
+      h.db,
+      sAdmin,
+      supplier.org.id,
+      order.id,
+      { dispatchBy: new Date(Date.now() + 7 * DAY) },
+      undefined,
+      ON,
+    );
     await payAll(order.id, admin);
     const sent = await dispatchOrder(
       h.db,

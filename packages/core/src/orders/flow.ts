@@ -27,7 +27,7 @@ import {
   type NewOrder,
   type OrderRow,
 } from "./records";
-import { DECLINE_REASONS, PROBLEM_REASONS, type OrderStatus } from "./transitions";
+import type { OrderStatus } from "./transitions";
 import { must } from "../must";
 
 // The order's life (steps 10.2, 10.3, 10.7, 10.9, 10.10). Every function here is behind the transactions flag (C8,
@@ -475,6 +475,9 @@ export async function supplierAccept(
   assertCan(actor, "order.manage", { organisationId });
   const order = await ownOrder(db, organisationId, orderId, "supplier");
   if (order.status !== "Pending acceptance") throw new OrderError("This order isn't waiting for you");
+  // 693:8: the dispatch date is required, and the buyer sees it.
+  const dispatchBy = input.dispatchBy ?? order.dispatchBy;
+  if (!dispatchBy) throw new OrderError("Choose a dispatch date", { dispatchBy: "Choose the date you'll dispatch" });
   const now = new Date();
   const card = await rateCardFor(db, now);
   await orderAccount(db, order);
@@ -490,7 +493,7 @@ export async function supplierAccept(
         also: async (t) => {
           await t
             .update(o)
-            .set({ acceptedAt: now, rateCardVersion: card.version, dispatchBy: input.dispatchBy ?? order.dispatchBy })
+            .set({ acceptedAt: now, rateCardVersion: card.version, dispatchBy })
             .where(eq(o.id, order.id));
           await completeDeadline(t, { type: ACCEPT_CLOCK, subjectType: "order", subjectId: order.id });
         },
@@ -507,22 +510,19 @@ export async function supplierAccept(
   return fresh;
 }
 
-/** Decline (275:23250): a reason is required; the buyer is told and offered Request quotes again. */
+/** Decline (693:8): "Declining asks for a reason and tells the buyer straight away" (free text); the buyer can request quotes again. */
 export async function supplierDecline(
   db: Database,
   actor: Actor,
   organisationId: string,
   orderId: string,
-  input: { reason: string; note?: string },
+  input: { reason: string },
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
   await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
-  if (!(DECLINE_REASONS as readonly string[]).includes(input.reason))
-    throw new OrderError("Choose a reason", { reason: "Choose why you're declining" });
-  if (input.reason === "Other" && !input.note?.trim())
-    throw new OrderError("Add a note", { note: "Tell the buyer why" });
+  if (!input.reason.trim()) throw new OrderError("Give a reason", { reason: "Tell the buyer why you can't fulfil it" });
   const order = await ownOrder(db, organisationId, orderId, "supplier");
   await moveOrder(
     db,
@@ -535,7 +535,7 @@ export async function supplierDecline(
       also: async (tx) => {
         await tx
           .update(o)
-          .set({ declinedAt: new Date(), declineReason: input.reason, declineNote: input.note ?? null })
+          .set({ declinedAt: new Date(), declineReason: input.reason.trim() })
           .where(eq(o.id, order.id));
         await cancelDeadline(tx, { type: ACCEPT_CLOCK, subjectType: "order", subjectId: order.id });
         await restock(tx, order.id);
@@ -908,14 +908,14 @@ export async function reportProblem(
   actor: Actor,
   organisationId: string,
   orderId: string,
-  input: { reason: string; details: string; acceptedPaise?: bigint; photoFileIds?: string[] },
+  input: { reason: string; details: string; fix?: string; acceptedPaise?: bigint; photoFileIds?: string[] },
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
   await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.place", { organisationId });
   const errors: Record<string, string> = {};
-  if (!(PROBLEM_REASONS as readonly string[]).includes(input.reason)) errors.reason = "Choose what went wrong";
+  if (!input.reason.trim()) errors.reason = "Say what went wrong";
   if (!input.details.trim()) errors.details = "Describe the problem";
   if (Object.keys(errors).length) throw new OrderError("Check the highlighted fields", errors);
   const order = await ownOrder(db, organisationId, orderId, "buyer");
@@ -932,6 +932,7 @@ export async function reportProblem(
         orderId: order.id,
         reason: input.reason,
         details: input.details.trim(),
+        wantedFix: input.fix?.trim() || null,
         photoFileIds: input.photoFileIds ?? [],
         disputedPaise: held - accepted,
         acceptedPaise: accepted,
