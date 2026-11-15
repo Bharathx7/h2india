@@ -34,6 +34,7 @@ export async function listTakedowns(db: Executor, actor: Actor) {
       id: lr.id,
       problem: lr.problem,
       details: lr.details,
+      attachments: lr.attachments,
       status: lr.status,
       createdAt: lr.createdAt,
       product: p.name,

@@ -97,6 +97,7 @@ export function ServiceView({
                 <Button type="submit" size="lg" className="w-full">
                   Request a proposal
                 </Button>
+                <p className="type-caption text-secondary">You can attach P&amp;IDs and drawings in the next step.</p>
               </fieldset>
             </form>
             <AskQuestion product={ref} signedIn={signedIn} company={company} className="w-full" />

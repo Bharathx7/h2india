@@ -1,10 +1,24 @@
 "use client";
 
 import { REPORT_PROBLEMS, QUESTION_MAX } from "@h2india/core/products/rules-client";
-import { Button, buttonClasses, cx, FormField, Icon, Input, Modal, Select, Switch, Textarea } from "@h2india/ui";
+import {
+  Button,
+  buttonClasses,
+  cx,
+  FileRow,
+  FileUpload,
+  FormField,
+  Icon,
+  Input,
+  Modal,
+  Select,
+  Switch,
+  Textarea,
+} from "@h2india/ui";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useFormGuard } from "@/lib/form-guard";
+import { checkFile, useUploads, type UploadItem } from "@/lib/uploads";
 import { useCompare, useCompareSync } from "@/marketplace/compare";
 import { saveCompareAction } from "../../compare/actions";
 import { askQuestionAction, reportListingAction } from "./actions";
@@ -104,6 +118,40 @@ function Summary({ product }: { product: ProductRef }) {
 }
 
 /** Ask a technical question (402:12544; sent 402:12601; phones 402:12630). Needs an account. */
+/** Up to 3 drawings, photos or documents (A123): PDF, JPG or PNG up to 10 MB each. */
+function Attachments({ uploads, error }: { uploads: ReturnType<typeof useUploads>; error?: string }) {
+  return (
+    <>
+      <FileUpload
+        label="Attach drawings or photos (optional)"
+        hint="Up to 3 · PDF, JPG or PNG up to 10 MB each"
+        check={(f) => checkFile("listing_evidence", f)}
+        error={error}
+        onFiles={(files) => {
+          uploads.add(files);
+        }}
+      />
+      {uploads.items.map((f: UploadItem) => (
+        <FileRow
+          key={f.localId}
+          name={f.name}
+          status={f.state}
+          progress={f.progress}
+          meta={f.meta}
+          error={f.problem}
+          onRemove={() => {
+            uploads.remove(f.localId);
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+const uploaded = (uploads: ReturnType<typeof useUploads>) =>
+  uploads.items.filter((f) => f.fileId).map((f) => ({ fileId: f.fileId ?? "", key: f.key }));
+const busy = (uploads: ReturnType<typeof useUploads>) => uploads.items.length > 0 && !uploads.ready;
+
 export function AskQuestion({
   product,
   signedIn,
@@ -122,6 +170,7 @@ export function AskQuestion({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const { trap, guard } = useFormGuard();
+  const uploads = useUploads("listing_evidence", { max: 3 });
   if (!signedIn) {
     return (
       <Link
@@ -134,7 +183,13 @@ export function AskQuestion({
   }
   const submit = () => {
     start(async () => {
-      const r = await askQuestionAction({ slug: product.slug, question, shareCompany: share, guard: guard() });
+      const r = await askQuestionAction({
+        slug: product.slug,
+        question,
+        shareCompany: share,
+        attachments: uploaded(uploads),
+        guard: guard(),
+      });
       if (r.ok) setSent(true);
       else setErrors(r.errors);
     });
@@ -181,7 +236,7 @@ export function AskQuestion({
               >
                 Cancel
               </Button>
-              <Button onClick={submit} disabled={pending}>
+              <Button onClick={submit} disabled={pending || busy(uploads)}>
                 Send question
               </Button>
             </>
@@ -223,6 +278,7 @@ export function AskQuestion({
                 }}
               />
             </FormField>
+            <Attachments uploads={uploads} error={errors.attachments} />
             {company ? (
               <Switch label={`Share my company name (${company})`} checked={share} onCheckedChange={setShare} />
             ) : null}
@@ -246,9 +302,17 @@ export function ReportListing({ product }: { product: ProductRef }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const { trap, guard } = useFormGuard();
+  const uploads = useUploads("listing_evidence", { max: 3 });
   const submit = () => {
     start(async () => {
-      const r = await reportListingAction({ slug: product.slug, problem, details, email, guard: guard() });
+      const r = await reportListingAction({
+        slug: product.slug,
+        problem,
+        details,
+        email,
+        attachments: uploaded(uploads),
+        guard: guard(),
+      });
       if (r.ok) setSent(true);
       else setErrors(r.errors);
     });
@@ -290,7 +354,7 @@ export function ReportListing({ product }: { product: ProductRef }) {
               >
                 Cancel
               </Button>
-              <Button onClick={submit} disabled={pending}>
+              <Button onClick={submit} disabled={pending || busy(uploads)}>
                 Send report
               </Button>
             </>
@@ -365,6 +429,7 @@ export function ReportListing({ product }: { product: ProductRef }) {
                 }}
               />
             </FormField>
+            <Attachments uploads={uploads} error={errors.attachments} />
             <FormField label="Your email (optional)" error={errors.email}>
               <Input
                 type="email"

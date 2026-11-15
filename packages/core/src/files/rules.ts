@@ -29,6 +29,8 @@ export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   grievance_attachment: { who: "anyone" },
   // The delivery link (695:13) is its own proof (single use, with the SMS code); limited per IP like work_id.
   delivery_photo: { who: "anyone" },
+  // Ask a question needs an account; Report this listing doesn't (limited per IP like work_id). A123.
+  listing_evidence: { who: "anyone" },
   // The supplier's dispatch documents and proof of delivery (order.manage); the buyer's photos with a problem.
   order_document: { who: "company", permission: ["order.manage", "order.place"] },
 };
@@ -44,6 +46,8 @@ export const READ_RULES: Record<
     sharedOnRfq?: boolean;
     /** Both companies of the order it is attached to may open it (order.view), step 10.9. */
     sharedOnOrder?: boolean;
+    /** The supplier a product question was asked of may open its attachments (A123). */
+    sharedOnQuestion?: boolean;
   }
 > = {
   work_id: { operator: "users.view" },
@@ -59,4 +63,6 @@ export const READ_RULES: Record<
   grievance_attachment: { operator: "compliance.view" },
   delivery_photo: { company: "order.view", operator: "orders.view", sharedOnOrder: true },
   order_document: { company: "order.view", operator: "orders.view", sharedOnOrder: true },
+  // Report evidence is read in admin Compliance (Takedowns), A123.
+  listing_evidence: { operator: "compliance.view", sharedOnQuestion: true },
 };

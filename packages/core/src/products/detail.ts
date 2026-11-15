@@ -8,6 +8,9 @@ import {
 } from "@h2india/db";
 import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
+import { loadActor, VISITOR } from "../authz/actor";
+import { attachFile } from "../files/files";
+import { must } from "../must";
 import type { AttributeDef } from "../catalogue/attributes";
 import { effectiveSchema, type ClassId } from "../catalogue/taxonomy";
 import { Money } from "../money";
@@ -322,8 +325,17 @@ async function liveProduct(db: Executor, slug: string) {
  */
 export async function askQuestion(
   db: Database,
-  input: { slug: string; userId: string; question: string; companyName: string | null; context?: RequestContext },
+  input: {
+    slug: string;
+    userId: string;
+    question: string;
+    companyName: string | null;
+    /** Up to 3 listing_evidence files the person uploaded (A123). */
+    attachments?: { fileId: string; key?: string }[];
+    context?: RequestContext;
+  },
 ): Promise<Result> {
+  if ((input.attachments?.length ?? 0) > 3) return { ok: false, errors: { attachments: "Attach up to 3 files" } };
   const question = input.question.trim();
   if (question.length < 10) return { ok: false, errors: { question: "Write your question in a sentence or two" } };
   if (question.length > QUESTION_MAX)
@@ -338,9 +350,20 @@ export async function askQuestion(
         organisationId: product.organisationId,
         askerId: input.userId,
         question,
+        attachments: (input.attachments ?? []).map((a) => a.fileId),
         sharedCompany: input.companyName,
       })
       .returning({ id: schema.productQuestions.id });
+    const asker = await loadActor(tx, input.userId);
+    for (const a of input.attachments ?? [])
+      await attachFile(tx, {
+        actor: asker,
+        key: a.key,
+        fileId: a.fileId,
+        kind: "listing_evidence",
+        attachedType: "product_question",
+        attachedId: must(row).id,
+      });
     await audit(tx, {
       actorId: input.userId,
       action: "product.question",
@@ -365,10 +388,13 @@ export async function reportListing(
     details: string;
     email: string;
     userId: string | null;
+    /** Up to 3 listing_evidence files, each with the upload key when sent signed out (A123). */
+    attachments?: { fileId: string; key?: string }[];
     context?: RequestContext;
   },
 ): Promise<Result> {
   const errors: Record<string, string> = {};
+  if ((input.attachments?.length ?? 0) > 3) errors.attachments = "Attach up to 3 files";
   if (!REPORT_PROBLEMS.some((p) => p.value === input.problem)) errors.problem = "Choose what's wrong";
   const details = input.details.trim();
   if (details.length < 10) errors.details = "Tell us what's wrong in a sentence or two";
@@ -387,8 +413,19 @@ export async function reportListing(
         details,
         email: email || null,
         reporterId: input.userId,
+        attachments: (input.attachments ?? []).map((a) => a.fileId),
       })
       .returning({ id: schema.listingReports.id });
+    const reporter = input.userId ? await loadActor(tx, input.userId) : VISITOR;
+    for (const a of input.attachments ?? [])
+      await attachFile(tx, {
+        actor: reporter,
+        key: a.key,
+        fileId: a.fileId,
+        kind: "listing_evidence",
+        attachedType: "listing_report",
+        attachedId: must(row).id,
+      });
     await audit(tx, {
       actorId: input.userId,
       action: "listing.reported",

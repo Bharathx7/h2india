@@ -5,6 +5,16 @@ import { underLimit } from "./limits";
 // a hidden "website" field people never fill (honeypot), a minimum time between the form appearing and being sent,
 // per-IP limits (a burst of 5 a minute and 30 an hour per form), and a bot challenge once a provider is chosen.
 
+/**
+ * The public search suggestions (A54): the overlay asks on every keystroke, so the limit is per IP per minute and
+ * generous enough for fast typing; a script hammering the search engine is turned away.
+ */
+export const SEARCH_SUGGEST_PER_MINUTE = 120;
+
+export async function suggestAllowed(ip: string | null): Promise<boolean> {
+  return underLimit(`suggest:${ip ?? "unknown"}`, 60, SEARCH_SUGGEST_PER_MINUTE);
+}
+
 export const FORM_LIMITS = {
   burst: { windowSeconds: 60, max: 5 },
   hourly: { windowSeconds: 3600, max: 30 },
