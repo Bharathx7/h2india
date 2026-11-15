@@ -58,8 +58,17 @@ jobs:
             echo "| --- | --- | --- | --- |"
             awk -F'\t' '{ printf "| %s | %s | %s | %s |\n", $1, $2, $3, $4 }' findings.tsv
           } >> "$GITHUB_STEP_SUMMARY"
+          cat findings.tsv
           high=$(awk -F'\t' '$1 + 0 >= 7' findings.tsv | wc -l)
           if [ "$high" -gt 0 ]; then
             echo "::error::$high high-severity CodeQL findings (see the summary)"
             exit 1
           fi
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: codeql-sarif
+          path: sarif
+          retention-days: 14
+          if-no-files-found: ignore
