@@ -700,7 +700,7 @@ export const CMS_PERSONAL: { collection: string; fields: string; purpose: string
   },
 ];
 
-const cell = (s: string) => s.replace(/\|/g, "\\|");
+const cell = (s: string) => s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 
 /** docs/privacy/inventory.md, written by `pnpm privacy:inventory`; inventory.test.ts checks the file is current. */
 export function inventoryMarkdown(): string {

@@ -355,7 +355,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
 
         <section className="flex flex-col gap-5 rounded-card border border-default bg-page p-5 md:p-6">
           <h2 className="type-h3">
-            {step} · {STEPS[step - 1]?.replace("&", "and").replace(" and send", " & send")}
+            {step} · {STEPS[step - 1]?.replaceAll("&", "and").replace(" and send", " & send")}
           </h2>
           {problem ? <Alert tone="error" title={problem} live /> : null}
           {errorList.length ? (

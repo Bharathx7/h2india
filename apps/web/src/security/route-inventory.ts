@@ -289,7 +289,7 @@ function routePath(file: string): string {
   return `/${p}`;
 }
 
-const cell = (s: string) => s.replace(/\|/g, "\\|");
+const cell = (s: string) => s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 
 export function renderMarkdown(entries: Entry[]): string {
   const routes = entries.filter((e) => e.kind === "route");
