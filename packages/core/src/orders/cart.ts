@@ -1,8 +1,9 @@
 import { schema, type Database } from "@h2india/db";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { OrderError, orderFigures, requireTransactions } from "./records";
+import { gstRows } from "./tax";
 import { must } from "../must";
 
 // The cart (step 10.2, 80:5973): fixed-price items from one supplier at a time. Adding from another supplier asks
@@ -120,11 +121,22 @@ export async function viewCart(db: Database, actor: Actor, organisationId: strin
           name: schema.organisations.legalName,
           trade: schema.companyProfiles.tradeName,
           slug: schema.companyProfiles.slug,
+          city: schema.companyProfiles.city,
+          state: schema.organisations.state,
+          verified: schema.organisations.verification,
+          gstin: sql<
+            string | null
+          >`(select g.gstin from core.organisation_gstins g where g.organisation_id = ${cart.supplierId}
+            order by g.is_default desc, g.created_at limit 1)`,
         })
         .from(schema.organisations)
         .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, schema.organisations.id))
         .where(eq(schema.organisations.id, cart.supplierId))
     : [];
+  const [buyer] = await db
+    .select({ state: schema.organisations.state })
+    .from(schema.organisations)
+    .where(eq(schema.organisations.id, organisationId));
   const items = rows.map(({ item, product }) => ({
     id: item.id,
     productId: product.id,
@@ -137,6 +149,7 @@ export async function viewCart(db: Database, actor: Actor, organisationId: strin
     available: product.status === "Live" && !product.deletedAt && product.pricing === "fixed" && !!product.pricePaise,
     stockLeft: product.stock === "in_stock" ? product.stockQty : null,
     shipDays: product.shipDays,
+    image: product.images[0]?.fileId ?? null,
   }));
   const figures = orderFigures(
     items
@@ -148,12 +161,38 @@ export async function viewCart(db: Database, actor: Actor, organisationId: strin
         gstRateBps: i.gstRateBps,
       })),
   );
+  const live = items.filter((i) => i.available);
+  const rates = new Set(live.map((i) => i.gstRateBps));
   return {
     supplier: supplier
-      ? { id: must(cart.supplierId), name: supplier.trade ?? supplier.name, slug: supplier.slug }
+      ? {
+          id: must(cart.supplierId),
+          name: supplier.trade ?? supplier.name,
+          legalName: supplier.name,
+          slug: supplier.slug,
+          city: supplier.city,
+          state: supplier.state,
+          verified: supplier.verified === "Verified",
+          gstin: supplier.gstin,
+        }
       : null,
     items,
     ...figures,
+    gst: gstRows({
+      gstPaise: figures.gstPaise,
+      rateBps: rates.size === 1 ? ([...rates][0] ?? null) : null,
+      supplierState: supplier?.state ?? null,
+      buyerState: buyer?.state ?? null,
+    }),
   };
 }
 export type CartView = Awaited<ReturnType<typeof viewCart>>;
+
+/** A live fixed-price product's id by its address (the product page's Add to cart and Buy now links). */
+export async function cartProductId(db: Database, slug: string): Promise<{ id: string; minOrder: number } | null> {
+  const [p] = await db
+    .select({ id: schema.products.id, minOrder: schema.products.minOrder })
+    .from(schema.products)
+    .where(and(eq(schema.products.slug, slug), eq(schema.products.status, "Live"), isNull(schema.products.deletedAt)));
+  return p ? { id: p.id, minOrder: Math.max(1, p.minOrder ?? 1) } : null;
+}
