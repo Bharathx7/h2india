@@ -1,6 +1,7 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
-import { newEmail, ownIp, withDb } from "../helpers/sign-in";
+import { expect, test } from "@playwright/test";
+import { ownIp, withDb } from "../helpers/sign-in";
 import { signInExisting } from "../helpers/rfq";
+import { as, PDF, setup, sms } from "../helpers/orders";
 
 // Flow B (playbook step 10.12, page 18): a fixed-price order, confirm then pay, against the simulated payment partner
 // (A176). Product page → Add to cart → checkout (delivery, billing, payment, review) → order placed → the supplier
@@ -8,105 +9,6 @@ import { signInExisting } from "../helpers/rfq";
 // shipped → proof of delivery → the receiving contact records the delivery with the SMS code → the buyer accepts →
 // the payout. Needs the app with FLAG_TRANSACTIONS=true, the worker (file checks, the partner's webhooks) and Mailpit.
 // Approver review with a passkey is proven in orders.int.test.ts.
-
-const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
-const PDF = Buffer.from("%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n");
-
-interface Setup {
-  tag: string;
-  buyerEmail: string;
-  supplierEmail: string;
-  slug: string;
-  mobile: string;
-  supplierOrg: string;
-}
-
-async function setup(): Promise<Setup> {
-  const tag = String(Date.now()).slice(-7);
-  const buyerEmail = newEmail(`flowb-buyer-${tag}`);
-  const supplierEmail = newEmail(`flowb-supplier-${tag}`);
-  const mobile = `98${tag.padStart(8, "0").slice(-8)}`;
-  const slug = `flowb-dryer-${tag}`;
-  return withDb(async (db) => {
-    const one = async (sql: string, args: unknown[]) => (await db.query<{ id: string }>(sql, args)).rows[0]?.id ?? "";
-    const [cat] = (await db.query<{ id: string }>("SELECT id FROM core.catalogue_categories LIMIT 1")).rows;
-    const buyerOrg = await one(
-      `INSERT INTO core.organisations (id, kind, legal_name, state) VALUES (gen_random_uuid(), 'buyer', $1, 'Maharashtra') RETURNING id`,
-      [`Flow B Buyer ${tag}`],
-    );
-    const supplierOrg = await one(
-      `INSERT INTO core.organisations (id, kind, legal_name, verification, state) VALUES (gen_random_uuid(), 'supplier', $1, 'Verified', 'Gujarat') RETURNING id`,
-      [`Flow B Dryers ${tag}`],
-    );
-    await db.query(
-      `INSERT INTO core.company_profiles (organisation_id, slug, trade_name, city) VALUES ($1, $2, $3, 'Ahmedabad')`,
-      [supplierOrg, `flowb-dryers-${tag}`, `Flow B Dryers ${tag}`],
-    );
-    await db.query(
-      `INSERT INTO core.products (id, organisation_id, category_id, slug, name, status, published_at, pricing, price_paise, price_currency, gst_rate_bps, stock, stock_qty)
-       VALUES (gen_random_uuid(), $1, $2, $3, $4, 'Live', now(), 'fixed', 68000000, 'INR', 1800, 'in_stock', 5)`,
-      [supplierOrg, cat?.id, slug, `Hydrogen dryer HD-50 ${tag}`],
-    );
-    const person = async (email: string, name: string, org: string, role: string, profile: string) => {
-      const user = await one(
-        `INSERT INTO core.users (id, email, name, email_verified, profile_type) VALUES (gen_random_uuid(), $1, $2, true, $3) RETURNING id`,
-        [email, name, profile],
-      );
-      await db.query(
-        `INSERT INTO core.memberships (id, organisation_id, user_id, role) VALUES (gen_random_uuid(), $1, $2, $3)`,
-        [org, user, role],
-      );
-    };
-    await person(buyerEmail, "Ravi Flow", buyerOrg, "Admin", "buyer");
-    await person(supplierEmail, "Sana Flow", supplierOrg, "Admin", "supplier");
-    const gstin = await one(
-      `INSERT INTO core.organisation_gstins (id, organisation_id, gstin, state_code, place, portal_status, is_default) VALUES (gen_random_uuid(), $1, $2, '27', 'Pune, Maharashtra', 'Active', true) RETURNING id`,
-      [buyerOrg, `27FLOWB${tag}1Z5`.slice(0, 15)],
-    );
-    await db.query(
-      `INSERT INTO core.delivery_sites (id, organisation_id, name, address, city, state, is_default, gstin_id, contacts)
-       VALUES (gen_random_uuid(), $1, 'Talegaon plant', 'Plot 14', 'Pune', 'Maharashtra', true, $2, $3)`,
-      [buyerOrg, gstin, JSON.stringify([{ name: "Suresh Patil", role: "Stores in-charge", mobile }])],
-    );
-    await db.query(
-      `INSERT INTO core.payout_bank_accounts (id, organisation_id, holder_name, account_last4, account_cipher, ifsc, status)
-       VALUES (gen_random_uuid(), $1, $2, '4321', 'test-only', 'SIMB0000002', 'Active')`,
-      [supplierOrg, `Flow B Dryers ${tag}`],
-    );
-    return { tag, buyerEmail, supplierEmail, slug, mobile, supplierOrg };
-  });
-}
-
-async function as(browser: Browser, email: string, next: string): Promise<Page> {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  const page = await context.newPage();
-  await signInExisting(page, email, next);
-  return page;
-}
-
-/** The last SMS to a mobile, from Mailpit (the fake SMS provider delivers there). */
-async function sms(page: Page, mobile: string, match: RegExp): Promise<RegExpExecArray> {
-  let found: RegExpExecArray | null = null;
-  await expect
-    .poll(
-      async () => {
-        const list = (await (
-          await page.request.get(
-            `${MAILPIT}/api/v1/search?query=${encodeURIComponent(`subject:"SMS to +91${mobile}"`)}&limit=5`,
-          )
-        ).json()) as { messages?: { ID: string }[] };
-        for (const m of list.messages ?? []) {
-          const body = (await (await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`)).json()) as { Text: string };
-          found = match.exec(body.Text);
-          if (found) return true;
-        }
-        return false;
-      },
-      { message: `an SMS to ${mobile}`, timeout: 30_000 },
-    )
-    .toBe(true);
-  return found as unknown as RegExpExecArray;
-}
 
 test("flow B: fixed-price order, confirm then pay, delivered and paid out", async ({
   page,
