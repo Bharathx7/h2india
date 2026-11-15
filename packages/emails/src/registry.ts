@@ -33,7 +33,7 @@ export const TEMPLATES = {
     name: "Order confirmed · pay now",
     frame: "665:82",
     step: "10.7",
-    built: false,
+    built: true,
   },
   "email.payment_instructions": {
     channel: "email",
@@ -49,7 +49,7 @@ export const TEMPLATES = {
     name: "Payout sent",
     frame: "665:239",
     step: "10.11",
-    built: false,
+    built: true,
   },
   "email.tender_alert_digest": {
     channel: "email",
@@ -89,7 +89,7 @@ export const TEMPLATES = {
     name: "Payment received",
     frame: "671:620",
     step: "10.5",
-    built: false,
+    built: true,
   },
   "email.order_dispatched": {
     channel: "email",
@@ -97,7 +97,7 @@ export const TEMPLATES = {
     name: "Order dispatched",
     frame: "671:685",
     step: "10.9",
-    built: false,
+    built: true,
   },
   "email.acceptance_reminder": {
     channel: "email",
@@ -113,7 +113,7 @@ export const TEMPLATES = {
     name: "Dispute opened",
     frame: "673:8",
     step: "10.10",
-    built: false,
+    built: true,
   },
   "email.approval_needed": {
     channel: "email",
@@ -121,7 +121,7 @@ export const TEMPLATES = {
     name: "Approval needed",
     frame: "673:86",
     step: "10.3",
-    built: false,
+    built: true,
   },
   "email.invitation": {
     channel: "email",

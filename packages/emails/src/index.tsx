@@ -215,3 +215,19 @@ export async function renderNewsletterIssue(props: NewsletterIssueProps & { subj
   const element = <NewsletterIssue {...props} />;
   return { subject: props.subject, html: await render(element), text: await render(element, { plainText: true }) };
 }
+
+// Order emails (Stage 10, A178).
+export {
+  acceptanceReminderMessage,
+  approvalNeededMessage,
+  disputeOpenedMessage,
+  orderConfirmedMessage,
+  orderDispatchedMessage,
+  paymentReceivedMessage,
+  payoutSentMessage,
+} from "./orders/messages";
+
+/** Any order email above, in the notice layout. */
+export function renderOrderEmail(appUrl: string, message: Parameters<typeof renderNotice>[1]) {
+  return renderNotice(appUrl, message);
+}

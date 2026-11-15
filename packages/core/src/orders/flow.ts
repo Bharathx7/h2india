@@ -11,7 +11,7 @@ import { nextReference } from "../reference";
 import { attachFile } from "../files/files";
 import { deliverSms } from "../notify/channels";
 import { defineSetting, getSetting } from "../settings";
-import { formatIstDate, formatIstDayMonth } from "../time";
+import { formatIstDate, formatIstDateTime, formatIstDayMonth } from "../time";
 import {
   dispatchChecklist,
   dispatchRulesSchema,
@@ -20,7 +20,14 @@ import {
   type DispatchRules,
 } from "./dispatch";
 import { heldOn, openPayments, orderAccount, refund, release } from "./money";
-import { noticeApprovalNeeded, noticeOrderPlaced, noticePaymentDue, noticeStatus } from "./notices";
+import {
+  noticeApprovalNeeded,
+  noticeDispatched,
+  noticeDisputeOpened,
+  noticeOrderConfirmed,
+  noticeOrderPlaced,
+  noticeStatus,
+} from "./notices";
 import {
   DUE_ON,
   dueUnpaid,
@@ -531,8 +538,9 @@ export async function supplierAccept(
   const fresh = must((await db.select().from(o).where(eq(o.id, order.id)))[0]);
   const due = await dueUnpaid(db, order.id);
   const amount = due.reduce((t, m) => t + m.amountPaise - m.paidPaise, 0n);
-  await tell(() => noticeStatus(db, fresh, "buyer", `${order.reference} confirmed by the supplier`, "check-circle"));
-  if (amount > 0n) await tell(() => noticePaymentDue(db, fresh, amount));
+  const supplierName = (await companyNames(db, fresh)).supplier;
+  const dueAt = due[0]?.dueAt ?? null;
+  await tell(() => noticeOrderConfirmed(db, fresh, supplierName, amount, dueAt ? formatIstDate(dueAt) : null));
   return fresh;
 }
 
@@ -871,7 +879,14 @@ export async function dispatchOrder(
       }),
     );
   }
-  await tell(() => noticeStatus(db, order, "buyer", `${order.reference} has been dispatched`, "truck"));
+  await tell(() =>
+    noticeDispatched(db, order, {
+      supplier: names.supplier,
+      carrier: shipment.transporter ?? "",
+      lr: shipment.lrNumber ?? "",
+      expected: shipment.expectedAt ? formatIstDayMonth(shipment.expectedAt) : "",
+    }),
+  );
 }
 
 async function companyNames(ex: Executor, order: OrderRow) {
@@ -1267,14 +1282,18 @@ export async function reportProblem(
     );
     return must(d);
   });
+  const replyBy = await db
+    .select({ dueAt: schema.deadlines.dueAt })
+    .from(schema.deadlines)
+    .where(and(eq(schema.deadlines.subjectId, dispute.id), eq(schema.deadlines.type, "disputeSupplierReply")));
+  const buyerName = (await companyNames(db, order)).buyer;
   await tell(() =>
-    noticeStatus(
-      db,
-      order,
-      "supplier",
-      `${dispute.reference}: the buyer reported a problem with ${order.reference}`,
-      "alert-triangle",
-    ),
+    noticeDisputeOpened(db, order, {
+      buyer: buyerName,
+      dispute: dispute.reference,
+      held: dispute.disputedPaise,
+      replyBy: replyBy[0]?.dueAt ? formatIstDateTime(replyBy[0].dueAt) : "2 working days",
+    }),
   );
   return dispute;
 }
