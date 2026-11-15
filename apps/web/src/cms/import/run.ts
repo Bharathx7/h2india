@@ -27,6 +27,8 @@ interface Mapped {
   data: Record<string, unknown>;
   publish: boolean;
   errors: string[];
+  /** Links to rows of the same file that don't exist yet: filled in once every row is saved. */
+  deferred: { column: string; keys: string[]; hasMany: boolean }[];
 }
 
 function columnsOf(fields: FlattenedField[], prefix = ""): Map<string, FlattenedField> {
@@ -83,10 +85,12 @@ async function mapRow(
   type: ContentTypeName,
   columns: Map<string, FlattenedField>,
   raw: Row,
+  inFile: ReadonlySet<string>,
 ): Promise<Mapped> {
   const spec = CONTENT_TYPES[type];
   const row = flattenRow(raw, columns);
   const errors: string[] = [];
+  const deferred: Mapped["deferred"] = [];
   const data: Record<string, unknown> = {};
   for (const [column, value] of Object.entries(row)) {
     if ((CONTROL_COLUMNS as readonly string[]).includes(column)) continue;
@@ -102,7 +106,11 @@ async function mapRow(
       }
       const keys = listOf(typeof value === "number" ? String(value) : value);
       const ids = keys.length ? await lookupIds(payload, field.relationTo, keys) : new Map<string, number | string>();
-      const missing = keys.filter((k) => !ids.has(k));
+      // A link to another row of this file (a glossary term's related terms) is made after every row is saved.
+      const sameFile = field.relationTo === spec.collection;
+      const later = sameFile ? keys.filter((k) => !ids.has(k) && inFile.has(k)) : [];
+      if (later.length) deferred.push({ column, keys, hasMany: field.hasMany === true });
+      const missing = keys.filter((k) => !ids.has(k) && !later.includes(k));
       if (missing.length) errors.push(`${column}: no ${field.relationTo} with ${missing.join(", ")}`);
       const found: (number | string)[] = keys.flatMap((k) => {
         const id = ids.get(k);
@@ -135,7 +143,20 @@ async function mapRow(
   const publish = publishCell === true;
   if (publish && !spec.publishable)
     errors.push("publish: articles always import as drafts for the Editor-in-chief (A39)");
-  return { key, data, publish, errors };
+  return { key, data, publish, errors, deferred };
+}
+
+/** The slug each row will have, so links between rows of the same file can be recognised before they exist. */
+function keysInFile(type: ContentTypeName, rows: Row[]): Set<string> {
+  const titleField = CONTENT_TYPES[type].titleField;
+  const keys = new Set<string>();
+  for (const raw of rows) {
+    const given = typeof raw.slug === "string" ? raw.slug.trim() : "";
+    const title = raw[titleField];
+    const key = given ? slugify(given) : typeof title === "string" ? slugify(title) : "";
+    if (key) keys.add(key);
+  }
+  return keys;
 }
 
 function messagesOf(error: unknown): string[] {
@@ -171,10 +192,11 @@ export async function importContent(
   const results: RowResult[] = [];
   const plans: { mapped: Mapped; existing: Doc | null; row: number }[] = [];
   const seen = new Set<string>();
+  const inFile = keysInFile(type, rows);
 
   for (const [i, raw] of rows.entries()) {
     const row = opts.firstRow + i;
-    const mapped = await mapRow(payload, type, columns, raw);
+    const mapped = await mapRow(payload, type, columns, raw, inFile);
     if (opts.sample) mapped.data.sample = true;
     if (mapped.key && seen.has(mapped.key)) mapped.errors.push("slug: appears twice in this file");
     seen.add(mapped.key);
@@ -191,6 +213,7 @@ export async function importContent(
     const existing = (found?.docs[0] as Doc | undefined) ?? null;
     if (mapped.errors.length === 0) {
       const unchanged =
+        mapped.deferred.length === 0 &&
         existing !== null &&
         Object.keys(mapped.data).every((k) => sameValue(mapped.data[k], existing[k])) &&
         (!mapped.publish || existing._status === "published");
@@ -216,8 +239,29 @@ export async function importContent(
 
   const report = summarise(type, false, results);
   if (!opts.apply || report.counts.error > 0) return report;
+  const saved = new Map<string, Doc>();
   for (const plan of plans) {
-    await inTransaction(payload, true, (req) => save(payload, spec.collection, plan.mapped, plan.existing, req, false));
+    const doc = await inTransaction(payload, true, (req) =>
+      save(payload, spec.collection, plan.mapped, plan.existing, req, false),
+    );
+    saved.set(plan.mapped.key, doc as unknown as Doc);
+  }
+  // Second pass: the links to rows that didn't exist during the first pass.
+  for (const plan of plans.filter((p) => p.mapped.deferred.length > 0)) {
+    const doc = saved.get(plan.mapped.key);
+    if (!doc) continue;
+    const links: Record<string, unknown> = {};
+    for (const d of plan.mapped.deferred) {
+      const ids = await lookupIds(payload, spec.collection, d.keys);
+      const found = d.keys.flatMap((k) => {
+        const id = ids.get(k);
+        return id === undefined ? [] : [id];
+      });
+      setPath(links, d.column, d.hasMany ? found : (found[0] ?? null));
+    }
+    await inTransaction(payload, true, (req) =>
+      save(payload, spec.collection, { ...plan.mapped, data: { ...plan.mapped.data, ...links } }, doc, req, false),
+    );
   }
   return summarise(type, true, results);
 }
