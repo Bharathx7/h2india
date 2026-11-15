@@ -78,3 +78,48 @@ export function supplierNextStep(o: OrderListItem, now: Date = new Date()): Next
 export function pipelineBadge(o: OrderListItem) {
   return { label: o.status, tone: o.overdue ? ("error" as const) : o.badge.tone };
 }
+
+/** What the buyer does next, on My orders (77:673, A178). */
+export function buyerNextStep(o: OrderListItem, now: Date = new Date()): NextStep {
+  switch (o.status) {
+    case "Awaiting approval":
+      return { text: "Waiting for your approver", urgent: false };
+    case "Pending acceptance":
+      return {
+        text: o.overdue
+          ? "The supplier is late to confirm · H2 India is following up"
+          : "The supplier confirms within 48 hours",
+        urgent: false,
+      };
+    case "Accepted":
+    case "Awaiting payment":
+    case "Ready to dispatch":
+      if (o.due)
+        return {
+          text: `Pay ${milestoneWord(o.due.label).toLowerCase()} ${Money.format(o.due.amountPaise)}${o.due.dueAt ? ` by ${formatIstDayMonth(o.due.dueAt)}` : ""}`,
+          urgent: Boolean(o.due.dueAt && o.due.dueAt.getTime() < now.getTime()),
+        };
+      return {
+        text: o.dispatchBy ? `Dispatch by ${formatIstDayMonth(o.dispatchBy)}` : "Being prepared",
+        urgent: false,
+      };
+    case "Shipped":
+      return { text: [o.transporter ? `On its way with ${o.transporter}` : "On its way"].join(""), urgent: false };
+    case "Delivered":
+      return {
+        text: o.buyerAcceptBy
+          ? `Accept or report a problem by ${formatIstDayMonth(o.buyerAcceptBy)}`
+          : "Accept or report a problem",
+        urgent: true,
+      };
+    case "Disputed":
+      return { text: "Problem reported · see the dispute", urgent: false };
+    case "Accepted by buyer":
+    case "Closed":
+      return { text: "Complete", urgent: false };
+    case "Declined":
+      return { text: "Declined by the supplier", urgent: false };
+    case "Cancelled":
+      return { text: "Cancelled", urgent: false };
+  }
+}

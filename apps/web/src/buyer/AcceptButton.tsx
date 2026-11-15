@@ -33,7 +33,8 @@ export function AcceptButton({
               setError(r.error);
               return;
             }
-            router.push(`/buyer/rfqs/${id}`);
+            // Accepting creates the order (10.1); its page says what happens next.
+            router.push(`/buyer/orders/${r.orderId}`);
             router.refresh();
           });
         }}
