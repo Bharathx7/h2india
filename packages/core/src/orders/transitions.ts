@@ -86,18 +86,19 @@ export function timelineStep(status: OrderStatus, stoppedAt?: OrderStatus): numb
 export type BadgeTone = "neutral" | "progress" | "success" | "warning" | "error";
 
 /** The badge tone for each status (807:14435). */
+/** Badge tones as drawn on 810:12156 and 807:14435 (Status badge 20:96). */
 export const ORDER_BADGE_TONE: Record<OrderStatus | "Overdue", BadgeTone> = {
-  "Awaiting approval": "progress",
+  "Awaiting approval": "warning",
   "Pending acceptance": "progress",
-  Accepted: "success",
+  Accepted: "progress",
   "Awaiting payment": "warning",
-  "Ready to dispatch": "progress",
+  "Ready to dispatch": "warning",
   Shipped: "progress",
   Delivered: "success",
   "Accepted by buyer": "success",
   Closed: "neutral",
   Declined: "error",
-  Cancelled: "neutral",
+  Cancelled: "error",
   Disputed: "error",
   Overdue: "error",
 };
@@ -182,11 +183,13 @@ export const BUYER_ORDER_TABS = [
   { key: "done", label: "Completed", statuses: ["Accepted by buyer", "Closed", "Declined", "Cancelled"] },
 ] as const satisfies readonly { key: string; label: string; statuses: readonly OrderStatus[] }[];
 
+/** The supplier pipeline tiles (810:12156): open stages, then Paid out (closed this month). */
 export const SUPPLIER_PIPELINE = [
-  { key: "new", label: "New", statuses: ["Pending acceptance"] },
-  { key: "payment", label: "Awaiting payment", statuses: ["Accepted", "Awaiting payment"] },
-  { key: "dispatch", label: "To dispatch", statuses: ["Ready to dispatch"] },
-  { key: "transit", label: "In transit", statuses: ["Shipped"] },
+  { key: "pending", label: "Pending acceptance", statuses: ["Pending acceptance"] },
+  { key: "accepted", label: "Accepted", statuses: ["Accepted"] },
+  { key: "payment", label: "Awaiting payment", statuses: ["Awaiting payment"] },
+  { key: "dispatch", label: "Ready to dispatch", statuses: ["Ready to dispatch"] },
+  { key: "shipped", label: "Shipped", statuses: ["Shipped"] },
   { key: "delivered", label: "Delivered", statuses: ["Delivered", "Disputed", "Accepted by buyer"] },
-  { key: "done", label: "Closed", statuses: ["Closed", "Declined", "Cancelled"] },
+  { key: "paid", label: "Paid out", statuses: ["Closed"] },
 ] as const satisfies readonly { key: string; label: string; statuses: readonly OrderStatus[] }[];

@@ -80,6 +80,8 @@ export const FILE_KINDS = {
     visibility: "private",
     sensitive: true,
   },
+  /** Order documents (step 10.9): GST tax invoice, e-way bill, proof of delivery, photos with a reported problem. */
+  order_document: { label: "Document", types: DOCS, maxMb: 10, visibility: "private", sensitive: false },
   delivery_photo: {
     label: "Photo",
     types: ["image/jpeg", "image/png"],

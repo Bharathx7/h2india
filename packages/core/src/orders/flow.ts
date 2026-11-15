@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomInt } from "node:crypto";
-import { requireFlag } from "@h2india/config";
+import { parseServerEnv, requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, eq, gt, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
@@ -8,6 +8,17 @@ import { assertCan } from "../authz/can";
 import { cancelDeadline, completeDeadline, onDeadline, startClock } from "../clocks/clocks";
 import { passkeyConfirmedRecently } from "../sign-in/step-up";
 import { nextReference } from "../reference";
+import { attachFile } from "../files/files";
+import { deliverSms } from "../notify/channels";
+import { defineSetting, getSetting } from "../settings";
+import { formatIstDate, formatIstDayMonth } from "../time";
+import {
+  dispatchChecklist,
+  dispatchRulesSchema,
+  DRAWN_DISPATCH_RULES,
+  itemsLeft,
+  type DispatchRules,
+} from "./dispatch";
 import { heldOn, openPayments, orderAccount, refund, release } from "./money";
 import { noticeApprovalNeeded, noticeOrderPlaced, noticePaymentDue, noticeStatus } from "./notices";
 import {
@@ -604,55 +615,114 @@ const sha = (v: string) => createHash("sha256").update(v).digest("hex");
 export const DELIVERY_LINK_DAYS = 14;
 export const DELIVERY_CODE_TRIES = 5;
 
+/** Whether an IRN is needed and the e-way bill threshold (OPEN: M11): the values drawn on 693:814 until the CA says. */
+export const DISPATCH_RULES = defineSetting<DispatchRules>({
+  key: "orders.dispatchRules",
+  description: "Dispatch checklist: e-invoice IRN required, and the order value above which an e-way bill is needed",
+  schema: dispatchRulesSchema,
+  fallback: DRAWN_DISPATCH_RULES,
+});
+
+const PRE_DISPATCH: readonly string[] = ["Accepted", "Awaiting payment", "Ready to dispatch"];
+
+export interface DispatchItemInput {
+  invoiceNumber?: string;
+  invoiceFileId?: string;
+  irn?: string;
+  irnAt?: Date;
+  ewayBillNumber?: string;
+  ewayBillFileId?: string;
+  certificatesNote?: string;
+  transporter?: string;
+  lrNumber?: string;
+  expectedAt?: Date;
+}
+
+/** Saves checklist items as the supplier adds them (693:814), before Mark as shipped. Files attach to the order. */
+export async function saveDispatchDetails(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  orderId: string,
+  input: DispatchItemInput,
+  context?: RequestContext,
+  opts: { flags?: Record<string, string | undefined> } = {},
+) {
+  await requireTransactions(db, [organisationId], opts.flags);
+  assertCan(actor, "order.manage", { organisationId });
+  const order = await ownOrder(db, organisationId, orderId, "supplier");
+  if (!PRE_DISPATCH.includes(order.status)) throw new OrderError("The checklist is closed once the order ships");
+  const clean = (v?: string) => (v === undefined ? undefined : v.trim() || null);
+  const values = {
+    invoiceNumber: clean(input.invoiceNumber),
+    invoiceFileId: input.invoiceFileId,
+    irn: clean(input.irn),
+    irnAt: input.irnAt ?? (input.irn?.trim() ? new Date() : undefined),
+    ewayBillNumber: clean(input.ewayBillNumber),
+    ewayBillFileId: input.ewayBillFileId,
+    certificatesNote: clean(input.certificatesNote),
+    certificatesAt: input.certificatesNote?.trim() ? new Date() : undefined,
+    transporter: clean(input.transporter),
+    lrNumber: clean(input.lrNumber),
+    expectedAt: input.expectedAt,
+  };
+  const set = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== undefined));
+  await db.transaction(async (tx) => {
+    for (const fileId of [input.invoiceFileId, input.ewayBillFileId].filter((x): x is string => Boolean(x))) {
+      await attachFile(tx, { actor, fileId, kind: "order_document", attachedType: "order", attachedId: order.id });
+    }
+    await tx
+      .insert(schema.shipments)
+      .values({ orderId: order.id, ...set })
+      .onConflictDoUpdate({ target: schema.shipments.orderId, set: { ...set, updatedAt: new Date() } });
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "order.dispatch_details",
+      resourceType: "order",
+      resourceId: order.id,
+      companyId: organisationId,
+      after: Object.fromEntries(Object.keys(set).map((k) => [k, "saved"])),
+      context,
+    });
+  });
+}
+
+/** The checklist as the page and the server see it. */
+export async function checklistFor(ex: Executor, order: OrderRow, buyerName: string) {
+  const [shipment] = await ex.select().from(schema.shipments).where(eq(schema.shipments.orderId, order.id));
+  const rules = await getSetting(ex, DISPATCH_RULES);
+  return {
+    shipment: shipment ?? null,
+    items: dispatchChecklist(shipment ?? null, { totalPaise: order.totalPaise, buyerName }, rules, formatIstDate),
+  };
+}
+
 /**
- * Dispatch (693:814): GST invoice, e-way bill and transport details; everything due before dispatch must be paid.
- * Makes the single-use delivery link and six-digit code for the receiving contact. Returns the link and code so the
- * caller can send them (SMS 668:232); they are stored only hashed.
+ * Mark as shipped (693:814): every checklist item done and everything due before dispatch paid. Tells the receiving
+ * contact by SMS (668:270) that it's on its way; the delivery code follows with proof of delivery.
  */
 export async function dispatchOrder(
   db: Database,
   actor: Actor,
   organisationId: string,
   orderId: string,
-  input: {
-    invoiceNumber: string;
-    invoiceFileId?: string | null;
-    ewayBillNumber?: string | null;
-    ewayBillFileId?: string | null;
-    transporter: string;
-    vehicleOrTracking?: string | null;
-  },
   context?: RequestContext,
   opts: { flags?: Record<string, string | undefined> } = {},
 ) {
   await requireTransactions(db, [organisationId], opts.flags);
   assertCan(actor, "order.manage", { organisationId });
-  const errors: Record<string, string> = {};
-  if (!input.invoiceNumber.trim()) errors.invoiceNumber = "Enter the GST invoice number";
-  if (!input.transporter.trim()) errors.transporter = "Enter the transporter";
-  if (Object.keys(errors).length) throw new OrderError("Complete the checklist", errors);
   const order = await ownOrder(db, organisationId, orderId, "supplier");
   if (order.status !== "Ready to dispatch") throw new OrderError("This order isn't ready to dispatch");
   if (!(await paidForDispatch(db, order.id))) throw new OrderError("The buyer hasn't paid what's due before dispatch");
-  const token = randomBytes(24).toString("base64url");
-  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+  const names = await companyNames(db, order);
+  const { items, shipment } = await checklistFor(db, order, names.buyer);
+  const left = itemsLeft(items);
+  if (left || !shipment) throw new OrderError(left || "Complete the dispatch checklist");
   await db.transaction(async (tx) => {
-    await tx.insert(schema.shipments).values({
-      orderId: order.id,
-      invoiceNumber: input.invoiceNumber.trim(),
-      invoiceFileId: input.invoiceFileId ?? null,
-      ewayBillNumber: input.ewayBillNumber?.trim() || null,
-      ewayBillFileId: input.ewayBillFileId ?? null,
-      transporter: input.transporter.trim(),
-      vehicleOrTracking: input.vehicleOrTracking?.trim() || null,
-      shippedBy: actor.userId,
-    });
-    await tx.insert(schema.deliveryLinks).values({
-      orderId: order.id,
-      tokenHash: sha(token),
-      codeHash: sha(`${order.id}:${code}`),
-      expiresAt: new Date(Date.now() + DELIVERY_LINK_DAYS * 86_400_000),
-    });
+    await tx
+      .update(schema.shipments)
+      .set({ shippedAt: new Date(), shippedBy: actor.userId, updatedAt: new Date() })
+      .where(eq(schema.shipments.orderId, order.id));
     await moveOrder(
       tx,
       actor.userId,
@@ -666,28 +736,114 @@ export async function dispatchOrder(
       },
     );
   });
+  if (order.receiverMobile && shipment.transporter && shipment.lrNumber && shipment.expectedAt) {
+    const carrier = shipment.transporter;
+    const lr = shipment.lrNumber;
+    const expected = formatIstDayMonth(shipment.expectedAt);
+    await tell(() =>
+      deliverSms({
+        template: "sms.order_dispatched_receiving_contact",
+        event: "order.dispatched",
+        to: `+91${must(order.receiverMobile)}`,
+        data: { order: order.reference, supplier: names.supplier, carrier, lr, expected },
+      }),
+    );
+  }
   await tell(() => noticeStatus(db, order, "buyer", `${order.reference} has been dispatched`, "truck"));
-  return { token, code, receiverMobile: order.receiverMobile };
+}
+
+async function companyNames(ex: Executor, order: OrderRow) {
+  const name = async (id: string) => {
+    const [row] = await ex
+      .select({ legal: schema.organisations.legalName, trade: schema.companyProfiles.tradeName })
+      .from(schema.organisations)
+      .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, schema.organisations.id))
+      .where(eq(schema.organisations.id, id));
+    return row?.trade ?? row?.legal ?? "";
+  };
+  return { buyer: await name(order.buyerOrganisationId), supplier: await name(order.supplierOrganisationId) };
+}
+
+/** A new single-use link and code; earlier ones stop working. Returns them so tests can use them. */
+async function issueDeliveryCode(tx: Executor, orderId: string) {
+  const token = randomBytes(8).toString("base64url");
+  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+  await tx
+    .update(schema.deliveryLinks)
+    .set({ usedAt: new Date() })
+    .where(and(eq(schema.deliveryLinks.orderId, orderId), isNull(schema.deliveryLinks.usedAt)));
+  await tx.insert(schema.deliveryLinks).values({
+    orderId,
+    tokenHash: sha(token),
+    codeHash: sha(`${orderId}:${code}`),
+    expiresAt: new Date(Date.now() + DELIVERY_LINK_DAYS * 86_400_000),
+  });
+  return { token, code };
+}
+
+async function sendDeliveryCode(db: Database, order: OrderRow, issued: { token: string; code: string }) {
+  if (!order.receiverMobile) return;
+  const names = await companyNames(db, order);
+  const base = parseServerEnv()
+    .APP_URL.replace(/^https?:\/\//, "")
+    .replace(/\/$/, "");
+  await deliverSms({
+    template: "sms.otp_delivery_receiving_contact",
+    event: "order.delivery_code",
+    to: `+91${order.receiverMobile}`,
+    data: { order: order.reference, supplier: names.supplier, link: `${base}/d/${issued.token}`, code: issued.code },
+  });
+  await db.update(schema.shipments).set({ codeSentAt: new Date() }).where(eq(schema.shipments.orderId, order.id));
+}
+
+/**
+ * Upload proof of delivery (308:6627): the goods are at the buyer's gate. Sends the receiving contact the delivery
+ * code (668:232); entering it confirms delivery.
+ */
+export async function uploadProofOfDelivery(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  orderId: string,
+  fileIds: string[],
+  context?: RequestContext,
+  opts: { flags?: Record<string, string | undefined> } = {},
+) {
+  await requireTransactions(db, [organisationId], opts.flags);
+  assertCan(actor, "order.manage", { organisationId });
+  if (!fileIds.length)
+    throw new OrderError("Add the proof of delivery", { files: "Upload the signed delivery note or photos" });
+  const order = await ownOrder(db, organisationId, orderId, "supplier");
+  if (order.status !== "Shipped") throw new OrderError("This order isn't in transit");
+  const issued = await db.transaction(async (tx) => {
+    for (const fileId of fileIds)
+      await attachFile(tx, { actor, fileId, kind: "order_document", attachedType: "order", attachedId: order.id });
+    await tx
+      .update(schema.shipments)
+      .set({ podFileIds: fileIds, podAt: new Date(), updatedAt: new Date() })
+      .where(eq(schema.shipments.orderId, order.id));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "order.proof_of_delivery",
+      resourceType: "order",
+      resourceId: order.id,
+      companyId: organisationId,
+      after: { files: fileIds.length },
+      context,
+    });
+    return issueDeliveryCode(tx, order.id);
+  });
+  await tell(() => sendDeliveryCode(db, order, issued));
+  return issued;
 }
 
 /** Sends a fresh code (G5 fallback: an operator resends). The old link stops working. */
 export async function resendDeliveryCode(db: Database, actor: Actor, orderId: string, reason: string) {
   if (!actor.operator.has("orders.edit")) throw new OrderError("Not allowed");
+  if (!reason.trim()) throw new OrderError("Say why");
   const [order] = await db.select().from(o).where(eq(o.id, orderId));
   if (!order || order.status !== "Shipped") throw new OrderError("This order isn't in transit");
-  const token = randomBytes(24).toString("base64url");
-  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
-  await db.transaction(async (tx) => {
-    await tx
-      .update(schema.deliveryLinks)
-      .set({ usedAt: new Date() })
-      .where(and(eq(schema.deliveryLinks.orderId, orderId), isNull(schema.deliveryLinks.usedAt)));
-    await tx.insert(schema.deliveryLinks).values({
-      orderId,
-      tokenHash: sha(token),
-      codeHash: sha(`${orderId}:${code}`),
-      expiresAt: new Date(Date.now() + DELIVERY_LINK_DAYS * 86_400_000),
-    });
+  const issued = await db.transaction(async (tx) => {
     await audit(tx, {
       actorId: actor.userId,
       action: "order.delivery_code_resent",
@@ -695,8 +851,10 @@ export async function resendDeliveryCode(db: Database, actor: Actor, orderId: st
       resourceId: orderId,
       reason,
     });
+    return issueDeliveryCode(tx, orderId);
   });
-  return { token, code, receiverMobile: order.receiverMobile };
+  await sendDeliveryCode(db, order, issued);
+  return issued;
 }
 
 /** What the delivery page may show (695:13): the order reference and items only, never prices. */

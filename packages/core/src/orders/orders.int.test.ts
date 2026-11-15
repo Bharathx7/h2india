@@ -19,6 +19,8 @@ import {
   decideDispute,
   dispatchOrder,
   placeCartOrder,
+  saveDispatchDetails,
+  uploadProofOfDelivery,
   recordReceipt,
   replyToDispute,
   reportProblem,
@@ -75,6 +77,48 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       })
       .returning();
     return must(p).id;
+  }
+
+  async function doc(userId: string) {
+    const [f] = await h.db
+      .insert(schema.files)
+      .values({
+        kind: "order_document",
+        status: "Available",
+        uploadedBy: userId,
+        organisationId: supplier.org.id,
+        name: "doc.pdf",
+        declaredType: "application/pdf",
+        declaredBytes: 1000,
+        quarantineKey: `q/${String(Math.random())}`,
+        bucket: "private",
+        objectKey: `o/${String(Math.random())}`,
+      })
+      .returning();
+    return must(f).id;
+  }
+
+  /** The 693:814 checklist, Mark as shipped, then proof of delivery (which issues the delivery code). */
+  async function ship(orderId: string, sAdmin: Actor, invoice: string) {
+    await saveDispatchDetails(
+      h.db,
+      sAdmin,
+      supplier.org.id,
+      orderId,
+      {
+        invoiceNumber: invoice,
+        invoiceFileId: await doc(supplier.admin.id),
+        irn: "IRN-TEST",
+        certificatesNote: "Factory test report uploaded",
+        transporter: "Gati KWE",
+        lrNumber: "4410 1967",
+        expectedAt: new Date(Date.now() + 3 * DAY),
+      },
+      undefined,
+      ON,
+    );
+    await dispatchOrder(h.db, sAdmin, supplier.org.id, orderId, undefined, ON);
+    return uploadProofOfDelivery(h.db, sAdmin, supplier.org.id, orderId, [await doc(supplier.admin.id)], undefined, ON);
   }
 
   async function placeOne(actor: Actor, qty = 2) {
@@ -272,15 +316,9 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect(await status(order.id)).toBe("Ready to dispatch");
 
     // Dispatch, then the receiving contact records the delivery with the code.
-    const sent = await dispatchOrder(
-      h.db,
-      sAdmin,
-      supplier.org.id,
-      order.id,
-      { invoiceNumber: "INV-1", transporter: "Safe Express" },
-      undefined,
-      ON,
-    );
+    // Mark as shipped stays locked until the checklist is done.
+    await expect(dispatchOrder(h.db, sAdmin, supplier.org.id, order.id, undefined, ON)).rejects.toThrow("items left");
+    const sent = await ship(order.id, sAdmin, "INV-1");
     const wrong = sent.code === "000000" ? "111111" : "000000";
     expect((await recordReceipt(h.db, { token: sent.token, code: wrong, condition: "Good" })).ok).toBe(false);
     expect((await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Good" })).ok).toBe(true);
@@ -349,15 +387,7 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       ON,
     );
     await payAll(order.id, admin);
-    const sent = await dispatchOrder(
-      h.db,
-      sAdmin,
-      supplier.org.id,
-      order.id,
-      { invoiceNumber: "INV-2", transporter: "VRL" },
-      undefined,
-      ON,
-    );
+    const sent = await ship(order.id, sAdmin, "INV-2");
     await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Damaged", notes: "One unit cracked" });
     const dispute = await reportProblem(
       h.db,

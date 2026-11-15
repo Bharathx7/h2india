@@ -315,6 +315,15 @@ export interface OrderListItem {
   dueNowPaise: bigint;
   createdAt: Date;
   dispatchBy: Date | null;
+  /** When the supplier's 48 hours end (Pending acceptance). */
+  acceptBy: Date | null;
+  /** The earliest unpaid milestone that is due, for "Advance ₹… due 13 Nov". */
+  due: { label: string; amountPaise: bigint; dueAt: Date | null } | null;
+  transporter: string | null;
+  shippedAt: Date | null;
+  /** When the buyer's 5 working days to accept end (Delivered). */
+  buyerAcceptBy: Date | null;
+  closedAt: Date | null;
 }
 
 const companyName = (column: typeof o.buyerOrganisationId | typeof o.supplierOrganisationId) =>
@@ -338,6 +347,13 @@ export async function listOrders(
       lineCount: sql<number>`(select count(*)::int from core.order_lines l where l.order_id = core.orders.id)`,
       dueNow: sql<string>`(select coalesce(sum(amount_paise - paid_paise), 0)::text from core.order_milestones m
         where m.order_id = core.orders.id and m.status in ('Due', 'Partly paid'))`,
+      dueLabel: sql<string | null>`(select m.trigger from core.order_milestones m
+        where m.order_id = core.orders.id and m.status in ('Due', 'Partly paid') order by m.position limit 1)`,
+      dueAt: sql<string | null>`(select m.due_at from core.order_milestones m
+        where m.order_id = core.orders.id and m.status in ('Due', 'Partly paid') order by m.position limit 1)`,
+      transporter: sql<string | null>`(select s.transporter from core.shipments s where s.order_id = core.orders.id)`,
+      buyerAcceptBy: sql<string | null>`(select d.due_at from core.deadlines d where d.subject_id = core.orders.id
+        and d.type = 'buyerAcceptsDelivery' and d.status = 'Open')`,
     })
     .from(o)
     .where(
@@ -370,6 +386,14 @@ export async function listOrders(
       dueNowPaise: BigInt(r.dueNow),
       createdAt: r.order.createdAt,
       dispatchBy: r.order.dispatchBy,
+      acceptBy: f?.acceptBy ?? null,
+      due: r.dueLabel
+        ? { label: r.dueLabel, amountPaise: BigInt(r.dueNow), dueAt: r.dueAt ? new Date(r.dueAt) : null }
+        : null,
+      transporter: r.transporter,
+      shippedAt: r.order.shippedAt,
+      buyerAcceptBy: r.buyerAcceptBy ? new Date(r.buyerAcceptBy) : null,
+      closedAt: r.order.closedAt,
     };
   });
 }

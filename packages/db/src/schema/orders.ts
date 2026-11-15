@@ -182,27 +182,41 @@ export const orderApprovals = core.table(
   (t) => [uniqueIndex("order_approvals_step").on(t.orderId, t.step)],
 );
 
-/** The one shipment of an order (G6) with its dispatch checklist (693:814). */
+/**
+ * The one shipment of an order (G6) and its dispatch checklist (693:814): each item is saved as the supplier adds it;
+ * Mark as shipped unlocks when all are done. After shipping, proof of delivery sends the receiving contact the code.
+ */
 export const shipments = core.table("shipments", {
   id: id(),
   orderId: uuid("order_id")
     .notNull()
     .references(() => orders.id)
     .unique(),
-  invoiceNumber: text("invoice_number").notNull(),
+  /** Tax invoice (GST): number and file. */
+  invoiceNumber: text("invoice_number"),
   invoiceFileId: uuid("invoice_file_id"),
+  /** E-invoice IRN and when it was generated. */
+  irn: text("irn"),
+  irnAt: utc("irn_at"),
   ewayBillNumber: text("eway_bill_number"),
   ewayBillFileId: uuid("eway_bill_file_id"),
-  transporter: text("transporter").notNull(),
-  vehicleOrTracking: text("vehicle_or_tracking"),
-  proofFileIds: uuid("proof_file_ids")
+  /** "Certificates for this product": what the supplier confirmed (test report, licence or why none is needed). */
+  certificatesNote: text("certificates_note"),
+  certificatesAt: utc("certificates_at"),
+  /** Carrier and tracking: who carries it, LR or tracking number, expected arrival. */
+  transporter: text("transporter"),
+  lrNumber: text("lr_number"),
+  expectedAt: utc("expected_at"),
+  shippedAt: utc("shipped_at"),
+  shippedBy: uuid("shipped_by").references(() => users.id),
+  /** Proof of delivery (308:6627); uploading it sends the receiving contact the delivery code. */
+  podFileIds: uuid("pod_file_ids")
     .array()
     .notNull()
     .default(sql`'{}'::uuid[]`),
-  shippedAt: utc("shipped_at")
-    .notNull()
-    .default(sql`now()`),
-  shippedBy: uuid("shipped_by").references(() => users.id),
+  podAt: utc("pod_at"),
+  codeSentAt: utc("code_sent_at"),
+  ...timestamps,
 });
 
 /** Changes to the promised dispatch date (344:27740, G8). Append-only. */
