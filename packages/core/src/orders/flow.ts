@@ -1126,28 +1126,47 @@ export async function reportProblem(
   return dispute;
 }
 
-/** The supplier answers a dispute (813:12602). */
+export const DISPUTE_OFFERS = ["replace", "partial_refund", "disagree"] as const;
+export type DisputeOffer = (typeof DISPUTE_OFFERS)[number];
+
+/**
+ * The supplier's response (813:12602): replace at their cost, offer a partial refund, or disagree and explain, with
+ * photos or documents. The buyer can accept the offer; either side can ask H2 India to decide.
+ */
 export async function replyToDispute(
   db: Database,
   actor: Actor,
   organisationId: string,
   disputeId: string,
-  reply: string,
+  input: { offer: DisputeOffer; reply: string; refundPaise?: bigint; fileIds?: string[] },
   context?: RequestContext,
 ) {
   assertCan(actor, "order.manage", { organisationId });
-  if (!reply.trim()) throw new OrderError("Write a reply", { reply: "Write your reply" });
+  const errors: Record<string, string> = {};
+  if (!DISPUTE_OFFERS.includes(input.offer)) errors.offer = "Choose your response";
+  if (!input.reply.trim()) errors.reply = "Explain your response";
+  if (input.reply.length > 1000) errors.reply = "Keep it under 1,000 characters";
   const [row] = await db
     .select({ d: schema.disputes, order: o })
     .from(schema.disputes)
     .innerJoin(o, eq(o.id, schema.disputes.orderId))
     .where(and(eq(schema.disputes.id, disputeId), eq(o.supplierOrganisationId, organisationId)));
   if (!row || row.d.status !== "Open") throw new OrderError("This dispute isn't waiting for your reply");
+  if (input.offer === "partial_refund") {
+    const r = input.refundPaise ?? 0n;
+    if (r <= 0n || r > row.d.disputedPaise) errors.refund = "Offer a refund up to the amount held";
+  }
+  if (Object.keys(errors).length) throw new OrderError("Check your response", errors);
   await db.transaction(async (tx) => {
+    for (const fileId of input.fileIds ?? [])
+      await attachFile(tx, { actor, fileId, kind: "order_document", attachedType: "order", attachedId: row.order.id });
     await tx
       .update(schema.disputes)
       .set({
-        supplierReply: reply.trim(),
+        offer: input.offer,
+        offerRefundPaise: input.offer === "partial_refund" ? (input.refundPaise ?? null) : null,
+        supplierReply: input.reply.trim(),
+        supplierFileIds: input.fileIds ?? [],
         supplierRepliedAt: new Date(),
         status: "Supplier replied",
         updatedAt: new Date(),
@@ -1161,8 +1180,113 @@ export async function replyToDispute(
       resourceType: "dispute",
       resourceId: disputeId,
       companyId: organisationId,
+      after: { offer: input.offer, refundPaise: input.refundPaise?.toString() ?? null },
       context,
     });
+  });
+  await tell(() =>
+    noticeStatus(db, row.order, "buyer", `${row.d.reference}: the supplier responded to your report`, "message-square"),
+  );
+}
+
+/**
+ * The buyer accepts the supplier's offer: a partial refund is refunded and the rest released; a replacement or
+ * repair releases the held amount (the supplier fixes it at their cost). The order ends Accepted by buyer.
+ */
+export async function acceptDisputeOffer(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  disputeId: string,
+  context?: RequestContext,
+) {
+  assertCan(actor, "order.place", { organisationId });
+  const order = await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ d: schema.disputes, order: o })
+      .from(schema.disputes)
+      .innerJoin(o, eq(o.id, schema.disputes.orderId))
+      .where(and(eq(schema.disputes.id, disputeId), eq(o.buyerOrganisationId, organisationId)))
+      .for("update");
+    if (!row || row.d.status !== "Supplier replied" || !row.d.offer || row.d.offer === "disagree")
+      throw new OrderError("There's no offer to accept");
+    const refundAmount = row.d.offer === "partial_refund" ? (row.d.offerRefundPaise ?? 0n) : 0n;
+    if (refundAmount > 0n)
+      await refund(tx, row.order, {
+        amountPaise: refundAmount,
+        reason: `Dispute ${row.d.reference}: partial refund agreed`,
+        disputeId: row.d.id,
+        requestedBy: actor.userId,
+      });
+    await release(tx, row.order, row.d.disputedPaise - refundAmount, `dispute:${row.d.id}`);
+    await tx
+      .update(schema.disputes)
+      .set({
+        status: "Resolved",
+        outcome: refundAmount > 0n ? "split" : "release_supplier",
+        refundPaise: refundAmount,
+        decisionNote: "The buyer accepted the supplier's offer",
+        decidedBy: actor.userId,
+        decidedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.disputes.id, row.d.id));
+    await completeDeadline(tx, { type: "disputeReview", subjectType: "dispute", subjectId: row.d.id });
+    await moveOrder(
+      tx,
+      actor.userId,
+      row.order,
+      { from: "Disputed", to: "Accepted by buyer" },
+      {
+        context,
+        reason: `Offer accepted (${row.d.reference})`,
+        also: async (t) => {
+          await t.update(o).set({ buyerAcceptedAt: new Date() }).where(eq(o.id, row.order.id));
+        },
+      },
+    );
+    return row.order;
+  });
+  await tell(() =>
+    noticeStatus(db, order, "supplier", `${order.reference}: the buyer accepted your offer`, "check-circle"),
+  );
+}
+
+/** "Ask H2 India to decide" (813:12602): either side moves the dispute to Under review for an operator (11.5). */
+export async function escalateDispute(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  disputeId: string,
+  context?: RequestContext,
+) {
+  const [row] = await db
+    .select({ d: schema.disputes, order: o })
+    .from(schema.disputes)
+    .innerJoin(o, eq(o.id, schema.disputes.orderId))
+    .where(eq(schema.disputes.id, disputeId));
+  if (!row) throw new OrderError("No such dispute");
+  const side =
+    row.order.buyerOrganisationId === organisationId
+      ? "buyer"
+      : row.order.supplierOrganisationId === organisationId
+        ? "supplier"
+        : null;
+  if (!side) throw new OrderError("No such dispute");
+  assertCan(actor, side === "buyer" ? "order.place" : "order.manage", { organisationId });
+  if (row.d.status === "Resolved" || row.d.status === "Under review") throw new OrderError("H2 India is already on it");
+  await db
+    .update(schema.disputes)
+    .set({ status: "Under review", escalatedBy: side, escalatedAt: new Date(), updatedAt: new Date() })
+    .where(eq(schema.disputes.id, disputeId));
+  await audit(db, {
+    actorId: actor.userId,
+    action: "dispute.escalated",
+    resourceType: "dispute",
+    resourceId: disputeId,
+    companyId: organisationId,
+    after: { by: side },
+    context,
   });
 }
 

@@ -284,8 +284,8 @@ export const deliveryReceipts = core.table("delivery_receipts", {
 });
 
 /**
- * A dispute (697:579). Status: Open · Supplier replied · Under review · Resolved. The disputed amount stays held until
- * an operator decides (step 11.5).
+ * A dispute (697:579, 813:12602). Status: Open · Supplier replied · Under review · Resolved. The supplier answers with
+ * an offer; the buyer accepts it, or either side asks H2 India to decide (step 11.5). The disputed amount stays held.
  */
 export const disputes = core.table(
   "disputes",
@@ -311,6 +311,16 @@ export const disputes = core.table(
       .default(sql`0`),
     supplierReply: text("supplier_reply"),
     supplierRepliedAt: utc("supplier_replied_at"),
+    /** The supplier's offer (813:12602): replace, partial_refund or disagree. */
+    offer: text("offer"),
+    offerRefundPaise: bigint("offer_refund_paise", { mode: "bigint" }),
+    supplierFileIds: uuid("supplier_file_ids")
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    /** Who asked H2 India to decide (buyer or supplier), moving it to Under review. */
+    escalatedBy: text("escalated_by"),
+    escalatedAt: utc("escalated_at"),
     /** refund_buyer, release_supplier, split */
     outcome: text("outcome"),
     refundPaise: bigint("refund_paise", { mode: "bigint" }),

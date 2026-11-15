@@ -28,7 +28,7 @@ import {
   supplierDecline,
 } from "./flow";
 import { deliverSimWebhooks, heldOn, receiveWebhook, reconcile, runPayouts, startOnlinePayment } from "./money";
-import { moveOrder, orderDetail } from "./records";
+import { insertOrder, moveOrder, orderDetail } from "./records";
 import { must } from "../must";
 
 // Stage 10 DONE WHEN (against the simulated partner, A176): the full order money flow runs; the same webhook twice
@@ -401,7 +401,14 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect(dispute.disputedPaise).toBe(14_750_00n);
     expect(await heldOn(h.db, order.id)).toBe(14_750_00n);
     expect(await status(order.id)).toBe("Disputed");
-    await replyToDispute(h.db, sAdmin, supplier.org.id, dispute.id, "We'll replace it or refund");
+    await expect(
+      replyToDispute(h.db, sAdmin, supplier.org.id, dispute.id, {
+        offer: "partial_refund",
+        reply: "x",
+        refundPaise: 0n,
+      }),
+    ).rejects.toThrow("Check your response");
+    await replyToDispute(h.db, sAdmin, supplier.org.id, dispute.id, { offer: "disagree", reply: "It left us sealed" });
     await decideDispute(h.db, operator, dispute.id, { outcome: "refund_buyer", note: "Damage confirmed by photos" });
     expect(await status(order.id)).toBe("Accepted by buyer");
     const [r] = await h.db.select().from(schema.refunds).where(eq(schema.refunds.orderId, order.id));
@@ -413,6 +420,51 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       .where(eq(schema.refunds.id, must(r).id));
     expect(r2?.status).toBe("Refunded");
     expect(await heldOn(h.db, order.id)).toBe(0n);
+  });
+
+  it("a 30/70 order pays out the advance once paid and holds the balance until acceptance (A177)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const sAdmin = await loadActor(h.db, supplier.admin.id);
+    const order = await h.db.transaction((tx) =>
+      insertOrder(tx, {
+        buyerOrganisationId: buyer.org.id,
+        supplierOrganisationId: supplier.org.id,
+        placedBy: buyer.admin.id,
+        source: "quote",
+        paymentMethod: "bank_transfer",
+        receiverName: "Site stores",
+        receiverMobile: "9876543210",
+        lines: [{ description: "Compressor skid", quantity: 1, unitPricePaise: 1_00_000_00n, gstRateBps: 1800 }],
+        schedule: [
+          { percentBps: 3000, trigger: "On confirmation" },
+          { percentBps: 7000, trigger: "Before dispatch" },
+        ],
+        needsApproval: false,
+      }),
+    );
+    expect(
+      (
+        await supplierAccept(
+          h.db,
+          sAdmin,
+          supplier.org.id,
+          order.id,
+          { dispatchBy: new Date(Date.now() + 7 * DAY) },
+          undefined,
+          ON,
+        )
+      ).status,
+    ).toBe("Awaiting payment");
+    await payAll(order.id, admin);
+    // ₹1,18,000 total: the 30% advance (₹35,400) goes to the supplier; nothing is held yet.
+    const settled = await h.db
+      .select()
+      .from(schema.orderSettlements)
+      .where(eq(schema.orderSettlements.orderId, order.id));
+    expect(settled.map((x) => x.releasedPaise)).toEqual([35_400_00n]);
+    expect(await status(order.id)).toBe("Ready to dispatch");
+    await payAll(order.id, admin);
+    expect(await heldOn(h.db, order.id)).toBe(82_600_00n);
   });
 
   it("forbidden moves fail, and the ledger can't be edited", async () => {

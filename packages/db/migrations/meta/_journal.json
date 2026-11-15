@@ -414,6 +414,13 @@
       "when": 1794724021193,
       "tag": "0058_dispatch_checklist",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1794724267649,
+      "tag": "0059_dispute_offer",
+      "breakpoints": true
     }
   ]
 }

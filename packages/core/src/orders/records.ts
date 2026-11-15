@@ -120,6 +120,18 @@ export async function requirePilot(ex: Executor, organisationIds: string[]) {
   if (pilot.length && organisationIds.some((id) => !pilot.includes(id))) throw new FlagOffError("transactions");
 }
 
+/**
+ * When suppliers are paid (A177, OPEN): 811:12584 and 813:12602 show the advance paid out 2 working days after the
+ * buyer pays it ("Advance already paid out"), and the balance held until the buyer accepts the delivery. The playbook
+ * (10.10) holds everything until acceptance; switch this off to do that.
+ */
+export const MONEY_RULES = defineSetting<{ releaseAdvanceOnPayment: boolean }>({
+  key: "orders.moneyRules",
+  description: "Pay out the advance once the buyer pays it (as drawn), or hold everything until acceptance",
+  schema: z.object({ releaseAdvanceOnPayment: z.boolean() }),
+  fallback: { releaseAdvanceOnPayment: true },
+});
+
 // ------------------------------------------------------------------------------------------------ milestones
 
 /** Quote triggers (rfq/totals PAYMENT_TRIGGERS) and when each falls due. */

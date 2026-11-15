@@ -6,6 +6,7 @@ import { assertCan } from "../authz/can";
 import { startClock } from "../clocks/clocks";
 import { orderLedgerProblems, post, monthlyIdentity } from "../ledger";
 import { nextReference } from "../reference";
+import { getSetting } from "../settings";
 import {
   paymentPartner,
   signSimWebhook,
@@ -19,7 +20,9 @@ import {
 import { nextPayoutRun, settle } from "./fees";
 import {
   calendar,
+  DUE_ON,
   makeDue,
+  MONEY_RULES,
   moveOrder,
   o,
   om,
@@ -336,6 +339,7 @@ async function recordPayment(
   }
   // Allocate to milestones that are due (then upcoming ones, for early payers), oldest first.
   const ms = await tx.select().from(om).where(eq(om.orderId, order.id)).orderBy(asc(om.position)).for("update");
+  const advancesPaid: { id: string; amountPaise: bigint }[] = [];
   let left = input.amountPaise;
   for (const m of [...ms.filter((x) => x.status !== "Upcoming"), ...ms.filter((x) => x.status === "Upcoming")]) {
     if (left <= 0n) break;
@@ -352,6 +356,9 @@ async function recordPayment(
         paidAt: paid === m.amountPaise ? new Date() : m.paidAt,
       })
       .where(eq(om.id, m.id));
+    // An advance is part of a split schedule; a single full payment stays held until acceptance.
+    if (paid === m.amountPaise && ms.length > 1 && DUE_ON[m.trigger] === "confirmation")
+      advancesPaid.push({ id: m.id, amountPaise: m.amountPaise });
   }
   const kept = input.amountPaise - left;
   await post(tx, {
@@ -375,6 +382,14 @@ async function recordPayment(
       after: { overpaidPaise: left.toString() },
       reason: "Overpayment flagged for Finance (G9)",
     });
+  }
+  // The advance goes to the supplier 2 working days after it is paid (811:12584, A177); the rest waits for acceptance.
+  if (
+    (await getSetting(tx, MONEY_RULES)).releaseAdvanceOnPayment &&
+    order.status !== "Accepted by buyer" &&
+    order.status !== "Closed"
+  ) {
+    for (const a of advancesPaid) await release(tx, order, a.amountPaise, `advance:${a.id}`);
   }
   // Paid after the buyer accepted: release straight away.
   if (order.status === "Accepted by buyer" || order.status === "Closed") {
