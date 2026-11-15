@@ -30,6 +30,7 @@ import {
 } from "./flow";
 import { deliverSimWebhooks, heldOn, receiveWebhook, reconcile, runPayouts, startOnlinePayment } from "./money";
 import { insertOrder, moveOrder, orderDetail } from "./records";
+import { buyerPayments, buyerRefunds, supplierMonths, supplierPayouts, supplierSettlements } from "./statements";
 import { must } from "../must";
 
 // Stage 10 DONE WHEN (against the simulated partner, A176): the full order money flow runs; the same webhook twice
@@ -499,6 +500,17 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect(await status(order.id)).toBe("Ready to dispatch");
     await payAll(order.id, admin);
     expect(await heldOn(h.db, order.id)).toBe(82_600_00n);
+  });
+
+  it("payments, refunds, releases and payouts are readable only by their own company", async () => {
+    const outsider = scopeFor(await loadActor(h.db, other.admin.id));
+    expect(await buyerPayments(outsider, h.db, buyer.org.id)).toEqual([]);
+    expect(await buyerRefunds(outsider, h.db, buyer.org.id)).toEqual([]);
+    expect(await supplierSettlements(outsider, h.db, supplier.org.id)).toEqual([]);
+    expect(await supplierPayouts(outsider, h.db, supplier.org.id)).toEqual([]);
+    const own = scopeFor(await loadActor(h.db, supplier.admin.id));
+    expect((await supplierSettlements(own, h.db, supplier.org.id)).length).toBeGreaterThan(0);
+    expect((await supplierMonths(own, h.db, supplier.org.id))[0]?.net).toBeGreaterThan(0n);
   });
 
   it("forbidden moves fail, and the ledger can't be edited", async () => {

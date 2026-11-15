@@ -116,7 +116,7 @@ export async function noticePayoutSent(db: Database, payoutId: string) {
         category: "orders",
         icon: "banknote",
         title: `Payout ${po.reference}: ${Money.format(po.amountPaise)} sent${po.utr ? ` (UTR ${po.utr})` : ""}`,
-        href: `/supplier/fees/payouts/${po.id}`,
+        href: `/supplier/invoices/payouts/${po.id}`,
       },
     });
   }
