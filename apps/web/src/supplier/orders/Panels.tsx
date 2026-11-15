@@ -565,7 +565,7 @@ export function DisputeResponse({
       <div className="flex flex-wrap gap-3">
         <Button
           size="lg"
-          disabled={a.pending || !uploads.ready}
+          disabled={a.pending || (uploads.items.length > 0 && !uploads.ready)}
           onClick={() => {
             a.go(() =>
               disputeResponseAction(orderId, disputeId, {

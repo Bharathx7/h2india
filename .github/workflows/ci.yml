@@ -95,6 +95,8 @@ jobs:
         run: pnpm e2e
         env:
           E2E_START_SERVER: "1"
+          # Ordering is on in local and staging with the simulated payment partner (A176); flows A, B and H use it.
+          FLAG_TRANSACTIONS: "true"
           CI: "true"
           # The /dev pages (tokens, component gallery) are checked in CI, as on staging.
           FLAG_DEV_PAGES: "true"

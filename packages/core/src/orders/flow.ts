@@ -1595,7 +1595,7 @@ export async function ordersNeedingOperations(db: Database) {
       or(
         and(
           eq(o.status, "Pending acceptance"),
-          sql`exists (select 1 from ${d} where ${d.subjectId} = core.orders.id and ${d.type} = ${ACCEPT_CLOCK} and ${d.status} = 'Open' and ${d.dueAt} < now())`,
+          sql`exists (select 1 from ${d} where ${d.subjectId} = core.orders.id::text and ${d.type} = ${ACCEPT_CLOCK} and ${d.status} = 'Open' and ${d.dueAt} < now())`,
         ),
         eq(o.status, "Disputed"),
         sql`exists (select 1 from core.delivery_links l where l.order_id = core.orders.id and l.locked_at is not null and l.used_at is null)`,

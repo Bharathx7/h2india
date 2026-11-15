@@ -342,9 +342,14 @@ export interface OrderListItem {
   closedAt: Date | null;
 }
 
-const companyName = (column: typeof o.buyerOrganisationId | typeof o.supplierOrganisationId) =>
-  sql<string>`(select coalesce(p.trade_name, x.legal_name) from core.organisations x
-    left join core.company_profiles p on p.organisation_id = x.id where x.id = ${column})`;
+// The outer column is written out (core.orders.…): in a single-table select Drizzle prints ${column} unqualified,
+// and inside this subquery it would bind to core.organisations (CLAUDE.md, step 9.2 note).
+const companyName = (side: "buyer" | "supplier") =>
+  side === "buyer"
+    ? sql<string>`(select coalesce(p.trade_name, x.legal_name) from core.organisations x
+    left join core.company_profiles p on p.organisation_id = x.id where x.id = core.orders.buyer_organisation_id)`
+    : sql<string>`(select coalesce(p.trade_name, x.legal_name) from core.organisations x
+    left join core.company_profiles p on p.organisation_id = x.id where x.id = core.orders.supplier_organisation_id)`;
 
 /** Orders for a buyer company or a supplier company (side), newest first, optionally by status. */
 export async function listOrders(
@@ -357,8 +362,8 @@ export async function listOrders(
   const rows = await db
     .select({
       order: o,
-      buyerName: companyName(o.buyerOrganisationId),
-      supplierName: companyName(o.supplierOrganisationId),
+      buyerName: companyName("buyer"),
+      supplierName: companyName("supplier"),
       firstLine: sql<string>`(select description from core.order_lines l where l.order_id = core.orders.id order by position limit 1)`,
       lineCount: sql<number>`(select count(*)::int from core.order_lines l where l.order_id = core.orders.id)`,
       dueNow: sql<string>`(select coalesce(sum(amount_paise - paid_paise), 0)::text from core.order_milestones m
@@ -368,7 +373,7 @@ export async function listOrders(
       dueAt: sql<string | null>`(select m.due_at from core.order_milestones m
         where m.order_id = core.orders.id and m.status in ('Due', 'Partly paid') order by m.position limit 1)`,
       transporter: sql<string | null>`(select s.transporter from core.shipments s where s.order_id = core.orders.id)`,
-      buyerAcceptBy: sql<string | null>`(select d.due_at from core.deadlines d where d.subject_id = core.orders.id
+      buyerAcceptBy: sql<string | null>`(select d.due_at from core.deadlines d where d.subject_id = core.orders.id::text
         and d.type = 'buyerAcceptsDelivery' and d.status = 'Open')`,
     })
     .from(o)
@@ -419,8 +424,8 @@ export async function orderDetail(scope: Scope, db: Database, orderId: string, n
   const [row] = await db
     .select({
       order: o,
-      buyerName: companyName(o.buyerOrganisationId),
-      supplierName: companyName(o.supplierOrganisationId),
+      buyerName: companyName("buyer"),
+      supplierName: companyName("supplier"),
       placedByName: sql<string>`(select name from core.users u where u.id = core.orders.placed_by)`,
       site: sql<
         string | null

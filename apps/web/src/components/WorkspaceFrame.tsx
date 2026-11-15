@@ -1,6 +1,13 @@
 "use client";
 
-import { BellPanel, WorkspaceShell, type WorkspaceArea, type WorkspaceNavGroup, type WorkspaceUser } from "@h2india/ui";
+import {
+  BellPanel,
+  Toaster,
+  WorkspaceShell,
+  type WorkspaceArea,
+  type WorkspaceNavGroup,
+  type WorkspaceUser,
+} from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
@@ -81,7 +88,8 @@ export function WorkspaceFrame(props: {
         />
       }
     >
-      {props.children}
+      {/* Toasts for every workspace page (Toast 22:150), so a page's controls can confirm what they did. */}
+      <Toaster>{props.children}</Toaster>
     </WorkspaceShell>
   );
 }

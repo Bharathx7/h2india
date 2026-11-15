@@ -7,7 +7,7 @@ import { enterCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign
 // Flow A (Figma page 18, 365:23; playbook step 9.9): a buyer from search to an accepted-quote decision. Home search →
 // category listing → compare 3 → RFQ wizard while signed out → sign in with the draft kept → join and set up the
 // company → RFQ sent → an operator approves → two suppliers quote → Quote received email → comparison → accept-quote
-// confirmation, ending as C8 decides (Confirm off at Launch 1). Needs the app, the worker (GSTIN checks) and Mailpit;
+// confirmation, ending as C8 decides (Confirm off at Launch 1), or on the created order where ordering is on (A176). Needs the app, the worker (GSTIN checks) and Mailpit;
 // runs in CI and on staging at 1440 and 390 with video.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
 test.use({ video: "on" });
@@ -208,6 +208,14 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
   await expect(page.getByText("Shortest")).toBeVisible();
   await page.getByRole("link", { name: "Accept quote" }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Accept");
-  await expect(page.getByText("Ordering opens in Launch 2")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Accept/ })).toBeDisabled();
+  // Ordering is on in local and staging with the simulated payment partner (A176): accepting creates the order and
+  // the supplier is asked to confirm it. With transactions off (production before Launch 2) Confirm stays off (C8).
+  if (process.env.FLAG_TRANSACTIONS === "true") {
+    await page.getByRole("button", { name: /^Accept/ }).click();
+    await page.waitForURL(/\/buyer\/orders\//);
+    await expect(page.getByRole("heading", { name: /Waiting for .* to confirm/ })).toBeVisible();
+  } else {
+    await expect(page.getByText("Ordering opens in Launch 2")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Accept/ })).toBeDisabled();
+  }
 });

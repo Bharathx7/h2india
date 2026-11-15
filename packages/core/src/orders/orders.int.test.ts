@@ -29,7 +29,7 @@ import {
   supplierDecline,
 } from "./flow";
 import { deliverSimWebhooks, heldOn, receiveWebhook, reconcile, runPayouts, startOnlinePayment } from "./money";
-import { insertOrder, moveOrder, orderDetail } from "./records";
+import { insertOrder, listOrders, moveOrder, orderDetail } from "./records";
 import { buyerPayments, buyerRefunds, supplierMonths, supplierPayouts, supplierSettlements } from "./statements";
 import { must } from "../must";
 
@@ -311,6 +311,12 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     // Company B sees nothing; the supplier sees it.
     const outsider = await loadActor(h.db, other.admin.id);
     expect(await orderDetail(scopeFor(outsider), h.db, order.id)).toBeNull();
+    // The lists on My orders and the supplier pipeline, with both company names.
+    const mine = await listOrders(scopeFor(admin), h.db, { organisationId: buyer.org.id, side: "buyer" });
+    expect(mine.find((x) => x.id === order.id)?.supplierName).toBe(supplier.org.legalName);
+    const theirs = await listOrders(scopeFor(sAdmin), h.db, { organisationId: supplier.org.id, side: "supplier" });
+    expect(theirs.find((x) => x.id === order.id)?.buyerName).toBe(buyer.org.legalName);
+    expect(await listOrders(scopeFor(outsider), h.db, { organisationId: buyer.org.id, side: "buyer" })).toEqual([]);
     expect((await orderDetail(scopeFor(sAdmin), h.db, order.id))?.side).toBe("supplier");
 
     await expect(

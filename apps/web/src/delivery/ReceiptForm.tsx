@@ -143,7 +143,12 @@ export function ReceiptForm({ token, reference }: { token: string; reference: st
           }}
         />
       </FormField>
-      <Button type="submit" size="lg" className="w-full" disabled={pending || code.length !== 6 || !uploads.ready}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={pending || code.length !== 6 || (uploads.items.length > 0 && !uploads.ready)}
+      >
         Record delivery
       </Button>
     </form>

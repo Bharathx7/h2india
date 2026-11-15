@@ -258,7 +258,7 @@ export function AcceptOrReport({
             }}
           >
             <Button
-              disabled={report.pending || !uploads.ready}
+              disabled={report.pending || (uploads.items.length > 0 && !uploads.ready)}
               onClick={() => {
                 report.go(
                   () =>
