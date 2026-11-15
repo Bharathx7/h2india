@@ -20,7 +20,7 @@ export const CONTENT_GROUPS = [
   { label: "Newsroom", slugs: ["authors", "topics", "tags", "newsletter-issues"] },
   { label: "Directory", slugs: ["people", "associations"] },
   { label: "Site", slugs: ["legal-pages", "help-articles", "team-members", "application-pages", "early-listings"] },
-  { label: "Files", slugs: ["media", "report-files"] },
+  { label: "Files", slugs: ["media", "media-files", "report-files"] },
 ] as const;
 
 export const CONTENT_SLUGS: readonly string[] = CONTENT_GROUPS.flatMap((g) => g.slugs);

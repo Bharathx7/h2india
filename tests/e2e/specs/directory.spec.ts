@@ -37,6 +37,9 @@ test("the list and the map show the same filtered companies", async ({ page }) =
   await expect(page.getByRole("heading", { name: `Dir ${tag}a` })).toHaveCount(0);
   // Map view: same filter, same company, as a keyboard-usable list by state.
   await page.goto(`/directory/companies?q=${tag}&state=Kerala&type=research&view=map`);
+  // The state-bubble map (A176, until M7) names each state's count; the list by state is behind a toggle.
+  await expect(page.getByRole("img", { name: /Kerala 1/ })).toBeVisible();
+  await page.getByText("Show the list instead").click();
   const map = page.getByRole("list", { name: /by state/ });
   await expect(map.getByRole("link", { name: `Dir ${tag}b` })).toBeVisible();
   await expect(map.getByRole("link", { name: `Dir ${tag}a` })).toHaveCount(0);

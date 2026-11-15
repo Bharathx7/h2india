@@ -10,7 +10,17 @@ const SAFE_ID = /^[A-Za-z0-9._-]{8,64}$/;
 /** Better Auth's session cookie (prefix "h2"; "__Secure-" in production). */
 const signedIn = (request: NextRequest) => request.cookies.getAll().some((c) => c.name.endsWith("h2.session_token"));
 
-const MAINTENANCE_OPEN = ["/maintenance", "/admin", "/cms", "/api", "/sign-in", "/sign-out", "/newsletter", "/_next"];
+const MAINTENANCE_OPEN = [
+  "/maintenance",
+  "/status",
+  "/admin",
+  "/cms",
+  "/api",
+  "/sign-in",
+  "/sign-out",
+  "/newsletter",
+  "/_next",
+];
 
 /** Requests that may change something. While viewing as someone (step 11.4) every one of them is refused here. */
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);

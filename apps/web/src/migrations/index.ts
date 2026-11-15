@@ -17,6 +17,7 @@ import * as migration_20261112_193125_newsletter_issues from './20261112_193125_
 import * as migration_20261112_201854_maintenance from './20261112_201854_maintenance';
 import * as migration_20261113_055110_application_pages from './20261113_055110_application_pages';
 import * as migration_20261113_064225_directory_people_associations from './20261113_064225_directory_people_associations';
+import * as migration_20261115_080037_media_files from './20261115_080037_media_files';
 
 export const migrations = [
   {
@@ -112,6 +113,11 @@ export const migrations = [
   {
     up: migration_20261113_064225_directory_people_associations.up,
     down: migration_20261113_064225_directory_people_associations.down,
-    name: '20261113_064225_directory_people_associations'
+    name: '20261113_064225_directory_people_associations',
+  },
+  {
+    up: migration_20261115_080037_media_files.up,
+    down: migration_20261115_080037_media_files.down,
+    name: '20261115_080037_media_files'
   },
 ];

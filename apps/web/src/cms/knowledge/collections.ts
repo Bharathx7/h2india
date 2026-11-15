@@ -412,7 +412,10 @@ const mediaFields = (urlLabel: string): Field[] => [
     label: urlLabel,
     type: "text",
     required: true,
-    admin: { description: "Where it's hosted (M9). Only the address is kept here." },
+    admin: {
+      description:
+        "Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.",
+    },
   },
   { name: "durationMinutes", type: "number" },
   {

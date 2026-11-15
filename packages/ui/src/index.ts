@@ -134,6 +134,7 @@ export { OrgCard } from "./components/cards/OrgCard";
 export type { OrgCardProps } from "./components/cards/OrgCard";
 export { ProductCard } from "./components/cards/ProductCard";
 export { MapView } from "./components/MapView";
+export { stateBubbles } from "./components/StateBubbles";
 export type { MapPoint, MapProvider, MapViewProps } from "./components/MapView";
 export type { ProductCardProps } from "./components/cards/ProductCard";
 export { HeroNetwork } from "./components/home/HeroNetwork";

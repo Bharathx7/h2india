@@ -1,5 +1,5 @@
 import { directorySearch, filterDirectory, parseDirectory, typeLabel } from "@h2india/core/directory/rules";
-import { buttonClasses, cx, EmptyState, Icon, MapView, OrgCard, Skeleton } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Icon, MapView, stateBubbles, OrgCard, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LiveSection } from "@/components/LiveSection";
@@ -10,7 +10,7 @@ import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
 
 // The company directory (477:40; phones 480:8; map view 478:708; empty 128:23393, loading 128:23411, error 128:23436),
-// step 6.6. List and map read the same filtered companies, so they always agree. The map shows its list by state
+// step 6.6. List and map read the same filtered companies, so they always agree. The map is the state-bubble stand-in (A176) with its list by state
 // until the tiles vendor is chosen (M7, A76).
 export const metadata: Metadata = {
   title: "Hydrogen directory · H2 India",
@@ -153,6 +153,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
             </p>
             {query.view === "map" ? (
               <MapView
+                provider={stateBubbles}
                 label="Organisations on the map"
                 points={result.all.map((e) => ({
                   id: e.id,

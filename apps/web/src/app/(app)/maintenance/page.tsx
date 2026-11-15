@@ -61,11 +61,13 @@ export default async function MaintenancePage() {
           ) : null}
         </div>
         <div className="flex flex-col gap-2">
-          {w.statusUrl ? (
-            <a href={w.statusUrl} className="inline-flex items-center gap-2 type-label-sm text-link underline">
-              <Icon name="external-link" size={16} /> Live status updates
-            </a>
-          ) : null}
+          {/* Our own status page until a status provider is chosen (M26, A176). */}
+          <a
+            href={w.statusUrl ?? "/status"}
+            className="inline-flex items-center gap-2 type-label-sm text-link underline"
+          >
+            <Icon name="external-link" size={16} /> Live status updates
+          </a>
           <Link href="/newsletter" className="inline-flex items-center gap-2 type-label-sm text-link underline">
             <Icon name="mail" size={16} /> Read India H₂ Weekly while you wait
           </Link>
