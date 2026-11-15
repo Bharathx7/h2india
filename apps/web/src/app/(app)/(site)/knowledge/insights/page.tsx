@@ -1,3 +1,5 @@
+import { getDb } from "@h2india/core";
+import { popularPaths } from "@h2india/core/analytics";
 import { ArrowLink, Breadcrumbs, buttonClasses, cx, EmptyState, Icon, Pagination } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,8 +11,8 @@ import { FilterSelect, NewsBand } from "@/news/client";
 import { StoryCard, wrap } from "@/news/parts";
 
 // Insights (440:40; phones 440:596; states 127:6977 empty, 127:6995 loading, 127:7030 error, step 5.3, A55): guides,
-// analysis and explainers, filtered by topic and reader level. "Popular this month" needs page views (analytics, M10);
-// until then it lists the newest pieces (A58).
+// analysis and explainers, filtered by topic and reader level. "Popular this month" ranks by first-party page counts
+// (A176, A58) and fills in with the newest pieces.
 
 export const metadata: Metadata = {
   title: "Insights · H2 India",
@@ -171,7 +173,15 @@ async function Results({
   }
   const filtered = Boolean(topic ?? level) || page > 1 || sort !== "newest";
   const featured = filtered ? null : (list.items[0] ?? null);
-  const popular = latest.items.filter((a) => a.id !== featured?.id || a.kind !== featured.kind).slice(0, 4);
+  // Popular this month (440:40): first-party page counts (A176, A58); the newest pieces fill in until there are views.
+  const counts = await popularPaths(getDb(), { prefix: "/", days: 30, limit: 200 });
+  const rank = new Map(counts.map((c, i) => [c.path, i]));
+  const popular = latest.items
+    .filter((a) => a.id !== featured?.id || a.kind !== featured.kind)
+    .map((a, i) => ({ a, r: rank.get(a.href) ?? 1000 + i }))
+    .sort((x, y) => x.r - y.r)
+    .map((x) => x.a)
+    .slice(0, 4);
   const query: Record<string, string> = {};
   if (topic) query.topic = topic;
   if (level) query.level = level;

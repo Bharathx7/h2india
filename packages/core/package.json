@@ -15,6 +15,8 @@
     "./orders/rules": "./src/orders/transitions.ts",
     "./orders/fees": "./src/orders/fees.ts",
     "./ledger": "./src/ledger/index.ts",
+    "./analytics": "./src/analytics/pageviews.ts",
+    "./status-checks": "./src/status-checks.ts",
     "./payments": "./src/adapters/payments/index.ts",
     "./messages": "./src/messages/index.ts",
     "./rfq/rules": "./src/rfq/transitions.ts",

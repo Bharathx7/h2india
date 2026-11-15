@@ -1,3 +1,5 @@
+import { getDb } from "@h2india/core";
+import { popularPaths } from "@h2india/core/analytics";
 import { cx } from "@h2india/ui";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -54,7 +56,13 @@ export default async function NewsHome({
   const lead = featured.items[0] ?? latest.items[0];
   const secondary = latest.items.filter((a) => a.id !== lead?.id && a.type !== "sponsored").slice(0, 2);
   const today = latest.items.slice(0, 7);
-  const mostRead = latest.items.slice(0, 5);
+  // Most read this week (428:950): first-party page counts (A176, A58); the newest stories until there are views.
+  const popular = await popularPaths(getDb(), { prefix: "/news/", days: 7, limit: 20 });
+  const pool = await listArticles({ notTypes: ["press_release"], state, limit: 60 });
+  const read = popular
+    .map((p) => pool.items.find((a) => a.href === p.path))
+    .filter((a): a is ArticleSummary => Boolean(a));
+  const mostRead = [...read, ...latest.items.filter((a) => !read.some((r) => r.id === a.id))].slice(0, 5);
   const sectionRails = sections.map((s, i) => ({ section: s, items: rails[i]?.items ?? [] }));
   const rail = ({ section, items }: { section: (typeof sections)[number]; items: ArticleSummary[] }) => (
     <Rail
