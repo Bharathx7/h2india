@@ -138,7 +138,7 @@ export function JobPostForm({ initial, companies }: { initial: Values; companies
               }}
             />
           </FormField>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <FormField label="Function" required error={errors.function}>
               <Select
                 value={v.function}
@@ -268,7 +268,7 @@ export function JobPostForm({ initial, companies }: { initial: Values; companies
             }}
           />
           {v.showSalary ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField label="From" error={errors.salaryFrom}>
                 <Input
                   inputMode="decimal"

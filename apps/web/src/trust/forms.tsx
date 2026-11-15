@@ -133,7 +133,7 @@ export function ContactForm({ topic }: { topic: string }) {
           </Link>
         }
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Your name" required error={f.errors.name}>
           <Input
             autoComplete="name"
@@ -304,7 +304,7 @@ export function PartnershipForm() {
           onValueChange={(x) => {
             f.set("partnerType", x);
           }}
-          className="grid gap-2 sm:grid-cols-2"
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
         >
           {PARTNER_TYPES.map((p) => (
             <Radio
@@ -337,7 +337,7 @@ export function PartnershipForm() {
           }}
         />
       </FormField>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Your name" required error={f.errors.name}>
           <Input
             autoComplete="name"
@@ -649,7 +649,7 @@ export function GrievanceForm({ type, page }: { type: string; page: string }) {
           </Alert>
         ) : null}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Your name" required error={errors.name}>
           <Input
             autoComplete="name"

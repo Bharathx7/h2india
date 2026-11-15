@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, inArray } from "drizzle-orm";
+import { recordMarketingChoices } from "../consent/records";
 import { TOPICS, type NotifyChannel, type TopicName } from "./topics";
 
 // A person's notification choices (577:288, 548:8): only changes from the drawn defaults are stored.
@@ -36,10 +37,19 @@ export async function setChoices(
   scope = "",
 ): Promise<void> {
   await ex.transaction(async (tx) => {
+    // Consent records (step 12.2) only for marketing choices that actually change.
+    const current = await tx
+      .select()
+      .from(np)
+      .where(and(eq(np.userId, userId), eq(np.scope, scope)));
+    const changed: typeof changes = [];
     for (const c of changes) {
       const topic = TOPICS[c.topic] as (typeof TOPICS)[TopicName] | undefined;
       if (!topic) continue;
       if ("locked" in topic && (topic.locked as readonly string[]).includes(c.channel)) continue;
+      const was =
+        current.find((r) => r.topic === c.topic && r.channel === c.channel)?.enabled ?? topic.defaults[c.channel];
+      if (was !== c.enabled) changed.push(c);
       await tx
         .insert(np)
         .values({ userId, scope, topic: c.topic, channel: c.channel, enabled: c.enabled })
@@ -48,6 +58,7 @@ export async function setChoices(
           set: { enabled: c.enabled, updatedAt: new Date() },
         });
     }
+    await recordMarketingChoices(tx, userId, changed);
   });
 }
 

@@ -125,7 +125,7 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
       <TrackerHead title="India Hydrogen Tracker" asOf={asOf} active="" csvHref="/tracker/projects/csv" />
       <div className={cx(wrap, "flex flex-col gap-6 pb-16 pt-6")}>
         {overview?.figures?.length ? (
-          <ul className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {overview.figures.map((f) => (
               <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-4">
                 <span className="type-h2 text-primary">{f.value}</span>
@@ -146,7 +146,7 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
 
         <MapLayers layers={layers} />
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-2">
             <BarChart title="Capacity by status, t/yr" unit="" bars={byStatus} />
             <p className="type-caption text-secondary">
@@ -166,22 +166,22 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
             {states.length ? (
               <dl className="flex flex-col gap-2.5">
                 {states.map((s) => (
-                  <div key={s.state} className="flex flex-col gap-1">
-                    <div className="flex justify-between">
-                      <dt className="type-body-sm text-primary">{s.state}</dt>
-                      <dd className="type-spec text-primary">{indianNumber(s.total)}</dd>
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className="flex h-2 overflow-hidden rounded-pill bg-subtle"
-                      style={{ width: `${String((s.total / maxState) * 100)}%` }}
-                    >
+                  <div key={s.state} className="grid grid-cols-[1fr_auto] gap-x-2 gap-y-1">
+                    <dt className="type-body-sm text-primary">{s.state}</dt>
+                    <dd className="type-spec text-primary">{indianNumber(s.total)}</dd>
+                    {/* The bar sits in its own dd: a dl's groups may hold only dt and dd (axe dlitem). */}
+                    <dd aria-hidden="true" className="col-span-2">
                       <span
-                        className="bg-accent"
-                        style={{ width: `${String(s.total ? (s.contracted / s.total) * 100 : 0)}%` }}
-                      />
-                      <span className="flex-1 bg-ink-500" />
-                    </div>
+                        className="flex h-2 overflow-hidden rounded-pill bg-subtle"
+                        style={{ width: `${String((s.total / maxState) * 100)}%` }}
+                      >
+                        <span
+                          className="bg-accent"
+                          style={{ width: `${String(s.total ? (s.contracted / s.total) * 100 : 0)}%` }}
+                        />
+                        <span className="flex-1 bg-ink-500" />
+                      </span>
+                    </dd>
                   </div>
                 ))}
               </dl>

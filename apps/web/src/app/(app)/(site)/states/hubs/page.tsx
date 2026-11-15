@@ -119,7 +119,7 @@ export default async function HubsPage({ searchParams }: { searchParams: Promise
                 </h2>
                 <p className="type-caption text-secondary">Ports recognised for shared hydrogen infrastructure.</p>
               </div>
-              <ul className="grid gap-3 md:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {ports.map((p) => (
                   <li key={p.id} className="flex flex-col gap-2 rounded-card border border-default p-3">
                     <span className="inline-flex items-center gap-1.5 self-start rounded-pill bg-subtle px-2 py-0.5 type-label-sm text-body">

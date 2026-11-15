@@ -82,7 +82,7 @@ export default async function BrandPage({ params }: { params: Params }) {
 
       {b.products.length ? (
         <PageSection id="brand-products" title={`${b.name} products`}>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {b.products.map((p) => (
               <li key={p.id} className="flex">
                 <ProductCard

@@ -100,7 +100,7 @@ export default function VerificationPage() {
         ]}
       />
       <Block id="badges" title="What each badge means" lead="Every badge on a profile opens the checks behind it.">
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {BADGES.map((b) => (
             <li key={b.title} className={cx(card, "flex flex-col gap-3 p-5")}>
               <div className="flex flex-col gap-1.5">

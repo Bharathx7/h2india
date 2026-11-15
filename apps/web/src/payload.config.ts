@@ -2,7 +2,7 @@ import "./cms/load-env";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { s3Storage } from "@payloadcms/storage-s3";
-import { parseServerEnv } from "@h2india/config";
+import { isAwsS3, parseServerEnv } from "@h2india/config";
 import { createHmac } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -166,7 +166,7 @@ export default buildConfig({
         endpoint: env.S3_ENDPOINT,
         region: env.S3_REGION,
         credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
-        forcePathStyle: !env.S3_ENDPOINT.includes("amazonaws.com"),
+        forcePathStyle: !isAwsS3(env.S3_ENDPOINT),
       },
     }),
     s3Storage({
@@ -189,7 +189,7 @@ export default buildConfig({
         endpoint: env.S3_ENDPOINT,
         region: env.S3_REGION,
         credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
-        forcePathStyle: !env.S3_ENDPOINT.includes("amazonaws.com"),
+        forcePathStyle: !isAwsS3(env.S3_ENDPOINT),
       },
     }),
   ],

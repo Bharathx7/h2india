@@ -25,7 +25,7 @@ export function KeyNumbers({ block }: { block: KeyNumbersBlock }) {
   return (
     <aside className="my-2 flex flex-col gap-4 rounded-card bg-subtle p-6" aria-label={block.heading ?? "Key numbers"}>
       <p className="type-eyebrow text-secondary">{block.heading ?? "Key numbers"}</p>
-      <dl className="grid gap-6 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {block.items.map((item) => (
           <div key={`${item.value}-${item.label}`} className="flex flex-col gap-1">
             <dt className="order-2 type-body-sm text-body">{item.label}</dt>

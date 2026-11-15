@@ -104,7 +104,7 @@ export function BoostEditor({ boosts }: { boosts: Boost[] }) {
   return (
     <div className="flex flex-col gap-3">
       {error ? <Alert tone="error" title={error} live /> : null}
-      <div className="grid gap-2 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <Input
           aria-label="Search"
           placeholder="Search, e.g. sight"

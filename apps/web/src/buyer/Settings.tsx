@@ -95,7 +95,7 @@ export function ProfileForm({ start, canEdit }: { start: ProfileStart; canEdit: 
             Your logo comes from your directory profile. Square PNG or SVG, up to 1 MB.
           </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="type-label">Legal name</span>
             <Input value={f.legalName} disabled />
@@ -411,7 +411,7 @@ export function SiteDialog({
             }}
           />
         </label>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <Input
             aria-label="City"
             placeholder="City"
@@ -467,7 +467,7 @@ export function SiteDialog({
         <fieldset className="flex flex-col gap-2">
           <legend className="type-label">Receiving contacts</legend>
           {f.contacts.map((c, i) => (
-            <div key={String(i)} className="grid gap-2 md:grid-cols-3">
+            <div key={String(i)} className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <Input
                 aria-label="Contact name"
                 placeholder="Name"
@@ -639,7 +639,7 @@ export function RulesForm({
       {r.error ? <Alert tone="error" title={r.error} live /> : null}
       <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
         <h3 className="type-h4">Orders above the limit need approval</h3>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="type-label">Approval needed above (₹)</span>
             <Input
@@ -681,7 +681,7 @@ export function RulesForm({
           }}
         />
         {f.second ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-1.5">
               <span className="type-label">Second approver above (₹)</span>
               <Input
@@ -781,7 +781,7 @@ export function Delegation({ people }: { people: { id: string; label: string }[]
         }
       >
         {r.error ? <Alert tone="error" title={r.error} live /> : null}
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Select
             aria-label="From"
             value={f.from}

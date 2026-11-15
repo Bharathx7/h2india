@@ -23,7 +23,7 @@ export function MapLayers({ layers }: { layers: Layer[] }) {
   return (
     <section
       aria-labelledby="map-title"
-      className="grid gap-6 rounded-card border border-default bg-page p-5 md:grid-cols-[16rem_1fr]"
+      className="grid grid-cols-1 gap-6 rounded-card border border-default bg-page p-5 md:grid-cols-[16rem_1fr]"
     >
       <div className="flex flex-col gap-3">
         <h2 id="map-title" className="type-h4 text-primary">

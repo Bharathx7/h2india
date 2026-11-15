@@ -122,7 +122,7 @@ export default async function SupplierRfqPage({
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
         <section className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">What the buyer needs</h2>
-          <dl className="grid gap-3 md:grid-cols-[150px_minmax(0,1fr)]">
+          <dl className="grid grid-cols-1 gap-3 md:grid-cols-[150px_minmax(0,1fr)]">
             {(
               [
                 ["Item", item ? `${item.description} × ${String(item.quantity)}` : d.rfq.title],
@@ -226,7 +226,7 @@ export default async function SupplierRfqPage({
                 </div>
               ) : null}
               {status === "Withdrawn" ? (
-                <dl className="grid gap-2 rounded-card bg-subtle p-3 md:grid-cols-[140px_minmax(0,1fr)]">
+                <dl className="grid grid-cols-1 gap-2 rounded-card bg-subtle p-3 md:grid-cols-[140px_minmax(0,1fr)]">
                   <dt className="type-body-sm text-secondary">Reason</dt>
                   <dd className="type-body-sm">{quote?.withdrawReason}</dd>
                   {quote?.withdrawNote ? (
@@ -237,7 +237,7 @@ export default async function SupplierRfqPage({
                   ) : null}
                 </dl>
               ) : (
-                <dl className="grid gap-2 md:grid-cols-[150px_minmax(0,1fr)]">
+                <dl className="grid grid-cols-1 gap-2 md:grid-cols-[150px_minmax(0,1fr)]">
                   {(
                     [
                       [

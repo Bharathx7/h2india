@@ -227,7 +227,7 @@ export function Listing(props: ListingProps) {
 
 function ProductGrid(props: ListingProps & { label?: string }) {
   return (
-    <ul aria-label={props.label ?? "Products"} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <ul aria-label={props.label ?? "Products"} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {props.items.map((p) => (
         <li key={p.id} className="flex">
           <ProductCard

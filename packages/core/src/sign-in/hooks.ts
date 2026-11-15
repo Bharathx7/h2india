@@ -1,7 +1,7 @@
 import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api";
 import { getDb } from "../db";
 import { normaliseEmail, SIGN_IN, SIGN_IN_ERROR } from "./rules";
-import { recordPasskeyStepUp } from "./step-up";
+import { recordPasskeyStepUp, recordPasskeySession } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
 import { isSuspended } from "../admin/users";
 
@@ -103,8 +103,11 @@ const PASSKEY = "/passkey/verify-authentication";
 
 export const afterSignIn = createAuthMiddleware(async (ctx) => {
   if (ctx.path === PASSKEY) {
-    const userId = ctx.context.newSession?.user.id;
-    if (userId && !isAPIError(ctx.context.returned)) await recordPasskeyStepUp(getDb(), userId);
+    const created = ctx.context.newSession;
+    if (created && !isAPIError(ctx.context.returned)) {
+      await recordPasskeyStepUp(getDb(), created.user.id);
+      await recordPasskeySession(getDb(), created.session.id, SIGN_IN.sessionDays * 24 * 60 * 60);
+    }
     return;
   }
   if (ctx.path !== VERIFY) return;

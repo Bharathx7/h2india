@@ -83,7 +83,7 @@ export default async function CompanyPage({
   let body: ReactNode;
   if (tab === "overview") {
     body = (
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-3">
             <h2 className="type-h3 text-primary">About {c.name}</h2>
@@ -120,7 +120,7 @@ export default async function CompanyPage({
           ) : null}
           <section className="flex flex-col gap-3 rounded-card border border-default p-5">
             <h2 className="type-h4 text-primary">At a glance</h2>
-            <dl className="grid gap-3 sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[
                 ["Makes or offers", c.categories.join(", ")],
                 ["Founded", c.foundedYear ? String(c.foundedYear) : ""],
@@ -157,7 +157,7 @@ export default async function CompanyPage({
     );
   } else if (tab === "products") {
     body = products.length ? (
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {products.map((p) => (
           <li key={p.id} className="flex">
             <ProductCard
@@ -252,7 +252,7 @@ export default async function CompanyPage({
     );
   } else if (tab === "contact") {
     body = session ? (
-      <dl className="grid max-w-150 gap-4 rounded-card border border-default p-5 sm:grid-cols-2">
+      <dl className="grid grid-cols-1 max-w-150 gap-4 rounded-card border border-default p-5 sm:grid-cols-2">
         {place ? (
           <div>
             <dt className="type-eyebrow text-secondary">Location</dt>

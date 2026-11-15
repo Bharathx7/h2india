@@ -137,7 +137,7 @@ export default async function BuyersGuidePage({ params }: { params: Params }) {
       </div>
 
       <section aria-labelledby="rfq" className="border-t border-default">
-        <div className={cx(wrap, "grid gap-6 py-12 lg:grid-cols-[22rem_1fr] lg:items-center")}>
+        <div className={cx(wrap, "grid grid-cols-1 gap-6 py-12 lg:grid-cols-[22rem_1fr] lg:items-center")}>
           <div className="flex flex-col gap-3">
             <p className="type-eyebrow text-secondary">REQUEST A QUOTE</p>
             <h2 id="rfq" className="type-h2 text-primary">
@@ -151,7 +151,7 @@ export default async function BuyersGuidePage({ params }: { params: Params }) {
               Request a quote
             </Link>
           </div>
-          <ol className="grid gap-4 md:grid-cols-3">
+          <ol className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <li key={s.title} className="flex flex-col gap-2 rounded-card border border-default p-4">
                 <span className="flex size-7 items-center justify-center rounded-pill bg-mint type-spec text-primary">

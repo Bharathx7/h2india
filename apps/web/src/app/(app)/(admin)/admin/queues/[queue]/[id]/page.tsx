@@ -84,7 +84,7 @@ export default async function ModerationPage({ params }: { params: Promise<{ que
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">{words.heading}</h2>
-            <dl className="grid gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
+            <dl className="grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
               {d.rows
                 .filter(([, v]) => v)
                 .map(([k, v]) => (

@@ -3,7 +3,7 @@
 import { decideField, ProductError, startExtraction, submitExtraction } from "@h2india/core/products";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "./actions";
+import { supplierActor } from "./actor";
 
 // The datasheet reader (step 8.4). The engine runs in the worker; these only queue, record checks and submit.
 

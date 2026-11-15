@@ -45,7 +45,7 @@ function Rows({ rows }: { rows: { label: string; value: ReactNode }[] }) {
       {rows.map((r) => (
         <div
           key={r.label}
-          className="grid gap-1 border-b border-default px-4 py-3 last:border-b-0 sm:grid-cols-[12rem_1fr] sm:gap-4"
+          className="grid grid-cols-1 gap-1 border-b border-default px-4 py-3 last:border-b-0 sm:grid-cols-[12rem_1fr] sm:gap-4"
         >
           <dt className="type-caption text-secondary">{r.label}</dt>
           <dd className="type-body-sm text-primary">{r.value}</dd>
@@ -203,7 +203,7 @@ export default async function TenderPage({ params }: { params: Params }) {
         <div className="flex min-w-0 max-w-180 flex-1 flex-col gap-10">
           {awarded && result ? (
             <Section id="results" title="Results">
-              <dl className="grid gap-3 sm:grid-cols-4">
+              <dl className="grid grid-cols-1 gap-3 sm:grid-cols-4">
                 {[
                   { label: "Winner", value: result.winnersLine?.trim() || first?.name || "Not public" },
                   { label: "Capacity", value: result.capacityLine?.trim() || first?.capacity || "Not public" },
@@ -219,7 +219,7 @@ export default async function TenderPage({ params }: { params: Params }) {
               {winners.length ? (
                 <>
                   <p className="type-eyebrow text-secondary">{winners.length > 1 ? "Awardees" : "Awardee"}</p>
-                  <ul className="grid gap-4 md:grid-cols-2">
+                  <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {winners.map((w) => {
                       const p = w.profileSlug ? profiles.get(w.profileSlug) : undefined;
                       return (
@@ -343,7 +343,7 @@ export default async function TenderPage({ params }: { params: Params }) {
 
           {couldBid.length ? (
             <Section id="bidders" title="Companies that could bid">
-              <ul className="grid gap-4 md:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {couldBid.map((c) => (
                   <li key={c.id} className="flex">
                     <OrgCard

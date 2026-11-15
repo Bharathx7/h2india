@@ -71,7 +71,7 @@ export default async function TrackerPreview({ params }: { params: Promise<{ col
         </p>
         <h1 className="type-h1">{title}</h1>
       </header>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex flex-col gap-6">
           <section aria-labelledby="fields" className="rounded-card border border-default p-6">
             <h2 id="fields" className="type-h4 pb-3">

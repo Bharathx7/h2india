@@ -93,7 +93,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
           {(tracker.figures ?? []).length ? (
             <section
               aria-label="Headline figures"
-              className={cx(wrap, "grid gap-4 pt-10 sm:grid-cols-2 lg:grid-cols-4")}
+              className={cx(wrap, "grid grid-cols-1 gap-4 pt-10 sm:grid-cols-2 lg:grid-cols-4")}
             >
               {(tracker.figures ?? []).map((f) => (
                 <div key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-5">
@@ -249,7 +249,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
               Upcoming and open rounds
             </h2>
           </div>
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {open.map((t) => (
               <li key={t.id}>
                 <TenderCard {...tenderView(t, now)} />
@@ -269,7 +269,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
               <Link href="/tags/sight">All SIGHT news</Link>
             </ArrowLink>
           </div>
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {news.items.map((a) => (
               <li key={a.id}>
                 <StoryCard a={a} className="h-full" />

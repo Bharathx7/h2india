@@ -1,6 +1,7 @@
 import { isEnabled } from "@h2india/config";
 import { refreshFlagsSoon } from "@h2india/core/admin/system";
 import { NextResponse, type NextRequest } from "next/server";
+import { originOf, securityHeaders } from "./security/headers";
 
 // Gives every request an ID (step 3.6). The audit log stores it, and the response returns it in X-Request-Id, so a
 // support conversation can be traced to the log entries. An ID set by the load balancer is kept if it looks safe.
@@ -25,7 +26,26 @@ const MAINTENANCE_OPEN = [
 /** Requests that may change something. While viewing as someone (step 11.4) every one of them is refused here. */
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+/** Security headers (step 12.1) on every response the proxy returns. */
+function secure(request: NextRequest, response: NextResponse) {
+  const storageOrigins = [originOf(process.env.S3_ENDPOINT), originOf(process.env.S3_PUBLIC_URL)].filter(
+    (o): o is string => o !== null,
+  );
+  const headers = securityHeaders({
+    dev: process.env.NODE_ENV !== "production",
+    storageOrigins,
+    pathname: request.nextUrl.pathname,
+    analyticsOrigin: originOf(process.env.NEXT_PUBLIC_ANALYTICS_SRC),
+  });
+  for (const [k, v] of headers) response.headers.set(k, v);
+  return response;
+}
+
 export function proxy(request: NextRequest) {
+  return secure(request, route(request));
+}
+
+function route(request: NextRequest) {
   // Switches changed in System settings (step 11.8): re-read at most every 30 seconds, in the background.
   refreshFlagsSoon();
   // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.

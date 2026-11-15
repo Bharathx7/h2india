@@ -94,3 +94,13 @@ export function parseServerEnv(source: Record<string, string | undefined> = proc
 export function parseClientEnv(source: Record<string, string | undefined> = process.env): ClientEnv {
   return parse(clientEnvSchema, source);
 }
+
+/** AWS S3 itself (any region) takes virtual-host URLs; MinIO and other S3-compatible stores need path-style ones. */
+export function isAwsS3(endpoint: string): boolean {
+  try {
+    const host = new URL(endpoint).hostname;
+    return host === "amazonaws.com" || host.endsWith(".amazonaws.com");
+  } catch {
+    return false;
+  }
+}

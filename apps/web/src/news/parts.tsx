@@ -247,7 +247,7 @@ export function PressReleases({ items }: { items: ArticleSummary[] }) {
           <Link href="/news/press-releases">All press releases</Link>
         </ArrowLink>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2 md:gap-6">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         {items.map((a) => (
           <li key={a.id}>
             <StoryCard a={a} layout="row" className="h-full" />
@@ -263,7 +263,7 @@ export function UpcomingEvents({ items }: { items: EventView[] }) {
   return (
     <section aria-labelledby="upcoming-events" className={cx(wrap, "flex flex-col gap-4 py-12")}>
       <RailHeader id="upcoming-events" title="Upcoming events" link={{ label: "All events", href: "/events" }} />
-      <ul className="grid gap-4 md:grid-cols-3 md:gap-6">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
         {items.map((e) => (
           <li key={e.href}>
             <EventCard {...e} />

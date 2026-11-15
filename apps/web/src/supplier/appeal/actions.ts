@@ -4,7 +4,7 @@ import { sendAppeal } from "@h2india/core/admin/appeals";
 import { UserAdminError } from "@h2india/core/admin/users";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "../actions";
+import { supplierActor } from "../actor";
 
 // Appeal a suspension (G10). The company is the person's own supplier company.
 export async function appealAction(reason: string): Promise<{ ok: true } | { ok: false; error: string }> {

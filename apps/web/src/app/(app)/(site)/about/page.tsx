@@ -65,7 +65,7 @@ export default async function AboutPage() {
         lead="The National Green Hydrogen Mission has moved from targets to awards. Commissioning is just starting, and buyers, suppliers and policymakers need one shared picture."
       >
         {t.aboutFigures.length ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {t.aboutFigures.map((f) => (
               <FigureTile key={f.label} f={f} large />
             ))}
@@ -73,13 +73,13 @@ export default async function AboutPage() {
         ) : null}
       </Block>
       <Block id="what-we-do" title="What we do" lead="Six parts of one platform.">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PARTS.map((p) => (
             <Feature key={p.title} icon={p.icon} title={p.title} text={p.text} />
           ))}
         </div>
       </Block>
-      <div className={cx(wrap, "grid gap-4 pt-12 md:grid-cols-2 md:pt-16")}>
+      <div className={cx(wrap, "grid grid-cols-1 gap-4 pt-12 md:grid-cols-2 md:pt-16")}>
         <section aria-labelledby="independence" className="flex flex-col gap-2 rounded-card bg-mint p-6">
           <p className="type-eyebrow text-link">Editorial independence</p>
           <h2 id="independence" className="type-h4 text-primary">

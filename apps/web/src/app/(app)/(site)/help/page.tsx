@@ -72,7 +72,7 @@ export default async function HelpPage({ searchParams }: { searchParams: Promise
           <h2 id="popular" className="type-h3 text-primary">
             Popular articles
           </h2>
-          <ol className="grid gap-x-6 md:grid-cols-2">
+          <ol className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             {popular.map((a, i) => (
               <li key={a.id} className="flex gap-4 border-b border-default py-3">
                 <span className="type-spec text-secondary">{String(i + 1).padStart(2, "0")}</span>

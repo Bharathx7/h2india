@@ -237,7 +237,7 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
                 </span>
               ) : null}
             </div>
-            <dl className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)]">
+            <dl className="grid grid-cols-1 gap-2 md:grid-cols-[160px_minmax(0,1fr)]">
               <dt className="type-body-sm text-secondary">Address</dt>
               <dd className="type-body-sm">{[s.address, s.city, s.state, s.pincode].filter(Boolean).join(", ")}</dd>
               <dt className="type-body-sm text-secondary">Bills to GSTIN</dt>

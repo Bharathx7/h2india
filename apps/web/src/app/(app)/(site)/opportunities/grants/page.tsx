@@ -45,8 +45,11 @@ function queryOf(params: Params, change: Record<string, string | null> = {}): st
 export default async function GrantsPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
   const forced = forcedState(one(params.view));
+  // The site layout has already loaded the viewer (cached), so the loading state links like the loaded one: a
+  // signed-in reader who clicks Create alert before the list arrives isn't sent to sign in.
+  const signedIn = Boolean(await siteViewer());
   const loading = (
-    <Shell counts={null} params={params} signedIn={false}>
+    <Shell counts={null} params={params} signedIn={signedIn}>
       <CardsLoading label="Loading grants" />
     </Shell>
   );
@@ -229,7 +232,7 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
 
 function Cards({ items, signedIn }: { items: GrantView[]; signedIn: boolean }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {items.map((g) => (
         <li key={g.id}>
           <SchemeCard

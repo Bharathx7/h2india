@@ -121,7 +121,7 @@ export function Feature({ icon, title, text }: { icon: IconName; title: string; 
 
 export function Steps({ steps }: { steps: { title: string; text: string }[] }) {
   return (
-    <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((s, i) => (
         <li key={s.title} className={cx(card, "flex flex-col gap-2 p-5")}>
           <span className="flex size-6 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
@@ -161,7 +161,10 @@ export function Faqs({
 }) {
   if (!items.length) return null;
   return (
-    <section aria-labelledby={id} className={cx(wrap, "grid gap-6 pt-12 md:pt-16 lg:grid-cols-[18rem_1fr] lg:gap-10")}>
+    <section
+      aria-labelledby={id}
+      className={cx(wrap, "grid grid-cols-1 gap-6 pt-12 md:pt-16 lg:grid-cols-[18rem_1fr] lg:gap-10")}
+    >
       <div className="flex flex-col gap-2">
         <h2 id={id} className="type-h2 text-primary">
           {title}

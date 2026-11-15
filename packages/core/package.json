@@ -25,6 +25,7 @@
     "./alerts/rules": "./src/alerts/rules.ts",
     "./auth": "./src/sign-in/auth.ts",
     "./sign-in": "./src/sign-in/rules.ts",
+    "./sign-in/step-up": "./src/sign-in/step-up.ts",
     "./companies": "./src/companies/index.ts",
     "./companies/client": "./src/companies/client.ts",
     "./jobs": "./src/jobs.ts",
@@ -64,7 +65,8 @@
     "./grievances": "./src/grievances/index.ts",
     "./grievances/rules": "./src/grievances/rules.ts",
     "./consent": "./src/consent/index.ts",
-    "./consent/cookies": "./src/consent/cookies.ts"
+    "./consent/cookies": "./src/consent/cookies.ts",
+    "./consent/wording": "./src/consent/wording.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

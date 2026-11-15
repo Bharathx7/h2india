@@ -6,6 +6,8 @@ import { assertCan } from "../authz/can";
 // Compliance (step 11.7): data-rights requests and grievance escalation.
 export * from "./data-rights";
 export * from "./escalation";
+export * from "./inventory";
+export * from "./retention";
 
 /** The acknowledge clock of each grievance (Grievances 660:281): when it's due and whether it was met. Read-only. */
 export async function grievanceClocks(db: Executor, actor: Actor, ids: string[]) {

@@ -38,7 +38,7 @@ export default async function ForSuppliersPage() {
         ]}
       />
       <Block id="buying" title="Who’s buying" lead="Buyers on H2 India work at organisations like these.">
-        <ul className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {BUYERS.map((b) => (
             <li key={b.label} className={cx(card, "flex items-center gap-2.5 p-4 type-label text-primary")}>
               <Icon name={b.icon} size={18} className="shrink-0 text-icon-primary" />
@@ -70,7 +70,7 @@ export default async function ForSuppliersPage() {
         />
       </Block>
       <Block id="get" title="What you get">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Feature
             icon="building"
             title="Storefront"

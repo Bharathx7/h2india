@@ -139,7 +139,10 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
             {c.documents.map((d) => {
               const st = documentStatusWord(d, now, notice.days);
               return (
-                <li key={d.id} className="grid items-start gap-3 py-3 md:grid-cols-[minmax(0,1fr)_120px_150px_auto]">
+                <li
+                  key={d.id}
+                  className="grid grid-cols-1 items-start gap-3 py-3 md:grid-cols-[minmax(0,1fr)_120px_150px_auto]"
+                >
                   <span className="flex gap-2">
                     <Icon name="file-text" size={18} />
                     <span>
@@ -296,7 +299,7 @@ export default async function VerificationPage({
         ) : (
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default">
             {claims.map((r) => (
-              <li key={r.claim.id} className="grid gap-4 p-5 md:grid-cols-[minmax(0,1fr)_320px]">
+              <li key={r.claim.id} className="grid grid-cols-1 gap-4 p-5 md:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="flex flex-col gap-1">
                   <Link href={`/directory/companies/${r.slug}`} className="type-label-lg text-link hover:underline">
                     {r.company}

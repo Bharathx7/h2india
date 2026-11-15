@@ -3,7 +3,7 @@
 import { uploadDocument, VerificationError } from "@h2india/core/supplier";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "./actions";
+import { supplierActor } from "./actor";
 
 // Upload a document (272:4545), step 8.2. The company is the person's own supplier company.
 

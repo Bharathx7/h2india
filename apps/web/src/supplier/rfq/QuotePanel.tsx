@@ -147,7 +147,7 @@ export function QuoteBuilder({
         </p>
       ) : null}
       {error ? <Alert tone="error" title={error} live /> : null}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Unit price, before GST" error={errors.unitPrice}>
           <Input
             inputMode="decimal"
@@ -224,7 +224,7 @@ export function QuoteBuilder({
           ))}
         </Select>
       </Field>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Warranty" suffix="months">
           <Input
             inputMode="numeric"

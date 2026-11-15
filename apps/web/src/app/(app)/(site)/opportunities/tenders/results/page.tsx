@@ -188,7 +188,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
           <h2 id="meaning" className="type-h2 text-primary">
             What the results mean
           </h2>
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {analyses.map((a) => (
               <li key={a.id}>
                 <StoryCard a={a} className="h-full" />

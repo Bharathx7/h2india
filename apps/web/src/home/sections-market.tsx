@@ -163,7 +163,7 @@ export function PlatformFeatures() {
         </p>
       </div>
       <div className="flex flex-col gap-5 md:gap-6">
-        <div className="grid gap-5 md:gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:gap-6 lg:grid-cols-2">
           <Tile className="bg-mint lg:h-171">
             <div aria-hidden="true" className="depth-accent-glow absolute top-30 left-40 size-160" />
             <TileText title="Confirm, then pay">
@@ -235,7 +235,7 @@ export function PlatformFeatures() {
                 </table>
               </div>
             </Tile>
-            <div className="grid gap-5 md:grid-cols-2 md:gap-6">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
               <Tile className="bg-page lg:h-95">
                 <TileText title="Documents checked">
                   GSTIN, PAN, bank name match and certificates such as PESO and BIS, checked before a listing goes live.

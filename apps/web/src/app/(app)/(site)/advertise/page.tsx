@@ -61,7 +61,7 @@ export default async function AdvertisePage() {
                   Figures are dated and come from our own analytics and lists. We never round up.
                 </p>
               </div>
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {t.audience.map((f) => (
                   <li key={f.label} className="flex flex-col gap-1 rounded-card bg-subtle p-4">
                     <span className="type-h4 text-primary">{f.value}</span>
@@ -100,7 +100,7 @@ export default async function AdvertisePage() {
                 Illustrations of how placements appear. Your artwork follows our ad specs.
               </p>
             </div>
-            <ul className="grid gap-3 sm:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {CREATIVES.map((c) => (
                 <li key={c} className="flex flex-col gap-2">
                   <div aria-hidden="true" className="flex h-24 flex-col gap-2 rounded-card bg-subtle p-3">

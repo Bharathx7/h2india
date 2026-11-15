@@ -76,7 +76,7 @@ export default async function BuyerHome() {
                 return (
                   <li
                     key={item.key}
-                    className="grid items-center gap-3 border-b border-default p-5 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
+                    className="grid grid-cols-1 items-center gap-3 border-b border-default p-5 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
                   >
                     <span
                       className={cx(

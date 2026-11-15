@@ -54,7 +54,7 @@ export default function MissionPage() {
         <h2 id="values" className="type-h3 text-primary">
           What we hold ourselves to
         </h2>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {VALUES.map((v) => (
             <li key={v.title} className={cx(card, "flex flex-col gap-2 p-5")}>
               <Icon name="shield-check" size={20} className="text-icon-primary" />
@@ -64,7 +64,7 @@ export default function MissionPage() {
           ))}
         </ul>
       </section>
-      <div className={cx(wrap, "grid gap-4 pt-6 md:grid-cols-2")}>
+      <div className={cx(wrap, "grid grid-cols-1 gap-4 pt-6 md:grid-cols-2")}>
         {[
           {
             title: "The team",

@@ -17,7 +17,7 @@ import {
 } from "@h2india/core/orders";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "../actions";
+import { supplierActor } from "../actor";
 
 // Supplier order actions (steps 10.7 to 10.10). The company is always the person's own supplier company
 // (supplierActor), never a value from the form.

@@ -141,7 +141,7 @@ export function jobChips(j: JobView): string[] {
 
 export function JobCards({ items, columns = 3 }: { items: JobView[]; columns?: 3 | 4 }) {
   return (
-    <ul className={cx("grid gap-4 md:grid-cols-2", columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
+    <ul className={cx("grid grid-cols-1 gap-4 md:grid-cols-2", columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
       {items.map((j) => (
         <li key={j.id}>
           <JobCard
@@ -163,7 +163,12 @@ export function JobCards({ items, columns = 3 }: { items: JobView[]; columns?: 3
 /** Loading cards in the final layout (state boards, step 2.5). */
 export function CardsLoading({ label, count = 6 }: { label: string; count?: number }) {
   return (
-    <div role="status" aria-busy="true" aria-label={label} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label={label}
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+    >
       {Array.from({ length: count }, (_, i) => (
         <div key={i} aria-hidden="true" className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
           <span className="block h-3 w-2/5 rounded-[6px] shimmer" />

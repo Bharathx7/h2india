@@ -15,6 +15,8 @@ export default tseslint.config(
       "apps/web/src/payload-types.ts",
       "apps/web/src/app/(payload)/cms/importMap.js",
       "apps/web/src/migrations/**",
+      // k6 load scripts (step 12.5) run in k6's own runtime, not Node or the browser.
+      "tests/load/**",
       "playwright-report/**",
       "test-results/**",
       // Runs inside Figma through the MCP use_figma tool (top-level await and return), not in Node.

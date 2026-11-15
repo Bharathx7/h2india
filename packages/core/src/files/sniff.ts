@@ -9,9 +9,36 @@ const ascii = (b: Uint8Array, at: number, text: string) => {
   return true;
 };
 
-// An SVG is text whose first element is <svg>, after an optional XML declaration, comments and doctype.
-const SVG_START =
-  /^\uFEFF?\s*(?:<\?xml[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*(?:<!DOCTYPE[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<svg[\s>]/i;
+/**
+ * An SVG is text whose first element is <svg>, after an optional XML declaration, comments and doctype. A linear scan,
+ * not a regular expression: the text is the uploader's, and a pattern with nested repeats can be made to backtrack
+ * for ever (CodeQL js/redos).
+ */
+export function startsWithSvg(text: string): boolean {
+  let i = text.startsWith("\uFEFF") ? 1 : 0;
+  const skipSpace = () => {
+    while (i < text.length && /\s/.test(text.charAt(i))) i++;
+  };
+  const skipPast = (end: string) => {
+    const at = text.indexOf(end, i);
+    if (at < 0) return false;
+    i = at + end.length;
+    return true;
+  };
+  for (;;) {
+    skipSpace();
+    const rest = text.slice(i, i + 9);
+    if (rest.startsWith("<?xml")) {
+      if (!skipPast(">")) return false;
+    } else if (rest.startsWith("<!--")) {
+      if (!skipPast("-->")) return false;
+    } else if (rest.toUpperCase().startsWith("<!DOCTYPE")) {
+      if (!skipPast(">")) return false;
+    } else {
+      return /^<svg[\s>]/i.test(text.slice(i, i + 5));
+    }
+  }
+}
 
 export function sniffType(bytes: Uint8Array): FileType | null {
   if (starts(bytes, PNG)) return "image/png";
@@ -21,7 +48,7 @@ export function sniffType(bytes: Uint8Array): FileType | null {
   const head = Buffer.from(bytes.subarray(0, 1024)).toString("latin1");
   if (head.includes("%PDF-")) return "application/pdf";
   const text = Buffer.from(bytes.subarray(0, 4096));
-  if (!text.includes(0) && SVG_START.test(text.toString("utf8"))) return "image/svg+xml";
+  if (!text.includes(0) && startsWithSvg(text.toString("utf8"))) return "image/svg+xml";
   // A CSV (step 8.5): UTF-8 text with no control bytes, whose first line has a comma.
   if (
     !text.includes(0) &&

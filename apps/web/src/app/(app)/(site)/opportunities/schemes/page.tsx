@@ -104,7 +104,7 @@ function Hero({ counts, q }: { counts: { open: number; closing: number; total: n
 
 function Cards({ items }: { items: SchemeView[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 md:gap-6">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
       {items.map((s) => (
         <li key={s.id}>
           <SchemeCard {...s} />
@@ -141,7 +141,7 @@ function Rail({
           <Link href={link.href}>{link.label}</Link>
         </ArrowLink>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
         {items.slice(0, 3).map((s) => (
           <li key={s.id}>
             <SchemeCard {...s} />
@@ -331,7 +331,7 @@ function Loading() {
   return (
     <div role="status" aria-busy="true" aria-label="Loading schemes">
       <Hero counts={null} q="" />
-      <div className={cx(wrap, "grid gap-4 py-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3")}>
+      <div className={cx(wrap, "grid grid-cols-1 gap-4 py-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3")}>
         {Array.from({ length: 6 }, (_, i) => (
           <div
             key={i}

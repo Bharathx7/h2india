@@ -6,7 +6,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { parseServerEnv } from "@h2india/config";
+import { isAwsS3, parseServerEnv } from "@h2india/config";
 
 // Object storage (step 3.7). Three buckets: quarantine (browser uploads, unchecked), private (documents, opened only by
 // signed link) and public (checked images). Files are served from the storage domain, never the application's.
@@ -20,7 +20,7 @@ export function s3(): S3Client {
     region: env.S3_REGION,
     credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
     // MinIO and other S3-compatible stores need path-style URLs; AWS works with either.
-    forcePathStyle: !env.S3_ENDPOINT.includes("amazonaws.com"),
+    forcePathStyle: !isAwsS3(env.S3_ENDPOINT),
     // Only send checksums S3 asks for: browsers can't compute the SDK's default ones for signed uploads.
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",

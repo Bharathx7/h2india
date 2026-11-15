@@ -40,7 +40,7 @@ export function NewAccountForm({ defaultHolder }: { defaultHolder: string }) {
         />
         <span className="type-caption text-secondary">It must match your GST legal name.</span>
       </label>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className="type-label">Account number</span>
           <Input

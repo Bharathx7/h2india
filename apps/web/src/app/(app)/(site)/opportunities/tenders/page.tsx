@@ -42,16 +42,19 @@ const day = (v: string) => (/^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "");
 export default async function TendersPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
   const forced = forcedState(one(params.view));
+  // The site layout has already loaded the viewer (cached), so the loading state links like the loaded one: a
+  // signed-in reader who clicks Create alert before the list arrives isn't sent to sign in.
+  const signedIn = Boolean(await siteViewer());
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
       {forced === "loading" ? (
-        <Shell counts={null} params={params} signedIn={false}>
+        <Shell counts={null} params={params} signedIn={signedIn}>
           <CardsLoading label="Loading tenders" />
         </Shell>
       ) : (
         <Suspense
           fallback={
-            <Shell counts={null} params={params} signedIn={false}>
+            <Shell counts={null} params={params} signedIn={signedIn}>
               <CardsLoading label="Loading tenders" />
             </Shell>
           }
@@ -288,7 +291,7 @@ const pageLink = (current: boolean) =>
 
 function Cards({ rows }: { rows: TenderRow[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {rows.map((r) => (
         <li key={r.id}>
           <TenderCard {...r.card} />

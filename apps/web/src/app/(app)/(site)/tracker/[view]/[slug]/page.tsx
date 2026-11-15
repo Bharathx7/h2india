@@ -191,7 +191,7 @@ export default async function TrackerRecordPage({ params }: { params: Params }) 
               <h2 id="companies" className="type-h4 text-primary">
                 Linked companies
               </h2>
-              <ul className="grid gap-3 sm:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {companies.map((c) => (
                   <li key={c.id ?? c.name} className="flex items-center gap-3 rounded-card border border-default p-3">
                     <span className="flex size-10 items-center justify-center rounded-pill bg-mint type-label-sm text-primary">

@@ -16,10 +16,12 @@ import { adminOrders, ledgerMonths } from "./admin";
 import { checkoutView, saveCheckout } from "./checkout";
 import {
   acceptDelivery,
+  acceptDisputeOffer,
   approveOrder,
   cancelOrder,
   decideDispute,
   dispatchOrder,
+  escalateDispute,
   placeCartOrder,
   rateOrder,
   ratingOf,
@@ -384,6 +386,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
         must(settlement).tdsPaise,
     );
     const later = new Date(Date.now() + 10 * DAY);
+    // A suspended supplier isn't paid (review M4); the release waits until the suspension is lifted.
+    const orgs = schema.organisations;
+    await h.db.update(orgs).set({ suspendedAt: new Date() }).where(eq(orgs.id, supplier.org.id));
+    await runPayouts(h.db, later);
+    expect(
+      (await h.db.select().from(schema.orderSettlements).where(eq(schema.orderSettlements.orderId, order.id)))[0]
+        ?.payoutId,
+    ).toBeNull();
+    await h.db.update(orgs).set({ suspendedAt: null }).where(eq(orgs.id, supplier.org.id));
     expect((await runPayouts(h.db, later)).length).toBeGreaterThanOrEqual(1);
     await deliverSimWebhooks(h.db, new Date(Date.now() + 60_000));
     expect(await status(order.id)).toBe("Closed");
@@ -526,6 +537,61 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const own = scopeFor(await loadActor(h.db, supplier.admin.id));
     expect((await supplierSettlements(own, h.db, supplier.org.id)).length).toBeGreaterThan(0);
     expect((await supplierMonths(own, h.db, supplier.org.id))[0]?.net).toBeGreaterThan(0n);
+  });
+
+  it("another company can't act on an order or its dispute, with its own company or this one's (12.1)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    const sAdmin = await loadActor(h.db, supplier.admin.id);
+    const rival = await makeCompany(h.db, "Rival Orders", "supplier");
+    const rivalAdmin = await loadActor(h.db, rival.admin.id);
+    const outsider = await loadActor(h.db, other.admin.id);
+    const order = await placeOne(admin);
+    const later = { dispatchBy: new Date(Date.now() + 7 * DAY) };
+
+    // Supplier side: a rival supplier can't accept, decline or ship it, naming its own company or the real one.
+    for (const org of [rival.org.id, supplier.org.id]) {
+      await expect(supplierAccept(h.db, rivalAdmin, org, order.id, later, undefined, ON)).rejects.toThrow();
+      await expect(
+        supplierDecline(h.db, rivalAdmin, org, order.id, { reason: "Not mine" }, undefined, ON),
+      ).rejects.toThrow();
+      await expect(dispatchOrder(h.db, rivalAdmin, org, order.id, undefined, ON)).rejects.toThrow();
+    }
+    // Buyer side: another buyer can't approve, cancel or accept it.
+    for (const org of [other.org.id, buyer.org.id]) {
+      await expect(approveOrder(h.db, outsider, org, order.id, {}, undefined, ON)).rejects.toThrow();
+      await expect(cancelOrder(h.db, outsider, org, order.id, "Not mine", undefined, ON)).rejects.toThrow();
+      await expect(acceptDelivery(h.db, outsider, org, order.id, undefined, ON)).rejects.toThrow();
+      await expect(rateOrder(h.db, outsider, org, order.id, { rating: 1 })).rejects.toThrow();
+    }
+    expect(await status(order.id)).toBe("Pending acceptance");
+
+    // Disputes: only the order's two companies may answer, accept or escalate.
+    await supplierAccept(h.db, sAdmin, supplier.org.id, order.id, later, undefined, ON);
+    await payAll(order.id, admin);
+    const sent = await ship(order.id, sAdmin, "INV-X");
+    await recordReceipt(h.db, { token: sent.token, code: sent.code, condition: "Damaged", notes: "Cracked" });
+    const dispute = await reportProblem(
+      h.db,
+      admin,
+      buyer.org.id,
+      order.id,
+      { reason: "Damaged in transit", details: "Cracked casing" },
+      undefined,
+      ON,
+    );
+    for (const org of [rival.org.id, supplier.org.id])
+      await expect(
+        replyToDispute(h.db, rivalAdmin, org, dispute.id, { offer: "disagree", reply: "Not ours" }),
+      ).rejects.toThrow();
+    for (const org of [other.org.id, buyer.org.id]) {
+      await expect(acceptDisputeOffer(h.db, outsider, org, dispute.id)).rejects.toThrow();
+      await expect(escalateDispute(h.db, outsider, org, dispute.id)).rejects.toThrow();
+    }
+    await expect(escalateDispute(h.db, rivalAdmin, rival.org.id, dispute.id)).rejects.toThrow();
+    const [d] = await h.db.select().from(schema.disputes).where(eq(schema.disputes.id, dispute.id));
+    expect(d?.status).toBe("Open");
+    expect(d?.supplierReply ?? null).toBeNull();
+    expect(await status(order.id)).toBe("Disputed");
   });
 
   it("the back office reads every order and the ledger only with operator permissions (11.5, 11.6)", async () => {

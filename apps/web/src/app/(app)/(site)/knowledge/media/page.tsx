@@ -81,7 +81,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
           </div>
         ) : null}
         {featured && show === "All" ? (
-          <div className="grid gap-4 pt-8 lg:grid-cols-[2fr_1fr]">
+          <div className="grid grid-cols-1 gap-4 pt-8 lg:grid-cols-[2fr_1fr]">
             <VideoTile v={featured} />
             <div className="flex flex-col gap-4">
               {side.map((v) => (
@@ -117,7 +117,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
             title="Podcast episodes"
             sub="Hydrogen Leaders: conversations with the people building India's hydrogen industry."
           >
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {podcasts.map((p) => (
                 <li key={p.id}>
                   <Link

@@ -304,6 +304,18 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Join details are copied to an account only after its email is proved (link or sign-in code).
 - The worker must run for background GSTIN checks (`pnpm dev:worker`); browser tests in CI start it.
 
+## Hardening (Stage 12)
+
+- Security headers come from `apps/web/src/security/headers.ts` through the proxy, at request time. A new outside origin the browser loads from needs adding there with a reason; never loosen `frame-ancestors`, `object-src` or `form-action`.
+- Every route handler and server action has a guard or a `PUBLIC` entry with a reason (`apps/web/src/security/route-inventory.ts`); regenerate `docs/security/routes.md` with `pnpm tsx scripts/route-inventory.ts`. Never export a helper from a `"use server"` file: every export there is callable from the browser.
+- Operator permissions count only in a passkey session when `operatorPasskey` is on (default in production): the gate is registered in `apps/web/src/server/auth.ts`, so always load permissions with `loadActor()`. A suspended person loads as a visitor.
+- Every new table is classified in `packages/core/src/compliance/inventory.ts` (personal fields, purpose, retention, processors), then `pnpm privacy:inventory`; a person's own table also gets an erasure step. The test fails otherwise.
+- A consent choice made inside an account is recorded with `recordDirectoryConsent()`/`recordMarketingChoices()` (words and version from `consent/wording.ts`); show the same words on screen.
+- Retention periods are the `privacy.retention` setting; never hard-code a period. `pnpm privacy:retention` shows what a period would remove.
+- `a11y-routes.spec.ts` lists every page without a parameter; add new ones there.
+- A loading box with an `aria-label` needs `role="status"` (axe "aria-prohibited-attr" on a plain div). A loading state can still be on screen when a test or person clicks, so it links exactly like the loaded page (read `siteViewer()` outside the `Suspense`) and no skeleton bar is wider than `max-w-full`.
+- Inside a `dl`, each group `div` holds only `dt` and `dd`; put a decorative bar in its own `aria-hidden` `dd`.
+
 ## Data rules (playbook Section 8)
 
 - Money is whole **paise** in `bigint`, with a currency column. No floats. One formatting helper (₹48,79,400; lakh and crore).

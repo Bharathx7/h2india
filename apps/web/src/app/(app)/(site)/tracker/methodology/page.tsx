@@ -43,7 +43,7 @@ export default async function MethodologyPage() {
                 A record moves forward only when we have the evidence in the right-hand column.
               </p>
             </div>
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="What each status means" className="relative overflow-x-auto">
               <table className="w-full min-w-150 text-left">
                 <thead className="bg-subtle type-label-sm text-secondary">
                   <tr>

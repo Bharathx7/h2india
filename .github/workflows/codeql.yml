@@ -1,0 +1,74 @@
+# Step 12.1: static analysis of the TypeScript on every change and weekly (new rules arrive between changes).
+# The repository is private without GitHub Advanced Security, so results aren't uploaded to Code scanning: they are
+# listed in the run summary, and any finding of high severity (7.0 or more) fails this check.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "30 1 * * 1" # Mondays 07:00 IST
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  analyze:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - "**/*.test.ts"
+              - "**/*.int.test.ts"
+              - tests/e2e
+              - "**/migrations/**"
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:javascript-typescript"
+          upload: never
+          output: sarif
+      - name: Findings (fails on high)
+        run: |
+          f=$(ls sarif/*.sarif | head -1)
+          jq -r '
+            .runs[0] as $r
+            | [$r.tool.driver.rules[]?, $r.tool.extensions[]?.rules[]?] as $rules
+            | $r.results[]?
+            | . as $x
+            | (first(($rules[] | select(.id == $x.ruleId) | .properties["security-severity"] // empty), "0")) as $sev
+            | "\($sev)\t\($x.ruleId)\t\($x.locations[0].physicalLocation.artifactLocation.uri):\($x.locations[0].physicalLocation.region.startLine)\t\($x.message.text | split("\n")[0])"
+          ' "$f" | sort -rn > findings.tsv
+          {
+            echo "### CodeQL findings: $(wc -l < findings.tsv)"
+            echo
+            echo "| Severity | Rule | Where | What |"
+            echo "| --- | --- | --- | --- |"
+            awk -F'\t' '{ printf "| %s | %s | %s | %s |\n", $1, $2, $3, $4 }' findings.tsv
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat findings.tsv
+          high=$(awk -F'\t' '$1 + 0 >= 7' findings.tsv | wc -l)
+          if [ "$high" -gt 0 ]; then
+            echo "::error::$high high-severity CodeQL findings (see the summary)"
+            exit 1
+          fi
+      - name: Keep the results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: codeql-sarif
+          path: sarif
+          retention-days: 14
+          if-no-files-found: ignore

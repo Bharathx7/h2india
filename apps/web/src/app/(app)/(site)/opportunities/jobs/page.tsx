@@ -38,8 +38,11 @@ function queryOf(params: Params, change: Record<string, string | null> = {}): st
 export default async function JobsPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
   const forced = forcedState(one(params.view));
+  // The site layout has already loaded the viewer (cached), so the loading state links like the loaded one: a
+  // signed-in reader who clicks Create alert before the list arrives isn't sent to sign in.
+  const signedIn = Boolean(await siteViewer());
   const loading = (
-    <Shell live={null} signedIn={false}>
+    <Shell live={null} signedIn={signedIn}>
       <CardsLoading label="Loading jobs" />
     </Shell>
   );

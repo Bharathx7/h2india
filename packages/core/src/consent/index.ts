@@ -16,3 +16,5 @@ export async function recordCookieConsent(value: string, source: "banner" | "pre
   });
   return true;
 }
+export * from "./records";
+export * from "./wording";

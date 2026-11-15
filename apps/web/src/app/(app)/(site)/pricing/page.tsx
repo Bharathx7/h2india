@@ -63,7 +63,7 @@ export default async function PricingPage() {
       </div>
       <Block id="plans" title="Supplier plans" lead="Start free. Upgrade when you need more reach and tools.">
         {plans.length ? (
-          <ul className="grid gap-4 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {plans.map((plan) => (
               <li
                 key={plan.name}
@@ -106,7 +106,7 @@ export default async function PricingPage() {
       >
         {hasCommission && c ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {c.launchValue ? (
                 <div className={cx(card, "flex flex-col gap-1 p-5")}>
                   <p className="type-eyebrow text-secondary">Launch offer</p>
@@ -160,7 +160,7 @@ export default async function PricingPage() {
         lead="For any plan. Every paid placement is labelled, and none of them changes search ranking or badges."
       >
         {p?.addOns?.length ? (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {p.addOns.map((a) => (
               <li key={a.name} className={cx(card, "flex flex-col gap-1 p-5")}>
                 <p className="type-label text-primary">{a.name}</p>

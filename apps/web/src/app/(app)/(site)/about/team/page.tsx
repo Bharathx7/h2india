@@ -29,7 +29,7 @@ export default async function TeamPage() {
           groups.map(({ g, list }) => (
             <section key={g} aria-label={g === "Management" ? "Management team" : "Advisors"}>
               {g === "Advisors" ? <h2 className="mb-4 type-h2 text-primary">Advisors</h2> : null}
-              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {list.map((p) => (
                   <li key={p.id} className={cx(card, "flex flex-col gap-3 p-6")}>
                     <span

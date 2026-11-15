@@ -276,7 +276,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
           title="Tenders"
           link={{ label: `See all ${String(openTenders.length)} tenders`, href: href("/opportunities/tenders") }}
         >
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {openTenders.slice(0, 4).map((t) => (
               <li key={t.id}>
                 <TenderCard {...t.card} />
@@ -288,7 +288,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
 
       {openSchemes.length ? (
         <Rail id="schemes" title="Schemes" link={{ label: "See all schemes", href: href("/opportunities/schemes") }}>
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {openSchemes.slice(0, 4).map((s) => (
               <li key={s.id}>
                 <SchemeCard {...s} />
@@ -304,7 +304,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
           title="Grants & calls"
           link={{ label: "See all grants and calls", href: "/opportunities/grants" }}
         >
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {grantViews
               .filter((g) => g.statusKey !== "Closed" && g.statusKey !== "Next round expected")
               .slice(0, 4)
@@ -346,7 +346,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
             {results.map((r) => (
               <li
                 key={r.id}
-                className="grid items-center gap-2 border-b border-default px-4 py-3 last:border-b-0 md:grid-cols-[7rem_1fr_6rem_1fr_8rem_7rem] md:gap-4"
+                className="grid grid-cols-1 items-center gap-2 border-b border-default px-4 py-3 last:border-b-0 md:grid-cols-[7rem_1fr_6rem_1fr_8rem_7rem] md:gap-4"
               >
                 <span className="type-spec text-primary">{r.date}</span>
                 <span className="flex flex-col">

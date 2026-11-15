@@ -376,7 +376,7 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">Request summary</h2>
-          <dl className="grid gap-2 md:grid-cols-[140px_minmax(0,1fr)]">
+          <dl className="grid grid-cols-1 gap-2 md:grid-cols-[140px_minmax(0,1fr)]">
             {(
               [
                 ["Quantity", item ? `${String(item.quantity)} ${item.unit}` : ""],

@@ -123,7 +123,7 @@ export function ExtendDeadline({
         }
       >
         {a.error ? <Alert tone="error" title={a.error} live /> : null}
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="type-label">New deadline</span>
             <Input
@@ -534,7 +534,7 @@ export function EditRfq({
             Saving creates version {next} of this RFQ and tells {all} what changed.
           </Alert>
           {a.error ? <Alert tone="error" title={a.error} live /> : null}
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField label="Quantity" required helper={start.unit}>
               <Input
                 type="number"

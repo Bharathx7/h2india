@@ -141,7 +141,7 @@ export default async function KnowledgeHome() {
 
       {chapters.length ? (
         <Block id="start" title="Start here">
-          <div className="grid gap-6 rounded-card border border-default p-5 md:grid-cols-[22rem_1fr]">
+          <div className="grid grid-cols-1 gap-6 rounded-card border border-default p-5 md:grid-cols-[22rem_1fr]">
             <div className="flex flex-col gap-3">
               <p className="type-eyebrow text-secondary">
                 FREE COURSE · {chapters.length} CHAPTERS{minutes ? ` · ABOUT ${String(minutes)} MINUTES` : ""}
@@ -196,7 +196,7 @@ export default async function KnowledgeHome() {
           title="Buyer's guides"
           link={{ label: `All ${String(buyers.length)} guides`, href: "/knowledge/guides" }}
         >
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {buyers.slice(0, 8).map((g) => (
               <li key={g.id}>
                 <Link
@@ -222,7 +222,7 @@ export default async function KnowledgeHome() {
 
       {insights.items.length ? (
         <Block id="insights" title="Latest insights" link={{ label: "All insights", href: "/knowledge/insights" }}>
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {insights.items.map((a) => (
               <li key={`${a.kind}-${String(a.id)}`}>
                 <StoryCard a={a} className="h-full" />
@@ -234,7 +234,7 @@ export default async function KnowledgeHome() {
 
       {terms.length ? (
         <Block id="glossary" title="Glossary" link={{ label: "Open the glossary", href: "/knowledge/glossary" }}>
-          <div className="grid gap-6 md:grid-cols-[1fr_20rem] md:items-start">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_20rem] md:items-start">
             <nav aria-label="Glossary letters" className="flex flex-wrap gap-2">
               {LETTERS.map((l) =>
                 letters.has(l) ? (
@@ -276,7 +276,7 @@ export default async function KnowledgeHome() {
           title="Standards and rules library"
           link={{ label: "All standards and rules", href: "/knowledge/standards" }}
         >
-          <ul className="grid gap-3 md:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {standards.slice(0, 6).map((s) => (
               <li key={s.id}>
                 <Link
@@ -296,7 +296,7 @@ export default async function KnowledgeHome() {
 
       {overview?.figures?.length ? (
         <Block id="tracker" title="India Hydrogen Tracker" link={{ label: "Open the tracker", href: "/tracker" }}>
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {overview.figures.slice(0, 3).map((f) => (
               <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-5">
                 <span className="type-display text-primary">{f.value}</span>
@@ -317,7 +317,7 @@ export default async function KnowledgeHome() {
 
       {media.length ? (
         <Block id="reports" title="Reports and videos">
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {media.map((m) => (
               <li key={m.href}>
                 <Link href={m.href} className="group flex h-full flex-col gap-2 rounded-card bg-mint p-5">

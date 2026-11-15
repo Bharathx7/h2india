@@ -109,7 +109,7 @@ export default async function GrantPage({ params }: { params: Params }) {
             <h2 id="glance" className="type-h4 text-primary">
               At a glance
             </h2>
-            <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
               {glance.map((f) => (
                 <div key={f.label} className="flex flex-col gap-0.5">
                   <dt className="type-eyebrow text-secondary">{f.label}</dt>

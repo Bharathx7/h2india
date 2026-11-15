@@ -13,7 +13,7 @@ import {
 } from "@h2india/core/products";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "./actions";
+import { supplierActor } from "./actor";
 
 // The product editor and Products list (step 8.3). The company is the person's own supplier company.
 

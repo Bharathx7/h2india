@@ -5,7 +5,7 @@ import { declineRfq, markViewed, RfqError, saveQuoteDraft, sendQuote, withdrawQu
 import { PAYMENT_PRESETS } from "@h2india/core/rfq/totals";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
-import { supplierActor } from "../actions";
+import { supplierActor } from "../actor";
 
 // Supplier RFQs and quotes (step 9.5). The company is always the person's own supplier company (supplierActor).
 

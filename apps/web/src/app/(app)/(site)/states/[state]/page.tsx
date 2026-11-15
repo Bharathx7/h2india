@@ -210,7 +210,7 @@ export default async function StatePage({ params }: { params: Params }) {
 
           {local.length ? (
             <Card title={`Companies in ${data.name}`} sub="Headquartered or operating here.">
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {local.map((c) => (
                   <li key={c.id} className="flex items-center gap-3 rounded-card border border-default p-3">
                     <span

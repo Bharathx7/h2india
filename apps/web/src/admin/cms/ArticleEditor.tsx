@@ -626,7 +626,7 @@ export function ArticleEditor({
             />
           </FormField>
           {form.type === "interview" ? (
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {(["name", "role", "organisation"] as const).map((k) => (
                 <FormField key={k} label={k === "name" ? "Interviewee" : k === "role" ? "Their role" : "Organisation"}>
                   <Input
@@ -650,7 +650,7 @@ export function ArticleEditor({
             </FormField>
           ) : null}
           {form.type === "sponsored" ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField label="Sponsor" required>
                 <Input
                   value={form.sponsor.name}

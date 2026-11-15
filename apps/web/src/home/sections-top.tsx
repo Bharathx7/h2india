@@ -187,7 +187,7 @@ export function ChoosePath() {
           Choose your path
         </h2>
       </div>
-      <div className="grid gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
         {PATHS.map((p) => (
           <FeatureCard
             key={p.eyebrow}
@@ -242,7 +242,7 @@ export function ForYou({ firstName, workspaceHref }: { firstName: string; worksp
       <h2 id="for-you-title" className="text-center type-h2 text-primary" data-testid="for-you-title">
         {firstName ? `For you, ${firstName}` : "For you"}
       </h2>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <FeatureCard key={c.eyebrow} eyebrow={c.eyebrow} title={c.title} href={c.href} className="shadow-none">
             {c.text}

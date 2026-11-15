@@ -1,7 +1,9 @@
 import { createDb, schema, type DbHandle } from "@h2india/db";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { consentHistory } from "../consent/records";
 import { notify } from "../notify/notify";
+import { setChoices } from "../notify/preferences";
 import { makeUser, useTestEnv } from "../testing/factory";
 import { exportCsv, exportMemberData, ProfileError, saveProfile } from "./account";
 import { createAlert } from "./alerts";
@@ -51,6 +53,26 @@ describe.skipIf(!url)("member profile, preferences and data", () => {
       .from(schema.auditLog)
       .where(and(eq(schema.auditLog.resourceId, u.id), eq(schema.auditLog.resourceType, "member_profile")));
     expect(changes.map((c) => c.action).sort()).toEqual(["member.listed", "member.unlisted"]);
+  });
+
+  it("records each consent choice with its words and version (step 12.2)", async () => {
+    const u = await makeUser(h.db, "Consent");
+    await saveProfile(h.db, u.id, profile(true));
+    await saveProfile(h.db, u.id, profile(true)); // no change, no new record
+    await saveProfile(h.db, u.id, profile(false));
+    await setChoices(h.db, u.id, [
+      { topic: "alert.matches", channel: "whatsapp", enabled: false },
+      { topic: "alert.matches", channel: "email", enabled: true }, // already on by default: not a change
+    ]);
+    const history = await consentHistory(h.db, u.id);
+    expect(history.map((c) => [c.purpose, c.granted]).reverse()).toEqual([
+      ["member-directory", true],
+      ["member-directory", false],
+      ["marketing:alert.matches:whatsapp", false],
+    ]);
+    expect(history.every((c) => c.version && c.wording)).toBe(true);
+    expect(history.find((c) => c.purpose === "member-directory")?.wording).toContain("research details");
+    expect((await exportMemberData(h.db, u.id)).consents).toHaveLength(3);
   });
 
   it("turning off WhatsApp stops the next WhatsApp message", async () => {

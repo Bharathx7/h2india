@@ -71,6 +71,21 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
     },
     account: { accountLinking: { enabled: true, trustedProviders: ["google"] } },
     hooks: { before: beforeSignIn, after: afterSignIn },
+    // A suspended account gets no session by any route: passkey, Google, a Join or recovery link (review H1).
+    // beforeSignIn also refuses email codes early, with the message the design asks for.
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            const [user] = await db
+              .select({ suspendedAt: schema.users.suspendedAt })
+              .from(schema.users)
+              .where(eq(schema.users.id, session.userId));
+            return user?.suspendedAt ? false : undefined;
+          },
+        },
+      },
+    },
     socialProviders: google,
     plugins: [
       emailOTP({

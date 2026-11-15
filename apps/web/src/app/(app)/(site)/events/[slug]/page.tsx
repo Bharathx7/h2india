@@ -104,7 +104,7 @@ function Speakers({ e }: { e: Event }) {
       title={list.length === 1 ? "Speaker" : "Speakers"}
       sub={isWebinar(e) ? undefined : "From the H2 India people directory."}
     >
-      <ul className="grid gap-4 sm:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {list.map((s) => (
           <li key={s.id ?? s.name} className="flex items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-mint type-label-sm text-primary">
@@ -131,7 +131,7 @@ async function Exhibitors({ e }: { e: Event }) {
       title={`Exhibitors on H2 India${e.exhibitorCount ? ` · ${String(list.length)} of ${String(e.exhibitorCount)}` : ""}`}
       sub="Open a profile to see products, certificates and contacts."
     >
-      <ul className="grid gap-x-6 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         {list.map((x) => {
           const p = x.profileSlug ? profiles.get(x.profileSlug) : undefined;
           return (

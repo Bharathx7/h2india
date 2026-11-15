@@ -62,7 +62,7 @@ export function ContentUpload({
   return (
     <section className="flex flex-col gap-4 rounded-card border border-default bg-page p-5">
       <h2 className="type-h5">Upload</h2>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <FormField label="File" required helper={maxLabel}>
           <input
             ref={input}

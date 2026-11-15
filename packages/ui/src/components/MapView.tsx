@@ -46,7 +46,7 @@ function groups(points: MapPoint[]) {
 
 export function MapView({ points, label, provider, renderLink = plainLink, className }: MapViewProps) {
   const list = (
-    <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label={`${label}, by state`}>
+    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label={`${label}, by state`}>
       {groups(points).map(([group, items]) => (
         <li key={group} className="flex flex-col gap-2 rounded-card border border-default bg-page p-4">
           <p className="flex items-center gap-2 type-label text-primary">

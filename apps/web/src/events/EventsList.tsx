@@ -361,7 +361,7 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
               {byMonth(list).map((g) => (
                 <section key={g.month} aria-label={g.month} className="flex flex-col gap-3">
                   <h2 className="type-eyebrow text-secondary">{g.month}</h2>
-                  <ul className="grid gap-3 md:grid-cols-2">
+                  <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {g.items.map((e) => (
                       <li key={e.id}>
                         <Card e={e} />

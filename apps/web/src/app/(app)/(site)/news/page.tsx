@@ -110,7 +110,7 @@ export default async function NewsHome({
             <div className="flex min-w-0 flex-1 flex-col gap-6">
               <StoryCard a={lead} layout="hero" />
               {secondary.length ? (
-                <ul className="grid gap-4 md:grid-cols-2 md:gap-6">
+                <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                   {secondary.map((a) => (
                     <li key={a.id}>
                       <StoryCard a={a} className="h-full" />
@@ -126,7 +126,10 @@ export default async function NewsHome({
 
           {sectionRails.slice(0, RAILS_BEFORE_WIDGETS).map(rail)}
 
-          <section aria-label="This week" className={cx(wrap, "grid gap-6 py-6 lg:grid-cols-2 lg:items-start")}>
+          <section
+            aria-label="This week"
+            className={cx(wrap, "grid grid-cols-1 gap-6 py-6 lg:grid-cols-2 lg:items-start")}
+          >
             <ClosingPanel items={closing} />
             <MostRead items={mostRead} />
           </section>
