@@ -85,13 +85,14 @@ export async function revisionAction(id: string, quoteId: string, aspects: strin
 export async function acceptAction(id: string, quoteId: string) {
   const { db, actor, org } = await buyer();
   const context = await requestContext();
+  let orderId: string;
   try {
-    await acceptQuote(db, actor, org, { rfqId: id, quoteId }, context);
+    orderId = (await acceptQuote(db, actor, org, { rfqId: id, quoteId }, context)).id;
   } catch (error) {
     if (error instanceof FlagOffError) return { ok: false as const, error: "Ordering opens in Launch 2." };
     if (error instanceof RfqError) return { ok: false as const, error: error.message };
     throw error;
   }
   revalidatePath(`/buyer/rfqs/${id}`);
-  return { ok: true as const };
+  return { ok: true as const, orderId };
 }

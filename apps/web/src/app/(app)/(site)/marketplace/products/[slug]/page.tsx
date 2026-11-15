@@ -181,7 +181,7 @@ export default async function ProductPage({
                     Add to cart
                   </Link>
                   <Link
-                    href={`/checkout?product=${p.slug}`}
+                    href={`/cart/add?product=${p.slug}&buy=1`}
                     className={buttonClasses({ variant: "outline", size: "lg" })}
                   >
                     Buy now

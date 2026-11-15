@@ -157,6 +157,21 @@ async function onLiveProduct(file: FileRow): Promise<boolean> {
   return Boolean(row);
 }
 
+/** A document or photo attached to an order: people with order.view at the buyer or the supplier (step 10.9). */
+async function onSharedOrder(file: FileRow, actor: Actor): Promise<boolean> {
+  const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
+  if (!rule?.sharedOnOrder || file.attachedType !== "order" || !file.attachedId) return false;
+  const [order] = await getDb()
+    .select({ buyer: schema.orders.buyerOrganisationId, supplier: schema.orders.supplierOrganisationId })
+    .from(schema.orders)
+    .where(eq(schema.orders.id, file.attachedId));
+  if (!order) return false;
+  return (
+    can(actor, "order.view", { organisationId: order.buyer }) ||
+    can(actor, "order.view", { organisationId: order.supplier })
+  );
+}
+
 /**
  * An RFQ file the other side may open (step 9.5): a buyer's attachment for people at a supplier the RFQ was sent to,
  * and a supplier's quote document for people at the buyer once that version is sent. rfq.view in that company.
@@ -392,7 +407,8 @@ export async function fileLink(input: {
   if (
     !canRead(file, input.actor, input.key) &&
     !(await onLiveProduct(file)) &&
-    !(await onSharedRfq(file, input.actor))
+    !(await onSharedRfq(file, input.actor)) &&
+    !(await onSharedOrder(file, input.actor))
   ) {
     throw new FileError("NOT_FOUND", "No such file");
   }

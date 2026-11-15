@@ -40,6 +40,10 @@ export const serverEnvSchema = z.object({
   /** SMS and WhatsApp providers (M5). "fake" delivers to Mailpit and treats templates as approved. */
   SMS_PROVIDER: z.enum(["fake"]).default("fake"),
   WHATSAPP_PROVIDER: z.enum(["fake"]).default("fake"),
+  /** Payment partner (M3, step 10.4). "sim" is the simulated partner (A176): test pay page, signed webhooks, no money. */
+  PAYMENT_PARTNER: z.enum(["sim"]).default("sim"),
+  /** The simulated partner refuses to run in a production build unless this is "true" (staging only, never live). */
+  PAYMENT_SIM_ALLOWED: z.enum(["true", "false"]).default("false"),
   CLAMAV_HOST: z.string().min(1).default("localhost"),
   CLAMAV_PORT: z.coerce.number().int().positive().default(3310),
   SMTP_HOST: z.string().min(1),

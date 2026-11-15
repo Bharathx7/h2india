@@ -18,7 +18,7 @@ content system. Only `packages/core` imports `packages/db` (enforced by ESLint).
 | Soft delete       | `deleted_at` on records people can remove                                                                                                           | `softDelete` columns                                      |
 | Authorship        | `created_by`, `updated_by`                                                                                                                          | `authorship` columns                                      |
 
-Reference types: ORD (order), RFQ (quote request), Q (quote), R (return), PO (purchase order),
+Reference types: ORD (order), RFQ (quote request), Q (quote), R (refund), PO (payout), DSP (dispute),
 GRV (grievance), DRR (delivery receipt), EV (event).
 
 ## Sign-in tables (step 3.2)

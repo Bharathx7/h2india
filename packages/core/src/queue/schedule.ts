@@ -25,6 +25,9 @@ import { pruneSearchOutbox } from "../search/outbox";
 import { pruneThrottle } from "../sign-in/throttle";
 import { QUEUES, queue } from "./queues";
 import { rollUpYesterdayReports } from "../admin/system";
+// Registers the order clocks (48 hours to accept, 5 working days to accept a delivery), Stage 10.
+import "../orders/flow";
+import { deliverSimWebhooks, reconcile, runPayouts } from "../orders/money";
 
 // The schedule runner (step 3.8): housekeeping and the deadline tick, as BullMQ job schedulers on the clocks queue.
 // Every job reads its work from the database, so a missed run (worker down, Redis flushed) is caught up by the next.
@@ -89,6 +92,17 @@ export const SCHEDULES: Scheduled[] = [
       getDb()
         .delete(schema.verifications)
         .where(sql`${schema.verifications.expiresAt} < now() - interval '1 day'`),
+  },
+  // Stage 10 (A176): webhooks the simulated payment partner owes (refunds and payouts settling). No-op for a real one.
+  { id: "payments-sim-webhooks", every: 15_000, run: () => deliverSimWebhooks(getDb()) },
+  // Payout runs at 11:00 and 16:00 IST (step 10.11); releases due on a holiday wait for the next working day's run.
+  { id: "payouts-1100", pattern: "30 5 * * *", run: () => runPayouts(getDb()) },
+  { id: "payouts-1600", pattern: "30 10 * * *", run: () => runPayouts(getDb()) },
+  // 02:00 IST every day: yesterday's settlement report against the ledger (steps 10.4, 10.6).
+  {
+    id: "payments-reconcile",
+    pattern: "30 20 * * *",
+    run: () => reconcile(getDb(), new Date(Date.now() + 5.5 * 3_600_000 - 86_400_000).toISOString().slice(0, 10)),
   },
   // 02:30 IST every day: "We keep notifications for 90 days" (97:2564).
   { id: "notifications-prune", pattern: "0 21 * * *", run: () => pruneNotifications(getDb()) },

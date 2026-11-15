@@ -1,8 +1,12 @@
-import { getDb } from "@h2india/core";
+import { isEnabled } from "@h2india/config";
+import { getDb, Money } from "@h2india/core";
+import { scopeFor } from "@h2india/core/authz";
+import { listOrders } from "@h2india/core/orders";
+import { formatIstDate } from "@h2india/core/time";
 import { buyerChecklist } from "@h2india/core/buyer";
 import { companyRoles } from "@h2india/core/supplier";
 import { listAlerts } from "@h2india/core/members";
-import { buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
+import { Alert, buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
@@ -130,12 +134,32 @@ export default async function BuyerHome() {
     );
   }
   const opportunities = feed.items.filter((x) => x.kind === "tender" || x.kind === "scheme").slice(0, 2);
+  // Payment due banner (721:24597): the first order with a payment due, while ordering is on.
+  const dueOrder = isEnabled("transactions")
+    ? (await listOrders(scopeFor(page.actor), db, { organisationId: b.organisationId, side: "buyer" })).find(
+        (o) => o.due,
+      )
+    : undefined;
   return (
     <BuyerWorkspace page={page} current="/buyer">
       <div>
         <h1 className="type-h2">Dashboard</h1>
         <p className="type-body-sm text-secondary">{[b.legalName, b.city, b.state].filter(Boolean).join(" · ")}</p>
       </div>
+      {dueOrder?.due ? (
+        <Alert
+          tone={dueOrder.due.dueAt && dueOrder.due.dueAt.getTime() < new Date().getTime() ? "error" : "warning"}
+          title={`${Money.format(dueOrder.due.amountPaise)} is due on ${dueOrder.reference}${dueOrder.due.dueAt ? ` by ${formatIstDate(dueOrder.due.dueAt)}` : ""}`}
+          action={
+            <Link href={`/buyer/orders/${dueOrder.id}`} className="type-label underline">
+              Pay now
+            </Link>
+          }
+        >
+          {dueOrder.supplierName} is waiting for it before the next step. It&apos;s held in escrow until you accept the
+          delivery.
+        </Alert>
+      ) : null}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">Recent activity</h2>

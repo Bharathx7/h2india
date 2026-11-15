@@ -48,19 +48,22 @@ export async function listNotifications(
   opts: { filter?: InboxFilter; limit?: number; before?: Date; now?: Date } = {},
 ) {
   const filter = opts.filter ?? "all";
-  return ex
-    .select()
-    .from(n)
-    .where(
-      and(
-        eq(n.userId, userId),
-        lte(n.visibleAt, opts.now ?? new Date()),
-        filter === "unread" ? isNull(n.readAt) : filter === "all" ? undefined : eq(n.category, filter),
-        opts.before ? lt(n.visibleAt, opts.before) : undefined,
-      ),
-    )
-    .orderBy(desc(n.visibleAt))
-    .limit(Math.min(opts.limit ?? 50, 200));
+  return (
+    ex
+      .select()
+      .from(n)
+      .where(
+        and(
+          eq(n.userId, userId),
+          lte(n.visibleAt, opts.now ?? new Date()),
+          filter === "unread" ? isNull(n.readAt) : filter === "all" ? undefined : eq(n.category, filter),
+          opts.before ? lt(n.visibleAt, opts.before) : undefined,
+        ),
+      )
+      // Ids are UUID v7 (time-ordered), so they break ties between notifications made in the same millisecond.
+      .orderBy(desc(n.visibleAt), desc(n.id))
+      .limit(Math.min(opts.limit ?? 50, 200))
+  );
 }
 
 export async function unreadCount(ex: Executor, userId: string, now: Date = new Date()): Promise<number> {

@@ -33,7 +33,7 @@ export const TEMPLATES = {
     name: "Order confirmed · pay now",
     frame: "665:82",
     step: "10.7",
-    built: false,
+    built: true,
   },
   "email.payment_instructions": {
     channel: "email",
@@ -49,7 +49,7 @@ export const TEMPLATES = {
     name: "Payout sent",
     frame: "665:239",
     step: "10.11",
-    built: false,
+    built: true,
   },
   "email.tender_alert_digest": {
     channel: "email",
@@ -89,7 +89,7 @@ export const TEMPLATES = {
     name: "Payment received",
     frame: "671:620",
     step: "10.5",
-    built: false,
+    built: true,
   },
   "email.order_dispatched": {
     channel: "email",
@@ -97,7 +97,7 @@ export const TEMPLATES = {
     name: "Order dispatched",
     frame: "671:685",
     step: "10.9",
-    built: false,
+    built: true,
   },
   "email.acceptance_reminder": {
     channel: "email",
@@ -113,7 +113,7 @@ export const TEMPLATES = {
     name: "Dispute opened",
     frame: "673:8",
     step: "10.10",
-    built: false,
+    built: true,
   },
   "email.approval_needed": {
     channel: "email",
@@ -121,7 +121,7 @@ export const TEMPLATES = {
     name: "Approval needed",
     frame: "673:86",
     step: "10.3",
-    built: false,
+    built: true,
   },
   "email.invitation": {
     channel: "email",
@@ -315,7 +315,7 @@ export const TEMPLATES = {
     name: "Delivery OTP",
     frame: "668:232",
     step: "10.9",
-    built: false,
+    built: true,
   },
   "sms.order_dispatched_receiving_contact": {
     channel: "sms",
@@ -323,7 +323,7 @@ export const TEMPLATES = {
     name: "Order dispatched",
     frame: "668:270",
     step: "10.9",
-    built: false,
+    built: true,
   },
   // Not drawn (M21; wording A9): built from the screens' own copy in the steps that needed them.
   "email.bank_account_changed": {
@@ -456,6 +456,18 @@ export const APPROVED_TEXT = {
   "sms.otp_sign_in": (input: { code: string }) =>
     `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
   "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+  /** 668:232, template otp_delivery_receiving_contact (step 10.9). The link is the short delivery address. */
+  "sms.otp_delivery_receiving_contact": (input: { order: string; supplier: string; link: string; code: string }) =>
+    `Delivery of ${input.order} from ${input.supplier} is at your gate. Record what arrived at ${input.link} and enter code ${input.code}. Never share it. -H2 India`,
+  /** 668:270, template order_dispatched_receiving_contact (step 10.9). */
+  "sms.order_dispatched_receiving_contact": (input: {
+    order: string;
+    supplier: string;
+    carrier: string;
+    lr: string;
+    expected: string;
+  }) =>
+    `${input.order} from ${input.supplier} is on its way with ${input.carrier}, LR ${input.lr}. Expected ${input.expected}. We'll text a delivery code when it arrives. -H2 India`,
   /** Not drawn (step 8.6, A159): wording from 588:1179, to register with the provider (M5). */
   "sms.bank_account_changed": (input: { company: string; last4: string; until: string }) =>
     `${input.company}'s payout bank account on H2 India was changed to the account ending ${input.last4}. Payouts are held until ${input.until} IST. Didn't make this change? Cancel it in your account. -H2 India`,

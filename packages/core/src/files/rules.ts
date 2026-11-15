@@ -27,8 +27,10 @@ export const UPLOAD_RULES: Record<FileKind, UploadRule> = {
   press_image: { who: "signed-in" },
   // Anyone may raise a grievance (519:8), signed in or not; limited per IP address like work_id.
   grievance_attachment: { who: "anyone" },
-  // The delivery link (695:13) gives its own proof; it arrives with deliveries in Stage 10.
-  delivery_photo: { who: "not-yet", until: "Stage 10 delivery link" },
+  // The delivery link (695:13) is its own proof (single use, with the SMS code); limited per IP like work_id.
+  delivery_photo: { who: "anyone" },
+  // The supplier's dispatch documents and proof of delivery (order.manage); the buyer's photos with a problem.
+  order_document: { who: "company", permission: ["order.manage", "order.place"] },
 };
 
 export const READ_RULES: Record<
@@ -40,6 +42,8 @@ export const READ_RULES: Record<
     listedOnLiveProduct?: boolean;
     /** The other side of an RFQ may open it: suppliers it was sent to, and the buyer of a sent quote (step 9.5). */
     sharedOnRfq?: boolean;
+    /** Both companies of the order it is attached to may open it (order.view), step 10.9. */
+    sharedOnOrder?: boolean;
   }
 > = {
   work_id: { operator: "users.view" },
@@ -53,5 +57,6 @@ export const READ_RULES: Record<
   logo: { company: "company.view", operator: "catalogue.view" },
   press_image: { operator: "content.view" },
   grievance_attachment: { operator: "compliance.view" },
-  delivery_photo: { company: "order.view", operator: "orders.view" },
+  delivery_photo: { company: "order.view", operator: "orders.view", sharedOnOrder: true },
+  order_document: { company: "order.view", operator: "orders.view", sharedOnOrder: true },
 };

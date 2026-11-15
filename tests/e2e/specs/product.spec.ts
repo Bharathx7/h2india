@@ -62,15 +62,21 @@ test("a quote-only product shows its specs, no price and no buy button", async (
   expect(axe.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
 });
 
-test("a fixed-price product shows its price and GST, and no buy button while buying is off", async ({ page }) => {
+test("a fixed-price product shows its price and GST, and buy buttons only while buying is on", async ({ page }) => {
   const tag = await setUp(Math.random().toString(36).slice(2, 8));
   await page.goto(`/marketplace/products/fixed-${tag}`);
   await expect(page.getByText("₹48,500")).toBeVisible();
   await expect(page.getByText("GST 18%: ₹8,730")).toBeVisible();
   await expect(page.getByText("₹57,230 incl. GST per unit")).toBeVisible();
   await expect(page.getByText("Minimum order: 2 units")).toBeVisible();
-  expect(await page.content()).not.toMatch(/Add to cart|Buy now/);
-  await expect(page.getByRole("button", { name: "Request quote" })).toBeVisible();
+  if (process.env.FLAG_TRANSACTIONS === "true") {
+    // Ordering on (local and staging, A176): Add to cart and Buy now, and payment held until delivery is accepted.
+    await expect(page.getByRole("link", { name: "Add to cart" })).toBeVisible();
+    await expect(page.getByText("Payment is held until you accept delivery")).toBeVisible();
+  } else {
+    expect(await page.content()).not.toMatch(/Add to cart|Buy now/);
+    await expect(page.getByRole("button", { name: "Request quote" })).toBeVisible();
+  }
 });
 
 test("Report this listing reaches the listings queue", async ({ page }) => {

@@ -2,7 +2,7 @@ import { Queue, type JobsOptions } from "bullmq";
 import { redisConnection } from "../companies/jobs";
 
 // The worker's queues (step 3.8). Every job retries with back-off; one that fails every attempt lands in the
-// dead-letter list (core.dead_letters) with its error. Payments get their queue with Batch 6 (on hold).
+// dead-letter list (core.dead_letters) with its error. Payment work runs on the clocks queue's schedules (Stage 10).
 
 export const QUEUES = {
   gstin: "gstin-check",
