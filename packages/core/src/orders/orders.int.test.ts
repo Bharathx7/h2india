@@ -12,6 +12,7 @@ import { recordPasskeyStepUp } from "../sign-in/step-up";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { addToCart, OtherSupplierInCart, viewCart } from "./cart";
+import { adminOrders, ledgerMonths } from "./admin";
 import { checkoutView, saveCheckout } from "./checkout";
 import {
   acceptDelivery,
@@ -517,6 +518,15 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const own = scopeFor(await loadActor(h.db, supplier.admin.id));
     expect((await supplierSettlements(own, h.db, supplier.org.id)).length).toBeGreaterThan(0);
     expect((await supplierMonths(own, h.db, supplier.org.id))[0]?.net).toBeGreaterThan(0n);
+  });
+
+  it("the back office reads every order and the ledger only with operator permissions (11.5, 11.6)", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    await expect(adminOrders(h.db, admin, { view: "all" })).rejects.toThrow("Not allowed");
+    expect((await adminOrders(h.db, operator, { view: "all" })).length).toBeGreaterThan(0);
+    expect((await adminOrders(h.db, operator, { view: "disputes" })).length).toBeGreaterThan(0);
+    // Operations can't read money; Finance can (the role catalogue, 11.6).
+    await expect(ledgerMonths(h.db, operator, 1)).rejects.toThrow("Not allowed");
   });
 
   it("forbidden moves fail, and the ledger can't be edited", async () => {
