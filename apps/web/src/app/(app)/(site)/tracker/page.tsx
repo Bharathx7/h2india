@@ -166,22 +166,22 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
             {states.length ? (
               <dl className="flex flex-col gap-2.5">
                 {states.map((s) => (
-                  <div key={s.state} className="flex flex-col gap-1">
-                    <div className="flex justify-between">
-                      <dt className="type-body-sm text-primary">{s.state}</dt>
-                      <dd className="type-spec text-primary">{indianNumber(s.total)}</dd>
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className="flex h-2 overflow-hidden rounded-pill bg-subtle"
-                      style={{ width: `${String((s.total / maxState) * 100)}%` }}
-                    >
+                  <div key={s.state} className="grid grid-cols-[1fr_auto] gap-x-2 gap-y-1">
+                    <dt className="type-body-sm text-primary">{s.state}</dt>
+                    <dd className="type-spec text-primary">{indianNumber(s.total)}</dd>
+                    {/* The bar sits in its own dd: a dl's groups may hold only dt and dd (axe dlitem). */}
+                    <dd aria-hidden="true" className="col-span-2">
                       <span
-                        className="bg-accent"
-                        style={{ width: `${String(s.total ? (s.contracted / s.total) * 100 : 0)}%` }}
-                      />
-                      <span className="flex-1 bg-ink-500" />
-                    </div>
+                        className="flex h-2 overflow-hidden rounded-pill bg-subtle"
+                        style={{ width: `${String((s.total / maxState) * 100)}%` }}
+                      >
+                        <span
+                          className="bg-accent"
+                          style={{ width: `${String(s.total ? (s.contracted / s.total) * 100 : 0)}%` }}
+                        />
+                        <span className="flex-1 bg-ink-500" />
+                      </span>
+                    </dd>
                   </div>
                 ))}
               </dl>

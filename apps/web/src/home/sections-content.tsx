@@ -42,7 +42,7 @@ export function OpportunitiesSkeleton() {
   return (
     <section aria-label="Opportunities this week" aria-busy="true" className="bg-mint">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
-        <span className="block h-8.5 w-80 rounded-control shimmer" />
+        <span className="block h-8.5 w-80 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {[0, 1].map((c) => (
             <div key={c} className="flex flex-col gap-4">

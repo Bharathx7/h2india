@@ -313,6 +313,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - A consent choice made inside an account is recorded with `recordDirectoryConsent()`/`recordMarketingChoices()` (words and version from `consent/wording.ts`); show the same words on screen.
 - Retention periods are the `privacy.retention` setting; never hard-code a period. `pnpm privacy:retention` shows what a period would remove.
 - `a11y-routes.spec.ts` lists every page without a parameter; add new ones there.
+- A loading box with an `aria-label` needs `role="status"` (axe "aria-prohibited-attr" on a plain div). A loading state can still be on screen when a test or person clicks, so it links exactly like the loaded page (read `siteViewer()` outside the `Suspense`) and no skeleton bar is wider than `max-w-full`.
+- Inside a `dl`, each group `div` holds only `dt` and `dd`; put a decorative bar in its own `aria-hidden` `dd`.
 
 ## Data rules (playbook Section 8)
 
