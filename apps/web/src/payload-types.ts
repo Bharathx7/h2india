@@ -105,6 +105,7 @@ export interface Config {
     topics: Topic;
     tags: Tag;
     media: Media;
+    'media-files': MediaFile;
     editors: Editor;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -151,6 +152,7 @@ export interface Config {
     topics: TopicsSelect<false> | TopicsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-files': MediaFilesSelect<false> | MediaFilesSelect<true>;
     editors: EditorsSelect<false> | EditorsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -2069,7 +2071,7 @@ export interface Video {
   language?: string | null;
   description: string;
   /**
-   * Where it's hosted (M9). Only the address is kept here.
+   * Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.
    */
   url: string;
   durationMinutes?: number | null;
@@ -2125,7 +2127,7 @@ export interface Podcast {
    */
   alsoOn?: string | null;
   /**
-   * Where it's hosted (M9). Only the address is kept here.
+   * Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.
    */
   url: string;
   durationMinutes?: number | null;
@@ -3497,6 +3499,33 @@ export interface Association {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * MP4, WebM, MP3 or M4A. After uploading, copy the file's address into the video or podcast.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-files".
+ */
+export interface MediaFile {
+  id: number;
+  title: string;
+  /**
+   * Optional. Shown under the player for people who can't listen or watch.
+   */
+  transcript?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -3671,6 +3700,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'media-files';
+        value: number | MediaFile;
       } | null)
     | ({
         relationTo: 'editors';
@@ -5332,6 +5365,27 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-files_select".
+ */
+export interface MediaFilesSelect<T extends boolean = true> {
+  title?: T;
+  transcript?: T;
+  prefix?: T;
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

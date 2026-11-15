@@ -14,6 +14,7 @@ import { Corrections } from "./cms/collections/Corrections";
 import { Editors } from "./cms/collections/Editors";
 import { EarlyListings, HomeFigures, Prelaunch } from "./cms/home/collections";
 import { Media } from "./cms/collections/Media";
+import { MediaFiles } from "./cms/collections/MediaFiles";
 import { Tags, Topics } from "./cms/collections/Taxonomy";
 import {
   Chapters,
@@ -119,6 +120,7 @@ export default buildConfig({
     Topics,
     Tags,
     Media,
+    MediaFiles,
     Editors,
   ],
   globals: [
@@ -169,6 +171,12 @@ export default buildConfig({
     }),
     s3Storage({
       collections: {
+        "media-files": {
+          prefix: "cms/av",
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename, prefix }) =>
+            `${(env.S3_PUBLIC_URL ?? `${env.S3_ENDPOINT.replace(/\/$/, "")}/${env.S3_BUCKET_PUBLIC}`).replace(/\/$/, "")}/${prefix ? `${prefix}/` : ""}${filename}`,
+        },
         media: {
           prefix: "cms",
           disablePayloadAccessControl: true,
