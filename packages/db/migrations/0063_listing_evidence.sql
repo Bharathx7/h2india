@@ -1,0 +1,2 @@
+ALTER TABLE "core"."listing_reports" ADD COLUMN "attachments" uuid[] DEFAULT '{}'::uuid[] NOT NULL;--> statement-breakpoint
+ALTER TABLE "core"."product_questions" ADD COLUMN "attachments" uuid[] DEFAULT '{}'::uuid[] NOT NULL;

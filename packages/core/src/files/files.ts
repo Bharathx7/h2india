@@ -157,6 +157,18 @@ async function onLiveProduct(file: FileRow): Promise<boolean> {
   return Boolean(row);
 }
 
+/** An attachment to a product question: people at the product's supplier (company.view), A123. */
+async function onSharedQuestion(file: FileRow, actor: Actor): Promise<boolean> {
+  const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
+  if (!rule?.sharedOnQuestion || file.attachedType !== "product_question" || !file.attachedId) return false;
+  const [row] = await getDb()
+    .select({ supplier: schema.products.organisationId })
+    .from(schema.productQuestions)
+    .innerJoin(schema.products, eq(schema.products.id, schema.productQuestions.productId))
+    .where(eq(schema.productQuestions.id, file.attachedId));
+  return Boolean(row && can(actor, "company.view", { organisationId: row.supplier }));
+}
+
 /** A document or photo attached to an order: people with order.view at the buyer or the supplier (step 10.9). */
 async function onSharedOrder(file: FileRow, actor: Actor): Promise<boolean> {
   const rule = READ_RULES[file.kind as FileKind] as (typeof READ_RULES)[FileKind] | undefined;
@@ -408,7 +420,8 @@ export async function fileLink(input: {
     !canRead(file, input.actor, input.key) &&
     !(await onLiveProduct(file)) &&
     !(await onSharedRfq(file, input.actor)) &&
-    !(await onSharedOrder(file, input.actor))
+    !(await onSharedOrder(file, input.actor)) &&
+    !(await onSharedQuestion(file, input.actor))
   ) {
     throw new FileError("NOT_FOUND", "No such file");
   }

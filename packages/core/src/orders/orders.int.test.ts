@@ -21,6 +21,8 @@ import {
   decideDispute,
   dispatchOrder,
   placeCartOrder,
+  rateOrder,
+  ratingOf,
   saveDispatchDetails,
   uploadProofOfDelivery,
   recordReceipt,
@@ -385,6 +387,12 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect((await runPayouts(h.db, later)).length).toBeGreaterThanOrEqual(1);
     await deliverSimWebhooks(h.db, new Date(Date.now() + 60_000));
     expect(await status(order.id)).toBe("Closed");
+
+    // The buyer rates it once (G12); the supplier can't, and a second rating is refused.
+    await expect(rateOrder(h.db, sAdmin, supplier.org.id, order.id, { rating: 5 })).rejects.toThrow();
+    await rateOrder(h.db, admin, buyer.org.id, order.id, { rating: 4, comment: "On time, well packed." });
+    await expect(rateOrder(h.db, admin, buyer.org.id, order.id, { rating: 5 })).rejects.toThrow("already rated");
+    expect((await ratingOf(h.db, order.id))?.rating).toBe(4);
 
     // The books agree.
     const from = new Date(Date.now() - DAY);

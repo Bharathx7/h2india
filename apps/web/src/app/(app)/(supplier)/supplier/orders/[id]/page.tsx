@@ -1,6 +1,14 @@
 import { getDb, Money } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
-import { checklistFor, itemsLeft, orderDetail, rateCardFor, settle, type OrderDetail } from "@h2india/core/orders";
+import {
+  checklistFor,
+  itemsLeft,
+  orderDetail,
+  rateCardFor,
+  ratingOf,
+  settle,
+  type OrderDetail,
+} from "@h2india/core/orders";
 import { formatIstDate, formatIstDateTime, formatIstDayMonth } from "@h2india/core/time";
 import { Alert, buttonClasses, Icon, StatusBadge, Stepper, type StepItem } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -165,6 +173,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
   });
   const uncapped = Money.percent(exGst, card.feeBps);
   const { items } = await checklistFor(db, d.order, d.buyerName);
+  const rating = await ratingOf(db, d.order.id);
   const left = itemsLeft(items);
   const paidForDispatch = d.milestones
     .filter((m) => m.trigger !== "On receipt" && m.trigger !== "Retention")
@@ -354,12 +363,21 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
           ) : (
             <Summary d={d} />
           )}
-          <Card title="Delivery status">
-            <Stepper orientation="vertical" steps={deliverySteps(d)} />
-            <p className="type-caption text-secondary">
-              If the buyer reports a problem, the order moves to In dispute and the payout waits.
-            </p>
-          </Card>
+          <div className="flex flex-col gap-4">
+            {rating ? (
+              <Card title="The buyer's rating">
+                <p className="type-body-sm text-body">
+                  {rating.rating} of 5{rating.comment ? ` · “${rating.comment}”` : ""}
+                </p>
+              </Card>
+            ) : null}
+            <Card title="Delivery status">
+              <Stepper orientation="vertical" steps={deliverySteps(d)} />
+              <p className="type-caption text-secondary">
+                If the buyer reports a problem, the order moves to In dispute and the payout waits.
+              </p>
+            </Card>
+          </div>
         </div>
       ) : null}
 

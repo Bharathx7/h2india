@@ -1,13 +1,13 @@
 import { getDb, Money } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
-import { heldOn, orderDetail, timelineStep, TIMELINE_STEPS, type OrderDetail } from "@h2india/core/orders";
+import { heldOn, orderDetail, ratingOf, timelineStep, TIMELINE_STEPS, type OrderDetail } from "@h2india/core/orders";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
 import { Alert, buttonClasses, Icon, StatusBadge, Stepper, type StepItem } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { AcceptOrReport, CancelOrder, OfferActions, PayOnline, RequestDate } from "@/buyer/orders/Panels";
+import { AcceptOrReport, CancelOrder, OfferActions, PayOnline, RateOrder, RequestDate } from "@/buyer/orders/Panels";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { requireTransactionsPage } from "@/orders/guard";
 import { milestoneWord } from "@/orders/views";
@@ -96,6 +96,7 @@ export default async function BuyerOrderPage({
   const seat = page.buyer.seat.permissions;
   const canPlace = seat.has("order.place");
   const held = await heldOn(db, d.order.id);
+  const rating = await ratingOf(db, d.order.id);
   const due = d.milestones.filter((m) => m.status === "Due" || m.status === "Partly paid");
   const next = due[0];
   const paid = d.payments.filter((p) => p.status === "Succeeded").reduce((t, p) => t + p.amountPaise, 0n);
@@ -302,6 +303,17 @@ export default async function BuyerOrderPage({
                   canAccept={dispute.status === "Supplier replied" && dispute.offer !== "disagree"}
                 />
               ) : null}
+            </Card>
+          ) : null}
+
+          {canPlace && !rating && (d.status === "Accepted by buyer" || d.status === "Closed") ? (
+            <RateOrder orderId={d.order.id} supplier={d.supplierName} />
+          ) : null}
+          {rating ? (
+            <Card title="Your rating" className="w-full">
+              <p className="type-body-sm text-body">
+                {rating.rating} of 5{rating.comment ? ` · “${rating.comment}”` : ""}
+              </p>
             </Card>
           ) : null}
 

@@ -2,6 +2,7 @@ import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { loadActor, type Actor } from "@h2india/core/authz";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
+import { suspensionOf } from "@h2india/core/admin/appeals";
 import { supplierOf, type SupplierContext } from "@h2india/core/supplier";
 import { buttonClasses, Icon, type WorkspaceNavGroup } from "@h2india/ui";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
+import { SuspendedBanner } from "@/supplier/appeal/Banner";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
@@ -54,10 +56,11 @@ export async function SupplierShell({
   children: ReactNode;
 }) {
   const db = getDb();
-  const [shell, unread, bell] = await Promise.all([
+  const [shell, unread, bell, suspension] = await Promise.all([
     shellFor(page.userId),
     unreadCount(db, page.userId),
     listNotifications(db, page.userId, { limit: 5 }),
+    suspensionOf(db, page.supplier.organisationId),
   ]);
   return (
     <WorkspaceFrame
@@ -78,7 +81,16 @@ export async function SupplierShell({
         ) : null
       }
     >
-      <div className="flex flex-col gap-6 p-4 md:p-8">{children}</div>
+      <div className="flex flex-col gap-6 p-4 md:p-8">
+        {suspension ? (
+          <SuspendedBanner
+            reason={suspension.reason}
+            appeal={suspension.appeal ? { status: suspension.appeal.status, note: suspension.appeal.note } : null}
+            canAppeal={page.supplier.seat.permissions.has("company.manage")}
+          />
+        ) : null}
+        {children}
+      </div>
     </WorkspaceFrame>
   );
 }

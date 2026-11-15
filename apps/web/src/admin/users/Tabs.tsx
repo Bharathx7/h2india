@@ -9,6 +9,7 @@ const TABS = [
   { key: "people", label: "Users", href: "/admin/users" },
   { key: "roles", label: "Operator roles", href: "/admin/users/roles" },
   { key: "audit", label: "Audit log", href: "/admin/users/audit" },
+  { key: "appeals", label: "Appeals", href: "/admin/users/appeals" },
 ] as const;
 
 export function UsersHeader({ action }: { action?: ReactNode }) {

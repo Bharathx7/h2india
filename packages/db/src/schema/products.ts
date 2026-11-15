@@ -206,6 +206,11 @@ export const productQuestions = core.table(
     question: text("question").notNull(),
     /** The asker's company name, only when they chose to share it. */
     sharedCompany: text("shared_company"),
+    /** Drawings or photos with the question (A123): listing_evidence files, readable by the supplier. */
+    attachments: uuid("attachments")
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
     status: text("status").notNull().default("Open"),
     createdAt: utc("created_at")
       .notNull()
@@ -227,6 +232,11 @@ export const listingReports = core.table(
     details: text("details").notNull(),
     email: text("email"),
     reporterId: uuid("reporter_id").references(() => users.id),
+    /** Evidence with the report (A123): listing_evidence files, readable by catalogue operators only. */
+    attachments: uuid("attachments")
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
     status: text("status").notNull().default("Received"),
     createdAt: utc("created_at")
       .notNull()

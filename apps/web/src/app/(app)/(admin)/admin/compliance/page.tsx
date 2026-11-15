@@ -243,6 +243,11 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
               {badge({ text: "Time limit not set", tone: "neutral" })}
               {badge({ text: t.status, tone: tone(t.status) })}
               <td className="px-4 py-3 text-right align-top">
+                {t.attachments.map((f, i) => (
+                  <a key={f} href={`/api/v1/files/${f}/link`} className="mr-3 type-label-sm underline">
+                    Evidence {i + 1}
+                  </a>
+                ))}
                 <Link
                   href={`/marketplace/products/${t.slug}`}
                   className={buttonClasses({ variant: "outline", size: "sm" })}

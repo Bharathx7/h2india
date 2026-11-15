@@ -80,6 +80,15 @@ export const FILE_KINDS = {
     visibility: "private",
     sensitive: true,
   },
+  /** Drawings, photos or documents with Ask a question or Report this listing (A123), up to 3. */
+  listing_evidence: {
+    label: "Attachment",
+    types: DOCS,
+    maxMb: 10,
+    maxCount: 3,
+    visibility: "private",
+    sensitive: false,
+  },
   /** Order documents (step 10.9): GST tax invoice, e-way bill, proof of delivery, photos with a reported problem. */
   order_document: { label: "Document", types: DOCS, maxMb: 10, visibility: "private", sensitive: false },
   delivery_photo: {

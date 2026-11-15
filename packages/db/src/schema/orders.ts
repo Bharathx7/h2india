@@ -595,3 +595,18 @@ export const simPartnerEvents = core.table(
   },
   (t) => [index("sim_partner_events_ref").on(t.partnerRef), index("sim_partner_events_due").on(t.deliverAt)],
 );
+
+/** The buyer's rating of a completed order (G12): 1 to 5 with an optional comment, once per order. */
+export const orderRatings = core.table("order_ratings", {
+  orderId: uuid("order_id")
+    .primaryKey()
+    .references(() => orders.id),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  ratedBy: uuid("rated_by")
+    .notNull()
+    .references(() => users.id),
+  at: utc("at")
+    .notNull()
+    .default(sql`now()`),
+});

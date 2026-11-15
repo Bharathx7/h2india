@@ -1621,3 +1621,57 @@ export async function ordersNeedingOperations(db: Database) {
       ),
     );
 }
+
+// ------------------------------------------------------------------------------------------------ rating (G12)
+
+/** The buyer rates a completed order, once (G12): 1 to 5 and an optional comment the supplier sees. */
+export async function rateOrder(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  orderId: string,
+  input: { rating: number; comment?: string },
+  context?: RequestContext,
+) {
+  assertCan(actor, "order.place", { organisationId });
+  if (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 5)
+    throw new OrderError("Choose 1 to 5", { rating: "Choose 1 to 5" });
+  if ((input.comment?.length ?? 0) > 1000) throw new OrderError("Keep it to 1,000 characters");
+  const order = await ownOrder(db, organisationId, orderId, "buyer");
+  if (order.status !== "Accepted by buyer" && order.status !== "Closed")
+    throw new OrderError("You can rate an order once you've accepted the delivery");
+  const [row] = await db
+    .insert(schema.orderRatings)
+    .values({
+      orderId: order.id,
+      rating: input.rating,
+      comment: input.comment?.trim() || null,
+      ratedBy: must(actor.userId),
+    })
+    .onConflictDoNothing()
+    .returning();
+  if (!row) throw new OrderError("You've already rated this order");
+  await audit(db, {
+    actorId: actor.userId,
+    action: "order.rated",
+    resourceType: "order",
+    resourceId: order.id,
+    companyId: order.supplierOrganisationId,
+    after: { rating: input.rating },
+    context,
+  });
+  await tell(() =>
+    noticeStatus(
+      db,
+      order,
+      "supplier",
+      `${order.reference}: the buyer rated the order ${String(input.rating)} of 5`,
+      "check-circle",
+    ),
+  );
+}
+
+export async function ratingOf(db: Database, orderId: string) {
+  const [row] = await db.select().from(schema.orderRatings).where(eq(schema.orderRatings.orderId, orderId));
+  return row ?? null;
+}

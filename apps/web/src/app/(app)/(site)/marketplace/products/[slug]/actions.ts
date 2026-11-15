@@ -17,6 +17,7 @@ export async function askQuestionAction(input: {
   slug: string;
   question: string;
   shareCompany: boolean;
+  attachments?: { fileId: string; key?: string }[];
   guard?: FormGuard;
 }): Promise<FormResult> {
   const session = await getSession();
@@ -30,6 +31,7 @@ export async function askQuestionAction(input: {
     userId: session.user.id,
     question: input.question,
     companyName: company,
+    attachments: input.attachments,
     context,
   });
 }
@@ -39,6 +41,7 @@ export async function reportListingAction(input: {
   problem: string;
   details: string;
   email: string;
+  attachments?: { fileId: string; key?: string }[];
   guard?: FormGuard;
 }): Promise<FormResult> {
   const context = await requestContext();
