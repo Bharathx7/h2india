@@ -38,12 +38,13 @@ describe.skipIf(!url)("database foundations", () => {
   });
 
   it("never hands out the same reference number twice, even all at once", async () => {
+    // A year no other test uses: order tests (Stage 10) number real orders in the current year in parallel.
     const refs = await Promise.all(
-      Array.from({ length: 60 }, () => nextReference(h.db, "ORD", new Date("2026-11-11T12:00:00Z"))),
+      Array.from({ length: 60 }, () => nextReference(h.db, "ORD", new Date("2031-11-11T12:00:00Z"))),
     );
     expect(new Set(refs).size).toBe(60);
-    expect(refs.every((r) => /^ORD-2026-\d{4}$/.test(r))).toBe(true);
-    expect([...refs].sort()[0]).toBe("ORD-2026-0001");
+    expect(refs.every((r) => /^ORD-2031-\d{4}$/.test(r))).toBe(true);
+    expect([...refs].sort()[0]).toBe("ORD-2031-0001");
   });
 
   it("starts each year and type at 0001, using the year in India time", async () => {
