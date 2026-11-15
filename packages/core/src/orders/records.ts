@@ -209,6 +209,8 @@ export interface NewOrder {
   receiverName?: string | null;
   receiverMobile?: string | null;
   paymentMethod: string;
+  poNumber?: string | null;
+  poFileId?: string | null;
   dispatchBy?: Date | null;
   lines: {
     productId?: string | null;
@@ -261,6 +263,8 @@ export async function insertOrder(tx: Executor, input: NewOrder): Promise<OrderR
       receiverName: input.receiverName ?? null,
       receiverMobile: input.receiverMobile ?? null,
       paymentMethod: input.paymentMethod,
+      poNumber: input.poNumber ?? null,
+      poFileId: input.poFileId ?? null,
       dispatchBy: input.dispatchBy ?? null,
       ...figures,
     })

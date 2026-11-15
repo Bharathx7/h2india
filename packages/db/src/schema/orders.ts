@@ -26,6 +26,14 @@ export const carts = core.table(
       .notNull()
       .references(() => users.id),
     supplierId: uuid("supplier_id").references(() => organisations.id),
+    /** Checkout choices (80:6431, 768:47189, 80:6464), kept between the steps. */
+    deliverySiteId: uuid("delivery_site_id").references(() => deliverySites.id),
+    receiverName: text("receiver_name"),
+    receiverMobile: text("receiver_mobile"),
+    billingGstinId: uuid("billing_gstin_id").references(() => organisationGstins.id),
+    poNumber: text("po_number"),
+    poFileId: uuid("po_file_id"),
+    paymentMethod: text("payment_method"),
     ...timestamps,
   },
   (t) => [uniqueIndex("carts_owner").on(t.organisationId, t.userId)],
@@ -83,6 +91,9 @@ export const orders = core.table(
     receiverMobile: text("receiver_mobile"),
     /** bank_transfer, online, pay_later, letter_of_credit */
     paymentMethod: text("payment_method").notNull().default("bank_transfer"),
+    /** The buyer's purchase order number and file (768:47189), printed on the GST invoice and shared with the supplier. */
+    poNumber: text("po_number"),
+    poFileId: uuid("po_file_id"),
     currency: char("currency", { length: 3 }).notNull().default("INR"),
     subtotalPaise: bigint("subtotal_paise", { mode: "bigint" }).notNull(),
     gstPaise: bigint("gst_paise", { mode: "bigint" }).notNull(),

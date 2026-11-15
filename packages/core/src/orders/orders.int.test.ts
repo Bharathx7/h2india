@@ -12,6 +12,7 @@ import { recordPasskeyStepUp } from "../sign-in/step-up";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { addToCart, OtherSupplierInCart, viewCart } from "./cart";
+import { checkoutView, saveCheckout } from "./checkout";
 import {
   acceptDelivery,
   approveOrder,
@@ -227,6 +228,29 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     await addToCart(h.db, admin, buyer.org.id, { productId: otherProduct, quantity: 1, replace: true }, ON);
     expect((await viewCart(h.db, admin, buyer.org.id)).supplier?.id).toBe(second.org.id);
     await addToCart(h.db, admin, buyer.org.id, { productId, quantity: 2, replace: true }, ON);
+  });
+
+  it("keeps checkout choices between steps and refuses another company's site or an unverified GSTIN", async () => {
+    const admin = await loadActor(h.db, buyer.admin.id);
+    await addToCart(h.db, admin, buyer.org.id, { productId, quantity: 2, replace: true }, ON);
+    const [foreign] = await h.db
+      .insert(schema.deliverySites)
+      .values({ organisationId: other.org.id, name: "Not yours", address: "Elsewhere" })
+      .returning();
+    await expect(saveCheckout(h.db, admin, buyer.org.id, { deliverySiteId: must(foreign).id })).rejects.toThrow(
+      "Check the highlighted fields",
+    );
+    await saveCheckout(h.db, admin, buyer.org.id, {
+      deliverySiteId: siteId,
+      receiverName: "Site stores",
+      receiverMobile: "9876543210",
+      billingGstinId: gstinId,
+      paymentMethod: "bank_transfer",
+      poNumber: "PO-1",
+    });
+    const v = await checkoutView(h.db, admin, buyer.org.id);
+    expect(v.choices).toMatchObject({ deliverySiteId: siteId, billingGstinId: gstinId, poNumber: "PO-1" });
+    expect(v.cart.totalPaise).toBe(29_500_00n);
   });
 
   it("routes to approval above the limit; no self-approval; approval needs a fresh passkey", async () => {

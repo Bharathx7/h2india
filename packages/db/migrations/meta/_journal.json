@@ -428,6 +428,13 @@
       "when": 1794724432489,
       "tag": "0060_pod_and_date_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1794725209549,
+      "tag": "0061_checkout_choices",
+      "breakpoints": true
     }
   ]
 }

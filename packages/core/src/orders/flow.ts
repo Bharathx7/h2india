@@ -148,6 +148,9 @@ export interface CheckoutInput {
   receiverName: string;
   receiverMobile: string;
   paymentMethod: "bank_transfer" | "online" | "pay_later" | "letter_of_credit";
+  /** Purchase order number and PDF (768:47189), optional. */
+  poNumber?: string | null;
+  poFileId?: string | null;
 }
 
 function checkMethod(method: CheckoutInput["paymentMethod"], flags?: Record<string, string | undefined>) {
@@ -245,6 +248,8 @@ export async function placeCartOrder(
       receiverName: input.receiverName.trim(),
       receiverMobile: input.receiverMobile.replace(/\D/g, "").slice(-10),
       paymentMethod: input.paymentMethod,
+      poNumber: input.poNumber?.trim() || null,
+      poFileId: input.poFileId ?? null,
       lines,
       // A fixed-price cart is paid in full once the supplier confirms (Checkout 3 Payment 80:6464).
       schedule: [{ percentBps: 10_000, trigger: "On confirmation" }],
@@ -258,6 +263,14 @@ export async function placeCartOrder(
           .where(eq(schema.products.id, product.id));
       }
     }
+    if (input.poFileId)
+      await attachFile(tx, {
+        actor,
+        fileId: input.poFileId,
+        kind: "order_document",
+        attachedType: "order",
+        attachedId: order.id,
+      });
     await tx.delete(schema.cartItems).where(eq(schema.cartItems.cartId, cart.id));
     await tx.update(schema.carts).set({ supplierId: null }).where(eq(schema.carts.id, cart.id));
     if (order.status === "Pending acceptance") await startAcceptClock(tx, order);
