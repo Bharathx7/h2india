@@ -568,6 +568,11 @@ async function main(): Promise<number> {
   console.log(await seedProductSamples(getDb()));
   console.log(await seedBrandAndServiceSamples(getDb()));
 
+  // Topics, tags and authors first, then articles: schemes and tenders link to topics, and awarded tenders link to
+  // their analysis article, so on an empty database they must already exist.
+  await seedTopics(payload);
+  console.log(await seedArticles(payload, publish));
+
   for (const type of CONTENT) {
     const rows = (await rowsOf(type)).map((r) => (publish ? r : { ...r, publish: "no" }));
     const report = await importContent(payload, type, rows, { apply: true, firstRow: 1, sample: true });
@@ -575,8 +580,6 @@ async function main(): Promise<number> {
     problems += report.counts.error;
   }
   console.log(await seedReports(payload, publish));
-  await seedTopics(payload);
-  console.log(await seedArticles(payload, publish));
   for (const type of ["guides", "chapters", "videos", "podcasts"] as const) {
     console.log(await seedEditorial(payload, type, publish));
   }

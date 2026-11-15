@@ -88,6 +88,20 @@ jobs:
         run: pnpm db:migrate
       - name: Wait for the virus scanner
         run: for i in $(seq 1 100); do (echo PING | nc -q1 localhost 3310 | grep -q PONG) && exit 0; sleep 3; done; docker logs clamav; exit 1
+      # The sample data must load on an empty database in one run (a new server), and a second run must change
+      # nothing. Its own database, so the tests below start as before.
+      - name: Sample data loads on an empty database, and again without changes
+        env:
+          FLAG_SAMPLE_CONTENT: "true"
+        run: |
+          PGPASSWORD=change-me-postgres psql -h localhost -U h2india -d postgres -c "create database h2india_seed"
+          export DATABASE_URL=postgresql://h2india:change-me-postgres@localhost:5432/h2india_seed
+          pnpm db:migrate
+          pnpm db:seed
+          pnpm db:seed | tee seed-again.txt
+          if grep -E "^(Imported|Dry run).*: " seed-again.txt | grep -vE ": 0 to create, 0 to update, [0-9]+ unchanged, 0 with problems$"; then
+            echo "::error::The second seed run changed or refused something (above)"; exit 1
+          fi
       - name: Unit and integration tests
         run: pnpm test
       - name: Build
