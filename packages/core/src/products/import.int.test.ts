@@ -74,7 +74,8 @@ describe.skipIf(!url)("bulk import and quick stock", () => {
     expect(statuses.map((s) => s.s)).toEqual(["Draft"]);
     expect(await applyImport(h.db, await job(), file())).toBe("done");
     expect(await count()).toBe(499);
-  });
+    // 1,000 product writes: a shared CI machine needs longer than the 5-second default (it timed out at 5 s on main).
+  }, 30_000);
 
   it("quick stock refuses a lead time under a day and saves the rest at once", async () => {
     const actor = await loadActor(h.db, a.admin.id);
