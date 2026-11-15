@@ -6,7 +6,7 @@ Playbook step 9.9 · prepared 13 Nov 2026 · for the H2 India founder.
 
 ## What is ready
 
-Stages 1 to 9 are built, each on its own branch (`step/<id>-<name>`), stacked in order and **not merged to `main`**. Launch 1 is the public site, the directory and marketplace (quotes only, prices only on fixed-price product pages), member, supplier and buyer workspaces, RFQs and quotes, and the admin queues. Orders and payments (Batch 6, Stage 10) stay off: the `transactions` flag is off and every order route refuses on the server.
+Stages 1 to 9 are built, each on its own branch (`step/<id>-<name>`), stacked in order and merged to `main` on 14 Nov 2026 (PR #52). Launch 1 is the public site, the directory and marketplace (quotes only, prices only on fixed-price product pages), member, supplier and buyer workspaces, RFQs and quotes, and the admin queues. Orders and payments (Batch 6, Stage 10) stay off: the `transactions` flag is off and every order route refuses on the server.
 
 | Stage | What it gives you                                                                                                                   | State |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -187,7 +187,7 @@ Not needed for Launch 1: G1, G2, G3, G4, G5, G6, G7, G8, G9, C1, C2, C3, M3, M11
 
 ## Known issues
 
-- Flow specs have not been run against a running app in this environment; expect selector fixes on the first staging run.
+- A full local browser run found bugs, fixed in 0086fb2; the suite still has to run on staging.
 - The accept-quote screen at Launch 1 uses our wording ("Ordering opens in Launch 2"); the designer needs to add it to Figma (C8, A169).
 - Emails not drawn on page 16 (new message, deadline extended, decline all, close RFQ, revision request) are in-app only until M21.
 - The RFQ wizard's "Let H2 India suggest suppliers" switch and editing an RFQ after it is sent are not built (A164, A167).
@@ -196,14 +196,14 @@ Not needed for Launch 1: G1, G2, G3, G4, G5, G6, G7, G8, G9, C1, C2, C3, M3, M11
 
 ## Stage 12 results
 
-| Check                                               | Result      | Date |
-| --------------------------------------------------- | ----------- | ---- |
-| Flows A, C, D, E, G, I, J together on staging       | Not run yet |      |
-| Performance at volume (12.5)                        | Not run yet |      |
-| Accessibility (axe, keyboard) on all Launch 1 pages | Not run yet |      |
-| Security review and penetration test (M22)          | Not run yet |      |
-| Backup and restore drill                            | Not run yet |      |
-| Monitoring and alerts                               | Not run yet |      |
+| Check                                               | Result                                                  | Date        |
+| --------------------------------------------------- | ------------------------------------------------------- | ----------- |
+| Flows A, C, D, E, G, I, J together on staging       | Run locally; bugs fixed in 0086fb2. Staging run pending | 14 Nov 2026 |
+| Performance at volume (12.5)                        | Not run yet                                             |             |
+| Accessibility (axe, keyboard) on all Launch 1 pages | Not run yet                                             |             |
+| Security review and penetration test (M22)          | Not run yet                                             |             |
+| Backup and restore drill                            | Not run yet                                             |             |
+| Monitoring and alerts                               | Not run yet                                             |             |
 
 ## Sign-off
 
