@@ -50,7 +50,8 @@ export async function enqueueGstinCheck(gstin: string): Promise<void> {
       ),
     ]);
   } catch (error) {
-    console.error(`gstin-check: could not queue ${gstin}`, error);
+    // A fixed message, and only the GSTIN's own characters: typed input never shapes the log line (CodeQL).
+    console.error("gstin-check: could not queue", { gstin: gstin.replace(/[^0-9A-Z]/gi, "").slice(0, 15) }, error);
   }
 }
 

@@ -44,7 +44,7 @@ export default async function SavedPage({
     );
   return (
     <MemberShell userId={userId} current="/member/saved">
-      {pendingType ? <FromLink kind="save" type={pendingType} value={sp[pendingType] ?? ""} /> : null}
+      <FromLink kind="save" type={pendingType ?? null} value={pendingType ? (sp[pendingType] ?? "") : ""} />
       <div>
         <h1 className="type-h2">Saved items</h1>
         <p className="type-body text-secondary">{all.length} items. Only you can see what you save.</p>

@@ -91,10 +91,13 @@ export function QuoteBuilder({
   version,
   previous,
   sentLabel,
+  gstins = [],
 }: {
   rfqId: string;
   supplierId: string;
   start: QuoteForm;
+  /** The supplier's GSTINs for "Issued under" (supplier QC); only verified ones can be chosen. */
+  gstins?: { id: string; label: string; active: boolean }[];
   /** The version this draft becomes. */
   version: number;
   /** "unit price ₹41,50,000 · lead time 16" when revising. */
@@ -224,6 +227,23 @@ export function QuoteBuilder({
           ))}
         </Select>
       </Field>
+      {gstins.length ? (
+        <Field label="Issued under GSTIN" error={errors.supplierGstinId}>
+          <Select
+            value={f.supplierGstinId}
+            onChange={(e) => {
+              set({ supplierGstinId: e.target.value });
+            }}
+          >
+            <option value="">Choose</option>
+            {gstins.map((g) => (
+              <option key={g.id} value={g.id} disabled={!g.active}>
+                {g.active ? g.label : `${g.label} (being checked)`}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      ) : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Warranty" suffix="months">
           <Input

@@ -1,6 +1,6 @@
 import { getDb, Money } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
-import { rfqRevisions, supplierRfq } from "@h2india/core/rfq";
+import { rfqRevisions, supplierGstins, supplierRfq } from "@h2india/core/rfq";
 import { describeSchedule, PAYMENT_PRESETS } from "@h2india/core/rfq/totals";
 import { formatIstDate, formatIstDateTime, formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, Icon, StatusBadge } from "@h2india/ui";
@@ -35,7 +35,15 @@ export default async function SupplierRfqPage({
   const d = await supplierRfq(getDb(), scopeFor(page.actor), s.organisationId, id);
   if (!d) notFound();
   // supplierRfq already proved this supplier received the RFQ, so its versions may be shown.
-  const revisions = await rfqRevisions(getDb(), d.rfq.id);
+  const [revisions, gstinRows] = await Promise.all([
+    rfqRevisions(getDb(), d.rfq.id),
+    supplierGstins(getDb(), scopeFor(page.actor), s.organisationId),
+  ]);
+  const gstins = gstinRows.map((g) => ({
+    id: g.id,
+    label: `${g.gstin}${g.place ? ` · ${g.place}` : ""}${g.isDefault ? " (default)" : ""}`,
+    active: g.portalStatus === "Active",
+  }));
   const canQuote = s.seat.permissions.has("quote.send");
   const item = d.items[0];
   const quote = d.quote;
@@ -72,6 +80,7 @@ export default async function SupplierRfqPage({
     validUntil: day(base?.validUntil ?? null),
     changeNote: draft?.changeNote ?? "",
     documents: base?.documents ?? [],
+    supplierGstinId: base?.supplierGstinId ?? gstinRows.find((g) => g.portalStatus === "Active")?.id ?? "",
   };
   const due = dueBadge(d.rfq.offerDeadline);
   const header =
@@ -188,6 +197,7 @@ export default async function SupplierRfqPage({
                     : null
                 }
                 sentLabel={latest ? `v${String(latest.version)}` : null}
+                gstins={gstins}
               />
               {!latest && d.recipient.status !== "Declined" ? (
                 <DeclineRfq rfqId={d.rfq.id} buyer={d.buyer} startOpen={sp.decline === "1"} />

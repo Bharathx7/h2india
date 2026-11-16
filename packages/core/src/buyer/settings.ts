@@ -186,6 +186,13 @@ export async function removeGstin(
     .from(ds)
     .where(and(eq(ds.gstinId, id), isNull(ds.deletedAt)));
   if ((used?.n ?? 0) > 0) throw new BuyerSettingsError("A delivery site bills to this GSTIN. Change the site first.");
+  // Supplier QC: a quote was issued under it, so its orders and invoices still need it.
+  const [quoted] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.quoteVersions)
+    .where(eq(schema.quoteVersions.supplierGstinId, id));
+  if ((quoted?.n ?? 0) > 0)
+    throw new BuyerSettingsError("A quote was issued under this GSTIN, so it can't be removed.");
   await db.delete(g).where(eq(g.id, id));
   await audit(db, {
     actorId: actor.userId,

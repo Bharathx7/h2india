@@ -28,3 +28,4 @@ export * from "./system";
 export * from "./orders";
 export * from "./analytics";
 export * from "./consent";
+export * from "./category-requests";
