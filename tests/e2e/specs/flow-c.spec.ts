@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { fillDetails, freshGstin, typeGstin } from "../helpers/join";
 import { addAuthenticator, enterCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";

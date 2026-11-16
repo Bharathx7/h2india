@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 // Step 2.4: workspace shells from Figma 194:1190 and 194:1191.
 

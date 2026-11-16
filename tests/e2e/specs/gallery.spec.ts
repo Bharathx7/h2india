@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import { expectStates } from "../helpers/states";
 
 // Component gallery checks (playbook steps 2.3, 2.5 and 2.6) at 1440 and 390.

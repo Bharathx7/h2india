@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { asEditorInChief, cms, publishedHelpArticle, publishedLegalPage, signInOperator } from "../helpers/cms";
 import { newEmail, ownIp } from "../helpers/sign-in";
 

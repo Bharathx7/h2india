@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { fontVariables } from "./fonts";
 import "./globals.css";
+import { HydrationMark } from "@/components/HydrationMark";
 import { ViewAsBanner } from "@/components/ViewAsBanner";
 import { indexable, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/seo/site";
 
@@ -23,8 +24,10 @@ export function generateMetadata(): Metadata {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-IN" className={fontVariables}>
+    // data-app lets browser tests tell our pages (which hydrate) from the CMS, Mailpit and plain responses.
+    <html lang="en-IN" className={fontVariables} data-app="h2india">
       <body>
+        <HydrationMark />
         <ViewAsBanner />
         {children}
       </body>

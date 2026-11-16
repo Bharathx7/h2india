@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import { enterCode, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
 // Step 9.3: the RFQ wizard. A signed-out visitor fills in a request, signs in, and finds it waiting (399:11005);

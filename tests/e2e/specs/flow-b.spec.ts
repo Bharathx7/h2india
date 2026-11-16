@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import { ownIp, withDb } from "../helpers/sign-in";
 import { signInExisting } from "../helpers/rfq";
 import { as, PDF, setup, sms } from "../helpers/orders";
