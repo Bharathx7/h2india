@@ -98,5 +98,9 @@
   {
     "from": "/marketplace/p/:slug",
     "to": "/marketplace/products/:slug"
+  },
+  {
+    "from": "/list-your-company",
+    "to": "/join/supplier"
   }
 ]

@@ -75,9 +75,8 @@ export default function ForMembersPage() {
       <Block id="how" title="How it works" lead="Ready in about two minutes.">
         <Steps
           steps={[
-            { title: "Choose Individual member", text: "Join as a member opens Join with it already picked." },
-            { title: "Add your details", text: "Your name, what you do and your email." },
-            { title: "Confirm your email", text: "Type the code we email you. No password to remember." },
+            { title: "Join as a member", text: "Your name, what you do and your email." },
+            { title: "Confirm your email", text: "Open the link we email you. No password to remember." },
             { title: "Start", text: "Save, follow and set your alerts from your member dashboard." },
           ]}
         />

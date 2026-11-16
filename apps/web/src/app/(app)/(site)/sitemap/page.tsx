@@ -36,7 +36,7 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
       ["Associations and bodies", "/directory/associations"],
       ["People", "/directory/people"],
       ["Ecosystem map", "/directory/map"],
-      ["Claim your profile", "/list-your-company"],
+      ["List your company", "/join/supplier"],
     ],
   },
   {
@@ -123,9 +123,12 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
   {
     title: "Account",
     links: [
-      ["Sign in", "/sign-in"],
+      ["Buyer sign in", "/buyer/sign-in"],
+      ["Supplier sign in", "/supplier/sign-in"],
       ["Member sign in", "/member/sign-in"],
-      ["Join", "/join"],
+      ["Create a buyer account", "/join/buyer"],
+      ["Create a supplier account", "/join/supplier"],
+      ["Join as a member", "/join/member"],
       ["Forgot access", "/forgot-access"],
     ],
   },

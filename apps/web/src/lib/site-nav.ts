@@ -10,8 +10,10 @@ import { dayMonthYear } from "../news/format";
 export const SITE_LINKS: SiteLinks = {
   home: "/",
   requestQuote: "/rfq/new",
-  signIn: "/sign-in",
-  listCompany: "/list-your-company",
+  // Public QC 2 (16 Nov 2026): the header's Sign in is Buyer sign in (it links to Supplier and Member sign in);
+  // List your company is Create a supplier account.
+  signIn: "/buyer/sign-in",
+  listCompany: "/join/supplier",
   notifications: "/notifications",
   account: "/account",
   signOut: "/sign-out",
@@ -102,7 +104,7 @@ export const MEGA_MENUS: MegaSection[] = [
       eyebrow: "For companies",
       title: "Is your company listed?",
       text: "Claim your free profile, add your products and get found by Indian buyers.",
-      action: { label: "List your company", href: "/list-your-company", style: "button" },
+      action: { label: "List your company", href: "/join/supplier", style: "button" },
     },
   },
   {

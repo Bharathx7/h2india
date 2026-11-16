@@ -98,7 +98,7 @@ export function PathStep(props: {
         <p className="flex items-center justify-center gap-1 type-body-sm text-body">
           Already on H2 India?
           <TextLink asChild showIcon={false}>
-            <Link href={`${AUTH_LINKS.signIn}?next=/join`}>Sign in</Link>
+            <Link href={AUTH_LINKS.signIn}>Sign in</Link>
           </TextLink>
         </p>
       )}

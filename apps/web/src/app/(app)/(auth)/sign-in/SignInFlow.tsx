@@ -1,6 +1,13 @@
 "use client";
 
-import { formatIstTime, SIGN_IN, SIGN_IN_ERROR } from "@h2india/core/sign-in";
+import {
+  ACCOUNT_KINDS,
+  ACCOUNT_PAGES,
+  formatIstTime,
+  SIGN_IN,
+  SIGN_IN_ERROR,
+  type AccountKind,
+} from "@h2india/core/sign-in";
 import { Alert, Button, buttonClasses, FormField, Icon, Input, OtpInput, TextLink } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,8 +29,30 @@ interface Problem {
 }
 
 const OFFER_COOKIE = "h2_passkey_offer";
-/** Where the member sign-in page goes when no page sent the person there. */
-const MEMBER_HOME = "/member";
+/** Each account page's words (public QC 2, 16 Nov 2026): email only, no passkey or Google. */
+const AUDIENCE: Record<AccountKind, { title: string; lead: string; label: string; join: string; other: string }> = {
+  buyer: {
+    title: "Buyer sign in",
+    lead: "Sign in to request quotes, compare suppliers and follow your orders.",
+    label: "Work email",
+    join: "Create a buyer account",
+    other: "Buyer",
+  },
+  supplier: {
+    title: "Supplier sign in",
+    lead: "Sign in to manage your listings, quote requests and orders.",
+    label: "Work email",
+    join: "Create a supplier account",
+    other: "Supplier",
+  },
+  member: {
+    title: "Member sign in",
+    lead: "Sign in to see your saved items, follows, alerts and Hydrogen 101 progress.",
+    label: "Email",
+    join: "Join as a member",
+    other: "Member",
+  },
+};
 const OFFER_LATER_DAYS = 30;
 
 const linkButton = "cursor-pointer";
@@ -80,7 +109,7 @@ export function SignInFlow({
   initialError,
   staffOnly = false,
   signedInElsewhere = false,
-  member = false,
+  audience,
 }: {
   next: string;
   initialError?: Problem;
@@ -88,8 +117,8 @@ export function SignInFlow({
   staffOnly?: boolean;
   /** Admin domain, already signed in as someone who isn't staff: only Sign out is offered. */
   signedInElsewhere?: boolean;
-  /** The member sign-in page (public QC, 16 Nov 2026): member wording and Join as a member. */
-  member?: boolean;
+  /** The buyer, supplier or member sign-in page (public QC 2): email code only, that page's words and sign-up. */
+  audience?: AccountKind;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("start");
@@ -103,9 +132,8 @@ export function SignInFlow({
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<"passkey" | "send" | "verify" | "google" | "create">();
   const heading = useRef<HTMLHeadingElement>(null);
-  // The other sign-in page keeps the page the person is going back to.
-  const keepNext = next !== "/" && !(member && next === MEMBER_HOME);
-  const otherSignIn = `${member ? AUTH_LINKS.signIn : AUTH_LINKS.memberSignIn}${keepNext ? `?next=${encodeURIComponent(next)}` : ""}`;
+  const words = audience ? AUDIENCE[audience] : null;
+  const others = ACCOUNT_KINDS.filter((k) => k !== audience);
 
   // Move focus to the new heading when the step changes, so screen readers announce the new screen.
   useEffect(() => {
@@ -123,7 +151,7 @@ export function SignInFlow({
   }, [resendAt, now]);
 
   const finish = () => {
-    void whereNext(next, member).then((to) => {
+    void whereNext(next, audience).then((to) => {
       router.replace(to);
       router.refresh();
     });
@@ -151,7 +179,10 @@ export function SignInFlow({
       };
     }
     if (detail.code === SIGN_IN_ERROR.tooManyCodes || detail.status === 429) {
-      return { title: "Too many codes requested", body: `Try again in ${retryIn(detail.retryAt)}, or use a passkey.` };
+      return {
+        title: "Too many codes requested",
+        body: `Try again in ${retryIn(detail.retryAt)}${audience ? "." : ", or use a passkey."}`,
+      };
     }
     return { title: "We couldn't send a code", body: "Check your connection and try again." };
   };
@@ -192,6 +223,11 @@ export function SignInFlow({
   };
 
   const afterCodeSignIn = async () => {
+    // The buyer, supplier and member pages offer no passkey (public QC 2); suppliers set one up for bank changes.
+    if (audience) {
+      finish();
+      return;
+    }
     const canPasskey = typeof window.PublicKeyCredential === "function";
     if (canPasskey && !offerSnoozed()) {
       const { data } = await authClient.passkey.listUserPasskeys();
@@ -361,7 +397,16 @@ export function SignInFlow({
           Check your email
         </h1>
         <p className="type-body text-body">
-          We sent a {SIGN_IN.codeLength}-digit code to {email.trim()}. It expires in {SIGN_IN.codeMinutes} minutes.
+          {audience ? (
+            <>
+              We&apos;ve sent an email to {email.trim()}. If it has an H2 India account, the email holds a{" "}
+              {SIGN_IN.codeLength}-digit code that expires in {SIGN_IN.codeMinutes} minutes.
+            </>
+          ) : (
+            <>
+              We sent a {SIGN_IN.codeLength}-digit code to {email.trim()}. It expires in {SIGN_IN.codeMinutes} minutes.
+            </>
+          )}
         </p>
         <form
           className="flex flex-col gap-5"
@@ -421,6 +466,14 @@ export function SignInFlow({
             <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
           </TextLink>
         )}
+        {audience && words ? (
+          <p className="type-body-sm text-body">
+            No email? You may not have an account yet.{" "}
+            <TextLink asChild showIcon={false}>
+              <Link href={ACCOUNT_PAGES[audience].join}>{words.join}</Link>
+            </TextLink>
+          </p>
+        ) : null}
       </AuthCard>
     );
   }
@@ -437,6 +490,59 @@ export function SignInFlow({
     );
   }
 
+  // Buyer, supplier and member pages (public QC 2): one email box, then the code. Nothing else to choose.
+  if (audience && words) {
+    const keep = next !== ACCOUNT_PAGES[audience].home && next !== "/";
+    const withNext = (href: string) => (keep ? `${href}?next=${encodeURIComponent(next)}` : href);
+    return (
+      <AuthCard>
+        <h1 className="type-h2 text-primary">{words.title}</h1>
+        <p className="type-body text-body">{words.lead}</p>
+        {alert}
+        <form className="flex flex-col gap-5" onSubmit={(event) => void onEmail(event)} noValidate>
+          <FormField label={words.label} error={emailError}>
+            <Input
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder={audience === "member" ? "you@example.com" : "you@company.com"}
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (emailError) setEmailError(undefined);
+              }}
+            />
+          </FormField>
+          <Button type="submit" size="lg" className="w-full" disabled={busy === "send"}>
+            Send code
+          </Button>
+        </form>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <TextLink asChild showIcon={false}>
+            <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
+          </TextLink>
+          <p className="flex items-center gap-1 type-body-sm text-body">
+            New to H2 India?{" "}
+            <TextLink asChild showIcon={false}>
+              <Link href={ACCOUNT_PAGES[audience].join}>{words.join}</Link>
+            </TextLink>
+          </p>
+        </div>
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-default pt-4 type-body-sm text-body">
+          <span>Not a {audience}?</span>
+          {others.map((k, i) => (
+            <span key={k} className="flex items-center gap-2">
+              {i > 0 ? <span aria-hidden="true">·</span> : null}
+              <TextLink asChild showIcon={false}>
+                <Link href={withNext(ACCOUNT_PAGES[k].signIn)}>{AUDIENCE[k].title}</Link>
+              </TextLink>
+            </span>
+          ))}
+        </p>
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard>
       {staffOnly ? (
@@ -446,19 +552,10 @@ export function SignInFlow({
             For H2 India staff. Use your passkey, or a code sent to your work email.
           </p>
         </>
-      ) : member ? (
-        <>
-          <h1 className="type-h2 text-primary">Member sign in</h1>
-          <p className="type-body text-body">
-            Sign in to your member account to see your saved items, follows, alerts and Hydrogen 101 progress.
-          </p>
-        </>
       ) : (
         <>
           <h1 className="type-h2 text-primary">Sign in to H2 India</h1>
-          <p className="type-body text-body">
-            For buyers and suppliers. You&apos;ll come back to the page you were on.
-          </p>
+          <p className="type-body text-body">You&apos;ll come back to the page you were on.</p>
         </>
       )}
       {alert}
@@ -516,23 +613,13 @@ export function SignInFlow({
         </TextLink>
         {staffOnly ? null : (
           <p className="flex items-center gap-1 type-body-sm text-body">
-            {member ? "New here?" : "New to H2 India?"}{" "}
+            New to H2 India?{" "}
             <TextLink asChild showIcon={false}>
-              <Link href={member ? AUTH_LINKS.joinMember : AUTH_LINKS.join}>
-                {member ? "Join as a member" : "Join free"}
-              </Link>
+              <Link href={AUTH_LINKS.join}>Join free</Link>
             </TextLink>
           </p>
         )}
       </div>
-      {staffOnly ? null : (
-        <p className="flex flex-wrap items-center gap-1 border-t border-default pt-4 type-body-sm text-body">
-          {member ? "Buyer or supplier?" : "Member?"}{" "}
-          <TextLink asChild showIcon={false}>
-            <Link href={otherSignIn}>{member ? "Sign in here" : "Member sign in"}</Link>
-          </TextLink>
-        </p>
-      )}
     </AuthCard>
   );
 }

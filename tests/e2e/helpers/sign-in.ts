@@ -66,6 +66,17 @@ export async function emailCount(page: Page, email: string): Promise<number> {
 }
 
 /** Runs SQL against the app's database. Tests that need it skip when DATABASE_URL is not set. */
+/** An account for this email, as Join's confirm link makes it (email confirmed, not joined yet). Kept if it exists. */
+export async function ensureAccount(email: string): Promise<void> {
+  if (!process.env.DATABASE_URL) return;
+  await withDb((db) =>
+    db.query(
+      `INSERT INTO core.users (id, email, name, email_verified) VALUES (gen_random_uuid(), $1, '', true) ON CONFLICT (email) DO NOTHING`,
+      [email.trim().toLowerCase()],
+    ),
+  );
+}
+
 export async function withDb<T>(run: (db: pg.Client) => Promise<T>): Promise<T> {
   const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
   await db.connect();
@@ -93,11 +104,14 @@ export async function addAuthenticator(page: Page): Promise<void> {
 }
 
 /** Sign in page: enter the email and ask for a code. Returns the code from the email. */
-export async function requestCode(page: Page, email: string): Promise<string> {
+export async function requestCode(page: Page, email: string, opts: { account?: boolean } = {}): Promise<string> {
+  // Signing in never creates an account (public QC 2, 16 Nov 2026): a test's new person gets one first, as Join's
+  // confirm link would make it (no profile yet, so sign-in still leads to Join). `account: false` keeps the email new.
+  if (opts.account !== false) await ensureAccount(email);
   // Often reached by a link click (a full page load), not page.goto: wait until the form's handlers are attached.
   await hydrated(page);
   const sentAfter = Date.now() - 1000;
-  await page.getByLabel("Work email").fill(email);
+  await page.getByLabel(/^(Work )?email$/i).fill(email);
   await page.getByRole("button", { name: "Send code" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   return latestCode(page, email, sentAfter);

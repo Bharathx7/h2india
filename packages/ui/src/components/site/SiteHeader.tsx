@@ -17,7 +17,7 @@ import type { MegaSection, SiteLinks, SiteUser } from "./types";
    Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026, revised 16 Nov 2026: on
    desktop, scrolling down past the top strip and section nav hides them and leaves the main bar; scrolling up
    (any amount) brings both back at once, with no click needed. They also show at the top of the page, while a menu
-   is open and while keyboard focus is in the header. Desktop from 1024 px; below that the mobile header and
+   is open and while keyboard focus is in the header; clicking in the main bar keeps them hidden (public QC 2). Desktop from 1024 px; below that the mobile header and
    full-screen menu (decision M17). The language selector stays hidden (decision M15). */
 
 export interface SiteHeaderProps {
@@ -370,6 +370,16 @@ export function rowsHidden(last: number, y: number, wasHidden: boolean): boolean
   return wasHidden;
 }
 
+/** Whether focus came from the keyboard (Tab), not a click: :focus-visible, except text fields, which always match. */
+function keyboardFocus(el: HTMLElement): boolean {
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return false;
+  try {
+    return el.matches(":focus-visible");
+  } catch {
+    return false;
+  }
+}
+
 export function SiteHeader(props: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -415,8 +425,10 @@ export function SiteHeader(props: SiteHeaderProps) {
   return (
     <>
       <header
-        onFocus={() => {
-          setFocusWithin(true);
+        onFocus={(e) => {
+          // Only keyboard focus brings the hidden rows back (public QC 2, 16 Nov 2026): clicking the logo, search,
+          // Request a quote, Sign in or List your company after scrolling keeps just the main bar.
+          if (e.target instanceof HTMLElement && keyboardFocus(e.target)) setFocusWithin(true);
         }}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) setFocusWithin(false);

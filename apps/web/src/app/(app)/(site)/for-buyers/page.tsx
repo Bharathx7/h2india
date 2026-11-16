@@ -111,7 +111,10 @@ export default async function ForBuyersPage() {
         eyebrow="For buyers"
         title="Create a free buyer account"
         text="Save suppliers, track quote requests and add colleagues. It takes about two minutes."
-        actions={[{ label: "Create a buyer account", href: "/join?as=buyer" }]}
+        actions={[
+          { label: "Create a buyer account", href: "/join/buyer" },
+          { label: "Buyer sign in", href: "/buyer/sign-in", primary: false },
+        ]}
       />
     </main>
   );

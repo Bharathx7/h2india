@@ -350,6 +350,14 @@ export const TEMPLATES = {
     step: "8.6",
     built: true,
   },
+  "email.no_account": {
+    channel: "email",
+    key: "no_account",
+    name: "No account for this email (instead of a sign-in code)",
+    frame: null,
+    step: "QC 2",
+    built: true,
+  },
   "email.verify_email": {
     channel: "email",
     key: "verify_email",
