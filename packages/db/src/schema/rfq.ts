@@ -192,6 +192,8 @@ export const quoteVersions = core.table(
     validUntil: utc("valid_until"),
     warrantyMonths: integer("warranty_months"),
     notes: text("notes"),
+    /** The supplier GSTIN this version is issued under (supplier QC, 16 Nov 2026); an order from it bills from here. */
+    supplierGstinId: uuid("supplier_gstin_id").references(() => organisationGstins.id),
     /** What changed (required from v2; the buyer sees it). */
     changeNote: text("change_note"),
     documents: uuid("documents")

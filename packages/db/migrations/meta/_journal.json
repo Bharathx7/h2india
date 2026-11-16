@@ -470,6 +470,13 @@
       "when": 1794731398288,
       "tag": "0066_consent_records",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1794806878879,
+      "tag": "0067_qc_supplier_categories_gstins",
+      "breakpoints": true
     }
   ]
 }

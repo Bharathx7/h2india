@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import type { Actor } from "@h2india/core/authz";
+import { categoryRequestQueue } from "@h2india/core/catalogue/taxonomy";
 import { claimsFor, companiesBrief, submitters, supplierQueue, type QueueKey } from "@h2india/core/queues";
 import { getPayload } from "payload";
 
@@ -53,6 +54,26 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
       claimedBy: claims.get(r.id)?.claimedBy ?? null,
       claimer: claims.get(r.id)?.name ?? null,
       href: `/admin/verification?org=${r.organisationId}`,
+    }));
+  }
+  if (queue === "categories") {
+    // Supplier QC, 16 Nov 2026: categories suppliers asked for; decided on their own page.
+    const rows = await categoryRequestQueue(db, actor);
+    const claims = await claimsFor(
+      db,
+      queue,
+      rows.map((r) => r.id),
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      title: r.label,
+      line: "Category request",
+      submitter: r.requester ?? "",
+      organisation: r.company,
+      submittedAt: r.createdAt,
+      claimedBy: claims.get(r.id)?.claimedBy ?? null,
+      claimer: claims.get(r.id)?.name ?? null,
+      href: `/admin/queues/categories/${r.id}`,
     }));
   }
   if (queue === "comments") return []; // Public comments are off at launch (C9).

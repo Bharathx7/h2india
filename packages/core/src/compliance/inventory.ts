@@ -612,6 +612,7 @@ export const NOT_PERSONAL_TABLES: readonly string[] = [
   "catalogue_category_applications",
   "catalogue_changes",
   "catalogue_classes",
+  "category_requests",
   "company_profiles",
   "datasheet_extractions",
   "deadlines",
