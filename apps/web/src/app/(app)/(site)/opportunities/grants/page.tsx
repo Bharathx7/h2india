@@ -1,9 +1,10 @@
-import { Alert, buttonClasses, cx, EmptyState, SchemeCard, StatusBadge } from "@h2india/ui";
+import { Alert, buttonClasses, cx, EmptyState, Pagination, SchemeCard, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { GRANT_APPLICANTS, GRANT_THEMES } from "@/cms/records/opportunities";
 import { forcedState } from "@/lib/dev-state";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { allGrants } from "@/opportunities/data";
 import { ListFilters, SortBy, type FilterGroupSpec } from "@/opportunities/filters";
 import { CardsLoading, Crumbs, LoadError, memberHref, ViewToggle, wrap } from "@/opportunities/parts";
@@ -25,9 +26,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/opportunities/grants" },
 };
 export const dynamic = "force-dynamic";
-
-const PAGE = 6;
-const MORE = 3;
 
 type Params = Record<string, string | string[] | undefined>;
 const all = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
@@ -100,7 +98,7 @@ function Shell({
           <ViewToggle
             current={one(params.as) === "table" ? "table" : "cards"}
             hrefFor={(v) =>
-              `/opportunities/grants${queryOf(params, { as: v === "table" ? "table" : null, show: null })}#list`
+              `/opportunities/grants${queryOf(params, { as: v === "table" ? "table" : null, page: null })}#list`
             }
           />
         </div>
@@ -143,7 +141,7 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
     sort === "name" ? a.title.localeCompare(b.title) : a.deadlineAt.localeCompare(b.deadlineAt),
   );
   if (forced === "empty") list = [];
-  const show = Math.max(PAGE, Math.floor(Number(one(params.show))) || PAGE);
+  const shown = pageSlice(list, params.page);
   const groups: FilterGroupSpec[] = [
     {
       kind: "checks",
@@ -189,21 +187,21 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
           {list.length ? (
             <>
               <div className={cx(table && "md:hidden")}>
-                <Cards items={list.slice(0, show)} signedIn={signedIn} />
+                <Cards items={shown.items} signedIn={signedIn} />
               </div>
               {table ? (
                 <div className="hidden md:block">
-                  <Table items={list.slice(0, show)} />
+                  <Table items={shown.items} />
                 </div>
               ) : null}
-              {list.length > show ? (
-                <Link
-                  href={`/opportunities/grants${queryOf(params, { show: String(show + MORE) })}#list`}
-                  scroll={false}
-                  className={cx(buttonClasses({ variant: "outline" }), "w-full")}
-                >
-                  Show {Math.min(MORE, list.length - show)} more
-                </Link>
+              {shown.total > LIST_PER_PAGE ? (
+                <Pagination
+                  page={shown.page}
+                  perPage={LIST_PER_PAGE}
+                  total={shown.total}
+                  perPageOptions={[LIST_PER_PAGE]}
+                  query={pagingQuery(params)}
+                />
               ) : null}
             </>
           ) : (

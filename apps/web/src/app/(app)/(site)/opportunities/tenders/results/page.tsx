@@ -1,7 +1,8 @@
-import { cx, EmptyState } from "@h2india/ui";
+import { cx, EmptyState, Pagination } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { showSample } from "@/cms/sample";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { summarise } from "@/news/data";
 import { dayMonthYear } from "@/news/format";
 import { StoryCard } from "@/news/parts";
@@ -50,6 +51,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
   const list = rows.filter(
     (r) => (!issuer || r.issuer === issuer) && (!category || r.sector === category) && (!year || r.year === year),
   );
+  const shown = pageSlice(list, params.page);
   const analyses = [
     ...new Map(
       awarded
@@ -114,7 +116,12 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
           </p>
         </div>
         {list.length ? (
-          <div className="overflow-x-auto rounded-card border border-default">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Tender results"
+            className="overflow-x-auto rounded-card border border-default"
+          >
             <table className="w-full min-w-220 text-left">
               <thead className="bg-subtle type-label-sm text-secondary">
                 <tr>
@@ -129,7 +136,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
                 </tr>
               </thead>
               <tbody className="type-body-sm text-primary">
-                {list.map((r) => (
+                {shown.items.map((r) => (
                   <tr key={r.id} className="border-t border-default">
                     <td className="px-4 py-3 type-spec whitespace-nowrap">{r.date}</td>
                     <td className="max-w-72 px-4 py-3">
@@ -168,7 +175,17 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
               </tbody>
             </table>
           </div>
-        ) : (
+        ) : null}
+        {shown.total > LIST_PER_PAGE ? (
+          <Pagination
+            page={shown.page}
+            perPage={LIST_PER_PAGE}
+            total={shown.total}
+            perPageOptions={[LIST_PER_PAGE]}
+            query={pagingQuery(params)}
+          />
+        ) : null}
+        {list.length ? null : (
           <div className="rounded-card border border-default bg-page py-8">
             <EmptyState kind={rows.length ? "no-results" : "first-use"} icon="bar-chart" title="No results to show">
               {rows.length ? "Try another issuer, category or year." : "Results appear here once issuers declare them."}

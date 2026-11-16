@@ -64,7 +64,7 @@ export function WorkspaceFrame(props: {
       action={props.action}
       // Workspace top bar v2 (194:1191) has a help button: the help centre.
       helpHref="/help"
-      profileHref={props.home}
+      profileHref="/account"
       logoutHref="/sign-out"
       homeHref="/"
       notifications={

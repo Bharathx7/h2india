@@ -30,9 +30,13 @@ const FLAG_WORDS: Record<string, { label: string; hint: string }> = {
     hint: "Off until a lender is signed. Checkout doesn't show the option.",
   },
   letterOfCredit: { label: "Letter of credit for capital orders", hint: "Shown at checkout for Tier D orders only." },
+  buyerChecklist: {
+    label: "Buyer set-up checklist",
+    hint: "Shows new buyers the five set-up steps before their dashboard. Off: buyers go straight to the dashboard.",
+  },
 };
 const SITE_FLAGS = ["comingSoon", "maintenance", "searchIndexing"] as const;
-const FEATURE_FLAGS = ["transactions", "payLater", "letterOfCredit"] as const;
+const FEATURE_FLAGS = ["transactions", "payLater", "letterOfCredit", "buyerChecklist"] as const;
 
 /** An integration's state as a badge: connected, a built-in stand-in, or not connected yet. */
 const integrationBadge = (status: string) =>

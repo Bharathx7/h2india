@@ -1,4 +1,5 @@
-import { cx, EmptyState } from "@h2india/ui";
+import { cx, EmptyState, Pagination } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allReports } from "@/knowledge/data";
@@ -35,6 +36,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       (!year || yearOf(r.publishedOn) === year) &&
       (!free || !r.gated),
   );
+  const shown = pageSlice(list, s.page);
+
   const topics = [...new Map(reports.flatMap(topicsOf).map((t) => [t.slug, t])).values()];
   const years = [...new Set(reports.map((r) => yearOf(r.publishedOn)))].sort().reverse();
   return (
@@ -70,7 +73,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </div>
         {list.length ? (
           <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {list.map((r) => {
+            {shown.items.map((r) => {
               const pages = reportPages(r);
               return (
                 <li key={r.id}>
@@ -95,7 +98,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               );
             })}
           </ul>
-        ) : (
+        ) : null}
+        {shown.total > LIST_PER_PAGE ? (
+          <Pagination
+            page={shown.page}
+            perPage={LIST_PER_PAGE}
+            total={shown.total}
+            perPageOptions={[LIST_PER_PAGE]}
+            query={pagingQuery(s)}
+          />
+        ) : null}
+        {list.length ? null : (
           <div className="rounded-card border border-default py-6">
             <EmptyState
               kind={reports.length ? "no-results" : "first-use"}

@@ -1,5 +1,6 @@
 import { filterDirectory, parseDirectory, typeLabel } from "@h2india/core/directory/rules";
-import { buttonClasses, cx, EmptyState, OrgCard, Skeleton } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, OrgCard, Pagination, Skeleton } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LiveSection } from "@/components/LiveSection";
@@ -25,6 +26,8 @@ export default async function StartupsPage({
   const params = await searchParams;
   const forced = forcedState(typeof params.ui === "string" ? params.ui : undefined);
   const result = filterDirectory(await companies(), parseDirectory({ ...params, type: "startup", ui: undefined }));
+  // 20 a page like the other public lists (public QC); the directory rule's own 12-a-page slice isn't used here.
+  const shown = pageSlice(result.all, params.page);
   const link = ({ href, className, children }: { href: string; className: string; children: React.ReactNode }) => (
     <Link href={href} className={className}>
       {children}
@@ -55,7 +58,7 @@ export default async function StartupsPage({
         }
       >
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {result.items.map((e) => (
+          {shown.items.map((e) => (
             <li key={e.id} className="flex">
               <OrgCard
                 className="w-full"
@@ -72,6 +75,16 @@ export default async function StartupsPage({
             </li>
           ))}
         </ul>
+        {shown.total > LIST_PER_PAGE ? (
+          <Pagination
+            page={shown.page}
+            perPage={LIST_PER_PAGE}
+            total={shown.total}
+            perPageOptions={[LIST_PER_PAGE]}
+            query={pagingQuery(params)}
+            className="mt-6"
+          />
+        ) : null}
       </LiveSection>
       <section className="flex flex-wrap items-center gap-4 rounded-card bg-subtle p-6">
         <div className="min-w-0 flex-1">

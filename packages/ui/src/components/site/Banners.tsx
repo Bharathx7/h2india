@@ -54,7 +54,7 @@ export function CookieBanner({
       aria-label="Cookies"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-page shadow-ink-float"
     >
-      <div className="mx-auto flex max-w-300 flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:gap-8">
+      <div className="mx-auto flex max-w-300 flex-col gap-4 px-4 py-5 md:px-6 lg:flex-row lg:items-center lg:gap-8 xl:px-0">
         <div className="flex-1">
           <p className="type-label-lg text-primary">We use cookies</p>
           <p className="mt-1 type-body-sm text-secondary">
