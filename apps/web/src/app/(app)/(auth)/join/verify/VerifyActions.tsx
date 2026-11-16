@@ -7,7 +7,16 @@ import { useEffect, useState } from "react";
 import { resendLink } from "../actions";
 
 // Resend email / Change email (527:158) and Send a new link (527:192).
-export function VerifyActions({ mode, canSend }: { mode: "sent" | "expired"; canSend: boolean }) {
+export function VerifyActions({
+  mode,
+  canSend,
+  back = "/join",
+}: {
+  mode: "sent" | "expired";
+  canSend: boolean;
+  /** The sign-up page the person came from (public QC 3), for Change email. */
+  back?: string;
+}) {
   const router = useRouter();
   const [resendAt, setResendAt] = useState(() => (mode === "sent" ? Date.now() + JOIN.linkResendSeconds * 1000 : 0));
   const [now, setNow] = useState(() => Date.now());
@@ -72,7 +81,7 @@ export function VerifyActions({ mode, canSend }: { mode: "sent" | "expired"; can
           variant="ghost"
           size="sm"
           onClick={() => {
-            router.push("/join");
+            router.push(back);
           }}
         >
           Change email

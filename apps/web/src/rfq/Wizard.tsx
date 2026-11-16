@@ -315,7 +315,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
       {setup.signedIn && !setup.buyer ? (
         <Alert tone="info" title="Request quotes from a buyer account">
           Your account isn&apos;t part of a buyer company yet.{" "}
-          <Link href="/join" className="underline">
+          <Link href="/join/buyer" className="underline">
             Add your company
           </Link>{" "}
           to send requests.
@@ -837,7 +837,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
             <p className="type-caption text-secondary">
               New to H2 India?{" "}
               <Link
-                href="/join"
+                href="/join/buyer"
                 className="underline"
                 onClick={() => {
                   writeLocal(s);

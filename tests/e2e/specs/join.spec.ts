@@ -60,6 +60,9 @@ test("a new buyer joins from scratch: confirms the email by link and creates the
   await expect(page.getByText(`Thanks, ${email} is confirmed.`)).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
 
+  // Public QC 3: company details stay on the buyer's own sign-up page, never the shared /join.
+  await expect(page).toHaveURL(/\/join\/buyer\?step=company$/);
+  await expect(page.getByText("Create a buyer account", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Company details" })).toBeVisible();
   await typeGstin(page, gstin);
   await expect(alert(page).filter({ hasText: "GSTIN is active" })).toBeVisible();

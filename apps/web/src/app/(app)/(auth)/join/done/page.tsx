@@ -29,7 +29,15 @@ export default async function DonePage() {
   const title = first ? `You're in, ${first}` : "You're in";
 
   if (!company) {
-    if (profile?.profileType !== "member") redirect("/join");
+    if (profile?.profileType !== "member") {
+      redirect(
+        profile?.profileType === "supplier"
+          ? "/join/supplier"
+          : profile?.profileType === "buyer"
+            ? "/join/buyer"
+            : "/join",
+      );
+    }
     return (
       <AuthCard>
         <StatusIcon name="check-circle" />
