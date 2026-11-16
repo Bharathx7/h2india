@@ -18,6 +18,8 @@ test.beforeEach(async ({ context }, info) => {
 });
 
 async function axe(page: Page) {
+  // After an in-app page change Next.js adds the <title> just after the content: wait for it (it must still come).
+  await expect(page).toHaveTitle(/\S/);
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(results.violations.map((v) => `${v.id}: ${String(v.nodes.length)} × ${v.help}`)).toEqual([]);
 }
