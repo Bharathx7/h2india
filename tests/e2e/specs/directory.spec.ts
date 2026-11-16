@@ -92,7 +92,14 @@ test("signed-out visitors are asked to sign in or join, and the menu has no Dire
       "href",
       `/sign-in?next=${encodeURIComponent(path)}`,
     );
-    await expect(page.locator("#main").getByRole("link", { name: "Join H2 India" })).toBeVisible();
+    await expect(page.locator("#main").getByRole("link", { name: "Join as a member" })).toHaveAttribute(
+      "href",
+      "/join/member",
+    );
+    await expect(page.locator("#main").getByRole("link", { name: "Create a supplier account" })).toHaveAttribute(
+      "href",
+      "/join/supplier",
+    );
   }
   await page.goto("/news");
   await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);

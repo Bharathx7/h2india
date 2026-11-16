@@ -28,7 +28,7 @@ export async function requireBuyer(path: string): Promise<BuyerPage> {
   const db = getDb();
   const actor = await loadActor(db, session.user.id);
   const buyer = await buyerOf(db, actor);
-  if (!buyer) redirect("/join");
+  if (!buyer) redirect("/join/buyer");
   return { userId: session.user.id, actor, buyer };
 }
 

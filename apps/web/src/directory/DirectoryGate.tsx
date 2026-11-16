@@ -44,14 +44,18 @@ export function DirectoryGate() {
           <Suspense fallback={<PathOnly />}>
             <SignInLink />
           </Suspense>
-          <Link href={AUTH_LINKS.join} className={buttonClasses({ variant: "outline" })}>
-            Join H2 India
+          <Link href={AUTH_LINKS.joinMember} className={buttonClasses({ variant: "outline" })}>
+            Join as a member
           </Link>
         </div>
         <p className="type-body-sm text-body">
-          Joining as an individual?{" "}
-          <Link href="/for-members" className="text-primary underline underline-offset-2">
-            See what members get
+          Buyer or supplier?{" "}
+          <Link href={AUTH_LINKS.joinBuyer} className="text-primary underline underline-offset-2">
+            Create a buyer account
+          </Link>{" "}
+          ·{" "}
+          <Link href={AUTH_LINKS.joinSupplier} className="text-primary underline underline-offset-2">
+            Create a supplier account
           </Link>
         </p>
       </div>

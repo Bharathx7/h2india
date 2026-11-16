@@ -114,8 +114,8 @@ export function SignedOut({ what, next }: { what: string; next: string }) {
         <Link href={`/sign-in?next=${encodeURIComponent(next)}`} className={buttonClasses({ size: "sm" })}>
           Sign in
         </Link>
-        <Link href="/join" className={buttonClasses({ variant: "outline", size: "sm" })}>
-          Join H2 India
+        <Link href="/join/member" className={buttonClasses({ variant: "outline", size: "sm" })}>
+          Join as a member
         </Link>
       </div>
     </div>

@@ -153,7 +153,7 @@ function Confirmed({
               <p className="type-body-sm text-body">
                 A free member account lists every webinar you&apos;ve joined, with join links and replays.
               </p>
-              <Link href="/join" className={cx(buttonClasses({ size: "sm" }), "self-start")}>
+              <Link href="/join/member" className={cx(buttonClasses({ size: "sm" }), "self-start")}>
                 Create a free account
               </Link>
             </section>

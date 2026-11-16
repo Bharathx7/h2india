@@ -57,7 +57,7 @@ export default async function ConfirmPage({ searchParams }: { searchParams: Prom
                 Follow topics and companies, save searches and get an email when a tender or scheme matches.
               </p>
               <Button asChild variant="outline">
-                <Link href="/join">Create free account</Link>
+                <Link href="/join/member">Create free account</Link>
               </Button>
             </div>
           )}
