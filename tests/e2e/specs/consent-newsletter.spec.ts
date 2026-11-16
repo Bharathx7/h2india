@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { asEditorInChief, publishedIssue, signInOperator } from "../helpers/cms";
 import { newEmail, ownIp } from "../helpers/sign-in";
 

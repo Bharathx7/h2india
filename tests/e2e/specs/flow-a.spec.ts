@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "../fixtures";
 import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { freshGstin, reachCompanyStep, typeGstin } from "../helpers/join";
 import { signInExisting } from "../helpers/rfq";
