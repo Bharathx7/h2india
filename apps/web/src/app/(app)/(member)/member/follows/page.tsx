@@ -50,7 +50,7 @@ export default async function FollowsPage({
         : [];
   return (
     <MemberShell userId={userId} current="/member/follows">
-      {linkType ? <FromLink kind="follow" type={linkType} value={sp[linkType] ?? ""} /> : null}
+      <FromLink kind="follow" type={linkType ?? null} value={linkType ? (sp[linkType] ?? "") : ""} />
       <div>
         <h1 className="type-h2">Manage follows</h1>
         <p className="type-body text-secondary">

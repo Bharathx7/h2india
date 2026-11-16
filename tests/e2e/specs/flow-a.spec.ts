@@ -154,6 +154,9 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
   await page.getByLabel("Address").fill("Plot 14, Talegaon MIDC Phase II");
   await page.getByLabel("State").fill("Maharashtra");
   await page.getByRole("button", { name: "Save site" }).click();
+  // Wait for the save: leaving at once could cancel it, and the request would have no delivery site.
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByText("Talegaon plant").first()).toBeVisible();
   await page.goto("/rfq/new");
   await expect(page.getByText("Welcome back, your request is ready to send")).toBeVisible();
   await expect(page.getByLabel("Title")).toHaveValue(`2 × diaphragm compressors ${tag}`);
