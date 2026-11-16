@@ -109,7 +109,8 @@ test("the checker walks through six questions to results", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Which hydrogen schemes could fit you?" })).toBeVisible();
   await page.getByRole("button", { name: "Start" }).click();
   const pick = async (option: string) => {
-    await page.getByLabel(option).check();
+    // Exact: "No" is also inside "H2 Economy".
+    await page.getByLabel(option, { exact: true }).check();
     await page.getByRole("button", { name: /Continue|See my matches/ }).click();
   };
   await expect(page.getByText("Question 1 of 6")).toBeVisible();
