@@ -1,7 +1,8 @@
-import { buttonClasses, cx, EmptyState, Icon } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Icon, Pagination } from "@h2india/ui";
 import Link from "next/link";
 import { EVENT_TYPES } from "@/cms/records/collections";
 import { forcedState } from "@/lib/dev-state";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { ListFilters, type FilterGroupSpec } from "@/opportunities/filters";
 import { CardsLoading, Crumbs, LoadError, wrap } from "@/opportunities/parts";
 import { allEvents } from "./data";
@@ -177,6 +178,8 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
     return `${preset.path}${s ? `?${s}` : ""}#list`;
   };
   const featured = !preset.past ? list.find((e) => e.featured) : undefined;
+  // The list view shows 20 a page (public QC); the calendar shows its month whole.
+  const shown = pageSlice(list, params.page);
   const month = /^\d{4}-\d{2}$/.test(one(params.month)) ? one(params.month) : monthKey(now.toISOString());
   const inMonth = list.filter((e) => monthKey(e.startsAt) === month || monthKey(e.endsAt) === month);
   const grid = calendarMonth(month, list, now);
@@ -204,7 +207,12 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
               {(["list", "calendar"] as const).map((v) => (
                 <Link
                   key={v}
-                  href={query({ as: v === "calendar" ? "calendar" : null, month: v === "calendar" ? month : null })}
+                  href={query({
+                    as: v === "calendar" ? "calendar" : null,
+                    month: v === "calendar" ? month : null,
+                    page: null,
+                    perPage: null,
+                  })}
                   scroll={false}
                   aria-current={view === v ? "page" : undefined}
                   className={cx(
@@ -358,7 +366,7 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
                   <span className={buttonClasses({ size: "sm" })}>View event</span>
                 </Link>
               ) : null}
-              {byMonth(list).map((g) => (
+              {byMonth(shown.items).map((g) => (
                 <section key={g.month} aria-label={g.month} className="flex flex-col gap-3">
                   <h2 className="type-eyebrow text-secondary">{g.month}</h2>
                   <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -370,6 +378,15 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
                   </ul>
                 </section>
               ))}
+              {shown.total > LIST_PER_PAGE ? (
+                <Pagination
+                  page={shown.page}
+                  perPage={LIST_PER_PAGE}
+                  total={shown.total}
+                  perPageOptions={[LIST_PER_PAGE]}
+                  query={pagingQuery(params)}
+                />
+              ) : null}
             </>
           )}
           {!preset.past ? <SubmitBand /> : null}

@@ -1,4 +1,5 @@
-import { buttonClasses, cx, EmptyState, Icon, Skeleton, StatusBadge } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Icon, Pagination, Skeleton, StatusBadge } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PERSON_AFFILIATION, PERSON_AVAILABLE, PERSON_EXPERTISE } from "@/cms/directory/collections";
@@ -45,6 +46,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
       (!available.length || available.some((a) => (p.availableFor ?? []).includes(a as never))) &&
       (!state || p.state === state),
   );
+  const page = pageSlice(shown, s.page);
   const states = [...new Set(everyone.map((p) => p.state).filter((x): x is string => Boolean(x)))].sort();
   const box = (name: string, value: string, chosen: string[]) => (
     <label key={value} className="flex items-center gap-2.5 type-body text-primary">
@@ -146,7 +148,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
             }
           >
             <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {shown.map((p) => (
+              {page.items.map((p) => (
                 <li key={p.id} className="flex flex-col gap-3 rounded-card border border-default p-4">
                   <div className="flex items-start gap-3">
                     <span
@@ -186,6 +188,16 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
                 </li>
               ))}
             </ul>
+            {page.total > LIST_PER_PAGE ? (
+              <Pagination
+                page={page.page}
+                perPage={LIST_PER_PAGE}
+                total={page.total}
+                perPageOptions={[LIST_PER_PAGE]}
+                query={pagingQuery(s)}
+                className="mt-6"
+              />
+            ) : null}
           </LiveSection>
         </div>
       </form>

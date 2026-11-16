@@ -1,4 +1,5 @@
-import { cx, EmptyState, Icon, Skeleton } from "@h2india/ui";
+import { cx, EmptyState, Icon, Pagination, Skeleton } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ASSOCIATION_KINDS } from "@/cms/directory/collections";
@@ -19,12 +20,13 @@ export const dynamic = "force-dynamic";
 export default async function AssociationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ kind?: string; state?: string }>;
+  searchParams: Promise<{ kind?: string; state?: string; page?: string }>;
 }) {
   const s = await searchParams;
   const forced = forcedState(s.state);
   const list = await associations();
-  const shown = s.kind ? list.filter((a) => a.kind === s.kind) : list;
+  const matching = s.kind ? list.filter((a) => a.kind === s.kind) : list;
+  const shown = pageSlice(matching, s.page);
   const initials = (n: string) =>
     n
       .replace(/\(.*\)/, "")
@@ -60,7 +62,7 @@ export default async function AssociationsPage({
       </nav>
       <LiveSection
         label="Associations"
-        state={forced ?? (shown.length ? "ready" : "empty")}
+        state={forced ?? (shown.total ? "ready" : "empty")}
         skeleton={<Skeleton kind="card" />}
         empty={
           <div className="rounded-card border border-default bg-subtle">
@@ -71,7 +73,7 @@ export default async function AssociationsPage({
         }
       >
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {shown.map((a) => (
+          {shown.items.map((a) => (
             <li key={a.id} className="flex flex-col gap-3 rounded-card border border-default p-5">
               <div className="flex items-start gap-3">
                 <span
@@ -106,6 +108,16 @@ export default async function AssociationsPage({
             </li>
           ))}
         </ul>
+        {shown.total > LIST_PER_PAGE ? (
+          <Pagination
+            page={shown.page}
+            perPage={LIST_PER_PAGE}
+            total={shown.total}
+            perPageOptions={[LIST_PER_PAGE]}
+            query={pagingQuery(s)}
+            className="mt-6"
+          />
+        ) : null}
       </LiveSection>
     </main>
   );

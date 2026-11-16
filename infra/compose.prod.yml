@@ -24,6 +24,7 @@ services:
     <<: *app
     environment:
       APP_URL: ${PUBLIC_URL:?set PUBLIC_URL}
+      SITE_ROLE: public
     ports: ["127.0.0.1:${PUBLIC_PORT:-3210}:3000"]
 
   # The admin and the CMS. Same image; its own APP_URL so sign-in, passkeys and Payload use the admin domain.
@@ -32,6 +33,8 @@ services:
     <<: *app
     environment:
       APP_URL: ${ADMIN_URL:?set ADMIN_URL}
+      # Signs in H2 India staff only (public QC, 16 Nov 2026).
+      SITE_ROLE: admin
       FLAG_SEARCH_INDEXING: "false"
     ports: ["127.0.0.1:${ADMIN_PORT:-3211}:3000"]
 

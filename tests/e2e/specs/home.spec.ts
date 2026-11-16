@@ -111,7 +111,10 @@ test.describe("motion", () => {
     await expect(hero).toHaveAttribute("data-focus", "buyers");
   });
 
-  test("the hero loop and the logo strip pause on request", async ({ page, isMobile }) => {
+  test("the hero loop keeps moving and has no pause button; the logo strip holds on hover", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "the network card shows from 1024 px");
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
@@ -119,17 +122,13 @@ test.describe("motion", () => {
     await expect(hero).toHaveAttribute("data-running", "true");
     // Focus moves every 2.5 s (781:7247).
     await expect(hero).not.toHaveAttribute("data-focus", "buyers", { timeout: 4000 });
-    await hero.getByRole("button", { name: "Pause animation" }).click();
-    await expect(hero).toHaveAttribute("data-running", "false");
-    const held = await hero.getAttribute("data-focus");
-    await page.waitForTimeout(3000);
-    await expect(hero).toHaveAttribute("data-focus", held ?? "");
-    await expect(hero.getByRole("button", { name: "Play animation" })).toBeVisible();
+    // Founder change to F6, 16 Nov 2026: no pause buttons on the home page.
+    await expect(page.getByRole("button", { name: /^(Pause|Play) animation$/ })).toHaveCount(0);
 
     const strip = page.getByTestId("logo-marquee");
     if ((await strip.count()) > 0) {
       await expect(strip).toHaveAttribute("data-paused", "false");
-      await page.getByRole("button", { name: "Pause animation" }).click();
+      await strip.hover();
       await expect(strip).toHaveAttribute("data-paused", "true");
     }
   });

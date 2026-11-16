@@ -1,7 +1,8 @@
-import { cx, Icon } from "@h2india/ui";
+import { cx, Icon, Pagination } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allGuides } from "@/knowledge/data";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { Crumbs, wrap } from "@/opportunities/parts";
 
 // Buyer's guides (step 5.6): every guide written for a product category, as on the knowledge home (470:1391). No list
@@ -14,8 +15,12 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-export default async function GuidesPage() {
+type Search = Record<string, string | string[] | undefined>;
+
+export default async function GuidesPage({ searchParams }: { searchParams: Promise<Search> }) {
+  const params = await searchParams;
   const guides = (await allGuides()).filter((g) => (g.productCategories ?? []).length > 0);
+  const shown = pageSlice(guides, params.page);
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
       <div className={cx(wrap, "flex flex-col gap-2 pt-6 md:pt-8")}>
@@ -29,7 +34,7 @@ export default async function GuidesPage() {
       <div className={cx(wrap, "pb-16 pt-6")}>
         {guides.length ? (
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {guides.map((g) => (
+            {shown.items.map((g) => (
               <li key={g.id}>
                 <Link
                   href={`/knowledge/guides/${g.slug}`}
@@ -47,7 +52,18 @@ export default async function GuidesPage() {
               </li>
             ))}
           </ul>
-        ) : (
+        ) : null}
+        {shown.total > LIST_PER_PAGE ? (
+          <Pagination
+            page={shown.page}
+            perPage={LIST_PER_PAGE}
+            total={shown.total}
+            perPageOptions={[LIST_PER_PAGE]}
+            query={pagingQuery(params)}
+            className="mt-6"
+          />
+        ) : null}
+        {guides.length ? null : (
           <p className="rounded-card bg-subtle p-5 type-body-sm text-body">
             Buyer&apos;s guides are being written. Until then, see{" "}
             <Link href="/knowledge/insights" className="text-link underline">

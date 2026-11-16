@@ -1,6 +1,7 @@
 import { getDb } from "@h2india/core";
 import { listBrands } from "@h2india/core/brands";
-import { Button, cx, EmptyState, Icon, Skeleton } from "@h2india/ui";
+import { Button, cx, EmptyState, Icon, Pagination, Skeleton } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { showSample } from "@/cms/sample";
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-type Search = Promise<{ q?: string; class?: string; origin?: string; dealer?: string; state?: string }>;
+type Search = Promise<{ q?: string; class?: string; origin?: string; dealer?: string; state?: string; page?: string }>;
 
 export default async function BrandsPage({ searchParams }: { searchParams: Search }) {
   const s = await searchParams;
@@ -35,7 +36,21 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
       withDealer: s.dealer === "1",
     }),
   ]);
-  const letters = [...new Set(data.brands.map((b) => b.name.charAt(0).toUpperCase()))].sort();
+  const letterOf = (b: { name: string }) => b.name.charAt(0).toUpperCase();
+  // A to Z, 20 a page (public QC): the letter links go to the page where that letter starts.
+  const sorted = [...data.brands].sort((a, b) =>
+    letterOf(a) < letterOf(b) ? -1 : letterOf(a) > letterOf(b) ? 1 : a.name.localeCompare(b.name, "en-IN"),
+  );
+  const letters = [...new Set(sorted.map(letterOf))];
+  const shown = pageSlice(sorted, s.page);
+  const query = pagingQuery(s);
+  const letterHref = (l: string) => {
+    const page = Math.floor(sorted.findIndex((b) => letterOf(b) === l) / LIST_PER_PAGE) + 1;
+    if (page === shown.page) return `#letter-${l}`;
+    const q = new URLSearchParams({ ...query, ...(page > 1 ? { page: String(page) } : {}) }).toString();
+    return `?${q}#letter-${l}`;
+  };
+  const pageLetters = [...new Set(shown.items.map(letterOf))];
   const n = data.total.toLocaleString("en-IN");
   const field = "h-11 rounded-control border-[1.5px] border-control bg-page px-3 type-body text-primary";
 
@@ -112,14 +127,14 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
             {letters.map((l) => (
               <a
                 key={l}
-                href={`#letter-${l}`}
+                href={letterHref(l)}
                 className="inline-flex size-8 items-center justify-center rounded-pill border border-default type-label-sm hover:border-focus"
               >
                 {l}
               </a>
             ))}
           </nav>
-          {letters.map((l) => (
+          {pageLetters.map((l) => (
             <section
               key={l}
               id={`letter-${l}`}
@@ -128,8 +143,8 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
             >
               <h2 className="type-h4 text-primary">{l}</h2>
               <ul className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-                {data.brands
-                  .filter((b) => b.name.charAt(0).toUpperCase() === l)
+                {shown.items
+                  .filter((b) => letterOf(b) === l)
                   .map((b) => (
                     <li key={b.slug}>
                       <Link
@@ -154,6 +169,15 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
               </ul>
             </section>
           ))}
+          {shown.total > LIST_PER_PAGE ? (
+            <Pagination
+              page={shown.page}
+              perPage={LIST_PER_PAGE}
+              total={shown.total}
+              perPageOptions={[LIST_PER_PAGE]}
+              query={query}
+            />
+          ) : null}
         </LiveSection>
       </div>
     </main>

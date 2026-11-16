@@ -1,3 +1,6 @@
+import { parseServerEnv } from "@h2india/config";
+import { getDb } from "@h2india/core";
+import { hasOperatorRole } from "@h2india/core/authz";
 import { safeReturnPath } from "@h2india/core/sign-in";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -26,6 +29,11 @@ async function returnPath(next: string | undefined): Promise<string> {
   }
 }
 
+const NOT_STAFF = {
+  title: "This sign-in is for H2 India staff",
+  body: "Buyers, suppliers and members sign in on the H2 India website.",
+};
+
 export default async function SignInPage({
   searchParams,
 }: {
@@ -33,10 +41,21 @@ export default async function SignInPage({
 }) {
   const { next: raw, error } = await searchParams;
   const next = await returnPath(raw);
-  if (await getSession()) redirect(await whereNext(next));
+  const staffOnly = parseServerEnv().SITE_ROLE === "admin";
+  const session = await getSession();
+  if (session) {
+    // On the admin domain a signed-in person who isn't staff is shown why, with Sign out: a page can't sign them out
+    // while it draws (whereNext does it after a fresh sign-in).
+    if (staffOnly && !(await hasOperatorRole(getDb(), session.user.id))) {
+      return <SignInFlow next={next} staffOnly signedInElsewhere initialError={NOT_STAFF} />;
+    }
+    redirect(await whereNext(next));
+  }
   const initialError =
     error === "google"
       ? { title: "Google sign-in didn't finish", body: "Try again, or use a passkey or an email code." }
-      : undefined;
-  return <SignInFlow next={next} initialError={initialError} />;
+      : error === "not-staff"
+        ? NOT_STAFF
+        : undefined;
+  return <SignInFlow next={next} staffOnly={staffOnly} initialError={initialError} />;
 }

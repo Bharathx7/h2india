@@ -81,6 +81,7 @@ const PUBLIC = [
 ];
 
 const MEMBER = [
+  "/account",
   "/member",
   "/member/alerts",
   "/member/applications",
