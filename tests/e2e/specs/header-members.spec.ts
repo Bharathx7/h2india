@@ -173,7 +173,8 @@ test("signed in on the public site: role badge, bell panel, Dashboard; Request a
   await signInExisting(page, d.buyerEmail, "/news");
   await page.goto("/news");
   await expect(header.getByTestId("role-badge").first()).toHaveText("Buyer");
-  await expect(header.getByRole("link", { name: "Buyer" })).toHaveCount(0);
+  // The badge is not a link (the top strip's "For Buyers" is, hence exact).
+  await expect(header.getByRole("link", { name: "Buyer", exact: true })).toHaveCount(0);
   await expect(header.getByRole("link", { name: "Request a quote" }).first()).toBeVisible();
   await header
     .getByRole("button", { name: /^Notifications/ })
