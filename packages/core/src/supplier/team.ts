@@ -87,6 +87,38 @@ export async function inviteMember(
   now: Date = new Date(),
 ): Promise<{ id: string; token: string }> {
   assertCan(actor, "team.manage", { organisationId });
+  return sendInvitation(
+    db,
+    {
+      organisationId,
+      email: input.email,
+      role: input.role,
+      invitedBy: actor.userId,
+      inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
+      context: input.context,
+    },
+    now,
+  );
+}
+
+/**
+ * Records an invitation and emails it (Invitation, 548:8). Callers check who may invite: a company's team.manage
+ * (inviteMember) or an operator adding a company for its owner (addSupplierByOperator, admin QC).
+ */
+export async function sendInvitation(
+  db: Database,
+  input: {
+    organisationId: string;
+    email: string;
+    role: string;
+    invitedBy: string | null;
+    /** How the email names the inviter's role, for example "Admin" or "H2 India team". */
+    inviterRole: string;
+    context?: RequestContext;
+  },
+  now: Date = new Date(),
+): Promise<{ id: string; token: string }> {
+  const organisationId = input.organisationId;
   const email = input.email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new TeamError("Enter a full email address");
   const roles = await companyRoles(db, organisationId);
@@ -102,11 +134,11 @@ export async function inviteMember(
   const expiresAt = (await workingCalendar(db)).add(now, await clockDuration(db, "teamInvitation"));
   const [row] = await db
     .insert(inv)
-    .values({ organisationId, email, role: role.name, tokenHash: hash(token), invitedBy: actor.userId, expiresAt })
+    .values({ organisationId, email, role: role.name, tokenHash: hash(token), invitedBy: input.invitedBy, expiresAt })
     .returning({ id: inv.id });
   if (!row) throw new Error("invitation not saved");
   await audit(db, {
-    actorId: actor.userId,
+    actorId: input.invitedBy,
     action: "team.invited",
     resourceType: "invitation",
     resourceId: row.id,
@@ -117,7 +149,7 @@ export async function inviteMember(
   const [inviter] = await db
     .select({ name: u.name })
     .from(u)
-    .where(eq(u.id, actor.userId ?? ""));
+    .where(eq(u.id, input.invitedBy ?? ""));
   const [org] = await db
     .select({
       legal: schema.organisations.legalName,
@@ -139,7 +171,7 @@ export async function inviteMember(
       name: "",
       email,
       inviter: inviter?.name ?? "A colleague",
-      inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
+      inviterRole: input.inviterRole,
       company: org?.trade ?? org?.legal ?? "",
       companyLine: [org?.legal, org?.verification === "Verified" ? "verified supplier" : null, org?.city]
         .filter(Boolean)
@@ -220,6 +252,16 @@ export async function acceptInvitation(
     throw new TeamError(`This invitation is for ${found.email}. Sign in with that email to accept it.`);
   await db.transaction(async (tx) => {
     await tx.update(inv).set({ acceptedAt: now }).where(eq(inv.id, found.id));
+    // Admin QC: someone invited before they had an account hasn't been through Join, so give them the company's
+    // workspace type; otherwise sign-in would keep sending them to Join.
+    const [org] = await tx
+      .select({ kind: schema.organisations.kind })
+      .from(schema.organisations)
+      .where(eq(schema.organisations.id, found.organisationId));
+    await tx
+      .update(u)
+      .set({ profileType: org?.kind === "buyer" ? "buyer" : "supplier" })
+      .where(and(eq(u.id, userId), isNull(u.profileType)));
     await tx
       .insert(m)
       .values({ organisationId: found.organisationId, userId, role: found.role })

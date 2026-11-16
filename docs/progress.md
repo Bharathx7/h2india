@@ -185,3 +185,9 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | 13.6 | Launch 1 go-live (Gate 2) | Checklist written 15 Nov 2026 (`docs/launch/launch-1.md`), with the way back. Waits on Gate 2 |
 | 13.7 | Launch 2: transactions for the pilot group (Gate 3) | Checklist written 15 Nov 2026 (`docs/launch/launch-2.md`). Waits on M3, M11, C1, C3 and Gate 3 |
 | 13.8 | After launch: release rhythm, upgrades and keeping the design in sync | Rhythm written 15 Nov 2026 (`docs/launch/after-launch.md`) |
+
+## Founder QC rounds (admin)
+
+| Round | What changed | Status |
+|---|---|---|
+| Admin QC (16 Nov 2026) | Branch `step/qc-admin`. Company detail (`/admin/users/companies/<id>`, linked from User detail): details, GSTINs, team and open invitations, listings, verification and badges, RFQs or quotes, recent activity. Add a supplier (Users · Add a supplier, users.edit): created as Join creates it, owner invited as Admin, never Verified by this. Fixed: an invited person with no account was sent to Join instead of back to the invitation. Feature switches: already in System settings, no change. No Figma frames (connection down) | In review |

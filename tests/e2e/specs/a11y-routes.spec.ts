@@ -142,6 +142,7 @@ const ADMIN = [
   "/admin/settings",
   "/admin/settings/search",
   "/admin/users",
+  "/admin/users/companies/new",
   "/admin/users/appeals",
   "/admin/users/audit",
   "/admin/users/roles",
