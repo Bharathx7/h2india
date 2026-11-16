@@ -1,5 +1,5 @@
 import { getDb } from "@h2india/core";
-import { invitationFor } from "@h2india/core/supplier";
+import { agreedToTerms, invitationFor } from "@h2india/core/supplier";
 import { Alert, buttonClasses } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -27,7 +27,11 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
             You&apos;re invited as {found.role}. Sign in with {found.email} to accept.
           </p>
           {session ? (
-            <AcceptInvite token={token} workspace="/supplier" />
+            <AcceptInvite
+              token={token}
+              workspace={found.workspace}
+              needsTerms={!(await agreedToTerms(getDb(), session.user.id))}
+            />
           ) : (
             <Link
               href={`/sign-in?next=${encodeURIComponent(`/invite/${token}`)}`}

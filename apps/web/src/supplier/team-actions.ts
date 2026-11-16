@@ -16,6 +16,7 @@ import { getDb } from "@h2india/core";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
+import { currentTermsVersion } from "@/trust/terms";
 import { loadActor } from "@h2india/core/authz";
 import { supplierActor } from "./actor";
 
@@ -97,11 +98,16 @@ export async function answerJoinRequestAction(requestId: string, approve: boolea
   );
 }
 
-export async function acceptInvitationAction(token: string): Promise<Result> {
+export async function acceptInvitationAction(token: string, agreedToTerms: boolean): Promise<Result> {
   const session = await getSession();
   if (!session) return { ok: false, error: "Sign in first." };
   const context = await requestContext();
-  return run(() => acceptInvitation(getDb(), session.user.id, token, context), "/supplier");
+  // The version recorded is the one published now, as Join records it (admin QC).
+  const termsVersion = agreedToTerms ? await currentTermsVersion() : undefined;
+  return run(
+    () => acceptInvitation(getDb(), session.user.id, token, context, undefined, { termsVersion }),
+    "/supplier",
+  );
 }
 
 export async function saveStorefrontAction(form: StorefrontForm, publish: boolean) {

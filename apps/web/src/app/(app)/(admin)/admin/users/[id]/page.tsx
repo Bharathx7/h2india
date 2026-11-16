@@ -70,7 +70,12 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
                 <span className="flex items-start gap-3">
                   <Icon name="building" size={18} className="mt-0.5" />
                   <span>
-                    <span className="block type-label">{c.name}</span>
+                    <Link
+                      href={`/admin/users/companies/${c.id}`}
+                      className="block type-label underline underline-offset-2"
+                    >
+                      {c.name}
+                    </Link>
                     <span className="block type-caption text-secondary">
                       {[
                         roleWord(c.role),

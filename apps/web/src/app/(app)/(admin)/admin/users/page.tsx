@@ -1,5 +1,6 @@
 import { getDb } from "@h2india/core";
 import { listUsers, operatorRoleGrid } from "@h2india/core/admin/users";
+import { can } from "@h2india/core/authz";
 import { formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, EmptyState, Icon, Skeleton, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -86,7 +87,16 @@ export default async function UsersPage({
   const filtered = Boolean(sp.q?.trim() || type || status || passkey);
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
-      <UsersHeader />
+      <UsersHeader
+        action={
+          can(actor, "users.edit") ? (
+            <Link href="/admin/users/companies/new" className={buttonClasses({})}>
+              <Icon name="plus" size={18} />
+              Add a supplier
+            </Link>
+          ) : undefined
+        }
+      />
       <UserTabs current="people" counts={{ people: everyone.total, roles: roles.length }} />
       <form method="get" className="flex flex-wrap gap-3">
         <label className="relative min-w-60 flex-1 md:max-w-sm">

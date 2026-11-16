@@ -27,6 +27,8 @@ export async function whereNext(next: string): Promise<string> {
     }
     return site.to;
   }
+  // An invitation link brings people back to accept it, even before they have joined (admin QC, 16 Nov 2026).
+  if (back.startsWith("/invite/")) return back;
   const profile = await joinProfile(session.user.id);
   if (!profile?.profileType) return "/join";
   if (profile.profileType === "member") return back;
