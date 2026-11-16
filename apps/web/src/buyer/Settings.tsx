@@ -193,7 +193,14 @@ export function ProfileForm({ start, canEdit }: { start: ProfileStart; canEdit: 
   );
 }
 
-export function AddGstin() {
+/** Add a GSTIN. Buyers by default; the supplier's Company details passes its own action and wording (supplier QC). */
+export function AddGstin({
+  action = addGstinAction,
+  description = "We check it with GST records in the background. You can request quotes while we check.",
+}: {
+  action?: (gstin: string, place: string) => Promise<R>;
+  description?: string;
+} = {}) {
   const r = useRun();
   const [open, setOpen] = useState(false);
   const [gstin, setGstin] = useState("");
@@ -213,7 +220,7 @@ export function AddGstin() {
         onOpenChange={setOpen}
         width={480}
         title="Add a GSTIN"
-        description="We check it with GST records in the background. You can request quotes while we check."
+        description={description}
         footer={
           <div className="flex justify-end gap-3">
             <Button
@@ -228,7 +235,7 @@ export function AddGstin() {
               disabled={r.pending}
               onClick={() => {
                 r.go(
-                  () => addGstinAction(gstin, place),
+                  () => action(gstin, place),
                   () => {
                     setOpen(false);
                   },
@@ -270,11 +277,15 @@ export function GstinActions({
   isDefault,
   active,
   gstin,
+  setDefault = defaultGstinAction,
+  remove = removeGstinAction,
 }: {
   id: string;
   isDefault: boolean;
   active: boolean;
   gstin: string;
+  setDefault?: (id: string) => Promise<R>;
+  remove?: (id: string) => Promise<R>;
 }) {
   const r = useRun();
   return (
@@ -285,7 +296,7 @@ export function GstinActions({
           size="sm"
           disabled={r.pending}
           onClick={() => {
-            r.go(() => defaultGstinAction(id));
+            r.go(() => setDefault(id));
           }}
         >
           Set as default
@@ -298,7 +309,7 @@ export function GstinActions({
           size="sm"
           label={`Remove ${gstin}`}
           onClick={() => {
-            r.go(() => removeGstinAction(id));
+            r.go(() => remove(id));
           }}
         />
       ) : null}

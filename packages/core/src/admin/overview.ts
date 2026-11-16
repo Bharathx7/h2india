@@ -138,6 +138,25 @@ export async function overviewTiles(db: Executor, actor: Actor, now: Date = new 
       }),
     );
 
+    // Supplier QC, 16 Nov 2026: categories suppliers asked for.
+    const cr = schema.categoryRequests;
+    const asked = await db
+      .select({ at: cr.createdAt })
+      .from(cr)
+      .where(eq(cr.status, "Pending"))
+      .orderBy(asc(cr.createdAt));
+    const co = age(asked[0]?.at ?? null);
+    tiles.push(
+      tile({
+        key: "categories",
+        label: "Category requests",
+        count: asked.length,
+        oldestHours: co,
+        line: co === null ? "No request is waiting" : `Oldest waiting ${ageText(co)} · review within 2 working days`,
+        href: "/admin/queues/categories",
+      }),
+    );
+
     // Open RFQs where a chosen supplier has neither quoted nor declined a day after it went out.
     const cutoff = new Date(now.getTime() - amber * 3_600_000);
     const rs = schema.rfqSuppliers;
@@ -174,16 +193,20 @@ export async function overviewTiles(db: Executor, actor: Actor, now: Date = new 
   return tiles;
 }
 
-/** Counts on the admin sidebar (626:8): items waiting in Queues (listings and RFQs) and Verification. */
+/** Counts on the admin sidebar (626:8): items waiting in Queues (listings, RFQs and category requests) and Verification. */
 export async function adminCounts(db: Executor): Promise<Partial<Record<string, number>>> {
   const n = sql<number>`count(*)::int`;
-  const [listings, rfqs, reviews] = await Promise.all([
+  const [listings, rfqs, reviews, categories] = await Promise.all([
     db.select({ n }).from(schema.productRevisions).where(eq(schema.productRevisions.status, "In review")),
     db
       .select({ n })
       .from(schema.rfqs)
       .where(and(eq(schema.rfqs.status, "In moderation"), isNull(schema.rfqs.deletedAt))),
     db.select({ n }).from(schema.supplierReviews).where(eq(schema.supplierReviews.status, "Submitted")),
+    db.select({ n }).from(schema.categoryRequests).where(eq(schema.categoryRequests.status, "Pending")),
   ]);
-  return { queues: (listings[0]?.n ?? 0) + (rfqs[0]?.n ?? 0), verification: reviews[0]?.n ?? 0 };
+  return {
+    queues: (listings[0]?.n ?? 0) + (rfqs[0]?.n ?? 0) + (categories[0]?.n ?? 0),
+    verification: reviews[0]?.n ?? 0,
+  };
 }

@@ -27,6 +27,8 @@ export interface QuoteForm {
   validUntil: string;
   changeNote: string;
   documents: string[];
+  /** The supplier GSTIN the quote is issued under (supplier QC); "" keeps the one chosen or the default. */
+  supplierGstinId: string;
 }
 
 const paise = (v: string) => {
@@ -85,6 +87,7 @@ async function save(rfqId: string, f: QuoteForm) {
       changeNote: f.changeNote,
       documents: f.documents,
       schedule: preset?.lines ?? [],
+      supplierGstinId: f.supplierGstinId || undefined,
     },
     await requestContext(),
   );

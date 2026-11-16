@@ -3,6 +3,12 @@ import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor } from "../authz/actor";
 import { scopeFor } from "../authz/scope";
+import {
+  categoryRequestQueue,
+  companyCategoryRequests,
+  decideCategoryRequest,
+  requestCategory,
+} from "../catalogue/requests";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { supplierChecklist } from "./checklist";
 import { supplierOf } from "./context";
@@ -168,5 +174,58 @@ describe.skipIf(!url)("supplier workspace", () => {
         fileId: await file(b.admin.id, b.org.id),
       }),
     ).rejects.toThrow("Not allowed");
+  });
+  it("supplier QC: a category request goes to the queue; B can't see or make A's; approving adds the category", async () => {
+    const aActor = await loadActor(h.db, a.admin.id);
+    const bActor = await loadActor(h.db, b.admin.id);
+    const label = `Hydrogen leak sensors ${String(Date.now()).slice(-6)}`;
+    const made = await requestCategory(h.db, aActor, a.org.id, {
+      classId: "components",
+      label,
+      description: "Fixed and portable hydrogen leak detectors",
+    });
+    // B can neither read A's requests nor ask in A's name; a Viewer can't ask at all.
+    expect(await companyCategoryRequests(h.db, scopeFor(bActor), a.org.id)).toEqual([]);
+    await expect(
+      requestCategory(h.db, bActor, a.org.id, { classId: "components", label: "X", description: "Y" }),
+    ).rejects.toThrow("Not allowed");
+    await expect(
+      requestCategory(h.db, await loadActor(h.db, a.requester.id), a.org.id, {
+        classId: "components",
+        label: "X",
+        description: "Y",
+      }),
+    ).rejects.toThrow("Not allowed");
+    expect((await companyCategoryRequests(h.db, scopeFor(aActor), a.org.id)).map((x) => x.id)).toContain(made.id);
+
+    // A supplier can't decide; a Catalogue moderator approves under a settled name.
+    await expect(
+      decideCategoryRequest(h.db, aActor, { id: made.id, decision: "reject", reason: "no" }),
+    ).rejects.toThrow("Not allowed");
+    const mod = await makeUser(h.db, "Category moderator");
+    const [role] = await h.db
+      .select({ id: schema.roles.id })
+      .from(schema.roles)
+      .where(and(eq(schema.roles.scope, "operator"), eq(schema.roles.name, "Catalogue moderator")));
+    await h.db.insert(schema.operatorRoles).values({ userId: mod.id, roleId: role?.id ?? "" });
+    const op = await loadActor(h.db, mod.id);
+    expect((await categoryRequestQueue(h.db, op)).map((x) => x.id)).toContain(made.id);
+    const { categoryId } = await decideCategoryRequest(h.db, op, {
+      id: made.id,
+      decision: "approve",
+      classId: "components",
+      label,
+    });
+    const [request] = await h.db.select().from(schema.categoryRequests).where(eq(schema.categoryRequests.id, made.id));
+    expect(request).toMatchObject({ status: "Approved", categoryId });
+    const [category] = await h.db
+      .select({ label: schema.catalogueCategories.label })
+      .from(schema.catalogueCategories)
+      .where(eq(schema.catalogueCategories.id, categoryId ?? ""));
+    expect(category?.label).toBe(label);
+    // Decided once only.
+    await expect(decideCategoryRequest(h.db, op, { id: made.id, decision: "reject", reason: "late" })).rejects.toThrow(
+      "already",
+    );
   });
 });

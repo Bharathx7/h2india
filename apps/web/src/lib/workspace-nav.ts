@@ -59,6 +59,7 @@ export const WORKSPACE_NAV: Record<WorkspaceArea, WorkspaceNavGroup[]> = {
     {
       heading: "Company",
       items: [
+        { label: "Company details", href: "/supplier/company", icon: "building" },
         { label: "Verification", href: "/supplier/verification", icon: "shield-check" },
         { label: "Content", href: "/supplier/content", icon: "newspaper" },
         { label: "Team", href: "/supplier/team", icon: "users" },

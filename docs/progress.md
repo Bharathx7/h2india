@@ -185,3 +185,9 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | 13.6 | Launch 1 go-live (Gate 2) | Checklist written 15 Nov 2026 (`docs/launch/launch-1.md`), with the way back. Waits on Gate 2 |
 | 13.7 | Launch 2: transactions for the pilot group (Gate 3) | Checklist written 15 Nov 2026 (`docs/launch/launch-2.md`). Waits on M3, M11, C1, C3 and Gate 3 |
 | 13.8 | After launch: release rhythm, upgrades and keeping the design in sync | Rhythm written 15 Nov 2026 (`docs/launch/after-launch.md`) |
+
+## Founder QC rounds (supplier)
+
+| Round | What changed | Status |
+|---|---|---|
+| Supplier QC (16 Nov 2026) | Branch `step/qc-supplier`. Category requests: suppliers ask from Add a product (`/supplier/products/categories`), operators approve (adds the category) or reject with a reason in Queues · Category requests; the supplier is told in the app (email wording waits on M21). Supplier GSTINs: Company details (`/supplier/company`) with the buyer's rules; each quote is issued under one verified GSTIN, which the buyer sees on the comparison and the accept page. Roles and content review: checked against the existing tests, no change. No Figma frames (connection down): built from existing components | In review |

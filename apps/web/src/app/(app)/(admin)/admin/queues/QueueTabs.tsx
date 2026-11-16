@@ -7,16 +7,16 @@ import { cx } from "@h2india/ui";
 import Link from "next/link";
 import { queueItems } from "@/admin/queues/data";
 
-// The seven queue tabs on Queues (627:8 to 630:968), each with its count (step 11.2).
+// The queue tabs on Queues (627:8 to 630:968), each with its count (step 11.2).
 
 export async function queueCounts(actor: Actor): Promise<Record<QueueKey, number>> {
   const db = getDb();
   const [listings, rfqs, ...rest] = await Promise.all([
     listingQueue(db, actor),
     moderationQueue(db, actor),
-    ...(["suppliers", "content", "events", "jobs", "comments"] as const).map((q) => queueItems(actor, q)),
+    ...(["suppliers", "content", "events", "jobs", "comments", "categories"] as const).map((q) => queueItems(actor, q)),
   ]);
-  const [suppliers, content, events, jobs, comments] = rest;
+  const [suppliers, content, events, jobs, comments, categories] = rest;
   return {
     suppliers: suppliers?.length ?? 0,
     listings: listings.length,
@@ -25,6 +25,7 @@ export async function queueCounts(actor: Actor): Promise<Record<QueueKey, number
     events: events?.length ?? 0,
     jobs: jobs?.length ?? 0,
     comments: comments?.length ?? 0,
+    categories: categories?.length ?? 0,
   };
 }
 

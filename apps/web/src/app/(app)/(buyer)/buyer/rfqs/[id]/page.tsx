@@ -117,6 +117,8 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
       value: (x) => (x.version.warrantyMonths ? `${String(x.version.warrantyMonths)} months` : "—"),
     },
     { key: "schedule", label: "Payment schedule", value: (x) => describeSchedule(x.schedule) },
+    // Supplier QC, 16 Nov 2026: the supplier GSTIN each quote is issued under (it goes on the invoice).
+    { key: null, label: "Supplier GSTIN", value: (x) => x.supplierGstin?.gstin ?? "—" },
   ];
   const timeline = [
     { label: `Created · ${formatIstDayMonth(d.rfq.createdAt)}`, done: true },
