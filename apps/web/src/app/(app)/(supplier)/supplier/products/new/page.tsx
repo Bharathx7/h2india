@@ -74,6 +74,12 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
           </Link>
         </div>
       </div>
+      <p className="type-body-sm text-body">
+        Can&apos;t find a category that fits?{" "}
+        <Link href="/supplier/products/categories" className="type-label text-link underline underline-offset-2">
+          Request a new category
+        </Link>
+      </p>
       <form method="get" role="search">
         <label className="flex items-center gap-2 rounded-control border-[1.5px] border-control bg-page px-3">
           <Icon name="search" size={18} className="text-icon-secondary" />
@@ -100,7 +106,15 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
               </li>
             ))
           ) : (
-            <li className="p-4 type-body-sm text-body">No category matches. Try a broader word.</li>
+            <li className="flex flex-col gap-1 p-4 type-body-sm text-body">
+              No category matches. Try a broader word.
+              <Link
+                href={`/supplier/products/categories?q=${encodeURIComponent(sp.q ?? "")}`}
+                className="self-start type-label text-link underline underline-offset-2"
+              >
+                Request a new category
+              </Link>
+            </li>
           )}
         </ul>
       ) : (

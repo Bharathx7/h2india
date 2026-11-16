@@ -4,7 +4,7 @@ import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 
-// The queue framework (step 11.2): claiming and deciding, shared by the seven queues. An operator claims an item
+// The queue framework (step 11.2): claiming and deciding, shared by the queues. An operator claims an item
 // (Assign to me), or it is claimed for them when they decide; only the claimant can decide, and only once, so two
 // operators can never decide the same item. Every claim and decision is audit-logged with its reasons.
 
@@ -16,6 +16,8 @@ export const QUEUES = [
   { key: "events", label: "Events", sla: "review within 1 working day" },
   { key: "jobs", label: "Jobs", sla: "review within 1 working day" },
   { key: "comments", label: "Comments", sla: "review within 1 working day" },
+  // Supplier QC, 16 Nov 2026: a supplier asks for a category the catalogue lacks.
+  { key: "categories", label: "Category requests", sla: "review within 2 working days" },
 ] as const;
 export type QueueKey = (typeof QUEUES)[number]["key"];
 export type Decision = "approve" | "changes" | "reject";

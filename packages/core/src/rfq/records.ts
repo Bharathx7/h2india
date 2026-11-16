@@ -939,6 +939,19 @@ export interface QuoteInput {
   changeNote?: string | null;
   documents?: string[];
   schedule: PaymentLine[];
+  /** The supplier GSTIN the quote is issued under (supplier QC); left out: the one already chosen, else the default. */
+  supplierGstinId?: string | null;
+}
+
+const sg = schema.organisationGstins;
+
+/** A supplier's GSTINs, default first, for the quote form's "Issued under" choice. */
+export async function supplierGstins(ex: Executor, scope: Scope, supplierId: string) {
+  return ex
+    .select({ id: sg.id, gstin: sg.gstin, place: sg.place, portalStatus: sg.portalStatus, isDefault: sg.isDefault })
+    .from(sg)
+    .where(and(inScope(scope, sg.organisationId), eq(sg.organisationId, supplierId)))
+    .orderBy(desc(sg.isDefault), asc(sg.gstin));
 }
 
 /** The latest version of a quote, and whether it is a draft. */
@@ -997,6 +1010,24 @@ export async function saveQuoteDraft(
       version = made ?? null;
     }
     if (!version) throw new Error("version insert returned nothing");
+    // Issued under: the GSTIN chosen now, else the one this draft already had, else the company's verified default.
+    let supplierGstinId = version.supplierGstinId;
+    if (input.supplierGstinId) {
+      const [own] = await tx
+        .select({ id: sg.id })
+        .from(sg)
+        .where(and(eq(sg.id, input.supplierGstinId), eq(sg.organisationId, supplierId)));
+      if (!own) throw new RfqError("Choose one of your company's GSTINs", { supplierGstinId: "Choose a GSTIN" });
+      supplierGstinId = own.id;
+    } else if (!supplierGstinId) {
+      const [def] = await tx
+        .select({ id: sg.id })
+        .from(sg)
+        .where(and(eq(sg.organisationId, supplierId), eq(sg.portalStatus, "Active")))
+        .orderBy(desc(sg.isDefault), asc(sg.gstin))
+        .limit(1);
+      supplierGstinId = def?.id ?? null;
+    }
     const figures = quoteFigures(input.lines, {
       paise: input.freightPaise ?? 0n,
       gstRateBps: input.freightGstRateBps ?? 0,
@@ -1014,6 +1045,7 @@ export async function saveQuoteDraft(
         notes: input.notes?.trim() || null,
         changeNote: input.changeNote?.trim() || null,
         documents: input.documents ?? [],
+        supplierGstinId,
         subtotalPaise: figures.subtotalPaise,
         gstPaise: figures.gstPaise,
         totalPaise: figures.totalPaise,
@@ -1077,6 +1109,15 @@ export async function quoteProblems(
   const s = scheduleProblem(schedule);
   if (s) e.schedule = s;
   if (v.version > 1 && !v.changeNote) e.changeNote = "Tell the buyer what changed";
+  // Supplier QC: once the supplier has a verified GSTIN, a quote is issued under one of them. (While the only GSTIN
+  // is still being checked, quoting works as before.)
+  const [quote] = await ex.select({ organisationId: q.organisationId }).from(q).where(eq(q.id, v.quoteId));
+  const gstins = quote ? await ex.select().from(sg).where(eq(sg.organisationId, quote.organisationId)) : [];
+  if (gstins.some((x) => x.portalStatus === "Active")) {
+    const chosen = gstins.find((x) => x.id === v.supplierGstinId);
+    if (!chosen) e.supplierGstinId = "Choose the GSTIN this quote is issued under";
+    else if (chosen.portalStatus !== "Active") e.supplierGstinId = "Issue the quote under a verified GSTIN";
+  }
   return e;
 }
 
@@ -1266,11 +1307,14 @@ export async function quoteVersion(
     .orderBy(desc(qv.version))
     .limit(1);
   if (!v) return null;
-  const [lines, schedule] = await Promise.all([
+  const [lines, schedule, issuedUnder] = await Promise.all([
     db.select().from(ql).where(eq(ql.versionId, v.id)).orderBy(asc(ql.position)),
     db.select().from(qp).where(eq(qp.versionId, v.id)).orderBy(asc(qp.position)),
+    v.supplierGstinId
+      ? db.select({ gstin: sg.gstin, place: sg.place }).from(sg).where(eq(sg.id, v.supplierGstinId))
+      : Promise.resolve([]),
   ]);
-  return { quote, version: v, lines, schedule };
+  return { quote, version: v, lines, schedule, supplierGstin: issuedUnder[0] ?? null };
 }
 
 /** RFQs sent to a supplier (inbox 615:8): only once sent, never drafts or ones in moderation. */

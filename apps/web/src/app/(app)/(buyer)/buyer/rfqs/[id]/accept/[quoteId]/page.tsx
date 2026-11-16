@@ -115,6 +115,7 @@ export default async function AcceptQuotePage({ params }: { params: Promise<{ id
                       : "",
                   ],
                   ["Bill to", gstin ? `${b.legalName} · GSTIN ${gstin.gstin}` : b.legalName],
+                  ["Supplier GSTIN", v.supplierGstin?.gstin ?? ""],
                 ] as [string, string][]
               )
                 .filter(([, x]) => x)
