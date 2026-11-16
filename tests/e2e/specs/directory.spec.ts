@@ -88,11 +88,11 @@ test("signed-out visitors are asked to sign in or join, and the menu has no Dire
   ]) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1, name: "Sign in to open the Directory" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
+    await expect(page.locator("#main").getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
       "href",
       `/sign-in?next=${encodeURIComponent(path)}`,
     );
-    await expect(page.getByRole("link", { name: "Join H2 India" })).toBeVisible();
+    await expect(page.locator("#main").getByRole("link", { name: "Join H2 India" })).toBeVisible();
   }
   await page.goto("/news");
   await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
