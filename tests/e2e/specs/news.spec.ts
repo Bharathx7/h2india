@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "../fixtures";
 import { cms, newAuthor, paragraph, signInOperator } from "../helpers/cms";
 import { ownIp } from "../helpers/sign-in";
 

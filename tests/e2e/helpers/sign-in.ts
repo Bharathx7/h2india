@@ -1,6 +1,7 @@
 import { CONSENT_COOKIE, writeConsent } from "../../../packages/core/src/consent/cookies";
 import { expect, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
 import pg from "pg";
+import { hydrated } from "../fixtures";
 
 // Helpers for the sign-in flows (step 3.2). Codes are read from Mailpit, as a person would read their inbox.
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
@@ -93,6 +94,8 @@ export async function addAuthenticator(page: Page): Promise<void> {
 
 /** Sign in page: enter the email and ask for a code. Returns the code from the email. */
 export async function requestCode(page: Page, email: string): Promise<string> {
+  // Often reached by a link click (a full page load), not page.goto: wait until the form's handlers are attached.
+  await hydrated(page);
   const sentAfter = Date.now() - 1000;
   await page.getByLabel("Work email").fill(email);
   await page.getByRole("button", { name: "Send code" }).click();

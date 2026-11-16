@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 
 // Playbook step 2.1 and 2.2 "done when" checks, on the generated tokens page.
 
