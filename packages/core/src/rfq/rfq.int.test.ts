@@ -474,8 +474,8 @@ describe.skipIf(!url)("RFQs and quotes", () => {
   it("supplier QC: a quote is issued under one of the supplier's own verified GSTINs; the buyer sees which", async () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const id = await draft([sup(2).org.id]);
-    await submitRfq(h.db, admin, buyer.org.id, id);
-    await approveRfq(h.db, moderator, id);
+    // One supplier: sent straight away, unless moderation applies.
+    if ((await submitRfq(h.db, admin, buyer.org.id, id)) === "In moderation") await approveRfq(h.db, moderator, id);
     const c = await loadActor(h.db, sup(2).admin.id);
     const tail = String(Date.now()).slice(-4);
     const [main, other] = await h.db
