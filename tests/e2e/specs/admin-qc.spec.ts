@@ -72,6 +72,10 @@ test("a Super admin adds a supplier; the new owner accepts the invitation and ge
   const accept = page.getByRole("button", { name: "Accept invitation" });
   await expect(notNow.or(accept)).toBeVisible({ timeout: 15_000 });
   if (await notNow.isVisible()) await notNow.click();
+  // They never went through Join, so they agree to the Terms here first.
+  await accept.click();
+  await expect(page.getByText("Agree to the Terms of use and Privacy policy to continue")).toBeVisible();
+  await page.getByRole("checkbox", { name: /I agree to the Terms of use/ }).click();
   await accept.click();
   await expect(page).toHaveURL(/\/supplier/);
   const role = await withDb(

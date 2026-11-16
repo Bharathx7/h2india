@@ -210,10 +210,21 @@ export async function revokeInvitation(
   });
 }
 
+/** Whether a person already agreed to the Terms (through Join or an earlier invitation): the invitation page asks if not. */
+export async function agreedToTerms(db: Executor, userId: string): Promise<boolean> {
+  const [person] = await db.select({ at: u.termsAcceptedAt }).from(u).where(eq(u.id, userId));
+  return Boolean(person?.at);
+}
+
 /** What the invitation page shows before accepting. */
 export async function invitationFor(db: Executor, token: string, now: Date = new Date()) {
   const [row] = await db
-    .select({ inv, legal: schema.organisations.legalName, trade: schema.companyProfiles.tradeName })
+    .select({
+      inv,
+      legal: schema.organisations.legalName,
+      trade: schema.companyProfiles.tradeName,
+      kind: schema.organisations.kind,
+    })
     .from(inv)
     .innerJoin(schema.organisations, eq(schema.organisations.id, inv.organisationId))
     .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, inv.organisationId))
@@ -232,24 +243,36 @@ export async function invitationFor(db: Executor, token: string, now: Date = new
     role: row.inv.role,
     company: row.trade ?? row.legal,
     organisationId: row.inv.organisationId,
+    /** Where the person lands after accepting. */
+    workspace: row.kind === "buyer" ? "/buyer" : "/supplier",
     state,
   };
 }
 
-/** Accept invitation: only the signed-in person whose email it was sent to; they join with the chosen role. */
+/**
+ * Accept invitation: only the signed-in person whose email it was sent to; they join with the chosen role. Someone
+ * who never went through Join hasn't agreed to the Terms yet: they agree here (`termsVersion`, the published version
+ * shown with the checkbox), recorded as Join records it (admin QC, 16 Nov 2026).
+ */
 export async function acceptInvitation(
   db: Database,
   userId: string,
   token: string,
   context?: RequestContext,
   now: Date = new Date(),
+  opts: { termsVersion?: string } = {},
 ) {
   const found = await invitationFor(db, token, now);
   if (!found || found.state !== "open")
     throw new TeamError("This invitation can't be used any more. Ask for a new one.");
-  const [person] = await db.select({ email: u.email }).from(u).where(eq(u.id, userId));
+  const [person] = await db
+    .select({ email: u.email, termsAcceptedAt: u.termsAcceptedAt })
+    .from(u)
+    .where(eq(u.id, userId));
   if (person?.email.toLowerCase() !== found.email)
     throw new TeamError(`This invitation is for ${found.email}. Sign in with that email to accept it.`);
+  if (!person.termsAcceptedAt && !opts.termsVersion)
+    throw new TeamError("Agree to the Terms of use and Privacy policy to continue");
   await db.transaction(async (tx) => {
     await tx.update(inv).set({ acceptedAt: now }).where(eq(inv.id, found.id));
     // Admin QC: someone invited before they had an account hasn't been through Join, so give them the company's
@@ -262,6 +285,11 @@ export async function acceptInvitation(
       .update(u)
       .set({ profileType: org?.kind === "buyer" ? "buyer" : "supplier" })
       .where(and(eq(u.id, userId), isNull(u.profileType)));
+    if (!person.termsAcceptedAt)
+      await tx
+        .update(u)
+        .set({ termsAcceptedAt: now, termsVersion: opts.termsVersion ?? null })
+        .where(eq(u.id, userId));
     await tx
       .insert(m)
       .values({ organisationId: found.organisationId, userId, role: found.role })

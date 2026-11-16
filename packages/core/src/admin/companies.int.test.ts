@@ -105,17 +105,19 @@ describe.skipIf(!url)("admin companies", () => {
       invitedBy: adminId,
       inviterRole: "H2 India team",
     });
-    await acceptInvitation(h.db, owner.id, token);
+    // Someone who never went through Join agrees to the Terms when accepting.
+    await expect(acceptInvitation(h.db, owner.id, token)).rejects.toThrow("Terms");
+    await acceptInvitation(h.db, owner.id, token, undefined, undefined, { termsVersion: "test" });
     const [member] = await h.db
       .select()
       .from(schema.memberships)
       .where(eq(schema.memberships.organisationId, made.organisationId));
     expect(member).toMatchObject({ userId: owner.id, role: "Admin" });
     const [after] = await h.db
-      .select({ profileType: schema.users.profileType })
+      .select({ profileType: schema.users.profileType, termsVersion: schema.users.termsVersion })
       .from(schema.users)
       .where(eq(schema.users.id, owner.id));
-    expect(after?.profileType).toBe("supplier");
+    expect(after).toMatchObject({ profileType: "supplier", termsVersion: "test" });
   });
 
   it("company detail is for operators only: a company's own admin can't open it", async () => {

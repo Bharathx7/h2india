@@ -42,7 +42,7 @@ describe.skipIf(!url)("team and storefront", () => {
     const { token } = await inviteMember(h.db, admin, a.org.id, { email: colleague.email, role: "Catalogue" });
     expect((await invitationFor(h.db, token))?.state).toBe("open");
     await expect(acceptInvitation(h.db, stranger.id, token)).rejects.toThrow(colleague.email);
-    await acceptInvitation(h.db, colleague.id, token);
+    await acceptInvitation(h.db, colleague.id, token, undefined, undefined, { termsVersion: "test" });
     const actor = await loadActor(h.db, colleague.id);
     expect(actor.companies.get(a.org.id)?.role).toBe("Catalogue");
     expect(actor.companies.get(a.org.id)?.permissions.has("product.manage")).toBe(true);
