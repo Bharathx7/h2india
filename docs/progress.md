@@ -186,8 +186,9 @@ Batches: 0 plan · 1 foundations (stages 1–3) · 2 content and website (4–5)
 | 13.7 | Launch 2: transactions for the pilot group (Gate 3) | Checklist written 15 Nov 2026 (`docs/launch/launch-2.md`). Waits on M3, M11, C1, C3 and Gate 3 |
 | 13.8 | After launch: release rhythm, upgrades and keeping the design in sync | Rhythm written 15 Nov 2026 (`docs/launch/after-launch.md`) |
 
-## Founder QC rounds (admin)
+## Founder QC rounds
 
 | Round | What changed | Status |
 |---|---|---|
+| Public QC 1 (16 Nov 2026) | Branch `step/qc-public`. Header search: "/" badge removed (the shortcut still works). Home: both pause buttons removed (hero network and logo strip keep moving; F6 changed). Header, footer and banners line up with page content at every width. Account: `/account` page (details, notifications, company, sign-in and security) for the header's Account and the workspace's Profile, which led nowhere before; the workspace pill is a plain link with an arrow. Admin domain signs in H2 India staff only (`SITE_ROLE`); public sign-in unchanged. Buyer set-up checklist behind the `buyerChecklist` switch (off). Numbered pages on the public lists that had none. Knowledge menu card (tracker figure, else Hydrogen 101). Left as they were (founder): directory stays public, product cards | Done: merged (#61) and live 16 Nov 2026 (image 7b1418829031) |
 | Admin QC (16 Nov 2026) | Branch `step/qc-admin`. Company detail (`/admin/users/companies/<id>`, linked from User detail): details, GSTINs, team and open invitations, listings, verification and badges, RFQs or quotes, recent activity. Add a supplier (Users · Add a supplier, users.edit): created as Join creates it, owner invited as Admin, never Verified by this. Fixed: an invited person with no account was sent to Join instead of back to the invitation. Feature switches: already in System settings, no change. No Figma frames (connection down) | In review |

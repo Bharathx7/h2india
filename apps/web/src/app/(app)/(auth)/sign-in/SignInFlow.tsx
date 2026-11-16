@@ -1,7 +1,7 @@
 "use client";
 
 import { formatIstTime, SIGN_IN, SIGN_IN_ERROR } from "@h2india/core/sign-in";
-import { Alert, Button, FormField, Icon, Input, OtpInput, TextLink } from "@h2india/ui";
+import { Alert, Button, buttonClasses, FormField, Icon, Input, OtpInput, TextLink } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type SyntheticEvent, type ReactNode } from "react";
@@ -73,7 +73,19 @@ function snoozeOffer() {
   document.cookie = `${OFFER_COOKIE}=later; max-age=${String(OFFER_LATER_DAYS * 86400)}; path=/; samesite=lax`;
 }
 
-export function SignInFlow({ next, initialError }: { next: string; initialError?: Problem }) {
+export function SignInFlow({
+  next,
+  initialError,
+  staffOnly = false,
+  signedInElsewhere = false,
+}: {
+  next: string;
+  initialError?: Problem;
+  /** The admin domain (public QC, 16 Nov 2026): staff wording, no Google and no Join. */
+  staffOnly?: boolean;
+  /** Admin domain, already signed in as someone who isn't staff: only Sign out is offered. */
+  signedInElsewhere?: boolean;
+}) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("start");
   const [email, setEmail] = useState("");
@@ -405,12 +417,35 @@ export function SignInFlow({ next, initialError }: { next: string; initialError?
     );
   }
 
+  if (signedInElsewhere) {
+    return (
+      <AuthCard>
+        <h1 className="type-h2 text-primary">Sign in to the H2 India back office</h1>
+        {alert}
+        <a href="/sign-out" className={`${buttonClasses({ variant: "outline", size: "lg" })} w-full`}>
+          Sign out
+        </a>
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard>
-      <h1 className="type-h2 text-primary">Sign in to H2 India</h1>
-      <p className="type-body text-body">
-        One sign-in for buyers, suppliers and members. You&apos;ll come back to the page you were on.
-      </p>
+      {staffOnly ? (
+        <>
+          <h1 className="type-h2 text-primary">Sign in to the H2 India back office</h1>
+          <p className="type-body text-body">
+            For H2 India staff. Use your passkey, or a code sent to your work email.
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="type-h2 text-primary">Sign in to H2 India</h1>
+          <p className="type-body text-body">
+            One sign-in for buyers, suppliers and members. You&apos;ll come back to the page you were on.
+          </p>
+        </>
+      )}
       {alert}
       <Button
         size="lg"
@@ -444,30 +479,34 @@ export function SignInFlow({ next, initialError }: { next: string; initialError?
           Send code
         </Button>
       </form>
-      <button
-        type="button"
-        onClick={() => void google()}
-        disabled={busy === "google"}
-        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-card border border-default bg-page px-3.5 type-label text-primary transition-colors duration-(--motion-duration-fast) ease-standard hover:border-hover disabled:cursor-default disabled:text-secondary"
-      >
-        <span
-          aria-hidden="true"
-          className="flex size-5 items-center justify-center rounded-pill border border-control type-label-sm"
+      {staffOnly ? null : (
+        <button
+          type="button"
+          onClick={() => void google()}
+          disabled={busy === "google"}
+          className="flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-card border border-default bg-page px-3.5 type-label text-primary transition-colors duration-(--motion-duration-fast) ease-standard hover:border-hover disabled:cursor-default disabled:text-secondary"
         >
-          G
-        </span>
-        Continue with Google
-      </button>
+          <span
+            aria-hidden="true"
+            className="flex size-5 items-center justify-center rounded-pill border border-control type-label-sm"
+          >
+            G
+          </span>
+          Continue with Google
+        </button>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <TextLink asChild showIcon={false}>
           <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
         </TextLink>
-        <p className="flex items-center gap-1 type-body-sm text-body">
-          New to H2 India?{" "}
-          <TextLink asChild showIcon={false}>
-            <Link href={AUTH_LINKS.join}>Join free</Link>
-          </TextLink>
-        </p>
+        {staffOnly ? null : (
+          <p className="flex items-center gap-1 type-body-sm text-body">
+            New to H2 India?{" "}
+            <TextLink asChild showIcon={false}>
+              <Link href={AUTH_LINKS.join}>Join free</Link>
+            </TextLink>
+          </p>
+        )}
       </div>
     </AuthCard>
   );

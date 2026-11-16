@@ -64,4 +64,21 @@ export function safeReturnPath(next: unknown, fallback = "/"): string {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+/**
+ * Which sign-in an app serves (public QC, 16 Nov 2026): the admin domain signs in H2 India staff only; the public
+ * domain is unchanged. "both" is one app serving everything (local development and tests).
+ */
+export type SiteRole = "both" | "public" | "admin";
+
+/** Where a signed-in person goes on this site: the admin site turns away anyone who isn't an operator. */
+export function siteSignIn(
+  role: SiteRole,
+  operator: boolean,
+  next: string,
+): { ok: true; to: string } | { ok: false; reason: "not-staff" } {
+  if (role !== "admin") return { ok: true, to: next };
+  if (!operator) return { ok: false, reason: "not-staff" };
+  return { ok: true, to: next === "/" ? "/admin" : next };
+}
+
 export { formatIstTime } from "../time";

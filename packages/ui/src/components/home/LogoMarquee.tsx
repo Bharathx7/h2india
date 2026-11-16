@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Icon } from "../../icons/Icon";
 import { cx } from "../../lib/cx";
-import { PauseButton } from "./Motion";
 
 // Logo marquee (161:1657) with Logo tiles (845:10885): brands listed on H2 India, a continuous sideways scroll (90 s a
-// loop, linear, 781:7247). It stops on hover, on keyboard focus and with the pause button (F6); reduced motion shows a
-// still row. Brand marks are a placeholder until the brands approve their logos.
+// loop, linear, 781:7247). It stops on hover and on keyboard focus; reduced motion shows a still row.
+// No pause button: founder change to F6, 16 Nov 2026. Brand marks are a placeholder until the brands approve their logos.
 
 export interface MarqueeBrand {
   name: string;
@@ -23,7 +22,6 @@ export function LogoMarquee({
   label: string;
   className?: string;
 }) {
-  const [paused, setPaused] = useState(false);
   const [held, setHeld] = useState(false);
   // Enough copies to fill a wide screen before the loop repeats.
   const copies = brands.length < 6 ? 4 : 2;
@@ -43,13 +41,6 @@ export function LogoMarquee({
     ));
   return (
     <div className={cx("relative", className)}>
-      <PauseButton
-        paused={paused}
-        onToggle={() => {
-          setPaused((p) => !p);
-        }}
-        className="absolute -top-14 right-0"
-      />
       <div
         className="overflow-hidden"
         onMouseEnter={() => {
@@ -65,12 +56,7 @@ export function LogoMarquee({
           setHeld(false);
         }}
       >
-        <ul
-          aria-label={label}
-          data-testid="logo-marquee"
-          data-paused={paused || held}
-          className="marquee-track flex w-max"
-        >
+        <ul aria-label={label} data-testid="logo-marquee" data-paused={held} className="marquee-track flex w-max">
           {Array.from({ length: copies }, (_, i) => set(i))}
         </ul>
       </div>

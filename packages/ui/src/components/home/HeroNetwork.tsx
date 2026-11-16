@@ -2,12 +2,12 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { cx } from "../../lib/cx";
-import { PauseButton, useReducedMotion } from "./Motion";
+import { useReducedMotion } from "./Motion";
 
 // Hero card · ecosystem network (375:7052, Standard layout 600 x 560; the Wide layout is not built, F5).
 // Motion spec 781:7247: focus moves Buyers → Suppliers → Schemes → Tenders → News and repeats, every 2.5 s, each change
-// 400 ms ease-in-out; the detail box changes with it. Reduced motion shows the static Buyers frame; the pause button
-// (F6) stops the loop. Positions are the frame's, in container units so the card scales on narrower screens.
+// 400 ms ease-in-out; the detail box changes with it. Reduced motion shows the static Buyers frame. No pause button:
+// founder change to F6, 16 Nov 2026 (the loop keeps moving). Positions are the frame's, in container units so the card scales on narrower screens.
 
 type Focus = "buyers" | "suppliers" | "schemes" | "tenders" | "news";
 
@@ -47,9 +47,8 @@ const change: CSSProperties = { transition: "all 400ms ease-in-out" };
 
 export function HeroNetwork({ className }: { className?: string }) {
   const reduced = useReducedMotion();
-  const [paused, setPaused] = useState(false);
   const [index, setIndex] = useState(0);
-  const running = !reduced && !paused;
+  const running = !reduced;
 
   useEffect(() => {
     if (!running) return;
@@ -192,16 +191,6 @@ export function HeroNetwork({ className }: { className?: string }) {
           </ul>
         </div>
       </div>
-      {reduced ? null : (
-        <PauseButton
-          tone="dark"
-          paused={paused}
-          onToggle={() => {
-            setPaused((p) => !p);
-          }}
-          className="absolute top-4 right-4"
-        />
-      )}
     </div>
   );
 }

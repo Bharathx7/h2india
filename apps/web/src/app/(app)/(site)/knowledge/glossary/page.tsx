@@ -1,4 +1,5 @@
-import { ArrowLink, buttonClasses, cx, EmptyState, Icon } from "@h2india/ui";
+import { ArrowLink, buttonClasses, cx, EmptyState, Icon, Pagination } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allTerms, termOfTheDay } from "@/knowledge/data";
@@ -31,6 +32,7 @@ export default async function GlossaryPage({ searchParams }: { searchParams: Pro
         [t.term, t.expansion, t.short, ...(t.aliases ?? [])].some((x) => (x ?? "").toLowerCase().includes(q)),
       )
     : terms.filter((t) => initial(t) === letter);
+  const shown = pageSlice(list, s.page);
   const today = termOfTheDay(terms);
   const popular = terms.filter((t) => t.popular);
 
@@ -95,7 +97,7 @@ export default async function GlossaryPage({ searchParams }: { searchParams: Pro
           </p>
           {list.length ? (
             <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {list.map((t) => (
+              {shown.items.map((t) => (
                 <li key={t.id}>
                   <Link
                     href={`/knowledge/glossary/${t.slug}`}
@@ -107,7 +109,17 @@ export default async function GlossaryPage({ searchParams }: { searchParams: Pro
                 </li>
               ))}
             </ul>
-          ) : (
+          ) : null}
+          {shown.total > LIST_PER_PAGE ? (
+            <Pagination
+              page={shown.page}
+              perPage={LIST_PER_PAGE}
+              total={shown.total}
+              perPageOptions={[LIST_PER_PAGE]}
+              query={pagingQuery(s)}
+            />
+          ) : null}
+          {list.length ? null : (
             <div className="rounded-card border border-default py-6">
               <EmptyState
                 kind="no-results"

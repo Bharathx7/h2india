@@ -1,4 +1,5 @@
-import { cx, EmptyState, Icon, StatusBadge } from "@h2india/ui";
+import { cx, EmptyState, Icon, Pagination, StatusBadge } from "@h2india/ui";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allStandards } from "@/knowledge/data";
@@ -47,6 +48,7 @@ export default async function StandardsPage({ searchParams }: { searchParams: Pr
   list = [...list].sort((a, b) =>
     sort === "code" ? a.code.localeCompare(b.code) : sort === "oldest" ? yearOf(a) - yearOf(b) : yearOf(b) - yearOf(a),
   );
+  const shown = pageSlice(list, s.page);
   const groups: FilterGroupSpec[] = [
     {
       kind: "checks",
@@ -113,7 +115,7 @@ export default async function StandardsPage({ searchParams }: { searchParams: Pr
           </p>
           {list.length ? (
             <ul className="flex flex-col gap-3">
-              {list.map((x) => (
+              {shown.items.map((x) => (
                 <li key={x.id}>
                   <Link
                     href={`/knowledge/standards/${x.slug}`}
@@ -141,7 +143,17 @@ export default async function StandardsPage({ searchParams }: { searchParams: Pr
                 </li>
               ))}
             </ul>
-          ) : (
+          ) : null}
+          {shown.total > LIST_PER_PAGE ? (
+            <Pagination
+              page={shown.page}
+              perPage={LIST_PER_PAGE}
+              total={shown.total}
+              perPageOptions={[LIST_PER_PAGE]}
+              query={pagingQuery(s)}
+            />
+          ) : null}
+          {list.length ? null : (
             <div className="rounded-card border border-default py-6">
               <EmptyState kind="no-results" title="No records match">
                 Try another search or filter.

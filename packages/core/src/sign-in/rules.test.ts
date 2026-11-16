@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatIstTime, looksLikeEmail, normaliseEmail, safeReturnPath } from "./rules";
+import { formatIstTime, looksLikeEmail, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
 
 describe("return to the page the person started from", () => {
   it("keeps a path on this site, with its query and anchor", () => {
@@ -52,5 +52,22 @@ describe("a plausible email address", () => {
     const start = Date.now();
     expect(looksLikeEmail(`a@${"!.".repeat(100_000)}`)).toBe(false);
     expect(Date.now() - start).toBeLessThan(200);
+  });
+});
+
+describe("the admin domain signs in staff only", () => {
+  it("lets anyone through on the public site and on one app serving both", () => {
+    expect(siteSignIn("public", false, "/buyer")).toEqual({ ok: true, to: "/buyer" });
+    expect(siteSignIn("both", false, "/")).toEqual({ ok: true, to: "/" });
+    expect(siteSignIn("public", true, "/")).toEqual({ ok: true, to: "/" });
+  });
+
+  it("turns away a buyer, supplier or member on the admin site", () => {
+    expect(siteSignIn("admin", false, "/admin")).toEqual({ ok: false, reason: "not-staff" });
+  });
+
+  it("sends an operator to the back office, or back to the admin page they came from", () => {
+    expect(siteSignIn("admin", true, "/")).toEqual({ ok: true, to: "/admin" });
+    expect(siteSignIn("admin", true, "/admin/queues")).toEqual({ ok: true, to: "/admin/queues" });
   });
 });

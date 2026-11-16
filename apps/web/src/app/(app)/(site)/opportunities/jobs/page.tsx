@@ -1,9 +1,10 @@
 import { EXPERIENCE_FILTERS, JOB_FUNCTIONS, WORK_MODES } from "@h2india/core/opportunities/rules";
-import { buttonClasses, cx, EmptyState } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Pagination } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { forcedState } from "@/lib/dev-state";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { allJobs } from "@/opportunities/data";
 import { ListFilters, SortBy, type FilterGroupSpec } from "@/opportunities/filters";
 import { CardsLoading, Crumbs, JobCards, LoadError, memberHref, wrap } from "@/opportunities/parts";
@@ -19,8 +20,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/opportunities/jobs" },
 };
 export const dynamic = "force-dynamic";
-
-const PAGE = 6;
 
 type Params = Record<string, string | string[] | undefined>;
 const all = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
@@ -120,7 +119,7 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
     one(params.sort),
   );
   if (forced === "empty") list = [];
-  const show = Math.max(PAGE, Math.floor(Number(one(params.show))) || PAGE);
+  const shown = pageSlice(list, params.page);
   const locations = [...new Set(live.flatMap((j) => j.states))].sort().map((v) => ({ value: v, label: stateLabel(v) }));
   const groups: FilterGroupSpec[] = [
     { kind: "toggle", name: "students", title: "Students and interns", label: "Internships and graduate roles" },
@@ -160,15 +159,15 @@ async function List({ params, forced }: { params: Params; forced: ReturnType<typ
           </div>
           {list.length ? (
             <>
-              <JobCards items={list.slice(0, show)} />
-              {list.length > show ? (
-                <Link
-                  href={`/opportunities/jobs${queryOf(params, { show: String(show + PAGE) })}#list`}
-                  scroll={false}
-                  className={cx(buttonClasses({ variant: "outline" }), "w-full")}
-                >
-                  Show more jobs
-                </Link>
+              <JobCards items={shown.items} />
+              {shown.total > LIST_PER_PAGE ? (
+                <Pagination
+                  page={shown.page}
+                  perPage={LIST_PER_PAGE}
+                  total={shown.total}
+                  perPageOptions={[LIST_PER_PAGE]}
+                  query={pagingQuery(params)}
+                />
               ) : null}
             </>
           ) : (
