@@ -32,9 +32,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const s = await getScheme((await params).slug);
-  if (!s) return { title: "Not found · H2 India" };
+  if (!s) return { title: "Not found · H2 Economy" };
   return {
-    title: `${s.name} · Schemes · H2 India`,
+    title: `${s.name} · Schemes · H2 Economy`,
     description: s.summary,
     alternates: { canonical: `/opportunities/schemes/${s.slug}` },
   };
@@ -102,7 +102,7 @@ export default async function SchemePage({ params }: { params: Params }) {
         </a>
       ),
     },
-    { label: "Last verified", value: verified ? `${verified} by H2 India editors` : "Not yet verified" },
+    { label: "Last verified", value: verified ? `${verified} by H2 Economy editors` : "Not yet verified" },
   ];
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">

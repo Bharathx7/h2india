@@ -9,8 +9,8 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const tag = await getTag((await params).slug);
-  if (!tag) return { title: "Not found · H2 India" };
-  return { title: `${tag.name} · H2 India`, alternates: { canonical: `/tags/${tag.slug}` } };
+  if (!tag) return { title: "Not found · H2 Economy" };
+  return { title: `${tag.name} · H2 Economy`, alternates: { canonical: `/tags/${tag.slug}` } };
 }
 
 export default async function Page({

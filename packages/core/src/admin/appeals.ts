@@ -29,7 +29,7 @@ export async function sendAppeal(
     .select({ id: a.id })
     .from(a)
     .where(and(eq(a.organisationId, organisationId), eq(a.status, "Open")));
-  if (open) throw new UserAdminError("Your appeal is already with H2 India");
+  if (open) throw new UserAdminError("Your appeal is already with H2 Economy");
   await db.transaction(async (tx) => {
     const [row] = await tx
       .insert(a)

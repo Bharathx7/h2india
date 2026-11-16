@@ -12,7 +12,7 @@ import { AddState } from "@/schemes/AddState";
 // comparison can be shared; "Download CSV" gives the same table.
 
 export const metadata: Metadata = {
-  title: "Compare state hydrogen policies · H2 India",
+  title: "Compare state hydrogen policies · H2 Economy",
   description: "Up to four states' hydrogen policies side by side: incentives, nodal agencies, projects and tenders.",
   alternates: { canonical: "/states/compare" },
 };

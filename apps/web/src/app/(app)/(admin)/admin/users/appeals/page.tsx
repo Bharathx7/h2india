@@ -9,7 +9,7 @@ import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
 
 // Appeals against company suspensions (G10): read with users.view, decided with users.edit. Built without a frame
 // (A178).
-export const metadata: Metadata = { title: "Appeals · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Appeals · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AppealsPage() {

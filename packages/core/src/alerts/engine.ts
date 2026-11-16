@@ -239,7 +239,7 @@ async function deliver(alert: Alert, items: Send[], total: number, now: Date) {
             intro: `Your alert ${alert.label}.`,
             items: shown,
             viewLabel: t.view,
-            more: total > items.length ? `and ${String(total - items.length)} more on H2 India` : undefined,
+            more: total > items.length ? `and ${String(total - items.length)} more on H2 Economy` : undefined,
             all: { label: `See all ${t.many}`, href: absolute(t.all) },
             manageHref: `${appUrl()}/member/alerts`,
             offHref,

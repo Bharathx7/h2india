@@ -11,7 +11,7 @@ import { WatchCategory, type CategoryOption, type WatchRow } from "@/member/Watc
 
 // Buyer Saved searches and alerts (79:3425; phones 132:9656; empty 128:9510, loading 128:9530, error 128:9553), step
 // 7.3: the categories a buyer watches, in the buyer workspace (step 9.1).
-export const metadata: Metadata = { title: "Alerts · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Alerts · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function BuyerAlertsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {

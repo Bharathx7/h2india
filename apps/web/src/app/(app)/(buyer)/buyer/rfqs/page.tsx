@@ -12,7 +12,7 @@ import { forcedState } from "@/lib/dev-state";
 
 // RFQs (557:8; phones 558:124; states 558:8), step 9.6: the company's requests by tab, with quotes in, the offer
 // deadline countdown and the designed badge. ?state= forces the loading, empty and error states.
-export const metadata: Metadata = { title: "RFQs · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQs · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const hoursOf = (d: { hours?: number; days?: number; workingDays?: number }) =>
@@ -200,7 +200,7 @@ export default async function BuyerRfqsPage({
         </div>
       </LiveSection>
       <p className="type-caption text-secondary">
-        RFQs sent to more than one supplier are checked by H2 India within 1 working day before suppliers see them.
+        RFQs sent to more than one supplier are checked by H2 Economy within 1 working day before suppliers see them.
       </p>
     </BuyerWorkspace>
   );

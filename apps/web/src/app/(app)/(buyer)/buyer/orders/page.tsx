@@ -13,7 +13,7 @@ import { buyerNextStep } from "@/orders/views";
 
 // My orders (77:673; phones 81:8334; states 128:9187 empty, 128:9220 loading, 128:9259 error), step 10.1. Built
 // from the supplier pipeline's patterns while Figma is out of reach (A178).
-export const metadata: Metadata = { title: "Orders · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Orders · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function BuyerOrdersPage({

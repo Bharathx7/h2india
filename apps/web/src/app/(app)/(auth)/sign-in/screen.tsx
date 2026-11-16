@@ -28,8 +28,8 @@ async function returnPath(next: string | undefined, fallback: string): Promise<s
 }
 
 const NOT_STAFF = {
-  title: "This sign-in is for H2 India staff",
-  body: "Buyers, suppliers and members sign in on the H2 India website.",
+  title: "This sign-in is for H2 Economy staff",
+  body: "Buyers, suppliers and members sign in on the H2 Economy website.",
 };
 
 export async function SignInScreen({

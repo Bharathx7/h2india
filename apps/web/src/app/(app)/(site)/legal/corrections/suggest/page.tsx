@@ -8,8 +8,8 @@ import { SideBoxes } from "@/submissions/parts";
 // link the reader followed (?page=).
 
 export const metadata: Metadata = {
-  title: "Suggest a correction · H2 India",
-  description: "Found a mistake on H2 India? Tell us what's wrong and we'll check it against the source.",
+  title: "Suggest a correction · H2 Economy",
+  description: "Found a mistake on H2 Economy? Tell us what's wrong and we'll check it against the source.",
   alternates: { canonical: "/legal/corrections/suggest" },
 };
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export default async function SuggestCorrectionPage({ searchParams }: { searchPa
         <Crumbs items={[{ label: "Corrections", href: "/legal/corrections" }, { label: "Suggest a correction" }]} />
         <h1 className="mt-2 type-h1 text-primary">Suggest a correction</h1>
         <p className="type-body text-body">
-          Found a mistake on H2 India? Tell us what&apos;s wrong and we&apos;ll check it against the source.
+          Found a mistake on H2 Economy? Tell us what&apos;s wrong and we&apos;ll check it against the source.
         </p>
       </div>
       <div className={cx(wrap, "flex flex-col gap-6 pt-6 lg:flex-row lg:items-start")}>

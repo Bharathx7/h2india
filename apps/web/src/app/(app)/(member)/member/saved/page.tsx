@@ -12,7 +12,7 @@ import { formatIstDayMonth } from "@h2india/core/companies/client";
 
 // Saved items (541:8; phones 542:46; empty 541:643, loading 541:796), step 7.2. Save links across the site arrive
 // here as ?job=slug, ?tender=slug … and are saved once the page opens (never on prefetch).
-export const metadata: Metadata = { title: "Saved items · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Saved items · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [

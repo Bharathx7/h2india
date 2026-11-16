@@ -20,7 +20,7 @@ import { checkCode, sendCode } from "./codes";
 //  • lost passkey: a code to the work email and a code to the mobile on file, then a new passkey (528:53, 528:217)
 //  • changed mobile: a code to the work email and a code to the new number, then an Admin approves (528:293, 528:480; A14)
 //  • lost email: a code to the mobile on file and an Admin's confirmation, then a new work email (528:534; A15)
-// Where the company's only Admin is the person, H2 India support approves instead (A17). No shortcut "for support".
+// Where the company's only Admin is the person, H2 Economy support approves instead (A17). No shortcut "for support".
 
 const { recoveryRequests: rr, users: u, memberships: m, organisations: o, verifications: v } = schema;
 
@@ -264,7 +264,7 @@ async function notifyPasskeyReset(userId: string, organisationId: string | null)
   }
 }
 
-/** Sends the request to the other Admins, or to H2 India support when there is none (A17). */
+/** Sends the request to the other Admins, or to H2 Economy support when there is none (A17). */
 async function askForApproval(row: typeof rr.$inferSelect, what: "mobile" | "email"): Promise<string> {
   const env = parseServerEnv();
   const db = getDb();

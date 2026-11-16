@@ -64,7 +64,7 @@ export function ArchiveSignup() {
     >
       {trap}
       <h2 id="get-weekly" className="type-h4 text-primary">
-        Get India H₂ Weekly
+        Get H2 Economy Weekly
       </h2>
       <p className="type-body-sm text-body">Every Monday at 08:00 IST. Free. Unsubscribe in one click.</p>
       <Input
@@ -182,7 +182,7 @@ export function UnsubscribeButton({ token }: { token: string }) {
           <Icon name="check-circle" size={28} />
         </span>
         <h2 className="type-h3 text-primary">You&rsquo;re unsubscribed</h2>
-        <p className="type-body text-body">{result} won&rsquo;t get India H₂ Weekly any more.</p>
+        <p className="type-body text-body">{result} won&rsquo;t get H2 Economy Weekly any more.</p>
         <Link href="/newsletter" className="type-label text-link underline">
           Changed your mind? Subscribe again
         </Link>

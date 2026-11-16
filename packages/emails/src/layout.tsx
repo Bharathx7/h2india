@@ -28,7 +28,7 @@ export function EmailLayout({ appUrl, preview, reason, preferencesHref, footerLi
           style={{ backgroundColor: colour.page, border: `1px solid ${colour.border}`, maxWidth: "600px" }}
         >
           <Section style={{ padding: "24px 32px", borderBottom: `1px solid ${colour.border}` }}>
-            <Img src={`${appUrl}/brand/h2india-logo-email.png`} width={132} height={36} alt="H2 India" />
+            <Img src={`${appUrl}/brand/h2economy-logo-email.png`} width={212} height={40} alt="H2 Economy" />
           </Section>
           <Section style={{ padding: "32px" }}>{children}</Section>
           <Section style={{ padding: "24px 32px", backgroundColor: colour.subtle }}>

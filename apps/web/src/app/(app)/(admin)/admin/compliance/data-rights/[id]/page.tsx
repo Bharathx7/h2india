@@ -11,7 +11,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // A data-rights request (660:1786), step 11.7: access, correction or erasure. Erasure shows the dry run (every table
 // and file, and whether it is deleted, masked or kept) before it can run.
-export const metadata: Metadata = { title: "Data-rights request · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Data-rights request · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const ACTION: Record<PlanLine["action"], { label: string; tone: "error" | "warning" | "neutral" }> = {

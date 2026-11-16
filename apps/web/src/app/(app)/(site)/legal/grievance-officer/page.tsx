@@ -10,9 +10,9 @@ import { card, main, PageHead, Value, wrap } from "@/trust/parts";
 // listing); ?ticket= pre-fills Check a complaint (the link in the acknowledgement email).
 
 export const metadata: Metadata = {
-  title: "Grievance officer · H2 India",
+  title: "Grievance officer · H2 Economy",
   description:
-    "Raise a complaint about content, a listing, privacy or a payment on H2 India. Every complaint gets a ticket number you can track.",
+    "Raise a complaint about content, a listing, privacy or a payment on H2 Economy. Every complaint gets a ticket number you can track.",
   alternates: { canonical: "/legal/grievance-officer" },
 };
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export default async function GrievanceOfficerPage({
     <main id="main" className={cx(main, "bg-page")}>
       <PageHead
         title="Grievance officer"
-        lead="Raise a complaint about content, a listing, privacy or a payment on H2 India. Every complaint gets a ticket number you can track."
+        lead="Raise a complaint about content, a listing, privacy or a payment on H2 Economy. Every complaint gets a ticket number you can track."
       />
       <div className={cx(wrap, "flex flex-col gap-6 pt-8 lg:flex-row lg:items-start")}>
         <GrievanceForm type={sp.type ?? ""} page={page} />

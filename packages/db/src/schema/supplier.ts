@@ -8,7 +8,7 @@ import { core } from "./core";
 // The supplier workspace (Stage 8).
 
 /**
- * "Submit for review" (584:8 step 5): the supplier asks H2 India to check the company and first listing. Operators
+ * "Submit for review" (584:8 step 5): the supplier asks H2 Economy to check the company and first listing. Operators
  * decide it in the Verification desk (step 8.2). Statuses change only through changeStatus().
  */
 export const supplierReviews = core.table(
@@ -38,7 +38,7 @@ export const supplierReviews = core.table(
 
 /**
  * A verification document (step 8.2; 586:8, Upload document 272:4545): GSTIN, PAN, CIN, Udyam, factory licence,
- * certificates, or a site visit recorded by H2 India. Status: Submitted, Verified, Needs re-upload, Rejected, Expired.
+ * certificates, or a site visit recorded by H2 Economy. Status: Submitted, Verified, Needs re-upload, Rejected, Expired.
  * A re-upload is a new row that `replaces` the old one; the old one stays for the record.
  */
 export const verificationDocuments = core.table(
@@ -59,7 +59,7 @@ export const verificationDocuments = core.table(
     issuedBy: text("issued_by"),
     issuedOn: utc("issued_on"),
     expiresOn: utc("expires_on"),
-    /** Site visits: when H2 India visits. */
+    /** Site visits: when H2 Economy visits. */
     visitAt: utc("visit_at"),
     status: text("status").notNull().default("Submitted"),
     reason: text("reason"),

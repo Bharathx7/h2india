@@ -26,7 +26,7 @@ import { siteViewer } from "@/server/site";
 // stay). Alerts arrive with member accounts in step 7.3 (A71).
 
 export const metadata: Metadata = {
-  title: "Hydrogen opportunities in India · H2 India",
+  title: "Hydrogen opportunities in India · H2 Economy",
   description: "Tenders, schemes, grants and jobs, checked against the official source.",
   alternates: { canonical: "/opportunities" },
 };

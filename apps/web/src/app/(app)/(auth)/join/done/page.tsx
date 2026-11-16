@@ -11,7 +11,7 @@ import { StatusIcon } from "../../StatusIcon";
 
 // Join step 5 · Done (Figma 525:508). Buyers get the four next steps; suppliers go to their dashboard, which has
 // their onboarding checklist (decision A8); members go to their home (A5).
-export const metadata: Metadata = { title: "You're in · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "You're in · H2 Economy", robots: { index: false } };
 
 const BUYER_NEXT = [
   { label: "Invite your colleagues", href: "/buyer" },

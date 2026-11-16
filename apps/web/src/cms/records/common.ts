@@ -35,7 +35,7 @@ export function sourceFields(label = "Official page"): Field[] {
       type: "text",
       required: true,
       admin: {
-        description: "The official page or portal. Readers confirm details there (A29: no applying on H2 India).",
+        description: "The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).",
       },
       validate: (v: string | null | undefined) =>
         typeof v === "string" && /^https?:\/\/\S+\.\S+/.test(v.trim())

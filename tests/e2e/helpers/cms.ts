@@ -133,7 +133,7 @@ export async function publishedHelpArticle(request: APIRequestContext, title: st
   expect(res.status, JSON.stringify(res.body.errors)).toBeLessThan(300);
 }
 
-/** A published India H₂ Weekly issue for the newsletter archive. */
+/** A published H2 Economy Weekly issue for the newsletter archive. */
 export async function publishedIssue(request: APIRequestContext) {
   const n = 5000 + Math.floor(Math.random() * 4000);
   const res = await cms(request, "POST", "newsletter-issues", {
@@ -141,7 +141,7 @@ export async function publishedIssue(request: APIRequestContext) {
     list: "weekly",
     number: n,
     sentOn: new Date().toISOString(),
-    title: `India H₂ Weekly #${String(n)}`,
+    title: `H2 Economy Weekly #${String(n)}`,
     slug: `india-h2-weekly-${String(n)}-${String(Date.now())}`,
     highlights: [{ text: "Placeholder highlight for the browser tests." }],
   });

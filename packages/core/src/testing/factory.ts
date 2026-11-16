@@ -22,7 +22,7 @@ export const TEST_ENV = {
   CLAMAV_PORT: "3310",
   SMTP_HOST: "localhost",
   SMTP_PORT: "1025",
-  EMAIL_FROM: "H2 India <test@h2india.local>",
+  EMAIL_FROM: "H2 Economy <test@h2india.local>",
 } as const;
 
 /** Points getDb() at the test database. Call in beforeAll. */

@@ -6,7 +6,7 @@ import { DatasheetUpload } from "@/supplier/DatasheetUpload";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Start from a datasheet (step 8.4): pick the category and upload the PDF; the worker reads it.
-export const metadata: Metadata = { title: "Start from a datasheet · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Start from a datasheet · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function DatasheetStartPage() {
@@ -27,7 +27,7 @@ export default async function DatasheetStartPage() {
       <div>
         <h1 className="type-h2">Start from a datasheet</h1>
         <p className="type-body-sm text-secondary">
-          We read the datasheet and fill in a draft for you to check. Nothing shows to buyers until H2 India approves
+          We read the datasheet and fill in a draft for you to check. Nothing shows to buyers until H2 Economy approves
           it.
         </p>
       </div>

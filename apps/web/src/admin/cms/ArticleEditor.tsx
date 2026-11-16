@@ -24,7 +24,7 @@ import { moveArticleAction, saveArticleAction } from "./actions";
 import type { ArticleForm } from "./articles";
 import type { BodyBlock } from "./body";
 
-// The article editor in the H2 India back office (step 4.6; Doc 1 §11.4 "CMS editors: Article editor"): blocks,
+// The article editor in the H2 Economy back office (step 4.6; Doc 1 §11.4 "CMS editors: Article editor"): blocks,
 // required sources, SEO panel, the workflow Draft → In review → Legal check → Scheduled → Published, and the
 // corrections log. Saving keeps a draft; status changes go through the workflow actions.
 
@@ -948,7 +948,7 @@ export function ArticleEditor({
             </FormField>
             <div className="flex flex-col gap-1 rounded-input bg-subtle p-3">
               <span className="type-eyebrow text-secondary">Search preview</span>
-              <span className="type-label text-link">{(seoTitle || "Headline").slice(0, 60)} | H2 India</span>
+              <span className="type-label text-link">{(seoTitle || "Headline").slice(0, 60)} | H2 Economy</span>
               <span className="type-caption text-secondary">news › {meta?.slug ?? "…"}</span>
               <span className="type-caption text-body">
                 {(form.seo.description || form.dek || "Standfirst").slice(0, 160)}

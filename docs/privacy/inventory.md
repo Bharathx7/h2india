@@ -2,7 +2,7 @@
 
 <!-- Written by `pnpm privacy:inventory` from packages/core/src/compliance/inventory.ts. Don't edit by hand. -->
 
-What personal data H2 India holds, why, for how long, who can read it and which outside processor receives it
+What personal data H2 Economy holds, why, for how long, who can read it and which outside processor receives it
 (step 12.2, DPDP Act 2023). **Not decided** means the founder and the lawyer still have to set the period; the
 retention job (`pnpm privacy:retention`) reports what each period would remove and acts only once it is set.
 Processors are named by role until each vendor is chosen and its processing agreement is signed.
@@ -45,7 +45,7 @@ Processors are named by role until each vendor is chosen and its processing agre
 | `notification_deliveries` | `recipient`, `payload`, `user_id` | Record of each email, SMS and WhatsApp sent, for retries and support | Legitimate use: contract | **Not decided** | Operators (system.view) | Hosting provider (server, database, backups); Email provider; SMS provider; WhatsApp provider |
 | `audit_log` | `actor_id`, `acting_as_id`, `ip`, `user_agent`, `before`, `after`, `reason` | Who changed what (step 3.6); secrets and codes are masked | Legitimate use: legal obligation | 8 years (AUDIT_RETENTION_YEARS) | Operators with audit.view | Hosting provider (server, database, backups) |
 | `status_history` | `actor_id`, `reason` | Who moved a record to which status | Legitimate use: legal obligation | As long as the record | The record's companies; operators | Hosting provider (server, database, backups) |
-| `newsletter_subscribers` | `email`, `topics`, `monthly_note`, `consent_version`, `confirmed_at`, `unsubscribed_at` | India H₂ Weekly and digests (double opt-in) | Consent | **Not decided** | Newsletter editors (content.export) | Hosting provider (server, database, backups); Email provider |
+| `newsletter_subscribers` | `email`, `topics`, `monthly_note`, `consent_version`, `confirmed_at`, `unsubscribed_at` | H2 Economy Weekly and digests (double opt-in) | Consent | **Not decided** | Newsletter editors (content.export) | Hosting provider (server, database, backups); Email provider |
 | `newsletter_deliveries` | `subscriber_id` | Which issue went to whom, so each is sent once | Consent | **Not decided** | Nobody reads it per person | Hosting provider (server, database, backups) |
 | `cookie_consents` | `browser_id`, `version`, `analytics` | Proof of each cookie choice; a random browser id, no name or email. Pseudonymous: the id is random and lives in the person's own cookie. | Consent | **Not decided** | Compliance operators | Hosting provider (server, database, backups) |
 | `webinar_registrations` | `user_id`, `name`, `email`, `organisation`, `role`, `mobile`, `sponsor_consent`, `consent_text`, `consent_version` | Webinar seats, reminders and the replay; the sponsor only with consent | Consent | **Not decided** | Events editors; the sponsor receives only those who agreed | Hosting provider (server, database, backups); Email provider; WhatsApp provider |

@@ -311,7 +311,7 @@ export const Standards: CollectionConfig = {
         },
         {
           name: "checkedAt",
-          label: "Last checked by H2 India",
+          label: "Last checked by H2 Economy",
           type: "date",
           admin: { date: { pickerAppearance: "dayOnly", displayFormat: "d MMM yyyy" } },
         },
@@ -397,7 +397,7 @@ export const Reports: CollectionConfig = {
         {
           name: "disclosure",
           type: "textarea",
-          admin: { description: "For example Hydrotek Systems paid for this survey. H2 India wrote it." },
+          admin: { description: "For example Hydrotek Systems paid for this survey. H2 Economy wrote it." },
         },
       ],
     },
@@ -414,7 +414,7 @@ const mediaFields = (urlLabel: string): Field[] => [
     required: true,
     admin: {
       description:
-        "Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.",
+        "Where it's hosted (M9). For a file H2 Economy hosts, upload it in Video and audio files and paste its address here.",
     },
   },
   { name: "durationMinutes", type: "number" },

@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 // The default share image (step 5.10): the wordmark and the platform line on ink, in the brand colours from the
 // design tokens. Pages with their own picture (articles with a lead image) set it in their metadata.
 
-export const alt = "H2 India: India's hydrogen ecosystem platform";
+export const alt = "H2 Economy: India's hydrogen ecosystem platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -27,7 +27,7 @@ export default function OpenGraphImage() {
       <div style={{ display: "flex", alignItems: "flex-end", fontSize: 84, fontWeight: 700 }}>
         <span>H</span>
         <span style={{ color: c["bg/accent"], fontSize: 52, marginBottom: -6 }}>2</span>
-        <span>India</span>
+        <span style={{ marginLeft: 20 }}>Economy</span>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.15 }}>India&apos;s hydrogen ecosystem platform</div>

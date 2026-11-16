@@ -45,13 +45,13 @@ export function MobileFlow() {
           support={waitingFor === "Waiting for support"}
           body={
             waitingFor === "Waiting for support"
-              ? `You're the only admin of your company, so H2 India support will check your ID and approve the new number within 2 working days. We'll text ${sentTo ?? "your new number"} when it's done.`
+              ? `You're the only admin of your company, so H2 Economy support will check your ID and approve the new number within 2 working days. We'll text ${sentTo ?? "your new number"} when it's done.`
               : `Your company admin needs to approve the new number. We'll text ${sentTo ?? "your new number"} when it's done.`
           }
           onAnswer={(s) => {
             setStep(s === "Completed" ? "done" : "waiting");
             if (s === "Declined")
-              setProblem("Your admin didn't approve the new number. Contact them, or H2 India support.");
+              setProblem("Your admin didn't approve the new number. Contact them, or H2 Economy support.");
           }}
         />
         {problem ? <Alert tone="error" title={problem} live /> : null}

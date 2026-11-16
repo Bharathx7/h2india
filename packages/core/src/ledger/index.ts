@@ -13,7 +13,7 @@ export const LEDGER_ACCOUNTS = {
   held_for_acceptance: "Held for acceptance",
   /** Released to the supplier, waiting for the payout run. */
   supplier_payable: "Supplier payable",
-  platform_fee: "H2 India fee",
+  platform_fee: "H2 Economy fee",
   gst_on_fee: "GST on fee",
   tcs_payable: "TCS payable",
   tds_payable: "TDS payable",

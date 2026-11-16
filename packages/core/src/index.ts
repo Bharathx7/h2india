@@ -1,6 +1,6 @@
-// Domain logic for H2 India. Pages and API routes call this package; only this package touches the database.
+// Domain logic for H2 Economy. Pages and API routes call this package; only this package touches the database.
 
-export const PRODUCT_NAME = "H2 India";
+export const PRODUCT_NAME = "H2 Economy";
 
 export { Money } from "./money";
 export type { Paise } from "./money";

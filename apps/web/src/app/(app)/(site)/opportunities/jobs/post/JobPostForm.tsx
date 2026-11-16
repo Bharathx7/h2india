@@ -303,10 +303,10 @@ export function JobPostForm({ initial, companies }: { initial: Values; companies
             }}
           >
             <Radio value="link" label="Link to our careers page" />
-            <Radio value="inbox" label="Receive applications in my H2 India inbox" disabled />
+            <Radio value="inbox" label="Receive applications in my H2 Economy inbox" disabled />
           </RadioGroup>
           <p className="-mt-2 type-caption text-secondary">
-            Applications in your H2 India inbox arrive with the supplier inbox.
+            Applications in your H2 Economy inbox arrive with the supplier inbox.
           </p>
           <FormField label="Careers page link" required error={errors.careersUrl ?? errors.applyBy}>
             <Input

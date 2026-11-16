@@ -20,9 +20,9 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? (v[0] ?? "
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const view = subView((await params).view);
-  if (!view) return { title: "Not found · H2 India" };
+  if (!view) return { title: "Not found · H2 Economy" };
   return {
-    title: `${view.title} · India Hydrogen Tracker · H2 India`,
+    title: `${view.title} · India Hydrogen Tracker · H2 Economy`,
     description: `${view.title}: every record with its source and as-of date, updated every Monday.`,
     alternates: { canonical: `/tracker/${view.path}` },
   };

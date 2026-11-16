@@ -15,7 +15,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Compliance requests (660:8), step 11.7: Grievances (660:281), Takedowns (660:851), Corrections (660:1301) and Data
 // rights (660:1786), each against its clock, with the states on 661:948. Clock lengths come from the clock settings.
-export const metadata: Metadata = { title: "Compliance · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Compliance · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [

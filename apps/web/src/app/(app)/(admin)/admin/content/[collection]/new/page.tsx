@@ -6,7 +6,7 @@ import { cmsSession } from "@/admin/cms/session";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // A new record of any content type (step 4.6), in the native editor.
-export const metadata: Metadata = { title: "New · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "New · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function NewRecordPage({ params }: { params: Promise<{ collection: string }> }) {

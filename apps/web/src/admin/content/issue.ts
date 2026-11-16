@@ -10,7 +10,7 @@ import { dataAsOf, SUB_VIEWS, type Row } from "@/tracker/views";
 import { ARTICLE_TYPES } from "@/cms/types";
 import { absolute } from "@/seo/site";
 
-// What an India H₂ Weekly issue holds (composer 648:312, step 11.3), auto-filled from published items of the week
+// What an H2 Economy Weekly issue holds (composer 648:312, step 11.3), auto-filled from published items of the week
 // before the send: top stories, tenders and grants closing in the week after, and events coming up. No prices.
 
 const day = (iso: string | null | undefined) =>
@@ -39,7 +39,7 @@ export async function trackerChart(key: string | null | undefined): Promise<Issu
     title: c.title,
     unit: c.unit,
     bars,
-    source: `H2 India · India Hydrogen Tracker${asOf ? `, as of ${formatIstDate(new Date(asOf))}` : ""}`,
+    source: `H2 Economy · India Hydrogen Tracker${asOf ? `, as of ${formatIstDate(new Date(asOf))}` : ""}`,
   };
 }
 
@@ -87,7 +87,7 @@ export async function issueContent(
   ]);
   return {
     title: issue.title,
-    masthead: `India H₂ Weekly · #${String(issue.number)} · ${day(issue.sentOn ?? at.toISOString())}`,
+    masthead: `H2 Economy Weekly · #${String(issue.number)} · ${day(issue.sentOn ?? at.toISOString())}`,
     sections: [
       {
         heading: "Top stories",

@@ -149,7 +149,7 @@ export const MEGA_MENUS: MegaSection[] = [
     ],
     promo: {
       eyebrow: "Newsletter",
-      title: "India H₂ Weekly",
+      title: "H2 Economy Weekly",
       text: "The week's Indian hydrogen news, tenders and scheme deadlines, every Monday.",
       action: { label: "Subscribe", href: "/newsletter", style: "button" },
     },
@@ -189,7 +189,11 @@ export const MEGA_MENUS: MegaSection[] = [
     label: "Knowledge",
     eyebrow: "Knowledge",
     primary: [
-      { label: "Insights", description: "Analysis and explainers from the H2 India desk", href: "/knowledge/insights" },
+      {
+        label: "Insights",
+        description: "Analysis and explainers from the H2 Economy desk",
+        href: "/knowledge/insights",
+      },
       {
         label: "Hydrogen 101",
         description: "Start here: the basics, chapter by chapter",

@@ -69,7 +69,7 @@ export function HeroSearch() {
         >
           <Icon name="search" size={24} className="hidden text-icon-primary md:block" />
           <Icon name="search" size={20} className="text-icon-primary md:hidden" />
-          <span className="sr-only">Search H2 India</span>
+          <span className="sr-only">Search H2 Economy</span>
           <input
             type="search"
             name="q"

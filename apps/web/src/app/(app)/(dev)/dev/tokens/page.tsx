@@ -151,10 +151,10 @@ export default function TokensPage() {
         </div>
         <div className="mt-10 rounded-card bg-subtle p-6" data-testid="glyph-check">
           <h3 className="type-h3">Glyph check</h3>
-          <p className="type-display mt-4">H₂ India ₹48,79,400</p>
-          <p className="type-h1 mt-2">H₂ India ₹48,79,400 → × •</p>
-          <p className="type-body mt-2">H₂ India ₹48,79,400 → × •</p>
-          <p className="type-spec mt-2">H₂ India ₹48,79,400 → × •</p>
+          <p className="type-display mt-4">H₂ Economy ₹48,79,400</p>
+          <p className="type-h1 mt-2">H₂ Economy ₹48,79,400 → × •</p>
+          <p className="type-body mt-2">H₂ Economy ₹48,79,400 → × •</p>
+          <p className="type-spec mt-2">H₂ Economy ₹48,79,400 → × •</p>
         </div>
       </Section>
 

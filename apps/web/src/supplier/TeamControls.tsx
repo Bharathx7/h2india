@@ -239,8 +239,8 @@ export function MemberMenu({
           </p>
           <p className="flex gap-2 type-body-sm">
             <Icon name="check-circle" size={16} />
-            Invoices, statements and messages {first} worked on stay with the company. Their H2 India account isn&apos;t
-            deleted, and you can invite them again.
+            Invoices, statements and messages {first} worked on stay with the company. Their H2 Economy account
+            isn&apos;t deleted, and you can invite them again.
           </p>
         </div>
       </ConfirmDialog>

@@ -3,7 +3,7 @@ import { enterCode, newEmail, requestCode, withDb } from "./sign-in";
 
 // RFQ test data written straight to the database (Launch 1 gaps): a buyer company with an Admin, a verified supplier
 // with a Sales person and a live product in a fresh category, and an RFQ already sent to that supplier (or waiting in
-// moderation with "Let H2 India suggest suppliers" on). Statuses here are fixtures; the app moves them in the tests.
+// moderation with "Let H2 Economy suggest suppliers" on). Statuses here are fixtures; the app moves them in the tests.
 
 export interface RfqSetup {
   tag: string;

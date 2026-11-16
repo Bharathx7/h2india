@@ -105,7 +105,7 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
           <FormField
             label="Receiving contact"
             required
-            helper="Gets the 6-digit delivery code by SMS and confirms what arrived. No H2 India account needed."
+            helper="Gets the 6-digit delivery code by SMS and confirms what arrived. No H2 Economy account needed."
             error={s.problem?.fields.receiverMobile}
           >
             <Select

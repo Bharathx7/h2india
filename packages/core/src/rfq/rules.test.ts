@@ -38,7 +38,7 @@ describe("RFQ and quote transitions (step 9.2)", () => {
     expect([ok, bad, okQuote, badQuote]).toHaveLength(4);
   });
 
-  it("checks with H2 India only when more than one supplier is chosen", () => {
+  it("checks with H2 Economy only when more than one supplier is chosen", () => {
     expect(needsModeration(1)).toBe(false);
     expect(needsModeration(2)).toBe(true);
   });

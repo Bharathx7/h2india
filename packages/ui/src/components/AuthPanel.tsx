@@ -140,7 +140,7 @@ function SupplierPreview() {
           New quote request
         </p>
         <p className="mt-1 type-caption text-body">
-          Greenfield Hydrogen · PEM electrolyser 50 kW · checked by H2 India
+          Greenfield Hydrogen · PEM electrolyser 50 kW · checked by H2 Economy
         </p>
         <span className="mt-2 inline-block rounded-pill bg-accent px-2.5 py-1 type-caption text-primary">
           Open request
@@ -234,7 +234,7 @@ export function AuthPanel({ role, eyebrow, headline, sub, strip = [], className 
           ))}
         </ul>
       ) : strip.length > 0 ? (
-        <ul aria-label="Companies on H2 India" className="flex flex-wrap gap-5.5">
+        <ul aria-label="Companies on H2 Economy" className="flex flex-wrap gap-5.5">
           {strip.map((name) => (
             <li key={name} className="type-h4">
               {name}

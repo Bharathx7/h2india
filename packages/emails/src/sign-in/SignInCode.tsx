@@ -26,8 +26,8 @@ export function SignInCode({ appUrl, code, name, expiresIn, expiresAt, purpose =
       preview={`It expires in ${expiresIn}. Never share it.`}
       reason={
         verification
-          ? "You're getting this because someone asked to recover the H2 India account for this email address."
-          : "You're getting this because someone asked to sign in to H2 India with this email address."
+          ? "You're getting this because someone asked to recover the H2 Economy account for this email address."
+          : "You're getting this because someone asked to sign in to H2 Economy with this email address."
       }
     >
       <Text style={{ ...type.eyebrow, color: colour.secondary, margin: "0 0 8px" }}>
@@ -37,7 +37,7 @@ export function SignInCode({ appUrl, code, name, expiresIn, expiresAt, purpose =
         {verification ? "Your verification code" : "Your sign-in code"}
       </Heading>
       <Text style={{ ...type.body, color: colour.body, margin: "0 0 24px" }}>
-        {name ? `Hi ${name}, enter` : "Enter"} this code on H2 India to{" "}
+        {name ? `Hi ${name}, enter` : "Enter"} this code on H2 Economy to{" "}
         {verification ? "confirm it's you and get back into your account" : "finish signing in"}.
       </Text>
       <Section style={{ backgroundColor: colour.subtle, borderRadius: "12px", padding: "20px", textAlign: "center" }}>
@@ -47,18 +47,19 @@ export function SignInCode({ appUrl, code, name, expiresIn, expiresAt, purpose =
         </Text>
       </Section>
       <Text style={{ ...type.bodySmall, color: colour.body, margin: "24px 0" }}>
-        Never share this code with anyone, including H2 India staff. We&apos;ll never call or message you to ask for it.
+        Never share this code with anyone, including H2 Economy staff. We&apos;ll never call or message you to ask for
+        it.
       </Text>
       <Text style={{ ...type.label, margin: "0 0 24px" }}>
         <Link href={`${appUrl}/forgot-access`} style={{ color: colour.link }}>
           Didn&apos;t try to sign in? Secure your account
         </Link>
       </Text>
-      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 India team</Text>
+      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 Economy team</Text>
     </EmailLayout>
   );
 }
 
 export function signInCodeSubject(code: string, purpose: "sign-in" | "verification" = "sign-in"): string {
-  return `${code} is your H2 India ${purpose === "verification" ? "verification" : "sign-in"} code`;
+  return `${code} is your H2 Economy ${purpose === "verification" ? "verification" : "sign-in"} code`;
 }

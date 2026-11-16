@@ -39,22 +39,22 @@ export function Hero() {
 
 const CHECKS = ["GSTIN", "PAN", "CIN", "Bank name match", "Site visit", "Certificates (PESO, BIS)"];
 
-/** 02 Trust strip (379:4415): brands listed on H2 India and what "Verified" means. */
+/** 02 Trust strip (379:4415): brands listed on H2 Economy and what "Verified" means. */
 export async function TrustStrip({ fail }: { fail: Fail }) {
   const brands = await settle("brands", fail, loadBrands);
   return (
     <Section id="trust" className="bg-page" inner="flex flex-col gap-6 py-8 md:items-center md:py-14">
       <h2 id="trust-title" className="text-center type-eyebrow text-secondary">
-        Brands listed on H2 India
+        Brands listed on H2 Economy
       </h2>
       {!brands.ok ? (
         <ModuleError title="We couldn't load the brands" text="This is on our side. Try again in a moment." />
       ) : brands.data.length ? (
-        <LogoMarquee brands={brands.data} label="Brands listed on H2 India" className="w-full" />
+        <LogoMarquee brands={brands.data} label="Brands listed on H2 Economy" className="w-full" />
       ) : null}
       <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:flex-row md:items-center md:gap-6 md:px-6">
         <div className="flex flex-col gap-0.5">
-          <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 India</p>
+          <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 Economy</p>
           <p className="hidden type-caption text-secondary md:block">Badges are never sold.</p>
         </div>
         <ul className="flex flex-1 flex-wrap gap-2" aria-label="What we check">
@@ -255,7 +255,7 @@ export function ForYou({ firstName, workspaceHref }: { firstName: string; worksp
 
 const STEPS = [
   { title: "Describe what you need", text: "Specs, quantity, delivery site and the date you need it on site." },
-  { title: "H2 India checks it", text: "We review every request within 1 working day before it goes out." },
+  { title: "H2 Economy checks it", text: "We review every request within 1 working day before it goes out." },
   { title: "Compare and choose", text: "Quotes arrive in one format. Accept the best one and order." },
   {
     title: "Confirm, then pay",
@@ -276,7 +276,7 @@ export function HowItWorks() {
             Send one request to up to 5 verified suppliers
           </h2>
           <p className="type-body text-neutral-0/80">
-            H2 India checks every request within 1 working day. Suppliers then quote in the same format, so you can
+            H2 Economy checks every request within 1 working day. Suppliers then quote in the same format, so you can
             compare them side by side.
           </p>
         </div>

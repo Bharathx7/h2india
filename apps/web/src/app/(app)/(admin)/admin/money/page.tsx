@@ -12,7 +12,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 // Admin Money (step 11.6): payments, payouts, the ledger and reconciliation (705:8: collected = paid out + fees + GST
 // on fees + TCS + TDS + held), and the rate card and pilot list. Built from the design system (A178). Read with
 // money.view; resolving a difference needs money.edit.
-export const metadata: Metadata = { title: "Money · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Money · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [

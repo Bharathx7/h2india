@@ -218,7 +218,7 @@ export const CONTACT_TOPICS = [
   { value: "Partnerships", reply: "3 working days" },
 ] as const;
 
-/** Partner with H2 India (742:8): the five partner types and what each usually covers. */
+/** Partner with H2 Economy (742:8): the five partner types and what each usually covers. */
 export const PARTNER_TYPES = [
   { value: "Industry body", hint: "Member news, directory listings, co-hosted webinars" },
   { value: "Event organiser", hint: "Calendar listing, media partnership, exhibitor lists" },

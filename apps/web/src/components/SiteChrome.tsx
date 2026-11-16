@@ -19,7 +19,7 @@ import { Analytics } from "@/consent/Analytics";
 import { CookieBanner } from "@/consent/CookieBanner";
 
 // The public site's header and footer (Site header 25:635, Footer v2 153:179) around every public page. The header's
-// search opens the search overlay (step 5.2); the footer signs people up for India H₂ Weekly (A46).
+// search opens the search overlay (step 5.2); the footer signs people up for H2 Economy Weekly (A46).
 
 /** The footer's topic chips (153:179) and the newsletter topics they stand for. */
 const FOOTER_TOPICS: Record<string, string> = {

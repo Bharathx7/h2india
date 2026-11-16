@@ -27,11 +27,11 @@ async function findApplication(id: string) {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
   const found = await findApplication(id);
-  if (!found) return { title: "Not found · H2 India" };
+  if (!found) return { title: "Not found · H2 Economy" };
   const page = await applicationPage(id);
   return {
-    title: `${page?.title ?? found.app.label} · Marketplace · H2 India`,
-    description: page?.intro ?? `${found.app.label}: equipment and suppliers on H2 India.`,
+    title: `${page?.title ?? found.app.label} · Marketplace · H2 Economy`,
+    description: page?.intro ?? `${found.app.label}: equipment and suppliers on H2 Economy.`,
     alternates: { canonical: applicationHref(id) },
   };
 }
@@ -156,7 +156,7 @@ export default async function ApplicationPage({ params }: { params: Params }) {
           <div className="flex flex-col gap-6">
             <Card
               title="Top suppliers"
-              sub={`Verified suppliers with ${app.shortLabel.toLowerCase()} products on H2 India.`}
+              sub={`Verified suppliers with ${app.shortLabel.toLowerCase()} products on H2 Economy.`}
             >
               {suppliers.length ? (
                 <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -181,7 +181,7 @@ export default async function ApplicationPage({ params }: { params: Params }) {
                   ))}
                 </ul>
               ) : (
-                <p className="type-body text-body">Suppliers show here as they list with H2 India.</p>
+                <p className="type-body text-body">Suppliers show here as they list with H2 Economy.</p>
               )}
             </Card>
             <Card title="Schemes and tenders">

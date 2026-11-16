@@ -20,7 +20,7 @@ test.beforeEach(async ({ context }, info) => {
 });
 
 const SECTIONS = [
-  "Brands listed on H2 India",
+  "Brands listed on H2 Economy",
   "India’s hydrogen sector, live",
   "Send one request to up to 5 verified suppliers",
   "Browse the marketplace",
@@ -47,7 +47,7 @@ test("logged out: every section, the drawn wording and the visitor's paths", asy
   ).toBeVisible();
   // Live figures: open tenders are counted live with today's date (A45).
   await expect(page.getByTestId("live-figures")).toContainText("hydrogen tenders open this month");
-  await expect(page.getByTestId("live-figures")).toContainText("H2 India tracker · as of");
+  await expect(page.getByTestId("live-figures")).toContainText("H2 Economy tracker · as of");
   // The catalogue arrives in Stage 6: tiles without counts, Featured products empty (A43).
   await expect(page.getByRole("link", { name: /^Systems/ })).toBeVisible();
   await expect(page.getByTestId("featured-empty")).toContainText("Featured products are on the way");
@@ -213,18 +213,18 @@ test("newsletter sign-up on the Coming soon page: invalid, sent, confirmed, topi
   page,
 }) => {
   await page.goto(COMING_SOON);
-  const form = page.getByRole("form", { name: "Get India H₂ Weekly" });
+  const form = page.getByRole("form", { name: "Get H2 Economy Weekly" });
   await form.getByLabel("Your work email").fill("ravi.k@greenfieldh2");
-  await form.getByRole("button", { name: "Get India H₂ Weekly" }).click();
+  await form.getByRole("button", { name: "Get H2 Economy Weekly" }).click();
   await expect(form).toContainText("Enter a full email address, like name@company.in");
 
   const email = newEmail("weekly");
   const after = Date.now() - 1000;
   await form.getByLabel("Your work email").fill(email);
-  await form.getByRole("button", { name: "Get India H₂ Weekly" }).click();
+  await form.getByRole("button", { name: "Get H2 Economy Weekly" }).click();
   await expect(page.getByTestId("newsletter-sent")).toContainText(`We’ve sent a link to ${email}`);
 
-  const mail = await newestMail(page, email, "Confirm your India H₂ Weekly subscription", after);
+  const mail = await newestMail(page, email, "Confirm your H2 Economy Weekly subscription", after);
   expect(mail).toContain("Every Monday at 08:00 IST");
   const link = /(http:\/\/\S+\/newsletter\/confirm\?token=\S+)/.exec(mail)?.[1] ?? "";
   expect(link).not.toBe("");
@@ -243,16 +243,16 @@ test("newsletter sign-up on the Coming soon page: invalid, sent, confirmed, topi
   );
   expect(row.rows[0]?.status).toBe("confirmed");
   expect(row.rows[0]?.topics).toContain("jobs");
-  await newestMail(page, email, "Welcome to India H₂ Weekly", after);
+  await newestMail(page, email, "Welcome to H2 Economy Weekly", after);
 
   // Signing up again sends a link to change topics instead (743:7293 "Already subscribed").
   await page.goto(COMING_SOON);
-  const again = page.getByRole("form", { name: "Get India H₂ Weekly" });
+  const again = page.getByRole("form", { name: "Get H2 Economy Weekly" });
   await again.getByLabel("Your work email").fill(email);
   await page.waitForTimeout(1200); // a form sent faster than a person types is refused (step 5.9)
-  await again.getByRole("button", { name: "Get India H₂ Weekly" }).click();
+  await again.getByRole("button", { name: "Get H2 Economy Weekly" }).click();
   await expect(page.getByTestId("newsletter-already")).toContainText("You're already subscribed");
-  await newestMail(page, email, "Change your India H₂ Weekly topics", after);
+  await newestMail(page, email, "Change your H2 Economy Weekly topics", after);
 
   // A broken link offers a new one.
   await page.goto(`${COMING_SOON}/newsletter/confirm?token=nope`);
@@ -282,13 +282,13 @@ test("a supplier asks to be listed early; operators see the request", async ({ p
     ),
   );
   expect(row.rows[0]).toMatchObject({ company: "Konkan Fuel Cells", sells: "components" });
-  expect(row.rows[0]?.consent_text).toContain("H2 India may use these details");
+  expect(row.rows[0]?.consent_text).toContain("H2 Economy may use these details");
 });
 
 test("Coming soon matches its drawn sections at this width", async ({ page }) => {
   await page.goto(COMING_SOON);
   for (const name of [
-    "Get India H₂ Weekly",
+    "Get H2 Economy Weekly",
     "Marketplace",
     "News and schemes",
     "Opportunities",

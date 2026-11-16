@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Icon } from "../../icons/Icon";
 import { cx } from "../../lib/cx";
 
-// Logo marquee (161:1657) with Logo tiles (845:10885): brands listed on H2 India, a continuous sideways scroll (90 s a
+// Logo marquee (161:1657) with Logo tiles (845:10885): brands listed on H2 Economy, a continuous sideways scroll (90 s a
 // loop, linear, 781:7247). It stops on hover and on keyboard focus; reduced motion shows a still row.
 // No pause button: founder change to F6, 16 Nov 2026. Brand marks are a placeholder until the brands approve their logos.
 

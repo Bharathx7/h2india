@@ -39,7 +39,7 @@ export async function latestSmsCode(page: Page, mobile: string, after: number): 
         const m = await newest(page, `sms-91${mobile}@sms.h2india.local`, after);
         if (!m) return "";
         const res = await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`);
-        code = /^(\d{6}) is your H2 India/.exec(((await res.json()) as { Text: string }).Text)?.[1] ?? "";
+        code = /^(\d{6}) is your H2 Economy/.exec(((await res.json()) as { Text: string }).Text)?.[1] ?? "";
         return code;
       },
       { message: `an SMS to ${mobile}`, timeout: 10_000 },
@@ -55,7 +55,7 @@ export async function latestConfirmLink(page: Page, email: string, after: number
     .poll(
       async () => {
         const m = await newest(page, email, after);
-        if (m?.Subject !== "Confirm your email for H2 India") return "";
+        if (m?.Subject !== "Confirm your email for H2 Economy") return "";
         const res = await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`);
         link =
           /(http:\/\/[^\s"]+\/magic-link\/verify[^\s"\]]+)/.exec(((await res.json()) as { Text: string }).Text)?.[1] ??
@@ -90,9 +90,9 @@ export async function signInNew(page: Page, email: string): Promise<void> {
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
   const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 India" }))).toBeVisible();
+  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
   if (await notNow.isVisible()) await notNow.click();
-  await expect(page.getByRole("heading", { name: "Join H2 India" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible({ timeout: 15_000 });
 }
 
 /** Join steps 1 to 4 for a signed-in person creating a new buyer or supplier company. */

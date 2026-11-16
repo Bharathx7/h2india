@@ -17,7 +17,7 @@ const valid = {
   S3_BUCKET_PUBLIC: "h2india-public",
   SMTP_HOST: "localhost",
   SMTP_PORT: "1025",
-  EMAIL_FROM: "H2 India <no-reply@h2india.local>",
+  EMAIL_FROM: "H2 Economy <no-reply@h2india.local>",
 };
 
 describe("server settings", () => {

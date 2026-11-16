@@ -87,13 +87,13 @@ test("once scrolled, only the header's main bar stays; the full header returns a
   await page.mouse.wheel(0, 600);
   await expect(nav).toBeHidden();
   expect(await heightOf()).toBeLessThan(80);
-  await expect(page.getByRole("link", { name: "H2 India home" }).first()).toBeInViewport();
+  await expect(page.getByRole("link", { name: "H2 Economy home" }).first()).toBeInViewport();
   // Hiding rows never moves the page: content sits where the scroll put it.
   const scrolled = await page.evaluate(() => Math.round(window.scrollY));
   expect(await mainTop()).toBe(162 - scrolled);
 
   // Keyboard focus in the header brings every row back, so all links stay reachable.
-  await page.getByRole("link", { name: "H2 India home" }).first().focus();
+  await page.getByRole("link", { name: "H2 Economy home" }).first().focus();
   await expect(nav).toBeVisible();
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(nav).toBeHidden();

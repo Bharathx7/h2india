@@ -1,5 +1,5 @@
 // The datasheet reader (step 8.4, playbook types). The engine (M8) returns, per attribute in the category's schema, the
-// value it read with a score; H2 India turns the score into High, Medium or Low with thresholds from settings.
+// value it read with a score; H2 Economy turns the score into High, Medium or Low with thresholds from settings.
 
 export interface ExtractedField {
   /** From the category's attribute schema (step 6.1), or name / model for the product itself. */

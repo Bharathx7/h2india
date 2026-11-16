@@ -4,7 +4,7 @@ import { isEnabled } from "@h2india/config";
 // structured data agree. Indexing stays off (noindex everywhere, robots.txt disallows all) until the
 // searchIndexing flag is switched on at Launch 1.
 
-export const SITE_NAME = "H2 India";
+export const SITE_NAME = "H2 Economy";
 export const SITE_DESCRIPTION =
   "India's hydrogen ecosystem platform: products and companies, Indian hydrogen news, schemes, tenders and events in one place.";
 

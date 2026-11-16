@@ -251,7 +251,7 @@ export function AcceptOrReport({
         open={reporting}
         onOpenChange={setReporting}
         title={`Report a problem with ${reference}`}
-        description={`${supplier} gets your report and has 2 working days to reply. Their payout stays on hold until it is resolved, and H2 India steps in if you can't agree within 5 working days.`}
+        description={`${supplier} gets your report and has 2 working days to reply. Their payout stays on hold until it is resolved, and H2 Economy steps in if you can't agree within 5 working days.`}
         footer={
           <Footer
             onCancel={() => {
@@ -343,7 +343,7 @@ export function AcceptOrReport({
   );
 }
 
-/** The supplier's offer on a dispute (697:579): accept it, or ask H2 India to decide. */
+/** The supplier's offer on a dispute (697:579): accept it, or ask H2 Economy to decide. */
 export function OfferActions({
   orderId,
   disputeId,
@@ -375,7 +375,7 @@ export function OfferActions({
             a.go(() => escalateAction(orderId, disputeId));
           }}
         >
-          Ask H2 India to decide
+          Ask H2 Economy to decide
         </Button>
       </div>
     </div>

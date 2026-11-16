@@ -6,7 +6,7 @@ import { CardsLoading } from "@/opportunities/parts";
 // Upcoming events (step 5.7): the events list with its preset. See EventsList.
 
 export const metadata: Metadata = {
-  title: "Hydrogen events in India · H2 India",
+  title: "Hydrogen events in India · H2 Economy",
   description: "Summits, expos, webinars and training for India's hydrogen industry, checked before they go live.",
   alternates: { canonical: "/events" },
 };

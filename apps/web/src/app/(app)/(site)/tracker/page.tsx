@@ -13,7 +13,7 @@ import { dataAsOf, stateName, type Row } from "@/tracker/views";
 // status, awarded capacity by state and Recent changes.
 
 export const metadata: Metadata = {
-  title: "India Hydrogen Tracker · H2 India",
+  title: "India Hydrogen Tracker · H2 Economy",
   description: "Projects, factories, pilots, stations, prices and state policies, each with its source and date.",
   alternates: { canonical: "/tracker" },
 };

@@ -15,7 +15,7 @@ import type { Event } from "@/payload-types";
 
 // Event registrations (725:667; phones 726:256; empty and error 726:5662), step 7.5: the webinars a member registered
 // for (step 5.7), upcoming and past. A new registration shows straight away (the page reads the registrations table).
-export const metadata: Metadata = { title: "Event registrations · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Event registrations · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const day = (iso: string) =>

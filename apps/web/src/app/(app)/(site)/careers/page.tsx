@@ -6,11 +6,11 @@ import { card, main, PageHead, wrap } from "@/trust/parts";
 import { memberHref } from "@/opportunities/parts";
 import { getSession } from "@/server/auth";
 
-// Careers (742:826, no open roles 742:1156). Roles are H2 India's own posts on the jobs board, so they're listed in
+// Careers (742:826, no open roles 742:1156). Roles are H2 Economy's own posts on the jobs board, so they're listed in
 // both places. Get job alerts goes to member alerts (A71).
 
 export const metadata: Metadata = {
-  title: "Careers · H2 India",
+  title: "Careers · H2 Economy",
   description: "Help build the place India's hydrogen industry goes to for products, people and facts.",
   alternates: { canonical: "/careers" },
 };
@@ -36,7 +36,7 @@ export default async function CareersPage() {
     <main id="main" className={main}>
       <PageHead
         crumbs={[{ label: "Company", href: "/about" }, { label: "Careers" }]}
-        title="Work at H2 India"
+        title="Work at H2 Economy"
         lead="Help build the place India's hydrogen industry goes to for products, people and facts."
         aside={
           <Link href={alerts} className={cx(buttonClasses({ variant: "outline" }), "shrink-0")}>
@@ -52,7 +52,7 @@ export default async function CareersPage() {
             </h2>
             {roles.length ? (
               <>
-                <p className="pb-3 type-caption text-secondary">Listed on the H2 India jobs board too.</p>
+                <p className="pb-3 type-caption text-secondary">Listed on the H2 Economy jobs board too.</p>
                 <ul className="flex flex-col divide-y divide-default border-t border-default">
                   {roles.map((r) => (
                     <li key={r.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -82,7 +82,7 @@ export default async function CareersPage() {
                   </Link>
                 }
               >
-                We post every role on the H2 India jobs board. Set a job alert and we&apos;ll tell you when we&apos;re
+                We post every role on the H2 Economy jobs board. Set a job alert and we&apos;ll tell you when we&apos;re
                 hiring.
               </EmptyState>
             )}

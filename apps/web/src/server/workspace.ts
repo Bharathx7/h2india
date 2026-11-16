@@ -16,7 +16,7 @@ export async function shellFor(userId: string) {
       .slice(0, 2)
       .toUpperCase() || "?";
   const role =
-    who.area === "admin" ? "H2 India operator" : who.area === "member" ? "Member" : (who.company ?? "Company");
+    who.area === "admin" ? "H2 Economy operator" : who.area === "member" ? "Member" : (who.company ?? "Company");
   const user: WorkspaceUser = { name, role, initials };
   return {
     area: who.area,

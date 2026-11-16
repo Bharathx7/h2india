@@ -7,7 +7,7 @@ import { isEnabled } from "@h2india/config";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth";
 
-// The simulated partner's checkout (A176): the tester chooses the outcome, which reaches H2 India only as a signed
+// The simulated partner's checkout (A176): the tester chooses the outcome, which reaches H2 Economy only as a signed
 // webhook, exactly as a real partner's would. Only someone at the paying company may finish it.
 const OUTCOMES = ["succeed", "fail", "pending", "timeout"] as const;
 const BACK = { succeed: "success", fail: "failed", pending: "pending", timeout: "timed-out" } as const;

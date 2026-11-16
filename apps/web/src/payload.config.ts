@@ -59,7 +59,7 @@ import { ApplicationPages } from "./cms/marketplace/collections";
 import { Associations, People } from "./cms/directory/collections";
 
 // The content system (step 4.1, ADR 0004, A26): Payload 3 inside the app, tables in the cms schema of the same
-// database, editors signed in with their H2 India account, the editor at /cms.
+// database, editors signed in with their H2 Economy account, the editor at /cms.
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const env = parseServerEnv();
@@ -70,9 +70,9 @@ export default buildConfig({
   secret: createHmac("sha256", env.AUTH_SECRET).update("payload").digest("hex"),
   admin: {
     user: Editors.slug,
-    // The CMS looks like the rest of H2 India (A175): always the light theme, styled from our tokens in custom.css.
+    // The CMS looks like the rest of H2 Economy (A175): always the light theme, styled from our tokens in custom.css.
     theme: "light",
-    meta: { titleSuffix: " · H2 India CMS" },
+    meta: { titleSuffix: " · H2 Economy CMS" },
     // No Gravatar look-ups: initials only.
     avatar: "default",
     routes: { login: "/login", logout: "/logout" },

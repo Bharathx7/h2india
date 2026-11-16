@@ -39,8 +39,8 @@ export async function latestCode(
 ): Promise<string> {
   const subject =
     purpose === "any"
-      ? /^(\d{6}) is your H2 India (?:sign-in|verification) code$/
-      : new RegExp(`^(\\d{6}) is your H2 India ${purpose} code$`);
+      ? /^(\d{6}) is your H2 Economy (?:sign-in|verification) code$/
+      : new RegExp(`^(\\d{6}) is your H2 Economy ${purpose} code$`);
   let found = "";
   await expect
     .poll(

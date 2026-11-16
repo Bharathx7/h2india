@@ -214,7 +214,7 @@ export const TEMPLATES = {
   "email.newsletter_issue": {
     channel: "email",
     key: "newsletter_issue",
-    name: "India H₂ Weekly issue",
+    name: "H2 Economy Weekly issue",
     frame: "648:312",
     step: "11.3",
     built: true,
@@ -470,11 +470,11 @@ export type TemplateId = keyof typeof TEMPLATES;
 export const APPROVED_TEXT = {
   /** 668:194 */
   "sms.otp_sign_in": (input: { code: string }) =>
-    `${input.code} is your H2 India sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 India staff. -H2 India`,
-  "sms.mobile_changed": () => "Your new mobile number for H2 India is confirmed. -H2 India",
+    `${input.code} is your H2 Economy sign-in code. It expires in 10 minutes. Never share this code with anyone, including H2 Economy staff. -H2 Economy`,
+  "sms.mobile_changed": () => "Your new mobile number for H2 Economy is confirmed. -H2 Economy",
   /** 668:232, template otp_delivery_receiving_contact (step 10.9). The link is the short delivery address. */
   "sms.otp_delivery_receiving_contact": (input: { order: string; supplier: string; link: string; code: string }) =>
-    `Delivery of ${input.order} from ${input.supplier} is at your gate. Record what arrived at ${input.link} and enter code ${input.code}. Never share it. -H2 India`,
+    `Delivery of ${input.order} from ${input.supplier} is at your gate. Record what arrived at ${input.link} and enter code ${input.code}. Never share it. -H2 Economy`,
   /** 668:270, template order_dispatched_receiving_contact (step 10.9). */
   "sms.order_dispatched_receiving_contact": (input: {
     order: string;
@@ -483,17 +483,17 @@ export const APPROVED_TEXT = {
     lr: string;
     expected: string;
   }) =>
-    `${input.order} from ${input.supplier} is on its way with ${input.carrier}, LR ${input.lr}. Expected ${input.expected}. We'll text a delivery code when it arrives. -H2 India`,
+    `${input.order} from ${input.supplier} is on its way with ${input.carrier}, LR ${input.lr}. Expected ${input.expected}. We'll text a delivery code when it arrives. -H2 Economy`,
   /** Not drawn (step 8.6, A159): wording from 588:1179, to register with the provider (M5). */
   "sms.bank_account_changed": (input: { company: string; last4: string; until: string }) =>
-    `${input.company}'s payout bank account on H2 India was changed to the account ending ${input.last4}. Payouts are held until ${input.until} IST. Didn't make this change? Cancel it in your account. -H2 India`,
-  /** 676:405, template webinar_registered: header "You're registered", footer "H2 India webinars". */
+    `${input.company}'s payout bank account on H2 Economy was changed to the account ending ${input.last4}. Payouts are held until ${input.until} IST. Didn't make this change? Cancel it in your account. -H2 Economy`,
+  /** 676:405, template webinar_registered: header "You're registered", footer "H2 Economy webinars". */
   "whatsapp.webinar_registration": (input: { name: string; title: string; date: string; time: string }) =>
     `Hi ${input.name}, you're registered for ${input.title}. ${input.date}, ${input.time} IST, online. We'll send the join link 1 hour before, and the replay afterwards.`,
-  /** 676:459, template webinar_reminder: header "Starts in {{1}}", footer "H2 India webinars". */
+  /** 676:459, template webinar_reminder: header "Starts in {{1}}", footer "H2 Economy webinars". */
   "whatsapp.webinar_reminder": (input: { name: string; title: string; time: string }) =>
     `Hi ${input.name}, ${input.title} starts at ${input.time} IST today. Join from your phone or laptop with the link below.`,
-  /** 668:152, template tender_alert_instant: header "Tender alert", footer "Manage alerts on H2 India". */
+  /** 668:152, template tender_alert_instant: header "Tender alert", footer "Manage alerts on H2 Economy". */
   "whatsapp.tender_alert_instant": (input: {
     issuer: string;
     change: string;
@@ -503,7 +503,7 @@ export const APPROVED_TEXT = {
     alert: string;
   }) =>
     `${input.issuer} ${input.change}: ${input.title} (${input.reference}). Bid due ${input.due}. This matches your alert for ${input.alert}.`,
-  /** 676:351, template scheme_alert_instant: header "Scheme deadline", footer "Manage alerts on H2 India". */
+  /** 676:351, template scheme_alert_instant: header "Scheme deadline", footer "Manage alerts on H2 Economy". */
   "whatsapp.scheme_alert": (input: {
     scheme: string;
     what: string;
@@ -513,7 +513,7 @@ export const APPROVED_TEXT = {
     alert: string;
   }) =>
     `${input.scheme}: ${input.what} are due ${input.due} on ${input.where}. ${input.left} left. This matches your alert for ${input.alert}.`,
-  /** 668:44, template rfq_received_supplier: header "New RFQ: {{1}}", footer "H2 India RFQ alerts", button View and quote. */
+  /** 668:44, template rfq_received_supplier: header "New RFQ: {{1}}", footer "H2 Economy RFQ alerts", button View and quote. */
   "whatsapp.rfq_received_supplier": (input: {
     name: string;
     buyerType: string;

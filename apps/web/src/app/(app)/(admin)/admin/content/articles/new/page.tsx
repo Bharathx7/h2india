@@ -5,8 +5,8 @@ import { articleChoices, EMPTY_ARTICLE, editorActor } from "@/admin/cms/articles
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { STATE_OPTIONS } from "@/cms/records/states";
 
-// New article (step 4.6): the H2 India article editor, in the back office.
-export const metadata: Metadata = { title: "New article · H2 India admin", robots: { index: false } };
+// New article (step 4.6): the H2 Economy article editor, in the back office.
+export const metadata: Metadata = { title: "New article · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function NewArticlePage() {

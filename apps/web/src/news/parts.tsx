@@ -240,7 +240,7 @@ export function PressReleases({ items }: { items: ArticleSummary[] }) {
             Press releases
           </h2>
           <p className="type-body-sm text-secondary">
-            Supplied by companies and published as received. Not edited or verified by H2 India.
+            Supplied by companies and published as received. Not edited or verified by H2 Economy.
           </p>
         </div>
         <ArrowLink asChild>

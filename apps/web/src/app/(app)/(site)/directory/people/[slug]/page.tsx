@@ -16,9 +16,9 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   if (!(await siteViewer())) return GATED_METADATA;
   const p = await person((await params).slug);
-  if (!p) return { title: "Not found · H2 India" };
+  if (!p) return { title: "Not found · H2 Economy" };
   return {
-    title: `${p.name} · People · H2 India`,
+    title: `${p.name} · People · H2 Economy`,
     description: [p.role, p.organisation].filter(Boolean).join(", "),
     alternates: { canonical: `/directory/people/${p.slug}` },
   };
@@ -61,7 +61,7 @@ export default async function PersonPage({ params }: { params: Params }) {
       {p.bio ? <p className="type-body text-body">{p.bio}</p> : null}
       <Link href={`/contact?person=${p.slug}`} className={cx(buttonClasses({}), "self-start")}>
         <Icon name="message-square" size={18} />
-        Contact via H2 India
+        Contact via H2 Economy
       </Link>
       <p className="type-caption text-secondary">
         We pass your message on; {p.name} decides whether to reply. Their email and phone stay private.

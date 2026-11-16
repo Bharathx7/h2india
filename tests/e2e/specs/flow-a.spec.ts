@@ -140,9 +140,9 @@ test("flow A: a buyer from search to choosing a quote", async ({ page, browser }
   await page.getByRole("button", { name: "Sign in to send" }).click();
   await page.waitForURL(/\/sign-in/);
   await enterCode(page, await requestCode(page, buyerEmail));
-  // A new person is offered a passkey ("Not now") and then Join H2 India, as in signInNew().
+  // A new person is offered a passkey ("Not now") and then Join H2 Economy, as in signInNew().
   const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 India" }))).toBeVisible();
+  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
   if (await notNow.isVisible()) await notNow.click();
   await reachCompanyStep(page, "Buyer company", "Ravi Kulkarni");
   await typeGstin(page, freshGstin());

@@ -16,7 +16,7 @@ import {
   unsubscribeToken,
 } from "./index";
 
-// India H₂ Weekly with double opt-in (step 5.1, A46): a sign-up stays pending until the emailed link is opened; signing
+// H2 Economy Weekly with double opt-in (step 5.1, A46): a sign-up stays pending until the emailed link is opened; signing
 // up again when confirmed sends a change-topics link; links expire after 48 hours and only the latest one works.
 const url = process.env.TEST_DATABASE_URL;
 

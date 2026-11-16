@@ -73,7 +73,7 @@ function details(e: Event, name: string, registrationId: string): WebinarDetails
     time: timeRange(e.startsAt, e.endsAt).replace("–", " to "),
     short: `${new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short" }).format(new Date(e.startsAt))} at ${clock(e.startsAt).replace(":00", "")} IST`,
     joinUrl: `${page}/join?t=${registrationToken(registrationId, "join")}`,
-    host: e.webinar?.sponsor?.name ? (e.host ?? "") : (e.host ?? "H2 India editorial team"),
+    host: e.webinar?.sponsor?.name ? (e.host ?? "") : (e.host ?? "H2 Economy editorial team"),
     calendar: calendarLinks(e, page),
   };
 }

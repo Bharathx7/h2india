@@ -43,7 +43,7 @@ describe.skipIf(!url)("suspension appeals (G10)", () => {
     );
     await expect(
       sendAppeal(h.db, admin, c.org.id, "Sending the same appeal a second time to make sure."),
-    ).rejects.toThrow("already with H2 India");
+    ).rejects.toThrow("already with H2 Economy");
     // Someone without company.manage can't appeal.
     await expect(
       sendAppeal(h.db, await loadActor(h.db, c.requester.id), c.org.id, "A viewer trying to appeal for the company."),

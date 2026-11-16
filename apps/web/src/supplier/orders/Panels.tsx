@@ -488,7 +488,7 @@ const OFFERS: { value: DisputeOffer; label: string }[] = [
   { value: "disagree", label: "Disagree and explain" },
 ];
 
-/** Your response (813:12602): an offer, words, photos or documents; or ask H2 India to decide. */
+/** Your response (813:12602): an offer, words, photos or documents; or ask H2 Economy to decide. */
 export function DisputeResponse({
   orderId,
   disputeId,
@@ -587,7 +587,7 @@ export function DisputeResponse({
             ask.go(() => askH2IndiaAction(orderId, disputeId));
           }}
         >
-          Ask H2 India to decide
+          Ask H2 Economy to decide
         </Button>
       </div>
     </section>

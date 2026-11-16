@@ -4,7 +4,7 @@ import type { AuthStrategy, Payload } from "payload";
 import type { Editor } from "@/payload-types";
 import { auth } from "@/server/auth";
 
-// Editors sign in to the CMS with their H2 India account (step 4.1, ADR 0004): our session cookie is read here, and only
+// Editors sign in to the CMS with their H2 Economy account (step 4.1, ADR 0004): our session cookie is read here, and only
 // operators with Content access get in. Their permissions (content.view/edit/delete/publish) ride on the user.
 
 function roleOf(permissions: string[]): string {
@@ -13,7 +13,7 @@ function roleOf(permissions: string[]): string {
   return "Viewer";
 }
 
-/** The editor record and CMS permissions for an H2 India user, made on first use; null without Content access. */
+/** The editor record and CMS permissions for an H2 Economy user, made on first use; null without Content access. */
 export async function editorUserFor(
   payload: Payload,
   user: { id: string; name?: string | null; email: string },

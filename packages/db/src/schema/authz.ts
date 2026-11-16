@@ -6,7 +6,7 @@ import { core } from "./core";
 // Permissions as data (step 3.4, playbook Section 10). Seeded from Figma 575:696, 592:371 and 656:8; the admin
 // Operator roles screen (step 11.4) changes them without a deploy.
 
-/** buyer | supplier roles for company members; operator roles for H2 India staff. */
+/** buyer | supplier roles for company members; operator roles for H2 Economy staff. */
 export const roles = core.table(
   "roles",
   {
@@ -40,7 +40,7 @@ export const rolePermissions = core.table(
   (t) => [primaryKey({ columns: [t.roleId, t.permissionKey] })],
 );
 
-/** Which H2 India staff hold which operator role. */
+/** Which H2 Economy staff hold which operator role. */
 export const operatorRoles = core.table(
   "operator_roles",
   {

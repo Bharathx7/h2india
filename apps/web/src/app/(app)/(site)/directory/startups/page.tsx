@@ -12,7 +12,7 @@ import { Crumbs } from "@/opportunities/parts";
 // Start-up spotlight (497:7060; phones 499:515), step 6.6: company profiles typed Start-up, newest first. The weekly
 // featured story joins when editors start the series (A135); "Apply to be featured" goes to Contact.
 export const metadata: Metadata = {
-  title: "Hydrogen start-ups in India · H2 India",
+  title: "Hydrogen start-ups in India · H2 Economy",
   description: "Start-ups working on hydrogen in India, from membranes to mobility.",
   alternates: { canonical: "/directory/startups" },
 };

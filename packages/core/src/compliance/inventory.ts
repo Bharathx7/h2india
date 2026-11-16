@@ -290,7 +290,7 @@ export const PERSONAL_TABLES: PersonalTable[] = [
   {
     table: "newsletter_subscribers",
     fields: ["email", "topics", "monthly_note", "consent_version", "confirmed_at", "unsubscribed_at"],
-    purpose: "India H₂ Weekly and digests (double opt-in)",
+    purpose: "H2 Economy Weekly and digests (double opt-in)",
     basis: "Consent",
     retention: null,
     access: "Newsletter editors (content.export)",
@@ -710,7 +710,7 @@ export function inventoryMarkdown(): string {
     "",
     "<!-- Written by `pnpm privacy:inventory` from packages/core/src/compliance/inventory.ts. Don't edit by hand. -->",
     "",
-    "What personal data H2 India holds, why, for how long, who can read it and which outside processor receives it",
+    "What personal data H2 Economy holds, why, for how long, who can read it and which outside processor receives it",
     "(step 12.2, DPDP Act 2023). **Not decided** means the founder and the lawyer still have to set the period; the",
     "retention job (`pnpm privacy:retention`) reports what each period would remove and acts only once it is set.",
     "Processors are named by role until each vendor is chosen and its processing agreement is signed.",

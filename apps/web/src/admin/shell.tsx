@@ -81,10 +81,10 @@ function LargerScreen() {
       </span>
       <h1 className="type-h3">Use a larger screen</h1>
       <p className="type-body text-body">
-        The H2 India back office needs a screen at least 1024 px wide. Open it on a laptop or desktop.
+        The H2 Economy back office needs a screen at least 1024 px wide. Open it on a laptop or desktop.
       </p>
       <Link href="/" className={buttonClasses({ variant: "outline" })}>
-        Go to H2 India home
+        Go to H2 Economy home
       </Link>
     </div>
   );

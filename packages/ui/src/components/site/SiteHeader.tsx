@@ -106,14 +106,14 @@ function Desktop({
       </div>
       <div className="mx-auto flex h-19 max-w-300 items-center justify-between gap-6 px-6 xl:px-0">
         <div className="flex min-w-0 flex-1 items-center gap-8">
-          <a href={links.home} aria-label="H2 India home" className="shrink-0 rounded-control">
+          <a href={links.home} aria-label="H2 Economy home" className="shrink-0 rounded-control">
             <Logo title="" />
           </a>
           <button
             type="button"
             onClick={onOpenSearch}
             aria-keyshortcuts="/"
-            aria-label="Search H2 India"
+            aria-label="Search H2 Economy"
             className="flex h-11 w-full max-w-110 min-w-40 items-center gap-3 rounded-pill border border-input bg-page pr-2 pl-4 text-left hover:border-focus"
           >
             <Icon name="search" size={20} className="text-icon-secondary" />
@@ -240,7 +240,7 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
   return (
     <RDialog.Root>
       <div className="flex h-16 items-center justify-between border-b border-default px-4 md:px-6 lg:hidden">
-        <a href={links.home} aria-label="H2 India home" className="rounded-control">
+        <a href={links.home} aria-label="H2 Economy home" className="rounded-control">
           <Logo title="" />
         </a>
         <div className="flex items-center gap-2">
@@ -255,7 +255,7 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-default px-4">
             <RDialog.Title asChild>
               <span>
-                <Logo title="H2 India menu" />
+                <Logo title="H2 Economy menu" />
               </span>
             </RDialog.Title>
             <RDialog.Close asChild>

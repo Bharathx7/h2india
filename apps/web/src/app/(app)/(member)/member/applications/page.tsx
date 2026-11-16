@@ -11,7 +11,7 @@ import { MemberShell, requireMember } from "@/member/shell";
 // Job applications (725:1038; empty 726:5662), step 7.5. Applications happen on the employer's site (A70), so a job
 // is added when the member clicks Apply; the status is theirs to keep and employers never see it. Reached from the
 // home feed, not the sidebar (F3 safe default).
-export const metadata: Metadata = { title: "Job applications · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Job applications · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const dm = (d: Date) =>
@@ -31,7 +31,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
         <div>
           <h1 className="type-h2">Job applications</h1>
           <p className="type-body-sm text-secondary">
-            Jobs you've applied for from H2 India. Only you see the status you set; employers don't.
+            Jobs you've applied for from H2 Economy. Only you see the status you set; employers don't.
           </p>
         </div>
         <Link href="/member/alerts?type=jobs" className={buttonClasses({ variant: "outline" })}>
@@ -62,7 +62,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                 </Link>
               }
             >
-              When you click Apply on a H2 India job, we add it here so you can track it.
+              When you click Apply on a H2 Economy job, we add it here so you can track it.
             </EmptyState>
           </div>
         }

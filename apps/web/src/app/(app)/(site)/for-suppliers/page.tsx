@@ -8,7 +8,7 @@ import { Block, card, DarkCta, Faqs, Feature, Hero, main, Steps, wrap } from "@/
 // questions come from the CMS.
 
 export const metadata: Metadata = {
-  title: "For suppliers · H2 India",
+  title: "For suppliers · H2 Economy",
   description:
     "Get a verified listing, receive structured quote requests from engineering and procurement teams, and reach India's hydrogen buyers.",
   alternates: { canonical: "/for-suppliers" },
@@ -31,14 +31,14 @@ export default async function ForSuppliersPage() {
       <Hero
         eyebrow="For suppliers"
         title="Reach India’s hydrogen buyers"
-        lead="Get a verified listing, receive structured quote requests from engineering and procurement teams, and get paid through H2 India with a GST invoice when orders launch."
+        lead="Get a verified listing, receive structured quote requests from engineering and procurement teams, and get paid through H2 Economy with a GST invoice when orders launch."
         actions={[
           { label: "List your company", href: "/join/supplier", primary: true },
           { label: "Supplier sign in", href: "/supplier/sign-in" },
           { label: "See pricing", href: "/pricing" },
         ]}
       />
-      <Block id="buying" title="Who’s buying" lead="Buyers on H2 India work at organisations like these.">
+      <Block id="buying" title="Who’s buying" lead="Buyers on H2 Economy work at organisations like these.">
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {BUYERS.map((b) => (
             <li key={b.label} className={cx(card, "flex items-center gap-2.5 p-4 type-label text-primary")}>
@@ -100,7 +100,7 @@ export default async function ForSuppliersPage() {
           <Feature
             icon="newspaper"
             title="News and event submissions"
-            text="Submit press releases, events and jobs to reach the people who read H2 India."
+            text="Submit press releases, events and jobs to reach the people who read H2 Economy."
           />
         </div>
       </Block>
@@ -116,8 +116,8 @@ export default async function ForSuppliersPage() {
                 {offer.launchValue === "₹0" ? "Zero commission" : `${offer.launchValue} commission`} {offer.launchNote}
               </h2>
               <p className="type-body-sm text-body">
-                Listing is free. After the offer, a commission applies only to orders paid through H2 India, capped per
-                order.
+                Listing is free. After the offer, a commission applies only to orders paid through H2 Economy, capped
+                per order.
               </p>
               <p className="type-caption text-secondary">
                 GST TCS and income-tax TDS still apply to payouts, as the law requires.

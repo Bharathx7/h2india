@@ -16,7 +16,7 @@ import { milestoneWord } from "@/orders/views";
 // one main action of each state, pay the advance (330:26743) and the balance (339:27238), payment outcomes
 // (691:12 to 691:1014), accept or report (330:27033), dispute (697:579) and refund status (700:8). Built from the
 // supplier frames and the design system while Figma is out of reach (A178).
-export const metadata: Metadata = { title: "Order · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Order · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);
@@ -290,7 +290,7 @@ export default async function BuyerOrderPage({
               ) : null}
               {dispute.status === "Under review" ? (
                 <p className="type-body-sm text-body">
-                  H2 India is reviewing the evidence and will decide within 5 working days.
+                  H2 Economy is reviewing the evidence and will decide within 5 working days.
                 </p>
               ) : null}
               {dispute.status === "Resolved" ? (

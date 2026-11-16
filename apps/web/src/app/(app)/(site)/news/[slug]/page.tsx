@@ -13,7 +13,7 @@ type Params = Promise<{ slug: string }>;
 const LATEST = { title: "Latest", description: "Every story from the newsroom, newest first. Times in IST." };
 const PRESS = {
   title: "Press releases",
-  description: "Supplied by companies and published as received. Not edited or verified by H2 India.",
+  description: "Supplied by companies and published as received. Not edited or verified by H2 Economy.",
 };
 
 async function resolve(slug: string) {
@@ -35,17 +35,17 @@ async function resolve(slug: string) {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const found = await resolve(slug);
-  if (!found) return { title: "Not found · H2 India" };
+  if (!found) return { title: "Not found · H2 Economy" };
   if (found.kind === "listing") {
     return {
-      title: `${found.title} · News · H2 India`,
+      title: `${found.title} · News · H2 Economy`,
       description: found.description ?? undefined,
       alternates: { canonical: `/news/${slug}` },
     };
   }
   const a = found.article;
   return {
-    title: `${a.seo?.title ?? a.title} · H2 India`,
+    title: `${a.seo?.title ?? a.title} · H2 Economy`,
     description: a.seo?.description ?? a.dek,
     alternates: { canonical: `/news/${a.slug}` },
     openGraph: { type: "article", title: a.title, description: a.dek, publishedTime: a.publishedAt ?? undefined },

@@ -6,12 +6,12 @@ import { issueDay, issues } from "@/newsletter/data";
 import { ArchiveSignup } from "@/newsletter/forms";
 import { Crumbs, wrap } from "@/opportunities/parts";
 
-// Newsletters archive (445:5885, phone 447:6556): India H₂ Weekly and Tender Alert digest tabs, past issues newest
+// Newsletters archive (445:5885, phone 447:6556): H2 Economy Weekly and Tender Alert digest tabs, past issues newest
 // first (ten at a time, then Show older issues), the sign-up box and In every issue.
 
 export const metadata: Metadata = {
-  title: "Newsletters · H2 India",
-  description: "Indian hydrogen news, tenders and schemes in your inbox. Read past issues of India H₂ Weekly.",
+  title: "Newsletters · H2 Economy",
+  description: "Indian hydrogen news, tenders and schemes in your inbox. Read past issues of H2 Economy Weekly.",
   alternates: { canonical: "/newsletter" },
 };
 export const dynamic = "force-dynamic";

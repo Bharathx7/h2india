@@ -9,16 +9,16 @@ import { NewsBand } from "@/news/client";
 import { Crumbs, wrap } from "@/opportunities/parts";
 import { ShareButton } from "@/news/client";
 
-// An issue of India H₂ Weekly (446:6106, phone 447:6734): eyebrow, title, Subscribe and share, read time, the numbered
+// An issue of H2 Economy Weekly (446:6106, phone 447:6734): eyebrow, title, Subscribe and share, read time, the numbered
 // sections, Manage preferences · Unsubscribe · Report a correction, and the previous and next issue.
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const i = await issue((await params).slug);
-  if (!i) return { title: "Issue not found · H2 India" };
+  if (!i) return { title: "Issue not found · H2 Economy" };
   return {
-    title: `${i.title} · India H₂ Weekly #${String(i.number)}`,
+    title: `${i.title} · H2 Economy Weekly #${String(i.number)}`,
     description: (i.highlights ?? []).map((h) => h.text).join(". "),
     alternates: { canonical: `/newsletter/issues/${i.slug}` },
   };
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function IssuePage({ params }: { params: Promise<{ slug: string }> }) {
   const i = await issue((await params).slug);
   if (!i) notFound();
-  const list = NEWSLETTER_LISTS.find((l) => l.value === i.list)?.label ?? "India H₂ Weekly";
+  const list = NEWSLETTER_LISTS.find((l) => l.value === i.list)?.label ?? "H2 Economy Weekly";
   const siblings = await issues(i.list);
   const at = siblings.findIndex((x) => x.id === i.id);
   const previous = at >= 0 ? siblings[at + 1] : undefined;

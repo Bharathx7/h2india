@@ -1303,7 +1303,7 @@ export type DisputeOffer = (typeof DISPUTE_OFFERS)[number];
 
 /**
  * The supplier's response (813:12602): replace at their cost, offer a partial refund, or disagree and explain, with
- * photos or documents. The buyer can accept the offer; either side can ask H2 India to decide.
+ * photos or documents. The buyer can accept the offer; either side can ask H2 Economy to decide.
  */
 export async function replyToDispute(
   db: Database,
@@ -1424,7 +1424,7 @@ export async function acceptDisputeOffer(
   );
 }
 
-/** "Ask H2 India to decide" (813:12602): either side moves the dispute to Under review for an operator (11.5). */
+/** "Ask H2 Economy to decide" (813:12602): either side moves the dispute to Under review for an operator (11.5). */
 export async function escalateDispute(
   db: Database,
   actor: Actor,
@@ -1446,7 +1446,8 @@ export async function escalateDispute(
         : null;
   if (!side) throw new OrderError("No such dispute");
   assertCan(actor, side === "buyer" ? "order.place" : "order.manage", { organisationId });
-  if (row.d.status === "Resolved" || row.d.status === "Under review") throw new OrderError("H2 India is already on it");
+  if (row.d.status === "Resolved" || row.d.status === "Under review")
+    throw new OrderError("H2 Economy is already on it");
   await db
     .update(schema.disputes)
     .set({ status: "Under review", escalatedBy: side, escalatedAt: new Date(), updatedAt: new Date() })

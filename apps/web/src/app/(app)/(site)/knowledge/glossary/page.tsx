@@ -9,7 +9,7 @@ import { Crumbs, wrap } from "@/opportunities/parts";
 // searched and "Missing a term?". Each term opens its page (735:3810).
 
 export const metadata: Metadata = {
-  title: "Hydrogen glossary · H2 India",
+  title: "Hydrogen glossary · H2 Economy",
   description: "Terms used in India's hydrogen industry, each explained in plain language.",
   alternates: { canonical: "/knowledge/glossary" },
 };

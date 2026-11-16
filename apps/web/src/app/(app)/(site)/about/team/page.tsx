@@ -7,8 +7,8 @@ import { initials } from "@/trust/views";
 // Management team (66:3923): people entered in Team and advisors, only those who agreed to be shown.
 
 export const metadata: Metadata = {
-  title: "Team and advisors · H2 India",
-  description: "The people who run H2 India and answer for every verification decision.",
+  title: "Team and advisors · H2 Economy",
+  description: "The people who run H2 Economy and answer for every verification decision.",
   alternates: { canonical: "/about/team" },
 };
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export default async function TeamPage() {
     <main id="main" className={main}>
       <PageHead
         title="Management Team"
-        lead="The people who run H2 India and answer for every verification decision."
+        lead="The people who run H2 Economy and answer for every verification decision."
       />
       <div className={cx(wrap, "flex flex-col gap-10 pt-8")}>
         {groups.length ? (

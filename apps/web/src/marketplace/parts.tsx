@@ -77,7 +77,7 @@ export function ClassTile({ c }: { c: PublicClass }) {
 
 const STEPS = [
   { title: "Describe what you need", text: "Specs, quantity, delivery site and the date you need it on site." },
-  { title: "H2 India checks it", text: "We review every request within 1 working day before it goes out." },
+  { title: "H2 Economy checks it", text: "We review every request within 1 working day before it goes out." },
   { title: "Compare and choose", text: "Quotes arrive in one format. Accept the best one and order." },
 ];
 
@@ -92,7 +92,7 @@ export function RfqBand() {
             Send one request to up to 5 verified suppliers
           </h2>
           <p className="type-body text-body">
-            H2 India checks every request within 1 working day. Suppliers then quote in the same format, so you can
+            H2 Economy checks every request within 1 working day. Suppliers then quote in the same format, so you can
             compare them side by side.
           </p>
           <Link href="/rfq/new" className={buttonClasses({ size: "lg" })}>

@@ -10,9 +10,9 @@ import type { AudienceFaq, HelpArticle, LegalPage, Pricing, TeamMember, TrustSet
 
 const payload = () => getPayload({ config });
 
-/** The name H2 India's own job posts carry, so Careers lists them from the jobs board ("Listed on the H2 India jobs
+/** The name H2 Economy's own job posts carry, so Careers lists them from the jobs board ("Listed on the H2 Economy jobs
  * board too", 742:826). */
-export const OWN_COMPANY = "H2 India";
+export const OWN_COMPANY = "H2 Economy";
 
 export type Figure = { value: string; label: string; source: string; asOf: string };
 
@@ -34,7 +34,7 @@ const PLACEHOLDER = {
   company: "[Operating company name] Private Limited",
   office: "[Registered office address]",
   officer: "[Grievance officer]",
-  email: "grievance@[H2 India domain]",
+  email: "grievance@[H2 Economy domain]",
 };
 
 export async function trustDetails(): Promise<TrustDetails> {
@@ -51,7 +51,7 @@ export async function trustDetails(): Promise<TrustDetails> {
     disclosureDate: s.disclosureDate ?? null,
     officer: {
       name: named(s.grievanceOfficer?.name) ?? PLACEHOLDER.officer,
-      designation: s.grievanceOfficer?.designation || "Grievance Officer, H2 India",
+      designation: s.grievanceOfficer?.designation || "Grievance Officer, H2 Economy",
       email: s.grievanceOfficer?.email || PLACEHOLDER.email,
     },
     partnerships: { name: named(s.partnerships?.name), role: s.partnerships?.role || "Head of Partnerships" },
@@ -111,7 +111,7 @@ export async function audienceFaqs(): Promise<AudienceFaq> {
   return (await payload()).findGlobal({ slug: "audience-faqs", depth: 0 });
 }
 
-/** H2 India's own open roles (742:826), from the jobs board. */
+/** H2 Economy's own open roles (742:826), from the jobs board. */
 export async function openRoles(now = new Date()): Promise<JobView[]> {
   return (await allJobs())
     .filter((j) => j.company === OWN_COMPANY)

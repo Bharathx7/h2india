@@ -5,8 +5,8 @@ import { articleChoices, articleForm, editorActor } from "@/admin/cms/articles";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { STATE_OPTIONS } from "@/cms/records/states";
 
-// Edit an article (step 4.6): the latest draft in the H2 India article editor, with its workflow.
-export const metadata: Metadata = { title: "Article · H2 India admin", robots: { index: false } };
+// Edit an article (step 4.6): the latest draft in the H2 Economy article editor, with its workflow.
+export const metadata: Metadata = { title: "Article · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {

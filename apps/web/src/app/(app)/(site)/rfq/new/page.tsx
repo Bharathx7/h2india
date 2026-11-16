@@ -16,7 +16,7 @@ import { getSession } from "@/server/auth";
 // compare, a project list, a supplier profile or the header button. Signed-out visitors can fill it in; it waits in
 // their browser until they sign in or join (399:11005). ?draft= resumes a draft or a returned RFQ (399:11227).
 export const metadata: Metadata = {
-  title: "Request a quote · H2 India",
+  title: "Request a quote · H2 Economy",
   description: "One request, up to 5 verified suppliers.",
   alternates: { canonical: "/rfq/new" },
 };

@@ -4,12 +4,12 @@ import { cx } from "@h2india/ui";
 import { siteViewer } from "@/server/site";
 import { main, PageHead, wrap } from "@/trust/parts";
 
-// Sitemap (742:1338): every section of H2 India in one place, as drawn. The machine sitemap is /sitemap.xml.
+// Sitemap (742:1338): every section of H2 Economy in one place, as drawn. The machine sitemap is /sitemap.xml.
 // The Directory group shows only to signed-in people (public QC, 16 Nov 2026).
 
 export const metadata: Metadata = {
-  title: "Sitemap · H2 India",
-  description: "Every section of H2 India in one place.",
+  title: "Sitemap · H2 Economy",
+  description: "Every section of H2 Economy in one place.",
   alternates: { canonical: "/sitemap" },
 };
 
@@ -44,7 +44,7 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
     links: [
       ["Latest news", "/news"],
       ["Insights", "/knowledge/insights"],
-      ["India H₂ Weekly", "/newsletter"],
+      ["H2 Economy Weekly", "/newsletter"],
       ["Press releases", "/news/press-releases"],
       ["Submit a press release", "/news/submit"],
     ],
@@ -141,7 +141,7 @@ export default async function SitemapPage() {
       <PageHead
         crumbs={[{ label: "Company", href: "/about" }, { label: "Sitemap" }]}
         title="Sitemap"
-        lead="Every section of H2 India in one place."
+        lead="Every section of H2 Economy in one place."
       />
       <div className={cx(wrap, "grid grid-cols-2 gap-x-6 gap-y-10 pt-8 md:grid-cols-3 lg:grid-cols-5")}>
         {groups.map((g) => (

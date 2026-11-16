@@ -9,7 +9,7 @@ import { Crumbs, wrap } from "@/opportunities/parts";
 // frame is drawn; this is the knowledge home's guide tiles at full length.
 
 export const metadata: Metadata = {
-  title: "Buyer's guides · H2 India",
+  title: "Buyer's guides · H2 Economy",
   description: "How to specify and buy hydrogen equipment in India, category by category.",
   alternates: { canonical: "/knowledge/guides" },
 };

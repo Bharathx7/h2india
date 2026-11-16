@@ -187,7 +187,7 @@ export const Prelaunch: GlobalConfig = {
 };
 
 export const EARLY_LISTING_CONSENT =
-  "H2 India may use these details to contact you about setting up your company profile before launch.";
+  "H2 Economy may use these details to contact you about setting up your company profile before launch.";
 
 export const EarlyListings: CollectionConfig = {
   slug: "early-listings",

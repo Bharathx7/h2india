@@ -10,7 +10,7 @@ import { PreferencesForm, type PreferenceRow } from "@/member/PreferencesForm";
 
 // Newsletters and notifications (548:8; phones 549:15), step 7.4. These are the choices notify() reads before every
 // send, so a channel turned off here stops with the next message.
-export const metadata: Metadata = { title: "Preferences · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Preferences · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function PreferencesPage() {

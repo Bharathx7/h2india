@@ -117,7 +117,7 @@ describe.skipIf(!url)("RFQ moderation", () => {
     expect(row?.status).toBe("Closed");
     expect(row?.closeReason).toBe("rejected");
   });
-  it("let H2 India suggest suppliers: goes to moderation with none chosen; the moderator adds verified ones (A164)", async () => {
+  it("let H2 Economy suggest suppliers: goes to moderation with none chosen; the moderator adds verified ones (A164)", async () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const { id } = await createRfq(h.db, admin, buyer.org.id, {
       title: "Compressors, suggest suppliers",

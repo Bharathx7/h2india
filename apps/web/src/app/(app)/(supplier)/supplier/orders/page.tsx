@@ -12,7 +12,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Supplier orders pipeline (810:12156; phones 811:12343; states 811:12517), step 10.7. The stage tiles filter the
 // open orders (?stage=); Paid out counts orders closed this month. ?state= forces the designed states.
-export const metadata: Metadata = { title: "Orders · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Orders · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SupplierOrdersPage({

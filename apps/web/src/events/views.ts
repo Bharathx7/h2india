@@ -69,7 +69,7 @@ export function eventCard(e: Event, now = new Date()): EventCard {
   const eyebrow = [
     e.featured ? null : e.eventType === "Conference and expo" ? "Conference and expo" : e.eventType,
     where,
-    isWebinar(e) ? (sponsor ? "Sponsored" : e.organiser === "H2 India" ? "H2 India" : null) : null,
+    isWebinar(e) ? (sponsor ? "Sponsored" : e.organiser === "H2 Economy" ? "H2 Economy" : null) : null,
   ]
     .filter(Boolean)
     .join(" · ")
@@ -230,7 +230,7 @@ export function icsFile(
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//H2 India//Events//EN",
+    "PRODID:-//H2 Economy//Events//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

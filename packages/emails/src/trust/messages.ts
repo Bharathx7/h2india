@@ -19,7 +19,7 @@ export interface GrievanceDetails {
   resolveBy: string;
   /** "our listings team is checking the certificate with the supplier": the team's line, if any. */
   teamLine: string | null;
-  /** "Anjali Deshmukh, Grievance Officer, H2 India · grievance@… · address", from the Trust settings (M2). */
+  /** "Anjali Deshmukh, Grievance Officer, H2 Economy · grievance@… · address", from the Trust settings (M2). */
   officer: string;
   signature: string;
   statusUrl: string;
@@ -35,7 +35,7 @@ export function grievanceMessage(d: GrievanceDetails): Message {
     preview: d.acknowledged
       ? `${team ?? "We're checking it"}. Outcome by ${d.resolveBy}.`
       : `We'll acknowledge it within 24 hours. Outcome by ${d.resolveBy}.`,
-    reason: "You're getting this because you raised a complaint with H2 India.",
+    reason: "You're getting this because you raised a complaint with H2 Economy.",
     eyebrow: `Grievance · ${d.reference}`,
     headline: "We've received your complaint",
     paragraphs: [

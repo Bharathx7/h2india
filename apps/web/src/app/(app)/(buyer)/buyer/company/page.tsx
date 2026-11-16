@@ -25,7 +25,7 @@ import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/
 
 // Company settings (step 9.1): Company profile 574:8, GSTINs 574:638, Delivery sites 575:331, Users and roles 575:696,
 // Approval rules 576:300, Security 576:662; Notifications (577:288) are the person's own choices on /notifications.
-export const metadata: Metadata = { title: "Company settings · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Company settings · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const SECTIONS: { key: string; label: string; icon: IconName }[] = [

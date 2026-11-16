@@ -14,16 +14,16 @@ import { Crumbs, wrap } from "@/opportunities/parts";
 import type { Author } from "@/payload-types";
 
 // A buyer's guide (472:2135; phones 473:3363, step 5.6): what the equipment is, how to compare it, the Indian
-// approvals and what to ask, with "On this page", who it's for and "Ready to buy?". "Compressors on H2 India" (live
+// approvals and what to ask, with "On this page", who it's for and "Ready to buy?". "Compressors on H2 Economy" (live
 // products) joins with the marketplace in Stage 6. A guide without product categories is an Insights piece.
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const g = await getGuideRecord((await params).slug);
-  if (!g) return { title: "Not found · H2 India" };
+  if (!g) return { title: "Not found · H2 Economy" };
   return {
-    title: `${g.title} · H2 India`,
+    title: `${g.title} · H2 Economy`,
     description: g.summary,
     alternates: { canonical: `/knowledge/guides/${g.slug}` },
   };
@@ -32,7 +32,7 @@ export const dynamic = "force-dynamic";
 
 const STEPS = [
   { title: "Describe what you need", text: "Specs, quantity, delivery site and the date you need it on site." },
-  { title: "H2 India checks it", text: "We review every request within 1 working day before it goes out." },
+  { title: "H2 Economy checks it", text: "We review every request within 1 working day before it goes out." },
   { title: "Compare and choose", text: "Quotes arrive in one format. Accept the best one and order." },
 ];
 
@@ -144,7 +144,7 @@ export default async function BuyersGuidePage({ params }: { params: Params }) {
               Send one request to up to 5 verified suppliers
             </h2>
             <p className="type-body-sm text-body">
-              H2 India checks every request within 1 working day. Suppliers then quote in the same format, so you can
+              H2 Economy checks every request within 1 working day. Suppliers then quote in the same format, so you can
               compare them side by side.
             </p>
             <Link href={quote} className={cx(buttonClasses({ variant: "primary" }), "self-start")}>

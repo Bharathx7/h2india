@@ -3,7 +3,7 @@
 // decides the tool and any others. Bump COOKIE_CONSENT_VERSION when the categories or the banner's words change, so
 // everyone is asked again.
 
-export const COOKIE_CONSENT_VERSION = "cookies-2026-11-13";
+export const COOKIE_CONSENT_VERSION = "cookies-2026-11-16";
 export const CONSENT_COOKIE = "h2_consent";
 /** A year, then we ask again. */
 export const CONSENT_MAX_AGE = 365 * 24 * 3600;

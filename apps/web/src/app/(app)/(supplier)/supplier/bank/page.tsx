@@ -10,7 +10,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Payout bank account (588:222): Current account 588:223, Change account confirm 588:748, Hold period 588:1179 and
 // 589:8, Verification failed 588:1586. Only the last four digits are shown. The Next payout card arrives with payouts.
-export const metadata: Metadata = { title: "Payout bank account · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Payout bank account · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const dots = "•••• ••••";
@@ -69,7 +69,7 @@ export default async function BankPage() {
       <div>
         <h1 className="type-h2">Payout bank account</h1>
         <p className="type-body-sm text-secondary">
-          Where H2 India sends your payouts. The account name must match your GST legal name.
+          Where H2 Economy sends your payouts. The account name must match your GST legal name.
         </p>
       </div>
       {change?.status === "Held" && change.holdUntil ? (

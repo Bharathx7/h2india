@@ -2,7 +2,7 @@ import { Heading, Link, Section, Text } from "@react-email/components";
 import { EmailLayout } from "../layout";
 import { colour, type } from "../theme";
 
-// An India H₂ Weekly issue as subscribers get it (composer preview 648:312, step 11.3): the editor's note, then the
+// An H2 Economy Weekly issue as subscribers get it (composer preview 648:312, step 11.3): the editor's note, then the
 // sections, each a list of linked items, and the footer with Manage preferences and Unsubscribe. No prices.
 
 export interface IssueSection {
@@ -16,14 +16,14 @@ export interface IssueChart {
   title: string;
   unit: string;
   bars: { label: string; value: number }[];
-  /** "H2 India · India Hydrogen Tracker, as of 10 Nov 2026" */
+  /** "H2 Economy · India Hydrogen Tracker, as of 10 Nov 2026" */
   source: string;
 }
 
 export interface NewsletterIssueProps {
   appUrl: string;
   title: string;
-  /** "India H₂ Weekly · #5 · Fri 13 Nov 2026" */
+  /** "H2 Economy Weekly · #5 · Fri 13 Nov 2026" */
   masthead: string;
   preview: string;
   editorNote: string;
@@ -39,7 +39,7 @@ export function NewsletterIssue(p: NewsletterIssueProps) {
     <EmailLayout
       appUrl={p.appUrl}
       preview={p.preview}
-      reason="You get this because you subscribed to India H₂ Weekly."
+      reason="You get this because you subscribed to H2 Economy Weekly."
       preferencesHref={p.manageUrl}
       footerLinks={[{ label: "Unsubscribe", href: p.unsubscribeUrl }]}
     >

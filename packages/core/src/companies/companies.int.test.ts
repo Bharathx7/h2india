@@ -61,7 +61,7 @@ describe.skipIf(!url)("companies and join requests", () => {
       S3_BUCKET_PUBLIC: "public",
       SMTP_HOST: "localhost",
       SMTP_PORT: "1025",
-      EMAIL_FROM: "H2 India <test@h2india.local>",
+      EMAIL_FROM: "H2 Economy <test@h2india.local>",
     });
     h = createDb(url ?? "", { max: 10 });
   });

@@ -16,7 +16,7 @@ import { QueueTabs } from "../QueueTabs";
 
 // Queues · Suppliers (627:8), Content (629:1625), Events (630:8), Jobs (630:570) and Comments (630:968), with their
 // states (630:1593), step 11.2. Listings and RFQs have their own pages. Age turns amber at 24 hours and red at 48.
-export const metadata: Metadata = { title: "Queues · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Queues · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const VIEWS = [

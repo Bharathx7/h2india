@@ -43,16 +43,16 @@ export function SuspendedBanner({
     >
       {reason ? `Reason: ${reason}. ` : ""}
       {waiting
-        ? "Your appeal is with H2 India. We'll tell you the decision."
+        ? "Your appeal is with H2 Economy. We'll tell you the decision."
         : appeal?.status === "Upheld"
           ? `Your last appeal was not accepted: ${appeal.note ?? ""}`
-          : "If you think this is a mistake, appeal and H2 India will review it."}
+          : "If you think this is a mistake, appeal and H2 Economy will review it."}
       <Modal
         open={open}
         onOpenChange={setOpen}
         width={480}
         title="Appeal the suspension"
-        description="Tell us why the suspension should be lifted and what you've done about the reason. A person at H2 India reviews it."
+        description="Tell us why the suspension should be lifted and what you've done about the reason. A person at H2 Economy reviews it."
         footer={
           <div className="flex justify-end gap-3">
             <Button

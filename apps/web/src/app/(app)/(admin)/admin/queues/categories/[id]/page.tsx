@@ -11,7 +11,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Category request (supplier QC, 16 Nov 2026). No Figma frame: built like the moderation pages (633:8). Shows what the
 // supplier asked for and where; the operator approves (adds the category) or rejects with a reason.
-export const metadata: Metadata = { title: "Category request · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Category request · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const UUID = /^[0-9a-f-]{36}$/i;

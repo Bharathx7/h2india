@@ -17,7 +17,7 @@ import { CompareTable } from "./CompareTable";
 // Compare (91:9; phones 98:3084; empty 128:23596, loading 128:23616, error 128:23655), step 6.5. The products come
 // from the address (?ids=), or for a signed-in person with none in the address, from their saved selection.
 export const metadata: Metadata = {
-  title: "Compare products · H2 India",
+  title: "Compare products · H2 Economy",
   description: "Compare hydrogen products side by side by specification.",
   alternates: { canonical: "/marketplace/compare" },
 };

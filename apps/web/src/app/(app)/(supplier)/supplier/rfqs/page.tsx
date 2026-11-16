@@ -12,7 +12,7 @@ import { dueBadge, inboxTab, quoteBadge, type InboxTab } from "@/supplier/rfq/vi
 
 // RFQ inbox (615:8; phones 616:346; states 621:1030), step 9.5: every RFQ sent to the company, by tab. ?state= forces
 // the designed loading, empty and error states.
-export const metadata: Metadata = { title: "RFQs · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQs · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS: { key: InboxTab; label: string }[] = [

@@ -11,7 +11,7 @@ import { shellFor } from "@/server/workspace";
 
 // Supplier home (step 8.1): the onboarding checklist (584:8; phones 585:15) until all five steps are done, then the
 // dashboard (584:961; phones 585:536). Both read the supplier's own records only. Order cards wait for transactions.
-export const metadata: Metadata = { title: "Supplier · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Supplier · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 function Step({ item, index }: { item: ChecklistItem; index: number }) {
@@ -56,11 +56,11 @@ export default async function SupplierHome() {
       <SupplierShell page={page} current="/supplier" title="Getting started">
         {s.verification !== "Verified" ? (
           <Alert tone="success" title="Verification in progress">
-            You can keep drafting. Publishing unlocks after H2 India approves your company.
+            You can keep drafting. Publishing unlocks after H2 Economy approves your company.
           </Alert>
         ) : null}
         <div>
-          <h1 className="type-h2">Set up {s.tradeName} on H2 India</h1>
+          <h1 className="type-h2">Set up {s.tradeName} on H2 Economy</h1>
           <p className="type-body-sm text-secondary">
             Five steps to go live. Buyers can find you once your company and first listing are approved.
           </p>

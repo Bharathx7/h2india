@@ -12,7 +12,7 @@ import { AssignButton, RfqDecision } from "../Decision";
 
 // Moderation · RFQ (632:1138), step 9.4: what the buyer sent, the seriousness checklist, the decision and the audit
 // trail. Approving sends RFQ received to every chosen supplier; Request changes sends RFQ returned to the buyer.
-export const metadata: Metadata = { title: "RFQ moderation · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQ moderation · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function RfqModerationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,7 +23,7 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
   const item = d.items[0];
   const failed = d.checks.filter((c) => !c.ok).length;
   const open = d.rfq.status === "In moderation";
-  // "Let H2 India suggest suppliers" (A164): verified suppliers that fit, for the moderator to add.
+  // "Let H2 Economy suggest suppliers" (A164): verified suppliers that fit, for the moderator to add.
   const chosen = new Set(d.suppliers.map((s) => s.organisationId));
   const candidates =
     open && d.rfq.suggestSuppliers
@@ -55,7 +55,7 @@ export default async function RfqModerationPage({ params }: { params: Promise<{ 
       "Suppliers",
       [
         d.suppliers.map((s) => s.name).join(" · "),
-        d.rfq.suggestSuppliers ? "The buyer asked H2 India to suggest suppliers" : "",
+        d.rfq.suggestSuppliers ? "The buyer asked H2 Economy to suggest suppliers" : "",
       ]
         .filter(Boolean)
         .join(" · ") || "None chosen",

@@ -10,7 +10,7 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 
 // Saved lists (78:2628), step 9.1. ?list= picks the list; ?state=loading|error|empty forces the designed states.
-export const metadata: Metadata = { title: "Saved lists · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Saved lists · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ListsPage({

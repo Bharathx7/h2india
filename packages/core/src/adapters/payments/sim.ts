@@ -7,7 +7,7 @@ import { must } from "../../must";
 
 // The simulated payment partner (A176). It behaves like a partner sandbox: each order gets its own virtual account,
 // checkout opens our test pay page (/dev/pay/<paymentId>) where the tester chooses Succeed, Fail, Pending or Time out,
-// and every outcome reaches H2 India only as a signed webhook through the same pipeline a real partner uses. Refunds and
+// and every outcome reaches H2 Economy only as a signed webhook through the same pipeline a real partner uses. Refunds and
 // payouts settle a few seconds later (the worker's tick delivers them), so screens show Processing first. No money
 // moves. Its own records (core.sim_partner_events) feed the settlement report, so reconciliation has two sides.
 
@@ -65,7 +65,7 @@ export function simPartner(getDb: () => Database): PaymentPartner {
       return Promise.resolve({
         accountNo: `2223${digits(orderRef, 10)}`,
         ifsc: "SIMB0000001",
-        payeeName: "H2 India order account (simulated)",
+        payeeName: "H2 Economy order account (simulated)",
       });
     },
 

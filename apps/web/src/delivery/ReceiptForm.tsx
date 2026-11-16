@@ -51,7 +51,7 @@ export function ReceiptForm({ token, reference }: { token: string; reference: st
         title={result.state === "locked" ? "This link is locked" : "This link can't be used any more"}
       >
         {result.state === "locked"
-          ? "Too many wrong codes. H2 India has been told and will send a new code or confirm the delivery with you."
+          ? "Too many wrong codes. H2 Economy has been told and will send a new code or confirm the delivery with you."
           : "The delivery was already recorded, or the link has expired."}
       </Alert>
     );

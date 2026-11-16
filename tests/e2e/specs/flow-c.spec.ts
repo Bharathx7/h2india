@@ -40,7 +40,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   await enterCode(page, await requestCode(page, email));
   await expect(page.getByRole("heading", { name: "Set up a passkey" })).toBeVisible();
   await page.getByRole("button", { name: "Create passkey" }).click();
-  await expect(page.getByRole("heading", { name: "Join H2 India" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
   await page.getByText("Supplier company", { exact: true }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByLabel("Company name or GSTIN").fill("zz-no-such-company");
@@ -57,7 +57,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
 
   // 2 The onboarding checklist.
   await page.goto("/supplier");
-  await expect(page.getByRole("heading", { name: `Set up ${company} on H2 India` })).toBeVisible();
+  await expect(page.getByRole("heading", { name: `Set up ${company} on H2 Economy` })).toBeVisible();
 
   // 3 Verification documents: GST certificate and PAN.
   for (const [doc, number, file] of [
@@ -128,7 +128,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
     await page.getByLabel("Lead time, shortest").fill("14");
     await page.getByLabel("Lead time, longest").fill("16");
     await page.getByRole("button", { name: "Submit for review" }).click();
-    await expect(page.getByText("Sent to H2 India for review. We'll email you when it's checked.")).toBeVisible();
+    await expect(page.getByText("Sent to H2 Economy for review. We'll email you when it's checked.")).toBeVisible();
   }
 
   // 7 Submit the company for review from the checklist.

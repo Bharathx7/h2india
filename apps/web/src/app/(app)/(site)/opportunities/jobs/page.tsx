@@ -15,7 +15,7 @@ import { siteViewer } from "@/server/site";
 // jobs for free and an editor checks each one before it shows (A68). Job alerts arrive in step 7.3 (A71).
 
 export const metadata: Metadata = {
-  title: "Hydrogen jobs in India · H2 India",
+  title: "Hydrogen jobs in India · H2 Economy",
   description: "Open roles at hydrogen companies, labs and agencies in India.",
   alternates: { canonical: "/opportunities/jobs" },
 };

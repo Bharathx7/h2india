@@ -103,7 +103,7 @@ describe.skipIf(!url)("admin companies", () => {
       email: person?.email ?? "",
       role: "Admin",
       invitedBy: adminId,
-      inviterRole: "H2 India team",
+      inviterRole: "H2 Economy team",
     });
     // Someone who never went through Join agrees to the Terms when accepting.
     await expect(acceptInvitation(h.db, owner.id, token)).rejects.toThrow("Terms");

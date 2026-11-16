@@ -6,9 +6,9 @@ import { buttonClasses, EmptyState, Icon } from "@h2india/ui";
 import type { Metadata } from "next";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
-// Analytics · last 30 days (814:12112), step 8.8, from H2 India's own records. RFQ, quote win rate and response time
+// Analytics · last 30 days (814:12112), step 8.8, from H2 Economy's own records. RFQ, quote win rate and response time
 // tiles arrive with RFQs (Stage 9). Open to every supplier until plans are decided (M16).
-export const metadata: Metadata = { title: "Analytics · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Analytics · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const n = (x: number) => new Intl.NumberFormat("en-IN").format(x);
@@ -36,7 +36,7 @@ export default async function AnalyticsPage() {
         <div>
           <h1 className="type-h2">Analytics</h1>
           <p className="type-body-sm text-secondary">
-            How buyers find and respond to {page.supplier.tradeName} on H2 India. Compared with the previous 30 days.
+            How buyers find and respond to {page.supplier.tradeName} on H2 Economy. Compared with the previous 30 days.
           </p>
         </div>
         <div className="flex items-center gap-3">

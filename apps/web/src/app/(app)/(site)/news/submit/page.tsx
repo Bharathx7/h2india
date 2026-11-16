@@ -13,7 +13,7 @@ import { SideBoxes, SignedOut } from "@/submissions/parts";
 // companies are free and always labelled Press release when published.
 
 export const metadata: Metadata = {
-  title: "Submit a press release · H2 India",
+  title: "Submit a press release · H2 Economy",
   description: "Share company news with India's hydrogen industry. Every press release is reviewed and labelled.",
   alternates: { canonical: "/news/submit" },
 };
@@ -51,7 +51,7 @@ export default async function SubmitPressReleasePage() {
                 </Link>
               }
             >
-              Join your company on H2 India, or list it, to send press releases.
+              Join your company on H2 Economy, or list it, to send press releases.
             </EmptyState>
           </div>
         )}

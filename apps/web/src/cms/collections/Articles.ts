@@ -230,7 +230,7 @@ export const Articles: CollectionConfig = {
         {
           name: "disclosure",
           type: "textarea",
-          defaultValue: "This article is paid for by the sponsor. H2 India's editors checked its facts.",
+          defaultValue: "This article is paid for by the sponsor. H2 Economy's editors checked its facts.",
           validate: (value: string | null | undefined, { data }: { data: Partial<ArticleData> }) =>
             data.type !== "sponsored" || (typeof value === "string" && value.trim()) ? true : "Add the disclosure.",
         },

@@ -63,7 +63,8 @@ export function CloseSupportButton({ requestId }: { requestId: string }) {
           void closeSupport(requestId).then((r) => {
             setBusy(false);
             if (r.ok) router.refresh();
-            else setProblem(r.code === "NOT_ALLOWED" ? "Only H2 India support can close this request." : "Try again.");
+            else
+              setProblem(r.code === "NOT_ALLOWED" ? "Only H2 Economy support can close this request." : "Try again.");
           });
         }}
       >

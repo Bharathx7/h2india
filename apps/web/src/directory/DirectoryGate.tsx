@@ -37,7 +37,7 @@ export function DirectoryGate() {
         </span>
         <h1 className="type-h2 text-primary">Sign in to open the Directory</h1>
         <p className="type-body text-body">
-          The Directory of companies, people and associations in India&apos;s hydrogen ecosystem is for H2 India
+          The Directory of companies, people and associations in India&apos;s hydrogen ecosystem is for H2 Economy
           members, buyers and suppliers.
         </p>
         <div className="flex flex-wrap gap-3">

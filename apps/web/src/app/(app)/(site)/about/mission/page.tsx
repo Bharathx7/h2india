@@ -6,7 +6,7 @@ import { card, main, PageHead, wrap } from "@/trust/parts";
 // Mission (741:6475): words as drawn.
 
 export const metadata: Metadata = {
-  title: "Mission · H2 India",
+  title: "Mission · H2 Economy",
   description:
     "Our mission is to help India build its hydrogen economy faster, by making it easy to find the right product, partner, scheme and fact.",
   alternates: { canonical: "/about/mission" },
@@ -24,7 +24,7 @@ const VALUES = [
   { title: "Sourced and dated", text: "Every fact has a source and a date, and we correct mistakes in the open." },
   {
     title: "Useful to everyone",
-    text: "Students, start-ups and PSUs get the same facts. Most of H2 India is free.",
+    text: "Students, start-ups and PSUs get the same facts. Most of H2 Economy is free.",
   },
   {
     title: "Built for India",
@@ -32,7 +32,7 @@ const VALUES = [
   },
   {
     title: "Open about ourselves",
-    text: "We say who runs H2 India and what we sell, and we'll tell you if that changes.",
+    text: "We say who runs H2 Economy and what we sell, and we'll tell you if that changes.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function MissionPage() {
         {[
           {
             title: "The team",
-            text: "Meet the people who run H2 India and answer for every verification decision.",
+            text: "Meet the people who run H2 Economy and answer for every verification decision.",
             label: "Team and advisors",
             href: "/about/team",
           },

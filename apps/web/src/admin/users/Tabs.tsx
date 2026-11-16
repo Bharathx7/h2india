@@ -18,7 +18,7 @@ export function UsersHeader({ action }: { action?: ReactNode }) {
       <div>
         <h1 className="type-h2">Users</h1>
         <p className="type-body-sm text-secondary">
-          Everyone with a H2 India account, the organisations they belong to, operator roles and the audit log.
+          Everyone with a H2 Economy account, the organisations they belong to, operator roles and the audit log.
         </p>
       </div>
       {action}

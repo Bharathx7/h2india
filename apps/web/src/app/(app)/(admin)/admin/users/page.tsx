@@ -13,7 +13,7 @@ import { forcedState } from "@/lib/dev-state";
 
 // Users (651:8; states 657:1313), step 11.4: find anyone by name, email, mobile, company or GSTIN; filter by type,
 // status and passkey.
-export const metadata: Metadata = { title: "Users · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Users · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TYPES = [
@@ -194,7 +194,7 @@ export default async function UsersPage({
                     <td className="px-2 py-3">
                       {x.operator ? (
                         <>
-                          <span className="block type-body-sm">H2 India</span>
+                          <span className="block type-body-sm">H2 Economy</span>
                           <span className="block type-caption text-secondary">{x.operator}</span>
                         </>
                       ) : x.organisation ? (

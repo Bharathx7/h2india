@@ -14,7 +14,7 @@ import { StorefrontDecision } from "./StorefrontDecision";
 
 // Queues · Listings (629:367), step 8.3: every new listing and listing change waiting for a decision, oldest first.
 // Age turns amber at the queueAmber clock and red at queueRed (System settings 707:793). The other queues are 11.2.
-export const metadata: Metadata = { title: "Queues · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Queues · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const VIEWS = [

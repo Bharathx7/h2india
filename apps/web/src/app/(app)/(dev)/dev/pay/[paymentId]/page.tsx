@@ -7,7 +7,7 @@ import { finishCheckout } from "./actions";
 
 // Test pay page of the simulated payment partner (A176). It stands in for the partner's hosted checkout (792:15399)
 // until M3 is connected: no money moves, and whatever is chosen here reaches the order as a signed webhook.
-export const metadata: Metadata = { title: "Simulated checkout · H2 India" };
+export const metadata: Metadata = { title: "Simulated checkout · H2 Economy" };
 
 const METHOD: Record<string, string> = { upi: "UPI", card: "Card", netbanking: "Net banking" };
 
@@ -26,7 +26,8 @@ export default async function SimulatedCheckout({ params }: { params: Promise<{ 
         </p>
       </header>
       <Alert tone="warning" title="Test checkout">
-        No money moves. Choose what the bank does; H2 India hears about it by webhook, as it will from the real partner.
+        No money moves. Choose what the bank does; H2 Economy hears about it by webhook, as it will from the real
+        partner.
       </Alert>
       {facts.status !== "Pending" ? (
         <p className="type-body text-body">This payment is already {facts.status.toLowerCase()}.</p>

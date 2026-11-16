@@ -19,7 +19,7 @@ import { quoteHrefFor } from "@/search/present";
 // knowledge. Products arrive with Stage 6: until then their tab shows its no-results state, and the filter panel, sort
 // and grid/spec-table toggle (built on the category attribute schemas, step 6.1) are not shown. Never a price here.
 
-export const metadata: Metadata = { title: "Search · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Search · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const wrap = "mx-auto w-full max-w-300 px-4 md:px-6 xl:px-0";
@@ -84,12 +84,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 function StartSearch() {
   return (
     <>
-      <h1 className="mt-4 type-h1 text-primary md:mt-6">Search H2 India</h1>
+      <h1 className="mt-4 type-h1 text-primary md:mt-6">Search H2 Economy</h1>
       <p className="mt-2 type-body text-secondary">Find products, suppliers, news, schemes and tenders.</p>
       <form role="search" action="/search" className="mt-6 flex max-w-180 flex-col gap-3 md:flex-row">
         <label className="flex h-12 flex-1 items-center gap-2 rounded-pill border border-input bg-page px-4 focus-within:field-focus">
           <Icon name="search" size={20} className="text-icon-primary" />
-          <span className="sr-only">Search H2 India</span>
+          <span className="sr-only">Search H2 Economy</span>
           <input
             type="search"
             name="q"

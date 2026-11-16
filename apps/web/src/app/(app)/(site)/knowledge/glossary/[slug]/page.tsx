@@ -16,9 +16,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const t = await getTerm((await params).slug);
-  if (!t) return { title: "Not found · H2 India" };
+  if (!t) return { title: "Not found · H2 Economy" };
   return {
-    title: `${t.term}${t.expansion ? ` (${t.expansion})` : ""} · Hydrogen glossary · H2 India`,
+    title: `${t.term}${t.expansion ? ` (${t.expansion})` : ""} · Hydrogen glossary · H2 Economy`,
     description: t.short,
     alternates: { canonical: `/knowledge/glossary/${t.slug}` },
   };

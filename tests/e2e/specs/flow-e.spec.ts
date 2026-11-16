@@ -49,7 +49,7 @@ test("flow E: a reader becomes a subscriber and a member", async ({ page }) => {
       async () => {
         const r = await page.request.get(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`);
         const list = ((await r.json()) as { messages?: { ID: string; Subject: string }[] }).messages ?? [];
-        id = list.find((m) => /India H₂ Weekly/.test(m.Subject))?.ID ?? "";
+        id = list.find((m) => /H2 Economy Weekly/.test(m.Subject))?.ID ?? "";
         return id;
       },
       { message: "the confirmation email", timeout: 30_000 },
@@ -64,9 +64,9 @@ test("flow E: a reader becomes a subscriber and a member", async ({ page }) => {
   // 6 Member onboarding: the same address becomes a member.
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  // A new person is offered a passkey ("Not now") and then Join H2 India, as in signInNew().
+  // A new person is offered a passkey ("Not now") and then Join H2 Economy, as in signInNew().
   const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 India" }))).toBeVisible();
+  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
   if (await notNow.isVisible()) await notNow.click();
   await page.goto("/member");
   await expect(page).toHaveURL(/\/member\/welcome$/);

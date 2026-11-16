@@ -10,7 +10,7 @@ import { typeBadge, ARTICLE_TYPES } from "@/cms/types";
 
 // Preview of a draft for editors (step 4.1, "Preview" on 639:8). Only signed-in editors; the public article page with
 // every header variant comes with the newsroom in step 5.3.
-export const metadata: Metadata = { title: "Preview · H2 India CMS", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Preview · H2 Economy CMS", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ArticlePreview({ params }: { params: Promise<{ id: string }> }) {

@@ -2,7 +2,7 @@ import { Button, Column, Heading, Row, Section, Text } from "@react-email/compon
 import { EmailLayout } from "../layout";
 import { colour, type } from "../theme";
 
-// India H₂ Weekly emails (step 5.1, A46). "Confirm your subscription" is drawn (676:8); its envelope describes the
+// H2 Economy Weekly emails (step 5.1, A46). "Confirm your subscription" is drawn (676:8); its envelope describes the
 // welcome variant sent after confirming. "Already subscribed" is not drawn (M21) and uses the same frame.
 
 /** What each issue covers, in the words of 676:8. */
@@ -62,7 +62,7 @@ function Frame(props: {
       reason={props.reason}
       preferencesHref={props.preferencesHref}
     >
-      <Text style={{ ...type.eyebrow, color: colour.secondary, margin: "0 0 8px" }}>India H₂ Weekly</Text>
+      <Text style={{ ...type.eyebrow, color: colour.secondary, margin: "0 0 8px" }}>H2 Economy Weekly</Text>
       <Heading as="h1" style={{ ...type.h2, color: colour.primary, margin: "0 0 8px" }}>
         {props.headline}
       </Heading>
@@ -74,7 +74,7 @@ function Frame(props: {
       {props.after ? (
         <Text style={{ ...type.label, color: colour.link, margin: "0 0 24px" }}>{props.after}</Text>
       ) : null}
-      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>The India H₂ Weekly team</Text>
+      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>The H2 Economy Weekly team</Text>
     </EmailLayout>
   );
 }
@@ -90,7 +90,7 @@ export interface NewsletterConfirmProps {
   window: string;
 }
 
-export const newsletterConfirmSubject = "Confirm your India H₂ Weekly subscription";
+export const newsletterConfirmSubject = "Confirm your H2 Economy Weekly subscription";
 
 /** 676:8 Confirm your subscription. */
 export function NewsletterConfirm(p: NewsletterConfirmProps) {
@@ -98,10 +98,10 @@ export function NewsletterConfirm(p: NewsletterConfirmProps) {
     <Frame
       appUrl={p.appUrl}
       preview={`One click and your first issue arrives on ${p.firstIssue.replace(/ (\w{3})\w*$/, " $1")}.`}
-      reason="You're getting this because someone entered this address on H2 India."
+      reason="You're getting this because someone entered this address on H2 Economy."
       preferencesHref={`${p.appUrl}/newsletter`}
       headline="Confirm your subscription"
-      intro={`Hi, you asked for India H₂ Weekly at this address. Confirm within ${p.window} and your first issue arrives on ${p.firstIssue}.`}
+      intro={`Hi, you asked for H2 Economy Weekly at this address. Confirm within ${p.window} and your first issue arrives on ${p.firstIssue}.`}
       facts={[
         { label: "Arrives", value: ISSUE_SCHEDULE },
         { label: "Inside", value: ISSUE_CONTENTS },
@@ -121,7 +121,7 @@ export interface NewsletterWelcomeProps {
   topics: string[];
 }
 
-export const newsletterWelcomeSubject = "Welcome to India H₂ Weekly";
+export const newsletterWelcomeSubject = "Welcome to H2 Economy Weekly";
 
 /** The welcome variant of 676:8, sent after confirming: what each issue covers, the topics chosen, the first issue. */
 export function NewsletterWelcome(p: NewsletterWelcomeProps) {
@@ -129,9 +129,9 @@ export function NewsletterWelcome(p: NewsletterWelcomeProps) {
     <Frame
       appUrl={p.appUrl}
       preview={`Your first issue arrives on ${p.firstIssue}.`}
-      reason="You're getting this because you confirmed your India H₂ Weekly subscription."
+      reason="You're getting this because you confirmed your H2 Economy Weekly subscription."
       preferencesHref={p.manageUrl}
-      headline="Welcome to India H₂ Weekly"
+      headline="Welcome to H2 Economy Weekly"
       intro={`You're subscribed. Your first issue arrives on ${p.firstIssue}.`}
       facts={[
         { label: "Arrives", value: ISSUE_SCHEDULE },
@@ -151,18 +151,18 @@ export interface NewsletterManageProps {
   window: string;
 }
 
-export const newsletterManageSubject = "Change your India H₂ Weekly topics";
+export const newsletterManageSubject = "Change your H2 Economy Weekly topics";
 
 /** Not drawn (M21): the "You're already subscribed" state of the sign-up form (743:7293) sends this. */
 export function NewsletterManage(p: NewsletterManageProps) {
   return (
     <Frame
       appUrl={p.appUrl}
-      preview="This address already gets India H₂ Weekly."
-      reason="You're getting this because someone entered this address on H2 India."
+      preview="This address already gets H2 Economy Weekly."
+      reason="You're getting this because someone entered this address on H2 Economy."
       preferencesHref={p.manageUrl}
       headline="You're already subscribed"
-      intro="This email already gets India H₂ Weekly. Use the button to change your topics or the extra emails."
+      intro="This email already gets H2 Economy Weekly. Use the button to change your topics or the extra emails."
       facts={[
         { label: "Arrives", value: ISSUE_SCHEDULE },
         { label: "Link works for", value: p.window },

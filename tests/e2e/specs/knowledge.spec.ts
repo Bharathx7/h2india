@@ -126,7 +126,7 @@ test("downloading a gated report records consent and sends the file", async ({ p
     summary: "We asked 62 people who buy or specify electrolysers in India.",
     gated: true,
     file: fileId,
-    sponsor: { name: "Hydrotek Systems", disclosure: "Hydrotek Systems paid for this survey. H2 India wrote it." },
+    sponsor: { name: "Hydrotek Systems", disclosure: "Hydrotek Systems paid for this survey. H2 Economy wrote it." },
     _status: "published",
   });
   expect(created.status, JSON.stringify(created.body.errors)).toBe(201);

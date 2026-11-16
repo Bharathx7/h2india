@@ -24,12 +24,12 @@ test("every response carries a request ID for the audit log, and a safe incoming
 // in and bring them back afterwards.
 test("route group /sign-in loads its page", async ({ page }) => {
   await page.goto("/sign-in");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 Economy");
 });
 test("route group /admin asks a signed-out visitor to sign in", async ({ page }) => {
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/sign-in\?next=(%2F|\/)admin/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 Economy");
 });
 
 // Public QC 2, 16 Nov 2026: buyers and suppliers have their own sign-in pages.

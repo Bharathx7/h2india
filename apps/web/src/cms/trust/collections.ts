@@ -84,7 +84,7 @@ export const TrustSettings: GlobalConfig = {
   admin: {
     group: "Company",
     description:
-      "Who runs H2 India, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].",
+      "Who runs H2 Economy, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].",
   },
   access: { read: () => true, update: canEdit },
   versions: { max: 50 },
@@ -111,7 +111,7 @@ export const TrustSettings: GlobalConfig = {
       type: "textarea",
       admin: {
         description:
-          "Who runs H2 India (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.",
+          "Who runs H2 Economy (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.",
       },
     },
     { name: "disclosureDate", type: "date", admin: day },
@@ -123,7 +123,7 @@ export const TrustSettings: GlobalConfig = {
           type: "row",
           fields: [
             { name: "name", type: "text" },
-            { name: "designation", type: "text", defaultValue: "Grievance Officer, H2 India" },
+            { name: "designation", type: "text", defaultValue: "Grievance Officer, H2 Economy" },
             { name: "email", type: "email" },
           ],
         },
@@ -133,7 +133,7 @@ export const TrustSettings: GlobalConfig = {
       name: "partnerships",
       label: "Partnerships and press contact",
       type: "group",
-      admin: { description: "Named on Partner with H2 India (742:8) and the Media kit (741:6058)." },
+      admin: { description: "Named on Partner with H2 Economy (742:8) and the Media kit (741:6058)." },
       fields: [
         {
           type: "row",
@@ -148,7 +148,7 @@ export const TrustSettings: GlobalConfig = {
       name: "boilerplate",
       type: "textarea",
       defaultValue:
-        "H2 India is India's hydrogen ecosystem platform. It brings products and companies, Indian hydrogen news, schemes, tenders, events and data into one place for the people building India's hydrogen economy.",
+        "H2 Economy is India's hydrogen ecosystem platform. It brings products and companies, Indian hydrogen news, schemes, tenders, events and data into one place for the people building India's hydrogen economy.",
     },
     {
       name: "mediaKitUrl",
@@ -437,7 +437,7 @@ export const Pricing: GlobalConfig = {
           type: "row",
           fields: [
             { name: "afterValue", type: "text", admin: { description: "3%" } },
-            { name: "afterNote", type: "text", admin: { description: "of each order paid through H2 India" } },
+            { name: "afterNote", type: "text", admin: { description: "of each order paid through H2 Economy" } },
           ],
         },
         { name: "afterDetail", type: "text", admin: { description: "Capped at … per order. GST is added…" } },

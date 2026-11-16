@@ -97,7 +97,7 @@ export function AlertDigest(p: AlertDigestProps) {
           Manage alerts
         </Link>
       </Text>
-      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 India team</Text>
+      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 Economy team</Text>
     </EmailLayout>
   );
 }

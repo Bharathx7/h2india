@@ -8,7 +8,7 @@ import { checkFile, uploadHint, useUploads } from "@/lib/uploads";
 import { saveStorefrontAction } from "./team-actions";
 
 // Storefront editor (590:8; phones 594:8), step 8.7: sections on the left, the form, and a live preview of how buyers
-// see the company. Save keeps a draft; Publish changes sends it to H2 India for review.
+// see the company. Save keeps a draft; Publish changes sends it to H2 Economy for review.
 
 const SECTIONS = [
   { key: "banner", label: "Banner and logo" },
@@ -79,7 +79,7 @@ export function StorefrontEditor({
           ? {
               tone: "success",
               text: publish
-                ? "Sent to H2 India. Your storefront updates once they approve."
+                ? "Sent to H2 Economy. Your storefront updates once they approve."
                 : "Saved as a draft. Nothing changes for buyers until you publish.",
             }
           : { tone: "error", text: r.error },
@@ -118,12 +118,12 @@ export function StorefrontEditor({
         </Button>
       </div>
       {status.note ? (
-        <Alert tone="warning" title="H2 India asked for changes">
+        <Alert tone="warning" title="H2 Economy asked for changes">
           {status.note}
         </Alert>
       ) : null}
       {locked ? (
-        <Alert tone="info" title="With H2 India for review">
+        <Alert tone="info" title="With H2 Economy for review">
           You can edit again once they reply.
         </Alert>
       ) : null}
@@ -261,7 +261,7 @@ export function StorefrontEditor({
                   </span>
                 ) : null}
                 <span className="type-caption text-secondary">
-                  New categories are checked by H2 India before they show.
+                  New categories are checked by H2 Economy before they show.
                 </span>
               </div>
               <label className="flex flex-col gap-1.5">
@@ -483,7 +483,7 @@ export function StorefrontEditor({
             </div>
           </div>
           <p className="type-caption text-secondary">
-            Items marked &quot;in review&quot; appear for buyers after H2 India approves them.
+            Items marked &quot;in review&quot; appear for buyers after H2 Economy approves them.
           </p>
         </aside>
       </div>

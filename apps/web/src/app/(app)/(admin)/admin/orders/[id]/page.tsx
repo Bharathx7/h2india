@@ -13,7 +13,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 
 // Admin order (step 11.5): both sides, the money held, the history, the delivery fallback (G5) and the dispute
 // decision (refund, release or split). Built from the design system (A178).
-export const metadata: Metadata = { title: "Order · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Order · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);
@@ -67,7 +67,7 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                       dispute.supplierReply ? `${dispute.offer ?? ""}: ${dispute.supplierReply}` : "No reply yet",
                     ],
                     [
-                      "Asked H2 India",
+                      "Asked H2 Economy",
                       dispute.escalatedBy
                         ? `${dispute.escalatedBy}, ${dispute.escalatedAt ? formatIstDateTime(dispute.escalatedAt) : ""}`
                         : "—",

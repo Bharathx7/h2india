@@ -8,7 +8,7 @@ import { Block, card, DarkCta, Faqs, Feature, Hero, main, Steps } from "@/trust/
 // listings the cards show no count. Questions come from the CMS (For Buyers and Suppliers questions).
 
 export const metadata: Metadata = {
-  title: "For buyers · H2 India",
+  title: "For buyers · H2 Economy",
   description:
     "Find verified Indian suppliers, compare like-for-like quotes and order with a GST invoice. Free for buyers.",
   alternates: { canonical: "/for-buyers" },
@@ -58,7 +58,7 @@ export default async function ForBuyersPage() {
           ]}
         />
       </Block>
-      <Block id="why" title="Why buy on H2 India">
+      <Block id="why" title="Why buy on H2 Economy">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Feature
             icon="shield-check"

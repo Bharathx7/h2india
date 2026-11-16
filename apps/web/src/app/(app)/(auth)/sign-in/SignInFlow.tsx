@@ -399,7 +399,7 @@ export function SignInFlow({
         <p className="type-body text-body">
           {audience ? (
             <>
-              We&apos;ve sent an email to {email.trim()}. If it has an H2 India account, the email holds a{" "}
+              We&apos;ve sent an email to {email.trim()}. If it has an H2 Economy account, the email holds a{" "}
               {SIGN_IN.codeLength}-digit code that expires in {SIGN_IN.codeMinutes} minutes.
             </>
           ) : (
@@ -481,7 +481,7 @@ export function SignInFlow({
   if (signedInElsewhere) {
     return (
       <AuthCard>
-        <h1 className="type-h2 text-primary">Sign in to the H2 India back office</h1>
+        <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
         {alert}
         <a href="/sign-out" className={`${buttonClasses({ variant: "outline", size: "lg" })} w-full`}>
           Sign out
@@ -522,7 +522,7 @@ export function SignInFlow({
             <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
           </TextLink>
           <p className="flex items-center gap-1 type-body-sm text-body">
-            New to H2 India?{" "}
+            New to H2 Economy?{" "}
             <TextLink asChild showIcon={false}>
               <Link href={ACCOUNT_PAGES[audience].join}>{words.join}</Link>
             </TextLink>
@@ -547,14 +547,14 @@ export function SignInFlow({
     <AuthCard>
       {staffOnly ? (
         <>
-          <h1 className="type-h2 text-primary">Sign in to the H2 India back office</h1>
+          <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
           <p className="type-body text-body">
-            For H2 India staff. Use your passkey, or a code sent to your work email.
+            For H2 Economy staff. Use your passkey, or a code sent to your work email.
           </p>
         </>
       ) : (
         <>
-          <h1 className="type-h2 text-primary">Sign in to H2 India</h1>
+          <h1 className="type-h2 text-primary">Sign in to H2 Economy</h1>
           <p className="type-body text-body">You&apos;ll come back to the page you were on.</p>
         </>
       )}
@@ -613,7 +613,7 @@ export function SignInFlow({
         </TextLink>
         {staffOnly ? null : (
           <p className="flex items-center gap-1 type-body-sm text-body">
-            New to H2 India?{" "}
+            New to H2 Economy?{" "}
             <TextLink asChild showIcon={false}>
               <Link href={AUTH_LINKS.join}>Join free</Link>
             </TextLink>

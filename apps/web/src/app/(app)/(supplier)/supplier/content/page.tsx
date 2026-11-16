@@ -9,7 +9,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 // Content submissions (592:916; phones 594:843), step 8.7: press releases and events the company sent through the
 // public forms (step 5.7, the Content queue) and the jobs it posted (step 5.5). Editors review each before it's
 // published; their note shows here.
-export const metadata: Metadata = { title: "Content · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Content · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 interface Row {
@@ -129,7 +129,7 @@ export default async function ContentPage({
         <div>
           <h1 className="type-h2">Content</h1>
           <p className="type-body-sm text-secondary">
-            Press releases, events and jobs you send to H2 India. Our editors review each one before it&apos;s
+            Press releases, events and jobs you send to H2 Economy. Our editors review each one before it&apos;s
             published.
           </p>
         </div>

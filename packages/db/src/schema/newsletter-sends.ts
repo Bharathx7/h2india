@@ -6,7 +6,7 @@ import { core } from "./core";
 import { newsletterSubscribers } from "./newsletter";
 
 /**
- * Sending India H₂ Weekly (step 11.3; Issues 647:8, Composer 648:312). An issue is written in the CMS; its send lives
+ * Sending H2 Economy Weekly (step 11.3; Issues 647:8, Composer 648:312). An issue is written in the CMS; its send lives
  * here: subject, preview, when (IST), and how far it got. Each subscriber gets it at most once (newsletter_deliveries).
  * Opens and clicks are recorded only as the email provider reports them.
  */

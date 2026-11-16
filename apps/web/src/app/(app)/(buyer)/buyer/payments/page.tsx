@@ -12,7 +12,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 
 // Payments and invoices (720:8): Payments (720:281) and Refunds (720:881), step 10.8. GST invoices are on each order's
 // page under Documents. Built without its frames (A178).
-export const metadata: Metadata = { title: "Payments · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Payments · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const METHOD: Record<string, string> = {

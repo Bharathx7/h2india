@@ -111,13 +111,13 @@ test("sponsored and press-release labels show on cards and article pages", async
 
   await page.goto(`/news/${sponsored.slug}`);
   await expect(page.getByRole("main")).toContainText(
-    "Paid for by Sahyadri Gas Controls and produced by the H2 India Partner Studio, not the newsroom.",
+    "Paid for by Sahyadri Gas Controls and produced by the H2 Economy Partner Studio, not the newsroom.",
   );
   await expect(page.getByLabel("About the sponsor")).toContainText("Sponsored");
 
   await page.goto(`/news/${release.slug}`);
   await expect(page.getByRole("main")).toContainText(
-    "Supplied by Narmada Compression Works and published as received. H2 India has not edited or verified its claims.",
+    "Supplied by Narmada Compression Works and published as received. H2 Economy has not edited or verified its claims.",
   );
 });
 

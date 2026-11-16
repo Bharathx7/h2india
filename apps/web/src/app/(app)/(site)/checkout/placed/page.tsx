@@ -9,7 +9,7 @@ import { cartBuyer } from "@/cart/session";
 import { requireTransactionsPage } from "@/orders/guard";
 
 // Order placed (79:5587; phones 82:9036), step 10.2: what happens next. Built without its frame (A178).
-export const metadata: Metadata = { title: "Order placed · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Order placed · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function OrderPlacedPage({ searchParams }: { searchParams: Promise<{ order?: string }> }) {

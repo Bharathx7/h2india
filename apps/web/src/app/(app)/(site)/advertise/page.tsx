@@ -9,7 +9,7 @@ import { card, main, PageHead, wrap } from "@/trust/parts";
 // date (A45), and are hidden until entered; prices are on Pricing (C3). Enquiries go to the Submissions queue (ADV-).
 
 export const metadata: Metadata = {
-  title: "Advertise and sponsor · H2 India",
+  title: "Advertise and sponsor · H2 Economy",
   description:
     "Reach the people buying, building and regulating India's hydrogen economy. Every sponsored placement is labelled.",
   alternates: { canonical: "/advertise" },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const PLACEMENTS = [
-  ["Newsletter sponsorship", 'One sponsor slot in India H₂ Weekly each Monday, marked "Sponsored".'],
+  ["Newsletter sponsorship", 'One sponsor slot in H2 Economy Weekly each Monday, marked "Sponsored".'],
   [
     "Sponsored webinar",
     "You present; we host and moderate. Registrants are shared with you only if they tick a separate box.",

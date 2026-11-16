@@ -19,7 +19,7 @@ import {
 // Preview of a tracker record for editors ("Preview" on 643:1330, step 4.5), laid out like the record page (740:20):
 // the record's fields, its source and as-of date, the status timeline and the changes to this record. The public
 // tracker pages come with Stage 5.
-export const metadata: Metadata = { title: "Preview · H2 India CMS", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Preview · H2 Economy CMS", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 type Doc = Record<string, unknown> & {

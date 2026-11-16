@@ -113,7 +113,7 @@ export async function sendInvitation(
     email: string;
     role: string;
     invitedBy: string | null;
-    /** How the email names the inviter's role, for example "Admin" or "H2 India team". */
+    /** How the email names the inviter's role, for example "Admin" or "H2 Economy team". */
     inviterRole: string;
     context?: RequestContext;
   },

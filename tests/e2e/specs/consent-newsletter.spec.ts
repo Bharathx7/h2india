@@ -78,7 +78,7 @@ test("newsletter sign-up: check your inbox, confirm, already subscribed, one-cli
   await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText(/confirmation link to \w••••@example\.com/)).toBeVisible();
 
-  const confirm = await message(page, email, /India H₂ Weekly/);
+  const confirm = await message(page, email, /H2 Economy Weekly/);
   expect(confirm).not.toBeNull();
   const html = (await (await page.request.get(`${MAILPIT}/api/v1/message/${confirm?.ID ?? ""}`)).json()) as {
     HTML: string;
@@ -106,7 +106,7 @@ test("newsletter sign-up: check your inbox, confirm, already subscribed, one-cli
   const res = await page.request.post(target, { form: { "List-Unsubscribe": "One-Click" } });
   expect(res.status()).toBe(200);
   await page.goto(target);
-  await expect(page.getByRole("heading", { name: "Unsubscribe from India H₂ Weekly?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Unsubscribe from H2 Economy Weekly?" })).toBeVisible();
 });
 
 test("a filled honeypot or a form sent too fast is refused", async ({ page }, info) => {

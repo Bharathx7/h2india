@@ -13,7 +13,7 @@ import { Crumbs } from "@/opportunities/parts";
 // step 6.6. List and map read the same filtered companies, so they always agree. The map is the state-bubble stand-in (A176) with its list by state
 // until the tiles vendor is chosen (M7, A76).
 export const metadata: Metadata = {
-  title: "Hydrogen directory · H2 India",
+  title: "Hydrogen directory · H2 Economy",
   description:
     "Organisations across India's hydrogen value chain: manufacturers, suppliers, EPC firms, developers, labs, start-ups and research institutes.",
   alternates: { canonical: "/directory/companies" },
@@ -48,7 +48,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Se
           <h1 className="type-h1 text-primary">Hydrogen directory</h1>
           <p className="type-body text-body">
             {n(everyone.length)} organisations across India&apos;s hydrogen value chain: manufacturers, suppliers, EPC
-            firms, developers, labs, start-ups and research institutes. Badges show what H2 India has checked.
+            firms, developers, labs, start-ups and research institutes. Badges show what H2 Economy has checked.
           </p>
         </div>
         <Link

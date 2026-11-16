@@ -5,7 +5,7 @@ import { AUTH_LINKS } from "@/lib/auth-links";
 import { AuthCard } from "../AuthCard";
 
 // Forgot access hub (Figma 528:9; 390: 528:766), step 3.5.
-export const metadata: Metadata = { title: "Get back into your account · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Get back into your account · H2 Economy", robots: { index: false } };
 
 const PATHS: { href: string; icon: IconName; title: string; text: string }[] = [
   {

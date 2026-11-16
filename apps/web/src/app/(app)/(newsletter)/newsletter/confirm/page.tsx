@@ -8,7 +8,7 @@ import { Preferences, ResendLink } from "./forms";
 // Sign-up · confirmed, choose topics (448:7157) and This link has expired (448:7392), brought forward from 5.9 (A46).
 // Opening the emailed link confirms the subscription; the same page changes topics later ("Change your topics").
 
-export const metadata: Metadata = { title: "India H₂ Weekly · H2 India", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "H2 Economy Weekly · H2 Economy", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -35,7 +35,7 @@ export default async function ConfirmPage({ searchParams }: { searchParams: Prom
             </span>
             <h1 className="type-h2 text-primary">You&rsquo;re subscribed</h1>
             <p className="type-body text-body">
-              India H₂ Weekly arrives every Monday at 08:00 IST. Your first issue comes on {opened.link.firstIssue}.
+              H2 Economy Weekly arrives every Monday at 08:00 IST. Your first issue comes on {opened.link.firstIssue}.
             </p>
             <Preferences
               token={opened.link.token}

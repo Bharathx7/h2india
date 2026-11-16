@@ -115,7 +115,7 @@ export async function addGstin(
   if (first && panOf(first.gstin) !== panOf(gstin))
     throw new BuyerSettingsError("This GSTIN belongs to a different PAN. Add GSTINs of your own company only.");
   const [taken] = await db.select({ id: g.id }).from(g).where(eq(g.gstin, gstin));
-  if (taken) throw new BuyerSettingsError("This GSTIN belongs to another company on H2 India");
+  if (taken) throw new BuyerSettingsError("This GSTIN belongs to another company on H2 Economy");
   const [row] = await db
     .insert(g)
     .values({

@@ -15,7 +15,7 @@ import { StoryCard, wrap } from "@/news/parts";
 // (A176, A58) and fills in with the newest pieces.
 
 export const metadata: Metadata = {
-  title: "Insights · H2 India",
+  title: "Insights · H2 Economy",
   description: "Guides, analysis and market notes for people building India's hydrogen economy.",
   alternates: { canonical: "/knowledge/insights" },
 };

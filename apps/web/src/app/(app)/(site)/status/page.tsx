@@ -7,8 +7,8 @@ import { absolute } from "@/seo/site";
 // Service status (A176; the maintenance page's "Live status updates", 679:637, until a status provider is chosen,
 // M26). Checks our own services each time it opens; says only whether each part works. Built without a frame (A178).
 export const metadata: Metadata = {
-  title: "Service status · H2 India",
-  description: "Whether H2 India's website, search, documents and emails are working now.",
+  title: "Service status · H2 Economy",
+  description: "Whether H2 Economy's website, search, documents and emails are working now.",
   alternates: { canonical: absolute("/status") },
 };
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export default async function StatusPage() {
             size={20}
             className={allGood ? "text-icon-success" : "text-icon-warning"}
           />
-          {allGood ? "Everything is working." : "Some parts of H2 India are having problems. We're on it."}
+          {allGood ? "Everything is working." : "Some parts of H2 Economy are having problems. We're on it."}
         </p>
       </div>
       <ul className="flex flex-col rounded-card border border-default bg-page">

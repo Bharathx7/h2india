@@ -54,7 +54,7 @@ export const SCHEDULES: Scheduled[] = [
   // Step 5.2: applies search changes a save's nudge missed (Redis down, worker restarting). The CMS lives in the web
   // app, so the web app reads the records and writes the index. Unpublished content leaves search within a minute.
   { id: "search-sync", every: MINUTE, run: () => callWeb("/api/internal/search-sync") },
-  // India H₂ Weekly issues whose send time has come (step 11.3), a batch a minute.
+  // H2 Economy Weekly issues whose send time has come (step 11.3), a batch a minute.
   { id: "newsletter-send", every: MINUTE, run: () => callWeb("/api/internal/newsletter-send") },
   // 00:05 IST every day: record statuses follow the date (Closing soon, Closed), so their result rows are rebuilt.
   { id: "search-refresh", pattern: "35 18 * * *", run: () => callWeb("/api/internal/search-sync?refresh=records") },

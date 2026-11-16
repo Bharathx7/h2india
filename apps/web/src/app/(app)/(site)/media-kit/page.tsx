@@ -11,14 +11,14 @@ import { initials } from "@/trust/views";
 // team's export; until then the download buttons are hidden.
 
 export const metadata: Metadata = {
-  title: "Media kit · H2 India",
-  description: "Logos, colours, a boilerplate and facts about H2 India for journalists and partners.",
+  title: "Media kit · H2 Economy",
+  description: "Logos, colours, a boilerplate and facts about H2 Economy for journalists and partners.",
   alternates: { canonical: "/media-kit" },
 };
 export const dynamic = "force-dynamic";
 
 const COLOURS = [
-  { name: "H2 India green", swatch: "bg-accent", border: false },
+  { name: "H2 Economy green", swatch: "bg-accent", border: false },
   { name: "Ink", swatch: "bg-inverse", border: false },
   { name: "Mint", swatch: "bg-mint", border: false },
   { name: "White", swatch: "bg-page", border: true },
@@ -32,7 +32,7 @@ export default async function MediaKitPage() {
       <PageHead
         crumbs={[{ label: "Company", href: "/about" }, { label: "Media kit" }]}
         title="Media kit"
-        lead="Logos, colours, a boilerplate and facts about H2 India for journalists and partners."
+        lead="Logos, colours, a boilerplate and facts about H2 Economy for journalists and partners."
         aside={
           t.mediaKitUrl ? (
             <a href={t.mediaKitUrl} className={cx(buttonClasses({}), "shrink-0")}>

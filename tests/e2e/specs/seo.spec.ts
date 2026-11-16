@@ -102,6 +102,6 @@ test("canonical, share image and structured data", async ({ page, request }) => 
 
 test("the maintenance page", async ({ page }) => {
   await page.goto("/maintenance");
-  await expect(page.getByRole("heading", { name: "We're upgrading H2 India" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "We're upgrading H2 Economy" })).toBeVisible();
   await expect(page.getByText("Planned maintenance")).toBeVisible();
 });

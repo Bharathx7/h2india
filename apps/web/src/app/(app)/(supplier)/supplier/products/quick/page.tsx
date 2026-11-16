@@ -8,7 +8,7 @@ import { QuickStock, type QuickRow } from "@/supplier/QuickStock";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Quick stock and price (722:12379), step 8.5: fixed-price products; changes go live at once.
-export const metadata: Metadata = { title: "Quick stock and price · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Quick stock and price · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function QuickStockPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

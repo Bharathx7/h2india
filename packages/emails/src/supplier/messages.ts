@@ -55,7 +55,7 @@ export function verifiedMessage(d: { name: string; company: string; checked: str
     eyebrow: "Verification · verified",
     headline: "You're verified",
     paragraphs: [
-      `Hi ${first(d.name)}, H2 India has checked ${d.company}. Buyers now see the Verified supplier badge, with today's date.`,
+      `Hi ${first(d.name)}, H2 Economy has checked ${d.company}. Buyers now see the Verified supplier badge, with today's date.`,
     ],
     rows: d.checked.map((c) => ({ label: "Checked", value: c })),
     button: { label: "View verification status", href: d.statusUrl },
@@ -119,9 +119,9 @@ export function listingApprovedMessage(
   d: ListingDetails & { checkedAgainst: string | null; reviewed: string },
 ): Message {
   return {
-    subject: `Approved: ${d.code === d.product ? d.product : `${d.code} ${d.product}`} is live on H2 India`,
+    subject: `Approved: ${d.code === d.product ? d.product : `${d.code} ${d.product}`} is live on H2 Economy`,
     preview: "Buyers can now find it in search and on your storefront, and send you RFQs.",
-    reason: "You're getting this because you list products on H2 India.",
+    reason: "You're getting this because you list products on H2 Economy.",
     eyebrow: `Listing · ${d.code}`,
     headline: "Your listing is live",
     paragraphs: [
@@ -131,7 +131,7 @@ export function listingApprovedMessage(
       { label: "Product", value: d.product },
       ...(d.checkedAgainst ? [{ label: "Checked against", value: d.checkedAgainst }] : []),
       { label: "Status", value: "Live" },
-      { label: "Reviewed", value: `${d.reviewed} by the H2 India catalogue team` },
+      { label: "Reviewed", value: `${d.reviewed} by the H2 Economy catalogue team` },
     ],
     button: { label: "View your listing", href: d.liveUrl },
     links: [{ label: "Edit listing", href: d.editUrl }],
@@ -182,11 +182,11 @@ export function invitationMessage(d: {
   workspace: "supplier" | "buyer";
 }): Message {
   return {
-    subject: `${d.inviter} invited you to ${d.company} on H2 India`,
+    subject: `${d.inviter} invited you to ${d.company} on H2 Economy`,
     preview: `Join as ${/^[AEIOU]/i.test(d.role) ? "an" : "a"} ${d.role}. The invitation expires on ${d.expires.replace(/ \d{4}$/, "")}.`,
     reason: `You're getting this because ${d.inviter} invited ${d.email}.`,
     eyebrow: `Invitation · ${d.company}`,
-    headline: `Join ${d.company} on H2 India`,
+    headline: `Join ${d.company} on H2 Economy`,
     paragraphs: [
       `Hi ${first(d.name || d.email.split("@")[0] || "there")}, ${d.inviter}, ${/^[AEIOU]/i.test(d.inviterRole) ? "an" : "a"} ${d.inviterRole.toLowerCase()} at ${d.company}, invited you to the company's ${d.workspace} workspace.`,
     ],

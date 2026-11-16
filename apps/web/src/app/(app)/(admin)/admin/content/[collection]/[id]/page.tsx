@@ -7,7 +7,7 @@ import { cmsSession } from "@/admin/cms/session";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Edit a record of any content type (step 4.6): the latest draft, its status and "Last verified".
-export const metadata: Metadata = { title: "Edit · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Edit · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 /** Whole days since a time (for "14 days ago" on Last verified). */

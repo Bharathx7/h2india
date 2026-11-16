@@ -12,7 +12,7 @@ import { AssignButton } from "./Decision";
 
 // Queues · RFQs (629:1148), step 9.4: RFQs to two or more suppliers, checked within 1 working day. Age turns amber at
 // the queueAmber clock and red at queueRed (24 and 48 hours).
-export const metadata: Metadata = { title: "RFQ queue · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQ queue · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const VIEWS = [

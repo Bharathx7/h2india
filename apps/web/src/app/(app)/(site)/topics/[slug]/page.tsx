@@ -9,9 +9,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const topic = await getTopic((await params).slug);
-  if (!topic) return { title: "Not found · H2 India" };
+  if (!topic) return { title: "Not found · H2 Economy" };
   return {
-    title: `${topic.name} · H2 India`,
+    title: `${topic.name} · H2 Economy`,
     description: topic.description ?? undefined,
     alternates: { canonical: `/topics/${topic.slug}` },
   };

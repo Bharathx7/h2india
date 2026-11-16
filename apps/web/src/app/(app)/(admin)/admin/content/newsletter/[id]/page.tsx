@@ -17,7 +17,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 // Newsletter composer (648:312), step 11.3: the issue as subscribers get it (auto-filled from the week's published
 // items, with the editor's note) and the send settings. It sends at the set IST time to confirmed subscribers only.
 // New issues default to the next Monday at 8:00 AM IST (A172).
-export const metadata: Metadata = { title: "Newsletter · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Newsletter · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const local = (d: Date | null) =>
@@ -121,7 +121,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
                   <PreviewSection key={s.heading} section={s} />
                 ))}
               <p className="type-caption text-secondary">
-                You get this because you subscribed to India H₂ Weekly. Manage preferences · Unsubscribe
+                You get this because you subscribed to H2 Economy Weekly. Manage preferences · Unsubscribe
               </p>
             </div>
           </PreviewWidth>

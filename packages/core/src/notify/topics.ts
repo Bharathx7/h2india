@@ -94,7 +94,7 @@ export const TOPICS = {
   },
   "rfq.checked": {
     group: "RFQs and quotes",
-    label: "H2 India checks your RFQ",
+    label: "H2 Economy checks your RFQ",
     hint: "Approved, or returned for changes",
     defaults: { email: true, whatsapp: false, in_app: true },
   },

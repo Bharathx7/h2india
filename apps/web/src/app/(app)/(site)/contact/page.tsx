@@ -10,7 +10,7 @@ import { card, main, PageHead, Value, wrap } from "@/trust/parts";
 // to its own form so the complaint gets a ticket and its clocks. ?about= picks the topic chip.
 
 export const metadata: Metadata = {
-  title: "Contact us · H2 India",
+  title: "Contact us · H2 Economy",
   description:
     "Tell us what you need and we'll route it to the right team. Most enquiries get a reply within 1 working day.",
   alternates: { canonical: "/contact" },

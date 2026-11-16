@@ -78,10 +78,10 @@ export function Conversation({
         <div className="rounded-card bg-mint p-3">
           <p className="flex items-center gap-2 type-label">
             <Icon name="info" size={16} />
-            Keep conversations on H2 India
+            Keep conversations on H2 Economy
           </p>
           <p className="type-caption text-body">
-            Deals agreed off the platform aren&apos;t protected by H2 India payments or disputes.
+            Deals agreed off the platform aren&apos;t protected by H2 Economy payments or disputes.
           </p>
         </div>
         {list.map((m) => (

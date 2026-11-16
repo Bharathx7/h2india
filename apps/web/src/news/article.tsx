@@ -131,7 +131,7 @@ function Header({ a }: { a: Article }) {
     case "press_release":
       label = <TypeLabel tone="neutral">Press release</TypeLabel>;
       eyebrow = "Press releases";
-      note = <>Supplied by {a.issuer} and published as received. H2 India has not edited or verified its claims.</>;
+      note = <>Supplied by {a.issuer} and published as received. H2 Economy has not edited or verified its claims.</>;
       break;
     case "sponsored":
       label = (
@@ -143,7 +143,7 @@ function Header({ a }: { a: Article }) {
       second = a.sponsor?.name ? `Sponsored by ${a.sponsor.name}` : second;
       note = (
         <>
-          Paid for by {a.sponsor?.name} and produced by the H2 India Partner Studio, not the newsroom. Read our{" "}
+          Paid for by {a.sponsor?.name} and produced by the H2 Economy Partner Studio, not the newsroom. Read our{" "}
           <Link href="/legal/sponsored-content" className="text-link underline">
             sponsored content policy
           </Link>
@@ -156,7 +156,7 @@ function Header({ a }: { a: Article }) {
   }
   if (live) eyebrow = `Live · ${sectionLabel}`;
   const byline =
-    a.type === "press_release" ? (a.issuer ?? "") : authors.map((x) => x.name).join(", ") || "H2 India newsroom";
+    a.type === "press_release" ? (a.issuer ?? "") : authors.map((x) => x.name).join(", ") || "H2 Economy newsroom";
 
   return (
     <header className="flex flex-col gap-4 border-b border-default pb-6">

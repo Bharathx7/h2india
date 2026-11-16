@@ -17,7 +17,7 @@ import { MessageDrawer } from "@/messages/MessageDrawer";
 // RFQ detail and quote comparison (560:8; phones 562:8), step 9.6: header with the badge and Extend deadline, the
 // suppliers' statuses, the comparison with the best value in each row highlighted, the request summary and timeline,
 // and the RFQ actions (564:9). Accepting a quote is step 9.8; messages are step 9.7.
-export const metadata: Metadata = { title: "RFQ · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQ · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);
@@ -125,7 +125,7 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
     ...(d.decisions.some((x) => x.decision === "Approved")
       ? [
           {
-            label: `Checked by H2 India · ${formatIstDayMonth(d.decisions.find((x) => x.decision === "Approved")?.at ?? now)}`,
+            label: `Checked by H2 Economy · ${formatIstDayMonth(d.decisions.find((x) => x.decision === "Approved")?.at ?? now)}`,
             done: true,
           },
         ]
@@ -338,7 +338,7 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
             {open
               ? "No quotes yet"
               : d.rfq.status === "In moderation"
-                ? "H2 India is checking this request"
+                ? "H2 Economy is checking this request"
                 : "No quotes"}
           </h2>
           <p className="type-body-sm text-body">

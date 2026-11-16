@@ -13,7 +13,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 // Products (598:8; phones 599:8; states 600:8), step 8.3: the supplier's listings by status, with search, category,
 // bulk pause and archive. Views and enquiries arrive with analytics (8.8). Prices show here: this is the supplier's own
 // catalogue, not a public listing.
-export const metadata: Metadata = { title: "Products · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Products · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);

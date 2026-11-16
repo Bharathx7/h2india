@@ -89,7 +89,7 @@ export async function saveRfqDraft(s: WizardState): Promise<Saved> {
   }
 }
 
-/** Save and send: to one supplier it goes out now; to more, H2 India checks it first. */
+/** Save and send: to one supplier it goes out now; to more, H2 Economy checks it first. */
 export async function sendRfq(
   s: WizardState,
 ): Promise<{ ok: true; id: string; status: string } | { ok: false; error: string; errors?: Record<string, string> }> {

@@ -13,7 +13,7 @@ import { actionWords, deviceOf } from "@/admin/users/words";
 // Audit log (656:872; states 657:1313), step 11.4: every recorded action with who, what, the change, why and from
 // where, newest first, and an export for those with users.export. Append-only. The Organisation filter the frame
 // draws isn't here yet: entries are filtered by person, record type and dates.
-export const metadata: Metadata = { title: "Audit log · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Audit log · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const LIMIT = 200;

@@ -7,7 +7,7 @@ import { StorefrontEditor } from "@/supplier/StorefrontEditor";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Storefront editor (590:8; phones 594:8), step 8.7. The public result is the profile (482:8, step 6.7).
-export const metadata: Metadata = { title: "Storefront · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Storefront · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function StorefrontPage() {

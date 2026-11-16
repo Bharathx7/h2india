@@ -11,7 +11,7 @@ import { SubmitButton } from "../SubmitButton";
 // Preview a job before submitting it (468:7854, step 5.5): the job page exactly as readers will see it, under a bar
 // that says it isn't published. Only people in the posting company can open it.
 
-export const metadata: Metadata = { title: "Preview your job · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Preview your job · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function PreviewJob({ searchParams }: { searchParams: Promise<{ id?: string }> }) {

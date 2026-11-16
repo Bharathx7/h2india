@@ -7,9 +7,9 @@ import { Block, DarkCta, Feature, Hero, main, Steps } from "@/trust/parts";
 // Directory, which opens only for signed-in people.
 
 export const metadata: Metadata = {
-  title: "For members · H2 India",
+  title: "For members · H2 Economy",
   description:
-    "Join H2 India as a member: save and follow what matters to you, get alerts for tenders, schemes and jobs, learn with Hydrogen 101 and open the directory.",
+    "Join H2 Economy as a member: save and follow what matters to you, get alerts for tenders, schemes and jobs, learn with Hydrogen 101 and open the directory.",
   alternates: { canonical: "/for-members" },
 };
 
@@ -21,7 +21,7 @@ export default function ForMembersPage() {
     <main id="main" className={main}>
       <Hero
         eyebrow="For members"
-        title="Join H2 India as a member"
+        title="Join H2 Economy as a member"
         lead="For engineers, researchers, students and anyone following India's hydrogen economy. Keep what matters to you in one place and hear first when something changes."
         actions={[
           { label: "Join as a member", href: MEMBER_JOIN_HREF, primary: true },

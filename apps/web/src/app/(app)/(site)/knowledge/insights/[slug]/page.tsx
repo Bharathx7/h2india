@@ -20,9 +20,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const guide = await getGuide((await params).slug);
-  if (!guide) return { title: "Not found · H2 India" };
+  if (!guide) return { title: "Not found · H2 Economy" };
   return {
-    title: `${guide.title} · Insights · H2 India`,
+    title: `${guide.title} · Insights · H2 Economy`,
     description: guide.summary,
     alternates: { canonical: `/knowledge/insights/${guide.slug}` },
   };

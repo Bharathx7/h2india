@@ -11,7 +11,7 @@ import { shellFor } from "@/server/workspace";
 
 // Profile (545:8; phones 546:198; other types 546:8), step 7.4. Listing in the people directory is the member's own
 // choice ("Public profile", M24).
-export const metadata: Metadata = { title: "Profile · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Profile · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {

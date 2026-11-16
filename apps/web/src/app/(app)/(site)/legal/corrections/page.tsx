@@ -6,7 +6,7 @@ import { LegalDocument } from "@/trust/LegalDocument";
 // Corrections policy (521:754), with the way in to Suggest a correction (504:455).
 
 export const metadata: Metadata = {
-  title: "Corrections policy · H2 India",
+  title: "Corrections policy · H2 Economy",
   alternates: { canonical: "/legal/corrections" },
 };
 export const dynamic = "force-dynamic";

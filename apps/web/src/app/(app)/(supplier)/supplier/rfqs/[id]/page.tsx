@@ -15,7 +15,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // RFQ detail for a supplier (617:8 draft, 618:16 sent, 619:8 states), step 9.5. Messages with the buyer arrive in
 // step 9.7. ?revise=1 opens the next version; ?decline=1 (from the RFQ received email) opens Decline.
-export const metadata: Metadata = { title: "RFQ · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "RFQ · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);
@@ -110,7 +110,7 @@ export default async function SupplierRfqPage({
           {due ? <StatusBadge status={`Quotes ${due.label.replace("Due in", "due in")}`} tone={due.tone} /> : null}
           {d.buyer}
           {d.buyerCity ? `, ${d.buyerCity}` : ""}
-          {d.checked ? " · checked by H2 India" : ""}
+          {d.checked ? " · checked by H2 Economy" : ""}
           {d.rfq.offerDeadline ? ` · due ${formatIstDateTime(d.rfq.offerDeadline)}` : ""}
         </p>
         {revisions.length ? (

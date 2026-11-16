@@ -12,7 +12,7 @@ import { SideBoxes, SignedOut } from "@/submissions/parts";
 // step 5.7). Listing is free; no featured-event payment until F7 is decided.
 
 export const metadata: Metadata = {
-  title: "Submit an event · H2 India",
+  title: "Submit an event · H2 Economy",
   description: "List a hydrogen conference, exhibition, webinar or site visit. Listing is free.",
   alternates: { canonical: "/events/submit" },
 };

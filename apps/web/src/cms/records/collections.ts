@@ -282,7 +282,7 @@ export const Tenders: CollectionConfig = recordCollection({
             { name: "about", type: "text", admin: { description: "For example Green ammonia · Producer." } },
             {
               name: "profileSlug",
-              label: "H2 India profile",
+              label: "H2 Economy profile",
               type: "text",
               admin: { description: "The company's profile address, when it has one." },
             },
@@ -471,7 +471,7 @@ export const Jobs: CollectionConfig = recordCollection({
           name: "companySlug",
           label: "Company profile",
           type: "text",
-          admin: { description: "The company's H2 India profile address, when it has one." },
+          admin: { description: "The company's H2 Economy profile address, when it has one." },
         },
         {
           name: "companyLine",
@@ -514,7 +514,7 @@ export const Jobs: CollectionConfig = recordCollection({
       options: [
         { label: "External link", value: "link" },
         { label: "Email", value: "email" },
-        { label: "H2 India form", value: "form" },
+        { label: "H2 Economy form", value: "form" },
       ],
     },
     {
@@ -620,7 +620,7 @@ export const Events: CollectionConfig = recordCollection({
       name: "listedBy",
       label: "Listed by",
       type: "text",
-      admin: { description: "For example The organiser · checked by H2 India." },
+      admin: { description: "For example The organiser · checked by H2 Economy." },
     },
     {
       name: "featured",
@@ -670,13 +670,13 @@ export const Events: CollectionConfig = recordCollection({
           name: "host",
           label: "Host",
           type: "text",
-          admin: { description: "Webinars, for example H2 India editorial team." },
+          admin: { description: "Webinars, for example H2 Economy editorial team." },
         },
       ],
     },
     {
       name: "exhibitors",
-      label: "Exhibitors on H2 India",
+      label: "Exhibitors on H2 Economy",
       type: "array",
       fields: [
         {
@@ -695,7 +695,7 @@ export const Events: CollectionConfig = recordCollection({
       type: "group",
       admin: {
         condition: (d) => (d as { eventType?: string }).eventType === "Webinar",
-        description: "Registration on H2 India (732:521). The join link is sent only to people who registered.",
+        description: "Registration on H2 Economy (732:521). The join link is sent only to people who registered.",
       },
       fields: [
         list("learn", "What you'll learn", "point"),
@@ -808,7 +808,7 @@ export const Events: CollectionConfig = recordCollection({
     },
     {
       name: "coverage",
-      label: "H2 India coverage",
+      label: "H2 Economy coverage",
       type: "group",
       fields: [
         { name: "note", type: "textarea" },

@@ -10,7 +10,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Search management (707:281), step 11.3: searches that found nothing in the last 30 days, synonyms and boosted
 // results. Changes apply to the live search at once. Who searched is never stored.
-export const metadata: Metadata = { title: "Search · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Search · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SearchManagementPage({
@@ -39,7 +39,7 @@ export default async function SearchManagementPage({
       <div>
         <h1 className="type-h2">Search</h1>
         <p className="type-body-sm text-secondary">
-          What people search for on H2 India, and the synonyms and boosted results that help them find it.
+          What people search for on H2 Economy, and the synonyms and boosted results that help them find it.
         </p>
       </div>
       <nav aria-label="Search management" className="flex gap-6 border-b border-default">

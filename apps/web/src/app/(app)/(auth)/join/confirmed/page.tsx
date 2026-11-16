@@ -7,7 +7,7 @@ import { ContinueButton } from "./ContinueButton";
 
 // Email confirmed (Figma 527:217). The link has signed the person in; Continue copies their Join details to the
 // account and takes them to the next step.
-export const metadata: Metadata = { title: "Email confirmed · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Email confirmed · H2 Economy", robots: { index: false } };
 
 export default async function ConfirmedPage() {
   const session = await getSession();

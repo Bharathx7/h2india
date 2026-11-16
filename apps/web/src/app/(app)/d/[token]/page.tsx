@@ -6,13 +6,13 @@ import { ReceiptForm } from "@/delivery/ReceiptForm";
 
 // The receiving contact's page (695:13; Receipt recorded 695:110), step 10.9: no account, a single-use link from the
 // SMS (668:232) and its code. Shows only the order number and items, never prices. Built without its frame (A178).
-export const metadata: Metadata = { title: "Record a delivery · H2 India", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Record a delivery · H2 Economy", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const CLOSED: Record<string, string> = {
   invalid: "This link isn't right. Open the link from the SMS again.",
   used: "This delivery was already recorded. Thank you.",
-  locked: "This link is locked after too many wrong codes. H2 India will contact the buyer.",
+  locked: "This link is locked after too many wrong codes. H2 Economy will contact the buyer.",
   expired: "This link has expired. Ask the buyer to request a new code.",
 };
 

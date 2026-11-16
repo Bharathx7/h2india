@@ -8,7 +8,7 @@ import { Icon, Logo } from "@h2india/ui";
 // public address; the CMS and APIs stay reachable. The times come from the CMS setting Planned maintenance; if the
 // database is part of the work, the page still shows without them.
 
-export const metadata: Metadata = { title: "Planned maintenance · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Planned maintenance · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const time = new Intl.DateTimeFormat("en-IN", {
@@ -46,9 +46,9 @@ export default async function MaintenancePage() {
       <div className="flex w-full max-w-108 flex-col gap-4">
         <Logo />
         <p className="type-eyebrow text-secondary">Planned maintenance</p>
-        <h1 className="type-h2 text-primary">We&apos;re upgrading H2 India</h1>
+        <h1 className="type-h2 text-primary">We&apos;re upgrading H2 Economy</h1>
         <p className="type-body text-body">
-          H2 India is offline for planned work on our servers. Your account, orders, quotes and payments are safe, and
+          H2 Economy is offline for planned work on our servers. Your account, orders, quotes and payments are safe, and
           nothing you saved will be lost.
         </p>
         <div className="flex flex-col gap-1 rounded-card bg-mint p-5">
@@ -69,7 +69,7 @@ export default async function MaintenancePage() {
             <Icon name="external-link" size={16} /> Live status updates
           </a>
           <Link href="/newsletter" className="inline-flex items-center gap-2 type-label-sm text-link underline">
-            <Icon name="mail" size={16} /> Read India H₂ Weekly while you wait
+            <Icon name="mail" size={16} /> Read H2 Economy Weekly while you wait
           </Link>
         </div>
       </div>

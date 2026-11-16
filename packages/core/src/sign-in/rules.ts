@@ -65,7 +65,7 @@ export function safeReturnPath(next: unknown, fallback = "/"): string {
 }
 
 /**
- * Which sign-in an app serves (public QC, 16 Nov 2026): the admin domain signs in H2 India staff only; the public
+ * Which sign-in an app serves (public QC, 16 Nov 2026): the admin domain signs in H2 Economy staff only; the public
  * domain is unchanged. "both" is one app serving everything (local development and tests).
  */
 export type SiteRole = "both" | "public" | "admin";

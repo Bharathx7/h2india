@@ -9,7 +9,7 @@ export function reportDownloadMessage(input: { name: string; title: string; url:
   return {
     subject: `Your report: ${input.title}`,
     preview: "Here's the copy you asked for.",
-    reason: "You're getting this because you downloaded this report on H2 India.",
+    reason: "You're getting this because you downloaded this report on H2 Economy.",
     eyebrow: "Reports",
     headline: "Your report is ready",
     paragraphs: [

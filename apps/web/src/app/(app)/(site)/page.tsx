@@ -22,7 +22,7 @@ import { JsonLd, organizationLd, websiteLd } from "@/seo/jsonld";
 // Development only: ?state=loading shows the drawn skeletons; ?fail=tenders,news… forces those modules to fail.
 
 export const metadata: Metadata = {
-  title: "H2 India · India's hydrogen ecosystem platform",
+  title: "H2 Economy · India's hydrogen ecosystem platform",
   description:
     "Find hydrogen products and verified suppliers, follow Indian hydrogen news, and act on schemes and tenders.",
 };
