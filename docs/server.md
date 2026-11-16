@@ -2,8 +2,8 @@
 
 Status: **Built, not yet deployed** (13 Nov 2026, branch `step/1.7-server`). Commands: `docs/runbooks/deploy.md`.
 
-- **Domain A**: `h2india.deecodes.io`: website, workspaces (buyer, supplier, member) and backend (APIs). Files on the same domain under the bucket names (`/h2india-public/…`), because there are only two domains.
-- **Domain B**: `adminh2india.deecodes.io`: admin (`/admin` and the CMS).
+- **Domain A**: `h2economy.co`: website, workspaces (buyer, supplier, member) and backend (APIs). Files on the same domain under the bucket names (`/h2india-public/…`), because there are only two domains.
+- **Domain B**: `admin.h2economy.co`: admin (`/admin` and the CMS).
 
 Answers given (13 Nov 2026): deploy the step 5.10 code; the founder runs the server commands; host nginx with certbot (as hy-gen); email decided later, so mail is caught by an internal Mailpit (M6 open); production starts without sample content. Change from the plan below: on domain A, `/admin` and `/cms` redirect to domain B instead of a 404, so operators who type them land in the right place. Second change: only two domains, so there is no `files.A`; MinIO is served on domain A under the bucket paths (`/h2india-public/`, `/h2india-private/`, `/h2india-quarantine/`) with nosniff and a script-blocking CSP, and browser uploads from domain A are same-origin.
 
