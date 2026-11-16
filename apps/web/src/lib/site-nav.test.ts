@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { FOOTER_COLUMNS, footerFor, knowledgePromo, MEGA_MENUS, menusFor, SITE_LINKS } from "./site-nav";
+import {
+  canRequestQuote,
+  FOOTER_COLUMNS,
+  footerFor,
+  footerWithoutQuote,
+  knowledgePromo,
+  MEGA_MENUS,
+  menusFor,
+  menusWithoutQuote,
+  SITE_LINKS,
+} from "./site-nav";
 
 // Public QC (16 Nov 2026): the Knowledge menu's card was empty.
 describe("the Knowledge menu card", () => {
@@ -48,5 +58,23 @@ describe("the Directory in the menus", () => {
       "For Members",
       "For Suppliers",
     ]);
+  });
+});
+
+// Public QC 4 (16 Nov 2026): Request a quote is for buyers.
+describe("Request a quote", () => {
+  it("shows to signed-out visitors and buyers only", () => {
+    expect(canRequestQuote(null)).toBe(true);
+    expect(canRequestQuote({ workspaceHref: "/buyer" })).toBe(true);
+    for (const area of ["/supplier", "/member", "/admin"]) expect(canRequestQuote({ workspaceHref: area })).toBe(false);
+  });
+
+  it("leaves the Marketplace menu and the footer for everyone else", () => {
+    const hrefs = [
+      ...menusWithoutQuote(MEGA_MENUS).flatMap((m) => (m.tools ?? []).map((t) => t.href)),
+      ...footerWithoutQuote(FOOTER_COLUMNS).flatMap((c) => c.links.map((l) => l.href)),
+    ];
+    expect(hrefs).not.toContain("/rfq/new");
+    expect(MEGA_MENUS.flatMap((m) => (m.tools ?? []).map((t) => t.href))).toContain("/rfq/new");
   });
 });

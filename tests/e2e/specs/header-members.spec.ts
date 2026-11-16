@@ -1,6 +1,7 @@
 import { expect, hydrated, test } from "../fixtures";
 import { fillDetails, latestConfirmLink } from "../helpers/join";
 import { setup } from "../helpers/orders";
+import { signInExisting } from "../helpers/rfq";
 import { enterCode, ensureAccount, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
 // Public QC (16 Nov 2026), rounds 1 and 2. Header: the top strip and section nav hide while scrolling down, come back
@@ -156,4 +157,43 @@ test("a new supplier confirms their email and carries on in Create a supplier ac
   // The shared /join sends a signed-in supplier back to their own page too.
   await page.goto("/join");
   await expect(page).toHaveURL(/\/join\/supplier$/);
+});
+
+test("signed in on the public site: role badge, bell panel, Dashboard; Request a quote only for buyers", async ({
+  page,
+  browser,
+}, info) => {
+  test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
+  test.skip(info.project.name !== "desktop-1440", "The bell panel and avatar menu are in the desktop header");
+  test.setTimeout(120_000);
+  const d = await setup();
+  const header = page.locator("header");
+
+  // A buyer: badge "Buyer" (not a link), Request a quote, the bell opens a panel on the same page.
+  await signInExisting(page, d.buyerEmail, "/news");
+  await page.goto("/news");
+  await expect(header.getByTestId("role-badge").first()).toHaveText("Buyer");
+  // The badge is not a link (the top strip's "For Buyers" is, hence exact).
+  await expect(header.getByRole("link", { name: "Buyer", exact: true })).toHaveCount(0);
+  await expect(header.getByRole("link", { name: "Request a quote" }).first()).toBeVisible();
+  await header
+    .getByRole("button", { name: /^Notifications/ })
+    .first()
+    .click();
+  await expect(page.getByRole("dialog", { name: "Notifications" })).toBeVisible();
+  await expect(page).toHaveURL(/\/news$/);
+  await page.keyboard.press("Escape");
+  await header.getByRole("button", { name: /^Account: / }).click();
+  await page.getByRole("menuitem", { name: "Dashboard" }).click();
+  await expect(page).toHaveURL(/\/buyer$/);
+
+  // A supplier: badge "Supplier", no Request a quote anywhere in the header or footer.
+  const other = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
+  await ownIp(other, info);
+  const s = await other.newPage();
+  await signInExisting(s, d.supplierEmail, "/news");
+  await s.goto("/news");
+  await expect(s.locator("header").getByTestId("role-badge").first()).toHaveText("Supplier");
+  await expect(s.locator("header, footer").getByRole("link", { name: "Request a quote" })).toHaveCount(0);
+  await other.close();
 });
