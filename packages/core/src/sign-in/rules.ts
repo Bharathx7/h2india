@@ -26,15 +26,7 @@ export const SIGN_IN_ERROR = {
  * characters. Checked by position, not a backtracking regular expression, so a long crafted input can't stall the
  * server (CodeQL js/polynomial-redos).
  */
-export function looksLikeEmail(value: string): boolean {
-  const v = value.trim();
-  if (v.length < 5 || v.length > 254 || /\s/.test(v)) return false;
-  const at = v.indexOf("@");
-  if (at < 1 || at !== v.lastIndexOf("@")) return false;
-  const domain = v.slice(at + 1);
-  const dot = domain.lastIndexOf(".");
-  return dot > 0 && dot < domain.length - 1;
-}
+export { looksLikeEmail } from "../text-checks";
 
 export function normaliseEmail(email: string): string {
   return email.trim().toLowerCase();

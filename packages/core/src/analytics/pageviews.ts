@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, gte, like, sql } from "drizzle-orm";
+import { trimEndChars } from "../text-checks";
 
 // First-party analytics (A176, the M10 stand-in): a count per public page per IST day. The browser sends a view only
 // after the visitor accepts analytics cookies and never for operators (consent/Analytics.tsx); nothing here stores a
@@ -11,7 +12,7 @@ const PRIVATE = /^\/(admin|buyer|supplier|member|cms|api|dev|d|checkout|cart|sig
 export function countedPath(raw: string): string | null {
   let path = raw.split(/[?#]/)[0] ?? "";
   if (!path.startsWith("/") || path.startsWith("//")) return null;
-  if (path.length > 1) path = path.replace(/\/+$/, "");
+  if (path.length > 1) path = trimEndChars(path, "/") || "/";
   if (path.length > 200 || PRIVATE.test(path)) return null;
   if (!/^[\w\-/.~%]*$/.test(path)) return null;
   return path;

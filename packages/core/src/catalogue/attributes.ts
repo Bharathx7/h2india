@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { trimChars } from "../text-checks";
 
 // Attribute schemas (step 6.1, Taxonomy 636:596 and Add attribute 637:417). Pure, so the admin dialog, the product
 // editor, the CSV import and the datasheet reader all check values with the same rules and the same words.
@@ -64,14 +65,13 @@ export function formatAllowedValues(def: Pick<AttributeDef, "type" | "min" | "ma
 
 /** "Noise level" → "noise_level". The key is fixed once made; products keep their values under it. */
 export function keyFromLabel(label: string): string {
-  return label
+  const key = label
     .normalize("NFKD")
     .replace(/[^\w\s-]/g, "")
     .trim()
     .toLowerCase()
-    .replace(/[\s-]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 48);
+    .replace(/[\s-]+/g, "_");
+  return trimChars(key, "_").slice(0, 48);
 }
 
 const NUMBER = String.raw`-?\d[\d,]*(?:\.\d+)?`;

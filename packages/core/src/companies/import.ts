@@ -8,6 +8,7 @@ import { summarise, type ImportReport, type RowResult } from "../importing/repor
 import { nudgeIndexer, queueIndexChange } from "../search/outbox";
 import { queueProductsOf } from "../search/products";
 import { GST_STATES } from "./gstin";
+import { trimChars } from "../text-checks";
 
 // Pre-seeded company profiles (step 4.6, A38): created Unclaimed with no members, so nobody can act for the company
 // until it claims the profile (step 6.7). Rows are matched on `key`, so the same file can be imported again.
@@ -53,13 +54,12 @@ export const companyRow = z.object({
 export type CompanyRow = z.infer<typeof companyRow>;
 
 export function slugifyCompany(name: string): string {
-  return name
+  const slug = name
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+    .replace(/[^a-z0-9]+/g, "-");
+  return trimChars(slug, "-").slice(0, 80);
 }
 
 function profileValues(r: CompanyRow, sample: boolean) {

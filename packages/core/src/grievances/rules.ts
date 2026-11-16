@@ -2,6 +2,8 @@
 // the browser shows the same messages as the server. The timelines are the clocks grievanceAcknowledge (24 hours)
 // and grievanceResolve (15 days) in packages/config/src/clocks.ts (A24); pages read them from there.
 
+import { looksLikeEmail, looksLikeWebAddress } from "../text-checks";
+
 export const GRIEVANCE_TYPES = ["Content", "Listing", "Privacy", "Payment", "Other"] as const;
 export type GrievanceType = (typeof GRIEVANCE_TYPES)[number];
 
@@ -47,8 +49,9 @@ export interface CheckedGrievance {
   files: string[];
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const URL_OK = /^https?:\/\/[^\s/]+\.[^\s]+$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos). */
+const EMAIL = { test: looksLikeEmail };
+const URL_OK = { test: (v: string) => looksLikeWebAddress(v, { allowHttp: true }) };
 
 export function grievanceMobile(text: string): string | null {
   const digits = text.replace(/[\s-]/g, "").replace(/^\+?91/, "");

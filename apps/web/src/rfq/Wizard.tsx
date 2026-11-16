@@ -23,6 +23,7 @@ import { checkFile, uploadHint, useUploads } from "@/lib/uploads";
 import { deleteDraftAction, saveRfqDraft, sendRfq, specFieldsAction, suppliersAction } from "./actions";
 import {
   DELIVERY_TERMS,
+  EMPTY_WIZARD,
   LOCAL_DRAFT_KEY,
   PAYMENT_TERMS,
   stepOneErrors,
@@ -55,14 +56,20 @@ const STEPS = ["What you need", "Choose suppliers", "Delivery & deadlines", "Rev
 const readLocal = (): WizardState | null => {
   try {
     const raw = window.localStorage.getItem(LOCAL_DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as WizardState) : null;
+    return raw ? { ...EMPTY_WIZARD, ...(JSON.parse(raw) as Partial<WizardState>) } : null;
   } catch {
     return null;
   }
 };
+/**
+ * What a signed-out draft keeps in this browser: what the person asked for, never account details (the draft's id,
+ * the delivery site or the GSTIN chosen), which are picked again after sign-in (CodeQL
+ * js/clear-text-storage-of-sensitive-data).
+ */
+const forBrowser = (s: WizardState): Partial<WizardState> => ({ ...s, draftId: undefined, siteId: "", gstinId: "" });
 const writeLocal = (s: WizardState | null) => {
   try {
-    if (s) window.localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(s));
+    if (s) window.localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(forBrowser(s)));
     else window.localStorage.removeItem(LOCAL_DRAFT_KEY);
   } catch {
     /* private mode: the draft lives only in this page */

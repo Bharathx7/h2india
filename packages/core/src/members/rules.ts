@@ -1,3 +1,4 @@
+import { looksLikeWebAddress } from "../text-checks";
 // Member onboarding and follows (steps 7.1, 7.2). Pure and safe in the browser.
 
 /** 1 · Pick your persona (531:9). */
@@ -228,7 +229,7 @@ export function profileProblems(input: { name: string; persona: string | null; f
     problems[req] = `Enter your ${req === "affiliation" ? "affiliation" : req}`;
   }
   for (const l of input.fields.links ?? []) {
-    if (!/^https?:\/\/[^\s]+\.[^\s]+$/i.test(l.url.trim())) problems.links = "Each link needs a full web address";
+    if (!looksLikeWebAddress(l.url, { allowHttp: true })) problems.links = "Each link needs a full web address";
   }
   return problems;
 }

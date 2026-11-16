@@ -16,6 +16,7 @@ import {
   type AttributeType,
   type CheckedAttribute,
 } from "./attributes";
+import { trimChars } from "../text-checks";
 
 // The catalogue's taxonomy (step 6.1): reads for admin Catalogue (636:596) and the operator's changes. Every change
 // checks catalogue.edit, writes the audit log (before and after) and one line of change history, in one transaction.
@@ -527,15 +528,16 @@ const CATEGORY_LABEL_MAX = 60;
 
 /** "Tanks & cylinders" → "tanks-cylinders". */
 export const slugFromLabel = (label: string) =>
-  label
-    .normalize("NFKD")
-    .replace(/&/g, " ")
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
+  trimChars(
+    label
+      .normalize("NFKD")
+      .replace(/&/g, " ")
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_-]+/g, "-"),
+    "-",
+  ).slice(0, 60);
 
 async function checkCategoryLabel(
   tx: Executor,

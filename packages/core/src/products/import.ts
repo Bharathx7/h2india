@@ -73,7 +73,7 @@ export function cellValue(def: AttributeDef, raw: string): { value?: unknown; er
       return { value: n };
     }
     case "range": {
-      const [a, b] = text.split(/\s*(?:–|-|to)\s*/).map((t) => Number(t.replace(/,/g, "")));
+      const [a, b] = text.split(/–|-|to/).map((t) => Number(t.trim().replace(/,/g, "")));
       if (a === undefined || !Number.isFinite(a) || (b !== undefined && !Number.isFinite(b)))
         return { error: `"${text}" isn't a range. Enter it like 20-30.` };
       return { value: { min: a, max: b ?? a } };
@@ -345,28 +345,29 @@ export async function saveQuickStock(
   changes: QuickChange[],
   context?: RequestContext,
 ) {
-  const problems: Record<string, string> = {};
+  // Row ids come from the browser: a Map, not an object keyed by them (CodeQL js/remote-property-injection).
+  const problems = new Map<string, string>();
   const updates: { id: string; data: ProductInput }[] = [];
   for (const c of changes) {
     let price: bigint;
     try {
       price = Money.parse(c.price);
     } catch {
-      problems[c.id] = "Enter the price in rupees";
+      problems.set(c.id, "Enter the price in rupees");
       continue;
     }
     const qty = Number(c.stockQty);
     const days = Number(c.shipDays);
-    if (!(price > 0n)) problems[c.id] = "Enter the price in rupees";
-    else if (!Number.isInteger(qty) || qty < 0) problems[c.id] = "Stock is a whole number";
-    else if (!Number.isInteger(days) || days < 1) problems[c.id] = "At least 1 day";
+    if (!(price > 0n)) problems.set(c.id, "Enter the price in rupees");
+    else if (!Number.isInteger(qty) || qty < 0) problems.set(c.id, "Stock is a whole number");
+    else if (!Number.isInteger(days) || days < 1) problems.set(c.id, "At least 1 day");
     else
       updates.push({
         id: c.id,
         data: { pricing: "fixed", pricePaise: price, stock: "in_stock", stockQty: qty, shipDays: days },
       });
   }
-  if (Object.keys(problems).length) throw new ProductError("Fix the highlighted rows", problems);
+  if (problems.size) throw new ProductError("Fix the highlighted rows", Object.fromEntries(problems));
   for (const u of updates)
     await saveProduct(db, actor, organisationId, { id: u.id, data: u.data, submit: false, context });
   return updates.length;

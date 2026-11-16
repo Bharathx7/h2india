@@ -64,7 +64,8 @@ export function ImportUpload({
           </Select>
         </label>
         <a
-          href={`/supplier/products/import/template?category=${category}`}
+          // Only an id from the list, encoded (CodeQL js/xss-through-dom).
+          href={`/supplier/products/import/template?category=${encodeURIComponent(categories.find((c) => c.id === category)?.id ?? "")}`}
           className={buttonClasses({ variant: "outline", size: "sm" }) + " self-start"}
         >
           <Icon name="download" size={16} />

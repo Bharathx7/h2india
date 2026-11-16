@@ -2,6 +2,8 @@
 // Suggest a correction 504:455 and Write for us 504:985. Pure checks with the messages drawn; the limits are the
 // counters on the frames ("0 / 2,000", "0 / 6,000", "0 / 1,000", "0 / 1,500"). No featured-event payment (F7).
 
+import { looksLikeEmail, looksLikeWebAddress } from "../text-checks";
+
 export type SubmissionKind =
   "event" | "press_release" | "correction" | "pitch" | "contact" | "partnership" | "advertising";
 
@@ -45,8 +47,9 @@ export interface Checked {
 }
 export type Result = { ok: true; value: Checked } | { ok: false; errors: Errors };
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const URL_OK = /^https:\/\/[^\s/]+\.[^\s]+$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos). */
+const EMAIL = { test: looksLikeEmail };
+const URL_OK = { test: (v: string) => looksLikeWebAddress(v) };
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const t = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 

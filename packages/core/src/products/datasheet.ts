@@ -165,19 +165,26 @@ export async function decideField(
     .from(x)
     .where(and(eq(x.id, input.id), eq(x.organisationId, organisationId)));
   if (!row || row.status !== "Ready") throw new ProductError("This datasheet can't be changed now");
-  const field = row.fields.find((f) => f.attributeKey === input.key);
+  // The key is one of the category's attributes, taken from the schema, never the browser's word (CodeQL
+  // js/remote-property-injection).
+  const defs = await effectiveSchema(db, row.categoryId, { includeSample: true });
+  const def = defs.find((d) => d.key === input.key);
+  if (!def) throw new ProductError("This field isn't part of the category");
+  const key = def.key;
+  const field = row.fields.find((f) => f.attributeKey === key);
   if (input.state === "accepted" && field?.problem)
     throw new ProductError(`${field.problem}. Edit the value or mark it not in the datasheet.`);
   if (input.state === "edited") {
-    const defs = await effectiveSchema(db, row.categoryId, { includeSample: true });
-    const def = defs.find((d) => d.key === input.key);
-    const problem = def ? valueProblem(def, input.value) : null;
-    if (problem) throw new ProductError(problem, { [input.key]: problem });
+    const problem = valueProblem(def, input.value);
+    if (problem) throw new ProductError(problem, { [key]: problem });
   }
   await db
     .update(x)
     .set({
-      decisions: { ...row.decisions, [input.key]: { state: input.state, value: input.value } },
+      decisions: Object.fromEntries([
+        ...Object.entries(row.decisions),
+        [key, { state: input.state, value: input.value }],
+      ]),
       updatedAt: new Date(),
     })
     .where(eq(x.id, row.id));

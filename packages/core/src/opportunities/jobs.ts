@@ -1,3 +1,4 @@
+import { looksLikeWebAddress } from "../text-checks";
 // Jobs (step 5.5): the options drawn on the jobs list (464:6071) and the Post a job form (467:7472), and the rules a
 // posted job must meet. Posting is free and any signed-in company user may post (A68); every posted job is a draft
 // until an editor publishes it, and only editors make a job Featured.
@@ -161,8 +162,7 @@ export function checkJobPost(
   if (input.applyBy !== "link") errors.applyBy = "Link to your careers page for now";
   const url = input.careersUrl.trim();
   need("careersUrl", Boolean(url), "Enter your careers page link");
-  if (url && !/^https:\/\/[^\s/]+\.[^\s]+$/.test(url))
-    errors.careersUrl = "Enter the full link, starting with https://";
+  if (url && !looksLikeWebAddress(url)) errors.careersUrl = "Enter the full link, starting with https://";
 
   let closesAt: string | undefined;
   const day = input.closesOn.trim();
