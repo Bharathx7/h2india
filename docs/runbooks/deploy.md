@@ -15,7 +15,7 @@ never delivered. Read it through an SSH tunnel (step 7).
 
 ## Before the first deploy (once)
 
-1. **DNS.** Point `h2economy.co` (A record `@`) and `admin.h2economy.co` (A record `admin`) at the server's IP. There is no www site (founder, 16 Nov 2026).
+1. **DNS.** Point `h2economy.co` (A record `@`) and `admin.h2economy.co` (A record `admin`) at the server's IP. `www` (CNAME or A) points there too and redirects to `h2economy.co`.
    If the DNS is on Cloudflare, set them to "DNS only" (grey cloud), or nginx sees Cloudflare's address instead of
    the visitor's.
 2. **Server memory.** The H2 India containers need about 4 GB on top of what the server already runs (ClamAV alone
@@ -61,7 +61,7 @@ sudo mv /tmp/h2india-proxy.conf /tmp/h2india-files.conf /etc/nginx/snippets/
 sudo mv /tmp/h2india.conf /etc/nginx/sites-available/h2india.conf
 sudo ln -s /etc/nginx/sites-available/h2india.conf /etc/nginx/sites-enabled/h2india.conf
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d h2economy.co -d admin.h2economy.co
+sudo certbot --nginx -d h2economy.co -d www.h2economy.co -d admin.h2economy.co
 
 # 6. Search indexes (empty until editors publish)
 dc run --rm tools pnpm search:reindex
