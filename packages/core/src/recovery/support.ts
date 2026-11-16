@@ -14,6 +14,7 @@ import { deliverEmail } from "../notify/channels";
 import { nextReference } from "../reference";
 import { hitThrottle } from "../sign-in/throttle";
 import { RecoveryError } from "./recovery";
+import { looksLikeEmail } from "../text-checks";
 
 // Lost email, "Or send a support request" (528:534, received 528:664; step 3.7, decisions A16, A22, A23). The person
 // is signed out. Support gets an email with a link to a sign-in-protected review page; the Work ID is opened there
@@ -23,7 +24,8 @@ const { recoveryRequests: rr } = schema;
 
 /** Support requests per IP address per day. */
 export const SUPPORT_REQUESTS_PER_DAY = 5;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos). */
+const EMAIL = { test: looksLikeEmail };
 
 export interface SupportRequestInput {
   actor: Actor;

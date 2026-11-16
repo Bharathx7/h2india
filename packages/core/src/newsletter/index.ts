@@ -7,6 +7,7 @@ import { audit } from "../audit";
 import { getDb } from "../db";
 import { deliverEmail } from "../notify/channels";
 import { formatIstDateTime, istDate } from "../time";
+import { looksLikeEmail } from "../text-checks";
 
 // H2 Economy Weekly sign-up with double opt-in (step 5.1, A46; brought forward from 5.9). A sign-up stays "pending" until
 // the emailed link is opened (48 hours, 676:8). Signing up again with a confirmed address sends a link to change topics
@@ -43,7 +44,8 @@ export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-11-12";
 export const CONFIRM_HOURS = 48;
 export const MANAGE_DAYS = 7;
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos); the domain ends in 2+ letters. */
+const EMAIL = { test: (v: string) => looksLikeEmail(v) && (v.trim().split(".").at(-1)?.length ?? 0) >= 2 };
 
 export function isEmailAddress(value: string): boolean {
   return EMAIL.test(value.trim()) && value.trim().length <= 254;

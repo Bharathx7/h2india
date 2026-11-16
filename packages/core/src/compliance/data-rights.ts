@@ -7,6 +7,7 @@ import { assertCan } from "../authz/can";
 import { cancelDeadline, clockDuration, startClock, workingCalendar } from "../clocks/clocks";
 import { exportMemberData } from "../members/account";
 import { nextReference } from "../reference";
+import { looksLikeEmail } from "../text-checks";
 
 // Data-rights requests (660:1786), step 11.7: access (export), correction and erasure, each due 30 days after receipt.
 // Erasure is a reviewed job: the dry run lists every table and file it touches and what happens there (delete, mask or
@@ -30,7 +31,7 @@ export async function receiveRequest(
 ) {
   assertCan(actor, "compliance.edit");
   const email = input.email.trim().toLowerCase();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new DataRightsError("Enter the person's email");
+  if (!looksLikeEmail(email)) throw new DataRightsError("Enter the person's email");
   const [person] = await db.select({ id: u.id }).from(u).where(eq(u.email, email));
   const due = (await workingCalendar(db)).add(now, await clockDuration(db, "dataRightsDue"));
   return db.transaction(async (tx) => {

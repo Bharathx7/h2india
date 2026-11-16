@@ -15,6 +15,7 @@ import { notify } from "../notify/notify";
 import { nextReference } from "../reference";
 import { normaliseEmail } from "../sign-in/rules";
 import { checkCode, sendCode } from "./codes";
+import { looksLikeEmail } from "../text-checks";
 
 // Account recovery (step 3.5, Figma 528:8). Three paths, each needing two independent proofs:
 //  • lost passkey: a code to the work email and a code to the mobile on file, then a new passkey (528:53, 528:217)
@@ -74,7 +75,7 @@ async function byToken(token: string) {
 export async function startRecovery(input: { kind: RecoveryKind; email: string }) {
   const db = getDb();
   const email = normaliseEmail(input.email);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new RecoveryError("INVALID_EMAIL", "Enter your work email");
+  if (!looksLikeEmail(email)) throw new RecoveryError("INVALID_EMAIL", "Enter your work email");
   const [user] = await db.select().from(u).where(eq(u.email, email));
   const [seat] = user
     ? await db.select({ organisationId: m.organisationId }).from(m).where(eq(m.userId, user.id)).limit(1)
@@ -461,7 +462,7 @@ export async function recoveryForReview(actor: Actor, requestId: string) {
 export async function requestNewEmail(input: { userId: string; email: string }): Promise<void> {
   const db = getDb();
   const email = normaliseEmail(input.email);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new RecoveryError("INVALID_EMAIL", "Enter your new work email");
+  if (!looksLikeEmail(email)) throw new RecoveryError("INVALID_EMAIL", "Enter your new work email");
   const [taken] = await db.select({ id: u.id }).from(u).where(eq(u.email, email));
   if (taken) throw new RecoveryError("EMAIL_TAKEN", "That email already has an account");
   const [row] = await db

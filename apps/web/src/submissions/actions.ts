@@ -59,10 +59,14 @@ const RETURN_PATH: Record<SubmissionKind, string> = {
 };
 
 export async function submitContent(
-  kind: SubmissionKind,
+  requested: SubmissionKind,
   input: Record<string, unknown>,
   guard?: FormGuard,
 ): Promise<SubmitResult> {
+  // A server action's arguments come from the browser: only a known kind picks a check (CodeQL
+  // js/unvalidated-dynamic-method-call).
+  const kind = (Object.keys(RETURN_PATH) as SubmissionKind[]).find((k) => k === requested);
+  if (!kind) return { ok: false, reason: "failed" };
   const ctx = await requestContext();
   if (!(await underLimit(`submission:${kind}:${ctx.ip ?? "unknown"}`, 3600, 10)))
     return { ok: false, reason: "limited" };
@@ -136,7 +140,7 @@ export async function submitContent(
     }
     return { ok: true, reference };
   } catch (error) {
-    console.error(`[submissions] ${kind} failed`, error);
+    console.error("[submissions] failed", { kind }, error);
     return { ok: false, reason: "failed" };
   }
 }

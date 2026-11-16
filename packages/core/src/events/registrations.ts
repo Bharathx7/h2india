@@ -4,6 +4,7 @@ import { and, count, eq, isNull, sql } from "drizzle-orm";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { JOB_ROLES } from "../companies/client";
 import { startDeadline } from "../clocks/clocks";
+import { looksLikeEmail } from "../text-checks";
 
 // Webinar registration (step 5.7; 732:521, 732:939, closed or full 827:14696). The form asks only for what the design
 // shows. Seats are counted in the same transaction as the insert, under a lock on the webinar, so the last seat can't
@@ -49,7 +50,8 @@ export type RegistrationResult =
   | { ok: false; reason: "full" | "closed" }
   | { ok: false; reason: "invalid"; errors: Partial<Record<RegistrationField, string>> };
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos). */
+const EMAIL = { test: looksLikeEmail };
 
 /** "+91 98765 43210" or "9876543210" → "+919876543210"; null when it isn't an Indian mobile number. */
 export function indianMobile(text: string): string | null {

@@ -10,6 +10,7 @@ import { CLOCK_SETTINGS } from "../clocks/clocks";
 import { getDb } from "../db";
 import { listDeadLetters } from "../queue/dead-letters";
 import { defineSetting, getSetting, setSetting } from "../settings";
+import { looksLikeEmail } from "../text-checks";
 
 // System settings (707:793) and Reports (716:348), step 11.8. Switches and clocks are settings: every change is audited
 // with its reason, clock changes apply to new deadlines only (each deadline keeps its own due time), and switches that
@@ -51,9 +52,12 @@ export async function switchFlag(
   context?: RequestContext,
 ): Promise<"applied" | "proposed"> {
   assertCan(actor, "settings.edit");
+  // Only a switch from the list: the name becomes a key in the stored setting (CodeQL js/remote-property-injection).
+  const flag = ADMIN_FLAGS.find((f) => f === input.flag);
+  if (!flag) throw new SystemError("Unknown switch");
   if (!input.reason.trim()) throw new SystemError("Give a reason");
   if (!actor.userId) throw new SystemError("Sign in again");
-  if (TWO_PERSON_FLAGS.includes(input.flag)) {
+  if (TWO_PERSON_FLAGS.includes(flag)) {
     const [row] = await db
       .insert(schema.settingProposals)
       .values({ key: `flag.${input.flag}`, value: input.on, reason: input.reason.trim(), proposedBy: actor.userId })
@@ -74,7 +78,7 @@ export async function switchFlag(
     db,
     actor,
     FLAG_OVERRIDES,
-    { ...current, [input.flag]: input.on },
+    { ...current, [flag]: input.on },
     { reason: input.reason.trim(), context },
   );
   await refreshFlagOverrides(db);
@@ -271,7 +275,7 @@ export async function scheduleReport(
 ) {
   assertCan(actor, "reports.view");
   if (!actor.userId) throw new SystemError("Sign in again");
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email)) throw new SystemError("Enter an email address");
+  if (!looksLikeEmail(input.email)) throw new SystemError("Enter an email address");
   const [row] = await db
     .insert(schema.reportSchedules)
     .values({ email: input.email.trim().toLowerCase(), frequency: input.frequency, createdBy: actor.userId })

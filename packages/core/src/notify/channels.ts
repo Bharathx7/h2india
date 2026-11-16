@@ -198,8 +198,11 @@ async function deliverText(
   input: Base & { template: TextTemplateId; to: string; data: Record<string, string> },
   opts: { sendAfter?: Date } = {},
 ): Promise<"Sent" | "Waiting"> {
-  const status = await templateStatus(getDb(), input.template);
-  const text = (APPROVED_TEXT[input.template] as (d: Record<string, string>) => string)(input.data);
+  // Only a registered template's own words (CodeQL js/unvalidated-dynamic-method-call).
+  const template = (Object.keys(APPROVED_TEXT) as TextTemplateId[]).find((t) => t === input.template);
+  if (!template) throw new Error("Unknown text template");
+  const status = await templateStatus(getDb(), template);
+  const text = (APPROVED_TEXT[template] as (d: Record<string, string>) => string)(input.data);
   const base = {
     event: input.event,
     channel,

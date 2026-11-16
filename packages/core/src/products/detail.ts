@@ -306,6 +306,7 @@ export async function similarProducts(
 export { QUESTION_MAX, REPORT_PROBLEMS } from "./rules-client";
 import { QUESTION_MAX, REPORT_PROBLEMS } from "./rules-client";
 import { supplierNotSuspended } from "./suspension";
+import { looksLikeEmail } from "../text-checks";
 
 type Result = { ok: true } | { ok: false; errors: Record<string, string> };
 
@@ -377,7 +378,8 @@ export async function askQuestion(
   return { ok: true };
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Email check without a slow regular expression (CodeQL js/polynomial-redos). */
+const EMAIL = { test: looksLikeEmail };
 
 /** Report this listing (755:15048): goes to the Listings queue (step 11.2); the supplier never sees who sent it. */
 export async function reportListing(

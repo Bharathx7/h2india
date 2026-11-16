@@ -40,7 +40,16 @@ export function normaliseMobile(value: string): string | null {
 
 /** "Greenfield Mobility Solutions Private Limited" → "Greenfield Mobility Solutions", as the screens write it. */
 export function shortCompanyName(legalName: string): string {
-  return legalName.replace(/\s+(private\s+limited|pvt\.?\s+ltd\.?|limited|ltd\.?|llp)$/i, "").trim() || legalName;
+  // Word by word rather than one regular expression, so a long name can't make it slow (CodeQL js/polynomial-redos).
+  const words = legalName.trim().split(/\s+/);
+  const plain = (w: string | undefined) => (w ?? "").toLowerCase().replace(/\.$/, "");
+  const last = plain(words.at(-1));
+  const before = plain(words.at(-2));
+  let drop = 0;
+  if (words.length > 2 && ((before === "private" && last === "limited") || (before === "pvt" && last === "ltd")))
+    drop = 2;
+  else if (words.length > 1 && (last === "limited" || last === "ltd" || last === "llp")) drop = 1;
+  return words.slice(0, words.length - drop).join(" ") || legalName;
 }
 
 /** What the GSTIN step can show (Figma 526:8). */
