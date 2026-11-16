@@ -9,7 +9,7 @@ import type { TrackerHub } from "@/payload-types";
 // 6.6; until then its place shows what it will hold, as drawn. Choosing a valley opens its details beside the map.
 
 export const metadata: Metadata = {
-  title: "Green hydrogen hubs and hydrogen valleys · H2 India",
+  title: "Green hydrogen hubs and hydrogen valleys · H2 Economy",
   description: "Ports recognised as green hydrogen hubs, and the Hydrogen Valley Innovation Clusters.",
   alternates: { canonical: "/states/hubs" },
 };

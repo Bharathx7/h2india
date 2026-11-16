@@ -14,9 +14,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const j = await getJob((await params).slug);
-  if (!j) return { title: "Not found · H2 India" };
+  if (!j) return { title: "Not found · H2 Economy" };
   return {
-    title: `${j.role} · ${j.company} · H2 India jobs`,
+    title: `${j.role} · ${j.company} · H2 Economy jobs`,
     description: j.description.slice(0, 200),
     alternates: { canonical: `/opportunities/jobs/${j.slug}` },
     ...(jobView(j).status === "Expired" ? { robots: { index: false } } : {}),

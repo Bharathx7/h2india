@@ -60,7 +60,7 @@ export const host = (url: string) => {
   }
 };
 
-/** Documents (457:3222, 463:5337): each opens on the official portal; H2 India never hosts them. */
+/** Documents (457:3222, 463:5337): each opens on the official portal; H2 Economy never hosts them. */
 export function Documents({
   items,
   note,

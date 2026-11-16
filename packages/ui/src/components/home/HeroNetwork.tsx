@@ -75,7 +75,7 @@ export function HeroNetwork({ className }: { className?: string }) {
       <div
         className="relative aspect-[600/560] w-full overflow-hidden rounded-feature bg-inverse shadow-ink-float"
         role="img"
-        aria-label="H2 India connects buyers, suppliers, schemes, tenders and news"
+        aria-label="H2 Economy connects buyers, suppliers, schemes, tenders and news"
       >
         <svg viewBox="0 0 600 560" className="absolute inset-0 size-full" aria-hidden="true">
           <circle
@@ -122,7 +122,7 @@ export function HeroNetwork({ className }: { className?: string }) {
             className="font-display font-bold"
             style={{ fontSize: u(20), lineHeight: 1.3, letterSpacing: "-0.015em" }}
           >
-            H2 India
+            H2 Economy
           </span>
           <span
             className="font-mono font-medium uppercase"

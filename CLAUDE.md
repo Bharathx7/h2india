@@ -1,6 +1,6 @@
-# CLAUDE.md: H2 India
+# CLAUDE.md: H2 Economy
 
-H2 India is India's hydrogen ecosystem platform: a marketplace (quotes; prices only on fixed-price product pages), a company directory, news and insights, schemes, tenders, grants, jobs, knowledge, the India Hydrogen Tracker and events. It has buyer, supplier, member and admin workspaces.
+H2 Economy (renamed from H2 India on 16 Nov 2026; code, database and server names keep `h2india`) is India's hydrogen ecosystem platform: a marketplace (quotes; prices only on fixed-price product pages), a company directory, news and insights, schemes, tenders, grants, jobs, knowledge, the India Hydrogen Tracker and events. It has buyer, supplier, member and admin workspaces.
 
 The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The build follows `docs/playbook.pdf`, one step at a time.
 
@@ -184,6 +184,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Newsletter, consent and form protection (step 5.9)
 
+- The brand is **H2 Economy** in everything people see (pages, emails, logo). Internal names (`@h2india/*` packages, database, cookies, `/srv/h2india`, `h2india-*` buckets) stay. The logo is an interim wordmark (`packages/ui/src/brand/Logo.tsx`: the approved H₂ mark plus "Economy" in Inter Extra Bold) until the designer draws the final one.
 - Every public form calls `checkForm()` (`@h2india/core`) on the server before saving, and sends `guard()` from `useFormGuard()` (`apps/web/src/lib/form-guard.tsx`) with its `{trap}` rendered inside the form. A new public form does both.
 - Cookie choices live in the `h2_consent` cookie (`@h2india/core/consent/cookies`); read them with `useCookieChoice()`. Load nothing that tracks people except through `Analytics`, which needs consent and skips operators. Bump `COOKIE_CONSENT_VERSION` when the categories or banner words change.
 - Newsletter mail carries `unsubscribeHeaders()`; unsubscribing goes only through `unsubscribe()` (one-click POST or the confirm page).

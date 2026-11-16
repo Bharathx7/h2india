@@ -28,7 +28,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Supplier order (step 10.7 to 10.10): accept or decline (693:8), awaiting payment (811:12584), dispatch checklist
 // (693:814), in transit and delivered (693:814 Delivery status), dispute open (813:12602).
-export const metadata: Metadata = { title: "Order · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Order · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);
@@ -284,7 +284,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
               ]}
             />
             <div className="mt-2 flex flex-col gap-2 rounded-card bg-subtle p-5">
-              <p className="type-label">H2 India fee for this order</p>
+              <p className="type-label">H2 Economy fee for this order</p>
               {(
                 [
                   [`${String(card.feeBps / 100)}% of ${rupees(exGst)} (before GST)`, rupees(uncapped)],
@@ -305,7 +305,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
               ))}
               {fee.launchOffer && card.launchOfferTo ? (
                 <p className="type-caption text-secondary">
-                  No H2 India fee until {formatIstDate(new Date(`${card.launchOfferTo}T00:00:00+05:30`))} under the
+                  No H2 Economy fee until {formatIstDate(new Date(`${card.launchOfferTo}T00:00:00+05:30`))} under the
                   launch offer.
                 </p>
               ) : card.sample ? (
@@ -390,7 +390,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
             >
               {dispute.reason}
               {dispute.acceptedPaise > 0n ? "; the rest was accepted" : ""}. {rupees(dispute.disputedPaise)} is held in
-              escrow until you both agree or H2 India decides.
+              escrow until you both agree or H2 Economy decides.
             </Alert>
             <Card title="What the buyer sent" className="w-full">
               <p className="type-body text-body">“{dispute.details}”</p>
@@ -420,7 +420,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
             ) : (
               <Card title="Your response" className="w-full">
                 <p className="type-body-sm text-body">
-                  {dispute.supplierReply ?? "H2 India is reviewing the evidence."}
+                  {dispute.supplierReply ?? "H2 Economy is reviewing the evidence."}
                 </p>
               </Card>
             )}
@@ -450,7 +450,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
               <ul className="flex list-disc flex-col gap-2 pl-5 type-body-sm">
                 <li>Reply within 2 working days</li>
                 <li>The buyer accepts your offer or replies</li>
-                <li>No agreement: H2 India reviews the evidence and decides</li>
+                <li>No agreement: H2 Economy reviews the evidence and decides</li>
                 <li>The held amount is released or refunded as agreed</li>
               </ul>
             </Card>

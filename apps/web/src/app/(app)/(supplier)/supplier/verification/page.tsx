@@ -11,9 +11,9 @@ import { forcedState } from "@/lib/dev-state";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 import { UploadDocument } from "@/supplier/UploadDocument";
 
-// Verification documents (586:8; phones 587:281), step 8.2: the checks H2 India runs on the company, with status,
+// Verification documents (586:8; phones 587:281), step 8.2: the checks H2 Economy runs on the company, with status,
 // expiry and what to fix. Only the company's own documents (scope). Uploads need verification.manage.
-export const metadata: Metadata = { title: "Verification · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Verification · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function VerificationPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
@@ -45,7 +45,7 @@ export default async function VerificationPage({ searchParams }: { searchParams:
         <div>
           <h1 className="type-h2">Verification</h1>
           <p className="type-body-sm text-secondary">
-            Checks H2 India runs on {s.tradeName}. Keep them current to keep your badges.
+            Checks H2 Economy runs on {s.tradeName}. Keep them current to keep your badges.
           </p>
         </div>
         {canUpload ? <UploadDocument organisationId={s.organisationId} /> : null}
@@ -100,7 +100,7 @@ export default async function VerificationPage({ searchParams }: { searchParams:
         empty={
           <div className="rounded-card border border-default bg-page">
             <EmptyState title="No documents yet">
-              Upload your GST certificate, PAN and certificate of incorporation. H2 India checks them within 1 working
+              Upload your GST certificate, PAN and certificate of incorporation. H2 Economy checks them within 1 working
               day.
             </EmptyState>
           </div>

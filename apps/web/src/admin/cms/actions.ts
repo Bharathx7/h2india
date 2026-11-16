@@ -9,7 +9,7 @@ import { editorActor, type ArticleForm } from "./articles";
 import { blocksToLexical } from "./body";
 import type { Article } from "@/payload-types";
 
-// Saving an article from the H2 India editor (step 4.6). Saving always writes a draft version; publishing and every
+// Saving an article from the H2 Economy editor (step 4.6). Saving always writes a draft version; publishing and every
 // other status change goes through the editorial workflow (transitionArticle), which checks the rule and the role.
 
 export type ArticleResult = { ok: true; id: number } | { ok: false; error: string };

@@ -21,11 +21,11 @@ import { ActiveFilters, SchemeFilters, SortSelect } from "@/schemes/filters";
 import { wrap } from "@/news/parts";
 
 // Schemes hub (411:9; phones 412:814, filters sheet 412:1379; states 421:2662 no results, 421:3306 loading, 421:4160
-// couldn't load, step 5.4). Every scheme links to its official source; nobody applies on H2 India. Saving a scheme
+// couldn't load, step 5.4). Every scheme links to its official source; nobody applies on H2 Economy. Saving a scheme
 // and alerts come with member accounts (Stage 7).
 
 export const metadata: Metadata = {
-  title: "Government schemes for hydrogen · H2 India",
+  title: "Government schemes for hydrogen · H2 Economy",
   description:
     "Central and state schemes for hydrogen producers, manufacturers, start-ups and researchers, with deadlines and official sources.",
   alternates: { canonical: "/opportunities/schemes" },
@@ -165,8 +165,8 @@ function Rail({
 function Disclaimer() {
   return (
     <Alert tone="info" title="Check the official source before you apply">
-      H2 India summarises public scheme documents. Rules and dates can change; each scheme page links to the ministry or
-      agency notice.
+      H2 Economy summarises public scheme documents. Rules and dates can change; each scheme page links to the ministry
+      or agency notice.
     </Alert>
   );
 }

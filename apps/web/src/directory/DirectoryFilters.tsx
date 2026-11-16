@@ -76,7 +76,7 @@ export function DirectoryFilters({ query, facets }: { query: DirectoryQuery; fac
       ) : null}
       <FilterGroup title="Badges">
         <Checkbox
-          label={`Verified by H2 India${n(facets.verified)}`}
+          label={`Verified by H2 Economy${n(facets.verified)}`}
           checked={query.verified}
           onCheckedChange={(v) => {
             go({ verified: v === true });

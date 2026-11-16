@@ -11,7 +11,7 @@ import type { Standard } from "@/payload-types";
 // applies to hydrogen in India, summarised. We link to the issuer and never host the texts.
 
 export const metadata: Metadata = {
-  title: "Standards and regulations library · H2 India",
+  title: "Standards and regulations library · H2 Economy",
   description:
     "The standards, rules and notifications that apply to hydrogen in India, summarised, with official links.",
   alternates: { canonical: "/knowledge/standards" },

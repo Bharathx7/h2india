@@ -1,5 +1,5 @@
 /*
- * The CMS in the H2 India look (A175): our fonts, colours, radii and buttons, from the design tokens. Payload keeps its
+ * The CMS in the H2 Economy look (A175): our fonts, colours, radii and buttons, from the design tokens. Payload keeps its
  * layout; every colour here is one of our tokens, so the CMS changes when the tokens do. Light theme only.
  */
 @import "tailwindcss/theme" layer(theme);

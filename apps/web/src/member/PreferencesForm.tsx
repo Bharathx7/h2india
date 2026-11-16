@@ -94,11 +94,16 @@ export function PreferencesForm({
             </h3>
             <p className="type-caption text-secondary">The week's hydrogen news, tenders and schemes in one email.</p>
           </div>
-          <Select aria-label="How often for India H2 Weekly" className="w-48" value="weekly" onChange={() => undefined}>
+          <Select
+            aria-label="How often for H2 Economy Weekly"
+            className="w-48"
+            value="weekly"
+            onChange={() => undefined}
+          >
             <option value="weekly">Weekly · Monday</option>
           </Select>
           <Switch
-            label={<span className="sr-only">India H2 Weekly</span>}
+            label={<span className="sr-only">H2 Economy Weekly</span>}
             checked={newsletter.weekly}
             onCheckedChange={(v) => {
               setNewsletter({ weekly: v, tenderDigest: v && newsletter.tenderDigest });

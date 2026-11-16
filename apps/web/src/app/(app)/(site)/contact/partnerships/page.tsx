@@ -5,10 +5,10 @@ import { trustDetails } from "@/trust/data";
 import { PartnershipForm } from "@/trust/forms";
 import { card, main, PageHead, wrap } from "@/trust/parts";
 
-// Partner with H2 India (742:8, errors as drawn, sent 742:516). Proposals go to the Submissions queue (PE-).
+// Partner with H2 Economy (742:8, errors as drawn, sent 742:516). Proposals go to the Submissions queue (PE-).
 
 export const metadata: Metadata = {
-  title: "Partner with H2 India",
+  title: "Partner with H2 Economy",
   description:
     "Industry bodies, event organisers, researchers, state agencies, universities and media: tell us what you have in mind.",
   alternates: { canonical: "/contact/partnerships" },
@@ -22,7 +22,7 @@ export default async function PartnershipPage() {
     <main id="main" className={main}>
       <PageHead
         crumbs={[{ label: "Company", href: "/about" }, { label: "Partnership enquiry" }]}
-        title="Partner with H2 India"
+        title="Partner with H2 Economy"
         lead="Industry bodies, event organisers, researchers, state agencies, universities and media: tell us what you have in mind. We reply within 3 working days."
       />
       <div className={cx(wrap, "flex flex-col gap-6 pt-6 lg:flex-row lg:items-start")}>

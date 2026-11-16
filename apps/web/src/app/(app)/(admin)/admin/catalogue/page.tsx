@@ -20,7 +20,7 @@ import { categoryMeta, historyLine } from "./format";
 
 // Admin Catalogue · Taxonomy (636:596) with Add attribute (637:417), step 6.1. Operators with catalogue.view see it;
 // catalogue.edit can change it. Others get a plain 404, so the screen's existence isn't revealed.
-export const metadata: Metadata = { title: "Catalogue · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Catalogue · H2 Economy admin", robots: { index: false } };
 
 /** The category opened first: the one in the address, else the first with attributes (Diaphragm at launch). */
 function pick(tree: TreeClass[], wanted: string | undefined): string | null {

@@ -1,7 +1,7 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, asc, eq, isNull } from "drizzle-orm";
 
-// "Brands listed on H2 India" (home trust strip 379:4415, step 5.1): company profiles in the directory, pre-seeded ones
+// "Brands listed on H2 Economy" (home trust strip 379:4415, step 5.1): company profiles in the directory, pre-seeded ones
 // included (A38). Sample profiles (F9) only where sample content is switched on.
 
 const { organisations: o, companyProfiles: p } = schema;

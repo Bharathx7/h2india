@@ -25,7 +25,7 @@ import type { Scheme } from "@/payload-types";
 // Alerts for matches ("Set alert", "we'll alert you") come with step 7.3.
 
 export const metadata: Metadata = {
-  title: "Scheme eligibility checker · H2 India",
+  title: "Scheme eligibility checker · H2 Economy",
   description: "Six questions to see which central and state hydrogen schemes could fit your organisation.",
   alternates: { canonical: "/opportunities/eligibility" },
   robots: { index: true, follow: true },

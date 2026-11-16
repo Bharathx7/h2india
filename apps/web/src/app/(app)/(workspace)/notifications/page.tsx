@@ -9,7 +9,7 @@ import { NotificationsView } from "./NotificationsView";
 import { toRows } from "./rows";
 
 // Notification centre (97:2564; phones 100:4631; empty, loading and error 128:23533, 128:23553, 128:23576).
-export const metadata: Metadata = { title: "Notifications · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Notifications · H2 Economy", robots: { index: false } };
 
 export default async function NotificationsPage({
   searchParams,

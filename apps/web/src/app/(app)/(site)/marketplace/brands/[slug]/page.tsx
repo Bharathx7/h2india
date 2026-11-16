@@ -18,9 +18,9 @@ const load = (slug: string) => brandDetail(getDb(), slug, { includeSample: showS
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const b = await load((await params).slug);
-  if (!b) return { title: "Not found · H2 India" };
+  if (!b) return { title: "Not found · H2 Economy" };
   return {
-    title: `${b.name} · Brands · H2 India`,
+    title: `${b.name} · Brands · H2 Economy`,
     description: b.description ?? `${b.name} products and authorised dealers in India.`,
     alternates: { canonical: `/marketplace/brands/${b.slug}` },
   };
@@ -111,7 +111,7 @@ export default async function BrandPage({ params }: { params: Params }) {
         title="Authorised in India"
         sub={
           b.dealers.length
-            ? `Dealers hold a current authorisation letter from ${b.name}, checked by H2 India.`
+            ? `Dealers hold a current authorisation letter from ${b.name}, checked by H2 Economy.`
             : undefined
         }
         className="bg-mint"

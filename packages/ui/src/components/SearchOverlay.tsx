@@ -256,7 +256,7 @@ export function SearchOverlay({
             "md:rounded-modal md:border md:border-default md:shadow-ink-float",
           )}
         >
-          <RDialog.Title className="sr-only">Search H2 India</RDialog.Title>
+          <RDialog.Title className="sr-only">Search H2 Economy</RDialog.Title>
           <div className="flex items-center gap-3 border-b border-default px-4 py-3 md:px-5 md:py-4">
             <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-pill border border-input px-3 md:h-auto md:gap-3 md:rounded-none md:border-0 md:px-0">
               <Icon name="search" size={24} className="hidden shrink-0 text-icon-primary md:block" />

@@ -10,7 +10,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 
 // Checkout (365:27759), step 10.2: 1 Delivery (80:6431; 82:8912), 2 Billing (768:47189; 768:47559), 3 Payment
 // (80:6464; 134:10078) and 4 Review (80:6687; 134:10179). Payment and Review are built without their frames (A178).
-export const metadata: Metadata = { title: "Checkout · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Checkout · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const STEPS: { key: Step; label: string }[] = [

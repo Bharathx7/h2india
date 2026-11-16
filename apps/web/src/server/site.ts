@@ -38,7 +38,7 @@ export const siteViewer = cache(async (): Promise<Viewer | null> => {
     user: {
       name,
       initials,
-      organisation: who.company ?? (who.area === "admin" ? "H2 India" : ""),
+      organisation: who.company ?? (who.area === "admin" ? "H2 Economy" : ""),
       workspace: WORKSPACE[who.area] ?? "Member",
       workspaceHref: `/${who.area}`,
       unread,

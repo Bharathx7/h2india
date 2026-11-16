@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ page: str
   const page = (await params).page;
   const p = PAGES.find((x) => x.value === page);
   if (!p) return {};
-  return { title: `${p.label} · H2 India`, alternates: { canonical: p.href } };
+  return { title: `${p.label} · H2 Economy`, alternates: { canonical: p.href } };
 }
 
 export default async function LegalPage({ params }: { params: Promise<{ page: string }> }) {

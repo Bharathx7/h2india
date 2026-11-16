@@ -9,7 +9,7 @@ import { StageBadge, wrap } from "@/tracker/parts";
 // rhythm) and how to report a correction.
 
 export const metadata: Metadata = {
-  title: "How the tracker works · India Hydrogen Tracker · H2 India",
+  title: "How the tracker works · India Hydrogen Tracker · H2 Economy",
   description: "What each status means, which sources we trust, how often we update and how to report a correction.",
   alternates: { canonical: "/tracker/methodology" },
 };

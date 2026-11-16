@@ -21,17 +21,17 @@ export interface SiteFooterProps {
   columns: FooterColumn[];
   /** Social profiles; each shows only with an address. */
   social?: { linkedin?: string; youtube?: string; x?: string; whatsapp?: string };
-  /** Sign up for India H₂ Weekly. Resolve true when the address is saved. */
+  /** Sign up for H2 Economy Weekly. Resolve true when the address is saved. */
   onSubscribe: (email: string, topics: string[]) => Promise<boolean>;
   topics?: string[];
   homeHref?: string;
 }
 
 const SOCIAL: { key: "linkedin" | "youtube" | "x" | "whatsapp"; label: string; text: string }[] = [
-  { key: "linkedin", label: "H2 India on LinkedIn", text: "in" },
-  { key: "youtube", label: "H2 India on YouTube", text: "▶" },
-  { key: "x", label: "H2 India on X", text: "X" },
-  { key: "whatsapp", label: "H2 India on WhatsApp", text: "Wa" },
+  { key: "linkedin", label: "H2 Economy on LinkedIn", text: "in" },
+  { key: "youtube", label: "H2 Economy on YouTube", text: "▶" },
+  { key: "x", label: "H2 Economy on X", text: "X" },
+  { key: "whatsapp", label: "H2 Economy on WhatsApp", text: "Wa" },
 ];
 
 function Newsletter({ onSubscribe, topics }: { onSubscribe: SiteFooterProps["onSubscribe"]; topics: string[] }) {
@@ -47,7 +47,7 @@ function Newsletter({ onSubscribe, topics }: { onSubscribe: SiteFooterProps["onS
   return (
     <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-3" aria-labelledby="footer-newsletter">
       <p id="footer-newsletter" className="type-label-lg text-primary">
-        India H₂ Weekly
+        H2 Economy Weekly
       </p>
       <p className="type-caption text-secondary">Indian hydrogen news, tenders and scheme deadlines. Every Monday.</p>
       {state === "done" ? (
@@ -113,7 +113,7 @@ export function SiteFooter({
     <footer className="relative overflow-hidden border-t border-default bg-page">
       <div className="mx-auto grid max-w-300 grid-cols-1 gap-10 px-4 pt-12 pb-8 md:px-6 lg:grid-cols-[320px_1fr] lg:gap-16 xl:px-0">
         <div className="flex flex-col gap-5">
-          <a href={homeHref} aria-label="H2 India home" className="self-start rounded-control">
+          <a href={homeHref} aria-label="H2 Economy home" className="self-start rounded-control">
             <Logo title="" />
           </a>
           <p className="type-body-sm text-body">
@@ -142,14 +142,14 @@ export function SiteFooter({
           ))}
         </nav>
         <p className="type-caption text-secondary lg:col-span-2">
-          Scheme, tender and tracker information is summarised by H2 India from official sources. Always confirm details
-          on the official portal before applying or bidding.
+          Scheme, tender and tracker information is summarised by H2 Economy from official sources. Always confirm
+          details on the official portal before applying or bidding.
         </p>
       </div>
       <div className="border-t border-default">
         <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-4 px-4 py-5 md:px-6 xl:px-0">
           <p className="type-caption text-secondary">
-            © {new Date().getFullYear()} H2 India · Made for India&apos;s hydrogen economy
+            © {new Date().getFullYear()} H2 Economy · Made for India&apos;s hydrogen economy
           </p>
           <div className="flex items-center gap-3">
             {shownSocial.map((s) => (
@@ -171,7 +171,7 @@ export function SiteFooter({
       {/* The large wordmark (Manrope 800, 300 px, -5%, bg/mint). Drawn as SVG text: decorative, not read out. */}
       <svg aria-hidden="true" viewBox="0 0 1440 170" className="block w-full select-none" focusable="false">
         <text x="20" y="199" className="fill-fresh-50 font-display font-extrabold" fontSize="300" letterSpacing="-15">
-          H2 India
+          H2 Economy
         </text>
       </svg>
     </footer>

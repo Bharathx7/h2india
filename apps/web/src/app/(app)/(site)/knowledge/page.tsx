@@ -14,7 +14,7 @@ import { siteViewer } from "@/server/site";
 // glossary, the standards library, tracker headline figures and reports and videos. Every figure carries its source.
 
 export const metadata: Metadata = {
-  title: "Learn India's hydrogen economy · H2 India",
+  title: "Learn India's hydrogen economy · H2 Economy",
   description: "Courses, buyer's guides, a glossary and the standards that apply in India.",
   alternates: { canonical: "/knowledge" },
 };

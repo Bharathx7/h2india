@@ -9,8 +9,8 @@ import { searchHelp } from "@/trust/views";
 // Help centre (96:1942), search results and no results (763:40134).
 
 export const metadata: Metadata = {
-  title: "Help centre · H2 India",
-  description: "Answers about buying, selling, payments, verification, alerts and your account on H2 India.",
+  title: "Help centre · H2 Economy",
+  description: "Answers about buying, selling, payments, verification, alerts and your account on H2 Economy.",
   alternates: { canonical: "/help" },
 };
 export const dynamic = "force-dynamic";

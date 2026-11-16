@@ -86,7 +86,7 @@ describe.skipIf(!url)("account recovery", () => {
     expect(user?.mobile).toBe(newMobile);
   });
 
-  it("the company's only Admin goes to H2 India support, who approve with queue and user access", async () => {
+  it("the company's only Admin goes to H2 Economy support, who approve with queue and user access", async () => {
     const a = await makeCompany(h.db, "SoleAdmin");
     const start = await startRecovery({ kind: "mobile", email: a.admin.email });
     const view = await readRecovery(start.token);

@@ -27,7 +27,7 @@ import { siteViewer } from "@/server/site";
 type Params = Promise<{ slug: string }>;
 const TABS = ["overview", "products", "projects", "certifications", "news", "events", "jobs", "contact"] as const;
 type Tab = (typeof TABS)[number];
-/** Badges with the date H2 India last checked each one (step 8.2: "the badge with today's date"). */
+/** Badges with the date H2 Economy last checked each one (step 8.2: "the badge with today's date"). */
 async function Badges({ organisationId }: { organisationId: string }) {
   const badges = await publicBadges(getDb(), organisationId);
   if (!badges.length) return null;
@@ -47,9 +47,9 @@ const load = (slug: string) => companyProfile(getDb(), slug, { includeSample: sh
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   if (!(await siteViewer())) return GATED_METADATA;
   const c = await load((await params).slug);
-  if (!c) return { title: "Not found · H2 India" };
+  if (!c) return { title: "Not found · H2 Economy" };
   return {
-    title: `${c.name} · Directory · H2 India`,
+    title: `${c.name} · Directory · H2 Economy`,
     description: c.summary ?? `${c.name}: ${[c.types[0], c.city, c.state].filter(Boolean).join(", ")}.`,
     alternates: { canonical: `/directory/companies/${c.slug}` },
   };
@@ -128,7 +128,7 @@ export default async function CompanyPage({
                 ["Makes or offers", c.categories.join(", ")],
                 ["Founded", c.foundedYear ? String(c.foundedYear) : ""],
                 ["Employees", c.employees ?? ""],
-                ["Products on H2 India", String(products.length)],
+                ["Products on H2 Economy", String(products.length)],
               ]
                 .filter(([, v]) => v)
                 .map(([k, v]) => (
@@ -142,13 +142,13 @@ export default async function CompanyPage({
         </div>
         <aside
           className="flex flex-col gap-3 self-start rounded-card border border-default p-5"
-          aria-label="What H2 India checked"
+          aria-label="What H2 Economy checked"
         >
           {c.verified ? <VerifiedBadge kind="supplier" /> : <p className="type-label text-primary">Not yet verified</p>}
           <p className="type-body-sm text-body">
             {c.verified
-              ? "H2 India has checked this company's registration."
-              : "H2 India hasn't completed its checks on this company yet."}
+              ? "H2 Economy has checked this company's registration."
+              : "H2 Economy hasn't completed its checks on this company yet."}
           </p>
           <Badges organisationId={c.organisationId} />
           <Link href="/verification" className="inline-flex items-center gap-1.5 type-label text-link">
@@ -177,7 +177,7 @@ export default async function CompanyPage({
         ))}
       </ul>
     ) : (
-      <Empty title="No products listed yet">{`${c.name} hasn't listed products on H2 India yet. You can still send a quote request.`}</Empty>
+      <Empty title="No products listed yet">{`${c.name} hasn't listed products on H2 Economy yet. You can still send a quote request.`}</Empty>
     );
   } else if (tab === "certifications") {
     body = certificates.length ? (
@@ -251,7 +251,7 @@ export default async function CompanyPage({
         ))}
       </ul>
     ) : (
-      <Empty title="No open roles">{`${c.name} has no open roles on H2 India right now.`}</Empty>
+      <Empty title="No open roles">{`${c.name} has no open roles on H2 Economy right now.`}</Empty>
     );
   } else if (tab === "contact") {
     body = session ? (
@@ -307,7 +307,7 @@ export default async function CompanyPage({
         <Crumbs items={[{ label: "Directory", href: "/directory/companies" }, { label: c.name }]} />
         {!c.claimed ? (
           <Alert tone="info" title="Is this your company?">
-            This profile was set up by H2 India from public information.{" "}
+            This profile was set up by H2 Economy from public information.{" "}
             <Link href={`${base}/claim`} className="type-label underline">
               Claim this profile
             </Link>{" "}

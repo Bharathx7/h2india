@@ -8,7 +8,7 @@ interface Base {
   orderUrl: string;
 }
 
-const reason = "You get this because you're on an order on H2 India.";
+const reason = "You get this because you're on an order on H2 Economy.";
 
 export function orderConfirmedMessage(d: Base & { supplier: string; amount: string; due: string | null }) {
   return {
@@ -80,7 +80,7 @@ export function disputeOpenedMessage(d: Base & { buyer: string; dispute: string;
     eyebrow: "PROBLEM REPORTED",
     headline: `${d.buyer} reported a problem`,
     paragraphs: [
-      `Hi ${d.name}, ${d.dispute} is open on ${d.reference}. ${d.held} is held in escrow until you both agree or H2 India decides.`,
+      `Hi ${d.name}, ${d.dispute} is open on ${d.reference}. ${d.held} is held in escrow until you both agree or H2 Economy decides.`,
       `Reply by ${d.replyBy} with an offer or your side of it.`,
     ],
     button: { label: "Respond", href: d.orderUrl },
@@ -91,7 +91,7 @@ export function approvalNeededMessage(d: Base & { requester: string; amount: str
   return {
     subject: `${d.reference} needs your approval · ${d.amount}`,
     preview: `${d.requester} placed an order with ${d.supplier} above the approval limit.`,
-    reason: "You get this because you approve orders for your company on H2 India.",
+    reason: "You get this because you approve orders for your company on H2 Economy.",
     eyebrow: "APPROVAL NEEDED",
     headline: `${d.requester} needs your approval`,
     paragraphs: [
@@ -111,7 +111,7 @@ export function payoutSentMessage(d: {
   return {
     subject: `Payout ${d.payout}: ${d.amount} sent`,
     preview: `${d.amount} is on its way to your payout account.`,
-    reason: "You get this because you see payouts for your company on H2 India.",
+    reason: "You get this because you see payouts for your company on H2 Economy.",
     eyebrow: "PAYOUT SENT",
     headline: `${d.amount} sent`,
     paragraphs: [`Hi ${d.name}, payout ${d.payout} has been sent to your payout bank account.`],

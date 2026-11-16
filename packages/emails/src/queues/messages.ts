@@ -17,8 +17,8 @@ export function eventLiveMessage(d: {
 }): Message {
   return {
     subject: `Your event is live: ${d.event}`,
-    preview: "It's on the H2 India events listing now. Share the link or make it Featured.",
-    reason: "You're getting this because you submitted an event to H2 India.",
+    preview: "It's on the H2 Economy events listing now. Share the link or make it Featured.",
+    reason: "You're getting this because you submitted an event to H2 Economy.",
     eyebrow: `Published · ${d.reference}`,
     headline: "Your event is live",
     paragraphs: [
@@ -46,7 +46,7 @@ export function changesNeededMessage(d: {
   return {
     subject: `${d.reference} needs a few details`,
     preview: d.changes.slice(0, 120),
-    reason: `You're getting this because you submitted ${d.reference} to H2 India.`,
+    reason: `You're getting this because you submitted ${d.reference} to H2 Economy.`,
     eyebrow: `${d.reference} · Changes needed`,
     headline: `${d.reference} needs a few details`,
     paragraphs: [`Hi ${first(d.name)}, before we ${d.listed} ${d.title}, please make these changes.`, d.changes],
@@ -66,11 +66,11 @@ export function jobLiveMessage(d: {
 }): Message {
   return {
     subject: "Your job post is live",
-    preview: `"${d.role}" is now on H2 India Jobs.`,
-    reason: `You're getting this because you posted ${d.reference} on H2 India.`,
+    preview: `"${d.role}" is now on H2 Economy Jobs.`,
+    reason: `You're getting this because you posted ${d.reference} on H2 Economy.`,
     eyebrow: `Published · ${d.reference}`,
     headline: "Your job post is live",
-    paragraphs: [`Hi ${first(d.name)}, "${d.role}" is now on H2 India Jobs${d.closes ? ` until ${d.closes}` : ""}.`],
+    paragraphs: [`Hi ${first(d.name)}, "${d.role}" is now on H2 Economy Jobs${d.closes ? ` until ${d.closes}` : ""}.`],
     rows: [
       { label: "Reference", value: d.reference },
       { label: "Job", value: d.role },

@@ -12,7 +12,7 @@ import { Decision } from "./Decision";
 
 // Moderation · Listing (632:695), step 8.3: what changed (live now and submitted), the automated checks, the decision
 // and the audit trail. Approving a change applies it to the live listing at once.
-export const metadata: Metadata = { title: "Listing review · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Listing review · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ModerationPage({ params }: { params: Promise<{ id: string }> }) {

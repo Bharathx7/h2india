@@ -246,7 +246,7 @@ export function AskQuestion({
         <Summary product={product} />
         {sent ? (
           <p role="status" className="type-body text-body">
-            {product.supplier} gets your question through H2 India. You&apos;ll see the answer in Messages and
+            {product.supplier} gets your question through H2 Economy. You&apos;ll see the answer in Messages and
             we&apos;ll email you when it arrives.
           </p>
         ) : (
@@ -283,7 +283,7 @@ export function AskQuestion({
               <Switch label={`Share my company name (${company})`} checked={share} onCheckedChange={setShare} />
             ) : null}
             <p className="type-caption text-secondary">
-              Your question goes to the supplier through H2 India. Your email and phone number stay private.
+              Your question goes to the supplier through H2 Economy. Your email and phone number stay private.
             </p>
           </form>
         )}

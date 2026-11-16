@@ -4,7 +4,7 @@ import type { Actor as WorkflowActor } from "@/cms/workflow";
 import { cmsSession } from "./session";
 import { lexicalToBlocks, type BodyBlock } from "./body";
 
-// The H2 India article editor's data (step 4.6): the article as our form, the choices for its pickers, and the editor
+// The H2 Economy article editor's data (step 4.6): the article as our form, the choices for its pickers, and the editor
 // acting, in the shape the editorial workflow (cms/workflow.ts) checks.
 
 export interface ArticleForm {

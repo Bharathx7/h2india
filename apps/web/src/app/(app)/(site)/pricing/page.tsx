@@ -8,7 +8,7 @@ import { Block, card, DarkCta, Faqs, Hero, main, wrap } from "@/trust/parts";
 // because C1, C3 and M16 are still open; nothing here is written in code. Sections without prices say so.
 
 export const metadata: Metadata = {
-  title: "Pricing · H2 India",
+  title: "Pricing · H2 Economy",
   description: "Free for buyers. Simple for suppliers: listing is free, and paid plans add tools.",
   alternates: { canonical: "/pricing" },
 };
@@ -32,7 +32,7 @@ export default async function PricingPage() {
       <Hero
         eyebrow="Pricing"
         title="Free for buyers. Simple for suppliers."
-        lead="Suppliers list for free. Paid plans add tools, and a capped commission applies to orders paid through H2 India once the launch offer ends."
+        lead="Suppliers list for free. Paid plans add tools, and a capped commission applies to orders paid through H2 Economy once the launch offer ends."
         actions={[
           { label: "List your company", href: "/list-your-company", primary: true },
           { label: "Contact us", href: "/contact?about=supplier" },
@@ -49,8 +49,8 @@ export default async function PricingPage() {
               Buyers: free
             </h2>
             <p className="type-body-sm text-body">
-              Search, compare, request quotes and order without paying H2 India. You pay only the supplier&apos;s price
-              on their GST invoice.
+              Search, compare, request quotes and order without paying H2 Economy. You pay only the supplier&apos;s
+              price on their GST invoice.
             </p>
           </div>
           <Link
@@ -102,7 +102,7 @@ export default async function PricingPage() {
       <Block
         id="commission"
         title="Commission on orders"
-        lead="Charged only on orders paid through H2 India. No sale, no fee. Listing is never charged commission."
+        lead="Charged only on orders paid through H2 Economy. No sale, no fee. Listing is never charged commission."
       >
         {hasCommission && c ? (
           <>

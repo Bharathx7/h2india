@@ -10,7 +10,7 @@ import { cancelDeadline, onDeadline, startDeadline } from "../clocks/clocks";
 import { deliverEmail } from "../notify/channels";
 import { manageLink, unsubscribeHeaders, unsubscribeUrl } from "./index";
 
-// Sending India H₂ Weekly (step 11.3). The issue is written in the CMS; this keeps its subject, preview and editor's
+// Sending H2 Economy Weekly (step 11.3). The issue is written in the CMS; this keeps its subject, preview and editor's
 // note, schedules the send for an IST time (a deadline, so it survives restarts), and sends to confirmed subscribers
 // only, in batches, each at most once, with the one-click unsubscribe headers. Editors need content.edit.
 

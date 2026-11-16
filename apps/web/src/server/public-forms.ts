@@ -17,7 +17,7 @@ import { getPayload } from "payload";
 import { EARLY_LISTING_CONSENT } from "@/cms/home/collections";
 import { requestContext } from "./request-context";
 
-// Public forms on the home, Coming soon and newsletter pages (step 5.1): India H₂ Weekly sign-up (A46) and early listing
+// Public forms on the home, Coming soon and newsletter pages (step 5.1): H2 Economy Weekly sign-up (A46) and early listing
 // requests (A47). Each is rate-limited per address; nothing here needs an account.
 
 async function allowed(form: string, max: number): Promise<boolean> {

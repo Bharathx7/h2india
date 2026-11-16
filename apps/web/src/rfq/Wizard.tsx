@@ -214,7 +214,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
     const e =
       step === 1 ? stepOneErrors(s, specs) : step === 3 ? stepThreeErrors(s, Boolean(setup.buyer), setup.today) : {};
     if (step === 2 && !s.supplierIds.length && !s.suggest)
-      e.suppliers = "Choose at least one supplier, or let H2 India suggest them";
+      e.suppliers = "Choose at least one supplier, or let H2 Economy suggest them";
     setErrors(e);
     if (Object.keys(e).length) return;
     setStep(step + 1);
@@ -267,7 +267,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
           <h1 className="type-h2">{moderated ? "Your request is in moderation" : "Your request is on its way"}</h1>
           <p className="type-body text-body">
             {moderated
-              ? `H2 India checks every request within 1 working day. We'll email you when it goes to the ${String(count)} suppliers you chose.`
+              ? `H2 Economy checks every request within 1 working day. We'll email you when it goes to the ${String(count)} suppliers you chose.`
               : "The supplier can quote now. We'll email you when a quote arrives."}
           </p>
           <ol className="flex flex-col items-start gap-2 type-body-sm">
@@ -298,11 +298,11 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
         <h1 className="type-h1">Request a quote</h1>
         {setup.returned ? <StatusBadge status="Needs changes" tone="warning" /> : null}
         <p className="type-body text-body">
-          One request, up to 5 verified suppliers. H2 India checks every request within 1 working day.
+          One request, up to 5 verified suppliers. H2 Economy checks every request within 1 working day.
         </p>
       </div>
       {setup.returned ? (
-        <Alert tone="warning" title={`H2 India returned this request on ${setup.returned.on}`}>
+        <Alert tone="warning" title={`H2 Economy returned this request on ${setup.returned.on}`}>
           {[setup.returned.reasons.join(". "), setup.returned.note].filter(Boolean).join(" · Moderator's note: ")}{" "}
           Requests are reviewed again when you resubmit.
         </Alert>
@@ -534,13 +534,13 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                 {matches === null
                   ? "Finding verified suppliers…"
                   : matches.length
-                    ? `We matched ${String(matches.length)} verified ${matches.length === 1 ? "supplier" : "suppliers"} to your specs. Pick up to 5, or let H2 India suggest them.`
+                    ? `We matched ${String(matches.length)} verified ${matches.length === 1 ? "supplier" : "suppliers"} to your specs. Pick up to 5, or let H2 Economy suggest them.`
                     : "No verified supplier lists this category yet. Try a broader category."}
               </p>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <StatusBadge status={`${String(count)} of 5 selected`} tone="success" />
                 <Switch
-                  label="Let H2 India suggest suppliers"
+                  label="Let H2 Economy suggest suppliers"
                   checked={s.suggest}
                   onCheckedChange={(on) => {
                     set({ suggest: on });
@@ -549,7 +549,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
               </div>
               {s.suggest ? (
                 <p className="rounded-card bg-mint p-3 type-body-sm">
-                  H2 India will add verified suppliers that fit, up to 5 in all, when it checks your request
+                  H2 Economy will add verified suppliers that fit, up to 5 in all, when it checks your request
                   {count
                     ? `. Your ${count === 1 ? "choice stays" : `${String(count)} choices stay`} on the list.`
                     : "."}
@@ -754,7 +754,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                   rows: [
                     [`Selected (${String(count)})`, s.supplierIds.map((id) => s.supplierNames[id] ?? "").join(" · ")],
                     ...(s.suggest
-                      ? [["Suggested by H2 India", "Added when your request is checked"] as [string, string]]
+                      ? [["Suggested by H2 Economy", "Added when your request is checked"] as [string, string]]
                       : []),
                   ],
                 },
@@ -835,7 +835,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
           </div>
           {!setup.signedIn && step === 4 ? (
             <p className="type-caption text-secondary">
-              New to H2 India?{" "}
+              New to H2 Economy?{" "}
               <Link
                 href="/join/buyer"
                 className="underline"
@@ -858,9 +858,9 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
             [
               "Suppliers",
               count
-                ? `${String(count)} of 5 selected${s.suggest ? " · H2 India suggests more" : ""}`
+                ? `${String(count)} of 5 selected${s.suggest ? " · H2 Economy suggests more" : ""}`
                 : s.suggest
-                  ? "H2 India suggests them"
+                  ? "H2 Economy suggests them"
                   : "Not chosen yet",
             ],
             [

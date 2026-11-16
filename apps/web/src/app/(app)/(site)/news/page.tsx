@@ -21,11 +21,11 @@ import {
 } from "@/news/parts";
 
 // News home (428:473; phones 429:1287, step 5.3): the lead story and two more, Today in Indian hydrogen, a rail per
-// section, Closing this week, Most read, press releases, the India H₂ Weekly band and upcoming events. The state
+// section, Closing this week, Most read, press releases, the H2 Economy Weekly band and upcoming events. The state
 // filter narrows every list (national stories always show); choosing a topic opens its section.
 
 export const metadata: Metadata = {
-  title: "News · H2 India",
+  title: "News · H2 Economy",
   description: "Indian hydrogen news, checked against the source: policy, projects, tenders, technology and mobility.",
   alternates: { canonical: "/news" },
 };

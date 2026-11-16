@@ -41,7 +41,7 @@ export function ServiceView({
           </Alert>
         ) : p.providerStatus !== "Verified" ? (
           <Alert tone="warning" title="This provider hasn't finished verification yet">
-            You can still request a proposal. Their dated checks will show here once H2 India completes them.
+            You can still request a proposal. Their dated checks will show here once H2 Economy completes them.
           </Alert>
         ) : null}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">

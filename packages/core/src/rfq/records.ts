@@ -26,7 +26,7 @@ import {
 import { must } from "../must";
 
 // RFQ and quote records (step 9.2). Buyers work on their company's RFQs (rfq.create); suppliers see an RFQ only once
-// it is Sent to them, and answer with quote.send; H2 India moderates with queues.edit. Statuses move only through
+// it is Sent to them, and answer with quote.send; H2 Economy moderates with queues.edit. Statuses move only through
 // moveRfq()/moveQuote(), which take a move the transition table allows (anything else is a type error) and write the
 // history and audit log. Deadlines: rfqModeration (clock), rfqOfferDeadline and quoteValidity (chosen times).
 
@@ -133,7 +133,7 @@ export interface RfqDraftInput {
   items?: RfqItemInput[];
   /** Supplier companies (at most 5, verified only). */
   supplierIds?: string[];
-  /** Let H2 India suggest suppliers (398:9635): the moderator adds up to 5 in all. */
+  /** Let H2 Economy suggest suppliers (398:9635): the moderator adds up to 5 in all. */
   suggestSuppliers?: boolean;
 }
 
@@ -271,7 +271,7 @@ export async function draftProblems(ex: Executor, rfqId: string, now: Date = new
   if (!row.title.trim()) e.title = "Give the request a title";
   if (!items.length) e.items = "Say what you need and how many";
   if (!suppliers.length && !row.suggestSuppliers)
-    e.suppliers = "Choose at least one supplier, or let H2 India suggest them";
+    e.suppliers = "Choose at least one supplier, or let H2 Economy suggest them";
   if (suppliers.length > MAX_RFQ_SUPPLIERS) e.suppliers = `Choose up to ${String(MAX_RFQ_SUPPLIERS)} suppliers`;
   if (!row.deliverySiteId) e.deliverySite = "Choose where to deliver";
   if (!row.offerDeadline) e.offerDeadline = "Set an offer deadline";
@@ -294,7 +294,7 @@ async function sendToSuppliers(tx: Executor, rfq: { id: string; offerDeadline: D
 }
 
 /**
- * Send a draft. To one supplier it goes straight out (Sent); to two or more, H2 India checks it first (In moderation,
+ * Send a draft. To one supplier it goes straight out (Sent); to two or more, H2 Economy checks it first (In moderation,
  * 1 working day). Returns the new status.
  */
 export async function submitRfq(
@@ -317,7 +317,7 @@ export async function submitRfq(
     throw new RfqError("A supplier you chose is no longer verified. Choose another", {
       suppliers: "Choose verified suppliers only",
     });
-  // H2 India picks suppliers in moderation when asked to suggest them, whatever the count.
+  // H2 Economy picks suppliers in moderation when asked to suggest them, whatever the count.
   if (needsModeration(count) || row.suggestSuppliers) {
     await moveRfq(
       db,
@@ -362,7 +362,7 @@ export async function deleteRfqDraft(db: Database, actor: Actor, organisationId:
 // ------------------------------------------------------------------------------------------------ moderation
 
 /**
- * Approve a checked RFQ (632:1138): it goes to every chosen supplier. When the buyer let H2 India suggest suppliers,
+ * Approve a checked RFQ (632:1138): it goes to every chosen supplier. When the buyer let H2 Economy suggest suppliers,
  * the moderator's picks (verified only, up to 5 in all) are added first and recorded on the decision.
  */
 export async function approveRfq(
@@ -394,7 +394,7 @@ export async function approveRfq(
     { from: "In moderation", to: "Sent" },
     {
       context,
-      ...(added.length ? { reason: `H2 India added ${String(added.length)} suggested supplier(s)` } : {}),
+      ...(added.length ? { reason: `H2 Economy added ${String(added.length)} suggested supplier(s)` } : {}),
       also: async (tx) => {
         if (added.length) await tx.insert(rs).values(added.map((organisationId) => ({ rfqId, organisationId })));
         await tx.insert(schema.rfqModerationDecisions).values({

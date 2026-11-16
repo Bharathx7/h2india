@@ -9,7 +9,7 @@ import { EditorPage } from "../editor-page";
 
 // Add a product · Choose category (612:8; phones 614:851), step 8.3: class, category and type, with the fields buyers
 // will compare. Continue opens the editor for that category. Other ways to add: a datasheet (8.4) or a CSV (8.5).
-export const metadata: Metadata = { title: "Add a product · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Add a product · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 type Search = Promise<{ class?: string; cat?: string; sub?: string; category?: string; q?: string; from?: string }>;

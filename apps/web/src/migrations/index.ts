@@ -18,6 +18,7 @@ import * as migration_20261112_201854_maintenance from './20261112_201854_mainte
 import * as migration_20261113_055110_application_pages from './20261113_055110_application_pages';
 import * as migration_20261113_064225_directory_people_associations from './20261113_064225_directory_people_associations';
 import * as migration_20261115_080037_media_files from './20261115_080037_media_files';
+import * as migration_20261116_150000_rename_h2economy from './20261116_150000_rename_h2economy';
 
 export const migrations = [
   {
@@ -119,5 +120,10 @@ export const migrations = [
     up: migration_20261115_080037_media_files.up,
     down: migration_20261115_080037_media_files.down,
     name: '20261115_080037_media_files'
+  },
+  {
+    up: migration_20261116_150000_rename_h2economy.up,
+    down: migration_20261116_150000_rename_h2economy.down,
+    name: '20261116_150000_rename_h2economy',
   },
 ];

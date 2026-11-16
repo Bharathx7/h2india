@@ -61,7 +61,7 @@ export async function submitSupportRequest(input: SupportRequestInput): Promise<
   const db = getDb();
   const limit = await hitThrottle(db, `support-request:${input.ip ?? "unknown"}`, 86_400);
   if (limit.count > SUPPORT_REQUESTS_PER_DAY) {
-    throw new SupportRequestError(null, "Too many requests from here today. Email H2 India support instead.");
+    throw new SupportRequestError(null, "Too many requests from here today. Email H2 Economy support instead.");
   }
 
   const result = await db.transaction(async (tx) => {

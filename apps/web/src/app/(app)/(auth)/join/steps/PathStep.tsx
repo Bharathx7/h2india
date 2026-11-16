@@ -38,11 +38,11 @@ export function PathStep(props: {
 }) {
   return (
     <>
-      <Progress step={1} of={props.value === "member" ? 2 : 4} label="How you'll use H2 India" />
-      <h1 className="type-h2 text-primary">Join H2 India</h1>
+      <Progress step={1} of={props.value === "member" ? 2 : 4} label="How you'll use H2 Economy" />
+      <h1 className="type-h2 text-primary">Join H2 Economy</h1>
       <p className="type-body text-body">Free for buyers and members. Choose the option that fits you best.</p>
       <fieldset className="flex min-w-0 flex-col gap-5">
-        <legend className="sr-only">How you'll use H2 India</legend>
+        <legend className="sr-only">How you'll use H2 Economy</legend>
         {OPTIONS.map((o) => {
           const selected = props.value === o.value;
           return (
@@ -96,7 +96,7 @@ export function PathStep(props: {
       </Button>
       {props.signedIn ? null : (
         <p className="flex items-center justify-center gap-1 type-body-sm text-body">
-          Already on H2 India?
+          Already on H2 Economy?
           <TextLink asChild showIcon={false}>
             <Link href={AUTH_LINKS.signIn}>Sign in</Link>
           </TextLink>

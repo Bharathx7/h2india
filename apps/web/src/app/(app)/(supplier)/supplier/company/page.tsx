@@ -13,7 +13,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Company details · GSTINs (supplier QC, 16 Nov 2026). No Figma frame: built like the buyer's GSTINs (574:638), with
 // the same rules (same PAN, checked with GST records, only a verified GSTIN can be the default or issue a quote).
-export const metadata: Metadata = { title: "Company details · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Company details · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SupplierCompanyPage() {

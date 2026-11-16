@@ -6,7 +6,7 @@ import { getSession } from "@/server/auth";
 import { Onboarding } from "./Onboarding";
 
 // Member onboarding (531:8), step 7.1. Offered once, after joining; finished or skipped, it isn't shown again.
-export const metadata: Metadata = { title: "Welcome · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Welcome · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function WelcomePage() {

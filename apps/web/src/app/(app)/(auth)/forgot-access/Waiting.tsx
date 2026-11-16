@@ -29,7 +29,7 @@ export function Waiting(props: {
       <p className="type-caption text-secondary">{props.caption}</p>
       <StatusIcon name="clock" />
       <h1 className="type-h2 text-primary">
-        {props.support ? "Waiting for H2 India support" : "Waiting for your admin"}
+        {props.support ? "Waiting for H2 Economy support" : "Waiting for your admin"}
       </h1>
       <p className="type-body text-body">{props.body}</p>
       <Button asChild variant="outline" size="lg" className="w-full">

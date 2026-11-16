@@ -101,7 +101,7 @@ test("a full webinar shows the closed state; registering sends the confirmation"
   const created = await cms(page.request, "POST", "events", {
     _status: "published",
     name: `Sizing webinar ${t}`,
-    organiser: "H2 India",
+    organiser: "H2 Economy",
     eventType: "Webinar",
     attendance: "Online",
     startsAt: inDays(20),
@@ -153,7 +153,7 @@ test("a replay opens only for people who registered and are signed in", async ({
   const created = await cms(page.request, "POST", "events", {
     _status: "published",
     name: `PESO replay ${t}`,
-    organiser: "H2 India",
+    organiser: "H2 Economy",
     eventType: "Webinar",
     attendance: "Online",
     startsAt: inDays(-10),

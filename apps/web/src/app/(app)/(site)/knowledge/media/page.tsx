@@ -10,7 +10,7 @@ import { Crumbs, wrap } from "@/opportunities/parts";
 // episodes, and the two bands (film with us, request a quote). Playback follows the media adapter (M9).
 
 export const metadata: Metadata = {
-  title: "Videos and podcasts · H2 India",
+  title: "Videos and podcasts · H2 Economy",
   description: "Explainers, interviews and event highlights from Indian hydrogen suppliers, buyers and policy makers.",
   alternates: { canonical: "/knowledge/media" },
 };
@@ -143,7 +143,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
           <div className="flex flex-col gap-1">
             <p className="type-eyebrow text-secondary">FOR SUPPLIERS</p>
             <h2 id="film" className="type-h4 text-primary">
-              Film a short talk with H2 India
+              Film a short talk with H2 Economy
             </h2>
             <p className="max-w-150 type-body-sm text-body">
               We film your product, plant or process with an editor and add it to your profile and product pages.
@@ -171,7 +171,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
               Request a quote
             </Link>
             <Link href="/list-your-company" className={buttonClasses({ variant: "inverse" })}>
-              Sell on H2 India
+              Sell on H2 Economy
             </Link>
           </div>
         </section>

@@ -12,7 +12,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // A content library (step 4.6): every record of one type, newest change first, with search, its status and when it
 // was last verified. Media and report files also take uploads here.
-export const metadata: Metadata = { title: "Content · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Content · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function LibraryPage({
@@ -73,8 +73,8 @@ export default async function LibraryPage({
           <ContentHeader
             intro={
               collection === "media"
-                ? "Images used across H2 India. Every image needs alt text before it can be used."
-                : "Everyone who writes for H2 India. Readers see the author under the article."
+                ? "Images used across H2 Economy. Every image needs alt text before it can be used."
+                : "Everyone who writes for H2 Economy. Readers see the author under the article."
             }
             actions={
               collection === "authors" && cms.can("content.edit") ? (

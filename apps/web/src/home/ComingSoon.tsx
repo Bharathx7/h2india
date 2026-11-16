@@ -46,7 +46,7 @@ export function ComingSoon({ launchLine }: { launchLine: string }) {
               <p className="type-body text-body">Products, companies, news, schemes and tenders, in one place.</p>
             </div>
             <div className="flex flex-col gap-3 rounded-card bg-page p-6 md:w-120 md:shrink-0">
-              <h2 className="type-h4 text-primary">Get India H₂ Weekly</h2>
+              <h2 className="type-h4 text-primary">Get H2 Economy Weekly</h2>
               <p className="type-body-sm text-body">
                 Indian hydrogen news, tenders and scheme deadlines, every Monday. Pick what you want more of:
               </p>
@@ -80,7 +80,7 @@ export function ComingSoon({ launchLine }: { launchLine: string }) {
       </main>
       <footer className="bg-inverse">
         <div className={`${wrap} flex flex-col gap-3 py-6 text-inverse md:flex-row md:items-center md:gap-6`}>
-          <p className="flex-1 type-caption">© {year} H2 India · India&rsquo;s hydrogen ecosystem platform</p>
+          <p className="flex-1 type-caption">© {year} H2 Economy · India&rsquo;s hydrogen ecosystem platform</p>
           <Link href="/legal/privacy" className="type-label hover:underline">
             Privacy
           </Link>

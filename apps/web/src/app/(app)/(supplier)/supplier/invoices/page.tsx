@@ -12,7 +12,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 // Fees and invoices (365:34452), step 10.11: Overview (816:12052; phones 822:14186), Orders and fees (816:12500),
 // Payouts (816:13000), Fee invoices (817:13047, 817:13414), Tax credits (822:13176) and Statements (822:13666). The
 // rate card's figures are samples until the CA signs them (M11). Built without its frames (A178).
-export const metadata: Metadata = { title: "Fees and invoices · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Fees and invoices · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [
@@ -83,7 +83,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
       <div className="flex flex-col gap-1">
         <h1 className="type-h2">Fees and invoices</h1>
         <p className="type-body text-body">
-          What you&apos;re paid for each order, H2 India&apos;s fee, and the TCS and TDS deducted for you to claim.
+          What you&apos;re paid for each order, H2 Economy&apos;s fee, and the TCS and TDS deducted for you to claim.
         </p>
       </div>
       {card.sample ? (
@@ -225,7 +225,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
             ))}
           </Table>
         ) : (
-          <EmptyState title="No fee invoices yet">H2 India invoices its fee once a month.</EmptyState>
+          <EmptyState title="No fee invoices yet">H2 Economy invoices its fee once a month.</EmptyState>
         )
       ) : null}
 

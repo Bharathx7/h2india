@@ -11,7 +11,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Bulk upload (607:9; phones 608:8; Modal Import products 272:4427), step 8.5. The worker checks every row; valid rows
 // become drafts matched on the supplier's SKU; problems are listed by row and column.
-export const metadata: Metadata = { title: "Bulk upload · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Bulk upload · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ImportPage() {

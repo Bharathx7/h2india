@@ -15,7 +15,7 @@ export const DOCUMENT_TYPES = {
 export type DocumentType = keyof typeof DOCUMENT_TYPES;
 export const isDocumentType = (v: string): v is DocumentType => v in DOCUMENT_TYPES;
 
-/** What a supplier can upload; a site visit is recorded by H2 India. */
+/** What a supplier can upload; a site visit is recorded by H2 Economy. */
 export const UPLOADABLE: DocumentType[] = ["gstin", "pan", "cin", "udyam", "factory_licence", "certificate", "dpiit"];
 
 export const DOCUMENT_TRANSITIONS = {

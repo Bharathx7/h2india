@@ -13,7 +13,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Grievance · GRV-2026-00318 (661:325), step 11.7: the complaint, its timeline, both clocks, status and assignee,
 // the note the person sees and the outcome. Moves go through moveGrievance() (history and audit).
-export const metadata: Metadata = { title: "Grievance · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Grievance · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 /** "+91 98•• ••• 114": enough to recognise the number, not to copy it. */

@@ -21,7 +21,7 @@ import { siteViewer } from "@/server/site";
 // India. Alerts arrive with member accounts (step 7.3, A71).
 
 export const metadata: Metadata = {
-  title: "Grants and calls for proposals · H2 India",
+  title: "Grants and calls for proposals · H2 Economy",
   description: "Research and start-up funding for hydrogen in India, with deadlines and the funder's official call.",
   alternates: { canonical: "/opportunities/grants" },
 };

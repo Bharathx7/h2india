@@ -11,7 +11,7 @@ import { PERIODS, REPORT_DOWNLOADS } from "./report-groups";
 // Reports overview (716:348), step 11.8: Audience, Marketplace, Content output and Download a report, for the chosen
 // period against the one before, from the nightly roll-ups only (report_daily). A figure that isn't rolled up yet
 // (site analytics, alert subscribers, orders, content counts) shows "—" with the reason, never a made-up number.
-export const metadata: Metadata = { title: "Reports · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Reports · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 type Metric = Awaited<ReturnType<typeof reportsOverview>>[number];
@@ -87,7 +87,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <div className="max-w-xl">
           <h1 className="type-h2">Reports</h1>
           <p className="type-body-sm text-secondary">
-            How H2 India is doing across audience, marketplace and content. Pick the dates once and every section
+            How H2 Economy is doing across audience, marketplace and content. Pick the dates once and every section
             follows.
           </p>
         </div>

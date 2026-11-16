@@ -15,7 +15,7 @@ import { ProductError, saveProduct } from "./editor";
 
 // The datasheet reader (step 8.4; Datasheet review 610:8). A supplier uploads a PDF and picks the category; the worker
 // (never the browser) asks the engine to read it; each field gets a confidence from the thresholds; the supplier
-// accepts, edits or marks "Not in datasheet"; nothing reaches buyers until H2 India approves the resulting listing.
+// accepts, edits or marks "Not in datasheet"; nothing reaches buyers until H2 Economy approves the resulting listing.
 // Values outside an attribute's allowed range are flagged and never saved as read (a misread pressure is a safety
 // issue). The engine, its version and the region are recorded per extraction.
 

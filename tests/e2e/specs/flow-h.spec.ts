@@ -4,7 +4,7 @@ import { deliverOrder, setup } from "../helpers/orders";
 import { ownIp, withDb } from "../helpers/sign-in";
 
 // Flow H (playbook step 10.12, page 18): the exception path. A delivery arrives damaged; the receiving contact records
-// it; the buyer accepts part and reports a problem; the supplier responds; the buyer asks H2 India; an operator splits
+// it; the buyer accepts part and reports a problem; the supplier responds; the buyer asks H2 Economy; an operator splits
 // it; the refund is Processing, then Refunded when the simulated partner confirms. The ledger is checked at the end.
 // Needs the app with FLAG_TRANSACTIONS=true, the worker and Mailpit.
 
@@ -38,7 +38,7 @@ test("flow H: damaged delivery, accept part, dispute, decision and refund", asyn
   await page.getByRole("button", { name: "Report problem" }).click();
   await expect(page.getByRole("heading", { name: /Problem reported/ })).toBeVisible();
 
-  // 3 The supplier disagrees; the buyer asks H2 India to decide.
+  // 3 The supplier disagrees; the buyer asks H2 Economy to decide.
   await s.reload();
   await expect(s.getByRole("heading", { name: "Your response" })).toBeVisible();
   await s.getByRole("radio", { name: "Disagree and explain" }).click();
@@ -46,8 +46,8 @@ test("flow H: damaged delivery, accept part, dispute, decision and refund", asyn
   await s.getByRole("button", { name: "Send response" }).click();
   await expect(s.getByText("It left our plant sealed")).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Ask H2 India to decide" }).click();
-  await expect(page.getByText(/H2 India is reviewing/)).toBeVisible();
+  await page.getByRole("button", { name: "Ask H2 Economy to decide" }).click();
+  await expect(page.getByText(/H2 Economy is reviewing/)).toBeVisible();
 
   // 4 An operator splits it: part refunded to the buyer, the rest released to the supplier.
   const back = await backOfficeContext(browser);

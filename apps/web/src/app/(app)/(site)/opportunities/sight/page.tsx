@@ -11,7 +11,7 @@ import { sightSchemes, sightTracker, tendersForSchemes, tenderView, toneOf } fro
 // carry their source. Alerts for the next round come with step 7.3.
 
 export const metadata: Metadata = {
-  title: "SIGHT programme tracker · H2 India",
+  title: "SIGHT programme tracker · H2 Economy",
   description: "Every SIGHT round SECI has run, who won it, and what's open now.",
   alternates: { canonical: "/opportunities/sight" },
 };
@@ -167,7 +167,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
                     Awardees
                   </h2>
                   <p className="type-body-sm text-secondary">
-                    Companies awarded capacity, linked to their H2 India profile where one exists
+                    Companies awarded capacity, linked to their H2 Economy profile where one exists
                   </p>
                 </div>
                 <nav aria-label="Awardee groups" className="flex flex-wrap gap-2">
@@ -220,7 +220,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
                               View profile<span className="sr-only"> of {a.company}</span>
                             </Link>
                           ) : (
-                            <span className="type-caption text-secondary">Not on H2 India</span>
+                            <span className="type-caption text-secondary">Not on H2 Economy</span>
                           )}
                         </td>
                       </tr>

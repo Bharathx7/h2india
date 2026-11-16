@@ -14,7 +14,7 @@ import { JoinButton } from "./JoinButton";
 // pending (494:8), approved (494:323), rejected with reason (494:371), already claimed with a join request (494:427).
 // Every claim is approved by an operator (A137).
 type Params = Promise<{ slug: string }>;
-export const metadata: Metadata = { title: "Claim this profile · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Claim this profile · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ClaimPage({ params }: { params: Params }) {

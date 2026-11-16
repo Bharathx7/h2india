@@ -11,7 +11,7 @@ import { Crumbs } from "@/opportunities/parts";
 
 // Associations and bodies (498:8; phones 499:1430), step 6.6: kept by editors in the CMS.
 export const metadata: Metadata = {
-  title: "Associations and bodies · H2 India",
+  title: "Associations and bodies · H2 Economy",
   description: "Industry bodies, alliances, chambers and government bodies working on hydrogen in India.",
   alternates: { canonical: "/directory/associations" },
 };

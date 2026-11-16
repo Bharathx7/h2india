@@ -207,7 +207,7 @@ export function JobPage({
                     Save job
                   </Link>
                 )}
-                <p className="type-caption text-secondary">You’ll leave H2 India to apply. Closes {closes}.</p>
+                <p className="type-caption text-secondary">You’ll leave H2 Economy to apply. Closes {closes}.</p>
               </>
             )}
           </section>

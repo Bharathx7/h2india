@@ -11,12 +11,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   const link = "rounded-control hover:text-body hover:underline underline-offset-2";
   return (
     <div className="flex min-h-dvh flex-col items-center gap-4 bg-mint px-4 py-6 md:justify-center md:gap-6 md:py-12">
-      <Link href="/" aria-label="H2 India home" className="rounded-control">
+      <Link href="/" aria-label="H2 Economy home" className="rounded-control">
         <Logo title="" height={36} />
       </Link>
       <main className="w-full max-w-140">{children}</main>
       <footer className="type-caption text-secondary">
-        © {year} H2 India ·{" "}
+        © {year} H2 Economy ·{" "}
         <Link href={AUTH_LINKS.privacy} className={link}>
           Privacy
         </Link>{" "}

@@ -34,7 +34,7 @@ const word = () =>
 async function openOverlay(page: Page) {
   const mobile = (page.viewportSize()?.width ?? 1440) < 768;
   if (mobile) await page.getByRole("banner").getByRole("button", { name: "Search", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "Search H2 India" });
+  const dialog = page.getByRole("dialog", { name: "Search H2 Economy" });
   // The "/" shortcut works once the page has hydrated; press again until it has.
   if (!mobile) {
     await expect(async () => {

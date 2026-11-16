@@ -74,7 +74,7 @@ export interface JobPostInput {
   showSalary: boolean;
   salaryFrom: string;
   salaryTo: string;
-  /** "link" only for now: applications in the H2 India inbox arrive with the supplier inbox (A70). */
+  /** "link" only for now: applications in the H2 Economy inbox arrive with the supplier inbox (A70). */
   applyBy: string;
   careersUrl: string;
   /** YYYY-MM-DD, India time. */

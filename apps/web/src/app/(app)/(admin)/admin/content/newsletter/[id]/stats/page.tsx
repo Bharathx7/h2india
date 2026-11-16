@@ -11,7 +11,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Newsletter stats (647:660), step 11.3: how an issue did. Sent and delivered come from our deliveries; opens, clicks
 // and link clicks only as the email provider reports them (M6), so until then they show "—". Counts only.
-export const metadata: Metadata = { title: "Newsletter stats · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Newsletter stats · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const CONTENT_TABS = [

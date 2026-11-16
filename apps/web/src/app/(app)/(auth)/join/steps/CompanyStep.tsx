@@ -254,7 +254,7 @@ export function CompanyStep(props: {
 
       {!without && result?.state === "already_registered" ? (
         <>
-          <Alert tone="info" title={`${result.name} is already on H2 India`} live>
+          <Alert tone="info" title={`${result.name} is already on H2 Economy`} live>
             {result.members} {result.members === 1 ? "colleague has" : "colleagues have"} joined. Ask the company admin
             to add you instead of creating a second account.
           </Alert>
@@ -323,7 +323,7 @@ export function CompanyStep(props: {
       ) : null}
       {without ? (
         <>
-          <Alert tone="info" title="You can still use H2 India">
+          <Alert tone="info" title="You can still use H2 Economy">
             Browse and send quote requests now. Suppliers can&apos;t publish products until they add a GSTIN.
           </Alert>
           {nameField}

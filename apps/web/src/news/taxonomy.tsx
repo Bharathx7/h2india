@@ -200,7 +200,7 @@ export async function AuthorPage({ author, page }: { author: Author; page: numbe
       ? "Contributor"
       : author.kind === "organisation"
         ? "Organisation"
-        : "H2 India newsroom";
+        : "H2 Economy newsroom";
   const latest = list.items[0];
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">

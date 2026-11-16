@@ -107,7 +107,9 @@ export function DatasheetReview({
         />
         <StatusBadge status={`${String(needs.length)} to check`} tone="neutral" />
         {count("low") ? <StatusBadge status={`${String(count("low"))} low confidence`} tone="warning" /> : null}
-        <span className="ml-auto type-caption text-secondary">Nothing shows to buyers until H2 India approves it.</span>
+        <span className="ml-auto type-caption text-secondary">
+          Nothing shows to buyers until H2 Economy approves it.
+        </span>
       </div>
       {error ? <Alert tone="error" title={error} live /> : null}
       <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
@@ -251,7 +253,7 @@ export function DatasheetReview({
           <p className="type-caption text-secondary">
             {needs.length
               ? `Check ${String(needs.length)} more ${needs.length === 1 ? "field" : "fields"} to submit.`
-              : "Submitting sends this draft to H2 India's catalogue team with your checked values."}
+              : "Submitting sends this draft to H2 Economy's catalogue team with your checked values."}
           </p>
           <Button
             disabled={pending || needs.length > 0 || !name.trim()}

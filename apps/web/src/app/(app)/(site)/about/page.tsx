@@ -6,13 +6,13 @@ import { trustDetails } from "@/trust/data";
 import { Block, card, Feature, FigureTile, Hero, main, Value, wrap } from "@/trust/parts";
 import { istDay } from "@/trust/views";
 
-// About H2 India (66:4251). The Why now figures are entered with their source and date (Company and legal details,
+// About H2 Economy (66:4251). The Why now figures are entered with their source and date (Company and legal details,
 // A45); the disclosure names the operating company (M2) and shows [placeholders] until it's entered.
 
 export const metadata: Metadata = {
-  title: "About H2 India",
+  title: "About H2 Economy",
   description:
-    "H2 India brings India's hydrogen products, companies, news, schemes, tenders, knowledge and events into one place.",
+    "H2 Economy brings India's hydrogen products, companies, news, schemes, tenders, knowledge and events into one place.",
   alternates: { canonical: "/about" },
 };
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ const PARTS = [
   {
     icon: "newspaper",
     title: "News and Insights",
-    text: "Daily India-first hydrogen news, analysis, interviews and the India H₂ Weekly newsletter.",
+    text: "Daily India-first hydrogen news, analysis, interviews and the H2 Economy Weekly newsletter.",
   },
   {
     icon: "file-text",
@@ -55,9 +55,9 @@ export default async function AboutPage() {
   return (
     <main id="main" className={main}>
       <Hero
-        eyebrow="About H2 India"
+        eyebrow="About H2 Economy"
         title="Build India’s hydrogen ecosystem"
-        lead="H2 India brings India's hydrogen products, companies, news, schemes, tenders, knowledge and events into one place, so the people building the industry can find each other and decide with facts."
+        lead="H2 Economy brings India's hydrogen products, companies, news, schemes, tenders, knowledge and events into one place, so the people building the industry can find each other and decide with facts."
       />
       <Block
         id="why-now"
@@ -96,10 +96,10 @@ export default async function AboutPage() {
         <section aria-labelledby="disclosure" className={cx(card, "flex flex-col gap-2 p-6")}>
           <p className="type-eyebrow text-secondary">Disclosure</p>
           <h2 id="disclosure" className="type-h4 text-primary">
-            Who runs H2 India
+            Who runs H2 Economy
           </h2>
           <p className="type-body-sm text-body">
-            H2 India is operated by <Value>{t.operatingCompany}</Value>.
+            H2 Economy is operated by <Value>{t.operatingCompany}</Value>.
             {t.disclosure ? (
               <>
                 {" "}
@@ -110,8 +110,8 @@ export default async function AboutPage() {
           </p>
         </section>
       </div>
-      <nav aria-label="The people behind H2 India" className={cx(wrap, "flex flex-wrap items-center gap-4 pt-8")}>
-        <span className="type-body-sm text-body">The people behind H2 India:</span>
+      <nav aria-label="The people behind H2 Economy" className={cx(wrap, "flex flex-wrap items-center gap-4 pt-8")}>
+        <span className="type-body-sm text-body">The people behind H2 Economy:</span>
         {[
           ["Team and advisors", "/about/team"],
           ["Careers", "/careers"],

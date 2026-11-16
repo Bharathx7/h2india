@@ -136,7 +136,7 @@ export function submissionReceivedMessage(input: {
   return {
     subject: `We've received your ${w.noun}: ${input.title}`,
     preview: `Reference ${input.reference}. We usually review within 1 working day.`,
-    reason: `You're getting this because you submitted ${/^[aeiou]/.test(w.noun) ? "an" : "a"} ${w.noun} to H2 India.`,
+    reason: `You're getting this because you submitted ${/^[aeiou]/.test(w.noun) ? "an" : "a"} ${w.noun} to H2 Economy.`,
     eyebrow: `Submission · ${input.reference}`,
     headline: w.headline,
     paragraphs: [`Hi ${firstName(input.name)}, ${w.review}`],

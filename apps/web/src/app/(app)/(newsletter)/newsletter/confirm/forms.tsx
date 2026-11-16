@@ -62,7 +62,7 @@ export function Preferences({
         <Alert tone="success" title="Preferences saved" live />
       ) : state === "error" ? (
         <Alert tone="error" title="We couldn't save your preferences" live>
-          This link may have expired. Use the link in your latest India H₂ Weekly email.
+          This link may have expired. Use the link in your latest H2 Economy Weekly email.
         </Alert>
       ) : null}
       <Button type="submit" size="lg" disabled={state === "saving"} className="w-full">
@@ -87,7 +87,7 @@ export function ResendLink() {
   if (state.status === "sent") {
     return (
       <Alert tone="success" title="Check your inbox" live className="w-full text-left">
-        If {email.trim()} signed up for India H₂ Weekly, a new link is on its way.
+        If {email.trim()} signed up for H2 Economy Weekly, a new link is on its way.
       </Alert>
     );
   }

@@ -89,7 +89,7 @@ export const SightTracker: GlobalConfig = {
               name: "profileSlug",
               label: "Company profile",
               type: "text",
-              admin: { description: "The company's H2 India profile slug, if it has one." },
+              admin: { description: "The company's H2 Economy profile slug, if it has one." },
             },
           ],
         },

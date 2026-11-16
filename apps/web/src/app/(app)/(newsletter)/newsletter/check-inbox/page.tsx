@@ -7,7 +7,7 @@ import { StateCard } from "../card";
 
 // Sign-up · check your inbox (448:7048). The address arrives masked (a••••@greenfieldh2.in).
 
-export const metadata: Metadata = { title: "Check your inbox · India H₂ Weekly", robots: { index: false } };
+export const metadata: Metadata = { title: "Check your inbox · H2 Economy Weekly", robots: { index: false } };
 
 export default async function CheckInboxPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
   const to = ((await searchParams).to ?? "").slice(0, 120);
@@ -15,7 +15,7 @@ export default async function CheckInboxPage({ searchParams }: { searchParams: P
     <StateCard icon="mail" title="Check your inbox">
       <p className="type-body text-body">
         We&apos;ve sent a confirmation link to {to || "your email"}. Click it within {CONFIRM_HOURS} hours to start
-        getting India H₂ Weekly.
+        getting H2 Economy Weekly.
       </p>
       <p className="type-caption text-secondary">Can&apos;t find it? Check your spam or Promotions folder.</p>
       <div className="flex flex-wrap justify-center gap-3">

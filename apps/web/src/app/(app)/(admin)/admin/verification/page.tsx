@@ -30,7 +30,7 @@ import { DocumentDecision, GrantBadge, ReviewDecision, RevokeBadge, RunChecks } 
 // Verification desk (635:9; Revoke badge 636:436), step 8.2: documents, automated checks and expiry dates in one
 // place, and badges granted only from recorded evidence. Profile claims (step 6.7) follow below. Operators with
 // verification.view see everything; verification.edit decides.
-export const metadata: Metadata = { title: "Verification · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Verification · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS: { key: DeskTab; label: string }[] = [

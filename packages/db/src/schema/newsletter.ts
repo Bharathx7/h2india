@@ -2,7 +2,7 @@ import { boolean, index, text, uniqueIndex } from "drizzle-orm/pg-core";
 import { id, timestamps, utc } from "../columns";
 import { core } from "./core";
 
-// India H₂ Weekly subscribers (step 5.1, A46; brought forward from 5.9). Double opt-in: a sign-up is "pending" until the
+// H2 Economy Weekly subscribers (step 5.1, A46; brought forward from 5.9). Double opt-in: a sign-up is "pending" until the
 // emailed link is opened, and only "confirmed" addresses get issues (step 11.3). The consent text version shown at
 // sign-up is kept with the record (playbook step 5.9).
 

@@ -33,7 +33,7 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
       : {};
 
   return betterAuth({
-    appName: "H2 India",
+    appName: "H2 Economy",
     baseURL: env.APP_URL,
     secret: env.AUTH_SECRET,
     telemetry: { enabled: false },
@@ -121,7 +121,7 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
       }),
       passkey({
         rpID: new URL(env.APP_URL).hostname,
-        rpName: "H2 India",
+        rpName: "H2 Economy",
         origin: env.APP_URL,
         authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
       }),

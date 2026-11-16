@@ -20,7 +20,7 @@ export interface WizardState {
   attachments: WizardFile[];
   supplierIds: string[];
   supplierNames: Record<string, string>;
-  /** Let H2 India suggest suppliers (398:9635, A164). */
+  /** Let H2 Economy suggest suppliers (398:9635, A164). */
   suggest: boolean;
   deliveryState: string;
   siteId: string;

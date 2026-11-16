@@ -87,7 +87,7 @@ export function buyerNextStep(o: OrderListItem, now: Date = new Date()): NextSte
     case "Pending acceptance":
       return {
         text: o.overdue
-          ? "The supplier is late to confirm · H2 India is following up"
+          ? "The supplier is late to confirm · H2 Economy is following up"
           : "The supplier confirms within 48 hours",
         urgent: false,
       };

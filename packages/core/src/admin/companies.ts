@@ -163,7 +163,7 @@ export function addSupplierProblems(input: AddSupplierInput): Record<string, str
 
 const COMPANY_MESSAGES: Record<string, { field: string; text: string }> = {
   INVALID_GSTIN: { field: "gstin", text: "This GSTIN isn't valid" },
-  ALREADY_REGISTERED: { field: "gstin", text: "This company is already on H2 India" },
+  ALREADY_REGISTERED: { field: "gstin", text: "This company is already on H2 Economy" },
   GSTIN_NOT_FOUND: { field: "gstin", text: "This GSTIN isn't on the GST portal" },
   SUPPLIER_NEEDS_ACTIVE_GSTIN: { field: "gstin", text: "Suppliers need an active GSTIN" },
   NAME_REQUIRED: { field: "name", text: "GST records give no name: enter the company's legal name" },
@@ -207,7 +207,7 @@ export async function addSupplierByOperator(
       email: input.ownerEmail,
       role: "Admin",
       invitedBy: actor.userId,
-      inviterRole: "H2 India team",
+      inviterRole: "H2 Economy team",
       context,
     });
   } catch (error) {

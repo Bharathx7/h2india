@@ -15,7 +15,7 @@ import { buildFeed } from "@/member/feed";
 // Buyer home (step 9.1): the onboarding checklist (553:8; phones 555:15) until all five steps are done, then the
 // dashboard (554:8; phones 555:445; first use 554:483). Public QC, 16 Nov 2026: the checklist shows only while the
 // buyerChecklist switch is on (off by default), so buyers go straight to the dashboard until the steps are chosen. Quote, order and spend figures fill in from steps 9.2 to 10.
-export const metadata: Metadata = { title: "Buyer · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Buyer · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const LINK: Record<string, { href: string; label: string; primary?: boolean }> = {
@@ -41,7 +41,7 @@ export default async function BuyerHome() {
     return (
       <BuyerWorkspace page={page} current="/buyer">
         <div>
-          <h1 className="type-h2">Set up {b.legalName} on H2 India</h1>
+          <h1 className="type-h2">Set up {b.legalName} on H2 Economy</h1>
           <p className="type-body-sm text-secondary">
             Finish these steps so your team can request quotes, approve and place orders.
           </p>
@@ -165,7 +165,7 @@ export default async function BuyerHome() {
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">Recent activity</h2>
           <p className="type-body-sm text-body">
-            Quotes, approvals and deliveries show here as your team uses H2 India.
+            Quotes, approvals and deliveries show here as your team uses H2 Economy.
           </p>
           <Link href="/rfq/new" className={buttonClasses({ size: "sm" }) + " self-start"}>
             Request a quote

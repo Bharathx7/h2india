@@ -26,7 +26,7 @@ export function structuredData(a: Article, url: string) {
             name: x.name,
             url: new URL(`/authors/${x.slug}`, url).toString(),
           })),
-    publisher: { "@type": "Organization", name: "H2 India" },
+    publisher: { "@type": "Organization", name: "H2 Economy" },
     ...(a.type === "sponsored" && a.sponsor?.name
       ? { sponsor: { "@type": "Organization", name: a.sponsor.name } }
       : {}),

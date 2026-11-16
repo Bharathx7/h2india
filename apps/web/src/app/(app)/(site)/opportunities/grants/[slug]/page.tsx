@@ -9,16 +9,16 @@ import { Crumbs, Documents, host, memberHref, Section, wrap } from "@/opportunit
 import { dayMonth, daysLeft, grantView, stepStates } from "@/opportunities/views";
 import { siteViewer } from "@/server/site";
 
-// Grant or call detail (open 463:5337, closed 463:6046; step 5.5). H2 India doesn't take applications: the call
+// Grant or call detail (open 463:5337, closed 463:6046; step 5.5). H2 Economy doesn't take applications: the call
 // opens on the funder's portal. Alerts for the next call arrive with member accounts (step 7.3, A71).
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const g = await getGrant((await params).slug);
-  if (!g) return { title: "Not found · H2 India" };
+  if (!g) return { title: "Not found · H2 Economy" };
   return {
-    title: `${g.title} · ${g.funder} · H2 India`,
+    title: `${g.title} · ${g.funder} · H2 Economy`,
     description: g.summary ?? g.amountPerProject ?? g.howToApply.slice(0, 200),
     alternates: { canonical: `/opportunities/grants/${g.slug}` },
   };
@@ -127,7 +127,7 @@ export default async function GrantPage({ params }: { params: Params }) {
               <div className="flex flex-col gap-0.5">
                 <dt className="type-eyebrow text-secondary">Last verified</dt>
                 <dd className="type-body-sm text-primary">
-                  {verified ? `${verified} by H2 India editors` : "Not yet verified"}
+                  {verified ? `${verified} by H2 Economy editors` : "Not yet verified"}
                 </dd>
               </div>
             </dl>
@@ -258,7 +258,7 @@ export default async function GrantPage({ params }: { params: Params }) {
                   Apply on the {g.funder} portal
                 </h2>
                 <p className="type-body-sm text-body">
-                  H2 India does not take applications. We link to the official call and remind you before it closes.
+                  H2 Economy does not take applications. We link to the official call and remind you before it closes.
                 </p>
                 <a
                   href={g.sourceUrl}

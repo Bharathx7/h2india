@@ -140,7 +140,7 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           time: "4:00 to 5:00 PM IST",
           short: "26 Nov at 4 PM IST",
           joinUrl: `${appUrl}/events/electrolyser-buying/join`,
-          host: "H2 India editorial team",
+          host: "H2 Economy editorial team",
           calendar: { google: appUrl, outlook: appUrl, ics: `${appUrl}/events/electrolyser-buying/ics` },
         }),
       );
@@ -155,8 +155,8 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           resolveBy: "25 Nov 2026",
           teamLine: "our listings team is checking the certificate with the supplier",
           officer:
-            "[Grievance officer], Grievance Officer, H2 India · grievance@[H2 India domain] · [Registered office address]",
-          signature: "[Grievance officer], Grievance Officer, H2 India",
+            "[Grievance officer], Grievance Officer, H2 Economy · grievance@[H2 Economy domain] · [Registered office address]",
+          signature: "[Grievance officer], Grievance Officer, H2 Economy",
           statusUrl: `${appUrl}/legal/grievance-officer?ticket=GRV-2026-00318`,
         }),
       );
@@ -281,7 +281,7 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
       return {
         kind: "email",
         mail: {
-          subject: "H2 India test message",
+          subject: "H2 Economy test message",
           html: await render(element),
           text: await render(element, { plainText: true }),
         },

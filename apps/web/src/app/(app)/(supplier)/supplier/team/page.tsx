@@ -8,7 +8,7 @@ import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Team and permissions (592:371; phones 594:564; Dialog Remove team member 685:318), step 8.7.
-export const metadata: Metadata = { title: "Team · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Team · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const initials = (n: string) =>

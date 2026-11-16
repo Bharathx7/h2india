@@ -11,7 +11,7 @@ import { MemberShell, requireMember } from "@/member/shell";
 
 // Hydrogen 101 progress (725:8; phones 726:8; loading 726:5662), step 7.5: chapters done, time spent, quiz average,
 // and where to pick up. Progress is saved as the member reads (ChapterTracker).
-export const metadata: Metadata = { title: "Hydrogen 101 · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Hydrogen 101 · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function LearningPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {

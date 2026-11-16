@@ -32,7 +32,7 @@ test("the three fonts load and carry the rupee sign, subscript two and arrow", a
     return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family);
   });
   for (const family of ["manrope", "inter", "plexMono"]) expect(result).toContain(family);
-  await expect(page.getByTestId("glyph-check")).toContainText("H₂ India ₹48,79,400");
+  await expect(page.getByTestId("glyph-check")).toContainText("H₂ Economy ₹48,79,400");
 });
 
 test("text styles match the Figma values", async ({ page }) => {

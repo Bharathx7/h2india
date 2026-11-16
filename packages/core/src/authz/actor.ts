@@ -18,7 +18,7 @@ export interface Actor {
   readonly platform: ReadonlySet<PlatformRole>;
   /** Companies the person belongs to, by organisation id. */
   readonly companies: ReadonlyMap<string, CompanySeat>;
-  /** Operator permissions, for H2 India staff. */
+  /** Operator permissions, for H2 Economy staff. */
   readonly operator: ReadonlySet<string>;
 }
 

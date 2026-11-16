@@ -10,7 +10,7 @@ import { queueIndexChange } from "../search/outbox";
 import { queueProductsOf } from "../search/products";
 
 // The storefront editor (590:8; phones 594:8), step 8.7. Changes are saved as a draft ("Nothing changes for buyers
-// until you publish"); Publish changes sends them to H2 India, and the public profile (482:8) updates on approval.
+// until you publish"); Publish changes sends them to H2 Economy, and the public profile (482:8) updates on approval.
 // Until a lighter storefront review is decided, every publish uses the Listings queue (playbook 8.7, A160).
 
 const r = schema.storefrontRevisions;
@@ -131,7 +131,7 @@ export async function saveStorefrontDraft(db: Database, actor: Actor, organisati
     .from(r)
     .where(and(eq(r.organisationId, organisationId), inArray(r.status, ["Draft", "In review", "Needs changes"])));
   if (open?.status === "In review")
-    throw new StorefrontError("Your last changes are with H2 India for review. You can edit again once they reply.");
+    throw new StorefrontError("Your last changes are with H2 Economy for review. You can edit again once they reply.");
   if (open)
     await db
       .update(r)
@@ -238,7 +238,7 @@ export async function decideStorefront(
 /**
  * For the checklist's Storefront basics (584:8): logo, about, locations on the live storefront. Until a storefront has
  * the basics live, changes sent for review count too (published: false), so the step reads "being checked" and a new
- * supplier can submit for review while H2 India checks the storefront.
+ * supplier can submit for review while H2 Economy checks the storefront.
  */
 export async function storefrontFacts(db: Executor, organisationId: string) {
   const [p] = await db.select().from(prof).where(eq(prof.organisationId, organisationId));

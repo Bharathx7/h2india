@@ -9,7 +9,7 @@ import { SignInScreen } from "./screen";
 // site /sign-in (old links, "sign in to continue" redirects) opens Buyer sign in, which links to the other two. The
 // admin domain keeps the staff sign-in here, and locally (SITE_ROLE=both) it is the full screen with passkeys.
 
-export const metadata: Metadata = { title: "Sign in · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Sign in · H2 Economy", robots: { index: false } };
 
 export default async function SignInPage({
   searchParams,

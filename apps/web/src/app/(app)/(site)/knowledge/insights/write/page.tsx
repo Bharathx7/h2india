@@ -7,8 +7,8 @@ import { SideBoxes } from "@/submissions/parts";
 // Write for us (504:985, received 505:288; step 5.7). A pitch first, not a finished article. No account needed.
 
 export const metadata: Metadata = {
-  title: "Write for us · H2 India",
-  description: "Pitch analysis or an explainer to H2 India's editors.",
+  title: "Write for us · H2 Economy",
+  description: "Pitch analysis or an explainer to H2 Economy's editors.",
   alternates: { canonical: "/knowledge/insights/write" },
 };
 

@@ -13,7 +13,7 @@ import { publishingCalendar } from "@/cms/workflow";
 
 // Overview (626:8), step 11.1: what needs a decision today across the queues this operator may see, with the age of
 // the oldest item against the SLA clocks, and the week's publishing calendar. ?week=-1|1 moves the calendar.
-export const metadata: Metadata = { title: "Overview · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Overview · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const IST = "Asia/Kolkata";

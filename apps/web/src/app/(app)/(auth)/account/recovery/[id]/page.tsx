@@ -12,7 +12,7 @@ import { CloseSupportButton, DecideButtons } from "./DecideButtons";
 
 // Review a recovery request (steps 3.5 and 3.7). Not drawn (decision A11): built from the auth card and the Join
 // request screens. Only an Admin of the company or operators with Users access see it; the server checks every answer.
-export const metadata: Metadata = { title: "Review a request · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Review a request · H2 Economy", robots: { index: false } };
 
 export default async function RecoveryReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -54,7 +54,7 @@ export default async function RecoveryReviewPage({ params }: { params: Promise<{
         ) : (
           <p className="type-body text-body" role="status">
             {open
-              ? "Waiting for H2 India support."
+              ? "Waiting for H2 Economy support."
               : "This request is closed. The work ID is deleted 30 days after closing."}
           </p>
         )}

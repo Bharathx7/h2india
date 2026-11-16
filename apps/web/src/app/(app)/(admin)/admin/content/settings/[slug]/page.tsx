@@ -6,7 +6,7 @@ import { cmsSession } from "@/admin/cms/session";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
 // One site setting (step 4.6) in the native editor. The CMS's own access rules decide who may change it.
-export const metadata: Metadata = { title: "Site setting · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Site setting · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SettingPage({ params }: { params: Promise<{ slug: string }> }) {

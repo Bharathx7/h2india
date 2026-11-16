@@ -107,7 +107,7 @@ export function SignedOut({ what, next }: { what: string; next: string }) {
       </span>
       <h2 className="type-h3 text-primary">Sign in to submit {what}</h2>
       <p className="max-w-120 type-body text-body">
-        You need a free H2 India account to submit events, press releases and jobs, so we know who to contact.
+        You need a free H2 Economy account to submit events, press releases and jobs, so we know who to contact.
         Corrections and pitches don&apos;t need an account.
       </p>
       <div className="flex gap-3">

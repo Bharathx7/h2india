@@ -17,7 +17,7 @@ import type { Article } from "@/payload-types";
 // marketplace prices.
 
 export const metadata: Metadata = {
-  title: "Tender results & awards · H2 India",
+  title: "Tender results & awards · H2 Economy",
   description: "Winners and discovered prices from concluded hydrogen tenders in India.",
   alternates: { canonical: "/opportunities/tenders/results" },
 };

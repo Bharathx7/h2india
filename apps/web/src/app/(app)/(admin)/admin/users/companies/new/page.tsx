@@ -6,7 +6,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Add a supplier (admin QC, 16 Nov 2026). No Figma frame: built from the admin forms. The company is created exactly
 // as Join creates it; it isn't Verified until its badges are granted from evidence.
-export const metadata: Metadata = { title: "Add a supplier · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Add a supplier · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AddSupplierPage() {

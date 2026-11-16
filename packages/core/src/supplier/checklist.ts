@@ -154,8 +154,8 @@ export function buildChecklist(f: SupplierFacts): Checklist {
     state: f.review === "approved" ? "done" : f.review === "submitted" ? "checking" : "todo",
     detail:
       f.review === "submitted"
-        ? "H2 India is checking your company and first listing."
-        : "H2 India checks your company and first listing before you go live.",
+        ? "H2 Economy is checking your company and first listing."
+        : "H2 Economy checks your company and first listing before you go live.",
     badge: f.review === "submitted" ? "In review" : undefined,
   };
   const items = [company, bank, storefront, product, review];

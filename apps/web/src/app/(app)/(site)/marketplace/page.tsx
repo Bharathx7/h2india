@@ -12,7 +12,7 @@ import { applicationHref, categoryHref, classHref, popularCategories, productsLi
 // anywhere. Products, their counts and featured brands join when suppliers list products (8.3, A109).
 
 export const metadata: Metadata = {
-  title: "Marketplace · H2 India",
+  title: "Marketplace · H2 Economy",
   description:
     "Hydrogen equipment, components and services from verified suppliers in India. Compare by specification and request quotes from up to 5 suppliers.",
   alternates: { canonical: "/marketplace" },

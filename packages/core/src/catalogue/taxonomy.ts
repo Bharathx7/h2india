@@ -247,7 +247,7 @@ export async function categoryHistory(
     .where(eq(changes.categoryId, categoryId))
     .orderBy(desc(changes.at), desc(changes.id))
     .limit(Math.min(limit, 500));
-  return rows.map((r) => ({ at: r.at, who: r.name || r.email || "H2 India", summary: r.summary }));
+  return rows.map((r) => ({ at: r.at, who: r.name || r.email || "H2 Economy", summary: r.summary }));
 }
 
 /**

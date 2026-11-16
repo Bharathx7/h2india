@@ -9,7 +9,7 @@ import { Crumbs } from "@/opportunities/parts";
 // The ecosystem map (756:13075), step 6.6: every listed organisation by state. Tiles wait for M7; the map's place shows
 // the state-bubble stand-in (A176) until M7, with the list by state as its keyboard alternative (A76).
 export const metadata: Metadata = {
-  title: "Ecosystem map · H2 India",
+  title: "Ecosystem map · H2 Economy",
   description: "Who is building what in India's hydrogen economy, state by state.",
   alternates: { canonical: "/directory/map" },
 };

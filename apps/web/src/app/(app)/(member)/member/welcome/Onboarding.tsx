@@ -91,7 +91,7 @@ export function Onboarding({
         {step === 1 ? (
           <>
             <h1 id="onboarding-title" className="type-h2 text-primary">
-              Welcome to H2 India{firstName ? `, ${firstName}` : ""}
+              Welcome to H2 Economy{firstName ? `, ${firstName}` : ""}
             </h1>
             <p className="type-body text-body">
               Tell us a little about yourself so we can show you the right news, opportunities and people.

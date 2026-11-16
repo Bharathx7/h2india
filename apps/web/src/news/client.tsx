@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { subscribeToNewsletter } from "@/server/public-forms";
 
-// The newsroom's interactive pieces (step 5.3): India H₂ Weekly sign-ups, the filter selects (they change the address,
+// The newsroom's interactive pieces (step 5.3): H2 Economy Weekly sign-ups, the filter selects (they change the address,
 // so a filtered page can be shared), the share button and the live explainer's refresh.
 
 /** The band's topic chips (376:7341) and the newsletter topics they stand for (as in the footer, A46). */
@@ -43,11 +43,11 @@ export function NewsBand() {
   );
 }
 
-/** India H₂ Weekly in a side column (441:801). */
+/** H2 Economy Weekly in a side column (441:801). */
 export function WeeklyBox({ tone }: { tone?: "outline" | "tint" }) {
   return (
     <SignUpBox
-      title="India H₂ Weekly"
+      title="H2 Economy Weekly"
       body="The week's hydrogen news, tenders and schemes, every Monday at 08:00 IST."
       topics={["policy", "tenders-schemes", "projects", "technology"]}
       onSubscribe={signUp}

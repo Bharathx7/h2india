@@ -316,7 +316,7 @@ export function QuoteBuilder({
       <div className="rounded-card bg-mint p-4">
         <p className="type-label">If the buyer accepts this quote</p>
         <p className="type-caption text-body">
-          H2 India&apos;s commission and the TCS and TDS on this order are shown here once fees are finalised. Until
+          H2 Economy&apos;s commission and the TCS and TDS on this order are shown here once fees are finalised. Until
           then nothing is deducted.
         </p>
       </div>

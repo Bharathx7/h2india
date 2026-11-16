@@ -13,7 +13,7 @@ import type { Topic } from "@/payload-types";
 // Reports (736:8, step 5.6): data notes, surveys and analysis. Most are free; some ask for a work email (A33).
 
 export const metadata: Metadata = {
-  title: "Reports · H2 India",
+  title: "Reports · H2 Economy",
   description: "Data notes, surveys and analysis on India's hydrogen economy.",
   alternates: { canonical: "/knowledge/reports" },
 };

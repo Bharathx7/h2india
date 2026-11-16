@@ -78,7 +78,7 @@ describe("structured data", () => {
       dateModified: "2026-11-10T06:35:00.000Z",
       articleSection: "Tenders & awards",
       author: [{ "@type": "Person", name: "Ananya Rao", url: "https://h2india.example/authors/ananya-rao" }],
-      publisher: { "@type": "Organization", name: "H2 India" },
+      publisher: { "@type": "Organization", name: "H2 Economy" },
     });
   });
 

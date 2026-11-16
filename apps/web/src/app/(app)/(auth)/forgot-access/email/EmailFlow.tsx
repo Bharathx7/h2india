@@ -33,7 +33,7 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
         else setProblem("We couldn't sign you in. Start again.");
       });
     } else if (s === "Declined") {
-      setProblem("Your admin didn't confirm it's you. Contact them, or send H2 India a support request.");
+      setProblem("Your admin didn't confirm it's you. Contact them, or send H2 Economy a support request.");
     }
   }, []);
 
@@ -74,7 +74,7 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
           support={waitingFor === "Waiting for support"}
           body={
             waitingFor === "Waiting for support"
-              ? "H2 India support will check your ID with your company and approve within 2 working days. Keep this page open, or come back to it in this browser."
+              ? "H2 Economy support will check your ID with your company and approve within 2 working days. Keep this page open, or come back to it in this browser."
               : "Your company admin needs to confirm it's you. Keep this page open, or come back to it in this browser."
           }
           onAnswer={onAnswer}
@@ -103,7 +103,7 @@ export function EmailFlow(props: { signedIn: boolean; confirmed: boolean }) {
               void addNewEmail(newEmail).then((r) => {
                 setBusy(false);
                 if (r.ok) setStep("sent");
-                else if (r.code === "EMAIL_TAKEN") setEmailError("That email already has an H2 India account");
+                else if (r.code === "EMAIL_TAKEN") setEmailError("That email already has an H2 Economy account");
                 else setEmailError("Enter your new work email, like you@company.com");
               });
             }}

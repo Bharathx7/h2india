@@ -80,7 +80,7 @@ export function FeaturedProducts() {
         id="featured"
         eyebrow="Featured"
         title="Featured products"
-        sub="Curated by H2 India. Prices appear only on product pages."
+        sub="Curated by H2 Economy. Prices appear only on product pages."
         link={{ label: "Explore the marketplace", href: "/marketplace" }}
       />
       <div className="rounded-card border border-default bg-subtle" data-testid="featured-empty">
@@ -154,7 +154,7 @@ export function PlatformFeatures() {
   return (
     <Section id="platform" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
       <div className="flex flex-col gap-2">
-        <p className="type-eyebrow text-secondary">Why buy and sell on H2 India</p>
+        <p className="type-eyebrow text-secondary">Why buy and sell on H2 Economy</p>
         <h2 id="platform-title" className="type-h2 text-primary md:type-h1">
           One process, from request to GST invoice
         </h2>

@@ -31,10 +31,10 @@ async function load(params: Params) {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const found = await load(params);
-  if (!found) return { title: "Not found · H2 India" };
+  if (!found) return { title: "Not found · H2 Economy" };
   const title = recordTitle(found.record);
   return {
-    title: `${title} · India Hydrogen Tracker · H2 India`,
+    title: `${title} · India Hydrogen Tracker · H2 Economy`,
     description: `${found.view.tab} record with its source and status history.`,
     alternates: { canonical: `/tracker/${found.view.path}/${found.record.slug}` },
   };

@@ -11,7 +11,7 @@ import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Payout detail (817:12613), step 10.11: the orders it paid, with the fee, TCS and TDS each. Built without its
 // frame (A178).
-export const metadata: Metadata = { title: "Payout · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Payout · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);

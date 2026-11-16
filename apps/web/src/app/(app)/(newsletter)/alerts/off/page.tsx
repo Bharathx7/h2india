@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 // "Turn off this alert" (665:307 footer), step 7.3: turns off this one alert, no sign-in needed. The link only shows a
 // button, so mail scanners that open links don't turn anything off; the one-click POST is /api/alerts/off.
 export const metadata: Metadata = {
-  title: "Turn off an alert · H2 India",
+  title: "Turn off an alert · H2 Economy",
   robots: { index: false },
   alternates: { canonical: "/alerts/off" },
 };

@@ -16,7 +16,7 @@ import { eventLd, JsonLd } from "@/seo/jsonld";
 import type { Article, Event } from "@/payload-types";
 
 // An event (expo 729:11207 and 824:13453, live day 733:493; webinar 732:521 and 824:13975, full 827:14696, registered
-// 732:939, replay 733:22 and 824:14435; step 5.7). Organisers' events link to their own registration; H2 India
+// 732:939, replay 733:22 and 824:14435; step 5.7). Organisers' events link to their own registration; H2 Economy
 // webinars take registrations here. Replays open only for people who registered (signed in, or through the signed
 // link in their email).
 
@@ -25,9 +25,9 @@ type Search = Promise<{ t?: string; details?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const e = await getEvent((await params).slug);
-  if (!e) return { title: "Not found · H2 India" };
+  if (!e) return { title: "Not found · H2 Economy" };
   return {
-    title: `${e.name} · Events · H2 India`,
+    title: `${e.name} · Events · H2 Economy`,
     description: e.description?.slice(0, 200) ?? `${e.eventType} · ${dayMonthYear(e.startsAt)}`,
     alternates: { canonical: `/events/${e.slug}` },
   };
@@ -102,7 +102,7 @@ function Speakers({ e }: { e: Event }) {
     <Box
       id="speakers"
       title={list.length === 1 ? "Speaker" : "Speakers"}
-      sub={isWebinar(e) ? undefined : "From the H2 India people directory."}
+      sub={isWebinar(e) ? undefined : "From the H2 Economy people directory."}
     >
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {list.map((s) => (
@@ -128,7 +128,7 @@ async function Exhibitors({ e }: { e: Event }) {
   return (
     <Box
       id="exhibitors"
-      title={`Exhibitors on H2 India${e.exhibitorCount ? ` · ${String(list.length)} of ${String(e.exhibitorCount)}` : ""}`}
+      title={`Exhibitors on H2 Economy${e.exhibitorCount ? ` · ${String(list.length)} of ${String(e.exhibitorCount)}` : ""}`}
       sub="Open a profile to see products, certificates and contacts."
     >
       <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
@@ -166,7 +166,7 @@ function Coverage({ e }: { e: Event }) {
   return (
     <section aria-labelledby="coverage" className="flex flex-col gap-2 rounded-card border border-default p-5">
       <h2 id="coverage" className="type-h4 text-primary">
-        H2 India coverage
+        H2 Economy coverage
       </h2>
       {e.coverage?.note ? <p className="type-body-sm text-body">{e.coverage.note}</p> : null}
       {articles.map((a) => (
@@ -477,7 +477,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
               <Box
                 id="directory"
                 title="Exhibitor directory"
-                sub={`${String(e.exhibitorCount ?? (e.exhibitors ?? []).length)} exhibitors · ${String((e.exhibitors ?? []).filter((x) => x.profileSlug).length)} have H2 India profiles`}
+                sub={`${String(e.exhibitorCount ?? (e.exhibitors ?? []).length)} exhibitors · ${String((e.exhibitors ?? []).filter((x) => x.profileSlug).length)} have H2 Economy profiles`}
               >
                 <ul className="flex flex-col">
                   {(e.exhibitors ?? []).map((x) => {
@@ -517,7 +517,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
     { label: "Dates", value: `${dates}${multiDay(e) ? "" : ` · ${timeRange(e.startsAt, e.endsAt)}`}` },
     ...(e.venue ? [{ label: "Venue", value: e.venue }] : []),
     ...(e.priceText ? [{ label: "Tickets", value: e.priceText }] : []),
-    { label: "Listed by", value: e.listedBy ?? "The organiser · checked by H2 India" },
+    { label: "Listed by", value: e.listedBy ?? "The organiser · checked by H2 Economy" },
   ];
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">

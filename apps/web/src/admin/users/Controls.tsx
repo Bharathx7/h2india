@@ -276,7 +276,7 @@ export function ViewAs({
 }: {
   userId: string;
   name: string;
-  /** "Pranava H2's supplier workspace", or "H2 India" for a member. */
+  /** "Pranava H2's supplier workspace", or "H2 Economy" for a member. */
   sees: string;
   label: string;
   variant?: "outline" | "secondary";
@@ -302,7 +302,7 @@ export function ViewAs({
         open={open}
         onOpenChange={setOpen}
         width={480}
-        title={`View H2 India as ${name}?`}
+        title={`View H2 Economy as ${name}?`}
         description={`You'll see ${sees} the way ${first} does. It's read-only: you can't change anything, send messages or approve actions.`}
         footer={
           <div className="flex justify-end gap-3">

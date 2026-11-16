@@ -10,9 +10,9 @@ import { CategoryRequestForm } from "@/supplier/CategoryRequestForm";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Request a category (supplier QC, 16 Nov 2026). No Figma frame: built from the Add a product page and the
-// workspace panels. A supplier can't list in a requested category until H2 India approves it, which adds it to the
+// workspace panels. A supplier can't list in a requested category until H2 Economy approves it, which adds it to the
 // catalogue; the answer arrives here and in notifications.
-export const metadata: Metadata = { title: "Request a category · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Request a category · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TONE = { Pending: "progress", Approved: "success", Rejected: "error" } as const;

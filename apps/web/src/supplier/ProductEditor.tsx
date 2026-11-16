@@ -83,7 +83,7 @@ function Field({
       {note ? (
         <span className="flex gap-1.5 rounded-control bg-warning px-2 py-1.5 type-caption text-primary">
           <Icon name="message-square" size={14} />
-          H2 India: {note}
+          H2 Economy: {note}
         </span>
       ) : null}
     </label>
@@ -151,7 +151,7 @@ export function ProductEditor({
         setErrors({});
         setMessage({
           tone: "success",
-          text: submit ? "Sent to H2 India for review. We'll email you when it's checked." : "Draft saved.",
+          text: submit ? "Sent to H2 Economy for review. We'll email you when it's checked." : "Draft saved.",
         });
         if (!start.id) router.replace(`/supplier/products/${r.id}`);
         else router.refresh();
@@ -303,7 +303,7 @@ export function ProductEditor({
       {start.notes.length ? (
         <Alert
           tone="warning"
-          title={`H2 India asked for ${String(start.notes.length)} ${start.notes.length === 1 ? "change" : "changes"} before this goes live${start.live ? " again" : ""}`}
+          title={`H2 Economy asked for ${String(start.notes.length)} ${start.notes.length === 1 ? "change" : "changes"} before this goes live${start.live ? " again" : ""}`}
         >
           <ol className="mt-2 flex flex-col gap-2">
             {start.notes.map((n, i) => (
@@ -321,13 +321,13 @@ export function ProductEditor({
         </Alert>
       ) : null}
       {start.rejectReason !== null ? (
-        <Alert tone="error" title="H2 India can't list this product">
+        <Alert tone="error" title="H2 Economy can't list this product">
           {start.rejectReason || "The catalogue team couldn't approve this listing."} You can delete it, or start a new
           listing.
         </Alert>
       ) : null}
       {start.status === "In review" ? (
-        <Alert tone="info" title="With H2 India for review">
+        <Alert tone="info" title="With H2 Economy for review">
           You can edit it again once the catalogue team replies, usually within 2 working days.
         </Alert>
       ) : null}
@@ -483,7 +483,7 @@ export function ProductEditor({
       <Section
         id="documents"
         title="Documents and compliance"
-        text="Datasheets and certificates buyers can download. Certificates are checked by H2 India."
+        text="Datasheets and certificates buyers can download. Certificates are checked by H2 Economy."
       >
         {f.documents.map((d) => (
           <FileRow
@@ -522,7 +522,7 @@ export function ProductEditor({
           />
         ) : null}
         {note("documents") ? (
-          <p className="rounded-control bg-warning px-2 py-1.5 type-caption">H2 India: {note("documents")}</p>
+          <p className="rounded-control bg-warning px-2 py-1.5 type-caption">H2 Economy: {note("documents")}</p>
         ) : null}
         <div className="flex flex-col gap-2">
           <span className="type-label">Certificates named on the listing</span>
@@ -729,8 +729,8 @@ export function ProductEditor({
         <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-card border border-default bg-page p-4 shadow-ink-float-sm">
           <p className="type-caption text-secondary">
             {resubmit || start.live
-              ? "Resubmitting sends these changes to H2 India's catalogue team. Your live listing stays up until they approve."
-              : "H2 India checks every new listing before buyers see it, usually within 2 working days."}
+              ? "Resubmitting sends these changes to H2 Economy's catalogue team. Your live listing stays up until they approve."
+              : "H2 Economy checks every new listing before buyers see it, usually within 2 working days."}
           </p>
           <div className="flex gap-3">
             <Button

@@ -18,10 +18,10 @@ export function opsAlarmMessage(d: OpsAlarmDetails): Message {
   const clear = d.failing.length === 0;
   return {
     subject: clear
-      ? "H2 India: all alarms clear"
-      : `H2 India ${critical ? "CRITICAL" : "warning"}: ${d.failing.map((a) => a.label).join(", ")}`,
+      ? "H2 Economy: all alarms clear"
+      : `H2 Economy ${critical ? "CRITICAL" : "warning"}: ${d.failing.map((a) => a.label).join(", ")}`,
     preview: clear ? `Clear since ${d.at}.` : `${String(d.failing.length)} alarms failing at ${d.at}.`,
-    reason: "You're getting this because you're on the H2 India operations alert list (OPS_ALERT_EMAIL).",
+    reason: "You're getting this because you're on the H2 Economy operations alert list (OPS_ALERT_EMAIL).",
     eyebrow: "Operations alarm",
     headline: clear ? "All alarms are clear" : "Something needs attention",
     paragraphs: clear

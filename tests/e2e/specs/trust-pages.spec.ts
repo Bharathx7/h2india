@@ -137,7 +137,7 @@ test("legal pages, help search and the company pages", async ({ page, browser },
     ["/about", "Build India’s hydrogen ecosystem"],
     ["/pricing", "Free for buyers. Simple for suppliers."],
     ["/verification", "How verification works"],
-    ["/careers", "Work at H2 India"],
+    ["/careers", "Work at H2 Economy"],
     ["/advertise", "Advertise and sponsor"],
     ["/sitemap", "Sitemap"],
   ] as const) {

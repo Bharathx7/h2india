@@ -219,7 +219,7 @@ export async function saveProduct(
       .where(and(eq(p.id, input.id), eq(p.organisationId, organisationId), isNull(p.deletedAt)));
     if (!product) throw new ProductError("No such product");
     if (product.status === "In review")
-      throw new ProductError("This listing is with H2 India for review. You can edit it once they reply.");
+      throw new ProductError("This listing is with H2 Economy for review. You can edit it once they reply.");
     if (product.status === "Rejected" || product.status === "Archived")
       throw new ProductError("This listing can't be changed. Start a new one.");
   }
@@ -294,7 +294,7 @@ export async function saveProduct(
           .where(and(eq(r.productId, id), inArray(r.status, ["Draft", "In review", "Needs changes"])))
           .for("update");
         if (open?.status === "In review")
-          throw new ProductError("A change to this listing is with H2 India for review.");
+          throw new ProductError("A change to this listing is with H2 Economy for review.");
         if (changed.length) {
           const values = { data: jsonSafe(reviewed), kind: changeKind(changed), updatedAt: new Date() };
           if (open) await tx.update(r).set(values).where(eq(r.id, open.id));

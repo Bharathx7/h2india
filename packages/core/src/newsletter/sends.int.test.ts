@@ -11,8 +11,8 @@ import { saveSend, scheduleSend, sendBatch, sendFor, sendStats, NewsletterSendEr
 const url = process.env.TEST_DATABASE_URL;
 const mail = process.env.MAILPIT_URL;
 const content = {
-  title: "India H₂ Weekly #5",
-  masthead: "India H₂ Weekly · #5",
+  title: "H2 Economy Weekly #5",
+  masthead: "H2 Economy Weekly · #5",
   sections: [{ heading: "Top stories", items: [{ title: "Story", href: "https://example.org/a", meta: "Analysis" }] }],
 };
 

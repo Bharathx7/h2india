@@ -12,7 +12,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Moderation · Content (633:8), Event (633:567) and Job (633:1059), step 11.2: what was sent, the checks, the decision
 // and who has it. Suppliers are decided on the Verification desk; listings and RFQs on their own screens.
-export const metadata: Metadata = { title: "Moderation · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Moderation · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const AFTER: Record<string, { approve: string; after: string; heading: string }> = {

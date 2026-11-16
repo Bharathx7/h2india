@@ -13,7 +13,7 @@ import { MemberShell, requireMember } from "@/member/shell";
 
 // Alerts (534:8; phones 536:414), step 7.3. Create alert links across the site arrive as ?type=tenders, ?tender=slug,
 // ?scheme=slug, ?grant=slug and open the Create alert modal (534:587) filled in.
-export const metadata: Metadata = { title: "Alerts · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Alerts · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 function ago(at: Date, now: Date): string {

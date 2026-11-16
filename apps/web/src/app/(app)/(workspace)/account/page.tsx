@@ -13,7 +13,7 @@ import { toRows } from "../notifications/rows";
 // There is no Figma frame for it; it is built from the workspace shell and the panels other workspace pages use, and
 // only links to screens that already exist (profile and preferences for members, notifications, company, recovery).
 
-export const metadata: Metadata = { title: "Account · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Account · H2 Economy", robots: { index: false } };
 
 const WORKSPACE_LABEL = { buyer: "Buyer", supplier: "Supplier", member: "Member", admin: "Admin" } as const;
 

@@ -66,7 +66,7 @@ describe.skipIf(!url)("notifications", () => {
       Text: string;
     };
     // The frame's parts: the wordmark header, the code, its expiry, and the footer with the reason.
-    expect(full.HTML).toContain("h2india-logo-email.png");
+    expect(full.HTML).toContain("h2economy-logo-email.png");
     expect(full.Text).toContain("482 913");
     expect(full.Text).toMatch(/10 minutes/);
     const [row] = await h.db

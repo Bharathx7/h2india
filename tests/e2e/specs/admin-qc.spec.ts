@@ -61,7 +61,7 @@ test("a Super admin adds a supplier; the new owner accepts the invitation and ge
   await op.getByLabel("GSTIN").fill(gstin);
   await op.getByLabel("Owner's email").fill(newEmail("qc-other"));
   await op.getByRole("button", { name: "Add supplier and invite owner" }).click();
-  await expect(op.getByText("This company is already on H2 India").first()).toBeVisible();
+  await expect(op.getByText("This company is already on H2 Economy").first()).toBeVisible();
   await back.close();
 
   const path = await invitationLink(page, owner);

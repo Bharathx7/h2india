@@ -8,7 +8,7 @@ import { currentPoster, ownJobPost } from "@/opportunities/posting";
 // Job submitted (468:8311, step 5.5). The paid Featured offer drawn under the card is left out: Featured is an
 // editors' choice for now (A69).
 
-export const metadata: Metadata = { title: "Job submitted for review · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Job submitted for review · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function JobSubmitted({ searchParams }: { searchParams: Promise<{ id?: string }> }) {

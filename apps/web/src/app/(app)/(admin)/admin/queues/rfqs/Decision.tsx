@@ -52,7 +52,7 @@ export function RfqDecision({
         <fieldset className="flex flex-col gap-2 rounded-input border border-default p-3">
           <legend className="px-1 type-label">Suggested suppliers to add</legend>
           <p className="type-caption text-secondary">
-            The buyer asked H2 India to suggest suppliers. Add up to {suggest.slots}
+            The buyer asked H2 Economy to suggest suppliers. Add up to {suggest.slots}
             {suggest.chosen ? ` (they chose ${String(suggest.chosen)})` : ""}. Verified suppliers only.
           </p>
           {suggest.candidates.length ? (

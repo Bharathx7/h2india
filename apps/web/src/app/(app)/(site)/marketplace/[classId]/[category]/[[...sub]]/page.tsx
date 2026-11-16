@@ -39,10 +39,10 @@ const titleOf = (category: { label: string }, sub?: { label: string }) =>
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const found = await resolve(await params);
-  if (!found) return { title: "Not found · H2 India" };
+  if (!found) return { title: "Not found · H2 Economy" };
   const title = titleOf(found.category, found.sub);
   return {
-    title: `${title} · ${found.klass.label} · H2 India`,
+    title: `${title} · ${found.klass.label} · H2 Economy`,
     description: `Compare ${title.toLowerCase()} from suppliers in India by specification, and request quotes from up to 5 verified suppliers.`,
     alternates: { canonical: found.sub ? categoryHref(found.sub, found.category) : categoryHref(found.category) },
   };

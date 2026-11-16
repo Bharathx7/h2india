@@ -15,7 +15,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 
 // Admin Orders (step 11.5): orders needing Operations (a supplier late to answer, a locked delivery link, a dispute),
 // disputes, and every order. Built from the design system while Figma is out of reach (A178).
-export const metadata: Metadata = { title: "Orders · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Orders · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS: { key: AdminOrderView; label: string }[] = [

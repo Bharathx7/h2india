@@ -98,7 +98,7 @@ function SidebarBody({
   return (
     <div data-surface="inverse" className="flex h-full flex-col gap-5 bg-inverse px-4 pt-7 pb-6">
       <div className={cx("flex items-center gap-2.5 pl-2", compact && "max-lg:hidden")}>
-        <a href={homeHref} aria-label="H2 India home" className="rounded-control">
+        <a href={homeHref} aria-label="H2 Economy home" className="rounded-control">
           <Logo version="primary-on-dark" height={36} title="" />
         </a>
         <span className={cx("rounded-[4px] bg-accent px-1.5 type-label-sm text-primary", compact && "max-lg:hidden")}>
@@ -231,7 +231,7 @@ export function WorkspaceShell({
             </RDialog.Trigger>
             <p className="hidden min-w-0 truncate type-h3 lg:block lg:w-55">{welcome}</p>
             {/* Phones and tablets: the wordmark does not fit the icon rail, so it sits in the top bar. */}
-            <a href={homeHref} aria-label="H2 India home" className="rounded-control lg:hidden">
+            <a href={homeHref} aria-label="H2 Economy home" className="rounded-control lg:hidden">
               <Logo height={28} title="" />
             </a>
             <button

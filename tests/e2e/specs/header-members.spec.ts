@@ -28,7 +28,7 @@ test("the header rows hide while scrolling down and come back on a scroll up", a
   await page.mouse.wheel(0, 1200);
   await expect(nav).toBeHidden();
   // A click in the main bar (here pressing on the logo) keeps just the main bar.
-  await page.getByRole("link", { name: "H2 India home" }).first().hover();
+  await page.getByRole("link", { name: "H2 Economy home" }).first().hover();
   await page.mouse.down();
   await expect(nav).toBeHidden();
   await page.mouse.move(700, 600);
@@ -57,7 +57,7 @@ test("the top strip reads For Buyers, For Members, For Suppliers; Sign in is Buy
 
 test("For Members leads to the member sign-up and sign-in pages", async ({ page }) => {
   await page.goto("/for-members");
-  await expect(page.getByRole("heading", { level: 1, name: "Join H2 India as a member" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Join H2 Economy as a member" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What members can do" })).toBeVisible();
   await page.getByRole("link", { name: "Join as a member" }).first().click();
   await expect(page).toHaveURL(/\/join\/member$/);
@@ -114,7 +114,7 @@ test("signing in never creates an account: an unknown email gets a Create an acc
       const list = (await res.json()) as { messages?: { Subject: string }[] };
       return (list.messages ?? []).map((m) => m.Subject);
     })
-    .toEqual(["No H2 India account for this email"]);
+    .toEqual(["No H2 Economy account for this email"]);
 });
 
 test("a new account from sign-up that never finished goes to its own sign-up page after sign-in", async ({ page }) => {

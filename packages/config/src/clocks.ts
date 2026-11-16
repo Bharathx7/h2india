@@ -32,7 +32,7 @@ export const CLOCKS = {
     source: "System settings 707:793",
   },
   disputeReview: {
-    label: "H2 India reviews a dispute",
+    label: "H2 Economy reviews a dispute",
     duration: { workingDays: 5 },
     source: "System settings 707:793",
   },

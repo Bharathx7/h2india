@@ -10,9 +10,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const author = await getAuthor((await params).slug);
-  if (!author) return { title: "Not found · H2 India" };
+  if (!author) return { title: "Not found · H2 Economy" };
   return {
-    title: `${author.name} · H2 India`,
+    title: `${author.name} · H2 Economy`,
     description: author.bio ?? undefined,
     alternates: { canonical: `/authors/${author.slug}` },
   };

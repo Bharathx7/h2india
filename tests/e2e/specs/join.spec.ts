@@ -34,7 +34,7 @@ test("a new buyer joins from scratch: confirms the email by link and creates the
   const email = newEmail("neha");
   const gstin = freshGstin();
   await page.goto("/join");
-  await expect(page.getByText("Step 1 of 4 · How you'll use H2 India")).toBeVisible();
+  await expect(page.getByText("Step 1 of 4 · How you'll use H2 Economy")).toBeVisible();
   await axe(page);
   await page.getByRole("button", { name: "Continue" }).click(); // Buyer company is chosen by default
 
@@ -111,7 +111,7 @@ test("the GSTIN step reaches every designed state", async ({ page, isMobile }) =
   // 8 · no GSTIN yet (offered while no GSTIN has been accepted)
   await typeGstin(page, "");
   await page.getByRole("checkbox", { name: "I don't have a GSTIN yet" }).check();
-  await expect(page.getByText("You can still use H2 India")).toBeVisible();
+  await expect(page.getByText("You can still use H2 Economy")).toBeVisible();
   await expect(page.getByLabel("Company name")).toBeVisible();
   // 5 · already registered is in the next test.
 });
@@ -137,7 +137,7 @@ test("a second person from the same company gets a join request, not a second co
   await reachCompanyStep(second, "Buyer company", "Arjun Shah");
   await typeGstin(second, gstin);
   await expect(alert(second)).toContainText(
-    `Test Hydrogen ${gstin.slice(2, 12)} Private Limited is already on H2 India`,
+    `Test Hydrogen ${gstin.slice(2, 12)} Private Limited is already on H2 Economy`,
   );
   await expect(alert(second)).toContainText("1 colleague has joined.");
   await second.getByRole("button", { name: "Request to join" }).click();
@@ -212,7 +212,7 @@ test("an individual member joins in two steps", async ({ page, isMobile }) => {
   test.skip(isMobile, "desktop only");
   await signInNew(page, newEmail("student"));
   await page.getByText("Individual member", { exact: true }).click();
-  await expect(page.getByText("Step 1 of 2 · How you'll use H2 India")).toBeVisible();
+  await expect(page.getByText("Step 1 of 2 · How you'll use H2 Economy")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
   // Public QC 2: the choice sends people on to that account's own sign-up page, here one step.
   await expect(page).toHaveURL(/\/join\/member$/);

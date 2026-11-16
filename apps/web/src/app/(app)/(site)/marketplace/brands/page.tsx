@@ -14,9 +14,9 @@ import { Crumbs } from "@/opportunities/parts";
 // Brands index (401:11734; phones 405:13196), step 6.5: A–Z with search, class, country of origin and "has an
 // authorised dealer in India". The filters are a plain form, so they work without scripts and the address keeps them.
 export const metadata: Metadata = {
-  title: "Brands · Marketplace · H2 India",
+  title: "Brands · Marketplace · H2 Economy",
   description:
-    "Hydrogen brands sold on H2 India, from Indian makers and international manufacturers with authorised Indian dealers.",
+    "Hydrogen brands sold on H2 Economy, from Indian makers and international manufacturers with authorised Indian dealers.",
   alternates: { canonical: "/marketplace/brands" },
 };
 export const dynamic = "force-dynamic";
@@ -63,7 +63,7 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
             Brands
           </h1>
           <p className="type-body text-body">
-            {n} brands sold on H2 India, from Indian makers and international manufacturers with authorised Indian
+            {n} brands sold on H2 Economy, from Indian makers and international manufacturers with authorised Indian
             dealers.
           </p>
           <form method="get" role="search" className="flex flex-wrap items-center gap-3">

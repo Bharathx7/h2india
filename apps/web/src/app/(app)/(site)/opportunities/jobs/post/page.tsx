@@ -11,7 +11,7 @@ import { JobPostForm } from "./JobPostForm";
 // a draft until an editor publishes it, usually within 1 working day.
 
 export const metadata: Metadata = {
-  title: "Post a job · H2 India",
+  title: "Post a job · H2 Economy",
   description: "Free for verified companies. We review every job within 1 working day.",
   robots: { index: false },
 };
@@ -57,7 +57,7 @@ export default async function PostJobPage({ searchParams }: { searchParams: Prom
                 </Link>
               }
             >
-              Join your company on H2 India, or list it, to post jobs for free.
+              Join your company on H2 Economy, or list it, to post jobs for free.
             </EmptyState>
           </div>
         </div>

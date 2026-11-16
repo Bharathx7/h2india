@@ -9,7 +9,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 
 // Site settings (step 4.6): the single documents behind the home page, company details, pricing, tracker pages and
 // maintenance notice.
-export const metadata: Metadata = { title: "Site settings · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Site settings · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SettingsListPage() {

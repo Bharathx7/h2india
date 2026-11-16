@@ -10,7 +10,7 @@ import { requireTransactionsPage } from "@/orders/guard";
 
 // Cart (80:5973; phones 82:8772), step 10.2: fixed-price items from one supplier, priced from the product records
 // now. Turn this cart into a quote request opens the RFQ wizard with the items.
-export const metadata: Metadata = { title: "Cart · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Cart · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);

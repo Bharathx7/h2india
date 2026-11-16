@@ -6,7 +6,7 @@ import { organisations } from "./companies";
 import { core } from "./core";
 
 /**
- * Brands (step 6.5; index 401:11734, brand page 401:12097): makers whose products are sold on H2 India, Indian or
+ * Brands (step 6.5; index 401:11734, brand page 401:12097): makers whose products are sold on H2 Economy, Indian or
  * international, with their authorised Indian dealers. A dealer shows as Verified only once an operator has recorded
  * the evidence (the authorisation letter) and only while the letter is valid (playbook watch-out, A128).
  */

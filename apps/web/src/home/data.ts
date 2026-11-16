@@ -95,7 +95,7 @@ export async function loadFigures(now = new Date()): Promise<Figure[]> {
     {
       value: indianNumber(open.totalDocs),
       label: "hydrogen tenders open this month",
-      source: `H2 India tracker · as of ${dayMonthYear(now)}`,
+      source: `H2 Economy tracker · as of ${dayMonthYear(now)}`,
     },
     // "Verified supplier listings" joins when Stage 6 has real listings (A45).
   ];

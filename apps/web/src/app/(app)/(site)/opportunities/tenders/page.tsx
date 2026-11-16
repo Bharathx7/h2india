@@ -25,7 +25,7 @@ import { siteViewer } from "@/server/site";
 // Saved filters and alerts arrive with member accounts (step 7.3, A71).
 
 export const metadata: Metadata = {
-  title: "Hydrogen tenders in India · H2 India",
+  title: "Hydrogen tenders in India · H2 Economy",
   description:
     "Open hydrogen tenders from SECI, public sector companies, state agencies and ports, with bid due dates.",
   alternates: { canonical: "/opportunities/tenders" },

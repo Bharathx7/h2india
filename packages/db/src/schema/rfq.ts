@@ -45,14 +45,14 @@ export const rfqs = core.table(
       .default(sql`'{}'::uuid[]`),
     /** Where the RFQ started: product, category, compare, list, header, cart. */
     source: text("source"),
-    /** The H2 India moderator who picked it up (Assign to me, 629:1148). */
+    /** The H2 Economy moderator who picked it up (Assign to me, 629:1148). */
     moderatorId: uuid("moderator_id").references(() => users.id),
     submittedAt: utc("submitted_at"),
     sentAt: utc("sent_at"),
     closedAt: utc("closed_at"),
     /** Why it closed: accepted, declined all, closed by the buyer. */
     closeReason: text("close_reason"),
-    /** "Let H2 India suggest suppliers" (398:9635): the moderator adds suppliers before it is sent (A164). */
+    /** "Let H2 Economy suggest suppliers" (398:9635): the moderator adds suppliers before it is sent (A164). */
     suggestSuppliers: boolean("suggest_suppliers").notNull().default(false),
     /** Edit RFQ after sending (564:383): each saved edit is a new version, told to the suppliers. */
     version: integer("version").notNull().default(1),
@@ -109,7 +109,7 @@ export const rfqSuppliers = core.table(
   ],
 );
 
-/** H2 India's check of a multi-supplier RFQ (632:1138): Approved or Returned, with reasons. Append-only. */
+/** H2 Economy's check of a multi-supplier RFQ (632:1138): Approved or Returned, with reasons. Append-only. */
 export const rfqModerationDecisions = core.table(
   "rfq_moderation_decisions",
   {

@@ -8,7 +8,7 @@ import { getSession } from "@/server/auth";
 
 // Accept an invitation (Invitation email 673:155), step 8.7: the person signs in with a code sent to the invited
 // email, then joins the company with the role the admin chose.
-export const metadata: Metadata = { title: "Join your team · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Join your team · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
@@ -22,7 +22,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         </Alert>
       ) : (
         <>
-          <h1 className="type-h2">Join {found.company} on H2 India</h1>
+          <h1 className="type-h2">Join {found.company} on H2 Economy</h1>
           <p className="type-body text-body">
             You&apos;re invited as {found.role}. Sign in with {found.email} to accept.
           </p>

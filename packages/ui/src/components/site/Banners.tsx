@@ -58,7 +58,7 @@ export function CookieBanner({
         <div className="flex-1">
           <p className="type-label-lg text-primary">We use cookies</p>
           <p className="mt-1 type-body-sm text-secondary">
-            Necessary cookies keep you signed in and your cart safe. Optional cookies help us improve H2 India. Change
+            Necessary cookies keep you signed in and your cart safe. Optional cookies help us improve H2 Economy. Change
             this any time in Cookie preferences.
           </p>
         </div>

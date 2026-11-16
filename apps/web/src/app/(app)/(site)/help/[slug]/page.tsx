@@ -17,9 +17,9 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const a = await helpArticle((await params).slug);
-  if (!a) return { title: "Help article not found · H2 India" };
+  if (!a) return { title: "Help article not found · H2 Economy" };
   return {
-    title: `${a.title} · Help centre · H2 India`,
+    title: `${a.title} · Help centre · H2 Economy`,
     description: a.intro.slice(0, 160),
     alternates: { canonical: `/help/${a.slug}` },
   };

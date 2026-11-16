@@ -308,7 +308,7 @@ export function WhyItMatters() {
           India is building a 5 MMT green hydrogen economy
         </h2>
         <p className="type-body text-neutral-0/80 md:type-body-lg">
-          H2 India connects the buyers, suppliers, schemes and tenders that get it built.
+          H2 Economy connects the buyers, suppliers, schemes and tenders that get it built.
         </p>
         <Link
           href="/opportunities/schemes?mission=nghm"

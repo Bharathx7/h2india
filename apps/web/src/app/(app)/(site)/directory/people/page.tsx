@@ -10,10 +10,10 @@ import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
 
 // People in India's hydrogen industry (756:12213), step 6.6. Only people whose consent to be listed is recorded (M24
-// safe default). Contact goes through H2 India; emails are never shown. Filters are a plain form in the address.
+// safe default). Contact goes through H2 Economy; emails are never shown. Filters are a plain form in the address.
 export const metadata: Metadata = {
-  title: "People in India's hydrogen industry · H2 India",
-  description: "Experts, researchers and professionals who chose to list themselves. Contact goes through H2 India.",
+  title: "People in India's hydrogen industry · H2 Economy",
+  description: "Experts, researchers and professionals who chose to list themselves. Contact goes through H2 Economy.",
   alternates: { canonical: "/directory/people" },
 };
 export const dynamic = "force-dynamic";
@@ -74,8 +74,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
         <div className="flex flex-col gap-2">
           <h1 className="type-h1 text-primary">People in India&apos;s hydrogen industry</h1>
           <p className="type-body text-body">
-            Experts, researchers and professionals who chose to list themselves. Contact goes through H2 India; we never
-            share emails.
+            Experts, researchers and professionals who chose to list themselves. Contact goes through H2 Economy; we
+            never share emails.
           </p>
         </div>
         <Link href="/sign-in?next=/member/profile" className={buttonClasses({ variant: "outline" })}>
@@ -183,7 +183,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Searc
                     className={cx(buttonClasses({ variant: "outline", size: "sm" }), "self-start")}
                   >
                     <Icon name="message-square" size={16} />
-                    Contact via H2 India
+                    Contact via H2 Economy
                   </Link>
                 </li>
               ))}

@@ -22,9 +22,9 @@ async function findClass(id: string) {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const c = await findClass((await params).classId);
-  if (!c) return { title: "Not found · H2 India" };
+  if (!c) return { title: "Not found · H2 Economy" };
   return {
-    title: `${c.label} · Marketplace · H2 India`,
+    title: `${c.label} · Marketplace · H2 Economy`,
     description: `${c.description} Compare by specification and request quotes from verified suppliers in India.`,
     alternates: { canonical: classHref(c.id) },
   };
@@ -125,7 +125,7 @@ export default async function ClassPage({
           empty={
             <div className="rounded-card border border-default bg-page">
               <EmptyState title="Suppliers are joining">
-                {`Verified ${c.label.toLowerCase()} suppliers show here as they list with H2 India.`}
+                {`Verified ${c.label.toLowerCase()} suppliers show here as they list with H2 Economy.`}
               </EmptyState>
             </div>
           }

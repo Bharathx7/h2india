@@ -15,7 +15,7 @@ import { CONTENT_GROUPS } from "@/admin/cms/registry";
 
 // Content (step 11.3): Articles, Records, Newsletter (647:8), Media, Authors and Data quality (646:9, 646:733).
 // Articles (638:8, 642:326), records, media (649:8) and authors (649:730) open the native editors.
-export const metadata: Metadata = { title: "Content · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Content · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const LABEL: Record<string, string> = {
@@ -351,7 +351,7 @@ export default async function ContentPage({
           tab === "quality"
             ? `Records nobody has checked for ${String(STALE_DAYS)} days or more, and changes spotted on official sources. Verify against the source, or edit if something changed.`
             : tab === "newsletter"
-              ? "India H₂ Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
+              ? "H2 Economy Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
               : "Articles and structured records. Everything is reviewed before it's published, and every published piece keeps a corrections log."
         }
         actions={

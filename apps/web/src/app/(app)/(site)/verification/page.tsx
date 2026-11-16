@@ -6,9 +6,9 @@ import { Block, card, DarkCta, Hero, main, wrap } from "@/trust/parts";
 // How verification works (95:1428): words as drawn. "Report a listing" opens the grievance form with Listing chosen.
 
 export const metadata: Metadata = {
-  title: "How verification works · H2 India",
+  title: "How verification works · H2 Economy",
   description:
-    "Badges show what H2 India has checked about a company and when we last checked it. Badges are never sold.",
+    "Badges show what H2 Economy has checked about a company and when we last checked it. Badges are never sold.",
   alternates: { canonical: "/verification" },
 };
 
@@ -80,7 +80,7 @@ const TIERS = [
   {
     tier: "Tier 2",
     name: "Site-verified",
-    check: "Everything in Tier 1, plus a site visit by H2 India or an approved inspector, and the factory licence.",
+    check: "Everything in Tier 1, plus a site visit by H2 Economy or an approved inspector, and the factory licence.",
     often: "Site visit every 12 months",
     badge: "Site-verified",
     shown: "Verified supplier · site-verified",
@@ -93,7 +93,7 @@ export default function VerificationPage() {
       <Hero
         eyebrow="Trust"
         title="How verification works"
-        lead="Badges show what H2 India has checked about a company and when we last checked it. Badges are never sold."
+        lead="Badges show what H2 Economy has checked about a company and when we last checked it. Badges are never sold."
         actions={[
           { label: "Browse verified suppliers", href: "/directory?verified=1", primary: true },
           { label: "Report a listing", href: REPORT },
@@ -201,7 +201,7 @@ export default function VerificationPage() {
         text="Buy fixed-price items now, or send one quote request to up to 5 suppliers. Every order ends in a GST invoice."
         actions={[
           { label: "Request a quote", href: "/rfq/new" },
-          { label: "Sell on H2 India", href: "/for-suppliers", primary: false },
+          { label: "Sell on H2 Economy", href: "/for-suppliers", primary: false },
         ]}
       />
     </main>

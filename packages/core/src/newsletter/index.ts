@@ -8,7 +8,7 @@ import { getDb } from "../db";
 import { deliverEmail } from "../notify/channels";
 import { formatIstDateTime, istDate } from "../time";
 
-// India H₂ Weekly sign-up with double opt-in (step 5.1, A46; brought forward from 5.9). A sign-up stays "pending" until
+// H2 Economy Weekly sign-up with double opt-in (step 5.1, A46; brought forward from 5.9). A sign-up stays "pending" until
 // the emailed link is opened (48 hours, 676:8). Signing up again with a confirmed address sends a link to change topics
 // instead (743:7293 "Already subscribed"). Links are signed with the app secret and carry a nonce, so only the latest
 // link for an address works. Issues and the archive come with step 11.3.

@@ -25,9 +25,9 @@ const known = (v: string) => STATE_OPTIONS.some((o) => o.value === v && v !== "a
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { state } = await params;
   const name = STATE_OPTIONS.find((o) => o.value === state)?.label;
-  if (!name || !known(state)) return { title: "Not found · H2 India" };
+  if (!name || !known(state)) return { title: "Not found · H2 Economy" };
   return {
-    title: `Hydrogen in ${name} · H2 India`,
+    title: `Hydrogen in ${name} · H2 Economy`,
     description: `Policy, projects, companies, tenders and news for ${name}.`,
     alternates: { canonical: `/states/${state}` },
   };
@@ -82,7 +82,7 @@ export default async function StatePage({ params }: { params: Params }) {
   const asOf = p?.verification?.at ?? p?.updatedAt ?? null;
   const tiles = [
     { value: data.projectCount, label: "projects in the tracker" },
-    { value: local.length, label: "companies on H2 India" },
+    { value: local.length, label: "companies on H2 Economy" },
     { value: data.tenders.length, label: "open tenders" },
     { value: openSchemes.length, label: `open ${openSchemes.length === 1 ? "scheme" : "schemes"}` },
   ];

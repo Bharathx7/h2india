@@ -6,7 +6,7 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { Inbox } from "@/messages/Inbox";
 
 // Buyer messages (572:8), step 9.7. ?rfq=&supplier= (the Message button on 560:8) opens that conversation.
-export const metadata: Metadata = { title: "Messages · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Messages · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function BuyerMessagesPage({

@@ -282,7 +282,7 @@ export function ProductsTable({ rows, canEdit, company }: { rows: ProductLine[];
             </div>
             <p className="flex gap-2 type-body-sm">
               <Icon name="info" size={16} />
-              It comes off your storefront and H2 India search, and buyers who saved it see &quot;No longer
+              It comes off your storefront and H2 Economy search, and buyers who saved it see &quot;No longer
               available&quot;.
             </p>
             <p className="flex gap-2 type-body-sm">

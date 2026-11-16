@@ -9,7 +9,7 @@ import { ARTICLE_TYPES } from "@/cms/types";
 
 // The publishing calendar (626:8, step 4.6): a week at a time in IST, with what is scheduled and published each day,
 // and what is waiting in review or legal check.
-export const metadata: Metadata = { title: "Publishing calendar · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Publishing calendar · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const DAY = 86_400_000;

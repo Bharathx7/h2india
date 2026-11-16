@@ -15,7 +15,7 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 // Accept-quote confirmation (569:9; phones 570:8), step 9.8. Launch 1 has no ordering (C8, founder 11 Nov 2026): the
 // screen shows what accepting would do, Confirm is off while the transactions flag is off, and the buyer is pointed to
 // Message. The Launch 1 wording ("Ordering opens in Launch 2") isn't in Figma yet and needs design approval (OPEN: C8).
-export const metadata: Metadata = { title: "Accept quote · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Accept quote · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const rupees = (p: bigint) => Money.format(p);

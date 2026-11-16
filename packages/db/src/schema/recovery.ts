@@ -5,7 +5,7 @@ import { organisations } from "./companies";
 import { core } from "./core";
 
 // Account recovery (step 3.5, Figma 528:8). One row per attempt. Each path needs two independent proofs; the row
-// records which were given, and whether an Admin or H2 India support must still approve.
+// records which were given, and whether an Admin or H2 Economy support must still approve.
 
 export const recoveryRequests = core.table(
   "recovery_requests",

@@ -726,7 +726,7 @@ export interface Scheme {
       }[]
     | null;
   /**
-   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).
    */
   sourceUrl: string;
   documents?:
@@ -962,7 +962,7 @@ export interface Tender {
       }[]
     | null;
   /**
-   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).
    */
   sourceUrl: string;
   documents?:
@@ -1126,7 +1126,7 @@ export interface Grant {
    */
   howToApply: string;
   /**
-   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).
    */
   sourceUrl: string;
   documents?:
@@ -1240,7 +1240,7 @@ export interface Job {
     | null;
   jobType?: ('Full-time' | 'Part-time' | 'Contract' | 'Internship') | null;
   /**
-   * The company's H2 India profile address, when it has one.
+   * The company's H2 Economy profile address, when it has one.
    */
   companySlug?: string | null;
   /**
@@ -1330,7 +1330,7 @@ export interface Job {
    */
   featured?: boolean | null;
   /**
-   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).
    */
   sourceUrl: string;
   documents?:
@@ -1454,7 +1454,7 @@ export interface Event {
   registrationUrl?: string | null;
   description?: string | null;
   /**
-   * For example The organiser · checked by H2 India.
+   * For example The organiser · checked by H2 Economy.
    */
   listedBy?: string | null;
   /**
@@ -1484,7 +1484,7 @@ export interface Event {
     | null;
   exhibitorCount?: number | null;
   /**
-   * Webinars, for example H2 India editorial team.
+   * Webinars, for example H2 Economy editorial team.
    */
   host?: string | null;
   exhibitors?:
@@ -1500,7 +1500,7 @@ export interface Event {
       }[]
     | null;
   /**
-   * Registration on H2 India (732:521). The join link is sent only to people who registered.
+   * Registration on H2 Economy (732:521). The join link is sent only to people who registered.
    */
   webinar?: {
     learn?:
@@ -1587,7 +1587,7 @@ export interface Event {
     articles?: (number | Article)[] | null;
   };
   /**
-   * The official page or portal. Readers confirm details there (A29: no applying on H2 India).
+   * The official page or portal. Readers confirm details there (A29: no applying on H2 Economy).
    */
   sourceUrl: string;
   documents?:
@@ -1984,7 +1984,7 @@ export interface Report {
      */
     name?: string | null;
     /**
-     * For example Hydrotek Systems paid for this survey. H2 India wrote it.
+     * For example Hydrotek Systems paid for this survey. H2 Economy wrote it.
      */
     disclosure?: string | null;
   };
@@ -2071,7 +2071,7 @@ export interface Video {
   language?: string | null;
   description: string;
   /**
-   * Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.
+   * Where it's hosted (M9). For a file H2 Economy hosts, upload it in Video and audio files and paste its address here.
    */
   url: string;
   durationMinutes?: number | null;
@@ -2127,7 +2127,7 @@ export interface Podcast {
    */
   alsoOn?: string | null;
   /**
-   * Where it's hosted (M9). For a file H2 India hosts, upload it in Video and audio files and paste its address here.
+   * Where it's hosted (M9). For a file H2 Economy hosts, upload it in Video and audio files and paste its address here.
    */
   url: string;
   durationMinutes?: number | null;
@@ -5658,7 +5658,7 @@ export interface SightTracker {
         capacity?: string | null;
         priceOrIncentive?: string | null;
         /**
-         * The company's H2 India profile slug, if it has one.
+         * The company's H2 Economy profile slug, if it has one.
          */
         profileSlug?: string | null;
         id?: string | null;
@@ -5679,7 +5679,7 @@ export interface SightTracker {
   createdAt?: string | null;
 }
 /**
- * Who runs H2 India, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].
+ * Who runs H2 Economy, the registered office and the grievance officer (M2), and the figures on About, Advertise and the Media kit. Empty fields show as [placeholders].
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trust-settings".
@@ -5694,7 +5694,7 @@ export interface TrustSetting {
   registeredOffice?: string | null;
   officeHours?: string | null;
   /**
-   * Who runs H2 India (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.
+   * Who runs H2 Economy (66:4251), after the company name: for example whether any company in the group sells hydrogen products. Shown with the date below.
    */
   disclosure?: string | null;
   disclosureDate?: string | null;
@@ -5704,7 +5704,7 @@ export interface TrustSetting {
     email?: string | null;
   };
   /**
-   * Named on Partner with H2 India (742:8) and the Media kit (741:6058).
+   * Named on Partner with H2 Economy (742:8) and the Media kit (741:6058).
    */
   partnerships?: {
     name?: string | null;
@@ -5805,7 +5805,7 @@ export interface Pricing {
      */
     afterValue?: string | null;
     /**
-     * of each order paid through H2 India
+     * of each order paid through H2 Economy
      */
     afterNote?: string | null;
     /**

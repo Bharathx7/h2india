@@ -27,7 +27,7 @@ import { Limited, useSubmission } from "@/submissions/forms";
 import { ErrorSummary, NetworkError, Success } from "@/submissions/parts";
 import { checkComplaint, raiseComplaint, type CheckResult, type RaiseResult } from "./actions";
 
-// The step 5.8 forms: Contact us (66:4591), Partner with H2 India (742:8, sent 742:516), Advertise and sponsor
+// The step 5.8 forms: Contact us (66:4591), Partner with H2 Economy (742:8, sent 742:516), Advertise and sponsor
 // (741:5605), the grievance form (519:8, ticket 519:538) and Check a complaint (519:588). Contact, partnership and
 // advertising go through submitContent() like the step 5.7 forms; the grievance has its own record and clocks.
 

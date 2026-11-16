@@ -64,7 +64,7 @@ export const TOPIC_LABELS: Record<TopicName, { group: string; label: string; hin
     },
     "rfq.checked": {
       group: "RFQs and quotes",
-      label: "H2 India checks your RFQ",
+      label: "H2 Economy checks your RFQ",
       hint: "Approved, or returned for changes",
       locked: [],
     },

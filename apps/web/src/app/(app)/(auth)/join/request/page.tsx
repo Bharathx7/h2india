@@ -10,7 +10,7 @@ import { StatusIcon } from "../../StatusIcon";
 import { RequestActions } from "./RequestActions";
 
 // Join request (Figma 365:27779): Pending (527:8, 390: 528:696), Rejected (527:56), Approved and Expired (527:112).
-export const metadata: Metadata = { title: "Join request · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Join request · H2 Economy", robots: { index: false } };
 
 function initials(name: string): string {
   return name
@@ -120,7 +120,7 @@ export default async function JoinRequestPage() {
       />
       <p className="type-caption text-secondary">
         You can send one reminder a day. Requests expire after 14 days, on {formatIstDate(request.expiresAt)}. You can
-        browse H2 India and save items while you wait.
+        browse H2 Economy and save items while you wait.
       </p>
     </AuthCard>
   );

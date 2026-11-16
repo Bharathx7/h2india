@@ -137,7 +137,7 @@ export const products = core.table(
   ],
 );
 
-/** An operator's note on one field (602:281: "H2 India: add the test conditions..."). */
+/** An operator's note on one field (602:281: "H2 Economy: add the test conditions..."). */
 export interface ReviewNote {
   /** An attribute key, or a section: category, details, documents, commercial. */
   field: string;

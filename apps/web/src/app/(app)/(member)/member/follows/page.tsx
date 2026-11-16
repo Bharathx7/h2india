@@ -13,7 +13,7 @@ import { MemberShell, requireMember } from "@/member/shell";
 
 // Manage follows (543:8; phones 549:254; search to add 550:8), step 7.2: companies, topics and states, each with how it
 // notifies (All updates, Digest only, None). Follow links arrive as ?company=slug, ?topic=…, ?state=….
-export const metadata: Metadata = { title: "Follows · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Follows · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [

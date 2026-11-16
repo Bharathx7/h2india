@@ -7,7 +7,7 @@ import { publicOrEditor, refuseSamplePublish } from "../sample";
 // eight sections ("In every issue") are rich text.
 
 export const NEWSLETTER_LISTS = [
-  { value: "weekly", label: "India H₂ Weekly" },
+  { value: "weekly", label: "H2 Economy Weekly" },
   { value: "tender-digest", label: "Tender Alert digest" },
 ] as const;
 

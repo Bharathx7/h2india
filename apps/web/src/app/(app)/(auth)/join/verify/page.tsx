@@ -6,7 +6,7 @@ import { StatusIcon } from "../../StatusIcon";
 import { VerifyActions } from "./VerifyActions";
 
 // Verify email (Figma 365:27778): Check your inbox (527:158, 390: 528:734) and Link expired (527:192).
-export const metadata: Metadata = { title: "Check your inbox · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Check your inbox · H2 Economy", robots: { index: false } };
 
 export default async function VerifyPage({
   searchParams,

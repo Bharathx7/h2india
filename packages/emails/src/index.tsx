@@ -83,7 +83,7 @@ async function renderElement(subject: string, element: ReactElement): Promise<Re
   return { subject, html: await render(element), text: await render(element, { plainText: true }) };
 }
 
-/** India H₂ Weekly: confirm (676:8), welcome (its variant) and already subscribed (step 5.1, A46). */
+/** H2 Economy Weekly: confirm (676:8), welcome (its variant) and already subscribed (step 5.1, A46). */
 export function renderNewsletterConfirm(props: NewsletterConfirmProps) {
   return renderElement(newsletterConfirmSubject, <NewsletterConfirm {...props} />);
 }

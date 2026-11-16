@@ -10,7 +10,7 @@ import { Progress } from "./Progress";
 
 export function FindStep(props: {
   onPick: (organisationId: string | null) => void;
-  /** Back to "How you'll use H2 India"; none on a sign-up page for one kind of account. */
+  /** Back to "How you'll use H2 Economy"; none on a sign-up page for one kind of account. */
   onBack?: () => void;
   busy: boolean;
 }) {

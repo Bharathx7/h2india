@@ -11,9 +11,9 @@ export function directoryConsentWording(persona: string | null): string {
 }
 
 /** Marketing messages: newsletters, alerts and the like, per topic and channel (548:8). */
-export const MARKETING_CONSENT_VERSION = "2026-11-15";
+export const MARKETING_CONSENT_VERSION = "2026-11-16";
 
 export function marketingConsentWording(topicLabel: string, channel: string): string {
-  const how = channel === "whatsapp" ? "on WhatsApp" : channel === "in_app" ? "in H2 India" : "by email";
+  const how = channel === "whatsapp" ? "on WhatsApp" : channel === "in_app" ? "in H2 Economy" : "by email";
   return `${topicLabel}: send me these ${how}. Turn it off here at any time.`;
 }

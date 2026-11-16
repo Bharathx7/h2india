@@ -11,7 +11,7 @@ import { ClockRow, FailedJob, FlagRow, Proposal } from "@/admin/system/Controls"
 
 // System settings (707:793), step 11.8: switches, clocks, integrations and failed jobs. Every change needs a reason
 // and is audited; switches that open money flows need a second operator; clocks apply to new deadlines only.
-export const metadata: Metadata = { title: "System settings · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "System settings · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const FLAG_WORDS: Record<string, { label: string; hint: string }> = {

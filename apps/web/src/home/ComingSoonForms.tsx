@@ -22,7 +22,7 @@ const TOPICS = [
   { key: "jobs", label: "Jobs" },
 ];
 
-/** India H₂ Weekly sign-up with the drawn states (743:7293): submitting, success, already subscribed, invalid email. */
+/** H2 Economy Weekly sign-up with the drawn states (743:7293): submitting, success, already subscribed, invalid email. */
 export function NewsletterSignup() {
   const [topics, setTopics] = useState<string[]>(["news", "tenders-schemes"]);
   const [email, setEmail] = useState("");
@@ -47,7 +47,7 @@ export function NewsletterSignup() {
   if (result?.status === "already") {
     return (
       <Alert tone="info" title="You're already subscribed" live data-testid="newsletter-already">
-        This email already gets India H₂ Weekly. We&rsquo;ve sent you a link to change your topics.
+        This email already gets H2 Economy Weekly. We&rsquo;ve sent you a link to change your topics.
       </Alert>
     );
   }
@@ -57,7 +57,7 @@ export function NewsletterSignup() {
       onSubmit={(e) => void submit(e)}
       noValidate
       className="relative flex flex-col gap-3"
-      aria-label="Get India H₂ Weekly"
+      aria-label="Get H2 Economy Weekly"
     >
       {trap}
       <div role="group" aria-label="Topics" className="flex flex-wrap gap-2">
@@ -97,7 +97,7 @@ export function NewsletterSignup() {
         />
       </FormField>
       <Button type="submit" size="lg" disabled={sending} className="w-full">
-        {sending ? "Subscribing…" : "Get India H₂ Weekly"}
+        {sending ? "Subscribing…" : "Get H2 Economy Weekly"}
       </Button>
       {result?.status === "error" ? (
         <p role="alert" className="type-caption text-error">

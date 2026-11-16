@@ -13,16 +13,16 @@ import { newsForTopics, schemeView } from "@/schemes/data";
 import { siteViewer } from "@/server/site";
 import type { Scheme, Topic } from "@/payload-types";
 
-// Tender detail (open 457:3222, awarded 459:3621; step 5.5). Everything links to the issuer's portal: H2 India does
+// Tender detail (open 457:3222, awarded 459:3621; step 5.5). Everything links to the issuer's portal: H2 Economy does
 // not host tender documents or take bids. Track and Follow results sign people in; alerts arrive in step 7.3 (A71).
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const t = await getTender((await params).slug);
-  if (!t) return { title: "Not found · H2 India" };
+  if (!t) return { title: "Not found · H2 Economy" };
   return {
-    title: `${t.title} · ${t.issuer} tender · H2 India`,
+    title: `${t.title} · ${t.issuer} tender · H2 Economy`,
     description: t.description.slice(0, 200),
     alternates: { canonical: `/opportunities/tenders/${t.slug}` },
   };
@@ -252,7 +252,7 @@ export default async function TenderPage({ params }: { params: Params }) {
                               </Link>
                             </div>
                           ) : (
-                            <p className="type-caption text-secondary">Not on H2 India yet</p>
+                            <p className="type-caption text-secondary">Not on H2 Economy yet</p>
                           )}
                         </li>
                       );
@@ -317,7 +317,7 @@ export default async function TenderPage({ params }: { params: Params }) {
             <Section id="documents" title="Documents">
               <Documents
                 items={t.documents ?? []}
-                note="H2 India links to the official portal and does not host tender documents."
+                note="H2 Economy links to the official portal and does not host tender documents."
               />
             </Section>
           ) : null}

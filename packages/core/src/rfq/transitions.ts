@@ -52,7 +52,7 @@ export function acceptable(status: QuoteStatus, validUntil: Date | null, now: Da
 /** The most suppliers one RFQ can go to (wizard step 2, 398:9635). */
 export const MAX_RFQ_SUPPLIERS = 5;
 
-/** An RFQ to more than one supplier is checked by H2 India first (note on 557:8). */
+/** An RFQ to more than one supplier is checked by H2 Economy first (note on 557:8). */
 export const needsModeration = (supplierCount: number) => supplierCount > 1;
 
 export interface RfqBadge {

@@ -96,4 +96,4 @@ const stop = async () => {
 process.on("SIGTERM", () => void stop());
 process.on("SIGINT", () => void stop());
 
-console.log(`H2 India worker ready: ${workers.map((w) => w.name).join(", ")}`);
+console.log(`H2 Economy worker ready: ${workers.map((w) => w.name).join(", ")}`);

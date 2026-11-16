@@ -9,7 +9,7 @@ import { PasskeyStep } from "./PasskeyStep";
 
 // The back office needs a passkey sign-in (A172, step 12.1 review H2). An operator signed in another way confirms with
 // their passkey here, or creates one first. Built from the sign-in design system (A178; listed in frames-to-check).
-export const metadata: Metadata = { title: "Confirm with your passkey · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Confirm with your passkey · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function PasskeyStepPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {

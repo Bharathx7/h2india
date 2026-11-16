@@ -105,7 +105,7 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
 
   for (const x of gstins) {
     const found = await findRegistered(db, x);
-    if (found) throw new CompanyError("ALREADY_REGISTERED", `${found.name} is already on H2 India`, found.id);
+    if (found) throw new CompanyError("ALREADY_REGISTERED", `${found.name} is already on H2 Economy`, found.id);
   }
 
   // Check every GSTIN on the portal again here; the page's answer is never trusted.
@@ -175,7 +175,7 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
   } catch (error) {
     if (isUniqueViolation(error)) {
       const again = gstins[0] ? await findRegistered(db, gstins[0]) : null;
-      throw new CompanyError("ALREADY_REGISTERED", "This company is already on H2 India", again?.id);
+      throw new CompanyError("ALREADY_REGISTERED", "This company is already on H2 Economy", again?.id);
     }
     throw error;
   }

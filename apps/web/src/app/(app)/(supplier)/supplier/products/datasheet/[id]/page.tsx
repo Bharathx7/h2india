@@ -10,7 +10,7 @@ import { DatasheetReview, type ReviewField } from "@/supplier/DatasheetReview";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Check what we read from your datasheet (610:8; fields 611:8), step 8.4. The supplier's own extraction only.
-export const metadata: Metadata = { title: "Check your datasheet · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Check your datasheet · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function DatasheetReviewPage({ params }: { params: Promise<{ id: string }> }) {

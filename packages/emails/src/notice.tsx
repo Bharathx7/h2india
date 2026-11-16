@@ -97,7 +97,7 @@ export function Notice({
         </Text>
       ) : null}
       {note ? <Text style={{ ...type.bodySmall, color: colour.body, margin: "0 0 24px" }}>{note}</Text> : null}
-      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 India team</Text>
+      <Text style={{ ...type.bodySmall, color: colour.body, margin: 0 }}>H2 Economy team</Text>
     </EmailLayout>
   );
 }

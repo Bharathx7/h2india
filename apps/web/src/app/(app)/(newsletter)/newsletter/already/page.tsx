@@ -8,7 +8,7 @@ import { StateCard } from "../card";
 // Sign-up · already subscribed (448:7291). Manage preferences emails a fresh change-topics link, so nobody can change
 // someone else's topics by typing their address.
 
-export const metadata: Metadata = { title: "You're already subscribed · India H₂ Weekly", robots: { index: false } };
+export const metadata: Metadata = { title: "You're already subscribed · H2 Economy Weekly", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AlreadyPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
@@ -17,7 +17,7 @@ export default async function AlreadyPage({ searchParams }: { searchParams: Prom
   return (
     <StateCard icon="info" title="You're already subscribed">
       <p className="type-body text-body">
-        {to || "This address"} already gets India H₂ Weekly. You can change topics or how often we write.
+        {to || "This address"} already gets H2 Economy Weekly. You can change topics or how often we write.
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         <SendLinkAgain label="Manage preferences" primary />

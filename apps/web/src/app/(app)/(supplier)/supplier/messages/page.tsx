@@ -6,7 +6,7 @@ import { Inbox } from "@/messages/Inbox";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Supplier messages (the supplier side of 572:8), step 9.7. ?rfq= (Message the buyer on an RFQ) opens that conversation.
-export const metadata: Metadata = { title: "Messages · H2 India", robots: { index: false } };
+export const metadata: Metadata = { title: "Messages · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SupplierMessagesPage({

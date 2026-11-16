@@ -21,7 +21,7 @@ export function organizationLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: absolute("/"),
-    logo: absolute("/brand/h2india-logo-email.png"),
+    logo: absolute("/brand/h2economy-logo-email.png"),
     description: SITE_DESCRIPTION,
   };
 }

@@ -15,9 +15,9 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const s = await getStandard((await params).slug);
-  if (!s) return { title: "Not found · H2 India" };
+  if (!s) return { title: "Not found · H2 Economy" };
   return {
-    title: `${s.title} · Standards library · H2 India`,
+    title: `${s.title} · Standards library · H2 Economy`,
     description: s.summary,
     alternates: { canonical: `/knowledge/standards/${s.slug}` },
   };
@@ -141,7 +141,7 @@ export default async function StandardPage({ params }: { params: Params }) {
                 </dd>
               </div>
               <div className="flex flex-col gap-0.5 border-t border-default py-2.5">
-                <dt className="type-caption text-secondary">Last checked by H2 India</dt>
+                <dt className="type-caption text-secondary">Last checked by H2 Economy</dt>
                 <dd className="type-body-sm text-primary">{dayMonthYear(s.checkedAt ?? s.updatedAt)}</dd>
               </div>
             </dl>

@@ -6,9 +6,9 @@ import { cx } from "../../lib/cx";
 import { Button } from "../Button";
 import { CategoryChip } from "../Chips";
 
-/* Figma "Newsletter band" (376:7341, on the news home 428:1305 and Insights 440:40): India H₂ Weekly sign-up with topic
+/* Figma "Newsletter band" (376:7341, on the news home 428:1305 and Insights 440:40): H2 Economy Weekly sign-up with topic
    chips, the same content as the footer sign-up as a full-width band. And the side-column box (434:3284 "Tender Alert
-   digest", 441:801 "India H₂ Weekly"): title, one line, email and a full-width Subscribe. */
+   digest", 441:801 "H2 Economy Weekly"): title, one line, email and a full-width Subscribe. */
 
 type Subscribe = (email: string, topics: string[]) => Promise<boolean>;
 type SendState = "idle" | "sending" | "done" | "error";
@@ -70,7 +70,7 @@ function EmailField({ value, onChange, grow }: { value: string; onChange: (v: st
 export function NewsletterBand({
   onSubscribe,
   topics = ["Policy", "Tenders", "Projects", "Technology", "Mobility"],
-  title = "India H₂ Weekly",
+  title = "H2 Economy Weekly",
   body = "The week's Indian hydrogen news, tenders and scheme deadlines. Every Monday, free.",
   className,
 }: {

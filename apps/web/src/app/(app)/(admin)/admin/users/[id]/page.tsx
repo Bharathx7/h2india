@@ -14,7 +14,7 @@ import { actionWords, ago, deviceOf, kindWord, maskMobile, roleWord } from "@/ad
 // User detail (651:1042), step 11.4: memberships, sign-in security, sessions, account actions and recent activity,
 // with Suspend user (653:568) and View as user (657:328). Reset passkeys, Export data, Sign out and Delete account
 // aren't on this screen yet: they have no server action (export and erasure run from Compliance).
-export const metadata: Metadata = { title: "User · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "User · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function UserPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,7 +29,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   const isOperator = d.operatorRoles.length > 0;
   const main = d.companies[0];
   const type = kindWord(main?.kind, isOperator);
-  const sees = main ? `${main.name}'s ${main.kind === "buyer" ? "buyer" : "supplier"} workspace` : "H2 India";
+  const sees = main ? `${main.name}'s ${main.kind === "buyer" ? "buyer" : "supplier"} workspace` : "H2 Economy";
   const self = p.id === userId;
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
@@ -107,7 +107,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
                 <span className="flex items-start gap-3">
                   <Icon name="shield-check" size={18} className="mt-0.5" />
                   <span>
-                    <span className="block type-label">H2 India</span>
+                    <span className="block type-label">H2 Economy</span>
                     <span className="block type-caption text-secondary">{d.operatorRoles.join(", ")}</span>
                   </span>
                 </span>
@@ -170,7 +170,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
               <div className="flex flex-col gap-2 border-t border-default py-3">
                 <h3 className="type-label">View as {first}</h3>
                 <p className="type-caption text-secondary">
-                  See H2 India as {first} does. Read-only. You give a reason, a banner shows the whole time, and
+                  See H2 Economy as {first} does. Read-only. You give a reason, a banner shows the whole time, and
                   it&apos;s logged.
                 </p>
                 <span>

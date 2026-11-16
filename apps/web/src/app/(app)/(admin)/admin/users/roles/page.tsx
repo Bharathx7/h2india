@@ -11,7 +11,7 @@ import { Initials, UsersHeader, UserTabs } from "@/admin/users/Tabs";
 // Operator roles (656:8), step 11.4: each role, who holds it and its permissions by area, with the areas the design
 // marks Sensitive. Permissions are data (step 3.4) changed by a seed migration, so the grid is shown read-only here;
 // a Super admin adds and removes people below. Two-person approval for payouts arrives with Money (step 11.6).
-export const metadata: Metadata = { title: "Operator roles · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Operator roles · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const ACTION_LABEL: Record<string, string> = {

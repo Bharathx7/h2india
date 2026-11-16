@@ -13,7 +13,7 @@ import { actionWords, kindWord, roleWord } from "@/admin/users/words";
 // Company detail (admin QC, 16 Nov 2026): everything about one buyer or supplier company in one place. No Figma frame
 // (F1 keeps Organisations inside Users): built from the User detail panels (651:1042). Read-only; the actions stay on
 // their own screens (Verification, Queues, User detail).
-export const metadata: Metadata = { title: "Company · H2 India admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Company · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const n = (rows: { n: number }[]) => rows.reduce((a, r) => a + r.n, 0);
@@ -52,7 +52,7 @@ export default async function CompanyPage({
           <StatusBadge status={kindWord(org.kind)} tone="neutral" />
           <StatusBadge status={org.verification} tone={org.verification === "Verified" ? "success" : "neutral"} />
           {org.suspendedAt ? <StatusBadge status="Suspended" tone="error" /> : null}
-          {org.legalName} · on H2 India since {formatIstDate(org.createdAt)}
+          {org.legalName} · on H2 Economy since {formatIstDate(org.createdAt)}
         </p>
       </div>
       <div className="flex flex-wrap gap-3">

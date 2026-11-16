@@ -33,10 +33,11 @@ const load = (slug: string) => productDetail(getDb(), slug, { includeSample: sho
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const p = await load((await params).slug);
-  if (!p) return { title: "Not found · H2 India" };
+  if (!p) return { title: "Not found · H2 Economy" };
   return {
-    title: `${p.name} · ${p.supplier.name} · H2 India`,
-    description: p.summary ?? `${p.name} from ${p.supplier.name}: specifications, certificates and quotes on H2 India.`,
+    title: `${p.name} · ${p.supplier.name} · H2 Economy`,
+    description:
+      p.summary ?? `${p.name} from ${p.supplier.name}: specifications, certificates and quotes on H2 Economy.`,
     alternates: { canonical: p.href },
   };
 }
@@ -441,7 +442,7 @@ export default async function ProductPage({
             {[
               p.supplier.foundedYear ? `In business since ${String(p.supplier.foundedYear)}` : null,
               p.supplier.employees ? `${p.supplier.employees} employees` : null,
-              `${String(p.supplier.liveProducts)} ${p.supplier.liveProducts === 1 ? "product" : "products"} on H2 India`,
+              `${String(p.supplier.liveProducts)} ${p.supplier.liveProducts === 1 ? "product" : "products"} on H2 Economy`,
             ]
               .filter(Boolean)
               .join(" · ")}

@@ -3,7 +3,7 @@ import { cms, signInOperator } from "../helpers/cms";
 import { rfqSetup, signInExisting } from "../helpers/rfq";
 import { ownIp, withDb } from "../helpers/sign-in";
 
-// The Launch 1 gaps (13 Nov 2026): Edit RFQ after sending (564:383) and the message drawer (561:252); Let H2 India
+// The Launch 1 gaps (13 Nov 2026): Edit RFQ after sending (564:383) and the message drawer (561:252); Let H2 Economy
 // suggest suppliers (398:9635) with the moderator adding one; newsletter Stats (647:660) and the composer's chart and
 // sponsor slot (648:312); Save view on a queue. Needs the app and Mailpit (sign-in codes).
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
@@ -46,7 +46,7 @@ test("a buyer edits a sent RFQ; the supplier sees version 2 and messages the buy
   await other.close();
 });
 
-test("let H2 India suggest suppliers: the wizard allows none; the moderator adds a verified one", async ({
+test("let H2 Economy suggest suppliers: the wizard allows none; the moderator adds a verified one", async ({
   page,
   browser,
 }, info) => {
@@ -60,10 +60,10 @@ test("let H2 India suggest suppliers: the wizard allows none; the moderator adds
   await page.getByLabel("Quantity").fill("2");
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: /2 · Choose suppliers/ })).toBeVisible();
-  await page.getByRole("switch", { name: "Let H2 India suggest suppliers" }).click();
-  await expect(page.getByText(/H2 India will add verified suppliers that fit/)).toBeVisible();
+  await page.getByRole("switch", { name: "Let H2 Economy suggest suppliers" }).click();
+  await expect(page.getByText(/H2 Economy will add verified suppliers that fit/)).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Choose at least one supplier, or let H2 India suggest them")).toHaveCount(0);
+  await expect(page.getByText("Choose at least one supplier, or let H2 Economy suggest them")).toHaveCount(0);
 
   // A suggest-suppliers RFQ waiting in moderation: the moderator adds the verified supplier and approves.
   const waiting = await rfqSetup({ suggest: true });
@@ -101,7 +101,7 @@ test("newsletter: no stats before sending; the composer refuses a sponsor withou
     list: "weekly",
     number: n,
     sentOn: new Date().toISOString(),
-    title: `India H₂ Weekly #${String(n)}`,
+    title: `H2 Economy Weekly #${String(n)}`,
     slug: `india-h2-weekly-${String(n)}-${String(Date.now())}`,
   });
   expect(created.status).toBe(201);

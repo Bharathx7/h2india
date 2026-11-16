@@ -14,7 +14,7 @@ import { SUB_VIEWS } from "@/tracker/views";
 // source. Written automatically when a record is published (step 4.5).
 
 export const metadata: Metadata = {
-  title: "Recent changes · India Hydrogen Tracker · H2 India",
+  title: "Recent changes · India Hydrogen Tracker · H2 Economy",
   description: "Every tracker record we added or edited, with the value before and after.",
   alternates: { canonical: "/tracker/changes" },
 };
