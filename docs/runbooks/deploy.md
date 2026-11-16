@@ -2,10 +2,10 @@
 
 Step 1.7 (ADR 0006, `docs/server.md`). One Docker image runs everything; the server's own nginx sits in front.
 
-| Address                    | What                                 | Container (port on 127.0.0.1) |
-| -------------------------- | ------------------------------------ | ----------------------------- |
-| `h2india.deecodes.io`      | Website, buyer/supplier/member, APIs | `web-public` (3210)           |
-| `adminh2india.deecodes.io` | `/admin` and the CMS (`/cms`)        | `web-admin` (3211)            |
+| Address              | What                                 | Container (port on 127.0.0.1) |
+| -------------------- | ------------------------------------ | ----------------------------- |
+| `h2economy.co`       | Website, buyer/supplier/member, APIs | `web-public` (3210)           |
+| `admin.h2economy.co` | `/admin` and the CMS (`/cms`)        | `web-admin` (3211)            |
 
 Both web containers run the same image with their own `APP_URL`. Operators sign in on the admin domain separately;
 a passkey made on one domain doesn't work on the other.
@@ -15,7 +15,7 @@ never delivered. Read it through an SSH tunnel (step 7).
 
 ## Before the first deploy (once)
 
-1. **DNS.** Point `h2india` and `adminh2india` (A records under `deecodes.io`) at the server's IP.
+1. **DNS.** Point `h2economy.co` (A record `@`) and `admin.h2economy.co` (A record `admin`) at the server's IP. There is no www site (founder, 16 Nov 2026).
    If the DNS is on Cloudflare, set them to "DNS only" (grey cloud), or nginx sees Cloudflare's address instead of
    the visitor's.
 2. **Server memory.** The H2 India containers need about 4 GB on top of what the server already runs (ClamAV alone
@@ -61,7 +61,7 @@ sudo mv /tmp/h2india-proxy.conf /tmp/h2india-files.conf /etc/nginx/snippets/
 sudo mv /tmp/h2india.conf /etc/nginx/sites-available/h2india.conf
 sudo ln -s /etc/nginx/sites-available/h2india.conf /etc/nginx/sites-enabled/h2india.conf
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d h2india.deecodes.io -d adminh2india.deecodes.io
+sudo certbot --nginx -d h2economy.co -d admin.h2economy.co
 
 # 6. Search indexes (empty until editors publish)
 dc run --rm tools pnpm search:reindex
@@ -70,7 +70,7 @@ dc run --rm tools pnpm search:reindex
 dc run --rm tools pnpm admin:bootstrap you@example.com "Your Name"
 ```
 
-Then sign in at `https://adminh2india.deecodes.io/sign-in` with that email. To read the code, open a tunnel from
+Then sign in at `https://admin.h2economy.co/sign-in` with that email. To read the code, open a tunnel from
 your Mac: `ssh -L 8025:127.0.0.1:8025 <server>`, then open http://localhost:8025.
 
 ## Every later deploy
@@ -108,12 +108,12 @@ undone, so a rollback is only safe to a version that already worked with the cur
    `timedatectl` must say `System clock synchronized: yes`; if not, `sudo apt install chrony` and add
    `server time.nplindia.org iburst` and `server samay1.nic.in iburst` to `/etc/chrony/chrony.conf`.
 
-3. **Outside checks**: in GitHub, set the repository variable `PROD_URL` (`https://h2india.deecodes.io`) and the secret
+3. **Outside checks**: in GitHub, set the repository variable `PROD_URL` (`https://h2economy.co`) and the secret
    `HEALTH_TOKEN` (32 random characters; the same value as `HEALTH_TOKEN` in `h2india.env`). The Uptime workflow then
    checks the site every 15 minutes and opens an `uptime` issue on failure. Make sure whoever answers alerts watches
    the repository (Settings → Notifications) so failed runs reach their email and phone.
 
-4. **Alarms**: `curl -H "Authorization: Bearer $HEALTH_TOKEN" https://h2india.deecodes.io/api/health/deep | jq`
+4. **Alarms**: `curl -H "Authorization: Bearer $HEALTH_TOKEN" https://h2economy.co/api/health/deep | jq`
    lists every alarm with its runbook. Limits for the non-money alarms are the `ops.alarms` setting.
 
 5. **Forced error test** (Done when): break the deep health on purpose (for example stop the worker for 15 minutes so

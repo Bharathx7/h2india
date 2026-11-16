@@ -10,7 +10,7 @@ don't fire.
 
 1. Post "We're looking into it" on the status page (`/status`, or the page chosen in M26).
 2. `dc ps`: every service `running` or `healthy`? Note any that restart.
-3. `curl -s http://127.0.0.1:3210/api/health` and `curl -sI https://h2india.deecodes.io | head -1`.
+3. `curl -s http://127.0.0.1:3210/api/health` and `curl -sI https://h2economy.co | head -1`.
 4. If a release went out in the last hour, go to [bad-release.md](bad-release.md).
 
 ## Diagnosis

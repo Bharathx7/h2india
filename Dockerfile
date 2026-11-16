@@ -12,7 +12,7 @@ FROM base AS build
 COPY . .
 RUN pnpm install --frozen-lockfile
 # Canonical links, sitemaps and share cards always use the public site's address, on both domains.
-ARG NEXT_PUBLIC_APP_URL=https://h2india.deecodes.io
+ARG NEXT_PUBLIC_APP_URL=https://h2economy.co
 ARG DATABASE_URL=postgresql://h2india:change-me-postgres@localhost:5432/h2india
 ARG REDIS_URL=redis://localhost:6379
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL DATABASE_URL=$DATABASE_URL REDIS_URL=$REDIS_URL

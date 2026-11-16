@@ -304,7 +304,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.
-- `web-public` (h2india.deecodes.io) and `web-admin` (adminh2india.deecodes.io) are the same image with their own `APP_URL`; nginx decides which paths each domain serves. A new admin-only top-level path needs adding to the admin `location` in `infra/nginx/h2india.conf`.
+- `web-public` (h2economy.co) and `web-admin` (admin.h2economy.co, since 16 Nov 2026; the deecodes.io names are off, there is no www) are the same image with their own `APP_URL`; nginx decides which paths each domain serves. A new admin-only top-level path needs adding to the admin `location` in `infra/nginx/h2india.conf`.
 - The worker reaches the web app through `INTERNAL_WEB_URL`; `/api/internal/*` is blocked from outside.
 - The first Super admin is made once with `pnpm admin:bootstrap`; after that only through `grantOperatorRole()`.
 

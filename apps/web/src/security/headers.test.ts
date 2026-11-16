@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { contentSecurityPolicy, originOf, securityHeaders } from "./headers";
 
-const prod = { dev: false, storageOrigins: ["https://h2india.deecodes.io"], pathname: "/" };
+const prod = { dev: false, storageOrigins: ["https://h2economy.co"], pathname: "/" };
 const directive = (csp: string, name: string) =>
   csp
     .split("; ")
