@@ -10,12 +10,12 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1166.0",
-    "@aws-sdk/s3-request-presigner": "3.1166.0",
+    "@aws-sdk/client-s3": "3.1168.0",
+    "@aws-sdk/s3-request-presigner": "3.1168.0",
     "@h2india/config": "workspace:*",
     "@h2india/core": "workspace:*",
     "@react-email/components": "1.0.12",
-    "bullmq": "6.7.4",
+    "bullmq": "6.7.6",
     "drizzle-orm": "0.45.4",
     "meilisearch": "0.63.0",
     "nodemailer": "10.5.0",
