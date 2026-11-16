@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { signInOperator } from "../helpers/cms";
 
 // Step 12.1: every page carries the security headers, and the content security policy blocks nothing the pages

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { signInNew } from "../helpers/join";
 import { latestCode, newEmail, ownIp, withDb } from "../helpers/sign-in";

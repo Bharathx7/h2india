@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { ownIp, withDb } from "../helpers/sign-in";
 
 // Step 6.3 DONE WHEN: selecting filters updates results and counts and the address reproduces the view; the table view
