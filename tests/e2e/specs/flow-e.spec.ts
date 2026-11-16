@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "../fixtures";
 import { enterCode, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
 // Flow E (Figma page 18, playbook step 7.6): enthusiast to subscriber and member. Explainer article → glossary term

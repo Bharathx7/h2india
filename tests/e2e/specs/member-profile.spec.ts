@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures";
 import { signInNew } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
