@@ -6,12 +6,15 @@ import { person } from "@/directory/data";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
 import { absolute } from "@/seo/site";
+import { GATED_METADATA } from "@/directory/gate";
+import { siteViewer } from "@/server/site";
 
 // A person's profile (756:12711), step 6.6: only with their consent recorded (M24), or a member who chose to be listed
 // (step 7.4, seen only by signed-in visitors). No email or phone, ever.
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  if (!(await siteViewer())) return GATED_METADATA;
   const p = await person((await params).slug);
   if (!p) return { title: "Not found · H2 India" };
   return {

@@ -2,7 +2,7 @@
 
 import { SiteFooter, SiteHeader, type MegaSection, type SiteUser } from "@h2india/ui";
 import type { ReactNode } from "react";
-import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS } from "@/lib/site-nav";
+import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS, footerFor, menusFor } from "@/lib/site-nav";
 import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { subscribeToNewsletter } from "@/server/public-forms";
 import { Analytics } from "@/consent/Analytics";
@@ -42,7 +42,7 @@ export function SiteChrome({
         Skip to content
       </a>
       <SiteHeader
-        sections={menus}
+        sections={menusFor(menus, user !== null)}
         links={SITE_LINKS}
         tagline="India's hydrogen ecosystem platform"
         user={user}
@@ -53,7 +53,7 @@ export function SiteChrome({
       <HeaderSearch search={search} />
       {children}
       <SiteFooter
-        columns={FOOTER_COLUMNS}
+        columns={footerFor(FOOTER_COLUMNS, user !== null)}
         topics={Object.keys(FOOTER_TOPICS)}
         onSubscribe={async (email, topics) => {
           const result = await subscribeToNewsletter({

@@ -7,12 +7,15 @@ import { joinProfile, membershipsOf } from "@h2india/core/companies";
 import { safeReturnPath, siteSignIn } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
+import { workspaceFor } from "@/server/join";
 
 /**
  * Where to go once signed in: the page the person came from, unless they have not finished joining. An email with
- * no account gets an account at sign-in and then goes through Join (decision A1).
+ * no account gets an account at sign-in and then goes through Join (decision A1). From the member sign-in page
+ * (`member`), a new person joins with Member picked, and a buyer or supplier who used it goes to their own workspace
+ * instead of the member dashboard.
  */
-export async function whereNext(next: string): Promise<string> {
+export async function whereNext(next: string, member = false): Promise<string> {
   const session = await getSession();
   const back = safeReturnPath(next);
   if (!session) return back;
@@ -28,8 +31,9 @@ export async function whereNext(next: string): Promise<string> {
     return site.to;
   }
   const profile = await joinProfile(session.user.id);
-  if (!profile?.profileType) return "/join";
+  if (!profile?.profileType) return member ? "/join?as=member" : "/join";
   if (profile.profileType === "member") return back;
   const companies = await membershipsOf(getDb(), session.user.id);
-  return companies.length > 0 ? back : "/join";
+  if (!companies[0]) return "/join";
+  return member && back === "/member" ? workspaceFor(companies[0].kind) : back;
 }

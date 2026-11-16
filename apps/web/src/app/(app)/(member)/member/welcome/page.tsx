@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function WelcomePage() {
   const session = await getSession();
-  if (!session) redirect("/sign-in?next=/member/welcome");
+  if (!session) redirect("/member/sign-in?next=/member/welcome");
   const p = await memberProfile(getDb(), session.user.id);
   if (p?.onboardedAt) redirect("/member");
   const firstName = (session.user.name || "").split(/\s+/)[0] ?? "";

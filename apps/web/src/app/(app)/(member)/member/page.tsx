@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MemberPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
   const session = await getSession();
-  if (!session) redirect("/sign-in?next=/member");
+  if (!session) redirect("/member/sign-in");
   if (await needsOnboarding(getDb(), session.user.id)) redirect("/member/welcome");
   return <MemberHome userId={session.user.id} searchParams={searchParams} />;
 }

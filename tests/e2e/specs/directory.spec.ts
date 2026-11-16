@@ -1,10 +1,12 @@
 import { expect, test } from "../fixtures";
 import { cms, signInOperator } from "../helpers/cms";
-import { ownIp, withDb } from "../helpers/sign-in";
+import { signInNew } from "../helpers/join";
+import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 import { expectStates } from "../helpers/states";
 
 // Step 6.6 DONE WHEN: directory filters and the map show the same companies; a person without a consent flag never
-// appears in lists, search or the map; keyboard users can use the list alternative to the map.
+// appears in lists, search or the map; keyboard users can use the list alternative to the map. Public QC, 16 Nov 2026:
+// the directory opens only for signed-in people.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
 
 test.beforeEach(async ({ context }, info) => {
@@ -30,6 +32,7 @@ test("the list and the map show the same filtered companies", async ({ page }) =
   const tag = Math.random().toString(36).slice(2, 8);
   await company(`${tag}a`, "Kerala", "Manufacturer", true);
   await company(`${tag}b`, "Kerala", "Research institute", false);
+  await signInNew(page, newEmail("dir-list"));
   await page.goto(`/directory/companies?q=${tag}&state=Kerala`);
   await expect(page.getByRole("link", { name: /View profile of Dir/ })).toHaveCount(2);
   await page.goto(`/directory/companies?q=${tag}&state=Kerala&type=research`);
@@ -76,6 +79,34 @@ test("a person without recorded consent can't be published and never appears", a
   expect(await page.locator("main").innerText()).not.toMatch(/@/);
 });
 
+test("signed-out visitors are asked to sign in or join, and the menu has no Directory", async ({ page }) => {
+  for (const path of [
+    "/directory/companies",
+    "/directory/people",
+    "/directory/map",
+    `/directory/companies/no-such-${String(Date.now())}`,
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1, name: "Sign in to open the Directory" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
+      "href",
+      `/sign-in?next=${encodeURIComponent(path)}`,
+    );
+    await expect(page.getByRole("link", { name: "Join H2 India" })).toBeVisible();
+  }
+  await page.goto("/news");
+  await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
+  await expect(page.locator("footer").getByRole("link", { name: "Directory" })).toHaveCount(0);
+});
+
+test("signed in, the Directory menu is back", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop-1440", "The section nav is desktop; the phone menu reads the same list");
+  await signInNew(page, newEmail("dir-menu"));
+  await page.goto("/news");
+  await expect(page.getByRole("button", { name: "Directory" })).toBeVisible();
+});
+
 test("the directory has its designed states", async ({ page }) => {
+  await signInNew(page, newEmail("dir-states"));
   await expectStates(page, "/directory/companies");
 });

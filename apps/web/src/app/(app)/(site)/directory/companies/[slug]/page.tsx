@@ -17,6 +17,8 @@ import { wrap } from "@/marketplace/parts";
 import { dayMonthYear } from "@/news/format";
 import { Crumbs } from "@/opportunities/parts";
 import { getSession } from "@/server/auth";
+import { GATED_METADATA } from "@/directory/gate";
+import { siteViewer } from "@/server/site";
 
 // A company profile (Overview 481:8, Products 482:8; phones 483:8, 484:8; tabs 487:3188 to 489:20429), step 6.7. Tabs
 // are ?tab= so each is a link. An unclaimed profile carries the Claim this profile banner (492:5615). Contact details
@@ -43,6 +45,7 @@ async function Badges({ organisationId }: { organisationId: string }) {
 const load = (slug: string) => companyProfile(getDb(), slug, { includeSample: showSample() });
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  if (!(await siteViewer())) return GATED_METADATA;
   const c = await load((await params).slug);
   if (!c) return { title: "Not found · H2 India" };
   return {

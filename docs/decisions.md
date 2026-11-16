@@ -32,6 +32,7 @@ Source: playbook v1.0 Section 6 (11 Nov 2026), plus items found since. Last upda
 | F7 | Featured-event price and the organiser's payment step (Flow G) | You | Stage 5 (Batch 2) | Submission goes straight to review, no payment | Open |  |
 | F8 | EV-2026-0412: who organises it? | You | Stage 13 (Batch 5) | Sample data only; fixed when sample data is replaced | Open |  |
 | F9 | Sample data to replace: tracker prices and projects, state policies, report titles, careers, fee and payout figures | You and content team | Stage 13 (Batch 5) | Seed data marked as sample, hidden in production | Answered | Founder, 12 Nov 2026: sample content, marked as sample and hidden in production, until real content replaces it (M20). |
+| F10 | Who sees the Directory, and how members sign in | You | Public QC 2 | Directory public; one sign-in page | Decided 16 Nov 2026 | Founder (public QC 2): the Directory (every /directory page, company and people profiles included) opens only for signed-in people (members, buyers, suppliers, staff); visitors get a sign-in or join prompt, and the Directory leaves the menus, footer and sitemaps for them. Members get their own sign-in page (`/member/sign-in`) and a For Members page; the main sign-in page is for buyers and suppliers and links to it (a member using it still gets in). Desktop header: the top strip and section nav hide while scrolling down and come back on any scroll up. Top strip: For Buyers, For Members, For Suppliers. |
 
 ## Flow gaps recorded in Doc 4
 
