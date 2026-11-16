@@ -6,6 +6,7 @@ import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { looksLikeEmail } from "../sign-in/rules";
 import { inScope, type Scope } from "../authz/scope";
 import { clockDuration, workingCalendar } from "../clocks/clocks";
 import { deliverEmail } from "../notify/channels";
@@ -120,7 +121,7 @@ export async function sendInvitation(
 ): Promise<{ id: string; token: string }> {
   const organisationId = input.organisationId;
   const email = input.email.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new TeamError("Enter a full email address");
+  if (!looksLikeEmail(email)) throw new TeamError("Enter a full email address");
   const roles = await companyRoles(db, organisationId);
   const role = roles.find((r) => r.name === input.role);
   if (!role) throw new TeamError("Choose a role");

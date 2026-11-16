@@ -3,6 +3,7 @@ import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import type { RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { looksLikeEmail } from "../sign-in/rules";
 import { inScope, scopeFor } from "../authz/scope";
 import { CompanyError, createCompany } from "../companies/companies";
 import { sendInvitation, TeamError } from "../supplier/team";
@@ -156,7 +157,7 @@ export function addSupplierProblems(input: AddSupplierInput): Record<string, str
   const e: Record<string, string> = {};
   if (!/^[0-9]{2}[A-Z0-9]{13}$/.test(input.gstin.trim().toUpperCase()))
     e.gstin = "A GSTIN has 15 characters, like 27AAKCG5521M1Z3";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.ownerEmail.trim())) e.ownerEmail = "Enter the owner's full email";
+  if (!looksLikeEmail(input.ownerEmail)) e.ownerEmail = "Enter the owner's full email";
   return e;
 }
 
