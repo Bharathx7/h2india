@@ -22,7 +22,11 @@ export default async function VerifyPage({
         <StatusIcon name="alert-triangle" tone="warning" />
         <h1 className="type-h2 text-primary">This link has expired</h1>
         <p className="type-body text-body">Links work for 24 hours. We&apos;ll send a new one to {email}.</p>
-        <VerifyActions mode="expired" canSend={Boolean(draft?.email)} />
+        <VerifyActions
+          mode="expired"
+          canSend={Boolean(draft?.email)}
+          back={draft?.path ? `/join/${draft.path}` : "/join"}
+        />
       </AuthCard>
     );
   }
@@ -33,7 +37,7 @@ export default async function VerifyPage({
       <p className="type-body text-body">
         We sent a link to {email}. Open it to confirm your email. The link works for 24 hours.
       </p>
-      <VerifyActions mode="sent" canSend={Boolean(draft?.email)} />
+      <VerifyActions mode="sent" canSend={Boolean(draft?.email)} back={draft?.path ? `/join/${draft.path}` : "/join"} />
     </AuthCard>
   );
 }

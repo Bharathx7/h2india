@@ -66,7 +66,8 @@ export function JoinFlow(props: {
   }, [step]);
 
   const go = (href: string) => {
-    if (href === "/join?step=company") {
+    // Company details on this same page: change the step instead of loading the page again.
+    if (href === `${fixed ? ACCOUNT_PAGES[fixed].join : "/join"}?step=company`) {
       setStep("company");
       router.refresh();
       return;

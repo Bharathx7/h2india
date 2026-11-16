@@ -30,8 +30,10 @@ export async function JoinScreen({ fixed, wanted, as }: { fixed?: JoinPath; want
       if (request && request.status !== "Approved") redirect("/join/request");
     }
     if (profile?.profileType === "buyer" || profile?.profileType === "supplier") {
-      // Someone who confirmed their email as a buyer or supplier finishes on their own page.
-      if (fixed && fixed !== profile.profileType) redirect(`/join/${profile.profileType}`);
+      // Someone who confirmed their email as a buyer or supplier finishes on their own page, never the shared /join.
+      if (fixed !== profile.profileType) {
+        redirect(`/join/${profile.profileType}${wanted === "company" ? "?step=company" : ""}`);
+      }
       kind = profile.profileType;
       step = "company";
     }

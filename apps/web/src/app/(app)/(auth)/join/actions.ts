@@ -121,7 +121,8 @@ async function nextAfterDetails(token: string, user: { id: string; email: string
     await clearDraftCookie();
     return { ok: true, value: "/join/request" };
   }
-  return { ok: true, value: "/join?step=company" };
+  // Company details on that account's own sign-up page (public QC 3), not the shared /join.
+  return { ok: true, value: `/join/${draft.path}?step=company` };
 }
 
 /** Step 3. Signed-in people go straight on; others get the Verify email link (decision A7). */
@@ -254,7 +255,8 @@ export async function cancelAction(requestId: string): Promise<Result<string>> {
   if (!session) return fail("NOT_SIGNED_IN");
   try {
     await cancelJoinRequest({ userId: session.user.id, requestId, context: await requestContext() });
-    return { ok: true, value: "/join" };
+    const profile = await joinProfile(session.user.id);
+    return { ok: true, value: profile?.profileType === "supplier" ? "/join/supplier" : "/join/buyer" };
   } catch (error) {
     if (error instanceof JoinRequestError) return fail(error.code);
     throw error;
@@ -266,8 +268,9 @@ export async function startSeparateCompany(): Promise<Result<string>> {
   const session = await getSession();
   if (!session) return fail("NOT_SIGNED_IN");
   const profile = await joinProfile(session.user.id);
+  const kind = profile?.profileType === "supplier" ? "supplier" : "buyer";
   if (profile?.profileType !== "buyer" && profile?.profileType !== "supplier") {
     await setProfileType(session.user.id, "buyer");
   }
-  return { ok: true, value: "/join?step=company" };
+  return { ok: true, value: `/join/${kind}?step=company` };
 }

@@ -1,4 +1,5 @@
 import { expect, hydrated, test } from "../fixtures";
+import { fillDetails, latestConfirmLink } from "../helpers/join";
 import { setup } from "../helpers/orders";
 import { enterCode, ensureAccount, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
@@ -132,4 +133,27 @@ test("the wrong page signs a supplier in to their own dashboard, with a note", a
   await expect(page).toHaveURL(/\/supplier\?signed-in-as=buyer$/);
   await expect(page.getByText("You're signed in to your supplier account")).toBeVisible();
   await expect(page.getByText("This email isn't registered as a buyer.", { exact: false })).toBeVisible();
+});
+
+test("a new supplier confirms their email and carries on in Create a supplier account, not the shared Join", async ({
+  page,
+}) => {
+  test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
+  const email = newEmail("new-supplier");
+  await page.goto("/join/supplier");
+  await page.getByLabel("Company name or GSTIN").fill("zz-no-such-company");
+  await page.getByRole("button", { name: /Create a new company/ }).click();
+  await expect(page.getByRole("heading", { name: "Your details" })).toBeVisible();
+  await fillDetails(page, { email, name: "Pooja Nair" });
+  const sentAfter = Date.now() - 1000;
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeVisible();
+  await page.goto(await latestConfirmLink(page, email, sentAfter));
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/join\/supplier\?step=company$/);
+  await expect(page.getByText("Create a supplier account", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Company details" })).toBeVisible();
+  // The shared /join sends a signed-in supplier back to their own page too.
+  await page.goto("/join");
+  await expect(page).toHaveURL(/\/join\/supplier$/);
 });
