@@ -18,6 +18,7 @@ const MAINTENANCE_OPEN = [
   "/cms",
   "/api",
   "/sign-in",
+  "/member/sign-in",
   "/sign-out",
   "/newsletter",
   "/_next",

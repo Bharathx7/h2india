@@ -10,8 +10,12 @@ import { JoinFlow, type JoinStep } from "./JoinFlow";
 
 export const metadata: Metadata = { title: "Join · H2 India", robots: { index: false } };
 
-export default async function JoinPage({ searchParams }: { searchParams: Promise<{ step?: string }> }) {
-  const { step: wanted } = await searchParams;
+const PATHS = ["buyer", "supplier", "member"] as const;
+
+export default async function JoinPage({ searchParams }: { searchParams: Promise<{ step?: string; as?: string }> }) {
+  const { step: wanted, as } = await searchParams;
+  // ?as= (For Buyers, For Members) picks the first step's option; the person can still change it.
+  const preferred = PATHS.find((p) => p === as) ?? null;
   const session = await getSession();
   const draft = await readDraft(await draftToken());
 
@@ -36,6 +40,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
     <JoinFlow
       initialStep={step}
       kind={kind}
+      preferred={preferred}
       signedInEmail={session?.user.email ?? null}
       draft={{
         path: draft?.path ?? null,

@@ -22,6 +22,8 @@ interface Problem {
 }
 
 const OFFER_COOKIE = "h2_passkey_offer";
+/** Where the member sign-in page goes when no page sent the person there. */
+const MEMBER_HOME = "/member";
 const OFFER_LATER_DAYS = 30;
 
 const linkButton = "cursor-pointer";
@@ -78,6 +80,7 @@ export function SignInFlow({
   initialError,
   staffOnly = false,
   signedInElsewhere = false,
+  member = false,
 }: {
   next: string;
   initialError?: Problem;
@@ -85,6 +88,8 @@ export function SignInFlow({
   staffOnly?: boolean;
   /** Admin domain, already signed in as someone who isn't staff: only Sign out is offered. */
   signedInElsewhere?: boolean;
+  /** The member sign-in page (public QC, 16 Nov 2026): member wording and Join as a member. */
+  member?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("start");
@@ -98,6 +103,9 @@ export function SignInFlow({
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<"passkey" | "send" | "verify" | "google" | "create">();
   const heading = useRef<HTMLHeadingElement>(null);
+  // The other sign-in page keeps the page the person is going back to.
+  const keepNext = next !== "/" && !(member && next === MEMBER_HOME);
+  const otherSignIn = `${member ? AUTH_LINKS.signIn : AUTH_LINKS.memberSignIn}${keepNext ? `?next=${encodeURIComponent(next)}` : ""}`;
 
   // Move focus to the new heading when the step changes, so screen readers announce the new screen.
   useEffect(() => {
@@ -115,7 +123,7 @@ export function SignInFlow({
   }, [resendAt, now]);
 
   const finish = () => {
-    void whereNext(next).then((to) => {
+    void whereNext(next, member).then((to) => {
       router.replace(to);
       router.refresh();
     });
@@ -438,11 +446,18 @@ export function SignInFlow({
             For H2 India staff. Use your passkey, or a code sent to your work email.
           </p>
         </>
+      ) : member ? (
+        <>
+          <h1 className="type-h2 text-primary">Member sign in</h1>
+          <p className="type-body text-body">
+            Sign in to your member account to see your saved items, follows, alerts and Hydrogen 101 progress.
+          </p>
+        </>
       ) : (
         <>
           <h1 className="type-h2 text-primary">Sign in to H2 India</h1>
           <p className="type-body text-body">
-            One sign-in for buyers, suppliers and members. You&apos;ll come back to the page you were on.
+            For buyers and suppliers. You&apos;ll come back to the page you were on.
           </p>
         </>
       )}
@@ -501,13 +516,23 @@ export function SignInFlow({
         </TextLink>
         {staffOnly ? null : (
           <p className="flex items-center gap-1 type-body-sm text-body">
-            New to H2 India?{" "}
+            {member ? "New here?" : "New to H2 India?"}{" "}
             <TextLink asChild showIcon={false}>
-              <Link href={AUTH_LINKS.join}>Join free</Link>
+              <Link href={member ? AUTH_LINKS.joinMember : AUTH_LINKS.join}>
+                {member ? "Join as a member" : "Join free"}
+              </Link>
             </TextLink>
           </p>
         )}
       </div>
+      {staffOnly ? null : (
+        <p className="flex flex-wrap items-center gap-1 border-t border-default pt-4 type-body-sm text-body">
+          {member ? "Buyer or supplier?" : "Member?"}{" "}
+          <TextLink asChild showIcon={false}>
+            <Link href={otherSignIn}>{member ? "Sign in here" : "Member sign in"}</Link>
+          </TextLink>
+        </p>
+      )}
     </AuthCard>
   );
 }

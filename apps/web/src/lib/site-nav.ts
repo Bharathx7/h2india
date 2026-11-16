@@ -16,13 +16,31 @@ export const SITE_LINKS: SiteLinks = {
   account: "/account",
   signOut: "/sign-out",
   secondary: [
+    // Public QC, 16 Nov 2026: For Members sits between For Buyers and For Suppliers.
     { label: "For Buyers", href: "/for-buyers" },
+    { label: "For Members", href: "/for-members" },
     { label: "For Suppliers", href: "/for-suppliers" },
     { label: "Pricing", href: "/pricing" },
     { label: "Advertise", href: "/advertise" },
     { label: "Newsletter", href: "/newsletter" },
   ],
 };
+
+/** The Directory is for signed-in people only (public QC, 16 Nov 2026): every /directory page asks visitors to sign in. */
+export const DIRECTORY_PREFIX = "/directory";
+
+const isDirectoryLink = (href: string) =>
+  href === DIRECTORY_PREFIX || href.startsWith(`${DIRECTORY_PREFIX}/`) || href.startsWith(`${DIRECTORY_PREFIX}?`);
+
+/** The mega menus a visitor sees: without the Directory menu when nobody is signed in. */
+export function menusFor(menus: MegaSection[], signedIn: boolean): MegaSection[] {
+  return signedIn ? menus : menus.filter((m) => m.id !== "directory");
+}
+
+/** The footer columns a visitor sees: without Directory links when nobody is signed in. */
+export function footerFor(columns: FooterColumn[], signedIn: boolean): FooterColumn[] {
+  return signedIn ? columns : columns.map((c) => ({ ...c, links: c.links.filter((l) => !isDirectoryLink(l.href)) }));
+}
 
 export const MEGA_MENUS: MegaSection[] = [
   {
@@ -263,6 +281,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     heading: "For business",
     links: [
       { label: "For Buyers", href: "/for-buyers" },
+      { label: "For Members", href: "/for-members" },
       { label: "For Suppliers", href: "/for-suppliers" },
       { label: "Pricing", href: "/pricing" },
       { label: "Verification criteria", href: "/verification" },

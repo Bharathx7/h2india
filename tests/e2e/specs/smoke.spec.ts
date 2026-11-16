@@ -26,10 +26,17 @@ test("route group /sign-in loads its page", async ({ page }) => {
   await page.goto("/sign-in");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
 });
-for (const path of ["/buyer", "/supplier", "/member", "/admin"] as const) {
+for (const path of ["/buyer", "/supplier", "/admin"] as const) {
   test(`route group ${path} asks a signed-out visitor to sign in`, async ({ page }) => {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`/sign-in\\?next=(%2F|/)${path.slice(1)}`));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
   });
 }
+
+// Public QC, 16 Nov 2026: members have their own sign-in page.
+test("route group /member asks a signed-out visitor to sign in on the member page", async ({ page }) => {
+  await page.goto("/member");
+  await expect(page).toHaveURL(/\/member\/sign-in$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Member sign in");
+});

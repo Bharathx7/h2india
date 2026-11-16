@@ -14,9 +14,10 @@ import type { MegaSection, SiteLinks, SiteUser } from "./types";
 /* Figma "Site header" (25:635, frames 372:15391 to 372:16409): top strip, main bar (logo, search trigger,
    actions) and section nav with six mega menus. Logged in swaps Sign in and List your company for
    notifications, the workspace switcher and the avatar. The Header shadow appears once the page scrolls.
-   Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026: on desktop, once the page
-   has scrolled past the top strip and section nav, only the main bar stays at the top; both rows come back at the
-   top of the page, while a menu is open and while keyboard focus is in the header. Desktop from 1024 px; below that the mobile header and
+   Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026, revised 16 Nov 2026: on
+   desktop, scrolling down past the top strip and section nav hides them and leaves the main bar; scrolling up
+   (any amount) brings both back at once, with no click needed. They also show at the top of the page, while a menu
+   is open and while keyboard focus is in the header. Desktop from 1024 px; below that the mobile header and
    full-screen menu (decision M17). The language selector stays hidden (decision M15). */
 
 export interface SiteHeaderProps {
@@ -353,19 +354,38 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
   );
 }
 
-/** Desktop top strip (h-9) plus section nav (1 px border and h-12): scrolled past these, only the main bar stays. */
+/** Desktop top strip (h-9) plus section nav (1 px border and h-12): scrolled past these, the rows may hide. */
 const COLLAPSE_AFTER_PX = 36 + 1 + 48;
+/** Ignore scroll jitter smaller than this (trackpads report tiny back-and-forth moves). */
+const SCROLL_JITTER_PX = 4;
+
+/**
+ * Whether the top strip and section nav hide after a scroll from `last` to `y`: hidden while scrolling down past
+ * the rows, shown again on any scroll up and always near the top. `wasHidden` is kept for moves within the jitter.
+ */
+export function rowsHidden(last: number, y: number, wasHidden: boolean): boolean {
+  if (y <= COLLAPSE_AFTER_PX) return false;
+  if (y > last + SCROLL_JITTER_PX) return true;
+  if (y < last - SCROLL_JITTER_PX) return false;
+  return wasHidden;
+}
 
 export function SiteHeader(props: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [pastRows, setPastRows] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const collapsed = pastRows && !focusWithin && !menuOpen;
+  const collapsed = hidden && !focusWithin && !menuOpen;
+  const lastY = useRef(0);
+  const hiddenNow = useRef(false);
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 0);
-      setPastRows(window.scrollY > COLLAPSE_AFTER_PX);
+      const y = window.scrollY;
+      setScrolled(y > 0);
+      hiddenNow.current = rowsHidden(lastY.current, y, hiddenNow.current);
+      setHidden(hiddenNow.current);
+      // Remember the position only once it moved beyond the jitter, so slow scrolling still counts.
+      if (Math.abs(y - lastY.current) > SCROLL_JITTER_PX || y <= COLLAPSE_AFTER_PX) lastY.current = y;
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

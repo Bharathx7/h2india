@@ -18,12 +18,14 @@ export type JoinStep = "path" | "find" | "details" | "company";
 export function JoinFlow(props: {
   initialStep: JoinStep;
   kind: "buyer" | "supplier" | null;
+  /** The option a link asked for (?as=), ahead of a saved draft's choice. */
+  preferred?: JoinPath | null;
   signedInEmail: string | null;
   draft: DetailsDraft & { path: JoinPath | null };
 }) {
   const router = useRouter();
   const [step, setStep] = useState<JoinStep>(props.initialStep);
-  const [path, setPath] = useState<JoinPath>(props.draft.path ?? props.kind ?? "buyer");
+  const [path, setPath] = useState<JoinPath>(props.kind ?? props.preferred ?? props.draft.path ?? "buyer");
   const [busy, setBusy] = useState(false);
   const card = useRef<HTMLDivElement>(null);
   const first = useRef(true);

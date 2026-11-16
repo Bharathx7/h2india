@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cx } from "@h2india/ui";
+import { siteViewer } from "@/server/site";
 import { main, PageHead, wrap } from "@/trust/parts";
 
 // Sitemap (742:1338): every section of H2 India in one place, as drawn. The machine sitemap is /sitemap.xml.
+// The Directory group shows only to signed-in people (public QC, 16 Nov 2026).
 
 export const metadata: Metadata = {
   title: "Sitemap · H2 India",
@@ -85,6 +87,7 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
     title: "For business",
     links: [
       ["For buyers", "/for-buyers"],
+      ["For members", "/for-members"],
       ["For suppliers", "/for-suppliers"],
       ["Pricing", "/pricing"],
       ["Verification criteria", "/verification"],
@@ -121,13 +124,15 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
     title: "Account",
     links: [
       ["Sign in", "/sign-in"],
+      ["Member sign in", "/member/sign-in"],
       ["Join", "/join"],
       ["Forgot access", "/forgot-access"],
     ],
   },
 ];
 
-export default function SitemapPage() {
+export default async function SitemapPage() {
+  const groups = (await siteViewer()) ? GROUPS : GROUPS.filter((g) => g.title !== "Directory");
   return (
     <main id="main" className={main}>
       <PageHead
@@ -136,7 +141,7 @@ export default function SitemapPage() {
         lead="Every section of H2 India in one place."
       />
       <div className={cx(wrap, "grid grid-cols-2 gap-x-6 gap-y-10 pt-8 md:grid-cols-3 lg:grid-cols-5")}>
-        {GROUPS.map((g) => (
+        {groups.map((g) => (
           <nav key={g.title} aria-label={g.title} className="flex flex-col gap-2">
             <h2 className="type-eyebrow text-secondary">{g.title}</h2>
             {g.links.map(([label, href]) => (

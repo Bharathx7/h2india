@@ -11,7 +11,7 @@ import { shellFor } from "@/server/workspace";
 /** The signed-in member, or a trip to sign in that comes back here. */
 export async function requireMember(path: string): Promise<string> {
   const session = await getSession();
-  if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
+  if (!session) redirect(`/member/sign-in?next=${encodeURIComponent(path)}`);
   return session.user.id;
 }
 
