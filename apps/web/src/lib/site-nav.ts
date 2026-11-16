@@ -1,6 +1,7 @@
 import { APPLICATIONS, PRODUCT_CLASSES } from "@h2india/core/catalogue";
 import type { PublicCatalogue } from "@h2india/core/catalogue/taxonomy";
-import type { FooterColumn, MegaSection, SiteLinks } from "@h2india/ui";
+import type { FooterColumn, MegaPromo, MegaSection, SiteLinks } from "@h2india/ui";
+import { dayMonthYear } from "../news/format";
 
 // Site header, mega menus and footer from Figma (Site header 25:635, Mega menu 369:7387, Footer v2 153:179).
 // Labels are the design's. Live parts (category counts, the sponsored supplier, the tracker figure, upcoming
@@ -163,7 +164,7 @@ export const MEGA_MENUS: MegaSection[] = [
       { label: "Reports", href: "/knowledge/reports" },
       { label: "Videos & podcasts", href: "/knowledge/media" },
     ],
-    // The tracker figure promo comes from the tracker data, with its date and source.
+    // The card is filled per request by knowledgePromo(): a tracker figure with its source and date, else Hydrogen 101.
     promo: null,
   },
   {
@@ -193,26 +194,56 @@ export const MEGA_MENUS: MegaSection[] = [
  * categories, and the visible applications. The site layout calls this on each request, so a category an operator
  * adds or hides in admin Catalogue shows or disappears in the menu at once.
  */
-export function menusWithCatalogue(cat: PublicCatalogue): MegaSection[] {
+/** One published India Hydrogen Tracker figure (the tracker-overview setting): always with its source and date. */
+export interface TrackerFigure {
+  value: string;
+  label: string;
+  source: string;
+  asOf: string;
+}
+
+/**
+ * The card on the right of the Knowledge menu (public QC, 16 Nov 2026: it was empty). The first published tracker
+ * figure, with its source and as-of date; until one is published (or for a sample), the Hydrogen 101 starting point.
+ */
+export function knowledgePromo(figure: TrackerFigure | null): MegaPromo {
+  if (figure?.value.trim() && figure.source.trim() && figure.asOf)
+    return {
+      eyebrow: "India Hydrogen Tracker",
+      title: `${figure.value} ${figure.label}`,
+      text: `${figure.source} · as of ${dayMonthYear(figure.asOf)}`,
+      action: { label: "Open the tracker", href: "/tracker", style: "arrow" },
+    };
+  return {
+    eyebrow: "Start here",
+    title: "Hydrogen 101",
+    text: "The basics of green hydrogen, chapter by chapter.",
+    action: { label: "Start learning", href: "/knowledge/hydrogen-101", style: "button" },
+  };
+}
+
+export function menusWithCatalogue(cat: PublicCatalogue, trackerFigure: TrackerFigure | null = null): MegaSection[] {
   return MEGA_MENUS.map((m) =>
-    m.id !== "marketplace"
-      ? m
-      : {
-          ...m,
-          classes: cat.classes.map((c) => ({
-            id: c.id,
-            label: c.label,
-            href: `/marketplace/${c.id}`,
-            count: c.categories.length,
-            categories: c.categories
-              .slice(0, 8)
-              .map((x) => ({ label: x.label, href: `/marketplace/${c.id}/${x.slug}` })),
-          })),
-          applications: cat.applications.map((a) => ({
-            label: a.shortLabel,
-            href: `/marketplace/applications/${a.id}`,
-          })),
-        },
+    m.id === "knowledge"
+      ? { ...m, promo: knowledgePromo(trackerFigure) }
+      : m.id !== "marketplace"
+        ? m
+        : {
+            ...m,
+            classes: cat.classes.map((c) => ({
+              id: c.id,
+              label: c.label,
+              href: `/marketplace/${c.id}`,
+              count: c.categories.length,
+              categories: c.categories
+                .slice(0, 8)
+                .map((x) => ({ label: x.label, href: `/marketplace/${c.id}/${x.slug}` })),
+            })),
+            applications: cat.applications.map((a) => ({
+              label: a.shortLabel,
+              href: `/marketplace/applications/${a.id}`,
+            })),
+          },
   );
 }
 

@@ -15,6 +15,9 @@ export const serverEnvSchema = z.object({
   /** Where the worker reaches the web app for scheduled work (step 1.7), e.g. http://web-public:3000 inside Docker.
    * Falls back to APP_URL. Links in messages always use APP_URL. */
   INTERNAL_WEB_URL: optionalUrl,
+  /** Which sign-in this app serves (public QC, 16 Nov 2026): "admin" on the admin domain signs in H2 India staff
+   * only, "public" on the public domain, "both" when one app serves everything (local development and tests). */
+  SITE_ROLE: z.enum(["both", "public", "admin"]).default("both"),
   AUTH_SECRET: secret(32),
   // Google sign-in (step 3.2). Without both values the Google button reports that it is not set up yet.
   /** Who is told when an alarm starts failing (step 13.3): one address or several, comma-separated. Unset: nobody. */

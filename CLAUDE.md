@@ -66,6 +66,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - The one Better Auth setup is `packages/core/src/sign-in/auth.ts`; the web app adds only its cookie plugin (`apps/web/src/server/auth.ts`). Our extra rules (pause, per-email limits, tries left) are hooks in `hooks.ts`.
 - Numbers live in `SIGN_IN` (`@h2india/core/sign-in`, decision A2). Never repeat them in pages.
 - After sign-in, send people only to `safeReturnPath(next)`.
+- The admin domain signs in H2 India staff only: `SITE_ROLE=admin` on web-admin, `public` on web-public, `both` (default) locally; the rule is `siteSignIn()` and `whereNext()` applies it. Never add buyer, supplier or member sign-in wording to the admin domain.
+- The header's Account and the workspace's Profile open `/account`; personal settings link from there.
 - Browser test specs import `test` and `expect` from `tests/e2e/fixtures.ts`, never `@playwright/test` directly: page loads there wait for `<html data-hydrated>` (`HydrationMark` in the root layout) before a test types or clicks, and windows a test opens itself get their own IP. Call `hydrated(page)` after a full page load the fixture can't see (a plain link click) before filling a form.
 - Browser tests read sign-in codes from Mailpit (`MAILPIT_URL`) and give each test its own IP with `ownIp()` (`tests/e2e/helpers/sign-in.ts`), so per-IP limits do not leak between tests.
 - A test that needs an existing person signs in with `signInExisting()` (`tests/e2e/helpers/rfq.ts`), which waits out the passkey offer and the redirect; rows inserted by SQL give `id` with `gen_random_uuid()` (ids are made in the app, not by the database), and users made by SQL set `profile_type`, or sign-in sends them to Join.
@@ -338,6 +340,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 `transactions` is **off** (Batch 6 on hold). Every cart, checkout, order, payment and payout route calls `requireFlag("transactions")` on the server; hiding a button is not enough.
 
 `comingSoon` (FLAG_COMING_SOON) is **off**. When on, every public page shows the Coming soon page except to signed-in operators and the emails on the Pre-launch allow-list (A44); newsletter pages stay reachable so pre-launch sign-ups can confirm.
+
+`buyerChecklist` (FLAG_BUYER_CHECKLIST, also a System settings switch) is **off**: buyers go straight to their dashboard; when on, the five-step checklist shows until done.
 
 `sampleContent` (FLAG_SAMPLE_CONTENT) is **off** by default (F9, A37). Content with `sample` ticked is shown only when it is on (local, staging). Collections with a sample field use `publicOrEditor` and `refuseSamplePublish` from `cms/sample.ts`; Local API reads for readers use `publicWhere()`.
 

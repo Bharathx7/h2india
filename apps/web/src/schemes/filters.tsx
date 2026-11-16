@@ -29,6 +29,8 @@ function useFilters() {
   const params = useSearchParams();
   const go = (next: URLSearchParams) => {
     next.delete("show");
+    next.delete("page");
+    next.delete("perPage");
     const q = next.toString();
     router.push(q ? `${path}?${q}#all` : `${path}#all`, { scroll: false });
   };

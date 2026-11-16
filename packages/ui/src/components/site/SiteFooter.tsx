@@ -111,7 +111,7 @@ export function SiteFooter({
   const shownSocial = SOCIAL.filter((s) => social[s.key]);
   return (
     <footer className="relative overflow-hidden border-t border-default bg-page">
-      <div className="mx-auto grid max-w-300 grid-cols-1 gap-10 px-6 pt-12 pb-8 lg:grid-cols-[320px_1fr] lg:gap-16">
+      <div className="mx-auto grid max-w-300 grid-cols-1 gap-10 px-4 pt-12 pb-8 md:px-6 lg:grid-cols-[320px_1fr] lg:gap-16 xl:px-0">
         <div className="flex flex-col gap-5">
           <a href={homeHref} aria-label="H2 India home" className="self-start rounded-control">
             <Logo title="" />
@@ -147,7 +147,7 @@ export function SiteFooter({
         </p>
       </div>
       <div className="border-t border-default">
-        <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-4 px-6 py-5">
+        <div className="mx-auto flex max-w-300 flex-wrap items-center justify-between gap-4 px-4 py-5 md:px-6 xl:px-0">
           <p className="type-caption text-secondary">
             © {new Date().getFullYear()} H2 India · Made for India&apos;s hydrogen economy
           </p>

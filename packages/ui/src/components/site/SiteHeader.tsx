@@ -75,7 +75,7 @@ function Desktop({
   return (
     <div className="hidden lg:block">
       <div className={cx("bg-subtle", collapsed && "hidden")}>
-        <div className="mx-auto flex h-9 max-w-300 items-center justify-between px-6">
+        <div className="mx-auto flex h-9 max-w-300 items-center justify-between px-6 xl:px-0">
           <p className="type-caption text-secondary">{tagline}</p>
           <ul className="flex items-center gap-6">
             {links.secondary.map((l) => (
@@ -88,7 +88,7 @@ function Desktop({
           </ul>
         </div>
       </div>
-      <div className="mx-auto flex h-19 max-w-300 items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex h-19 max-w-300 items-center justify-between gap-6 px-6 xl:px-0">
         <div className="flex min-w-0 flex-1 items-center gap-8">
           <a href={links.home} aria-label="H2 India home" className="shrink-0 rounded-control">
             <Logo title="" />
@@ -102,7 +102,6 @@ function Desktop({
           >
             <Icon name="search" size={20} className="text-icon-secondary" />
             <span className="flex-1 truncate type-body text-secondary">Search products, companies, news, schemes</span>
-            <kbd className="rounded-control bg-subtle px-2 type-spec text-secondary">/</kbd>
           </button>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -128,13 +127,16 @@ function Desktop({
                   </span>
                 ) : null}
               </span>
+              {/* Public QC, 16 Nov 2026: a link to the workspace, so it no longer carries a menu arrow. */}
               <a
                 href={user.workspaceHref}
                 className="flex h-8.5 items-center gap-2 rounded-pill border border-default py-1 pr-3 pl-1 hover:border-hover"
               >
                 <span className="rounded-pill bg-tint px-2 py-1 type-label-sm text-primary">{user.workspace}</span>
-                <span className="max-w-40 truncate type-label text-primary">{user.organisation}</span>
-                <Icon name="chevron-down" size={16} className="text-icon-primary" />
+                <span className="max-w-40 truncate type-label text-primary">
+                  {user.organisation || `${user.workspace} workspace`}
+                </span>
+                <Icon name="arrow-right" size={16} className="text-icon-primary" />
               </a>
               <Menu>
                 <MenuTrigger
@@ -177,7 +179,7 @@ function Desktop({
         </div>
       </div>
       <div ref={navRef} onBlur={onBlur} className={cx("relative border-t border-default", collapsed && "hidden")}>
-        <nav aria-label="Main" className="mx-auto flex h-12 max-w-300 items-center gap-1 px-3">
+        <nav aria-label="Main" className="mx-auto flex h-12 max-w-306 items-center gap-1 px-3 xl:px-0">
           {sections.map((s) => (
             <button
               key={s.id}
@@ -225,7 +227,7 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
   const [expanded, setExpanded] = useState<string | null>(sections[0]?.id ?? null);
   return (
     <RDialog.Root>
-      <div className="flex h-16 items-center justify-between border-b border-default px-4 lg:hidden">
+      <div className="flex h-16 items-center justify-between border-b border-default px-4 md:px-6 lg:hidden">
         <a href={links.home} aria-label="H2 India home" className="rounded-control">
           <Logo title="" />
         </a>
@@ -372,7 +374,7 @@ export function SiteHeader(props: SiteHeaderProps) {
     };
   }, []);
   useEffect(() => {
-    // "/" opens search, as the hint in the search trigger says (not while typing in a field).
+    // "/" still opens search (not while typing in a field); its badge in the search trigger was removed, 16 Nov 2026.
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (

@@ -13,7 +13,8 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { buildFeed } from "@/member/feed";
 
 // Buyer home (step 9.1): the onboarding checklist (553:8; phones 555:15) until all five steps are done, then the
-// dashboard (554:8; phones 555:445; first use 554:483). Quote, order and spend figures fill in from steps 9.2 to 10.
+// dashboard (554:8; phones 555:445; first use 554:483). Public QC, 16 Nov 2026: the checklist shows only while the
+// buyerChecklist switch is on (off by default), so buyers go straight to the dashboard until the steps are chosen. Quote, order and spend figures fill in from steps 9.2 to 10.
 export const metadata: Metadata = { title: "Buyer · H2 India", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function BuyerHome() {
     listAlerts(db, page.userId),
     buildFeed(page.userId),
   ]);
-  if (!checklist.complete) {
+  if (isEnabled("buyerChecklist") && !checklist.complete) {
     const next = checklist.items.findIndex((i) => i.state === "todo");
     return (
       <BuyerWorkspace page={page} current="/buyer">

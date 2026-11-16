@@ -1,10 +1,21 @@
-import { Alert, ArrowLink, Breadcrumbs, Button, buttonClasses, cx, EmptyState, SchemeCard } from "@h2india/ui";
+import {
+  Alert,
+  ArrowLink,
+  Breadcrumbs,
+  Button,
+  buttonClasses,
+  cx,
+  EmptyState,
+  Pagination,
+  SchemeCard,
+} from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BENEFIT_TYPES } from "@/cms/records/eligibility";
 import { STATE_OPTIONS } from "@/cms/records/common";
 import { forcedState } from "@/lib/dev-state";
+import { LIST_PER_PAGE, pageSlice, pagingQuery } from "@/lib/paging";
 import { allSchemes, schemeView, stateLabel, type SchemeView } from "@/schemes/data";
 import { ActiveFilters, SchemeFilters, SortSelect } from "@/schemes/filters";
 import { wrap } from "@/news/parts";
@@ -23,7 +34,6 @@ export const dynamic = "force-dynamic";
 
 /** "Closing soon" on the hub lists deadlines in the next 14 days, as drawn (411:9). */
 const CLOSING_WINDOW_DAYS = 14;
-const PAGE = 6;
 const DAY = 86_400_000;
 const STATUSES = ["Open", "Closing soon", "Announced", "Results declared", "Next round expected", "Closed"];
 
@@ -199,7 +209,6 @@ async function Hub({ params, forced }: { params: Params; forced: ReturnType<type
   const benefits = all(params.benefit);
   const statuses = all(params.status);
   const sort = one(params.sort);
-  const show = Math.max(PAGE, Math.floor(Number(one(params.show))) || PAGE);
   const byId = new Map(schemes.map((s) => [s.id, s]));
   let list = views.filter((v) => {
     if (level === "central" && !v.central) return false;
@@ -225,6 +234,7 @@ async function Hub({ params, forced }: { params: Params; forced: ReturnType<type
     return (a.deadlineAt ?? "9999").localeCompare(b.deadlineAt ?? "9999");
   });
   if (forced === "empty") list = [];
+  const shown = pageSlice(list, params.page);
   const chips = [
     ...(q ? [{ name: "q", value: q, label: `Search: ${q}` }] : []),
     ...(level ? [{ name: "level", value: level, label: `Level: ${level === "central" ? "Central" : "State"}` }] : []),
@@ -241,8 +251,6 @@ async function Hub({ params, forced }: { params: Params; forced: ReturnType<type
     benefits: BENEFIT_TYPES,
     statuses: STATUSES.filter((s) => views.some((v) => v.status.label === s)),
   };
-  const moreQuery = new URLSearchParams(queryOf(params).slice(1));
-  moreQuery.set("show", String(show + PAGE));
 
   return (
     <>
@@ -286,15 +294,15 @@ async function Hub({ params, forced }: { params: Params; forced: ReturnType<type
           <ActiveFilters chips={chips} />
           {list.length ? (
             <>
-              <Cards items={list.slice(0, show)} />
-              {list.length > show ? (
-                <Link
-                  href={`/opportunities/schemes?${moreQuery.toString()}#all`}
-                  scroll={false}
-                  className={cx(buttonClasses({ variant: "outline" }), "w-full")}
-                >
-                  Show {Math.min(PAGE, list.length - show)} more schemes
-                </Link>
+              <Cards items={shown.items} />
+              {shown.total > LIST_PER_PAGE ? (
+                <Pagination
+                  page={shown.page}
+                  perPage={LIST_PER_PAGE}
+                  total={shown.total}
+                  perPageOptions={[LIST_PER_PAGE]}
+                  query={pagingQuery(params)}
+                />
               ) : null}
             </>
           ) : (
