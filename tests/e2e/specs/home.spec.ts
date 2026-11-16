@@ -128,7 +128,8 @@ test.describe("motion", () => {
     const strip = page.getByTestId("logo-marquee");
     if ((await strip.count()) > 0) {
       await expect(strip).toHaveAttribute("data-paused", "false");
-      await strip.hover();
+      // The strip itself keeps moving, so hover its still frame (which holds the strip).
+      await strip.locator("xpath=..").hover();
       await expect(strip).toHaveAttribute("data-paused", "true");
     }
   });

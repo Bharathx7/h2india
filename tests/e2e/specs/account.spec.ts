@@ -22,7 +22,8 @@ test("Account in the avatar menu opens the Account page", async ({ page, isMobil
   await page.getByRole("menuitem", { name: "Account" }).click();
   await expect(page).toHaveURL(/\/account$/);
   await expect(page.getByRole("heading", { level: 1, name: "Account" })).toBeVisible();
-  await expect(page.getByText(email)).toBeVisible();
+  // A person who hasn't joined yet has no name, so the header shows the email too: look in Your details only.
+  await expect(page.getByRole("region", { name: "Your details" }).getByText(email).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Notification settings" })).toHaveAttribute(
     "href",
     "/notifications?tab=email",
