@@ -34,6 +34,27 @@ export const DIRECTORY_PREFIX = "/directory";
 const isDirectoryLink = (href: string) =>
   href === DIRECTORY_PREFIX || href.startsWith(`${DIRECTORY_PREFIX}/`) || href.startsWith(`${DIRECTORY_PREFIX}?`);
 
+/**
+ * Request a quote is for buyers (public QC 4, 16 Nov 2026): only a buyer company can send a quote request. Signed-out
+ * visitors still see it (sign-in or sign-up comes first); signed-in suppliers, members and staff don't.
+ */
+export function canRequestQuote(user: { workspaceHref: string } | null): boolean {
+  return user === null || user.workspaceHref === "/buyer";
+}
+
+const isQuoteLink = (href: string) =>
+  href === SITE_LINKS.requestQuote || href.startsWith(`${SITE_LINKS.requestQuote}?`);
+
+/** The mega menus without Request a quote, for signed-in people who aren't buyers. */
+export function menusWithoutQuote(menus: MegaSection[]): MegaSection[] {
+  return menus.map((m) => (m.tools ? { ...m, tools: m.tools.filter((t) => !isQuoteLink(t.href)) } : m));
+}
+
+/** The footer without Request a quote, for signed-in people who aren't buyers. */
+export function footerWithoutQuote(columns: FooterColumn[]): FooterColumn[] {
+  return columns.map((c) => ({ ...c, links: c.links.filter((l) => !isQuoteLink(l.href)) }));
+}
+
 /** The mega menus a visitor sees: without the Directory menu when nobody is signed in. */
 export function menusFor(menus: MegaSection[], signedIn: boolean): MegaSection[] {
   return signedIn ? menus : menus.filter((m) => m.id !== "directory");

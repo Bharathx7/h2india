@@ -2,7 +2,17 @@
 
 import { SiteFooter, SiteHeader, type MegaSection, type SiteUser } from "@h2india/ui";
 import type { ReactNode } from "react";
-import { FOOTER_COLUMNS, MEGA_MENUS, SITE_LINKS, footerFor, menusFor } from "@/lib/site-nav";
+import {
+  canRequestQuote,
+  FOOTER_COLUMNS,
+  footerFor,
+  footerWithoutQuote,
+  MEGA_MENUS,
+  menusFor,
+  menusWithoutQuote,
+  SITE_LINKS,
+} from "@/lib/site-nav";
+import { SiteBell } from "./SiteBell";
 import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { subscribeToNewsletter } from "@/server/public-forms";
 import { Analytics } from "@/consent/Analytics";
@@ -33,6 +43,10 @@ export function SiteChrome({
   children: ReactNode;
 }) {
   const search = useHeaderSearch();
+  // Request a quote is for buyers and signed-out visitors (public QC 4).
+  const quote = canRequestQuote(user);
+  const sections = menusFor(quote ? menus : menusWithoutQuote(menus), user !== null);
+  const columns = footerFor(quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS), user !== null);
   return (
     <>
       <a
@@ -42,7 +56,9 @@ export function SiteChrome({
         Skip to content
       </a>
       <SiteHeader
-        sections={menusFor(menus, user !== null)}
+        sections={sections}
+        showRequestQuote={quote}
+        notifications={user ? <SiteBell unread={user.unread} /> : undefined}
         links={SITE_LINKS}
         tagline="India's hydrogen ecosystem platform"
         user={user}
@@ -53,7 +69,7 @@ export function SiteChrome({
       <HeaderSearch search={search} />
       {children}
       <SiteFooter
-        columns={footerFor(FOOTER_COLUMNS, user !== null)}
+        columns={columns}
         topics={Object.keys(FOOTER_TOPICS)}
         onSubscribe={async (email, topics) => {
           const result = await subscribeToNewsletter({

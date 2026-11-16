@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as RDialog } from "radix-ui";
-import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
+import { useEffect, useId, useRef, useState, type FocusEvent, type ReactNode } from "react";
 import { Logo } from "../../brand/Logo";
 import { Icon } from "../../icons/Icon";
 import { cx } from "../../lib/cx";
@@ -27,6 +27,19 @@ export interface SiteHeaderProps {
   onOpenSearch: () => void;
   /** "India's hydrogen ecosystem platform" */
   tagline?: string;
+  /** The bell with its drop-down panel (public QC 4); without it the bell links to the Notifications page. */
+  notifications?: ReactNode;
+  /** Request a quote is for buyers and signed-out visitors (public QC 4); false hides the button. */
+  showRequestQuote?: boolean;
+}
+
+/** The person's role as a plain badge, not a link (public QC 4, 16 Nov 2026). */
+function RoleBadge({ user }: { user: SiteUser }) {
+  return (
+    <span className="rounded-pill bg-tint px-2.5 py-1 type-label-sm text-primary" data-testid="role-badge">
+      {user.workspace}
+    </span>
+  );
 }
 
 function Desktop({
@@ -35,6 +48,8 @@ function Desktop({
   user,
   onOpenSearch,
   tagline,
+  notifications,
+  showRequestQuote = true,
   collapsed,
   onMenuChange,
 }: SiteHeaderProps & { collapsed: boolean; onMenuChange: (open: boolean) => void }) {
@@ -106,39 +121,34 @@ function Desktop({
           </button>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <a href={links.requestQuote} className={buttonClasses({ variant: "outline" })}>
-            Request a quote
-          </a>
+          {showRequestQuote ? (
+            <a href={links.requestQuote} className={buttonClasses({ variant: "outline" })}>
+              Request a quote
+            </a>
+          ) : null}
+          {user && notifications ? notifications : null}
+          {user && !notifications ? (
+            <span className="relative inline-flex">
+              <a
+                href={links.notifications}
+                aria-label={user.unread ? `Notifications, ${String(user.unread)} unread` : "Notifications"}
+                className="inline-flex size-10 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus hover:bg-subtle"
+              >
+                <Icon name="bell" size={18} />
+              </a>
+              {user.unread ? (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-1 -right-1 rounded-pill bg-accent px-1 type-label-sm text-primary"
+                >
+                  {user.unread}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
           {user ? (
             <>
-              <span className="relative inline-flex">
-                <a
-                  href={links.notifications}
-                  aria-label={user.unread ? `Notifications, ${String(user.unread)} unread` : "Notifications"}
-                  className="inline-flex size-10 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus hover:bg-subtle"
-                >
-                  <Icon name="bell" size={18} />
-                </a>
-                {user.unread ? (
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -top-1 -right-1 rounded-pill bg-accent px-1 type-label-sm text-primary"
-                  >
-                    {user.unread}
-                  </span>
-                ) : null}
-              </span>
-              {/* Public QC, 16 Nov 2026: a link to the workspace, so it no longer carries a menu arrow. */}
-              <a
-                href={user.workspaceHref}
-                className="flex h-8.5 items-center gap-2 rounded-pill border border-default py-1 pr-3 pl-1 hover:border-hover"
-              >
-                <span className="rounded-pill bg-tint px-2 py-1 type-label-sm text-primary">{user.workspace}</span>
-                <span className="max-w-40 truncate type-label text-primary">
-                  {user.organisation || `${user.workspace} workspace`}
-                </span>
-                <Icon name="arrow-right" size={16} className="text-icon-primary" />
-              </a>
+              <RoleBadge user={user} />
               <Menu>
                 <MenuTrigger
                   aria-label={`Account: ${user.name}`}
@@ -147,13 +157,14 @@ function Desktop({
                   {user.initials}
                 </MenuTrigger>
                 <MenuContent>
+                  {/* Public QC 4: Dashboard opens the person's own workspace; Account is Profile inside it. */}
                   <MenuItem
-                    icon="user"
+                    icon="layout-dashboard"
                     onSelect={() => {
-                      window.location.assign(links.account);
+                      window.location.assign(user.workspaceHref);
                     }}
                   >
-                    Account
+                    Dashboard
                   </MenuItem>
                   <MenuDivider />
                   <MenuItem
@@ -224,7 +235,7 @@ function Desktop({
   );
 }
 
-function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
+function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }: SiteHeaderProps) {
   const [expanded, setExpanded] = useState<string | null>(sections[0]?.id ?? null);
   return (
     <RDialog.Root>
@@ -254,16 +265,24 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
             {user ? (
               <div className="mb-4 flex flex-col gap-3 border-b border-default pb-4">
-                <a href={user.workspaceHref} className="flex items-center gap-3 rounded-control">
+                {/* Public QC 4: who is signed in, with the role as a plain badge; Dashboard and Sign out below. */}
+                <div className="flex items-center gap-3">
                   <span className="flex size-10 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
                     {user.initials}
                   </span>
-                  <span>
-                    <span className="block type-label-lg text-primary">{user.name}</span>
-                    <span className="block type-caption text-secondary">
-                      {user.organisation} · {user.workspace} workspace
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span className="block truncate type-label-lg text-primary">{user.name}</span>
+                    <span className="self-start">
+                      <RoleBadge user={user} />
                     </span>
                   </span>
+                </div>
+                <a
+                  href={user.workspaceHref}
+                  className="flex items-center gap-2 rounded-control py-2 type-label-lg text-primary"
+                >
+                  <Icon name="layout-dashboard" size={18} />
+                  Dashboard
                 </a>
                 <a
                   href={links.notifications}
@@ -273,6 +292,13 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
                   {user.unread ? (
                     <span className="rounded-pill bg-accent px-2 py-0.5 type-label-sm">{user.unread} new</span>
                   ) : null}
+                </a>
+                <a
+                  href={links.signOut}
+                  className="flex items-center gap-2 rounded-control py-2 type-label-lg text-primary"
+                >
+                  <Icon name="log-out" size={18} />
+                  Sign out
                 </a>
               </div>
             ) : null}
@@ -330,24 +356,28 @@ function Mobile({ sections, links, user, onOpenSearch }: SiteHeaderProps) {
               ))}
             </ul>
           </div>
-          <div className="flex shrink-0 flex-col gap-2 border-t border-default p-4">
-            <a
-              href={links.requestQuote}
-              className={cx(buttonClasses({ variant: user ? "primary" : "outline" }), "w-full")}
-            >
-              Request a quote
-            </a>
-            {user ? null : (
-              <div className="grid grid-cols-2 gap-2">
-                <a href={links.signIn} className={cx(buttonClasses({ variant: "ghost" }), "w-full")}>
-                  Sign in
+          {showRequestQuote || !user ? (
+            <div className="flex shrink-0 flex-col gap-2 border-t border-default p-4">
+              {showRequestQuote ? (
+                <a
+                  href={links.requestQuote}
+                  className={cx(buttonClasses({ variant: user ? "primary" : "outline" }), "w-full")}
+                >
+                  Request a quote
                 </a>
-                <a href={links.listCompany} className={cx(buttonClasses({ variant: "primary" }), "w-full")}>
-                  List your company
-                </a>
-              </div>
-            )}
-          </div>
+              ) : null}
+              {user ? null : (
+                <div className="grid grid-cols-2 gap-2">
+                  <a href={links.signIn} className={cx(buttonClasses({ variant: "ghost" }), "w-full")}>
+                    Sign in
+                  </a>
+                  <a href={links.listCompany} className={cx(buttonClasses({ variant: "primary" }), "w-full")}>
+                    List your company
+                  </a>
+                </div>
+              )}
+            </div>
+          ) : null}
         </RDialog.Content>
       </RDialog.Portal>
     </RDialog.Root>

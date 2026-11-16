@@ -112,10 +112,21 @@ export interface BellPanelProps {
   allHref: string;
   /** While the latest items load. */
   loading?: boolean;
+  /** "outline": the public site header's round bordered bell (public QC 4); the workspace top bar is plain. */
+  look?: "plain" | "outline";
 }
 
 /** The bell in the top bar with its red count, and the panel it opens (97:3168). */
-export function BellPanel({ items, unread, onMarkAllRead, onOpenChange, onOpen, allHref, loading }: BellPanelProps) {
+export function BellPanel({
+  items,
+  unread,
+  onMarkAllRead,
+  onOpenChange,
+  onOpen,
+  allHref,
+  loading,
+  look = "plain",
+}: BellPanelProps) {
   const [open, setOpen] = useState(false);
   return (
     <RPopover.Root
@@ -130,9 +141,13 @@ export function BellPanel({ items, unread, onMarkAllRead, onOpenChange, onOpen, 
           <button
             type="button"
             aria-label={unread > 0 ? `Notifications, ${String(unread)} unread` : "Notifications"}
-            className="flex size-10 items-center justify-center rounded-pill text-icon-secondary hover:bg-subtle"
+            className={
+              look === "outline"
+                ? "flex size-10 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus hover:bg-subtle"
+                : "flex size-10 items-center justify-center rounded-pill text-icon-secondary hover:bg-subtle"
+            }
           >
-            <Icon name="bell" size={22} />
+            <Icon name="bell" size={look === "outline" ? 18 : 22} />
           </button>
         </RPopover.Trigger>
         {unread > 0 ? (
