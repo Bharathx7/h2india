@@ -35,6 +35,7 @@
     "./clocks": "./src/clocks/index.ts",
     "./admin": "./src/admin/overview.ts",
     "./admin/users": "./src/admin/users.ts",
+    "./admin/companies": "./src/admin/companies.ts",
     "./admin/appeals": "./src/admin/appeals.ts",
     "./admin/system": "./src/admin/system.ts",
     "./compliance": "./src/compliance/index.ts",

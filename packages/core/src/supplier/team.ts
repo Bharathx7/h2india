@@ -6,6 +6,7 @@ import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { looksLikeEmail } from "../sign-in/rules";
 import { inScope, type Scope } from "../authz/scope";
 import { clockDuration, workingCalendar } from "../clocks/clocks";
 import { deliverEmail } from "../notify/channels";
@@ -87,8 +88,40 @@ export async function inviteMember(
   now: Date = new Date(),
 ): Promise<{ id: string; token: string }> {
   assertCan(actor, "team.manage", { organisationId });
+  return sendInvitation(
+    db,
+    {
+      organisationId,
+      email: input.email,
+      role: input.role,
+      invitedBy: actor.userId,
+      inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
+      context: input.context,
+    },
+    now,
+  );
+}
+
+/**
+ * Records an invitation and emails it (Invitation, 548:8). Callers check who may invite: a company's team.manage
+ * (inviteMember) or an operator adding a company for its owner (addSupplierByOperator, admin QC).
+ */
+export async function sendInvitation(
+  db: Database,
+  input: {
+    organisationId: string;
+    email: string;
+    role: string;
+    invitedBy: string | null;
+    /** How the email names the inviter's role, for example "Admin" or "H2 India team". */
+    inviterRole: string;
+    context?: RequestContext;
+  },
+  now: Date = new Date(),
+): Promise<{ id: string; token: string }> {
+  const organisationId = input.organisationId;
   const email = input.email.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new TeamError("Enter a full email address");
+  if (!looksLikeEmail(email)) throw new TeamError("Enter a full email address");
   const roles = await companyRoles(db, organisationId);
   const role = roles.find((r) => r.name === input.role);
   if (!role) throw new TeamError("Choose a role");
@@ -102,11 +135,11 @@ export async function inviteMember(
   const expiresAt = (await workingCalendar(db)).add(now, await clockDuration(db, "teamInvitation"));
   const [row] = await db
     .insert(inv)
-    .values({ organisationId, email, role: role.name, tokenHash: hash(token), invitedBy: actor.userId, expiresAt })
+    .values({ organisationId, email, role: role.name, tokenHash: hash(token), invitedBy: input.invitedBy, expiresAt })
     .returning({ id: inv.id });
   if (!row) throw new Error("invitation not saved");
   await audit(db, {
-    actorId: actor.userId,
+    actorId: input.invitedBy,
     action: "team.invited",
     resourceType: "invitation",
     resourceId: row.id,
@@ -117,7 +150,7 @@ export async function inviteMember(
   const [inviter] = await db
     .select({ name: u.name })
     .from(u)
-    .where(eq(u.id, actor.userId ?? ""));
+    .where(eq(u.id, input.invitedBy ?? ""));
   const [org] = await db
     .select({
       legal: schema.organisations.legalName,
@@ -139,7 +172,7 @@ export async function inviteMember(
       name: "",
       email,
       inviter: inviter?.name ?? "A colleague",
-      inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
+      inviterRole: input.inviterRole,
       company: org?.trade ?? org?.legal ?? "",
       companyLine: [org?.legal, org?.verification === "Verified" ? "verified supplier" : null, org?.city]
         .filter(Boolean)
@@ -178,10 +211,21 @@ export async function revokeInvitation(
   });
 }
 
+/** Whether a person already agreed to the Terms (through Join or an earlier invitation): the invitation page asks if not. */
+export async function agreedToTerms(db: Executor, userId: string): Promise<boolean> {
+  const [person] = await db.select({ at: u.termsAcceptedAt }).from(u).where(eq(u.id, userId));
+  return Boolean(person?.at);
+}
+
 /** What the invitation page shows before accepting. */
 export async function invitationFor(db: Executor, token: string, now: Date = new Date()) {
   const [row] = await db
-    .select({ inv, legal: schema.organisations.legalName, trade: schema.companyProfiles.tradeName })
+    .select({
+      inv,
+      legal: schema.organisations.legalName,
+      trade: schema.companyProfiles.tradeName,
+      kind: schema.organisations.kind,
+    })
     .from(inv)
     .innerJoin(schema.organisations, eq(schema.organisations.id, inv.organisationId))
     .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, inv.organisationId))
@@ -200,26 +244,53 @@ export async function invitationFor(db: Executor, token: string, now: Date = new
     role: row.inv.role,
     company: row.trade ?? row.legal,
     organisationId: row.inv.organisationId,
+    /** Where the person lands after accepting. */
+    workspace: row.kind === "buyer" ? "/buyer" : "/supplier",
     state,
   };
 }
 
-/** Accept invitation: only the signed-in person whose email it was sent to; they join with the chosen role. */
+/**
+ * Accept invitation: only the signed-in person whose email it was sent to; they join with the chosen role. Someone
+ * who never went through Join hasn't agreed to the Terms yet: they agree here (`termsVersion`, the published version
+ * shown with the checkbox), recorded as Join records it (admin QC, 16 Nov 2026).
+ */
 export async function acceptInvitation(
   db: Database,
   userId: string,
   token: string,
   context?: RequestContext,
   now: Date = new Date(),
+  opts: { termsVersion?: string } = {},
 ) {
   const found = await invitationFor(db, token, now);
   if (!found || found.state !== "open")
     throw new TeamError("This invitation can't be used any more. Ask for a new one.");
-  const [person] = await db.select({ email: u.email }).from(u).where(eq(u.id, userId));
+  const [person] = await db
+    .select({ email: u.email, termsAcceptedAt: u.termsAcceptedAt })
+    .from(u)
+    .where(eq(u.id, userId));
   if (person?.email.toLowerCase() !== found.email)
     throw new TeamError(`This invitation is for ${found.email}. Sign in with that email to accept it.`);
+  if (!person.termsAcceptedAt && !opts.termsVersion)
+    throw new TeamError("Agree to the Terms of use and Privacy policy to continue");
   await db.transaction(async (tx) => {
     await tx.update(inv).set({ acceptedAt: now }).where(eq(inv.id, found.id));
+    // Admin QC: someone invited before they had an account hasn't been through Join, so give them the company's
+    // workspace type; otherwise sign-in would keep sending them to Join.
+    const [org] = await tx
+      .select({ kind: schema.organisations.kind })
+      .from(schema.organisations)
+      .where(eq(schema.organisations.id, found.organisationId));
+    await tx
+      .update(u)
+      .set({ profileType: org?.kind === "buyer" ? "buyer" : "supplier" })
+      .where(and(eq(u.id, userId), isNull(u.profileType)));
+    if (!person.termsAcceptedAt)
+      await tx
+        .update(u)
+        .set({ termsAcceptedAt: now, termsVersion: opts.termsVersion ?? null })
+        .where(eq(u.id, userId));
     await tx
       .insert(m)
       .values({ organisationId: found.organisationId, userId, role: found.role })

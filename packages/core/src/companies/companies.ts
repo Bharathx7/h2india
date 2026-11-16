@@ -77,6 +77,11 @@ export interface CreateCompany {
   /** Required when the GST portal cannot give the legal name. */
   name?: string;
   context?: RequestContext;
+  /**
+   * Admin QC (16 Nov 2026): an operator adds the company for someone else, so `userId` is the operator and is not
+   * made a member; the owner is invited instead (`addSupplierByOperator`).
+   */
+  byOperator?: boolean;
 }
 
 interface Checked {
@@ -155,10 +160,11 @@ export async function createCompany(input: CreateCompany): Promise<{ organisatio
           checkedAt: c.pending ? null : new Date(),
         });
       }
-      await tx.insert(m).values({ organisationId, userId: input.userId, role: DEFAULT_ROLE.creator });
+      if (!input.byOperator)
+        await tx.insert(m).values({ organisationId, userId: input.userId, role: DEFAULT_ROLE.creator });
       await audit(tx, {
         actorId: input.userId,
-        action: "organisation.create",
+        action: input.byOperator ? "organisation.create_by_operator" : "organisation.create",
         resourceType: "organisation",
         resourceId: organisationId,
         companyId: organisationId,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatIstTime, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
+import { formatIstTime, looksLikeEmail, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
 
 describe("return to the page the person started from", () => {
   it("keeps a path on this site, with its query and anchor", () => {
@@ -35,6 +35,23 @@ describe("email and time helpers", () => {
 
   it("shows times in India time, as the designs do", () => {
     expect(formatIstTime(new Date("2026-11-11T16:28:00Z"))).toBe("9:58 PM");
+  });
+});
+
+describe("a plausible email address", () => {
+  it.each(["owner@example.com", "  ravi.k@plant.co.in "])("accepts %s", (v) => {
+    expect(looksLikeEmail(v)).toBe(true);
+  });
+  it.each(["", "owner", "@example.com", "owner@example", "owner@.com", "owner@com.", "a@b@c.com", "a b@c.com"])(
+    "refuses %j",
+    (v) => {
+      expect(looksLikeEmail(v)).toBe(false);
+    },
+  );
+  it("answers at once on a long crafted input", () => {
+    const start = Date.now();
+    expect(looksLikeEmail(`a@${"!.".repeat(100_000)}`)).toBe(false);
+    expect(Date.now() - start).toBeLessThan(200);
   });
 });
 
