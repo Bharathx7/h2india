@@ -26,11 +26,21 @@ test("route group /sign-in loads its page", async ({ page }) => {
   await page.goto("/sign-in");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
 });
-for (const path of ["/buyer", "/supplier", "/admin"] as const) {
-  test(`route group ${path} asks a signed-out visitor to sign in`, async ({ page }) => {
+test("route group /admin asks a signed-out visitor to sign in", async ({ page }) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/sign-in\?next=(%2F|\/)admin/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
+});
+
+// Public QC 2, 16 Nov 2026: buyers and suppliers have their own sign-in pages.
+for (const [path, title] of [
+  ["/buyer", "Buyer sign in"],
+  ["/supplier", "Supplier sign in"],
+] as const) {
+  test(`route group ${path} asks a signed-out visitor to sign in on its own page`, async ({ page }) => {
     await page.goto(path);
-    await expect(page).toHaveURL(new RegExp(`/sign-in\\?next=(%2F|/)${path.slice(1)}`));
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in to H2 India");
+    await expect(page).toHaveURL(new RegExp(`${path}/sign-in\\?next=(%2F|/)${path.slice(1)}`));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
   });
 }
 

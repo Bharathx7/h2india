@@ -4,6 +4,7 @@ import { normaliseEmail, SIGN_IN, SIGN_IN_ERROR } from "./rules";
 import { recordPasskeyStepUp, recordPasskeySession } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
 import { isSuspended } from "../admin/users";
+import { maySignIn } from "./accounts";
 
 // The sign-in rules Better Auth does not have (ADR 0003, decision A2), run around its email-code routes:
 //  • a 15-minute pause for an email after 5 wrong codes, even with a new code (Figma 524:2036)
@@ -57,6 +58,10 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
   }
   const pause = await readThrottle(db, key.paused(email));
   if (pause) throw pausedError(pause.expiresAt);
+  // Signing in never creates an account (public QC 2): without an account or an invitation, no code works.
+  if (ctx.path === VERIFY && !(await maySignIn(db, email))) {
+    throw new APIError("BAD_REQUEST", { code: SIGN_IN_ERROR.wrongCode, message: "That code didn't work" });
+  }
   if (ctx.path !== SEND) return;
 
   const gap = await hitThrottle(db, key.gap(email), SIGN_IN.resendSeconds);

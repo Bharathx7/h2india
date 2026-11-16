@@ -10,7 +10,8 @@ import { Progress } from "./Progress";
 
 export function FindStep(props: {
   onPick: (organisationId: string | null) => void;
-  onBack: () => void;
+  /** Back to "How you'll use H2 India"; none on a sign-up page for one kind of account. */
+  onBack?: () => void;
   busy: boolean;
 }) {
   const [query, setQuery] = useState("");
@@ -113,9 +114,11 @@ export function FindStep(props: {
         </ul>
       ) : null}
       <p className="type-caption text-secondary">A company admin approves each request to join.</p>
-      <Button variant="ghost" className="self-start" onClick={props.onBack}>
-        Back
-      </Button>
+      {props.onBack ? (
+        <Button variant="ghost" className="self-start" onClick={props.onBack}>
+          Back
+        </Button>
+      ) : null}
     </>
   );
 }

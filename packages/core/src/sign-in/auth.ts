@@ -11,7 +11,8 @@ import { JOIN } from "../companies/rules";
 import { getDb } from "../db";
 import { recoveryPlugin } from "../recovery/plugin";
 import { afterSignIn, beforeSignIn } from "./hooks";
-import { sendSignInCode } from "./mail";
+import { maySignIn } from "./accounts";
+import { sendNoAccount, sendSignInCode } from "./mail";
 import { normaliseEmail, SIGN_IN } from "./rules";
 
 // Sign-in (step 3.2, ADR 0003): passkey, six-digit email code and Google, with users and sessions in our
@@ -96,6 +97,12 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
         sendVerificationOTP: async ({ email, otp, type }) => {
           if (type !== "sign-in") return;
           const to = normaliseEmail(email);
+          // No account and no invitation: say so by email instead of sending a code (public QC 2). The page shows
+          // "Check your email" either way.
+          if (!(await maySignIn(db, to))) {
+            await sendNoAccount(to);
+            return;
+          }
           const [user] = await db
             .select({ name: schema.users.name })
             .from(schema.users)

@@ -211,7 +211,9 @@ test("an individual member joins in two steps", async ({ page, isMobile }) => {
   await page.getByText("Individual member", { exact: true }).click();
   await expect(page.getByText("Step 1 of 2 · How you'll use H2 India")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Step 2 of 2 · Your details")).toBeVisible();
+  // Public QC 2: the choice sends people on to that account's own sign-up page, here one step.
+  await expect(page).toHaveURL(/\/join\/member$/);
+  await expect(page.getByRole("heading", { name: "Your details" })).toBeVisible();
   await expect(page.getByLabel("Work email")).toHaveAttribute("readonly", "");
   await fillDetails(page, { name: "Asha Iyer" });
   await page.getByRole("button", { name: "Continue" }).click();

@@ -24,7 +24,7 @@ export interface BuyerPage {
 
 export async function requireBuyer(path: string): Promise<BuyerPage> {
   const session = await getSession();
-  if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
+  if (!session) redirect(`/buyer/sign-in?next=${encodeURIComponent(path)}`);
   const db = getDb();
   const actor = await loadActor(db, session.user.id);
   const buyer = await buyerOf(db, actor);

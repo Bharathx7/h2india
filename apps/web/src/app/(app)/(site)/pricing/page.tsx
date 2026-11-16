@@ -54,7 +54,7 @@ export default async function PricingPage() {
             </p>
           </div>
           <Link
-            href="/join?as=buyer"
+            href="/join/buyer"
             className={cx(buttonClasses({ variant: "outline", size: "sm" }), "shrink-0 bg-page")}
           >
             Create a buyer account

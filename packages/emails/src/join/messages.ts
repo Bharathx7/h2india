@@ -70,3 +70,31 @@ export function joinRequestAnsweredMessage(input: {
         button: { label: "See your options", href: input.url },
       };
 }
+
+/**
+ * Sent instead of a sign-in code when the email has no account (public QC 2, 16 Nov 2026). The sign-in page shows
+ * "Check your email" either way, so nobody can test which emails use H2 India; only the owner of the inbox learns
+ * there's no account, with the three ways to create one.
+ */
+export function noAccountMessage(input: {
+  email: string;
+  links: { buyer: string; supplier: string; member: string };
+}): Message {
+  return {
+    subject: "No H2 India account for this email",
+    preview: "Create a buyer or supplier account, or join as a member.",
+    reason: "You're getting this because someone asked to sign in to H2 India with this email address.",
+    eyebrow: "Sign in",
+    headline: "There's no account for this email",
+    paragraphs: [
+      `Someone asked for a sign-in code for ${input.email}, but there's no H2 India account with this email, so we didn't send a code.`,
+      "To use H2 India, create an account:",
+    ],
+    button: { label: "Create a buyer account", href: input.links.buyer },
+    links: [
+      { label: "Create a supplier account", href: input.links.supplier },
+      { label: "Join as a member", href: input.links.member },
+    ],
+    note: "Didn't try to sign in? You can ignore this email.",
+  };
+}

@@ -82,3 +82,40 @@ export function siteSignIn(
 }
 
 export { formatIstTime } from "../time";
+
+/** The sign-in and sign-up pages for each kind of account (public QC 2, 16 Nov 2026). */
+export const ACCOUNT_PAGES = {
+  buyer: { signIn: "/buyer/sign-in", join: "/join/buyer", home: "/buyer" },
+  supplier: { signIn: "/supplier/sign-in", join: "/join/supplier", home: "/supplier" },
+  member: { signIn: "/member/sign-in", join: "/join/member", home: "/member" },
+} as const;
+
+export type AccountKind = keyof typeof ACCOUNT_PAGES;
+
+export const ACCOUNT_KINDS = Object.keys(ACCOUNT_PAGES) as AccountKind[];
+
+/** "buyer" from "/buyer/rfqs": the kind of workspace a path belongs to, if any. */
+export function accountKindOfPath(path: string): AccountKind | null {
+  return (
+    ACCOUNT_KINDS.find((k) => path === ACCOUNT_PAGES[k].home || path.startsWith(`${ACCOUNT_PAGES[k].home}/`)) ?? null
+  );
+}
+
+/**
+ * Where a person goes after signing in on the page for `asked` (buyer, supplier or member), given the kind of account
+ * they really have. The right page: the page they came from. The wrong page: their own dashboard, with a note naming
+ * the page they used (`?signed-in-as=`). Someone who never finished joining goes to that page's sign-up.
+ */
+export function landingAfterSignIn(
+  asked: AccountKind,
+  has: AccountKind | null,
+  back: string,
+): { to: string; wrongPage: boolean } {
+  if (!has) return { to: ACCOUNT_PAGES[asked].join, wrongPage: false };
+  const target = accountKindOfPath(back);
+  if (has === asked)
+    return { to: target === null || target === has ? back : ACCOUNT_PAGES[has].home, wrongPage: false };
+  // A page outside the workspaces (a product, /account) is still fine to return to.
+  if (target === null && back !== "/") return { to: back, wrongPage: false };
+  return { to: `${ACCOUNT_PAGES[has].home}?signed-in-as=${asked}`, wrongPage: true };
+}

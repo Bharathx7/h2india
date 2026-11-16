@@ -33,7 +33,8 @@ export default async function ForSuppliersPage() {
         title="Reach India’s hydrogen buyers"
         lead="Get a verified listing, receive structured quote requests from engineering and procurement teams, and get paid through H2 India with a GST invoice when orders launch."
         actions={[
-          { label: "List your company", href: "/list-your-company", primary: true },
+          { label: "List your company", href: "/join/supplier", primary: true },
+          { label: "Supplier sign in", href: "/supplier/sign-in" },
           { label: "See pricing", href: "/pricing" },
         ]}
       />
@@ -133,7 +134,10 @@ export default async function ForSuppliersPage() {
         eyebrow="For suppliers"
         title="Ready to sell?"
         text="Register your company in about 10 minutes. Keep your GST certificate handy."
-        actions={[{ label: "List your company", href: "/list-your-company" }]}
+        actions={[
+          { label: "List your company", href: "/join/supplier" },
+          { label: "Supplier sign in", href: "/supplier/sign-in", primary: false },
+        ]}
       />
     </main>
   );

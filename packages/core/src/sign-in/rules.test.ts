@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatIstTime, looksLikeEmail, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
+import { formatIstTime, landingAfterSignIn, looksLikeEmail, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
 
 describe("return to the page the person started from", () => {
   it("keeps a path on this site, with its query and anchor", () => {
@@ -69,5 +69,34 @@ describe("the admin domain signs in staff only", () => {
   it("sends an operator to the back office, or back to the admin page they came from", () => {
     expect(siteSignIn("admin", true, "/")).toEqual({ ok: true, to: "/admin" });
     expect(siteSignIn("admin", true, "/admin/queues")).toEqual({ ok: true, to: "/admin/queues" });
+  });
+});
+
+describe("buyer, supplier and member sign-in pages (public QC 2)", () => {
+  it("the right page goes back to the page the person came from", () => {
+    expect(landingAfterSignIn("buyer", "buyer", "/buyer/rfqs")).toEqual({ to: "/buyer/rfqs", wrongPage: false });
+    expect(landingAfterSignIn("supplier", "supplier", "/marketplace")).toEqual({
+      to: "/marketplace",
+      wrongPage: false,
+    });
+  });
+
+  it("the wrong page signs the person in to their own dashboard, with a note", () => {
+    expect(landingAfterSignIn("buyer", "supplier", "/buyer")).toEqual({
+      to: "/supplier?signed-in-as=buyer",
+      wrongPage: true,
+    });
+    expect(landingAfterSignIn("member", "buyer", "/member")).toEqual({
+      to: "/buyer?signed-in-as=member",
+      wrongPage: true,
+    });
+  });
+
+  it("a page outside the workspaces is still fine to return to", () => {
+    expect(landingAfterSignIn("buyer", "supplier", "/account")).toEqual({ to: "/account", wrongPage: false });
+  });
+
+  it("someone who never finished joining goes to that page's sign-up", () => {
+    expect(landingAfterSignIn("supplier", null, "/supplier")).toEqual({ to: "/join/supplier", wrongPage: false });
   });
 });

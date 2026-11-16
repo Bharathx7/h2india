@@ -9,9 +9,10 @@ import {
   type WorkspaceUser,
 } from "@h2india/ui";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
 import type { Row } from "@/app/(app)/(workspace)/notifications/rows";
+import { SignedInAsNote } from "./SignedInAsNote";
 
 // The workspace shell with the live bell (97:3168): unread count, latest five, Mark all read. Refreshes every minute
 // and whenever the panel opens.
@@ -89,7 +90,13 @@ export function WorkspaceFrame(props: {
       }
     >
       {/* Toasts for every workspace page (Toast 22:150), so a page's controls can confirm what they did. */}
-      <Toaster>{props.children}</Toaster>
+      <Toaster>
+        {/* After signing in on another account's page (public QC 2): which account this is. */}
+        <Suspense fallback={null}>
+          <SignedInAsNote area={props.area} />
+        </Suspense>
+        {props.children}
+      </Toaster>
     </WorkspaceShell>
   );
 }

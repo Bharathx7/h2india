@@ -27,7 +27,7 @@ export interface SupplierPage {
 /** The signed-in person and their supplier company; anyone else is sent to sign in or to join as a supplier. */
 export async function requireSupplier(path: string): Promise<SupplierPage> {
   const session = await getSession();
-  if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
+  if (!session) redirect(`/supplier/sign-in?next=${encodeURIComponent(path)}`);
   const db = getDb();
   const actor = await loadActor(db, session.user.id);
   const supplier = await supplierOf(db, actor);

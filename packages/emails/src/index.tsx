@@ -1,7 +1,12 @@
 // Email, WhatsApp and SMS templates from Figma page 16 (step 3.9). Server only.
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
-import { joinRequestAnsweredMessage, joinRequestToAdminMessage, verifyEmailMessage } from "./join/messages";
+import {
+  joinRequestAnsweredMessage,
+  joinRequestToAdminMessage,
+  noAccountMessage,
+  verifyEmailMessage,
+} from "./join/messages";
 import {
   submissionReceivedMessage,
   webinarRegisteredMessage,
@@ -60,6 +65,10 @@ async function renderNotice(appUrl: string, message: NoticeMessage): Promise<Ren
 
 export function renderVerifyEmail(appUrl: string, input: Parameters<typeof verifyEmailMessage>[0]) {
   return renderNotice(appUrl, verifyEmailMessage(input));
+}
+
+export function renderNoAccount(appUrl: string, input: Parameters<typeof noAccountMessage>[0]) {
+  return renderNotice(appUrl, noAccountMessage(input));
 }
 
 export function renderJoinRequestToAdmin(appUrl: string, input: Parameters<typeof joinRequestToAdminMessage>[0]) {
