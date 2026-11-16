@@ -9,14 +9,21 @@ export * from "@playwright/test";
 
 const DONE = Symbol("hydration-wrapped");
 
-/** Waits until one of our pages has hydrated. Pages without `data-app` (not ours) pass at once. */
+/**
+ * How long a page has been open before a test may act on it. Public forms refuse anything sent sooner than a person
+ * could (FORM_LIMITS.minMs, 300 ms from page load, step 5.9); a fast CI run filled and sent the product question in
+ * 246 ms. Tests wait like a person instead; the guard is unchanged.
+ */
+export const HUMAN_PACE_MS = 700;
+
+/** Waits until one of our pages has hydrated and been open HUMAN_PACE_MS. Pages without `data-app` pass at once. */
 export async function hydrated(page: Page): Promise<void> {
   await page.waitForFunction(
-    () => {
+    (pace) => {
       const html = document.documentElement;
-      return html.dataset.app !== "h2india" || html.dataset.hydrated === "1";
+      return html.dataset.app !== "h2india" || (html.dataset.hydrated === "1" && performance.now() >= pace);
     },
-    null,
+    HUMAN_PACE_MS,
     { timeout: 30_000 },
   );
 }
