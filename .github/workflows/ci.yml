@@ -22,9 +22,9 @@ permissions:
 
 jobs:
   checks:
-    name: Check, test, build, smoke
+    name: Checks and unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 40
     # Real PostgreSQL and Redis for integration tests (step 3.1), Meilisearch (5.2), Mailpit for emails (step 3.2). Throwaway credentials, CI only.
     services:
       postgres:
@@ -70,6 +70,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Throwaway values only. CI never holds real secrets.
       - run: cp .env.example .env.local
+      - name: The deploy script (ShellCheck)
+        run: shellcheck infra/deploy.sh
       - name: Types, lint and format
         run: pnpm check
         env:
@@ -90,14 +92,83 @@ jobs:
         run: for i in $(seq 1 100); do (echo PING | nc -q1 localhost 3310 | grep -q PONG) && exit 0; sleep 3; done; docker logs clamav; exit 1
       - name: Unit and integration tests
         run: pnpm test
+
+  # Founder QC (17 Nov 2026): the browser tests took about 15 of CI's 22 minutes in one job. They now run on four
+  # machines at once, each on its own fresh database, app and worker (Playwright --shard), beside the checks above.
+  # Every test still runs at 1440 and 390 on every pull request.
+  e2e:
+    name: Browser tests (${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: h2india
+          POSTGRES_PASSWORD: change-me-postgres
+          POSTGRES_DB: h2india
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U h2india" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      # Search (step 5.2). The key matches .env.example, which CI copies to .env.local for the app.
+      meilisearch:
+        image: getmeili/meilisearch:v1.56
+        env:
+          MEILI_MASTER_KEY: change-me-meili-master-key
+          MEILI_ENV: development
+          MEILI_NO_ANALYTICS: "true"
+        ports: ["7700:7700"]
+      # Catches every email the app sends; the sign-in tests read their codes from it (step 3.2).
+      mailpit:
+        image: axllent/mailpit:v1.33.1
+        ports: ["1025:1025", "8025:8025"]
+    env:
+      DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india
+      TEST_DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india_test
+      REDIS_URL: redis://localhost:6379
+      MAILPIT_URL: http://localhost:8025
+      # The search integration tests use their own prefixed indexes on this engine (step 5.2).
+      TEST_MEILI_MASTER_KEY: change-me-meili-master-key
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Throwaway values only. CI never holds real secrets.
+      - run: cp .env.example .env.local
+      # File storage and the virus scanner (step 3.7), started here because they need start-up commands. The scanner
+      # downloads its signatures first, so it starts early and the wait comes just before the tests.
+      - name: Start file storage and virus scanner
+        run: |
+          docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=h2india -e MINIO_ROOT_PASSWORD=change-me-minio cgr.dev/chainguard/minio:latest server /data
+          docker run -d --name clamav -p 3310:3310 clamav/clamav:1.5
+          for i in $(seq 1 60); do curl -fsS localhost:9000/minio/health/live && break; sleep 2; done
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest mb --ignore-existing local/h2india-private local/h2india-public local/h2india-quarantine
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest anonymous set download local/h2india-public
+      - name: Migrations
+        run: pnpm db:migrate
       - name: Build
         run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
       - name: Install browser
         run: pnpm --filter @h2india/e2e exec playwright install --with-deps chromium
-      - name: Browser smoke tests (1440 and 390)
-        run: pnpm e2e
+      - name: Wait for the virus scanner
+        run: for i in $(seq 1 100); do (echo PING | nc -q1 localhost 3310 | grep -q PONG) && exit 0; sleep 3; done; docker logs clamav; exit 1
+      - name: Browser tests (1440 and 390), part ${{ matrix.shard }} of 4
+        run: pnpm e2e --shard=${{ matrix.shard }}/4
         env:
           E2E_START_SERVER: "1"
           # Ordering is on in local and staging with the simulated payment partner (A176); flows A, B and H use it.
@@ -115,12 +186,23 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             playwright-report
             test-results
           retention-days: 14
           if-no-files-found: ignore
+
+  # One status for all four parts, so a pull request shows a single "Browser tests" result.
+  browser-tests:
+    name: Browser tests
+    if: always()
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every part passed
+        run: test "${{ needs.e2e.result }}" = "success"
 
   security:
     name: Secrets and dependencies
@@ -147,7 +229,7 @@ jobs:
   nightly-report:
     name: Nightly report
     if: always() && github.event_name == 'schedule'
-    needs: [checks, security]
+    needs: [checks, e2e, security]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -158,20 +240,22 @@ jobs:
       - uses: actions/download-artifact@v7
         continue-on-error: true
         with:
-          name: playwright-report
+          pattern: playwright-report-*
           path: report
       - name: Summary
         run: |
           {
-            echo "### Nightly suite: ${{ needs.checks.result }}"
-            if [ -f report/playwright-report/results.json ]; then
-              jq -r '.stats | "Passed \(.expected), failed \(.unexpected), flaky \(.flaky), skipped \(.skipped), \(.duration/60000 | floor) minutes"' report/playwright-report/results.json
+            echo "### Nightly suite: checks ${{ needs.checks.result }}, browser tests ${{ needs.e2e.result }}"
+            files=$(ls report/*/playwright-report/results.json 2>/dev/null || true)
+            if [ -n "$files" ]; then
+              # The four parts ran at the same time: counts add up, the time is the slowest part's.
+              jq -s -r 'map(.stats) | "Passed \(map(.expected) | add), failed \(map(.unexpected) | add), flaky \(map(.flaky) | add), skipped \(map(.skipped) | add), \((map(.duration) | max) / 60000 | floor) minutes"' $files
               echo
-              jq -r '[.. | objects | select(has("specs")) | .specs[] | select(.ok == false) | "- \(.file): \(.title)"] | unique | .[]' report/playwright-report/results.json
+              jq -s -r '[.[] | .. | objects | select(has("specs")) | .specs[] | select(.ok == false) | "- \(.file): \(.title)"] | unique | .[]' $files
             fi
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Open an issue after two failed nights
-        if: needs.checks.result == 'failure'
+        if: needs.checks.result == 'failure' || needs.e2e.result == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

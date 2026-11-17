@@ -90,7 +90,8 @@ test("canonical, share image and structured data", async ({ page, request }) => 
     .locator('main a[href^="/events/"]')
     .filter({ hasNotText: /Submit|Calendar|Webinars|Training|Past/ })
     .first();
-  const href = await first.getAttribute("href");
+  // Only when an event is listed: on its own machine nothing else may have published one (getAttribute would wait).
+  const href = (await first.count()) ? await first.getAttribute("href") : null;
   if (href && !/\/events\/(submit|webinars|training|past)/.test(href)) {
     await page.goto(href);
     const ev = await page
