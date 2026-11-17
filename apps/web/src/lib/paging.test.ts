@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pageNumber, pageSlice, pagingQuery } from "./paging";
+import { pageNumber, pageOf, pageRequest, pageSlice, pageWindow, pagingQuery } from "./paging";
 
 const list = Array.from({ length: 45 }, (_, i) => i + 1);
 
@@ -22,5 +22,25 @@ describe("numbered pages on public lists", () => {
     expect(
       pagingQuery({ type: "epc", page: "2", perPage: "20", empty: "", many: ["a", "b"], none: undefined }),
     ).toEqual({ type: "epc", many: "a" });
+  });
+});
+
+describe("workspace paging (founder QC, 17 Nov 2026)", () => {
+  it("reads the page from the address and falls back to page 1 of 25", () => {
+    expect(pageRequest({})).toEqual({ page: 1, perPage: 25 });
+    expect(pageRequest({ page: "3", perPage: "50" })).toEqual({ page: 3, perPage: 50 });
+    expect(pageRequest({ page: "-2", perPage: "7" })).toEqual({ page: 1, perPage: 25 });
+    expect(pageRequest({ page: "x" })).toEqual({ page: 1, perPage: 25 });
+  });
+
+  it("slices a loaded list, and a page past the end shows the last page", () => {
+    const rows = Array.from({ length: 60 }, (_, i) => i);
+    expect(pageOf(rows, { page: 2, perPage: 25 })).toMatchObject({ rows: rows.slice(25, 50), total: 60, page: 2 });
+    expect(pageOf(rows, { page: 9, perPage: 25 })).toMatchObject({ rows: rows.slice(50), page: 3 });
+    expect(pageOf([], { page: 4, perPage: 25 })).toMatchObject({ rows: [], total: 0, page: 1 });
+  });
+
+  it("gives offset and limit for queries that page themselves", () => {
+    expect(pageWindow({ page: 3, perPage: 50 })).toEqual({ offset: 100, limit: 50 });
   });
 });

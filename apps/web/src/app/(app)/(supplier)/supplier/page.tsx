@@ -9,8 +9,8 @@ import { SubmitReview } from "@/supplier/SubmitReview";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 import { shellFor } from "@/server/workspace";
 
-// Supplier home (step 8.1): the onboarding checklist (584:8; phones 585:15) until all five steps are done, then the
-// dashboard (584:961; phones 585:536). Both read the supplier's own records only. Order cards wait for transactions.
+// Supplier home (step 8.1): the dashboard (584:961; phones 585:536), with the onboarding checklist (584:8; phones 585:15)
+// as a card on top until all five steps are done (founder QC, 17 Nov 2026: no steps before the dashboard). Both read the supplier's own records only. Order cards wait for transactions.
 export const metadata: Metadata = { title: "Supplier · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -50,113 +50,113 @@ export default async function SupplierHome() {
     productCounts(db, s.organisationId),
   ]);
 
-  if (!checklist.complete) {
-    const firstOpen = checklist.items.findIndex((i) => i.state === "todo");
-    return (
-      <SupplierShell page={page} current="/supplier" title="Getting started">
-        {s.verification !== "Verified" ? (
-          <Alert tone="success" title="Verification in progress">
-            You can keep drafting. Publishing unlocks after H2 Economy approves your company.
-          </Alert>
-        ) : null}
-        <div>
-          <h1 className="type-h2">Set up {s.tradeName} on H2 Economy</h1>
-          <p className="type-body-sm text-secondary">
-            Five steps to go live. Buyers can find you once your company and first listing are approved.
-          </p>
-        </div>
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <section aria-labelledby="progress" className="rounded-card border border-default bg-page">
-            <div className="flex flex-col gap-2 border-b border-default p-5">
-              <div className="flex items-baseline justify-between">
-                <h2 id="progress" className="type-h3">
-                  {checklist.done} of {checklist.total} done
-                </h2>
-                <span className="type-label text-secondary">
-                  {Math.round((checklist.done / checklist.total) * 100)}%
-                </span>
-              </div>
+  // Founder QC (17 Nov 2026): the dashboard shows from the first visit. Until the five steps are done they sit on top of
+  // it as a card (584:8's rows), so Submit for review stays where it was.
+  const firstOpen = checklist.items.findIndex((i) => i.state === "todo");
+  const setup = checklist.complete ? null : (
+    <section aria-labelledby="setup" className="flex flex-col gap-4">
+      {s.verification !== "Verified" ? (
+        <Alert tone="success" title="Verification in progress">
+          You can keep drafting. Publishing unlocks after H2 Economy approves your company.
+        </Alert>
+      ) : null}
+      <div>
+        <h2 id="setup" className="type-h3">
+          Set up {s.tradeName} on H2 Economy
+        </h2>
+        <p className="type-body-sm text-secondary">
+          Five steps to go live. Buyers can find you once your company and first listing are approved.
+        </p>
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section aria-labelledby="progress" className="rounded-card border border-default bg-page">
+          <div className="flex flex-col gap-2 border-b border-default p-5">
+            <div className="flex items-baseline justify-between">
+              <h3 id="progress" className="type-h4">
+                {checklist.done} of {checklist.total} done
+              </h3>
+              <span className="type-label text-secondary">{Math.round((checklist.done / checklist.total) * 100)}%</span>
+            </div>
+            <div
+              role="progressbar"
+              aria-labelledby="progress"
+              aria-valuemin={0}
+              aria-valuemax={checklist.total}
+              aria-valuenow={checklist.done}
+              className="h-1.5 overflow-hidden rounded-pill bg-subtle"
+            >
               <div
-                role="progressbar"
-                aria-labelledby="progress"
-                aria-valuemin={0}
-                aria-valuemax={checklist.total}
-                aria-valuenow={checklist.done}
-                className="h-1.5 overflow-hidden rounded-pill bg-subtle"
+                className="h-full rounded-pill bg-accent"
+                style={{ width: `${String((checklist.done / checklist.total) * 100)}%` }}
+              />
+            </div>
+          </div>
+          <ol>
+            {checklist.items.map((item, i) => (
+              <li
+                key={item.key}
+                className="grid grid-cols-1 items-center gap-3 border-b border-default p-5 last:border-0 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
               >
-                <div
-                  className="h-full rounded-pill bg-accent"
-                  style={{ width: `${String((checklist.done / checklist.total) * 100)}%` }}
-                />
-              </div>
-            </div>
-            <ol>
-              {checklist.items.map((item, i) => (
-                <li
-                  key={item.key}
-                  className="grid grid-cols-1 items-center gap-3 border-b border-default p-5 last:border-0 md:grid-cols-[auto_200px_minmax(0,1fr)_auto]"
-                >
-                  <Step item={item} index={i === firstOpen ? 0 : i + 1} />
-                  <h3 className="type-label text-primary">{item.title}</h3>
-                  <div className="flex flex-col gap-2 type-body-sm text-body">
-                    <p>{item.detail}</p>
-                    {item.key === "product" && item.state === "todo" ? (
-                      <div className="flex flex-wrap gap-2">
-                        <Link
-                          href="/supplier/products/new?from=datasheet"
-                          className={buttonClasses({ variant: "outline", size: "sm" })}
-                        >
-                          <Icon name="upload" size={16} />
-                          Upload datasheet
-                        </Link>
-                        <Link href="/supplier/products/new" className={buttonClasses({ size: "sm" })}>
-                          <Icon name="plus" size={16} />
-                          Add product
-                        </Link>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="flex justify-end">
-                    {item.key === "review" ? (
-                      item.state === "todo" ? (
-                        <SubmitReview ready={canSubmitForReview(checklist)} />
-                      ) : item.badge ? (
-                        <StatusBadge status={item.badge} tone="progress" />
-                      ) : null
-                    ) : item.key === "storefront" && item.state === "done" ? (
-                      <Link href="/supplier/storefront" className="type-label text-primary hover:underline">
-                        Edit
+                <Step item={item} index={i === firstOpen ? 0 : i + 1} />
+                <h4 className="type-label text-primary">{item.title}</h4>
+                <div className="flex flex-col gap-2 type-body-sm text-body">
+                  <p>{item.detail}</p>
+                  {item.key === "product" && item.state === "todo" ? (
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href="/supplier/products/new?from=datasheet"
+                        className={buttonClasses({ variant: "outline", size: "sm" })}
+                      >
+                        <Icon name="upload" size={16} />
+                        Upload datasheet
                       </Link>
-                    ) : item.key === "bank" && item.state === "todo" ? (
-                      <Link href="/supplier/bank" className="type-label text-link underline">
-                        Add account
+                      <Link href="/supplier/products/new" className={buttonClasses({ size: "sm" })}>
+                        <Icon name="plus" size={16} />
+                        Add product
                       </Link>
-                    ) : item.key === "storefront" ? (
-                      <Link href="/supplier/storefront" className="type-label text-link underline">
-                        Set up
-                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex justify-end">
+                  {item.key === "review" ? (
+                    item.state === "todo" ? (
+                      <SubmitReview ready={canSubmitForReview(checklist)} />
                     ) : item.badge ? (
-                      <StatusBadge status={item.badge} tone={item.state === "done" ? "success" : "progress"} />
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-          <aside className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
-            <h2 className="type-h4">What buyers will see</h2>
-            <p className="type-body-sm text-body">
-              After approval, your storefront, quotes and listings show these badges.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <VerifiedBadge kind="supplier" />
-              <VerifiedBadge kind="gst" />
-            </div>
-          </aside>
-        </div>
-      </SupplierShell>
-    );
-  }
+                      <StatusBadge status={item.badge} tone="progress" />
+                    ) : null
+                  ) : item.key === "storefront" && item.state === "done" ? (
+                    <Link href="/supplier/storefront" className="type-label text-primary hover:underline">
+                      Edit
+                    </Link>
+                  ) : item.key === "bank" && item.state === "todo" ? (
+                    <Link href="/supplier/bank" className="type-label text-link underline">
+                      Add account
+                    </Link>
+                  ) : item.key === "storefront" ? (
+                    <Link href="/supplier/storefront" className="type-label text-link underline">
+                      Set up
+                    </Link>
+                  ) : item.badge ? (
+                    <StatusBadge status={item.badge} tone={item.state === "done" ? "success" : "progress"} />
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <aside className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
+          <h3 className="type-h4">What buyers will see</h3>
+          <p className="type-body-sm text-body">
+            After approval, your storefront, quotes and listings show these badges.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <VerifiedBadge kind="supplier" />
+            <VerifiedBadge kind="gst" />
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
 
   const shell = await shellFor(page.userId);
   const articles = (await listArticles({ limit: 40 })).items
@@ -184,6 +184,7 @@ export default async function SupplierHome() {
           {s.verification === "Verified" ? <VerifiedBadge kind="supplier" /> : null}
         </p>
       </div>
+      {setup}
       <section aria-labelledby="attention" className="rounded-card border border-default bg-page">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-default p-5">
           <h2 id="attention" className="type-h4">

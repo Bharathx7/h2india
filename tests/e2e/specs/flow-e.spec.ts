@@ -67,7 +67,8 @@ test("flow E: a reader becomes a subscriber and a member", async ({ page }) => {
   // A new person goes on to Join H2 Economy, as in signInNew().
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
   await page.goto("/member");
-  await expect(page).toHaveURL(/\/member\/welcome$/);
+  await expect(page).toHaveURL(/\/member$/);
+  await page.goto("/member/welcome");
   await page.getByRole("radio", { name: /Enthusiast/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Electrolysers" }).click();

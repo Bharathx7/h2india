@@ -12,8 +12,10 @@ test.beforeEach(async ({ context }, info) => {
 
 test("a new member picks a persona, topics and states, and lands on the home", async ({ page }) => {
   await signInNew(page, newEmail("onboard"));
+  // Founder QC (17 Nov 2026): the home opens straight away; onboarding is offered, not forced.
   await page.goto("/member");
-  await expect(page).toHaveURL(/\/member\/welcome$/);
+  await expect(page).toHaveURL(/\/member$/);
+  await page.goto("/member/welcome");
   await page.getByRole("radio", { name: /Researcher/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: "What do you want to follow?" })).toBeVisible();
