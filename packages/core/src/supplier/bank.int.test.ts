@@ -16,7 +16,7 @@ import {
   payoutsHeld,
 } from "./bank";
 
-// Step 8.6 DONE WHEN: a change without a passkey is refused; every supplier admin gets the notice; the hold end time
+// Step 8.6 DONE WHEN: a change without a fresh confirmation code is refused; every supplier admin gets the notice; the hold end time
 // is shown and enforced; full account numbers never appear in logs or the audit log. Needs TEST_DATABASE_URL; Mailpit.
 const url = process.env.TEST_DATABASE_URL;
 
@@ -39,7 +39,7 @@ describe.skipIf(!url)("payout bank account", () => {
   const first = "50100234564417";
   const second = "50100987659083";
 
-  it("adds, then changes with a passkey, a hold, and notices to every admin; the number stays secret", async () => {
+  it("adds, then changes with a confirmation code, a hold, and notices to every admin; the number stays secret", async () => {
     const actor = await loadActor(h.db, a.admin.id);
     const other = await makeUser(h.db, "Second Admin");
     await h.db
@@ -64,11 +64,11 @@ describe.skipIf(!url)("payout bank account", () => {
       ifsc: "HDFC0001234",
     });
     expect(one.status).toBe("Pending");
-    await expect(confirmBankAccount(h.db, actor, a.org.id, { id: one.id })).rejects.toThrow("passkey");
+    await expect(confirmBankAccount(h.db, actor, a.org.id, { id: one.id })).rejects.toThrow("Confirm it's you");
     await recordStepUp(h.db, a.admin.id);
     expect((await confirmBankAccount(h.db, actor, a.org.id, { id: one.id })).holdUntil).toBeNull();
 
-    // The change: checked, confirmed with the passkey, held for the clock.
+    // The change: checked, confirmed with the code, held for the clock.
     const now = new Date();
     const two = await addBankAccount(h.db, actor, a.org.id, {
       holderName: "Pranava H2 Pvt Ltd",

@@ -1,5 +1,24 @@
+import { looksLikeEmail } from "../sign-in/rules";
+
 // Storefront rules (founder QC, 17 Nov 2026), pure and safe to import in the browser: the editor shows the same
 // messages before saving that the server gives when it refuses.
+
+/**
+ * A web address: at most 200 characters, no spaces, and a host with a dot ("greenfieldh2.in", "https://x.co/about").
+ * Parsed with URL rather than a pattern, so a long crafted input can't stall the server.
+ */
+function looksLikeWebsite(value: string): boolean {
+  if (value.length > 200 || /\s/.test(value)) return false;
+  let url: URL;
+  try {
+    url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+  } catch {
+    return false;
+  }
+  const host = url.hostname;
+  const dot = host.lastIndexOf(".");
+  return (url.protocol === "https:" || url.protocol === "http:") && dot > 0 && dot < host.length - 2;
+}
 
 export interface StorefrontFields {
   about?: string;
@@ -28,10 +47,10 @@ export function storefrontProblems(
 ): Partial<Record<StorefrontField, string>> {
   const out: Partial<Record<StorefrontField, string>> = {};
   const website = f.website?.trim();
-  if (website && !/^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(website))
-    out.website = "Enter a web address, like greenfieldh2.in";
+  if (website && !looksLikeWebsite(website)) out.website = "Enter a web address, like greenfieldh2.in";
   const email = f.contactEmail?.trim();
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) out.contactEmail = "Enter an email, like sales@company.com";
+  // looksLikeEmail checks by position, not a backtracking pattern (CodeQL js/polynomial-redos).
+  if (email && !looksLikeEmail(email)) out.contactEmail = "Enter an email, like sales@company.com";
   const phone = f.contactPhone?.replace(/[\s-]/g, "");
   if (phone && !/^\+?\d{8,15}$/.test(phone)) out.contactPhone = "Enter a phone number, like +91 98765 43210";
   if (f.foundedYear !== undefined && f.foundedYear !== null) {

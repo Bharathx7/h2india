@@ -40,7 +40,7 @@ import { must } from "../must";
 
 // Stage 10 DONE WHEN (against the simulated partner, A176): the full order money flow runs; the same webhook twice
 // changes the ledger once; a settlement difference shows in reconciliation; ledger rows can't be changed; a requester
-// can't approve their own order and approval needs a fresh passkey; bank-transfer instructions never show the
+// can't approve their own order and approval needs a fresh confirmation code; bank-transfer instructions never show the
 // supplier's bank; accepting part releases exactly that amount; company B can't read company A's order.
 const url = process.env.TEST_DATABASE_URL;
 const ON = { flags: { FLAG_TRANSACTIONS: "true" } };
@@ -259,7 +259,7 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect(v.cart.totalPaise).toBe(29_500_00n);
   });
 
-  it("routes to approval above the limit; no self-approval; approval needs a fresh passkey", async () => {
+  it("routes to approval above the limit; no self-approval; approval needs a fresh confirmation code", async () => {
     // The requester becomes the company's Approver (575:696) and the approval rule names them.
     await h.db
       .update(schema.memberships)
@@ -277,7 +277,7 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const approver = await loadActor(h.db, buyer.requester.id);
     try {
-      // The approver places an order above the limit: they can't approve it themselves, even with a passkey.
+      // The approver places an order above the limit: they can't approve it themselves, even confirmed.
       const own = await placeOne(approver);
       expect(own.status).toBe("Awaiting approval");
       await recordStepUp(h.db, buyer.requester.id);
@@ -287,12 +287,10 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       await cancelOrder(h.db, approver, buyer.org.id, own.id, "Placed by mistake", undefined, ON);
       expect(await status(own.id)).toBe("Cancelled");
 
-      // The admin places one: the approver approves it, only after a fresh passkey.
+      // The admin places one: the approver approves it, only after a fresh confirmation code.
       const o2 = await placeOne(admin);
       expect(o2.status).toBe("Awaiting approval");
-      await h.db
-        .delete(schema.signInThrottle)
-        .where(eq(schema.signInThrottle.key, `step-up:passkey:${buyer.requester.id}`));
+      await h.db.delete(schema.signInThrottle).where(eq(schema.signInThrottle.key, `step-up:${buyer.requester.id}`));
       await expect(approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON)).rejects.toThrow("step_up");
       await recordStepUp(h.db, buyer.requester.id);
       const approved = await approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON);

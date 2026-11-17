@@ -30,6 +30,15 @@ describe("storefront rules (founder QC, 17 Nov 2026)", () => {
     expect(Object.keys(bad).sort()).toEqual(["contactEmail", "contactPhone", "foundedYear", "locations", "website"]);
   });
 
+  it("answers fast on long crafted input (CodeQL js/polynomial-redos)", () => {
+    const evil = `!@!.${"!.".repeat(50_000)}`;
+    const started = Date.now();
+    const out = storefrontProblems({ contactEmail: evil, website: evil }, now);
+    expect(Date.now() - started).toBeLessThan(200);
+    expect(Object.keys(out).sort()).toEqual(["contactEmail", "website"]);
+    expect(storefrontProblems({ website: "https://greenfieldh2.in/about" }, now)).toEqual({});
+  });
+
   it("marks a step done only when buyers would see something in it", () => {
     expect(storefrontStepsDone({ about: "We make electrolysers" })).toEqual({
       brand: false,
