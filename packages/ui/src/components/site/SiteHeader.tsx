@@ -261,7 +261,10 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
         </div>
       </div>
       <RDialog.Portal>
-        <RDialog.Content aria-describedby={undefined} className="fixed inset-0 z-50 flex flex-col bg-page lg:hidden">
+        <RDialog.Content
+          aria-describedby={undefined}
+          className="sheet-enter fixed inset-0 z-50 flex flex-col bg-page lg:hidden"
+        >
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-default px-4">
             <RDialog.Title asChild>
               <span>

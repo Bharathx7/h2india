@@ -100,28 +100,36 @@ test("forcing one module to fail shows its designed error while the rest of the 
 });
 
 test.describe("motion", () => {
-  test("with reduced motion the hero shows the still Buyers frame and nothing moves", async ({ page, isMobile }) => {
-    test.skip(isMobile, "the network card shows from 1024 px");
+  test("with reduced motion the hero card stays on Buyers and nothing moves", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the hero card shows from 1024 px");
     await page.goto("/");
-    const hero = page.getByTestId("hero-network");
+    const hero = page.getByTestId("hero-card");
     await expect(hero).toHaveAttribute("data-focus", "buyers");
     await expect(hero).toHaveAttribute("data-running", "false");
+    await expect(hero.getByRole("tab", { name: "Buyers" })).toHaveAttribute("aria-selected", "true");
     await expect(hero.getByRole("button", { name: "Pause animation" })).toHaveCount(0);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(6000);
     await expect(hero).toHaveAttribute("data-focus", "buyers");
   });
 
-  test("the hero loop keeps moving and has no pause button; the logo strip holds on hover", async ({
+  test("the hero card advances, stops on a chosen tab and has no pause button; the logo strip holds on hover", async ({
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, "the network card shows from 1024 px");
+    test.skip(isMobile, "the hero card shows from 1024 px");
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
-    const hero = page.getByTestId("hero-network");
+    const hero = page.getByTestId("hero-card");
     await expect(hero).toHaveAttribute("data-running", "true");
-    // Focus moves every 2.5 s (781:7247).
-    await expect(hero).not.toHaveAttribute("data-focus", "buyers", { timeout: 4000 });
+    // The tabs advance every 5 s (founder upgrade, 17 Nov 2026).
+    await expect(hero).not.toHaveAttribute("data-focus", "buyers", { timeout: 8000 });
+    // Choosing a tab stops the rotation for good (WCAG 2.2.2).
+    await hero.getByRole("tab", { name: "Tenders" }).click();
+    await expect(hero).toHaveAttribute("data-focus", "tenders");
+    await expect(hero).toHaveAttribute("data-running", "false");
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(6000);
+    await expect(hero).toHaveAttribute("data-focus", "tenders");
     // Founder change to F6, 16 Nov 2026: no pause buttons on the home page.
     await expect(page.getByRole("button", { name: /^(Pause|Play) animation$/ })).toHaveCount(0);
 

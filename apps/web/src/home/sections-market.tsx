@@ -150,6 +150,8 @@ function Check({ children, icon = "check-circle" }: { children: ReactNode; icon?
  * 08 Platform features (851:376): the bento of how an order runs. The visuals are illustrations labelled as an example
  * (Bento visual components 845:10886 to 845:10977), not data.
  */
+// Two columns from 1280 px: at 1024 the right column was too narrow for the quote table and the fixed-height tiles
+// clipped their lists (site audit, 17 Nov 2026), so 1024 stacks like tablets.
 export function PlatformFeatures() {
   return (
     <Section id="platform" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
@@ -163,8 +165,8 @@ export function PlatformFeatures() {
         </p>
       </div>
       <div className="flex flex-col gap-5 md:gap-6">
-        <div className="grid grid-cols-1 gap-5 md:gap-6 lg:grid-cols-2">
-          <Tile className="bg-mint lg:h-171">
+        <div className="grid grid-cols-1 gap-5 md:gap-6 xl:grid-cols-2">
+          <Tile className="bg-mint xl:h-171">
             <div aria-hidden="true" className="depth-accent-glow absolute top-30 left-40 size-160" />
             <TileText title="Confirm, then pay">
               The supplier confirms your order before you pay. Your money is held by our payment partner and released
@@ -202,7 +204,7 @@ export function PlatformFeatures() {
             </div>
           </Tile>
           <div className="flex flex-col gap-5 md:gap-6">
-            <Tile className="bg-page md:flex-row lg:h-70">
+            <Tile className="bg-page md:flex-row xl:h-70">
               <div className="md:w-55 md:shrink-0">
                 <TileText title="Compare quotes side by side">
                   Every supplier answers in the same format: lead time, warranty, compliance and fit to spec.
@@ -236,7 +238,7 @@ export function PlatformFeatures() {
               </div>
             </Tile>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-              <Tile className="bg-page lg:h-95">
+              <Tile className="bg-page xl:h-95">
                 <TileText title="Documents checked">
                   GSTIN, PAN, bank name match and certificates such as PESO and BIS, checked before a listing goes live.
                 </TileText>
@@ -248,7 +250,7 @@ export function PlatformFeatures() {
                   </ul>
                 </div>
               </Tile>
-              <Tile className="bg-page lg:h-95">
+              <Tile className="bg-page xl:h-95">
                 <TileText title="GST-ready invoicing">
                   A GST invoice on every order, with TCS and TDS shown on each payout.
                 </TileText>
@@ -278,10 +280,10 @@ export function PlatformFeatures() {
         </div>
         <div
           data-reveal-item=""
-          className="relative flex flex-col gap-6 overflow-hidden rounded-modal bg-inverse p-6 md:p-8 lg:h-50 lg:flex-row"
+          className="relative flex flex-col gap-6 overflow-hidden rounded-modal bg-inverse p-6 md:p-8 xl:h-50 xl:flex-row"
         >
           <div aria-hidden="true" className="depth-deep-glow absolute -top-90 left-[56%] size-175" />
-          <div className="relative lg:w-96 lg:shrink-0">
+          <div className="relative xl:w-96 xl:shrink-0">
             <TileText title="Track every delivery" dark>
               Invoice, e-way bill and carrier tracking in one place. The receiving contact confirms arrival with a
               delivery code.

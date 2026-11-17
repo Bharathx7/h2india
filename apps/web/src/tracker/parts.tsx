@@ -63,8 +63,8 @@ export function TrackerHead({
                   href={v.path ? `/tracker/${v.path}` : "/tracker"}
                   aria-current={on ? "page" : undefined}
                   className={cx(
-                    "inline-flex h-11 items-center border-b-2 type-label",
-                    on ? "border-inverse text-primary" : "border-transparent text-body hover:text-primary",
+                    "tab-underline inline-flex h-11 items-center type-label transition-colors duration-(--motion-duration-fast)",
+                    on ? "text-primary" : "text-body hover:text-primary",
                   )}
                 >
                   {v.tab}

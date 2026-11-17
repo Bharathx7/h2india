@@ -182,7 +182,7 @@ export function TenderCard(t: {
         </div>
         <StatusBadge status={t.status.label} tone={t.status.tone} />
       </div>
-      <h3 className="type-label-lg text-primary">
+      <h3 className="type-label-lg text-primary transition-colors duration-(--motion-duration-fast) group-hover:text-link-hover">
         <a href={t.href} className={cx(stretch, "focus-visible:outline-none")}>
           {t.title}
         </a>
@@ -207,7 +207,7 @@ export function TenderCard(t: {
           href={t.trackHref}
           className={cx(
             above,
-            "inline-flex h-8 items-center rounded-pill border border-control px-3.25 type-label text-primary hover:border-focus hover:bg-subtle",
+            "inline-flex h-8 items-center rounded-pill border border-control px-3.25 type-label text-primary transition-[background-color,border-color,scale] duration-(--motion-duration-fast) ease-standard hover:border-focus hover:bg-subtle active:scale-[0.97]",
           )}
         >
           Track<span className="sr-only"> {t.title}</span>
@@ -234,7 +234,7 @@ export function SchemeCard(s: {
   actionLabel?: string;
 }) {
   const round =
-    "inline-flex size-8 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus";
+    "inline-flex size-8 items-center justify-center rounded-pill border border-control text-icon-primary transition-[background-color,border-color,scale] duration-(--motion-duration-fast) ease-standard hover:border-focus hover:bg-subtle active:scale-[0.97]";
   return (
     <article
       data-reveal-item=""
@@ -244,7 +244,9 @@ export function SchemeCard(s: {
         <p className="min-w-0 truncate type-eyebrow text-secondary">{s.level}</p>
         <StatusBadge status={s.status.label} tone={s.status.tone} />
       </div>
-      <h3 className="type-label-lg text-primary">{s.title}</h3>
+      <h3 className="type-label-lg text-primary transition-colors duration-(--motion-duration-fast) group-hover:text-link-hover">
+        {s.title}
+      </h3>
       <p className="type-body-sm text-body">{s.benefit}</p>
       {s.who.length ? (
         <ul className="flex flex-wrap gap-2" aria-label="Who can apply">
@@ -311,7 +313,7 @@ export function JobCard(j: {
         </div>
         {j.featured ? <ContentLabel>Featured</ContentLabel> : null}
       </div>
-      <h3 className="type-label-lg text-primary">
+      <h3 className="type-label-lg text-primary transition-colors duration-(--motion-duration-fast) group-hover:text-link-hover">
         <a href={j.href} className={cx(stretch, "focus-visible:outline-none")}>
           {j.role}
         </a>
@@ -333,7 +335,7 @@ export function JobCard(j: {
         <p className="type-caption text-secondary">{j.dates}</p>
         <span
           aria-hidden="true"
-          className="inline-flex h-8 shrink-0 items-center rounded-pill border border-control px-3.25 type-label text-primary group-hover:border-focus group-hover:bg-subtle"
+          className="inline-flex h-8 shrink-0 items-center rounded-pill border border-control px-3.25 type-label text-primary transition-[background-color,border-color] duration-(--motion-duration-fast) ease-standard group-hover:border-focus group-hover:bg-subtle"
         >
           Apply
         </span>

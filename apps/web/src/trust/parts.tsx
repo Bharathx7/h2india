@@ -1,4 +1,4 @@
-import { buttonClasses, cx, Icon, type IconName } from "@h2india/ui";
+import { buttonClasses, cx, Icon, Reveal, type IconName } from "@h2india/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Crumbs, wrap } from "@/opportunities/parts";
@@ -95,7 +95,7 @@ export function Block({
   className?: string;
 }) {
   return (
-    <section aria-labelledby={id} className={cx(wrap, "flex flex-col gap-4 pt-12 md:pt-16", className)}>
+    <Reveal as="section" aria-labelledby={id} className={cx(wrap, "flex flex-col gap-4 pt-12 md:pt-16", className)}>
       <div className="flex flex-col gap-1">
         <h2 id={id} className="type-h2 text-primary">
           {title}
@@ -103,13 +103,13 @@ export function Block({
         {lead ? <p className="type-body text-body">{lead}</p> : null}
       </div>
       {children}
-    </section>
+    </Reveal>
   );
 }
 
 export function Feature({ icon, title, text }: { icon: IconName; title: string; text: string }) {
   return (
-    <div className={cx(card, "flex flex-col gap-3 p-5")}>
+    <div data-reveal-item="" className={cx(card, "flex flex-col gap-3 p-5")}>
       <span className="flex size-9 items-center justify-center rounded-control bg-mint text-icon-primary">
         <Icon name={icon} size={18} />
       </span>
@@ -123,7 +123,7 @@ export function Steps({ steps }: { steps: { title: string; text: string }[] }) {
   return (
     <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((s, i) => (
-        <li key={s.title} className={cx(card, "flex flex-col gap-2 p-5")}>
+        <li key={s.title} data-reveal-item="" className={cx(card, "flex flex-col gap-2 p-5")}>
           <span className="flex size-6 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
             {i + 1}
           </span>
@@ -161,7 +161,8 @@ export function Faqs({
 }) {
   if (!items.length) return null;
   return (
-    <section
+    <Reveal
+      as="section"
       aria-labelledby={id}
       className={cx(wrap, "grid grid-cols-1 gap-6 pt-12 md:pt-16 lg:grid-cols-[18rem_1fr] lg:gap-10")}
     >
@@ -189,7 +190,7 @@ export function Faqs({
           </details>
         ))}
       </div>
-    </section>
+    </Reveal>
   );
 }
 
@@ -206,7 +207,8 @@ export function DarkCta({
 }) {
   return (
     <div className={cx(wrap, "pt-12 md:pt-16")}>
-      <section
+      <Reveal
+        as="section"
         aria-label={title}
         className="relative flex flex-col gap-6 overflow-hidden rounded-card bg-inverse px-6 py-10 md:flex-row md:items-center md:px-12"
       >
@@ -229,7 +231,7 @@ export function DarkCta({
             </Link>
           ))}
         </div>
-      </section>
+      </Reveal>
     </div>
   );
 }

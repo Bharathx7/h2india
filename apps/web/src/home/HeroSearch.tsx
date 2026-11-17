@@ -28,7 +28,7 @@ const POPULAR = [
 ];
 
 const chip =
-  "inline-flex items-center rounded-pill border-[1.5px] border-control bg-page type-label text-primary hover:border-focus";
+  "inline-flex items-center rounded-pill border-[1.5px] border-control bg-page type-label text-primary hover:border-focus hover:bg-subtle active:scale-[0.97] transition-[background-color,border-color,scale] duration-(--motion-duration-fast) ease-standard";
 
 export function HeroSearch() {
   const router = useRouter();

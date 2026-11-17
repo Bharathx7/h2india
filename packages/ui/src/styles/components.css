@@ -96,6 +96,49 @@
   }
 }
 
+/* Page tabs (founder upgrade, 17 Nov 2026): one underline for every tab row, drawn inside the tab so the active tab is
+   never taller than the others. It grows from the centre on hover and is full on the current page. */
+@utility tab-underline {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: var(--tab-line, 2px);
+    border-radius: 1px;
+    background: var(--background-color-inverse);
+    transform: scaleX(0);
+    opacity: 0.35;
+    transition:
+      transform var(--motion-duration-base) var(--ease-standard),
+      opacity var(--motion-duration-base) var(--ease-standard);
+  }
+  &:hover::after {
+    transform: scaleX(1);
+  }
+  &[aria-current="page"]::after {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Menus and sheets arrive (150 ms): the header's drop-down panels fade and settle 4 px; the phone menu fades in. */
+@keyframes h2-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-distance-nudge) * -1));
+  }
+}
+
+@utility menu-enter {
+  animation: h2-menu-in var(--motion-duration-fast) var(--ease-enter) both;
+}
+
+@utility sheet-enter {
+  animation: h2-fade var(--motion-duration-fast) var(--ease-enter) both;
+}
+
 /* Logo strip: continuous sideways scroll, 90 s a loop, linear. */
 @keyframes h2-marquee {
   to {
@@ -112,12 +155,28 @@
 
 /* Hover · cards: 2 px lift and shadow, 250 ms ease; reduced motion keeps the shadow only. */
 @utility card-lift {
+  /* One hover for every card (founder upgrade, 17 Nov 2026): it rises by the lift token, its shadow deepens and its
+     border darkens; pressing settles it. A strip under the card keeps the pointer on it while it rises, so it never
+     flickers at the bottom edge. */
+  position: relative;
   transition:
-    transform 250ms ease,
-    box-shadow 250ms ease;
+    transform var(--motion-duration-base) var(--ease-standard),
+    box-shadow var(--motion-duration-base) var(--ease-standard),
+    border-color var(--motion-duration-base) var(--ease-standard);
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 100% 0 calc(var(--motion-distance-lift) * -1);
+  }
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(calc(var(--motion-distance-lift) * -0.5));
     box-shadow: var(--shadow-ink-lift);
+    border-color: var(--border-color-hover);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-soft);
+    transition-duration: var(--motion-duration-instant);
   }
 }
 
@@ -139,6 +198,43 @@
 /* FAQ answers fade in when opened (site alignment, 17 Nov 2026); reduced motion makes it instant (base.css). */
 @utility faq-answer {
   animation: h2-fade var(--motion-duration-base) var(--ease-enter) both;
+}
+
+/* Hero card (founder upgrade, 17 Nov 2026): rows fade up 8 px, 40 ms apart; the active tab's line fills over 5 s;
+   the live dot breathes slowly. Reduced motion: base.css makes these instant, and the card never auto-advances. */
+@keyframes h2-hero-item {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@utility hero-item {
+  animation: h2-hero-item var(--motion-duration-slow) var(--ease-enter) both;
+  animation-delay: calc(var(--hero-i, 0) * 40ms);
+}
+
+@keyframes h2-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@utility hero-progress {
+  animation: h2-progress 5000ms linear both;
+}
+
+@keyframes h2-breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@utility hero-live-dot {
+  animation: h2-breathe 2400ms ease-in-out infinite;
 }
 
 /* Hero network detail box: the text changes with the focus (400 ms). */
