@@ -57,26 +57,35 @@ export default async function ListsPage({
         }
       >
         {current ? (
-          <div className="flex flex-col gap-4">
-            <nav aria-label="Lists" className="flex flex-wrap items-center gap-2">
+          // Founder QC (17 Nov 2026): the lists on the left, the chosen list on the right.
+          <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <nav aria-label="Lists" className="flex flex-col gap-1 rounded-card border border-default bg-page p-2">
+              <p className="px-3 pt-2 pb-1 type-eyebrow text-secondary">
+                {lists.length} {lists.length === 1 ? "list" : "lists"}
+              </p>
               {lists.map((l) => (
                 <Link
                   key={l.id}
                   href={`/buyer/lists?list=${l.id}`}
                   aria-current={l.id === current.id ? "page" : undefined}
                   className={cx(
-                    "rounded-pill border px-3 py-1.5 type-label-sm",
-                    l.id === current.id
-                      ? "border-transparent bg-inverse text-inverse"
-                      : "border-control hover:bg-subtle",
+                    "flex items-center justify-between gap-2 rounded-control px-3 py-2.5",
+                    l.id === current.id ? "bg-mint type-label text-primary" : "type-body-sm text-body hover:bg-subtle",
                   )}
                 >
-                  {l.name} · {l.count}
+                  <span className="min-w-0 truncate">{l.name}</span>
+                  <span className="shrink-0 type-caption text-secondary tabular-nums">{l.count}</span>
                 </Link>
               ))}
-              {canEdit ? <NewList label="New list" /> : null}
+              {canEdit ? (
+                <div className="border-t border-default px-1 pt-2">
+                  <NewList label="New list" />
+                </div>
+              ) : null}
             </nav>
-            <ListBoard key={current.id} listId={current.id} name={current.name} cards={cards} canEdit={canEdit} />
+            <div className="min-w-0 rounded-card border border-default bg-page p-5">
+              <ListBoard key={current.id} listId={current.id} name={current.name} cards={cards} canEdit={canEdit} />
+            </div>
           </div>
         ) : null}
       </LiveSection>

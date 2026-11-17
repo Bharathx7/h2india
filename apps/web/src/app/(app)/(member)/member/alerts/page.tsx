@@ -10,6 +10,8 @@ import { forcedState } from "@/lib/dev-state";
 import { emptyAlert, prefillAlert } from "@/member/alert-prefill";
 import { AlertsList, type AlertCard } from "@/member/AlertsList";
 import { MemberShell, requireMember } from "@/member/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Alerts (534:8; phones 536:414), step 7.3. Create alert links across the site arrive as ?type=tenders, ?tender=slug,
 // ?scheme=slug, ?grant=slug and open the Create alert modal (534:587) filled in.
@@ -49,6 +51,7 @@ export default async function AlertsPage({
     prefillAlert(sp),
   ]);
   const cards: AlertCard[] = rows.map((a) => ({ ...a, status: statusLine(a, now) }));
+  const paged = pageOf(cards, pageRequest(sp));
   const missing = (sp.tender ?? sp.scheme ?? sp.grant) && !start;
   return (
     <MemberShell userId={userId} current="/member/alerts">
@@ -66,7 +69,9 @@ export default async function AlertsPage({
             }
             empty={null}
           >
-            <AlertsList alerts={cards} reach={reach} start={start} blank={emptyAlert()} />
+            {/* Paged (founder QC, 17 Nov 2026), like every workspace list. */}
+            <AlertsList alerts={paged.rows} reach={reach} start={start} blank={emptyAlert()} />
+            <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
           </LiveSection>
         </div>
         <div className="flex flex-col gap-6 self-start">

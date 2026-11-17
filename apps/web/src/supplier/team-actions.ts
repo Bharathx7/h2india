@@ -2,7 +2,6 @@
 
 import {
   approveJoinRequest,
-  changeMemberRole,
   JoinRequestError,
   LastAdminError,
   notifyRequester,
@@ -26,7 +25,6 @@ import {
   MemberAccessError,
   RolePermissionError,
   setMemberAccess,
-  setRolePermission,
   type AccessChoice,
 } from "@h2india/core/authz";
 
@@ -72,16 +70,6 @@ async function run(work: () => Promise<unknown>, path: string, also?: string): P
   return { ok: true };
 }
 
-export async function inviteMemberAction(email: string, role: string) {
-  const { db, actor, supplier } = await teamActor();
-  const context = await requestContext();
-  return run(
-    () => inviteMember(db, actor, supplier.organisationId, { email, role, context }),
-    "/supplier/team",
-    "/buyer/company",
-  );
-}
-
 /** The access a form sends, checked for shape (callable from any browser); core checks the permissions themselves. */
 function accessOf(input: unknown): AccessChoice | null {
   if (typeof input !== "object" || input === null) return null;
@@ -123,15 +111,6 @@ export async function revokeInvitationAction(id: string) {
   return run(() => revokeInvitation(db, actor, supplier.organisationId, id, context), "/supplier/team");
 }
 
-export async function changeRoleAction(userId: string, role: string) {
-  const { db, actor, supplier } = await teamActor();
-  const context = await requestContext();
-  return run(
-    () => changeMemberRole(db, actor, { organisationId: supplier.organisationId, userId, role }, context),
-    "/supplier/team",
-  );
-}
-
 export async function removeMemberAction(userId: string) {
   const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
@@ -165,30 +144,5 @@ export async function acceptInvitationAction(token: string, agreedToTerms: boole
   return run(
     () => acceptInvitation(getDb(), session.user.id, token, context, undefined, { termsVersion }),
     "/supplier",
-  );
-}
-
-/** Team's permission grid (founder QC, 17 Nov 2026): tick or clear one permission for one role of this company. */
-export async function setRolePermissionAction(role: string, permission: string, on: boolean) {
-  // Callable from any browser: core checks the role and permission against the catalogue and team.manage.
-  if (typeof role !== "string" || typeof permission !== "string" || typeof on !== "boolean")
-    return { ok: false as const, error: "Something went wrong. Try again." };
-  const { db, actor, supplier } = await teamActor();
-  const context = await requestContext();
-  return run(
-    () =>
-      setRolePermission(
-        db,
-        actor,
-        {
-          organisationId: supplier.organisationId,
-          role,
-          permission,
-          on,
-        },
-        context,
-      ),
-    "/supplier/team",
-    "/buyer/company",
   );
 }

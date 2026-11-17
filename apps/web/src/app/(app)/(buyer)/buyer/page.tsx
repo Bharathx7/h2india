@@ -3,7 +3,7 @@ import { getDb, Money } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
 import { listOrders } from "@h2india/core/orders";
 import { formatIstDate } from "@h2india/core/time";
-import { buyerChecklist } from "@h2india/core/buyer";
+import { buyerChecklist, projectLists } from "@h2india/core/buyer";
 import { companyRoles } from "@h2india/core/supplier";
 import { listAlerts } from "@h2india/core/members";
 import { buyerRfqs } from "@h2india/core/rfq";
@@ -31,12 +31,14 @@ export default async function BuyerHome() {
   const page = await requireBuyer("/buyer");
   const db = getDb();
   const b = page.buyer;
-  const [checklist, roles, alerts, feed, rfqs] = await Promise.all([
+  const scope = scopeFor(page.actor);
+  const [checklist, roles, alerts, feed, rfqs, lists] = await Promise.all([
     buyerChecklist(db, b.organisationId),
     companyRoles(db, b.organisationId),
     listAlerts(db, page.userId),
     buildFeed(page.userId),
-    buyerRfqs(db, scopeFor(page.actor), b.organisationId),
+    buyerRfqs(db, scope, b.organisationId),
+    projectLists(db, scope, b.organisationId),
   ]);
   // Founder QC (17 Nov 2026): Recent activity shows the company's latest quote requests instead of a placeholder.
   const recent = rfqs.slice(0, 5);
@@ -145,12 +147,77 @@ export default async function BuyerHome() {
         (o) => o.due,
       )
     : undefined;
+  // Founder QC (17 Nov 2026): a clean dashboard. A summary row, the quotes waiting for a decision, recent requests,
+  // and alerts and opportunities on the side.
+  const open = rfqs.filter(
+    (x) => x.rfq.status === "Sent" || x.rfq.status === "Quotes received" || x.rfq.status === "In moderation",
+  );
+  const toDecide = rfqs.filter((x) => x.rfq.status === "Quotes received" && x.quoted > 0);
   return (
     <BuyerWorkspace page={page} current="/buyer">
       <div>
         <h1 className="type-h2">Dashboard</h1>
         <p className="type-body-sm text-secondary">{[b.legalName, b.city, b.state].filter(Boolean).join(" · ")}</p>
       </div>
+      <ul aria-label="Summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          {
+            value: open.length,
+            label: "Open quote requests",
+            sub: "Sent, in moderation or with quotes",
+            href: "/buyer/rfqs",
+          },
+          {
+            value: toDecide.length,
+            label: "Quotes to review",
+            sub: toDecide.length ? "Compare and choose a supplier" : "Nothing waiting for you",
+            href: "/buyer/rfqs",
+          },
+          { value: lists.length, label: "Project lists", sub: "Shortlists your team shares", href: "/buyer/lists" },
+          {
+            value: alerts.length,
+            label: "Saved search alerts",
+            sub: "New products in categories you watch",
+            href: "/buyer/alerts",
+          },
+        ].map((k) => (
+          <li key={k.label}>
+            <Link
+              href={k.href}
+              className="flex h-full flex-col gap-1 rounded-card border border-default bg-page p-5 hover:border-focus"
+            >
+              <span className="type-h2 tabular-nums">{k.value.toLocaleString("en-IN")}</span>
+              <span className="type-label text-primary">{k.label}</span>
+              <span className="type-caption text-secondary">{k.sub}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {toDecide.length ? (
+        <section
+          aria-labelledby="decide"
+          className="flex flex-col gap-3 rounded-card border border-default bg-mint p-5"
+        >
+          <h2 id="decide" className="type-h4">
+            Quotes waiting for your decision
+          </h2>
+          <ul className="flex flex-col divide-y divide-default">
+            {toDecide.slice(0, 3).map((x) => (
+              <li key={x.rfq.id} className="flex flex-wrap items-center gap-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate type-label text-primary">{x.rfq.title || x.rfq.reference}</p>
+                  <p className="type-caption text-secondary">
+                    {x.rfq.reference} · {String(x.quoted)} of {String(x.suppliers)} suppliers quoted
+                  </p>
+                </div>
+                <Link href={`/buyer/rfqs/${x.rfq.id}`} className={buttonClasses({ size: "sm" })}>
+                  Compare quotes
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {dueOrder?.due ? (
         <Alert
           tone={dueOrder.due.dueAt && dueOrder.due.dueAt.getTime() < new Date().getTime() ? "error" : "warning"}
@@ -203,17 +270,19 @@ export default async function BuyerHome() {
               Your quote requests and the quotes suppliers send show here. Start with what you need.
             </p>
           )}
-          <Link href="/rfq/new" className={buttonClasses({ size: "sm" }) + " self-start"}>
-            Request a quote
+          <Link href="/rfq/new" className={cx(buttonClasses({ size: "sm", variant: "outline" }), "self-start")}>
+            <Icon name="plus" size={16} />
+            New quote request
           </Link>
         </section>
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Saved search alerts</h2>
             {alerts.length ? (
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col divide-y divide-default">
                 {alerts.slice(0, 3).map((a) => (
-                  <li key={a.id} className="type-body-sm">
+                  <li key={a.id} className="flex items-center gap-2 py-2 type-body-sm">
+                    <Icon name="bell" size={16} className="text-icon-secondary" />
                     {a.label}
                   </li>
                 ))}
