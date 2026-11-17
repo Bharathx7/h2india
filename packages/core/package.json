@@ -26,6 +26,8 @@
     "./auth": "./src/sign-in/auth.ts",
     "./sign-in": "./src/sign-in/rules.ts",
     "./sign-in/step-up": "./src/sign-in/step-up.ts",
+    "./account": "./src/account/index.ts",
+    "./account/rules": "./src/account/rules.ts",
     "./companies": "./src/companies/index.ts",
     "./companies/client": "./src/companies/client.ts",
     "./jobs": "./src/jobs.ts",

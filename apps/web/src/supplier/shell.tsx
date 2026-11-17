@@ -1,19 +1,17 @@
-import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { loadActor, type Actor } from "@h2india/core/authz";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { suspensionOf } from "@h2india/core/admin/appeals";
 import { supplierOf, type SupplierContext } from "@h2india/core/supplier";
-import { buttonClasses, Icon, type WorkspaceNavGroup } from "@h2india/ui";
+import { buttonClasses, Icon } from "@h2india/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { SuspendedBanner } from "@/supplier/appeal/Banner";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
+import { navFor, shellFor } from "@/server/workspace";
 
 // The supplier workspace (Figma page 14, Stage 8): Workspace sidebar v2, supplier variant (Catalogue, Selling,
 // Business, Company), with Add product in the top bar. Orders are left out while transactions are off.
@@ -35,24 +33,15 @@ export async function requireSupplier(path: string): Promise<SupplierPage> {
   return { userId: session.user.id, actor, supplier };
 }
 
-function nav(): WorkspaceNavGroup[] {
-  const orders = isEnabled("transactions");
-  return WORKSPACE_NAV.supplier.map((g) => ({
-    ...g,
-    items: g.items.filter((i) => orders || i.href !== "/supplier/orders"),
-  }));
-}
-
 export async function SupplierShell({
   page,
   current,
-  title,
   children,
 }: {
   page: SupplierPage;
   current: string;
-  /** The top bar title, for example "Getting started" or "Dashboard". */
-  title: string;
+  /** The page's name ("Dashboard"). The top bar no longer shows it (founder QC, 17 Nov 2026); pages show their own h1. */
+  title?: string;
   children: ReactNode;
 }) {
   const db = getDb();
@@ -65,13 +54,11 @@ export async function SupplierShell({
   return (
     <WorkspaceFrame
       area="supplier"
-      groups={nav()}
+      groups={await navFor("supplier", page.userId)}
       current={current}
       user={{ ...shell.user, role: page.supplier.tradeName }}
-      welcome={title}
       home="/supplier"
       bell={{ unread, items: toRows(bell) }}
-      searchPlaceholder="Search RFQs, orders, products"
       action={
         page.supplier.seat.permissions.has("product.manage") ? (
           <Link href="/supplier/products/new" className={buttonClasses({})}>

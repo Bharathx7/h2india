@@ -48,8 +48,8 @@ export interface SearchOverlayProps {
   onRetry?: () => void;
   /** "Related categories" chips when nothing matches. */
   related?: { label: string; href: string }[];
-  /** The prefilled quote request for the typed words. */
-  quoteHref: string;
+  /** The prefilled quote request for the typed words. Left out for people who can't request a quote (suppliers, staff). */
+  quoteHref?: string;
   /** Renders links (for example Next.js Link). Defaults to <a>. */
   renderLink?: (props: { href: string; className: string; children: ReactNode; onClick?: () => void }) => ReactNode;
 }
@@ -182,20 +182,22 @@ export function SearchOverlay({
           </div>
         </div>
       ) : null}
-      <div className="flex flex-col items-start gap-4 rounded-card bg-mint p-4 sm:flex-row sm:items-center">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="type-label-lg text-primary">Tell suppliers what you need</p>
-          <p className="type-caption text-body">
-            We&apos;ll prefill a request with your search and send it to up to 5 verified suppliers.
-          </p>
+      {quoteHref ? (
+        <div className="flex flex-col items-start gap-4 rounded-card bg-mint p-4 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <p className="type-label-lg text-primary">Tell suppliers what you need</p>
+            <p className="type-caption text-body">
+              We&apos;ll prefill a request with your search and send it to up to 5 verified suppliers.
+            </p>
+          </div>
+          {renderLink({
+            href: quoteHref,
+            onClick: close,
+            className: buttonClasses({ variant: "primary", size: "sm" }),
+            children: "Request a quote",
+          })}
         </div>
-        {renderLink({
-          href: quoteHref,
-          onClick: close,
-          className: buttonClasses({ variant: "primary", size: "sm" }),
-          children: "Request a quote",
-        })}
-      </div>
+      ) : null}
     </div>
   );
 

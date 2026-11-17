@@ -2,6 +2,7 @@ import { isEnabled } from "@h2india/config";
 import { refreshFlagsSoon } from "@h2india/core/admin/system";
 import { NextResponse, type NextRequest } from "next/server";
 import { originOf, securityHeaders } from "./security/headers";
+import { siteUrl } from "./server/origin";
 
 // Gives every request an ID (step 3.6). The audit log stores it, and the response returns it in X-Request-Id, so a
 // support conversation can be traced to the log entries. An ID set by the load balancer is kept if it looks safe.
@@ -60,12 +61,12 @@ function route(request: NextRequest) {
       { status: 403 },
     );
   }
-  if (pathname === "/cms/logout") return NextResponse.redirect(new URL("/sign-out", request.url));
+  if (pathname === "/cms/logout") return NextResponse.redirect(siteUrl("/sign-out"));
   if (pathname.startsWith("/cms") && !signedIn(request)) {
-    return NextResponse.redirect(new URL("/sign-in?next=/cms", request.url));
+    return NextResponse.redirect(siteUrl("/sign-in?next=/cms"));
   }
   // Signed in but sent to Payload's sign-in page: the account has no Content access.
-  if (pathname === "/cms/login") return NextResponse.redirect(new URL("/", request.url));
+  if (pathname === "/cms/login") return NextResponse.redirect(siteUrl("/"));
   // Planned maintenance (step 5.10, 679:620): every public address shows the maintenance page with a 503, so search
   // engines keep their index. The CMS, APIs, sign-in and the newsletter archive stay reachable.
   if (isEnabled("maintenance") && !MAINTENANCE_OPEN.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {

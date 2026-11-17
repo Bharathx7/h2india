@@ -36,7 +36,6 @@ export default async function NotificationsPage({
       groups={shell.groups}
       current="/notifications"
       user={shell.user}
-      welcome={shell.welcome}
       home={shell.home}
       bell={{ unread, items: rows.slice(0, 5) }}
     >

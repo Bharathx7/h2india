@@ -1,17 +1,15 @@
 import { getDb } from "@h2india/core";
-import { adminAreas, adminCounts } from "@h2india/core/admin";
 import { isEnabled } from "@h2india/config";
 import { can, hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
-import { buttonClasses, Icon, Logo, type WorkspaceNavGroup } from "@h2india/ui";
+import { buttonClasses, Icon, Logo } from "@h2india/ui";
 import Link from "next/link";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { operatorSession, staffSignedIn } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
+import { navFor, shellFor } from "@/server/workspace";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
 // so its existence isn't revealed.
@@ -32,37 +30,26 @@ export async function requireOperator(permission: Permission, path: string): Pro
 export async function AdminShell({
   userId,
   current,
-  title,
   children,
 }: {
   userId: string;
   current: string;
-  title: string;
+  /** The page's name ("Catalogue"). The top bar no longer shows it (founder QC, 17 Nov 2026); pages show their own h1. */
+  title?: string;
   children: ReactNode;
 }) {
   const db = getDb();
-  const [shell, unread, bell, actor, counts] = await Promise.all([
+  const [shell, unread, bell] = await Promise.all([
     shellFor(userId),
     unreadCount(db, userId),
     listNotifications(db, userId, { limit: 5 }),
-    loadActor(db, userId),
-    adminCounts(db),
   ]);
-  const areas = adminAreas(actor);
-  const key = (href: string) => (href === "/admin" ? "overview" : href.split("/")[2]) as keyof typeof areas;
-  const groups: WorkspaceNavGroup[] = WORKSPACE_NAV.admin
-    .map((g) => ({
-      ...g,
-      items: g.items.filter((i) => areas[key(i.href)]).map((i) => ({ ...i, count: counts[key(i.href)] || undefined })),
-    }))
-    .filter((g) => g.items.length);
   return (
     <WorkspaceFrame
       area="admin"
-      groups={groups}
+      groups={await navFor("admin", userId)}
       current={current}
       user={shell.user}
-      welcome={title}
       home="/admin"
       bell={{ unread, items: toRows(bell) }}
     >

@@ -304,6 +304,14 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Data-rights erasure runs only through `erasurePlan()` then `eraseForRequest()` (`@h2india/core/compliance`): add every new table holding personal data to its STEPS.
 - `money.view` (and other names shared with company permissions) can't be checked with `can(actor, p)` without a company: for operator areas read `actor.operator.has(p)`.
 
+## Workspace shell (founder QC, 17 Nov 2026)
+
+- Every workspace page (buyer, supplier, member, admin, `/account`, `/notifications`) takes its sidebar from `navFor(area, userId)` (`apps/web/src/server/workspace.ts`): money pages only with `transactions` on, admin only the operator's areas with counts. Never pass `WORKSPACE_NAV` to `WorkspaceFrame` directly.
+- The top bar has no welcome line and no help button; the profile shows the avatar and name. Search opens the site search (`HeaderSearch`, Request a quote only for buyers) or, in the back office, `searchLinks` to Users, Listings and RFQs.
+- The sidebar must fit a 650 px tall window without scrolling (`workspace-shell.spec.ts`): Log out lives in the profile menu, items are 34 px. Adding a menu item means checking that test.
+- Redirects in route handlers and the proxy use `siteUrl()` (`apps/web/src/server/origin.ts`, from `APP_URL` at run time), never `request.url`: behind nginx that is `localhost:3000`.
+- Name and job role change only through `saveAccountDetails()` (`@h2india/core/account`, audited) on `/account`; email and mobile only through account recovery.
+
 ## Server and deploys (step 1.7)
 
 - Production runs from one image (`Dockerfile`, built by `.github/workflows/image.yml`, never on the server) with `infra/compose.prod.yml` behind the host nginx (`infra/nginx/`). Commands: `docs/runbooks/deploy.md`.

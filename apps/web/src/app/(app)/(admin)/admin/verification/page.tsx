@@ -20,7 +20,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { toRows } from "../../../(workspace)/notifications/rows";
@@ -218,10 +217,9 @@ export default async function VerificationPage({
   return (
     <WorkspaceFrame
       area="admin"
-      groups={WORKSPACE_NAV.admin}
+      groups={shell.groups}
       current="/admin/verification"
       user={shell.user}
-      welcome="Verification"
       home="/admin"
       bell={{ unread, items: toRows(bell) }}
     >

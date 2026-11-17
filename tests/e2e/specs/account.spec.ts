@@ -26,11 +26,27 @@ test("the avatar menu has Dashboard and Sign out; the Account page stays reachab
   await page.getByRole("menuitem", { name: "Dashboard" }).click();
   await expect(page).not.toHaveURL(/\/account$/);
   await page.goto("/account");
-  await expect(page.getByRole("heading", { level: 1, name: "Account" })).toBeVisible();
+  await expect(page).toHaveTitle(/^Account · H2 Economy/);
   // A person who hasn't joined yet has no name, so the header shows the email too: look in Your details only.
   await expect(page.getByRole("region", { name: "Your details" }).getByText(email).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Notification settings" })).toHaveAttribute(
     "href",
     "/notifications?tab=email",
   );
+});
+
+test("Your details: anyone can change their name and role; the page has its padding", async ({ page, isMobile }) => {
+  test.skip(isMobile, "desktop only");
+  await signInNew(page, newEmail("account-edit"));
+  await page.goto("/account");
+  const details = page.getByRole("region", { name: "Your details" });
+  await details.getByLabel("Full name").fill("Meera Iyer");
+  await details.getByLabel("Your role").selectOption("Engineering");
+  await details.getByRole("button", { name: "Save details" }).click();
+  await expect(page.getByText("Details saved")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Meera Iyer" })).toBeVisible();
+  // Founder QC, 17 Nov 2026: the content no longer sits against the sidebar and top bar.
+  const box = await page.getByRole("heading", { level: 1 }).boundingBox();
+  const main = await page.locator("main#main").boundingBox();
+  expect((box?.x ?? 0) - (main?.x ?? 0)).toBeGreaterThanOrEqual(32);
 });
