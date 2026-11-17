@@ -50,7 +50,7 @@ export const COMPANY_PERMISSIONS = {
   "product.manage": "Add and change products and datasheets",
   "storefront.manage": "Change the storefront",
   "money.view": "See fees, invoices and payouts",
-  "payout_bank.change": "Change the payout bank account (needs a passkey)",
+  "payout_bank.change": "Change the payout bank account (confirmed with an email code)",
 } as const;
 
 export type CompanyPermission = keyof typeof COMPANY_PERMISSIONS;

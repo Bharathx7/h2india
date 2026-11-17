@@ -23,7 +23,7 @@ import {
   type ProfileInput,
   type SiteInput,
 } from "@h2india/core/buyer";
-import { changeMemberRole } from "@h2india/core/companies";
+import { changeMemberRole, LastAdminError } from "@h2india/core/companies";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -46,6 +46,7 @@ async function run(work: () => Promise<unknown>, path = "/buyer/company"): Promi
   try {
     await work();
   } catch (error) {
+    if (error instanceof LastAdminError) return { ok: false, error: error.message };
     if (error instanceof BuyerSettingsError || error instanceof ListError) {
       return { ok: false, error: error.message, errors: (error as { errors?: Record<string, string> }).errors };
     }

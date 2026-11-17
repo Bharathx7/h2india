@@ -1,5 +1,5 @@
 import { getDb, Money } from "@h2india/core";
-import { scopeFor } from "@h2india/core/authz";
+import { roleGrid, scopeFor } from "@h2india/core/authz";
 import { companySessions, companySettings, delegationsOf } from "@h2india/core/buyer";
 import { companyRoles, teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
@@ -20,6 +20,7 @@ import {
   SiteDialog,
 } from "@/buyer/Settings";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
+import { RolePermissions } from "@/supplier/RolePermissions";
 import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/TeamControls";
 
 // Company settings (step 9.1): Company profile 574:8, GSTINs 574:638, Delivery sites 575:331, Users and roles 575:696,
@@ -272,9 +273,10 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else if (section === "users") {
-    const [team, roles] = await Promise.all([
+    const [team, roles, grid] = await Promise.all([
       teamView(db, scope, b.organisationId),
       companyRoles(db, b.organisationId),
+      roleGrid(db, page.actor, b.organisationId),
     ]);
     const today = new Date().toDateString();
     const active = (d: Date | null) =>
@@ -413,6 +415,12 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
           </Link>
           .
         </p>
+        <section aria-labelledby="permissions" className="flex flex-col gap-3">
+          <h3 id="permissions" className="type-h4">
+            Roles and permissions
+          </h3>
+          <RolePermissions permissions={grid.permissions} roles={grid.roles} canEdit={canTeam} />
+        </section>
       </>
     );
   } else if (section === "rules") {

@@ -1,6 +1,7 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { OperatorPermission, Permission } from "./catalogue";
+import { applyChanges, roleChangesFor } from "./company-roles";
 
 // Who is asking (step 3.4). Loaded from the database on every request, so a role change applies at once.
 
@@ -82,6 +83,9 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
   // A suspended person can do nothing, whatever session they still hold (review H1, step 11.4).
   if (profile?.suspendedAt) return VISITOR;
 
+  // Each company's own changes to its roles (founder QC, 17 Nov 2026; Team's permission grid).
+  const changes = await roleChangesFor(ex, seats);
+
   const platform = new Set<PlatformRole>();
   if (profile?.type) platform.add("member");
   if (seats.length > 0) platform.add("company_user");
@@ -93,7 +97,12 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
     companies: new Map(
       seats.map((s) => [
         s.organisationId,
-        { role: s.role, kind: s.kind, permissions: new Set(s.permissions), orderLimitPaise: s.orderLimitPaise },
+        {
+          role: s.role,
+          kind: s.kind,
+          permissions: applyChanges(s.permissions, changes.get(`${s.organisationId}|${s.role}`) ?? []),
+          orderLimitPaise: s.orderLimitPaise,
+        },
       ]),
     ),
     operator: new Set(ops.map((x) => x.key)),

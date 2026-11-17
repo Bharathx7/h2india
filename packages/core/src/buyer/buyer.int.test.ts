@@ -113,6 +113,13 @@ describe.skipIf(!url)("buyer workspace", () => {
     await expect(removeGstin(h.db, admin, a.org.id, second?.id ?? "")).rejects.toThrow("another default");
   });
 
+  it("the last Admin can't make themselves anything else (founder QC, 17 Nov 2026)", async () => {
+    const admin = await loadActor(h.db, a.admin.id);
+    await expect(
+      changeMemberRole(h.db, admin, { organisationId: a.org.id, userId: a.admin.id, role: "Requester" }),
+    ).rejects.toThrow("at least one admin");
+  });
+
   it("only a buyer Admin can invite, change roles or remove people", async () => {
     const requester = await loadActor(h.db, a.requester.id);
     const colleague = await makeUser(h.db, `Colleague ${tag}`);

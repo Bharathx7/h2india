@@ -161,6 +161,15 @@ export const PERSONAL_TABLES: PersonalTable[] = [
     processors: ["hosting"],
   },
   {
+    table: "company_role_permissions",
+    fields: ["changed_by"],
+    purpose: "A company's own changes to what each role may do (Team's permission grid), and who made them",
+    basis: "Legitimate use: contract",
+    retention: "While the company exists",
+    access: "The company's team; operators",
+    processors: ["hosting"],
+  },
+  {
     table: "member_profiles",
     fields: ["persona", "topics", "states", "listed", "profile"],
     purpose: "The member profile and, if they choose, the members directory (M24)",

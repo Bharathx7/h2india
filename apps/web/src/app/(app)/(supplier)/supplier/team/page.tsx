@@ -1,13 +1,15 @@
 import { getDb } from "@h2india/core";
-import { scopeFor } from "@h2india/core/authz";
+import { roleGrid, scopeFor } from "@h2india/core/authz";
 import { companyRoles, teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
 import { StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/TeamControls";
+import { RolePermissions } from "@/supplier/RolePermissions";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
-// Team and permissions (592:371; phones 594:564; Dialog Remove team member 685:318), step 8.7.
+// Team and permissions (592:371; phones 594:564; Dialog Remove team member 685:318), step 8.7. Founder QC (17 Nov 2026):
+// the roles' permissions are a grid of ticks the company admin can change (RolePermissions, setRolePermission).
 export const metadata: Metadata = { title: "Team · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -23,9 +25,10 @@ export default async function TeamPage() {
   const page = await requireSupplier("/supplier/team");
   const s = page.supplier;
   const db = getDb();
-  const [team, roles] = await Promise.all([
+  const [team, roles, grid] = await Promise.all([
     teamView(db, scopeFor(page.actor), s.organisationId),
     companyRoles(db, s.organisationId),
+    roleGrid(db, page.actor, s.organisationId),
   ]);
   const manage = s.seat.permissions.has("team.manage");
   const today = new Date().toDateString();
@@ -162,6 +165,17 @@ export default async function TeamPage() {
           </p>
         </aside>
       </div>
+      <section aria-labelledby="permissions" className="flex flex-col gap-3">
+        <div>
+          <h2 id="permissions" className="type-h3">
+            Roles and permissions
+          </h2>
+          <p className="type-body-sm text-secondary">
+            Tick what each role at {s.tradeName} can do. Everyone with that role gets the change.
+          </p>
+        </div>
+        <RolePermissions permissions={grid.permissions} roles={grid.roles} canEdit={manage} />
+      </section>
     </SupplierShell>
   );
 }

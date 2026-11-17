@@ -12,6 +12,7 @@ import { insertOrder } from "../orders/records";
 import { makeUser, twoCompanies, useTestEnv } from "../testing/factory";
 import { loadActor } from "./actor";
 import { can } from "./can";
+import { roleGrid, setRolePermission } from "./company-roles";
 import { scopeFor } from "./scope";
 
 // Step 3.4: company B can never read or change company A's records. Add every new company-owned record type here.
@@ -51,6 +52,19 @@ describe.skipIf(!url)("authorisation", () => {
       await expect(
         changeMemberRole(h.db, b, { organisationId: data.a.org.id, userId: data.a.requester.id, role: "Admin" }),
       ).rejects.toThrow("Not allowed");
+    });
+
+    it("role permissions (founder QC, 17 Nov 2026)", async () => {
+      const b = await loadActor(h.db, data.b.admin.id);
+      await expect(
+        setRolePermission(h.db, b, {
+          organisationId: data.a.org.id,
+          role: "Requester",
+          permission: "order.approve",
+          on: true,
+        }),
+      ).rejects.toThrow("Not allowed");
+      await expect(roleGrid(h.db, b, data.a.org.id)).rejects.toThrow("Not allowed");
     });
 
     it("invitations", async () => {
@@ -165,6 +179,51 @@ describe.skipIf(!url)("authorisation", () => {
     await expect(
       changeMemberRole(h.db, requester, { organisationId: data.a.org.id, userId: data.a.admin.id, role: "Requester" }),
     ).rejects.toThrow("Not allowed");
+  });
+
+  it("applies a company's own permission ticks at once, never to Admin or for admin-only permissions", async () => {
+    const admin = await loadActor(h.db, data.a.admin.id);
+    const before = await loadActor(h.db, data.a.requester.id);
+    expect(can(before, "order.approve", { organisationId: data.a.org.id })).toBe(false);
+    await setRolePermission(h.db, admin, {
+      organisationId: data.a.org.id,
+      role: "Requester",
+      permission: "order.approve",
+      on: true,
+    });
+    const after = await loadActor(h.db, data.a.requester.id);
+    expect(can(after, "order.approve", { organisationId: data.a.org.id })).toBe(true);
+    // Company B's Requesters are untouched.
+    const other = await loadActor(h.db, data.b.requester.id);
+    expect(can(other, "order.approve", { organisationId: data.b.org.id })).toBe(false);
+    await expect(
+      setRolePermission(h.db, admin, {
+        organisationId: data.a.org.id,
+        role: "Admin",
+        permission: "rfq.view",
+        on: false,
+      }),
+    ).rejects.toThrow("Admins can always do everything");
+    await expect(
+      setRolePermission(h.db, admin, {
+        organisationId: data.a.org.id,
+        role: "Requester",
+        permission: "team.manage",
+        on: true,
+      }),
+    ).rejects.toThrow("Only an admin");
+    // Back to the default: the company's change is removed.
+    await setRolePermission(h.db, admin, {
+      organisationId: data.a.org.id,
+      role: "Requester",
+      permission: "order.approve",
+      on: false,
+    });
+    const reset = await h.db
+      .select()
+      .from(schema.companyRolePermissions)
+      .where(eq(schema.companyRolePermissions.organisationId, data.a.org.id));
+    expect(reset).toEqual([]);
   });
 
   it("applies a role change made in the database at once, without a deploy", async () => {
