@@ -311,6 +311,12 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - The sidebar must fit a 650 px tall window without scrolling (`workspace-shell.spec.ts`): Log out lives in the profile menu, items are 34 px. Adding a menu item means checking that test.
 - Redirects in route handlers and the proxy use `siteUrl()` (`apps/web/src/server/origin.ts`, from `APP_URL` at run time), never `request.url`: behind nginx that is `localhost:3000`.
 - Name and job role change only through `saveAccountDetails()` (`@h2india/core/account`, audited) on `/account`; email and mobile only through account recovery.
+- Workspace lists page with `pageRequest()`/`pageOf()` (or `pageWindow()` for a query that pages itself) from `apps/web/src/lib/paging.ts` and `ListPager` under the list; counts on tabs and headings stay the whole list. A new workspace list does the same.
+- A company's role permissions are the catalogue's defaults plus its own ticks (`core.company_role_permissions`), applied in `loadActor()`; change them only with `setRolePermission()` (`@h2india/core/authz`, team.manage, audited). Admin is never changed and `ADMIN_ONLY` permissions are never granted to another role (A186).
+- Members manage their own sessions only through `mySessions()`/`signOutMySessions()` (`@h2india/core/account`); a member joins a company through the Join request functions, and approval sets their profile type from the company.
+- Storefront fields are checked with `storefrontProblems()` (`@h2india/core/supplier/storefront-rules`) in the browser and in `saveStorefrontDraft()`; an approved revision replaces every field (a cleared field stays cleared).
+- Buyers add products to project lists from the product page (`SaveToList`); `/rfq/new?from=list&products=<slugs>` fills the wizard from a list.
+- Show a GSTIN to people with `gstinLabel()` (its state); an order records the supplier GSTIN it's invoiced under (`orders.supplier_gstin_id`). The IGST/CGST split waits on A185.
 
 ## Server and deploys (step 1.7)
 
