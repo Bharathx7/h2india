@@ -1,7 +1,7 @@
 import { getDb, Money } from "@h2india/core";
-import { roleGrid, scopeFor } from "@h2india/core/authz";
+import { scopeFor } from "@h2india/core/authz";
 import { companySessions, companySettings, delegationsOf } from "@h2india/core/buyer";
-import { companyRoles, teamView } from "@h2india/core/supplier";
+import { teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
 import { cx, Icon, StatusBadge, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -19,8 +19,7 @@ import {
   SiteDialog,
 } from "@/buyer/Settings";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
-import { RolePermissions } from "@/supplier/RolePermissions";
-import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/TeamControls";
+import { TeamPanel } from "@/team/TeamPanel";
 
 // Company settings (step 9.1): Company profile 574:8, GSTINs 574:638, Delivery sites 575:331, Users and roles 575:696,
 // Approval rules 576:300, Security 576:662; Notifications (577:288) are the person's own choices on /notifications.
@@ -31,7 +30,7 @@ const SECTIONS: { key: string; label: string; icon: IconName }[] = [
   { key: "profile", label: "Company profile", icon: "building" },
   { key: "gstins", label: "GSTIN", icon: "file-text" },
   { key: "sites", label: "Delivery sites", icon: "map-pin" },
-  { key: "users", label: "Users and roles", icon: "users" },
+  { key: "users", label: "Team", icon: "users" },
   { key: "rules", label: "Approval rules", icon: "check" },
   { key: "security", label: "Security", icon: "lock" },
 ];
@@ -85,7 +84,11 @@ function Heading({ title, detail, action }: { title: string; detail: string; act
   );
 }
 
-export default async function CompanySettingsPage({ searchParams }: { searchParams: Promise<{ section?: string }> }) {
+export default async function CompanySettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string; q?: string; page?: string; perPage?: string }>;
+}) {
   const sp = await searchParams;
   const section = SECTIONS.find((s) => s.key === sp.section)?.key ?? "profile";
   const page = await requireBuyer(`/buyer/company?section=${section}`);
@@ -225,153 +228,59 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else if (section === "users") {
-    const [team, roles, grid] = await Promise.all([
-      teamView(db, scope, b.organisationId),
-      companyRoles(db, b.organisationId),
-      roleGrid(db, page.actor, b.organisationId),
-    ]);
-    const today = new Date().toDateString();
-    const active = (d: Date | null) =>
-      !d ? "—" : new Date(d).toDateString() === today ? "Today" : formatIstDayMonth(new Date(d));
+    // Founder QC (17 Nov 2026): the same Team panel as suppliers (ticked access per person, presets, edit, remove),
+    // plus each person's order limit, which only buyers have.
+    const team = await teamView(db, scope, b.organisationId);
     const limitText = (r: string, p: bigint | null) =>
-      p === null ? "—" : `${r === "Approver" ? "Approves" : "Orders"} up to ${Money.format(p).replace(/\.00$/, "")}`;
+      p === null
+        ? "No limit set"
+        : `${r === "Approver" ? "Approves" : "Orders"} up to ${Money.format(p).replace(/\.00$/, "")}`;
     body = (
       <>
-        <Heading
-          title="Users and roles"
-          detail="Who can request quotes, approve orders and manage company settings."
-          action={canTeam ? <InviteMember roles={roles} /> : undefined}
+        <Heading title="Team" detail="Who can request quotes, approve orders and manage company settings." />
+        <TeamPanel
+          view={team}
+          company={b.legalName}
+          selfId={page.userId}
+          manage={canTeam}
+          sp={sp}
+          basePath="/buyer/company"
+          keep={{ section: "users" }}
         />
-        {team.requests.length && canTeam ? (
-          <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-            <h3 className="type-h4">
-              {team.requests.length} {team.requests.length === 1 ? "person" : "people"} asked to join {b.legalName}
-            </h3>
-            {team.requests.map((q) => (
-              <div key={q.id} className="flex flex-wrap items-center gap-3 border-t border-default pt-3">
-                <span className="flex size-10 items-center justify-center rounded-pill bg-mint type-label">
-                  {initials(q.name || q.email)}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block type-label">{q.name || q.email}</span>
-                  <span className="block type-caption text-secondary">
-                    {q.email} · asked {formatIstDayMonth(q.createdAt)}
-                  </span>
-                </span>
-                <JoinRequest id={q.id} name={q.name || q.email} />
-              </div>
-            ))}
-          </section>
-        ) : null}
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="Company members"
-          className="relative overflow-x-auto rounded-card border border-default bg-page"
+        <section
+          aria-labelledby="limits"
+          className="flex flex-col gap-3 rounded-card border border-default bg-page p-5"
         >
-          <table className="w-full min-w-[720px]">
-            <thead>
-              <tr className="bg-subtle text-left type-caption text-secondary">
-                <th scope="col" className="px-4 py-3">
-                  Person
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Role
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Limit
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Last active
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {team.members.map((x) => (
-                <tr key={x.userId} className="border-t border-default">
-                  <td className="px-4 py-3">
-                    <span className="flex items-center gap-3">
-                      <span className="flex size-8 items-center justify-center rounded-pill bg-mint type-label-sm">
-                        {initials(x.name || x.email)}
-                      </span>
-                      <span>
-                        <span className="block type-label">
-                          {x.name || x.email}
-                          {x.userId === page.userId ? " (you)" : ""}
-                        </span>
-                        <span className="block type-caption text-secondary">{x.email}</span>
-                      </span>
-                    </span>
-                  </td>
-                  <td className="px-2 py-3">
-                    <StatusBadge status={x.role} tone="neutral" />
-                  </td>
-                  <td className="px-2 py-3 type-body-sm">
-                    <span className="flex flex-col items-start">
-                      {limitText(x.role, x.orderLimitPaise)}
-                      {canTeam ? (
-                        <LimitDialog
-                          userId={x.userId}
-                          name={x.name || x.email}
-                          role={x.role}
-                          limit={rupees(x.orderLimitPaise)}
-                        />
-                      ) : null}
-                    </span>
-                  </td>
-                  <td className="px-2 py-3 type-body-sm">{active(x.lastActive)}</td>
-                  <td className="px-2 py-3 text-right">
-                    {canTeam ? (
-                      <MemberMenu
-                        userId={x.userId}
-                        name={x.name || x.email}
-                        email={x.email}
-                        role={x.role}
-                        lastActive={active(x.lastActive)}
-                        company={b.legalName}
-                        roles={roles.map((r) => r.name)}
-                        self={x.userId === page.userId}
-                      />
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-              {team.invitations.map((i) => (
-                <tr key={i.id} className="border-t border-default">
-                  <td className="px-4 py-3">
-                    <span className="block type-label">{i.email}</span>
-                    <span className="block type-caption text-secondary">Expires {formatIstDayMonth(i.expiresAt)}</span>
-                  </td>
-                  <td className="px-2 py-3">
-                    <StatusBadge status={i.role} tone="neutral" />
-                  </td>
-                  <td className="px-2 py-3 type-body-sm">—</td>
-                  <td className="px-2 py-3">
-                    <StatusBadge status="Invite sent" tone="warning" />
-                  </td>
-                  <td className="px-2 py-3 text-right">
-                    {canTeam ? <RevokeInvite id={i.id} email={i.email} /> : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="type-caption text-secondary">
-          Orders above a person&apos;s limit need an Approver. Set thresholds and second approvers in{" "}
-          <Link href="/buyer/company?section=rules" className="underline">
-            Approval rules
-          </Link>
-          .
-        </p>
-        <section aria-labelledby="permissions" className="flex flex-col gap-3">
-          <h3 id="permissions" className="type-h4">
-            Roles and permissions
-          </h3>
-          <RolePermissions permissions={grid.permissions} roles={grid.roles} canEdit={canTeam} />
+          <div>
+            <h3 id="limits" className="type-h4">
+              Order limits
+            </h3>
+            <p className="type-caption text-secondary">
+              Orders above a person&apos;s limit need an Approver. Set thresholds and second approvers in{" "}
+              <Link href="/buyer/company?section=rules" className="underline">
+                Approval rules
+              </Link>
+              .
+            </p>
+          </div>
+          <ul className="flex flex-col divide-y divide-default">
+            {team.members.map((x) => (
+              <li key={x.userId} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                <span className="min-w-0">
+                  <span className="block type-label">{x.name || x.email}</span>
+                  <span className="block type-caption text-secondary">{limitText(x.role, x.orderLimitPaise)}</span>
+                </span>
+                {canTeam ? (
+                  <LimitDialog
+                    userId={x.userId}
+                    name={x.name || x.email}
+                    role={x.role}
+                    limit={rupees(x.orderLimitPaise)}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </section>
       </>
     );
@@ -479,38 +388,31 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
           {b.legalName} · you&apos;re {role === "Admin" ? "an" : "a"} {role}
         </p>
       </div>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <nav aria-label="Company settings" className="self-start rounded-card border border-default bg-page p-2">
-          <ul className="flex gap-1 overflow-x-auto lg:flex-col">
-            {SECTIONS.map((s) => (
-              <li key={s.key}>
-                <Link
-                  href={`/buyer/company?section=${s.key}`}
-                  aria-current={s.key === section ? "page" : undefined}
-                  className={cx(
-                    "flex items-center gap-2 rounded-input px-3 py-2 type-body-sm whitespace-nowrap",
-                    s.key === section ? "bg-mint" : "hover:bg-subtle",
-                  )}
-                >
-                  <Icon name={s.icon} size={18} />
-                  <span className="flex-1">{s.label}</span>
-                  {s.key === section ? <Icon name="check" size={16} /> : null}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link
-                href="/notifications?tab=email"
-                className="flex items-center gap-2 rounded-input px-3 py-2 type-body-sm whitespace-nowrap hover:bg-subtle"
-              >
-                <Icon name="bell" size={18} />
-                <span className="flex-1">Notifications</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-        <div className="flex min-w-0 flex-col gap-4">{body}</div>
-      </div>
+      {/* Founder QC (17 Nov 2026): the sections as tabs across the top, the section below at full width. */}
+      <nav aria-label="Company settings" className="flex gap-6 overflow-x-auto border-b border-default">
+        {SECTIONS.map((x) => (
+          <Link
+            key={x.key}
+            href={`/buyer/company?section=${x.key}`}
+            aria-current={x.key === section ? "page" : undefined}
+            className={cx(
+              "-mb-px inline-flex items-center gap-2 border-b-2 py-3 type-label whitespace-nowrap",
+              x.key === section ? "border-inverse text-primary" : "border-transparent text-secondary",
+            )}
+          >
+            <Icon name={x.icon} size={16} />
+            {x.label}
+          </Link>
+        ))}
+        <Link
+          href="/notifications?tab=email"
+          className="-mb-px inline-flex items-center gap-2 border-b-2 border-transparent py-3 type-label whitespace-nowrap text-secondary"
+        >
+          <Icon name="bell" size={16} />
+          Notifications
+        </Link>
+      </nav>
+      <div className="flex min-w-0 flex-col gap-4">{body}</div>
     </BuyerWorkspace>
   );
 }

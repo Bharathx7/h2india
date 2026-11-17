@@ -139,24 +139,40 @@ export function WatchCategory({
 
   return (
     <>
-      <h1 className="type-h2">Alerts</h1>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="type-body text-body">We email you when new products appear in categories you watch.</p>
+      {/* Founder QC (17 Nov 2026): a clear table of alerts with a summary; edit, pause and delete on each row. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="type-h2">Alerts</h1>
+          <p className="type-body-sm text-secondary">
+            We email you when new products appear in categories you watch. Choose how often, or pause one any time.
+          </p>
+        </div>
         <Button onClick={openNew}>
           <Icon name="bell" size={18} />
           Watch a category
         </Button>
       </div>
+      {rows.length ? (
+        <p className="type-body-sm text-secondary">
+          {rows.length} {rows.length === 1 ? "alert" : "alerts"} · {rows.filter((r) => r.on).length} on ·{" "}
+          {rows.filter((r) => !r.on).length} paused
+        </p>
+      ) : null}
       {rowError ? <Alert tone="error" title={rowError} live /> : null}
       {rows.length ? (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
           {rows.map((r) => (
-            <li key={r.id} className="flex flex-wrap items-center gap-4 rounded-card border border-default bg-page p-5">
+            <li key={r.id} className="flex flex-wrap items-center gap-4 p-5">
+              <span
+                aria-hidden="true"
+                className={`flex size-10 shrink-0 items-center justify-center rounded-pill ${r.on ? "bg-mint" : "bg-subtle"}`}
+              >
+                <Icon name="bell" size={18} />
+              </span>
               <div className="min-w-0 flex-1">
-                <h2 className="type-h4 text-primary">{r.label}</h2>
-                <p className="type-caption text-secondary">
-                  {r.path} · {r.news}
-                </p>
+                <h2 className="type-label-lg text-primary">{r.label}</h2>
+                <p className="type-caption text-secondary">{r.path}</p>
+                <p className={`type-caption ${r.news.startsWith("No") ? "text-secondary" : "text-link"}`}>{r.news}</p>
               </div>
               <Select
                 aria-label={`How often for ${r.label}`}
