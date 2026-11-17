@@ -1,0 +1,2 @@
+ALTER TABLE "core"."orders" ADD COLUMN "supplier_gstin_id" uuid;--> statement-breakpoint
+ALTER TABLE "core"."orders" ADD CONSTRAINT "orders_supplier_gstin_id_organisation_gstins_id_fk" FOREIGN KEY ("supplier_gstin_id") REFERENCES "core"."organisation_gstins"("id") ON DELETE no action ON UPDATE no action;

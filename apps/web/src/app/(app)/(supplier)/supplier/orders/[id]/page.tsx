@@ -25,6 +25,7 @@ import {
   ProofOfDelivery,
 } from "@/supplier/orders/Panels";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
+import { gstinLabel } from "@h2india/core/companies/client";
 
 // Supplier order (step 10.7 to 10.10): accept or decline (693:8), awaiting payment (811:12584), dispatch checklist
 // (693:814), in transit and delivered (693:814 Delivery status), dispute open (813:12602).
@@ -232,6 +233,8 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
               <Rows
                 rows={[
                   ["Buyer", `${d.buyerName}${d.gstin ? " · verified GSTIN" : ""}`],
+                  // Founder QC (17 Nov 2026): the GSTIN this order is invoiced under, with its state.
+                  ["Invoice from GSTIN", gstinLabel(d.supplierGstin) || "Not recorded"],
                   ["Deliver to", d.site ?? "Shared after you accept"],
                   [
                     "Receiving contact",
@@ -316,7 +319,8 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
           <Card title="Buyer and delivery">
             <Rows
               rows={[
-                ["Buyer", `${d.buyerName}${d.gstin ? ` · GSTIN ${d.gstin}` : ""}`],
+                ["Buyer", `${d.buyerName}${d.gstin ? ` · GSTIN ${gstinLabel(d.gstin)}` : ""}`],
+                ["Invoice from GSTIN", gstinLabel(d.supplierGstin) || "Not recorded"],
                 ["Deliver to", d.site ?? ""],
                 ["Receiving contact", `${d.order.receiverName ?? ""} · shared after dispatch`],
                 [

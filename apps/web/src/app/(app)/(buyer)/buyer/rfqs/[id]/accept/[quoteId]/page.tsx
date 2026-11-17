@@ -11,6 +11,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AcceptButton } from "@/buyer/AcceptButton";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
+import { gstinLabel } from "@h2india/core/companies/client";
 
 // Accept-quote confirmation (569:9; phones 570:8), step 9.8. Launch 1 has no ordering (C8, founder 11 Nov 2026): the
 // screen shows what accepting would do, Confirm is off while the transactions flag is off, and the buyer is pointed to
@@ -114,8 +115,8 @@ export default async function AcceptQuotePage({ params }: { params: Promise<{ id
                       ? `${formatIstDateTime(v.version.validUntil)}${daysLeft !== null ? ` · ${String(daysLeft)} days left` : ""}`
                       : "",
                   ],
-                  ["Bill to", gstin ? `${b.legalName} · GSTIN ${gstin.gstin}` : b.legalName],
-                  ["Supplier GSTIN", v.supplierGstin?.gstin ?? ""],
+                  ["Bill to", gstin ? `${b.legalName} · GSTIN ${gstinLabel(gstin.gstin)}` : b.legalName],
+                  ["Supplier GSTIN", gstinLabel(v.supplierGstin?.gstin)],
                 ] as [string, string][]
               )
                 .filter(([, x]) => x)

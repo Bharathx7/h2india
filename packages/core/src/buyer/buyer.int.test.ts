@@ -9,7 +9,16 @@ import { gstinCheckChar } from "../companies/gstin";
 import { inviteMember, removeMember } from "../supplier/team";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { buyerChecklist } from "./checklist";
-import { addToList, createList, listCards, ListError, listProductIds, projectLists, removeFromList } from "./lists";
+import {
+  addToList,
+  createList,
+  listCards,
+  ListError,
+  listProductIds,
+  projectLists,
+  removeFromList,
+  renameList,
+} from "./lists";
 import {
   addGstin,
   BuyerSettingsError,
@@ -160,6 +169,13 @@ describe.skipIf(!url)("buyer workspace", () => {
     expect(await listProductIds(h.db, scopeFor(bAdmin), a.org.id, list?.id ?? "")).toEqual([]);
     await expect(createList(h.db, bAdmin, a.org.id, "Sneaky")).rejects.toBeInstanceOf(ListError);
     await expect(removeFromList(h.db, bAdmin, a.org.id, list?.id ?? "", [])).rejects.toBeInstanceOf(ListError);
+    // Founder QC (17 Nov 2026): rename. Company B can't rename A's list, even by naming A's list in its own company.
+    await expect(renameList(h.db, bAdmin, a.org.id, list?.id ?? "", "Taken")).rejects.toBeInstanceOf(ListError);
+    await expect(renameList(h.db, bAdmin, b.org.id, list?.id ?? "", "Taken")).rejects.toThrow("No such list");
+    await renameList(h.db, aAdmin, a.org.id, list?.id ?? "", "Talegaon pilot, phase 2");
+    expect((await projectLists(h.db, scopeFor(aAdmin), a.org.id)).map((l) => l.name)).toContain(
+      "Talegaon pilot, phase 2",
+    );
   });
 
   it("a list holds products as cards, without a price", async () => {

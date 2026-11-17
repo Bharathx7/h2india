@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { parseServerEnv, requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
-import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { VISITOR, type Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -245,9 +245,22 @@ export async function placeCartOrder(
     }));
     const total = orderFigures(lines).totalPaise;
     const route = await approvalRoute(tx, organisationId, userId, total);
+    // The supplier's verified default GSTIN (founder QC, 17 Nov 2026): a cart has no quote to name one.
+    const [supplierGstin] = await tx
+      .select({ id: schema.organisationGstins.id })
+      .from(schema.organisationGstins)
+      .where(
+        and(
+          eq(schema.organisationGstins.organisationId, cart.supplierId),
+          eq(schema.organisationGstins.portalStatus, "Active"),
+        ),
+      )
+      .orderBy(desc(schema.organisationGstins.isDefault), asc(schema.organisationGstins.createdAt))
+      .limit(1);
     const order = await insertOrder(tx, {
       buyerOrganisationId: organisationId,
       supplierOrganisationId: cart.supplierId,
+      supplierGstinId: supplierGstin?.id ?? null,
       placedBy: userId,
       source: "cart",
       deliverySiteId: input.deliverySiteId,
@@ -345,6 +358,7 @@ export async function orderFromQuote(
     quoteVersionId: input.version.id,
     deliverySiteId: input.rfq.deliverySiteId,
     billingGstinId: input.rfq.billingGstinId,
+    supplierGstinId: input.version.supplierGstinId,
     receiverName,
     receiverMobile,
     paymentMethod: "bank_transfer",

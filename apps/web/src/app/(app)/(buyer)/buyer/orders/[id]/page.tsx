@@ -11,6 +11,7 @@ import { AcceptOrReport, CancelOrder, OfferActions, PayOnline, RateOrder, Reques
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { requireTransactionsPage } from "@/orders/guard";
 import { milestoneWord } from "@/orders/views";
+import { gstinLabel } from "@h2india/core/companies/client";
 
 // Buyer order (77:1178; phones 81:8452; all states 807:14435), steps 10.1 to 10.10: the seven-step timeline and the
 // one main action of each state, pay the advance (330:26743) and the balance (339:27238), payment outcomes
@@ -395,7 +396,9 @@ export default async function BuyerOrderPage({
               rows={[
                 ["Deliver to", d.site ?? ""],
                 ["Receiving contact", d.order.receiverName ?? ""],
-                ["Bill to GSTIN", d.gstin ?? ""],
+                ["Bill to GSTIN", gstinLabel(d.gstin)],
+                // Founder QC (17 Nov 2026): which of the supplier's GSTINs invoices this order, with its state.
+                ["Supplier GSTIN", gstinLabel(d.supplierGstin)],
                 [
                   "Dispatch date",
                   d.order.dispatchBy ? formatIstDate(d.order.dispatchBy) : "Set when the supplier confirms",

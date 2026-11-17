@@ -1,5 +1,5 @@
 import { schema, type Database, type Executor, type ReceivingContact } from "@h2india/db";
-import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -193,6 +193,12 @@ export async function removeGstin(
     .where(eq(schema.quoteVersions.supplierGstinId, id));
   if ((quoted?.n ?? 0) > 0)
     throw new BuyerSettingsError("A quote was issued under this GSTIN, so it can't be removed.");
+  // Founder QC (17 Nov 2026): orders now record the GSTIN they're invoiced or billed under.
+  const [ordered] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.orders)
+    .where(or(eq(schema.orders.supplierGstinId, id), eq(schema.orders.billingGstinId, id)));
+  if ((ordered?.n ?? 0) > 0) throw new BuyerSettingsError("An order uses this GSTIN, so it can't be removed.");
   await db.delete(g).where(eq(g.id, id));
   await audit(db, {
     actorId: actor.userId,

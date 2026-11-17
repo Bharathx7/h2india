@@ -62,6 +62,33 @@ export async function createList(db: Database, actor: Actor, organisationId: str
   return row;
 }
 
+/** Rename a list (founder QC, 17 Nov 2026). */
+export async function renameList(db: Database, actor: Actor, organisationId: string, listId: string, name: string) {
+  if (!canEdit(actor, organisationId)) throw new ListError("Not allowed");
+  const clean = name.trim().slice(0, 80);
+  if (!clean) throw new ListError("Name the list");
+  const done = await db
+    .update(l)
+    .set({ name: clean })
+    .where(and(eq(l.id, listId), eq(l.organisationId, organisationId), isNull(l.deletedAt)))
+    .returning({ id: l.id });
+  if (!done.length) throw new ListError("No such list");
+}
+
+/** The company's lists for a product page's "Save to project list": which already hold the product. */
+export async function listsForProduct(db: Executor, scope: Scope, organisationId: string, productId: string) {
+  return db
+    .select({
+      id: l.id,
+      name: l.name,
+      count: sql<number>`(select count(*)::int from core.project_list_items x where x.list_id = core.project_lists.id)`,
+      has: sql<boolean>`exists (select 1 from core.project_list_items x where x.list_id = core.project_lists.id and x.product_id = ${productId})`,
+    })
+    .from(l)
+    .where(and(inScope(scope, l.organisationId), eq(l.organisationId, organisationId), isNull(l.deletedAt)))
+    .orderBy(asc(l.createdAt));
+}
+
 export async function addToList(db: Database, actor: Actor, organisationId: string, listId: string, productId: string) {
   if (!canEdit(actor, organisationId)) throw new ListError("Not allowed");
   const [list] = await db
@@ -88,7 +115,7 @@ export async function removeFromList(
   const [list] = await db
     .select({ id: l.id })
     .from(l)
-    .where(and(eq(l.id, listId), eq(l.organisationId, organisationId)));
+    .where(and(eq(l.id, listId), eq(l.organisationId, organisationId), isNull(l.deletedAt)));
   if (!list || !productIds.length) return;
   await db.delete(i).where(and(eq(i.listId, listId), inArray(i.productId, productIds)));
 }

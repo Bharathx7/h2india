@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { AskRevision, CloseRfq, DeclineAll, EditRfq, ExtendDeadline } from "@/buyer/RfqActions";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { MessageDrawer } from "@/messages/MessageDrawer";
+import { gstinLabel } from "@h2india/core/companies/client";
 
 // RFQ detail and quote comparison (560:8; phones 562:8), step 9.6: header with the badge and Extend deadline, the
 // suppliers' statuses, the comparison with the best value in each row highlighted, the request summary and timeline,
@@ -118,7 +119,8 @@ export default async function BuyerRfqPage({ params }: { params: Promise<{ id: s
     },
     { key: "schedule", label: "Payment schedule", value: (x) => describeSchedule(x.schedule) },
     // Supplier QC, 16 Nov 2026: the supplier GSTIN each quote is issued under (it goes on the invoice).
-    { key: null, label: "Supplier GSTIN", value: (x) => x.supplierGstin?.gstin ?? "—" },
+    // Founder QC (17 Nov 2026): with its state, so the buyer sees which state each quote is invoiced from.
+    { key: null, label: "Supplier GSTIN", value: (x) => gstinLabel(x.supplierGstin?.gstin) || "—" },
   ];
   const timeline = [
     { label: `Created · ${formatIstDayMonth(d.rfq.createdAt)}`, done: true },

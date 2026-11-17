@@ -9,8 +9,8 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 
-// Saved lists (78:2628), step 9.1. ?list= picks the list; ?state=loading|error|empty forces the designed states.
-export const metadata: Metadata = { title: "Saved lists · H2 Economy", robots: { index: false } };
+// Project lists (78:2628), step 9.1; "Project lists" everywhere since founder QC (17 Nov 2026), as in the sidebar. ?list= picks the list; ?state=loading|error|empty forces the designed states.
+export const metadata: Metadata = { title: "Project lists · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ListsPage({
@@ -30,9 +30,15 @@ export default async function ListsPage({
   const forced = forcedState(sp.state);
   return (
     <BuyerWorkspace page={page} current="/buyer/lists">
-      <h1 className="type-h2">Saved lists</h1>
+      <div>
+        <h1 className="type-h2">Project lists</h1>
+        <p className="type-body-sm text-secondary">
+          Shortlists of products your company shares. Add products from any product page, then compare them or request
+          quotes together.
+        </p>
+      </div>
       <LiveSection
-        label="Saved lists"
+        label="Project lists"
         state={forced ?? (lists.length ? "ready" : "empty")}
         skeleton={
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -68,7 +74,7 @@ export default async function ListsPage({
                   {l.name} · {l.count}
                 </Link>
               ))}
-              {canEdit ? <NewList /> : null}
+              {canEdit ? <NewList label="New list" /> : null}
             </nav>
             <ListBoard key={current.id} listId={current.id} name={current.name} cards={cards} canEdit={canEdit} />
           </div>

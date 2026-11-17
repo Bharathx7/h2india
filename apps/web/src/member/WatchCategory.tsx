@@ -2,11 +2,13 @@
 
 import { FREQUENCIES } from "@h2india/core/alerts/rules";
 import { Alert, Button, EmptyState, Icon, Modal, Select, Switch } from "@h2india/ui";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { saveAlertAction, setAlertOnAction } from "./alert-actions";
+import { deleteAlertAction, saveAlertAction, setAlertOnAction } from "./alert-actions";
 
 // Buyer Alerts (79:3425; phones 132:9656) and Watch a category (275:23289; sheet 276:23283), step 7.3: product alerts
-// on a category, emailed when new products are listed.
+// on a category, emailed when new products are listed. Founder QC (17 Nov 2026): every alert can be edited (category,
+// how often, verified only) and deleted, like the member's alerts, and a failed change says so.
 
 export interface CategoryOption {
   /** "systems|Electrolysers" */
@@ -46,12 +48,34 @@ export function WatchCategory({
   /** The member's states (onboarding 531:101), for "verified suppliers in my states". */
   states: string[];
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  /** The alert being edited, or null for a new one. */
+  const [editing, setEditing] = useState<WatchRow | null>(null);
+  const [deleting, setDeleting] = useState<WatchRow | null>(null);
   const [category, setCategory] = useState(categories[0]?.value ?? "");
   const [frequency, setFrequency] = useState("weekly");
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState("");
+  const [rowError, setRowError] = useState("");
   const [pending, start] = useTransition();
+  const openNew = () => {
+    setEditing(null);
+    setCategory(categories[0]?.value ?? "");
+    setFrequency("weekly");
+    setVerified(false);
+    setError("");
+    setOpen(true);
+  };
+  const openEdit = (row: WatchRow) => {
+    setEditing(row);
+    const value = `${row.filters.class?.[0] ?? ""}|${row.filters.category?.[0] ?? ""}`;
+    setCategory(categories.some((c) => c.value === value) ? value : (categories[0]?.value ?? ""));
+    setFrequency(row.frequency);
+    setVerified((row.filters.badges ?? []).includes("verified"));
+    setError("");
+    setOpen(true);
+  };
   const watch = () => {
     start(async () => {
       const label =
@@ -60,20 +84,23 @@ export function WatchCategory({
           ?.label.split(" › ")
           .at(-1) ?? "Products";
       const r = await saveAlertAction({
+        ...(editing ? { id: editing.id } : {}),
         label,
         type: "products",
         query: "",
         filters: filtersFor(category, verified, states),
-        channels: ["email"],
+        channels: editing?.channels.length ? editing.channels : ["email"],
         frequency,
       });
-      if (r.ok) setOpen(false);
-      else setError(r.error);
+      if (r.ok) {
+        setOpen(false);
+        router.refresh();
+      } else setError(r.error);
     });
   };
   const change = (row: WatchRow, next: string) => {
     start(async () => {
-      await saveAlertAction({
+      const r = await saveAlertAction({
         id: row.id,
         label: row.label,
         type: "products",
@@ -82,6 +109,31 @@ export function WatchCategory({
         channels: row.channels,
         frequency: next,
       });
+      setRowError(r.ok ? "" : r.error);
+      router.refresh();
+    });
+  };
+  const toggle = (row: WatchRow, on: boolean) => {
+    start(async () => {
+      try {
+        await setAlertOnAction(row.id, on);
+        setRowError("");
+      } catch {
+        setRowError("We couldn't change that alert. Try again.");
+      }
+      router.refresh();
+    });
+  };
+  const remove = (row: WatchRow) => {
+    start(async () => {
+      try {
+        await deleteAlertAction(row.id);
+        setDeleting(null);
+        setRowError("");
+      } catch {
+        setRowError("We couldn't delete that alert. Try again.");
+      }
+      router.refresh();
     });
   };
 
@@ -90,15 +142,12 @@ export function WatchCategory({
       <h1 className="type-h2">Alerts</h1>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="type-body text-body">We email you when new products appear in categories you watch.</p>
-        <Button
-          onClick={() => {
-            setOpen(true);
-          }}
-        >
+        <Button onClick={openNew}>
           <Icon name="bell" size={18} />
           Watch a category
         </Button>
       </div>
+      {rowError ? <Alert tone="error" title={rowError} live /> : null}
       {rows.length ? (
         <ul className="flex flex-col gap-4">
           {rows.map((r) => (
@@ -126,10 +175,35 @@ export function WatchCategory({
               <Switch
                 label={r.on ? "On" : "Paused"}
                 checked={r.on}
+                disabled={pending}
                 onCheckedChange={(v) => {
-                  start(() => setAlertOnAction(r.id, v));
+                  toggle(r, v);
                 }}
               />
+              <span className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Edit ${r.label}`}
+                  onClick={() => {
+                    openEdit(r);
+                  }}
+                >
+                  <Icon name="pencil" size={16} />
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Delete ${r.label}`}
+                  onClick={() => {
+                    setDeleting(r);
+                  }}
+                >
+                  <Icon name="trash" size={16} />
+                  Delete
+                </Button>
+              </span>
             </li>
           ))}
         </ul>
@@ -138,12 +212,7 @@ export function WatchCategory({
           <EmptyState
             title="No categories watched yet"
             action={
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
+              <Button variant="outline" onClick={openNew}>
                 Watch a category
               </Button>
             }
@@ -156,7 +225,7 @@ export function WatchCategory({
         open={open}
         onOpenChange={setOpen}
         width={480}
-        title="Watch a category"
+        title={editing ? `Edit ${editing.label}` : "Watch a category"}
         description="We email you when new products are listed. You can pause or change this any time."
         footer={
           <div className="flex justify-end gap-3">
@@ -169,7 +238,7 @@ export function WatchCategory({
               Cancel
             </Button>
             <Button disabled={pending || !category} onClick={watch}>
-              Watch category
+              {editing ? "Save changes" : "Watch category"}
             </Button>
           </div>
         }
@@ -210,6 +279,38 @@ export function WatchCategory({
           checked={verified}
           onCheckedChange={setVerified}
         />
+      </Modal>
+      <Modal
+        open={deleting !== null}
+        onOpenChange={(o) => {
+          if (!o) setDeleting(null);
+        }}
+        width={480}
+        title="Delete this alert?"
+        description={deleting ? `You'll stop getting emails about ${deleting.label}.` : ""}
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleting(null);
+              }}
+            >
+              Keep it
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={pending}
+              onClick={() => {
+                if (deleting) remove(deleting);
+              }}
+            >
+              Delete alert
+            </Button>
+          </div>
+        }
+      >
+        <p className="type-body-sm text-body">You can watch the category again any time.</p>
       </Modal>
     </>
   );

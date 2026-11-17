@@ -3,6 +3,7 @@ import { loadActor, scopeFor } from "@h2india/core/authz";
 import { buyerOf, companySettings } from "@h2india/core/buyer";
 import { productDetail } from "@h2india/core/products";
 import { buyerRfq } from "@h2india/core/rfq";
+import { MAX_RFQ_SUPPLIERS } from "@h2india/core/rfq/rules";
 import { GST_STATES } from "@h2india/core/companies/client";
 import { formatIstDate } from "@h2india/core/time";
 import type { Metadata } from "next";
@@ -30,6 +31,7 @@ export default async function RequestQuotePage({
   searchParams: Promise<{
     product?: string;
     products?: string;
+    from?: string;
     category?: string;
     supplier?: string;
     draft?: string;
@@ -72,7 +74,38 @@ export default async function RequestQuotePage({
       start.categoryLabel = c.label;
       start.source = "category";
     }
-  } else if (sp.products) start.source = "compare";
+  } else if (sp.products) {
+    // From a project list (founder QC, 17 Nov 2026): the first product sets the category and title; the others are
+    // named in Requirements, and their verified suppliers are picked, up to the limit. ?products= holds slugs.
+    const slugs = sp.products
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .slice(0, 10);
+    const found = (
+      await Promise.all(slugs.map((slug) => productDetail(db, slug, { includeSample: showSample() })))
+    ).filter((x) => x !== null);
+    const first = found[0];
+    start.source = sp.from === "list" ? "list" : "compare";
+    if (first) {
+      const c = first.sub ?? first.category;
+      start.categoryId = c.id;
+      start.categoryLabel = categories.find((x) => x.id === c.id)?.label ?? c.label;
+      start.title = found.length > 1 ? `${first.name} and ${String(found.length - 1)} more` : first.name;
+      start.productId = first.id;
+      if (found.length > 1)
+        start.requirements = `Please quote for these products from our project list:\n${found
+          .map((x) => `• ${x.name} (${x.supplier.name})`)
+          .join("\n")}`;
+      const verified = [
+        ...new Map(
+          found.filter((x) => x.supplier.verified).map((x) => [x.supplier.organisationId, x.supplier]),
+        ).values(),
+      ].slice(0, MAX_RFQ_SUPPLIERS);
+      start.supplierIds = verified.map((x) => x.organisationId);
+      start.supplierNames = Object.fromEntries(verified.map((x) => [x.organisationId, x.name]));
+    }
+  }
 
   let draftStatus: string | null = null;
   if (sp.draft && buyer && actor) {

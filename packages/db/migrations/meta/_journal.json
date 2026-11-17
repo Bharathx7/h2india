@@ -484,6 +484,13 @@
       "when": 1794893100235,
       "tag": "0068_company_role_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1794894078014,
+      "tag": "0069_order_supplier_gstin",
+      "breakpoints": true
     }
   ]
 }
