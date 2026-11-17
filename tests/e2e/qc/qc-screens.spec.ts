@@ -66,6 +66,25 @@ const PAGES = {
   ],
 } as const;
 
+// The public website (founder upgrade, 17 Nov 2026), signed out, at every width the founder checks.
+const SITE = [
+  "/",
+  "/marketplace",
+  "/news",
+  "/opportunities",
+  "/opportunities/schemes",
+  "/opportunities/tenders",
+  "/tracker",
+  "/knowledge",
+  "/events",
+  "/for-buyers",
+  "/for-suppliers",
+  "/pricing",
+  "/about",
+  "/verification",
+];
+const SITE_WIDTHS: Record<string, number[]> = { "desktop-1440": [1440, 1024], "mobile-390": [768, 390, 360] };
+
 const OUT = "../../qc-screens";
 const slug = (path: string) => path.replace(/^\//, "").replace(/[/?=&]+/g, "_") || "home";
 
@@ -107,4 +126,24 @@ test("member pages", async ({ page }, info) => {
   test.setTimeout(600_000);
   await signInMember(page, newEmail("qc-member"));
   expect(await shoot(page, "member", info.project.name)).toEqual([]);
+});
+
+test("public website", async ({ page }, info) => {
+  test.setTimeout(900_000);
+  // Reduced motion: sections below the fold are shown at once, so a full-page picture has no half-faded parts.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const broken: string[] = [];
+  for (const width of SITE_WIDTHS[info.project.name] ?? []) {
+    await page.setViewportSize({ width, height: 900 });
+    const dir = `${OUT}/site/${String(width)}`;
+    mkdirSync(dir, { recursive: true });
+    for (const path of SITE) {
+      const res = await page.goto(path);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      if (!res || res.status() >= 500)
+        broken.push(`${path} @${String(width)} (${String(res?.status() ?? "no answer")})`);
+      await page.screenshot({ path: `${dir}/${slug(path)}.png`, fullPage: true });
+    }
+  }
+  expect(broken).toEqual([]);
 });

@@ -1,6 +1,8 @@
-import { FeatureCard, HeroNetwork, LogoMarquee, StatFigure, type IconName } from "@h2india/ui";
+import { ACCOUNT_PAGES } from "@h2india/core/sign-in";
+import { FeatureCard, HeroConsole, LogoMarquee, StatFigure, type HeroPanel, type IconName } from "@h2india/ui";
+import { Suspense } from "react";
 import Link from "next/link";
-import { loadBrands, loadFigures, settle, type HomeModule } from "./data";
+import { loadBrands, loadFigures, loadNews, loadSchemes, loadTenders, settle, type HomeModule } from "./data";
 import { HeroSearch } from "./HeroSearch";
 import { container, HomeArrowLink, ModuleError, Section } from "./parts";
 
@@ -8,8 +10,9 @@ import { container, HomeArrowLink, ModuleError, Section } from "./parts";
 
 type Fail = Set<HomeModule>;
 
-/** 01 Hero (783:7522): wording as drawn (A42). The network card shows from 1024 px; phones have no card (381:5864). */
-export function Hero() {
+/** 01 Hero (783:7522): wording as drawn (A42). The "On H2 Economy now" card shows from 1024 px; phones have no card
+ * (381:5864). The card streams in behind its own skeleton, so the heading and search never wait for it. */
+export function Hero({ fail }: { fail: Fail }) {
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden bg-mint">
       <div
@@ -31,13 +34,106 @@ export function Hero() {
           </p>
           <HeroSearch />
         </div>
-        <HeroNetwork className="hidden w-[46%] shrink-0 lg:block xl:w-150" />
+        <div className="hidden w-[46%] shrink-0 lg:block xl:w-150">
+          <Suspense fallback={<HeroCardSkeleton />}>
+            <HeroCard fail={fail} />
+          </Suspense>
+        </div>
       </div>
     </section>
   );
 }
 
 const CHECKS = ["GSTIN", "PAN", "CIN", "Bank name match", "Site visit", "Certificates (PESO, BIS)"];
+
+/** The hero card's skeleton: the same box, so nothing moves when it arrives. */
+function HeroCardSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading what's on H2 Economy"
+      className="flex w-full max-w-150 flex-col gap-5 rounded-feature bg-inverse p-6 shadow-ink-float xl:p-7"
+    >
+      <span className="h-4 w-40 rounded-pill bg-ink-700" />
+      <span className="grid grid-cols-5 gap-1.5">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span key={i} className="h-9 rounded-pill bg-ink-700" />
+        ))}
+      </span>
+      <span className="h-86 rounded-card bg-ink-700/60" />
+    </div>
+  );
+}
+
+/** Hero card (founder upgrade, 17 Nov 2026): the live tenders, schemes and news, the buyer's steps and the supplier's
+ * checks. Copy comes from the sections below it; a module that fails or is empty falls back to its chips. */
+async function HeroCard({ fail }: { fail: Fail }) {
+  const now = new Date();
+  const [tenders, schemes, news] = await Promise.all([
+    settle("tenders", fail, () => loadTenders(now, 3)),
+    settle("schemes", fail, () => loadSchemes(now, 3)),
+    settle("news", fail, loadNews),
+  ]);
+  const articles = news.ok ? [news.data.lead, ...news.data.more].filter((a) => a !== null).slice(0, 3) : [];
+  const panels: HeroPanel[] = [
+    {
+      id: "buyers",
+      tab: "Buyers",
+      eyebrow: "Buyers · find, compare, request",
+      rows: [],
+      steps: STEPS.slice(0, 3),
+      chips: [
+        { label: "Electrolysers", href: "/marketplace/systems/electrolysers" },
+        { label: "Fuel cells", href: "/marketplace/systems/fuel-cell-systems" },
+        { label: "Storage tanks", href: "/marketplace/components/tanks-cylinders" },
+      ],
+      cta: { label: "Request a quote", href: "/rfq/new" },
+    },
+    {
+      id: "suppliers",
+      tab: "Suppliers",
+      eyebrow: "Suppliers · verified with dated checks",
+      rows: [],
+      chips: CHECKS.map((label) => ({ label })),
+      note: "Each badge lists the checks we made and the date we made them. Badges are never sold.",
+      cta: { label: "List your company", href: ACCOUNT_PAGES.supplier.join },
+    },
+    {
+      id: "schemes",
+      tab: "Schemes",
+      eyebrow: "Schemes · central and state",
+      rows: schemes.ok
+        ? schemes.data.map((x) => ({ title: x.title, meta: x.deadline, href: x.href, status: x.status }))
+        : [],
+      chips: [{ label: "SIGHT" }, { label: "Hydrogen hubs" }, { label: "State policies" }, { label: "R&D calls" }],
+      cta: { label: "See all schemes", href: "/opportunities/schemes" },
+    },
+    {
+      id: "tenders",
+      tab: "Tenders",
+      eyebrow: "Tenders · closing soon",
+      rows: tenders.ok
+        ? tenders.data.map((t) => ({
+            title: t.title,
+            meta: `${t.issuer} · ${t.due}`,
+            href: t.href,
+            status: t.status,
+          }))
+        : [],
+      chips: [{ label: "SECI" }, { label: "PSUs" }, { label: "State agencies" }, { label: "Ports" }],
+      cta: { label: "See all tenders", href: "/opportunities/tenders" },
+    },
+    {
+      id: "news",
+      tab: "News",
+      eyebrow: "News · India first",
+      rows: articles.map((a) => ({ title: a.title, meta: a.section, href: a.href })),
+      chips: [{ label: "Policy" }, { label: "Projects" }, { label: "Technology" }, { label: "Mobility" }],
+      cta: { label: "Read the news", href: "/news" },
+    },
+  ];
+  return <HeroConsole panels={panels} />;
+}
 
 /** 02 Trust strip (379:4415): brands listed on H2 Economy and what "Verified" means. */
 export async function TrustStrip({ fail }: { fail: Fail }) {

@@ -156,7 +156,7 @@ export function MegaMenuPanel({ section, id }: { section: MegaSection; id: strin
       id={id}
       role="region"
       aria-label={`${section.label} menu`}
-      className="flex w-full max-w-300 overflow-hidden rounded-modal border border-default bg-page shadow-ink-float-sm"
+      className="menu-enter flex w-full max-w-300 overflow-hidden rounded-modal border border-default bg-page shadow-ink-float-sm"
     >
       {section.classes ? (
         <Marketplace section={section} />

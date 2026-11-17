@@ -11,8 +11,8 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE = cx(
   "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-pill border select-none",
-  "gap-2 hover:gap-3 active:gap-2 active:pt-0.5", // hover nudges the arrow 4 px; pressed sinks the content 1 px
-  "transition-[background-color,border-color,box-shadow,gap,padding] duration-(--motion-duration-base) ease-standard",
+  "gap-2 hover:gap-3 active:scale-[0.98] active:gap-2 active:pt-0.5", // hover nudges the arrow 4 px; pressed sinks the content 1 px and the button settles
+  "transition-[background-color,border-color,box-shadow,gap,padding,scale] duration-(--motion-duration-base) ease-standard",
   "focus-visible:outline-2 focus-visible:outline-offset-0", // Focus: 2 px border/focus outside the pill
   "disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40",
 );

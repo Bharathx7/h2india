@@ -21,7 +21,7 @@ export function CategoryChip({ selected = false, touch = false, className, child
       aria-pressed={selected}
       className={cx(
         "inline-flex items-center rounded-pill border-[1.5px] type-label whitespace-nowrap",
-        "transition-[background-color,border-color,color] duration-(--motion-duration-fast) ease-standard",
+        "transition-[background-color,border-color,color,scale] duration-(--motion-duration-fast) ease-standard active:scale-[0.97]",
         touch ? "h-11 px-3.75" : "h-8 px-2.75",
         selected
           ? "border-transparent bg-inverse text-inverse"

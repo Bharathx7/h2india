@@ -60,6 +60,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Never change a token value in code. If a value looks wrong (contrast, size), raise it; the designer changes Figma.
 - Green fills (`bg-accent`) take ink text, never white.
 - Every list or panel that loads data shows loading, empty and error states (step 2.5).
+- Website upgrade (founder, 17 Nov 2026, A193; palette unchanged, motion tokens only): every card uses `card-lift` (rises half the lift token, deeper shadow, hover border, settles on press; a strip under it stops edge flicker); buttons, chips and pill actions settle on press (`active:scale-[0.97–0.98]`); page tab rows use `tab-underline` (no border on the tab itself, so tabs stay one height); header menus use `menu-enter`, the phone menu `sheet-enter`; landing-page sections (`Block`, `Faqs`, `DarkCta` in `trust/parts.tsx`) fade up with `Reveal`. Reading and workspace pages get no scroll reveals.
+- The home hero card is `HeroConsole` ("On H2 Economy now"): tabs Buyers, Suppliers, Schemes, Tenders, News fed by the home loaders (`HeroCard` in `home/sections-top.tsx`, streamed behind a same-size skeleton); an empty or failed module falls back to its chips. It advances every 5 s, pauses on hover or focus, stops for good when a tab is chosen, and never starts with reduced motion.
 - Cards in a row line up (site alignment, 17 Nov 2026): a card fills its cell (`h-full`) and its action row sits on the bottom edge (`mt-auto`); an arrow beside a title that may wrap aligns to its first line. A search box's wrapper carries `focus-within:field-focus` whenever its input sets `outline-none`.
 
 ## Sign-in (step 3.2)

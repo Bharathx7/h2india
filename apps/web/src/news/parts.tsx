@@ -56,8 +56,9 @@ export function SectionTabs({ sections, active }: { sections: SectionLink[]; act
                 href={t.href}
                 aria-current={on ? "page" : undefined}
                 className={cx(
-                  "flex items-center px-1 py-3 type-label whitespace-nowrap",
-                  on ? "border-b-3 border-inverse text-primary" : "text-body hover:text-primary",
+                  "tab-underline flex items-center px-1 py-3 type-label whitespace-nowrap [--tab-line:3px]",
+                  "transition-colors duration-(--motion-duration-fast)",
+                  on ? "text-primary" : "text-body hover:text-primary",
                 )}
               >
                 {t.name}
