@@ -24,7 +24,7 @@ test("the top bar has a working search, no welcome or help, and the profile show
   await page.keyboard.press("Escape");
   // A member can't request a quote, so the search panel doesn't offer it.
   await header.getByRole("button", { name: /^Search / }).click();
-  await page.getByRole("dialog").getByRole("textbox").first().fill("electrolyser");
+  await page.getByRole("dialog").getByRole("combobox").fill("electrolyser");
   await expect(page.getByRole("dialog").getByRole("link", { name: "Request a quote" })).toHaveCount(0);
 });
 

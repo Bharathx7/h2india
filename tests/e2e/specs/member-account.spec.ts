@@ -14,7 +14,9 @@ test("Sign-in and security shows how the member signs in and this device", async
   await page.goto("/member/security");
   await expect(page.getByRole("heading", { level: 1, name: "Sign-in and security" })).toBeVisible();
   await expect(page.getByRole("region", { name: "How you sign in" }).getByText(email).first()).toBeVisible();
-  await expect(page.getByRole("region", { name: "Signed-in devices" }).getByText("This device")).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Signed-in devices" }).getByText("This device", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("You're signed in only on this device.")).toBeVisible();
 });
 

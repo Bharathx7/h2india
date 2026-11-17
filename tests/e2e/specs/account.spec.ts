@@ -43,7 +43,7 @@ test("Your details: anyone can change their name and role; the page has its padd
   await details.getByLabel("Full name").fill("Meera Iyer");
   await details.getByLabel("Your role").selectOption("Engineering");
   await details.getByRole("button", { name: "Save details" }).click();
-  await expect(page.getByText("Details saved")).toBeVisible();
+  await expect(page.getByText("Details saved", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Meera Iyer" })).toBeVisible();
   // Founder QC, 17 Nov 2026: the content no longer sits against the sidebar and top bar.
   const box = await page.getByRole("heading", { level: 1 }).boundingBox();

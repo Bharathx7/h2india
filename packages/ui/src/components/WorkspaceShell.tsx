@@ -327,8 +327,8 @@ function LinkSearch({ placeholder, links }: { placeholder: string; links: (query
           type="search"
           value={query}
           placeholder={placeholder}
-          aria-controls={listId}
-          aria-expanded={open && options.length > 0}
+          // A plain search box (axe aria-allowed-attr: no aria-expanded on searchbox); the suggestions are links.
+          aria-describedby={open && options.length ? listId : undefined}
           onFocus={() => {
             setOpen(true);
           }}
@@ -345,6 +345,7 @@ function LinkSearch({ placeholder, links }: { placeholder: string; links: (query
       {open && options.length ? (
         <ul
           id={listId}
+          aria-label="Search in"
           className="absolute inset-x-0 top-12 z-40 flex flex-col overflow-hidden rounded-card border border-default bg-page py-1 shadow-ink-float-sm"
         >
           {options.map((o) => (

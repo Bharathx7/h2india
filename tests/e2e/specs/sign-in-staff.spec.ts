@@ -43,7 +43,7 @@ test("staff set a password from the emailed link, then sign in to the back offic
   await page.getByLabel("New password").fill("short");
   await page.getByLabel("Type it again").fill("short");
   await page.getByRole("button", { name: "Set password" }).click();
-  await expect(page.getByText("Use at least 8 characters")).toBeVisible();
+  await expect(page.getByText("Use at least 8 characters", { exact: true })).toBeVisible();
   const password = `Pw-${String(Date.now())}-staff`;
   await page.getByLabel("New password").fill(password);
   await page.getByLabel("Type it again").fill(password);
