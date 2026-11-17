@@ -130,14 +130,15 @@ function SidebarBody({
     .filter(matches)
     .sort((a, b) => b.length - a.length)[0];
   return (
-    <div data-surface="inverse" className="flex h-full flex-col gap-4 bg-inverse px-4 pt-5 pb-4">
+    <div data-surface="inverse" className="flex h-full flex-col gap-3 bg-inverse px-4 pt-4 pb-4">
       {/* Founder QC (17 Nov 2026): the logo and the area badge didn't fit side by side in the 240 px rail and the badge
           was cut in half; the badge now sits under the logo, both whole. */}
-      <div className={cx("flex flex-col items-start gap-2 pl-2", compact && "max-lg:hidden")}>
+      {/* Kept compact so the longest menu (member) still fits a 650 px tall window (workspace-shell.spec.ts). */}
+      <div className={cx("flex flex-col items-start gap-1.5 pl-2", compact && "max-lg:hidden")}>
         <Link href={homeHref} aria-label="H2 Economy home" className="rounded-control" onClick={onNavigate}>
-          <Logo version="primary-on-dark" height={28} title="" />
+          <Logo version="primary-on-dark" height={24} title="" />
         </Link>
-        <span className="rounded-[4px] bg-accent px-1.5 py-0.5 type-label-sm whitespace-nowrap text-primary">
+        <span className="rounded-[4px] bg-accent px-1.5 type-label-sm whitespace-nowrap text-primary">
           {AREA_LABEL[area]} workspace
         </span>
       </div>
