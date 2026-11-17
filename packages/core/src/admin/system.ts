@@ -291,3 +291,27 @@ export async function reportSchedules(db: Executor, actor: Actor) {
   assertCan(actor, "reports.view");
   return db.select().from(schema.reportSchedules).orderBy(desc(schema.reportSchedules.createdAt));
 }
+
+/**
+ * Stop a scheduled report email (founder QC, 17 Nov 2026: a schedule could be added but never stopped). The person
+ * who scheduled it, or an operator with settings.edit. A schedule is a setting, not a record, so it is removed; the
+ * audit log keeps what it was.
+ */
+export async function cancelReportSchedule(db: Database, actor: Actor, id: string, context?: RequestContext) {
+  assertCan(actor, "reports.view");
+  await db.transaction(async (tx) => {
+    const [row] = await tx.select().from(schema.reportSchedules).where(eq(schema.reportSchedules.id, id)).for("update");
+    if (!row) throw new SystemError("This schedule was already stopped");
+    if (row.createdBy !== actor.userId && !actor.operator.has("settings.edit"))
+      throw new SystemError("Only the person who scheduled it, or a settings admin, can stop it");
+    await tx.delete(schema.reportSchedules).where(eq(schema.reportSchedules.id, id));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "report.unscheduled",
+      resourceType: "report_schedule",
+      resourceId: id,
+      before: { email: row.email, frequency: row.frequency },
+      context,
+    });
+  });
+}

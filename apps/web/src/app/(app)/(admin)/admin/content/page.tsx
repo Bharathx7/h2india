@@ -11,7 +11,9 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { possibleUpdates, RED_DAYS, STALE_DAYS, staleRecords } from "@/cms/records/quality";
 import { ArticlesLibrary } from "@/admin/cms/ArticlesLibrary";
 import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
-import { CONTENT_GROUPS } from "@/admin/cms/registry";
+import { CONTENT_GROUPS, CONTENT_SLUGS } from "@/admin/cms/registry";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Content (step 11.3): Articles, Records, Newsletter (647:8), Media, Authors and Data quality (646:9, 646:733).
 // Articles (638:8, 642:326), records, media (649:8) and authors (649:730) open the native editors.
@@ -38,6 +40,7 @@ export default async function ContentPage({
     author?: string;
     sort?: string;
     page?: string;
+    perPage?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -105,7 +108,7 @@ export default async function ContentPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {stale.map((r) => (
+                  {pageOf(stale, pageRequest(sp)).rows.map((r) => (
                     <tr key={`${r.collection}-${String(r.id)}`} className="border-t border-default">
                       <td className="px-4 py-3">
                         <span className="block type-label">{r.title}</span>
@@ -127,8 +130,13 @@ export default async function ContentPage({
                       <td className="px-4 py-3">
                         <span className="flex items-center justify-end gap-2">
                           <MarkVerified collection={r.collection} id={r.id} title={r.title} />
+                          {/* The built-in editor where the collection has one (founder QC: this always opened /cms). */}
                           <Link
-                            href={`/cms/collections/${r.collection}/${String(r.id)}`}
+                            href={
+                              CONTENT_SLUGS.includes(r.collection)
+                                ? `/admin/content/${r.collection}/${String(r.id)}`
+                                : `/cms/collections/${r.collection}/${String(r.id)}`
+                            }
                             className={buttonClasses({ variant: "ghost", size: "sm" })}
                           >
                             <Icon name="pencil" size={14} />
@@ -150,7 +158,7 @@ export default async function ContentPage({
           )
         ) : updates.length ? (
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
-            {updates.map((u) => (
+            {pageOf(updates, pageRequest(sp)).rows.map((u) => (
               <li key={String(u.id)} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <span>
                   <span className="block type-label">{u.title}</span>
@@ -175,21 +183,28 @@ export default async function ContentPage({
             </EmptyState>
           </div>
         )}
+        <ListPager
+          paged={pageOf<unknown>(view === "stale" ? stale : updates, pageRequest(sp))}
+          query={pagingQuery(sp)}
+        />
         <p className="type-caption text-secondary">
-          Showing {view === "stale" ? stale.length : updates.length} · red after {RED_DAYS} days
+          {view === "stale" ? stale.length : updates.length} in all · red after {RED_DAYS} days
         </p>
       </>
     );
   } else if (tab === "newsletter") {
     const [all, sends, audience] = await Promise.all([
-      payload.find({ collection: "newsletter-issues", sort: "-number", limit: 100, depth: 0, overrideAccess: true }),
+      payload.find({ collection: "newsletter-issues", sort: "-number", limit: 1000, depth: 0, overrideAccess: true }),
       listSends(db),
       confirmedCount(db),
     ]);
     const statusOf = (id: string, sentOn: string | null | undefined) =>
       sends.find((x) => x.issueId === id)?.status ?? (sentOn && new Date(sentOn) < new Date() ? "Sent" : "Draft");
     const filter = sp.status;
-    const rows = all.docs.filter((d) => !filter || statusOf(String(d.id), d.sentOn) === filter);
+    const matching = all.docs.filter((d) => !filter || statusOf(String(d.id), d.sentOn) === filter);
+    // Paged (founder QC, 17 Nov 2026: the list stopped at 100 issues).
+    const paged = pageOf(matching, pageRequest(sp));
+    const rows = paged.rows;
     /** Opens and clicks as a share of delivered (647:8), only once the provider reports them (M6). */
     const share = (x: number | null | undefined, of: number | undefined) =>
       x === null || x === undefined || !of ? "—" : `${(Math.round((x / of) * 1000) / 10).toFixed(1)}%`;
@@ -294,6 +309,7 @@ export default async function ContentPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={paged} query={pagingQuery(sp)} />
         <p className="type-caption text-secondary">Opens and clicks show only as the email provider reports them.</p>
       </>
     );
@@ -362,9 +378,10 @@ export default async function ContentPage({
             </Link>
           ) : (
             <>
+              {/* Records are added from their own list (each has New); this opens the list of record types. */}
               <Link href="/admin/content?tab=records" className={buttonClasses({ variant: "outline" })}>
-                <Icon name="plus" size={16} />
-                New record
+                <Icon name="folder" size={16} />
+                Records
               </Link>
               <Link href="/admin/content/articles/new" className={buttonClasses({})}>
                 <Icon name="plus" size={16} />

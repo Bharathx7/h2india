@@ -5,6 +5,7 @@ export {
   CLOCK_SETTINGS,
   clockDuration,
   completeDeadline,
+  listHolidays,
   onDeadline,
   removeHoliday,
   runDeadlines,

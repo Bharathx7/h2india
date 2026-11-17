@@ -226,8 +226,8 @@ export default async function AdminMoneyPage({
           tone="info"
           title="Rates, caps, TCS and TDS are confirmed by the Chartered Accountant before Launch 2 (M11)"
         >
-          Change them in Settings (settings.edit, audited). Each version applies to orders accepted from its effective
-          date.
+          They are changed by the engineering team as a new, audited version once the CA confirms them; there is no
+          editor here yet. Each version applies to orders accepted from its effective date.
         </Alert>
         <Table
           label="Rate cards"

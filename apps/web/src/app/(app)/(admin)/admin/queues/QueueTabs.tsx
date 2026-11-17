@@ -38,20 +38,32 @@ export async function queueCounts(actor: Actor): Promise<Record<QueueKey, number
 export async function QueueTabs({ current, actor }: { current: QueueKey; actor: Actor }) {
   const counts = await queueCounts(actor);
   return (
-    <nav aria-label="Queues" className="flex gap-6 overflow-x-auto border-b border-default">
-      {QUEUES.map((t) => (
-        <Link
-          key={t.key}
-          href={`/admin/queues/${t.key}`}
-          aria-current={t.key === current ? "page" : undefined}
-          className={cx(
-            "-mb-px border-b-2 py-3 whitespace-nowrap type-label",
-            t.key === current ? "border-inverse" : "border-transparent text-secondary",
-          )}
-        >
-          {t.label} <span className="text-secondary">{counts[t.key]}</span>
+    <div className="flex flex-col gap-3">
+      {/* Founder QC (17 Nov 2026): everything, not only what waits for a decision. */}
+      <p className="flex flex-wrap gap-4 type-label">
+        <span className="text-secondary">Browse everything:</span>
+        <Link href="/admin/listings" className="text-link underline">
+          All products
         </Link>
-      ))}
-    </nav>
+        <Link href="/admin/rfqs" className="text-link underline">
+          All RFQs
+        </Link>
+      </p>
+      <nav aria-label="Queues" className="flex gap-6 overflow-x-auto border-b border-default">
+        {QUEUES.map((t) => (
+          <Link
+            key={t.key}
+            href={`/admin/queues/${t.key}`}
+            aria-current={t.key === current ? "page" : undefined}
+            className={cx(
+              "-mb-px border-b-2 py-3 whitespace-nowrap type-label",
+              t.key === current ? "border-inverse" : "border-transparent text-secondary",
+            )}
+          >
+            {t.label} <span className="text-secondary">{counts[t.key]}</span>
+          </Link>
+        ))}
+      </nav>
+    </div>
   );
 }

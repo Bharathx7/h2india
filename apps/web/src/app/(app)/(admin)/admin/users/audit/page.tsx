@@ -1,4 +1,4 @@
-import { AUDIT_RETENTION_YEARS, getDb, readAuditLog } from "@h2india/core";
+import { AUDIT_RETENTION_YEARS, auditResourceTypes, countAuditLog, getDb, readAuditLog } from "@h2india/core";
 import { actorLabels, listUsers, operatorRoleGrid } from "@h2india/core/admin/users";
 import { can } from "@h2india/core/authz";
 import { buttonClasses, EmptyState, Icon } from "@h2india/ui";
@@ -10,15 +10,14 @@ import { AutoSelect } from "@/admin/users/Controls";
 import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { actionWords, deviceOf } from "@/admin/users/words";
 import { ListPager } from "@/components/ListPager";
-import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Audit log (656:872; states 657:1313), step 11.4: every recorded action with who, what, the change, why and from
-// where, newest first, and an export for those with users.export. Append-only. The Organisation filter the frame
-// draws isn't here yet: entries are filtered by person, record type and dates.
+// where, newest first, and an export for those with users.export. Append-only. Founder QC (17 Nov 2026): searched and
+// paged in the database (it showed only the newest 200), and ?company= filters to one organisation.
 export const metadata: Metadata = { title: "Audit log · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-const LIMIT = 200;
 const ist = (d: Date, o: Intl.DateTimeFormatOptions) => d.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", ...o });
 const typeWord = (t: string) => {
   const w = t.replace(/[_-]+/g, " ");
@@ -34,6 +33,7 @@ export default async function AuditPage({
     type?: string;
     from?: string;
     to?: string;
+    company?: string;
     page?: string;
     perPage?: string;
   }>;
@@ -48,23 +48,20 @@ export default async function AuditPage({
     resourceType: sp.type?.trim() || undefined,
     from: from ? new Date(`${from}T00:00:00+05:30`) : undefined,
     to: to ? new Date(`${to}T23:59:59+05:30`) : undefined,
+    companyId: sp.company && /^[0-9a-f-]{36}$/i.test(sp.company) ? sp.company : undefined,
+    text: sp.q?.trim() || undefined,
   };
   const db = getDb();
-  const [all, everyone, roles] = await Promise.all([
-    readAuditLog(db, actor, filter, { limit: LIMIT }),
+  const req = pageRequest(sp);
+  const [all, total, allTypes, everyone, roles] = await Promise.all([
+    readAuditLog(db, actor, filter, pageWindow(req)),
+    countAuditLog(db, actor, filter),
+    auditResourceTypes(db, actor),
     listUsers(db, actor, { limit: 1 }),
     operatorRoleGrid(db, actor),
   ]);
-  const q = sp.q?.trim().toLowerCase() ?? "";
-  const rows = q
-    ? all.filter((r) =>
-        `${r.action} ${actionWords(r.action)} ${r.resourceType} ${r.resourceId ?? ""} ${r.reason ?? ""}`
-          .toLowerCase()
-          .includes(q),
-      )
-    : all;
-  // readAuditLog loads the newest LIMIT entries; this pages through them.
-  const paged = pageOf(rows, pageRequest(sp));
+  const rows = all;
+  const paged = { rows: all, total, page: req.page, perPage: req.perPage };
   const names = await actorLabels(
     db,
     actor,
@@ -76,14 +73,14 @@ export default async function AuditPage({
   ];
   if (filter.actorId && !names.has(filter.actorId))
     actorOptions.push({ value: filter.actorId, label: "Chosen person" });
-  const types = [...new Set(all.map((r) => r.resourceType))].sort();
+  const types = [...allTypes];
   if (filter.resourceType && !types.includes(filter.resourceType)) types.push(filter.resourceType);
   const qs = new URLSearchParams(
     Object.entries({ actor: filter.actorId, type: filter.resourceType, from, to }).filter((e): e is [string, string] =>
       Boolean(e[1]),
     ),
   ).toString();
-  const filtered = Boolean(q || filter.actorId || filter.resourceType || from || to);
+  const filtered = Boolean(filter.text || filter.actorId || filter.resourceType || filter.companyId || from || to);
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <UsersHeader />
@@ -236,7 +233,7 @@ export default async function AuditPage({
         </div>
       )}
       <p className="type-caption text-secondary">
-        Showing {rows.length.toLocaleString("en-IN")} of the newest {LIMIT} entries
+        {total.toLocaleString("en-IN")} {total === 1 ? "entry" : "entries"}
         {from || to ? ` from ${from ?? "the start"} to ${to ?? "today"}` : ""}. Kept for {AUDIT_RETENTION_YEARS} years.
       </p>
     </AdminShell>

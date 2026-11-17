@@ -3,7 +3,16 @@
 import { Alert, Button, FormField, Icon, Input, Modal, Select, Switch, Toaster, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { clockAction, deadLetterAction, flagAction, proposalAction, scheduleReportAction } from "./actions";
+import {
+  cancelReportAction,
+  clockAction,
+  deadLetterAction,
+  flagAction,
+  holidayAction,
+  proposalAction,
+  removeHolidayAction,
+  scheduleReportAction,
+} from "./actions";
 
 // System settings controls (707:793) and Schedule report email (267:7338, toast 267:6920), step 11.8.
 
@@ -308,5 +317,114 @@ function ScheduleReportDialog() {
         </div>
       </Modal>
     </>
+  );
+}
+
+/** Stop a scheduled report email (founder QC, 17 Nov 2026). */
+export function CancelReport({ id, email }: { id: string; email: string }) {
+  const r = useRun();
+  return (
+    <span className="flex items-center gap-2">
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={r.pending}
+        onClick={() => {
+          r.go(() => cancelReportAction(id), "Stopped");
+        }}
+      >
+        Stop<span className="sr-only"> the report to {email}</span>
+      </Button>
+      {r.msg?.tone === "error" ? <span className="type-caption text-error">{r.msg.text}</span> : null}
+    </span>
+  );
+}
+
+/**
+ * Holidays (M18; founder QC, 17 Nov 2026: the list could only be changed in the database). Working-day clocks skip
+ * these days; a change applies to deadlines started after it.
+ */
+export function Holidays({
+  rows,
+  canEdit,
+}: {
+  rows: { day: string; name: string; source: string | null }[];
+  canEdit: boolean;
+}) {
+  const r = useRun();
+  const [day, setDay] = useState("");
+  const [name, setName] = useState("");
+  const fmt = (d: string) =>
+    new Date(`${d}T12:00:00+05:30`).toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  return (
+    <div className="flex flex-col gap-3">
+      {r.msg ? <Alert tone={r.msg.tone} title={r.msg.text} live /> : null}
+      {rows.length ? (
+        <ul className="flex max-h-80 flex-col divide-y divide-default overflow-y-auto">
+          {rows.map((h) => (
+            <li key={h.day} className="flex items-center justify-between gap-3 py-2 type-body-sm">
+              <span>
+                <span className="type-label">{fmt(h.day)}</span> · {h.name}
+              </span>
+              {canEdit ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={r.pending}
+                  onClick={() => {
+                    r.go(() => removeHolidayAction(h.day), "Removed");
+                  }}
+                >
+                  Remove<span className="sr-only"> {h.name}</span>
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="type-body-sm text-secondary">
+          No holidays yet: every Monday to Saturday counts as a working day.
+        </p>
+      )}
+      {canEdit ? (
+        <div className="flex flex-wrap items-end gap-3">
+          <FormField label="Date">
+            <Input
+              type="date"
+              value={day}
+              onChange={(e) => {
+                setDay(e.target.value);
+              }}
+            />
+          </FormField>
+          <FormField label="Holiday">
+            <Input
+              value={name}
+              maxLength={80}
+              placeholder="Diwali"
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+          </FormField>
+          <Button
+            disabled={r.pending || !day || !name.trim()}
+            onClick={() => {
+              r.go(() => holidayAction(day, name), "Saved");
+              setDay("");
+              setName("");
+            }}
+          >
+            Add holiday
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }

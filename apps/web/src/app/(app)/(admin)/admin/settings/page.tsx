@@ -2,12 +2,13 @@ import { ADMIN_FLAGS, isEnabled, TWO_PERSON_FLAGS } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { clockValues, openProposals, systemHealth } from "@h2india/core/admin/system";
 import { can } from "@h2india/core/authz";
+import { listHolidays } from "@h2india/core/clocks";
 import { formatIstDateTime } from "@h2india/core/time";
 import { buttonClasses, EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
-import { ClockRow, FailedJob, FlagRow, Proposal } from "@/admin/system/Controls";
+import { ClockRow, FailedJob, FlagRow, Holidays, Proposal } from "@/admin/system/Controls";
 
 // System settings (707:793), step 11.8: switches, clocks, integrations and failed jobs. Every change needs a reason
 // and is audited; switches that open money flows need a second operator; clocks apply to new deadlines only.
@@ -56,10 +57,11 @@ const unitOf = (d: { hours?: number; days?: number; workingDays?: number }) =>
 export default async function SettingsPage() {
   const { userId, actor } = await requireOperator("settings.view", "/admin/settings");
   const db = getDb();
-  const [health, clocks, proposals] = await Promise.all([
+  const [health, clocks, proposals, holidays] = await Promise.all([
     systemHealth(db, actor),
     clockValues(db),
     openProposals(db, actor),
+    listHolidays(db, actor),
   ]);
   const canEdit = can(actor, "settings.edit");
   const flagRows = (list: readonly (typeof ADMIN_FLAGS)[number][]) =>
@@ -140,6 +142,14 @@ export default async function SettingsPage() {
               </table>
             </div>
           </section>
+          <section className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
+            <h2 className="type-h4">Holidays</h2>
+            <p className="type-caption text-secondary">
+              Working-day clocks (SLA, review times) skip these days, Monday to Saturday otherwise. A change applies to
+              deadlines started after it.
+            </p>
+            <Holidays rows={holidays} canEdit={canEdit} />
+          </section>
           <section className="flex flex-col gap-1 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Feature flags</h2>
             <ul className="flex flex-col divide-y divide-default">{flagRows(FEATURE_FLAGS)}</ul>
@@ -166,9 +176,7 @@ export default async function SettingsPage() {
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Message template IDs</h2>
-            <p className="type-caption text-secondary">
-              IDs registered with each provider. Designs are on the Messages page.
-            </p>
+            <p className="type-caption text-secondary">IDs registered with each provider.</p>
             <div className="rounded-card bg-subtle">
               <EmptyState title="No provider IDs yet">
                 SMS (DLT) and WhatsApp template IDs show here with their status once the providers are chosen (M5).

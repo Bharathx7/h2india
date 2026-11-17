@@ -5,7 +5,7 @@ import { buttonClasses, cx, EmptyState, Icon } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
-import { ScheduleReport } from "@/admin/system/Controls";
+import { CancelReport, ScheduleReport } from "@/admin/system/Controls";
 import { PERIODS, REPORT_DOWNLOADS } from "./report-groups";
 
 // Reports overview (716:348), step 11.8: Audience, Marketplace, Content output and Download a report, for the chosen
@@ -201,8 +201,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 <span>
                   {s.email} · {s.frequency === "weekly" ? "Weekly" : "Monthly"}
                 </span>
-                <span className="text-secondary">
+                <span className="flex items-center gap-3 text-secondary">
                   {s.lastSentAt ? `Last sent ${formatIstDateTime(s.lastSentAt)}` : "Not sent yet"}
+                  <CancelReport id={s.id} email={s.email} />
                 </span>
               </li>
             ))}
