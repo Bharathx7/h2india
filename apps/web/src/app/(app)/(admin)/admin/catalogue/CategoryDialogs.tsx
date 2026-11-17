@@ -8,6 +8,7 @@ import {
   addCategoryAction,
   fullHistoryAction,
   moveCategoryAction,
+  moveSubCategoryAction,
   renameCategoryAction,
   setCategoryApplicationsAction,
   setCategoryHiddenAction,
@@ -209,16 +210,27 @@ export function MoveCategoryDialog(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tree: TreeClass[];
-  category: { id: string; label: string; classId: string };
+  category: { id: string; label: string; classId: string; parentId: string | null };
   onDone: Done;
 }) {
+  // A sub-category moves under another category (founder QC, 17 Nov 2026); a category moves to another main group.
+  const sub = props.category.parentId !== null;
   const [classId, setClassId] = useState(props.category.classId);
+  const [parentId, setParentId] = useState(props.category.parentId ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
-  const to = props.tree.find((c) => c.id === classId)?.label ?? "";
+  const parents = props.tree.flatMap((k) =>
+    k.categories.map((c) => ({ id: c.id, label: c.label, classLabel: k.label })),
+  );
+  const to = sub
+    ? (parents.find((p) => p.id === parentId)?.label ?? "")
+    : (props.tree.find((c) => c.id === classId)?.label ?? "");
+  const unchanged = sub ? parentId === props.category.parentId : classId === props.category.classId;
   const submit = () => {
     start(async () => {
-      const r = await moveCategoryAction(props.category.id, classId);
+      const r = sub
+        ? await moveSubCategoryAction(props.category.id, parentId)
+        : await moveCategoryAction(props.category.id, classId);
       if (!r.ok) {
         setErrors(r.errors);
         return;
@@ -233,7 +245,11 @@ export function MoveCategoryDialog(props: {
       onOpenChange={props.onOpenChange}
       width={480}
       title={`Move ${props.category.label}`}
-      description="Its sub-categories, attributes and products move with it."
+      description={
+        sub
+          ? "Its attributes and products move with it. Its products then also fill in the new category's attributes."
+          : "Its sub-categories, attributes and products move with it."
+      }
       footer={
         <>
           <Button
@@ -244,27 +260,48 @@ export function MoveCategoryDialog(props: {
           >
             Cancel
           </Button>
-          <Button onClick={submit} disabled={pending || classId === props.category.classId}>
+          <Button onClick={submit} disabled={pending || unchanged}>
             Move
           </Button>
         </>
       }
     >
       <FormError message={errors._} />
-      <FormField label="Main group" error={errors.classId}>
-        <Select
-          value={classId}
-          onChange={(e) => {
-            setClassId(e.target.value);
-          }}
-        >
-          {props.tree.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
-            </option>
-          ))}
-        </Select>
-      </FormField>
+      {sub ? (
+        <FormField label="Move under" error={errors.parentId}>
+          <Select
+            value={parentId}
+            onChange={(e) => {
+              setParentId(e.target.value);
+            }}
+          >
+            {props.tree.map((k) => (
+              <optgroup key={k.id} label={k.label}>
+                {k.categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </Select>
+        </FormField>
+      ) : (
+        <FormField label="Main group" error={errors.classId}>
+          <Select
+            value={classId}
+            onChange={(e) => {
+              setClassId(e.target.value);
+            }}
+          >
+            {props.tree.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+      )}
     </Modal>
   );
 }

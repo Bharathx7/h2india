@@ -145,6 +145,7 @@ const SUPPLIER = [
 const ADMIN = [
   "/admin",
   "/admin/catalogue",
+  "/admin/catalogue/applications",
   "/admin/compliance",
   "/admin/content",
   "/admin/content/calendar",

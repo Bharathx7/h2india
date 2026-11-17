@@ -37,8 +37,10 @@ export interface TreeNode {
   slug: string;
   hidden: boolean;
   sample: boolean;
-  /** Live listings. Products arrive in step 8.3; until then every count is 0 (the frames' counts are sample). */
+  /** Live listings in it and its sub-categories (founder QC, 17 Nov 2026: this was always 0). */
   liveProducts: number;
+  /** Its own attributes (not counting a parent's), for the "No attributes" filter. */
+  attributes: number;
   children: TreeNode[];
 }
 
@@ -54,6 +56,14 @@ export interface AttributeRow extends AttributeDef {
   sample: boolean;
   /** Added in the last 7 days: the "New" badge on 636:596. */
   isNew: boolean;
+  /** Products (not deleted) that store a value for it: its type and unit are locked and it can't be removed. */
+  inUse: number;
+}
+
+/** A parent category's attribute, shown read-only on a sub-category (products fill both in, effectiveSchema()). */
+export interface InheritedAttribute extends AttributeDef {
+  id: string;
+  from: string;
 }
 
 export interface CategoryChange {
@@ -74,6 +84,8 @@ export interface CategoryDetail {
   sample: boolean;
   liveProducts: number;
   attributes: AttributeRow[];
+  /** The parent's attributes a sub-category's products also fill in, first in the form. */
+  inherited: InheritedAttribute[];
   lastChange: CategoryChange | null;
   /** Display groups to offer in the dialog: the drawn three, then any others this category uses. */
   groups: string[];
@@ -93,28 +105,52 @@ export class CatalogueError extends Error {
 
 const NEW_FOR_MS = 7 * 86_400_000;
 
+/** Live listings per category (its own products, not its sub-categories'). */
+async function liveCounts(db: Executor): Promise<Map<string, number>> {
+  const p = schema.products;
+  const rows = await db
+    .select({ categoryId: p.categoryId, n: sql<number>`count(*)::int` })
+    .from(p)
+    .where(and(eq(p.status, "Live"), isNull(p.deletedAt)))
+    .groupBy(p.categoryId);
+  return new Map(rows.map((r) => [r.categoryId, r.n]));
+}
+
 /** The whole tree for the admin screen, sample and hidden categories included (they are marked). */
 export async function catalogueTree(db: Executor, actor: Actor): Promise<TreeClass[]> {
   assertCan(actor, "catalogue.view");
-  const [classes, rows] = await Promise.all([
+  const [classes, rows, counts, attrCounts] = await Promise.all([
     db.select().from(cls).orderBy(asc(cls.position)),
     db.select().from(cat).where(isNull(cat.deletedAt)).orderBy(asc(cat.position), asc(cat.label)),
+    liveCounts(db),
+    db
+      .select({ categoryId: attr.categoryId, n: sql<number>`count(*)::int` })
+      .from(attr)
+      .where(isNull(attr.deletedAt))
+      .groupBy(attr.categoryId),
   ]);
-  const node = (r: typeof cat.$inferSelect): TreeNode => ({
-    id: r.id,
-    label: r.label,
-    slug: r.slug,
-    hidden: r.hiddenAt !== null,
-    sample: r.sample,
-    liveProducts: 0,
-    children: rows.filter((c) => c.parentId === r.id).map(node),
+  const node = (r: typeof cat.$inferSelect): TreeNode => {
+    const children = rows.filter((c) => c.parentId === r.id).map(node);
+    return {
+      id: r.id,
+      label: r.label,
+      slug: r.slug,
+      hidden: r.hiddenAt !== null,
+      sample: r.sample,
+      liveProducts: (counts.get(r.id) ?? 0) + children.reduce((sum, c) => sum + c.liveProducts, 0),
+      attributes: attrCounts.find((a) => a.categoryId === r.id)?.n ?? 0,
+      children,
+    };
+  };
+  return classes.map((c) => {
+    const categories = rows.filter((r) => r.classId === c.id && r.parentId === null).map(node);
+    return {
+      id: c.id as ClassId,
+      label: c.label,
+      liveProducts: categories.reduce((sum, x) => sum + x.liveProducts, 0),
+      categories,
+    };
   });
-  return classes.map((c) => ({
-    id: c.id as ClassId,
-    label: c.label,
-    liveProducts: 0,
-    categories: rows.filter((r) => r.classId === c.id && r.parentId === null).map(node),
-  }));
 }
 
 /** A definition as a plain object for the audit log. */
@@ -198,7 +234,7 @@ export async function categoryDetail(
     .where(and(eq(cat.id, categoryId), isNull(cat.deletedAt)))
     .limit(1);
   if (!row) return null;
-  const [attributes, parent, [last], links] = await Promise.all([
+  const [attributes, parent, [last], links, counts, parentAttributes] = await Promise.all([
     liveAttributes(db, categoryId),
     row.c.parentId ? categoryRow(db, row.c.parentId) : Promise.resolve(null),
     categoryHistory(db, actor, categoryId, 1),
@@ -206,7 +242,17 @@ export async function categoryDetail(
       .select()
       .from(schema.catalogueCategoryApplications)
       .where(eq(schema.catalogueCategoryApplications.categoryId, categoryId)),
+    liveCounts(db),
+    row.c.parentId ? liveAttributes(db, row.c.parentId) : Promise.resolve([]),
   ]);
+  const kids = row.c.parentId
+    ? []
+    : await db
+        .select({ id: cat.id })
+        .from(cat)
+        .where(and(eq(cat.parentId, categoryId), isNull(cat.deletedAt)));
+  const inUse = await usageByAttribute(db, attributes);
+  const own = new Set(attributes.map((a) => a.key));
   const used = [...new Set(attributes.map((a) => a.displayGroup))];
   return {
     id: row.c.id,
@@ -218,14 +264,18 @@ export async function categoryDetail(
     description: row.c.description,
     hidden: row.c.hiddenAt !== null,
     sample: row.c.sample,
-    liveProducts: 0,
+    liveProducts: (counts.get(categoryId) ?? 0) + kids.reduce((sum, k) => sum + (counts.get(k.id) ?? 0), 0),
     attributes: attributes.map((a) => ({
       ...toDef(a),
       id: a.id,
       sample: a.sample,
       // Only what an operator added recently; the launch schema from the seed migration has no author.
       isNew: a.createdBy !== null && now.getTime() - a.createdAt.getTime() < NEW_FOR_MS,
+      inUse: inUse.get(a.id) ?? 0,
     })),
+    inherited: parentAttributes
+      .filter((a) => !own.has(a.key))
+      .map((a) => ({ ...toDef(a), id: a.id, from: parent?.label ?? "" })),
     lastChange: last ?? null,
     groups: [...DISPLAY_GROUPS, ...used.filter((g) => !(DISPLAY_GROUPS as readonly string[]).includes(g))],
     applicationIds: links.map((l) => l.applicationId),
@@ -251,11 +301,36 @@ export async function categoryHistory(
 }
 
 /**
- * How many products store a value for an attribute. Products arrive in step 8.3, which turns this into a count over
- * their attribute values (taking the attribute); until then nothing uses an attribute, so every change is allowed.
+ * How many products (not deleted) store a value for an attribute: those in its category, and for a top-level
+ * category's attribute, those in its sub-categories too (they inherit it, effectiveSchema()). Founder QC (17 Nov 2026):
+ * this was a placeholder returning 0, so a used attribute could be removed or have its type changed (A107).
  */
-export function productsUsingAttribute(): number {
-  return 0;
+export async function productsUsingAttribute(
+  db: Executor,
+  attribute: { categoryId: string; key: string },
+): Promise<number> {
+  const p = schema.products;
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(p)
+    .where(
+      and(
+        isNull(p.deletedAt),
+        sql`(${p.categoryId} = ${attribute.categoryId} or ${p.categoryId} in (select id from core.catalogue_categories where parent_id = ${attribute.categoryId}))`,
+        sql`${p.attributes} ? ${attribute.key}`,
+      ),
+    );
+  return row?.n ?? 0;
+}
+
+/** productsUsingAttribute() for a category's attributes at once, by attribute id. */
+async function usageByAttribute(
+  db: Executor,
+  rows: { id: string; categoryId: string; key: string }[],
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  for (const a of rows) out.set(a.id, await productsUsingAttribute(db, a));
+  return out;
 }
 
 async function record(
@@ -423,7 +498,7 @@ export async function updateAttribute(
     if (!checked.ok) return checked;
     const before = toDef(row);
     const v = checked.value;
-    const blocked = changeNeedsMigration(before, v, productsUsingAttribute());
+    const blocked = changeNeedsMigration(before, v, await productsUsingAttribute(tx, row));
     if (blocked) return { ok: false, errors: { type: blocked } };
     const summary = describeEdit(before, v);
     if (!summary) return { ok: true, value: { changed: false } };
@@ -458,9 +533,10 @@ export async function removeAttribute(
   const now = opts.now ?? new Date();
   await db.transaction(async (tx) => {
     const row = await attributeRow(tx, attributeId);
-    if (productsUsingAttribute() > 0) {
+    const using = await productsUsingAttribute(tx, row);
+    if (using > 0) {
       throw new CatalogueError(
-        "Products already use this attribute, so it can't be removed. Make it optional instead.",
+        `${String(using)} ${using === 1 ? "product uses" : "products use"} this attribute, so it can't be removed. Make it optional instead.`,
       );
     }
     await tx
@@ -889,4 +965,236 @@ export async function setCategoryApplications(
     });
     return { ok: true, value: null };
   });
+}
+
+/**
+ * Move a sub-category under another category (founder QC, 17 Nov 2026: only top-level categories could move). It
+ * takes the new parent's class; its products follow it and from then on also fill in the new parent's attributes.
+ */
+export async function moveSubCategory(
+  db: Database,
+  actor: Actor,
+  categoryId: string,
+  parentId: string,
+  opts: { context?: RequestContext; now?: Date } = {},
+): Promise<Result<null>> {
+  assertCan(actor, "catalogue.edit");
+  const now = opts.now ?? new Date();
+  return db.transaction(async (tx): Promise<Result<null>> => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('catalogue:tree'))`);
+    const row = await categoryRow(tx, categoryId);
+    if (!row.parentId)
+      return { ok: false, errors: { parentId: "This is a category; move it to another class instead" } };
+    if (row.parentId === parentId) return { ok: true, value: null };
+    const [to] = await tx
+      .select()
+      .from(cat)
+      .where(and(eq(cat.id, parentId), isNull(cat.deletedAt)))
+      .limit(1);
+    if (!to || to.parentId || to.id === categoryId)
+      return { ok: false, errors: { parentId: "Choose a category (not a sub-category)" } };
+    const checked = await checkCategoryLabel(tx, row.label, { classId: to.classId, parentId: to.id }, categoryId);
+    if ("error" in checked) return { ok: false, errors: { parentId: checked.error } };
+    const from = await categoryRow(tx, row.parentId);
+    const [{ next } = { next: 0 }] = await tx
+      .select({ next: max(cat.position) })
+      .from(cat)
+      .where(eq(cat.parentId, to.id));
+    await tx
+      .update(cat)
+      .set({ parentId: to.id, classId: to.classId, position: (next ?? 0) + 1, updatedBy: actor.userId, updatedAt: now })
+      .where(eq(cat.id, categoryId));
+    await queueProductsOf(tx, { categoryIds: [categoryId] });
+    await record(tx, {
+      actor,
+      categoryId,
+      summary: `moved ${row.label} from ${from.label} to ${to.label}`,
+      action: "catalogue.category.moved",
+      resourceType: "catalogue_category",
+      resourceId: categoryId,
+      before: { parentId: row.parentId, classId: row.classId },
+      after: { parentId: to.id, classId: to.classId },
+      context: opts.context,
+      now,
+    });
+    return { ok: true, value: null };
+  });
+}
+
+/** Move a category up or down among its siblings (the menus, filters and the tree follow the order). */
+export async function reorderCategory(
+  db: Database,
+  actor: Actor,
+  categoryId: string,
+  direction: "up" | "down",
+  opts: { context?: RequestContext; now?: Date } = {},
+): Promise<void> {
+  assertCan(actor, "catalogue.edit");
+  const now = opts.now ?? new Date();
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('catalogue:tree'))`);
+    const row = await categoryRow(tx, categoryId);
+    const siblings = await tx
+      .select()
+      .from(cat)
+      .where(
+        and(
+          eq(cat.classId, row.classId),
+          row.parentId ? eq(cat.parentId, row.parentId) : isNull(cat.parentId),
+          isNull(cat.deletedAt),
+        ),
+      )
+      .orderBy(asc(cat.position), asc(cat.label));
+    const i = siblings.findIndex((s) => s.id === categoryId);
+    const other = siblings[direction === "up" ? i - 1 : i + 1];
+    if (!other) return;
+    // Positions may repeat (seeded rows); renumber the siblings, then swap the two.
+    const order = siblings.map((s) => s.id);
+    order.splice(i, 1);
+    order.splice(direction === "up" ? i - 1 : i + 1, 0, categoryId);
+    for (const [n, id] of order.entries())
+      await tx
+        .update(cat)
+        .set({ position: n + 1 })
+        .where(eq(cat.id, id));
+    await record(tx, {
+      actor,
+      categoryId,
+      summary: `moved ${row.label} ${direction} the list, ${direction === "up" ? "above" : "below"} ${other.label}`,
+      action: "catalogue.category.reordered",
+      resourceType: "catalogue_category",
+      resourceId: categoryId,
+      context: opts.context,
+      now,
+    });
+  });
+}
+
+// ------------------------------------------------------------------------------------------------ applications
+
+export interface ApplicationInput {
+  label: string;
+  shortLabel: string;
+  examples: string;
+}
+
+function checkApplication(
+  input: ApplicationInput,
+): { ok: true; value: ApplicationInput } | { ok: false; errors: Record<string, string> } {
+  const label = input.label.trim().replace(/\s+/g, " ");
+  const shortLabel = input.shortLabel.trim().replace(/\s+/g, " ");
+  const examples = input.examples.trim().replace(/\s+/g, " ");
+  const errors: Record<string, string> = {};
+  if (!label) errors.label = "Enter the full name, as on the marketplace page";
+  else if (label.length > 80) errors.label = "Keep the name to 80 characters";
+  if (!shortLabel) errors.shortLabel = "Enter the short name, as on the home tiles and the menu";
+  else if (shortLabel.length > 30) errors.shortLabel = "Keep the short name to 30 characters";
+  if (examples.length > 160) errors.examples = "Keep the examples to 160 characters";
+  return Object.keys(errors).length ? { ok: false, errors } : { ok: true, value: { label, shortLabel, examples } };
+}
+
+/**
+ * Add an application (founder QC, 17 Nov 2026: categories could only tick existing ones). It joins the end of the
+ * browse-by-application list, hidden until an operator shows it, so nothing appears on the site half-made.
+ */
+export async function addApplication(
+  db: Database,
+  actor: Actor,
+  input: ApplicationInput,
+  opts: { context?: RequestContext } = {},
+): Promise<Result<{ id: string }>> {
+  assertCan(actor, "catalogue.edit");
+  const checked = checkApplication(input);
+  if (!checked.ok) return checked;
+  return db.transaction(async (tx): Promise<Result<{ id: string }>> => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('catalogue:applications'))`);
+    const id = slugFromLabel(checked.value.shortLabel);
+    if (!id) return { ok: false, errors: { shortLabel: "Use letters or numbers in the short name" } };
+    const all = await tx.select({ id: app.id, position: app.position }).from(app);
+    if (all.some((a) => a.id === id))
+      return {
+        ok: false,
+        errors: { shortLabel: `There is already an application called ${checked.value.shortLabel}` },
+      };
+    const position = Math.max(0, ...all.map((a) => a.position)) + 1;
+    await tx.insert(app).values({ id, ...checked.value, position, hiddenAt: new Date() });
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "catalogue.application.added",
+      resourceType: "catalogue_application",
+      resourceId: id,
+      after: { ...checked.value, hidden: true },
+      context: opts.context,
+    });
+    return { ok: true, value: { id } };
+  });
+}
+
+/** Rename an application or change its examples. Its id (the address) never changes. */
+export async function updateApplication(
+  db: Database,
+  actor: Actor,
+  id: string,
+  input: ApplicationInput,
+  opts: { context?: RequestContext } = {},
+): Promise<Result<null>> {
+  assertCan(actor, "catalogue.edit");
+  const checked = checkApplication(input);
+  if (!checked.ok) return checked;
+  return db.transaction(async (tx): Promise<Result<null>> => {
+    const [before] = await tx.select().from(app).where(eq(app.id, id)).for("update");
+    if (!before) return { ok: false, errors: { _: "This application no longer exists" } };
+    await tx.update(app).set(checked.value).where(eq(app.id, id));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "catalogue.application.changed",
+      resourceType: "catalogue_application",
+      resourceId: id,
+      before: { label: before.label, shortLabel: before.shortLabel, examples: before.examples },
+      after: { ...checked.value },
+      context: opts.context,
+    });
+    return { ok: true, value: null };
+  });
+}
+
+/** Hide an application from the site (its categories keep the link), or show it again. */
+export async function setApplicationHidden(
+  db: Database,
+  actor: Actor,
+  id: string,
+  hidden: boolean,
+  opts: { context?: RequestContext; now?: Date } = {},
+): Promise<void> {
+  assertCan(actor, "catalogue.edit");
+  const now = opts.now ?? new Date();
+  await db.transaction(async (tx) => {
+    const [before] = await tx.select().from(app).where(eq(app.id, id)).for("update");
+    if (!before) throw new CatalogueError("This application no longer exists");
+    if ((before.hiddenAt !== null) === hidden) return;
+    await tx
+      .update(app)
+      .set({ hiddenAt: hidden ? now : null })
+      .where(eq(app.id, id));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: hidden ? "catalogue.application.hidden" : "catalogue.application.shown",
+      resourceType: "catalogue_application",
+      resourceId: id,
+      before: { hidden: !hidden },
+      after: { hidden },
+      context: opts.context,
+    });
+  });
+}
+
+/** How many categories list each application, for the Applications list. */
+export async function applicationUsage(db: Executor, actor: Actor): Promise<Map<string, number>> {
+  assertCan(actor, "catalogue.view");
+  const links = schema.catalogueCategoryApplications;
+  const rows = await db
+    .select({ id: links.applicationId, n: sql<number>`count(*)::int` })
+    .from(links)
+    .groupBy(links.applicationId);
+  return new Map(rows.map((r) => [r.id, r.n]));
 }

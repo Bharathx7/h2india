@@ -8,7 +8,7 @@ import {
   type AttributeDef,
   type AttributeInput,
 } from "@h2india/core/catalogue/attributes";
-import { Button, FormField, Input, Modal, Select, Switch } from "@h2india/ui";
+import { Button, Drawer, FormField, Input, Select, Switch } from "@h2india/ui";
 import { useState, useTransition } from "react";
 import { addAttributeAction, updateAttributeAction } from "./actions";
 
@@ -21,8 +21,8 @@ export interface AttributeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category: { id: string; label: string; parentLabel: string | null; groups: string[]; otherLabels: string[] };
-  /** Editing this attribute; adding when absent. */
-  editing?: (AttributeDef & { id: string }) | null;
+  /** Editing this attribute; adding when absent. `inUse`: products that store a value for it (type and unit lock). */
+  editing?: (AttributeDef & { id: string; inUse?: number }) | null;
   onDone: (message: string) => void;
 }
 
@@ -69,6 +69,7 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
 
   const numeric = form.type === "number" || form.type === "range";
   const others = category.otherLabels.filter((l) => l !== editing?.label);
+  const locked = editing?.inUse ?? 0;
 
   const submit = () => {
     const checked = checkAttribute(form, others);
@@ -90,7 +91,8 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
   };
 
   return (
-    <Modal
+    // A side panel (founder QC, 17 Nov 2026), so the table stays in view while an attribute is edited.
+    <Drawer
       open={open}
       onOpenChange={onOpenChange}
       title={editing ? `Edit ${editing.label}` : `Add an attribute to ${category.label}`}
@@ -134,8 +136,17 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
               autoComplete="off"
             />
           </FormField>
-          <FormField label="Type" error={errors.type}>
+          <FormField
+            label="Type"
+            error={errors.type}
+            helper={
+              locked
+                ? `${String(locked)} ${locked === 1 ? "product uses" : "products use"} it: type and unit are locked`
+                : undefined
+            }
+          >
             <Select
+              disabled={locked > 0}
               value={form.type}
               onChange={(e) => {
                 set("type", e.target.value);
@@ -154,7 +165,7 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
               onChange={(e) => {
                 set("unit", e.target.value);
               }}
-              disabled={form.type === "choice" || form.type === "boolean"}
+              disabled={locked > 0 || form.type === "choice" || form.type === "boolean"}
               autoComplete="off"
             />
           </FormField>
@@ -254,6 +265,6 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
         {/* Enter submits the form from any field. */}
         <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
       </form>
-    </Modal>
+    </Drawer>
   );
 }

@@ -4,6 +4,7 @@ import { getDb } from "@h2india/core";
 import { ForbiddenError, loadActor } from "@h2india/core/authz";
 import type { AttributeInput } from "@h2india/core/catalogue/attributes";
 import {
+  addApplication,
   addAttribute,
   addCategory,
   CatalogueError,
@@ -11,11 +12,16 @@ import {
   duplicateCategory,
   moveAttribute,
   moveCategory,
+  moveSubCategory,
   removeAttribute,
   renameCategory,
+  reorderCategory,
+  setApplicationHidden,
   setCategoryApplications,
   setCategoryHidden,
+  updateApplication,
   updateAttribute,
+  type ApplicationInput,
 } from "@h2india/core/catalogue/taxonomy";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
@@ -34,7 +40,10 @@ async function run<T>(
 ): Promise<ActionResult<T>> {
   try {
     const result = await work(await session());
-    if (result.ok) revalidatePath(PAGE);
+    if (result.ok) {
+      revalidatePath(PAGE);
+      revalidatePath(`${PAGE}/applications`);
+    }
     return result;
   } catch (error) {
     if (error instanceof ForbiddenError)
@@ -99,6 +108,33 @@ export async function duplicateCategoryAction(categoryId: string) {
 
 export async function moveCategoryAction(categoryId: string, classId: string) {
   return run(async ({ db, actor, context }) => moveCategory(db, actor, categoryId, classId, { context }));
+}
+
+/** Founder QC (17 Nov 2026): a sub-category moves under another category. */
+export async function moveSubCategoryAction(categoryId: string, parentId: string) {
+  return run(async ({ db, actor, context }) => moveSubCategory(db, actor, categoryId, parentId, { context }));
+}
+
+export async function reorderCategoryAction(categoryId: string, direction: "up" | "down") {
+  return run(async ({ db, actor, context }) => {
+    await reorderCategory(db, actor, categoryId, direction === "up" ? "up" : "down", { context });
+    return done;
+  });
+}
+
+export async function addApplicationAction(input: ApplicationInput) {
+  return run(async ({ db, actor, context }) => addApplication(db, actor, input, { context }));
+}
+
+export async function updateApplicationAction(id: string, input: ApplicationInput) {
+  return run(async ({ db, actor, context }) => updateApplication(db, actor, id, input, { context }));
+}
+
+export async function setApplicationHiddenAction(id: string, hidden: boolean) {
+  return run(async ({ db, actor, context }) => {
+    await setApplicationHidden(db, actor, id, hidden, { context });
+    return done;
+  });
 }
 
 export async function setCategoryApplicationsAction(categoryId: string, applicationIds: string[]) {

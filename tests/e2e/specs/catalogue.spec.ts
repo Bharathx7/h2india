@@ -29,7 +29,8 @@ test("a catalogue moderator sees the launch schema and adds a category and an at
   await expect(page.getByRole("heading", { level: 1, name: "Catalogue" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Diaphragm" })).toBeVisible();
   const table = page.getByRole("region", { name: "Attribute schema for Diaphragm" });
-  await expect(table.getByRole("row")).toHaveCount(11);
+  // Grouped by display group (founder QC, 17 Nov 2026): ten attribute rows under their group headings.
+  await expect(table.getByRole("rowheader")).toHaveCount(10);
   await expect(table.getByRole("rowheader", { name: "Flow rate" })).toBeVisible();
   await expect(table.getByRole("row", { name: /Flow rate/ })).toContainText("1–5,000");
   expect(await seriousIssues(page)).toEqual([]);
@@ -74,11 +75,46 @@ test("a catalogue moderator sees the launch schema and adds a category and an at
   await expect(row).toContainText("At 1 m");
   // Filterable straight away: no deploy between the change and the schema the filters read.
   await expect(row.getByRole("checkbox", { name: "Filterable: Noise level" })).toBeChecked();
-  await expect(page.getByText(/added Noise level \(dB\(A\), test condition: at 1 m, optional\)/)).toBeVisible();
 
-  // Toggling a box in the table saves and is recorded.
-  await row.getByRole("checkbox", { name: "Required: Noise level" }).click();
+  // Ticking a box waits in the Save bar (founder QC, 17 Nov 2026: each click used to save at once); Discard undoes it.
+  const required = row.getByRole("checkbox", { name: "Required: Noise level" });
+  await required.click();
+  const bar = page.getByRole("region", { name: "Unsaved changes" });
+  await expect(bar).toContainText("1 unsaved change");
+  await bar.getByRole("button", { name: "Discard" }).click();
+  await expect(bar).toBeHidden();
+  await expect(required).not.toBeChecked();
+  await required.click();
+  await page.getByRole("region", { name: "Unsaved changes" }).getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "1 change saved" })).toBeVisible();
+  await expect(required).toBeChecked();
+
+  // Both changes are in the History tab.
+  await page.getByRole("link", { name: "History" }).click();
+  await expect(page.getByText(/added Noise level \(dB\(A\), test condition: at 1 m, optional\)/)).toBeVisible();
   await expect(page.getByText(/made Noise level required/)).toBeVisible();
+
+  // Details tab: where it sits and whether it's on the site.
+  await page.getByRole("link", { name: "Details" }).click();
+  await expect(page.getByRole("button", { name: "Move to another main group" })).toBeVisible();
+});
+
+test("applications can be added, renamed and shown (founder QC)", async ({ page }) => {
+  await signInOperator(page, "Catalogue moderator");
+  await page.goto("/admin/catalogue");
+  await page.getByRole("link", { name: "Applications" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Applications" })).toBeVisible();
+  const short = `Rail ${String(Date.now()).slice(-6)}`;
+  await page.getByRole("button", { name: "Add application" }).click();
+  const dialog = page.getByRole("dialog", { name: "Add an application" });
+  await dialog.getByLabel("Full name").fill(`Hydrogen rail ${short}`);
+  await dialog.getByLabel("Short name").fill(short);
+  await dialog.getByRole("button", { name: "Add application" }).click();
+  await expect(page.getByText(`${short} added. It's hidden until you show it.`)).toBeVisible();
+  const row = page.getByRole("row", { name: new RegExp(short) });
+  await expect(row).toContainText("Hidden");
+  await row.getByRole("button", { name: `Show ${short}` }).click();
+  await expect(row).toContainText("Shown");
 });
 
 test("operators without catalogue access get a 404", async ({ page }) => {

@@ -3,10 +3,11 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor } from "../authz/actor";
-import { makeUser, useTestEnv } from "../testing/factory";
+import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { checkAttributeValues, type AttributeInput } from "./attributes";
 import { seedCatalogueSamples } from "./samples";
 import {
+  addApplication,
   addAttribute,
   addCategory,
   catalogueApplications,
@@ -17,7 +18,13 @@ import {
   duplicateCategory,
   filterableAttributes,
   moveCategory,
+  moveSubCategory,
+  productsUsingAttribute,
+  removeAttribute,
+  reorderCategory,
+  setApplicationHidden,
   setCategoryHidden,
+  updateApplication,
   updateAttribute,
 } from "./taxonomy";
 
@@ -214,5 +221,101 @@ describe.skipIf(!url)("catalogue taxonomy", () => {
       .where(and(eq(c.slug, "pem"), eq(c.parentId, electrolysers?.id ?? ""), isNull(c.deletedAt)));
     expect(pem).toHaveLength(1);
     expect(pem[0]?.sample).toBe(true);
+  });
+
+  it("counts live products and locks an attribute products use (founder QC, A107)", async () => {
+    const { actor } = await operator("Catalogue moderator");
+    const parentId = await newCategory(actor);
+    const child = await addCategory(h.db, actor, { classId: "equipment", parentId, label: "Benchtop" });
+    if (!child.ok) throw new Error("no child");
+    const onParent = await addAttribute(h.db, actor, parentId, noise());
+    if (!onParent.ok) throw new Error("not added");
+    const supplier = await makeCompany(h.db, "Catalogue counts", "supplier");
+    await h.db.insert(schema.products).values({
+      organisationId: supplier.org.id,
+      categoryId: child.value.id,
+      slug: `bench-${tag()}`,
+      name: "Bench",
+      status: "Live",
+      publishedAt: new Date(),
+      attributes: { noise_level: 60 },
+    });
+    // The sub-category's product counts for the parent, and uses the parent's attribute it inherits.
+    const parent = await categoryDetail(h.db, actor, parentId);
+    expect(parent?.liveProducts).toBe(1);
+    expect(parent?.attributes[0]?.inUse).toBe(1);
+    expect(await productsUsingAttribute(h.db, { categoryId: parentId, key: "noise_level" })).toBe(1);
+    const node = (await catalogueTree(h.db, actor))
+      .find((k) => k.id === "equipment")
+      ?.categories.find((x) => x.id === parentId);
+    expect(node).toMatchObject({ liveProducts: 1, attributes: 1 });
+    expect(node?.children[0]).toMatchObject({ liveProducts: 1, attributes: 0 });
+    const sub = await categoryDetail(h.db, actor, child.value.id);
+    expect(sub?.inherited.map((a) => a.key)).toEqual(["noise_level"]);
+    // Locked: no new type or unit, no removal; other edits are fine.
+    expect(await updateAttribute(h.db, actor, onParent.value.id, noise({ unit: "dB" }))).toMatchObject({ ok: false });
+    await expect(removeAttribute(h.db, actor, onParent.value.id)).rejects.toThrow("can't be removed");
+    expect(await updateAttribute(h.db, actor, onParent.value.id, noise({ required: true }))).toMatchObject({
+      ok: true,
+    });
+  });
+
+  it("moves a sub-category under another category and reorders siblings", async () => {
+    const { actor } = await operator("Catalogue moderator");
+    const a = await newCategory(actor);
+    const b = await newCategory(actor);
+    const child = await addCategory(h.db, actor, { classId: "equipment", parentId: a, label: "Portable" });
+    if (!child.ok) throw new Error("no child");
+    expect(await moveSubCategory(h.db, actor, child.value.id, child.value.id)).toMatchObject({ ok: false });
+    expect(await moveSubCategory(h.db, actor, child.value.id, b)).toEqual({ ok: true, value: null });
+    expect((await categoryDetail(h.db, actor, child.value.id))?.parentId).toBe(b);
+    expect(await moveSubCategory(h.db, actor, a, b)).toMatchObject({ ok: false });
+
+    const second = await addCategory(h.db, actor, { classId: "equipment", parentId: b, label: "Fixed" });
+    if (!second.ok) throw new Error("no second");
+    await reorderCategory(h.db, actor, second.value.id, "up");
+    const kids = (await catalogueTree(h.db, actor))
+      .find((k) => k.id === "equipment")
+      ?.categories.find((x) => x.id === b)?.children;
+    expect(kids?.map((k) => k.label)).toEqual(["Fixed", "Portable"]);
+  });
+
+  it("adds applications hidden, renames them and shows them, audited", async () => {
+    const { actor } = await operator("Catalogue moderator");
+    const { actor: viewer } = await operator("Finance");
+    const short = `Rail ${tag()}`;
+    await expect(addApplication(h.db, viewer, { label: "x", shortLabel: "y", examples: "" })).rejects.toThrow(
+      "Not allowed",
+    );
+    expect(await addApplication(h.db, actor, { label: "", shortLabel: "", examples: "" })).toMatchObject({ ok: false });
+    const added = await addApplication(h.db, actor, {
+      label: `Hydrogen rail ${short}`,
+      shortLabel: short,
+      examples: "",
+    });
+    if (!added.ok) throw new Error("not added");
+    expect(await addApplication(h.db, actor, { label: "Again", shortLabel: short, examples: "" })).toMatchObject({
+      ok: false,
+    });
+    const find = async () =>
+      (await catalogueApplications(h.db, { includeHidden: true })).find((x) => x.id === added.value.id);
+    expect(await find()).toMatchObject({ hidden: true });
+    expect((await catalogueApplications(h.db)).some((x) => x.id === added.value.id)).toBe(false);
+    await updateApplication(h.db, actor, added.value.id, {
+      label: "Rail and ports",
+      shortLabel: short,
+      examples: "Locomotives",
+    });
+    await setApplicationHidden(h.db, actor, added.value.id, false);
+    expect(await find()).toMatchObject({ label: "Rail and ports", examples: "Locomotives", hidden: false });
+    const log = await h.db
+      .select({ action: schema.auditLog.action })
+      .from(schema.auditLog)
+      .where(eq(schema.auditLog.resourceId, added.value.id));
+    expect(log.map((l) => l.action).sort()).toEqual([
+      "catalogue.application.added",
+      "catalogue.application.changed",
+      "catalogue.application.shown",
+    ]);
   });
 });
