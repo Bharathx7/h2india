@@ -124,7 +124,7 @@ test("an Editor-in-chief archives a glossary term and restores it", async ({ pag
   expect(await archived()).toBe(true);
 
   await page.goto("/admin/content/glossary?view=archived");
-  await expect(page.getByText(term)).toBeVisible();
+  await expect(page.getByRole("cell", { name: term, exact: true })).toBeVisible();
   await page.getByRole("button", { name: `Restore ${term}` }).click();
   await expect.poll(archived, { timeout: 20_000 }).toBe(false);
   const audited = await withDb(async (db) => {
