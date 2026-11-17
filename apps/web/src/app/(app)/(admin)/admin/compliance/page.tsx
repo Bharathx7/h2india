@@ -12,6 +12,8 @@ import { getPayload } from "payload";
 import { NewRequest } from "@/admin/compliance/Controls";
 import { clockBadge, dueBadge, durationWords, type Tone } from "@/admin/compliance/views";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Compliance requests (660:8), step 11.7: Grievances (660:281), Takedowns (660:851), Corrections (660:1301) and Data
 // rights (660:1786), each against its clock, with the states on 661:948. Clock lengths come from the clock settings.
@@ -31,7 +33,7 @@ const tone = (s: string): Tone =>
   s === "Resolved" || s === "Completed" ? "success" : s === "Received" || s === "Rejected" ? "neutral" : "success";
 const closed = (s: string) => s === "Resolved" || s === "Completed" || s === "Rejected";
 
-type Sp = { tab?: string; q?: string; status?: string; type?: string };
+type Sp = { tab?: string; q?: string; status?: string; type?: string; page?: string; perPage?: string };
 
 export default async function CompliancePage({ searchParams }: { searchParams: Promise<Sp> }) {
   const sp = await searchParams;
@@ -68,6 +70,11 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
   };
   const ackOf = (id: string) => clocks.get(id)?.find((c) => c.type === "grievanceAcknowledge") ?? null;
   const here = TABS.find((t) => t.key === tab) ?? TABS[0];
+  // Each tab pages through what core loaded (grievances and takedowns at most 300, corrections 200).
+  const req = pageRequest(sp);
+  const pager = (paged: { page: number; perPage: number; total: number }) => (
+    <ListPager paged={paged} query={pagingQuery(sp)} />
+  );
   const href = (p: Partial<Sp>) => {
     const all: Record<string, string> = { tab, q, status: status === "open" ? "" : status, type, ...p };
     return `/admin/compliance?${new URLSearchParams(Object.entries(all).filter(([, v]) => v)).toString()}`;
@@ -189,6 +196,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
       .map((g) => ackOf(g.id)?.dueAt)
       .filter((d): d is Date => Boolean(d) && (d?.getTime() ?? 0) > now.getTime());
     next.sort((a, b) => a.getTime() - b.getTime());
+    const paged = pageOf(rows, req);
     body = (
       <>
         {toAck.length ? (
@@ -204,7 +212,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
           <>
             {table(
               ["Ticket", "Complaint", "Received", "Acknowledge", "Resolve", "Status", "Assignee", ""],
-              rows.map((g) => {
+              paged.rows.map((g) => {
                 const c = ackOf(g.id);
                 return (
                   <tr key={g.id} className="border-t border-default">
@@ -221,6 +229,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
               }),
               "Grievances",
             )}
+            {pager(paged)}
             {footer(rows.length, "grievances")}
           </>
         ) : (
@@ -231,11 +240,12 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
   } else if (tab === "takedowns") {
     const label = (p: string) => REPORT_PROBLEMS.find((x) => x.value === p)?.label ?? p;
     const rows = takedowns.filter((t) => byStatus(t.status) && matches(t.product, t.details, label(t.problem)));
+    const paged = pageOf(rows, req);
     body = rows.length ? (
       <>
         {table(
           ["Source", "Request", "Received", "Due", "Status", ""],
-          rows.map((t) => (
+          paged.rows.map((t) => (
             <tr key={t.id} className="border-t border-default">
               {ref("Listing report", "Report this listing")}
               {what(t.product, `${label(t.problem)}: ${t.details}`)}
@@ -259,6 +269,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
           )),
           "Takedown requests",
         )}
+        {pager(paged)}
         {footer(rows.length, "takedown requests")}
       </>
     ) : (
@@ -273,11 +284,12 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
       const title = typeof c.article === "object" ? c.article.title : "";
       return byStatus(cstatus(c.status)) && matches(title, c.description);
     });
+    const paged = pageOf(rows, req);
     body = rows.length ? (
       <>
         {table(
           ["Page", "Page and what's wrong", "Received", "Status", ""],
-          rows.map((c) => {
+          paged.rows.map((c) => {
             const title = typeof c.article === "object" ? c.article.title : `Article ${String(c.article)}`;
             return (
               <tr key={String(c.id)} className="border-t border-default">
@@ -291,6 +303,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
           }),
           "Corrections",
         )}
+        {pager(paged)}
         {footer(rows.length, "corrections")}
       </>
     ) : (
@@ -308,13 +321,14 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
     const rows = requests.filter(
       (x) => byStatus(x.status) && (!type || x.kind === type) && matches(x.reference, x.email, x.details),
     );
+    const paged = pageOf(rows, req);
     body = (
       <>
         {rows.length ? (
           <>
             {table(
               ["Reference", "Person and request", "Received", "Due", "Status", ""],
-              rows.map((x) => (
+              paged.rows.map((x) => (
                 <tr key={x.id} className="border-t border-default">
                   {ref(x.reference, RIGHT[x.kind] ?? x.kind)}
                   {what(x.email, x.details)}
@@ -326,6 +340,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
               )),
               "Data-rights requests",
             )}
+            {pager(paged)}
             {footer(rows.length, "data-rights requests")}
           </>
         ) : (

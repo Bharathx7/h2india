@@ -102,6 +102,8 @@ const MEMBER = [
   "/member/preferences",
   "/member/profile",
   "/member/saved",
+  "/member/security",
+  "/member/join-company",
   "/notifications",
   "/knowledge/insights/write",
   "/opportunities/jobs/post",

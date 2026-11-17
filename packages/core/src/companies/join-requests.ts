@@ -234,6 +234,12 @@ export async function approveJoinRequest(input: {
     also: async (tx) => {
       await tx.update(r).set({ decidedBy: input.adminId, decidedAt: new Date() }).where(eq(r.id, row.id));
       await tx.insert(m).values({ organisationId: row.organisationId, userId: row.userId, role }).onConflictDoNothing();
+      // A member who asked from Join a company (founder QC, 17 Nov 2026) becomes a buyer or supplier, as accepting an
+      // invitation does, so signing in takes them to the company's workspace.
+      await tx
+        .update(u)
+        .set({ profileType: org?.kind === "supplier" ? "supplier" : "buyer" })
+        .where(and(eq(u.id, row.userId), eq(u.profileType, "member")));
     },
   });
 }
