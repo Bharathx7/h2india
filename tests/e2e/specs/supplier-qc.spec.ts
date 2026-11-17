@@ -142,5 +142,5 @@ test("a supplier admin sets a member's access with ticks and presets, and adds a
   await add.getByRole("button", { name: "Catalogue", exact: true }).click();
   await add.getByRole("button", { name: "Send invitation" }).click();
   await expect(page.getByRole("heading", { name: "Waiting to accept" })).toBeVisible();
-  await expect(page.getByText(invitee)).toBeVisible();
+  await expect(page.getByText(invitee, { exact: true })).toBeVisible();
 });
