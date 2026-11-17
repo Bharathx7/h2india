@@ -512,6 +512,13 @@
       "when": 1794908858756,
       "tag": "0072_one_gstin_index",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1794926096117,
+      "tag": "0073_member_access",
+      "breakpoints": true
     }
   ]
 }

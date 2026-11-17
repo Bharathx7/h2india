@@ -33,7 +33,8 @@ test("the member menu's Sign-in and security and Join a company open real pages"
   await signInMember(page, newEmail("member-menu"));
   await page.goto("/member/saved");
   for (const [name, heading] of [
-    ["Sign-in and security", "Sign-in and security"],
+    // The sidebar says "Security" (founder QC, 17 Nov 2026: the full name was cut off); the page keeps its title.
+    ["Security", "Sign-in and security"],
     ["Join a company", "Join a company"],
   ] as const) {
     await page.getByRole("navigation", { name: "Member workspace" }).getByRole("link", { name }).click();

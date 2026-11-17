@@ -91,7 +91,9 @@ test("Company details shows the company's one GSTIN, verified and locked (A189)"
   await expect(page.getByRole("button", { name: /Add|Replace/ })).toHaveCount(0);
 });
 
-test("a supplier admin changes a team member's role from the row's actions", async ({ page }) => {
+test("a supplier admin sets a member's access with ticks and presets, and adds a member (founder QC)", async ({
+  page,
+}) => {
   const s = await supplier();
   const colleague = `Ravi Viewer ${s.tag}`;
   await withDb(async (db) => {
@@ -107,20 +109,38 @@ test("a supplier admin changes a team member's role from the row's actions", asy
       [user, s.email],
     );
   });
+  const seat = () =>
+    withDb(
+      async (db) =>
+        (
+          await db.query<{ role: string; permissions: string[] | null }>(
+            `SELECT m.role, m.permissions FROM core.memberships m JOIN core.users u ON u.id = m.user_id WHERE u.name = $1`,
+            [colleague],
+          )
+        ).rows[0],
+    );
   await signInExisting(page, s.email, "/supplier/team");
-  await page.getByRole("button", { name: `Actions for ${colleague}` }).click();
-  await page.getByRole("menuitem", { name: "Make Sales" }).click();
-  await expect
-    .poll(() =>
-      withDb(
-        async (db) =>
-          (
-            await db.query<{ role: string }>(
-              `SELECT m.role FROM core.memberships m JOIN core.users u ON u.id = m.user_id WHERE u.name = $1`,
-              [colleague],
-            )
-          ).rows[0]?.role,
-      ),
-    )
-    .toBe("Sales");
+  // A preset ticks the boxes.
+  await page.getByRole("button", { name: `Edit access for ${colleague}` }).click();
+  const drawer = page.getByRole("dialog", { name: `What ${colleague} can do` });
+  await drawer.getByRole("button", { name: "Sales", exact: true }).click();
+  await drawer.getByRole("button", { name: "Save access" }).click();
+  await expect.poll(async () => (await seat())?.role).toBe("Sales");
+  // One more tick than the preset makes it Custom, with exactly those permissions.
+  await page.getByRole("button", { name: `Edit access for ${colleague}` }).click();
+  await drawer.getByRole("checkbox", { name: /storefront/i }).click();
+  await drawer.getByRole("button", { name: "Save access" }).click();
+  await expect.poll(async () => (await seat())?.role).toBe("Custom");
+  expect((await seat())?.permissions).toContain("storefront.manage");
+  await expect(page.getByText(/Custom: \d+ of \d+/)).toBeVisible();
+
+  // Add member: an email and its access, sent as an invitation.
+  const invitee = newEmail(`qc-invite-${s.tag}`);
+  await page.getByRole("button", { name: "Add member" }).click();
+  const add = page.getByRole("dialog", { name: "Add a team member" });
+  await add.getByLabel("Work email").fill(invitee);
+  await add.getByRole("button", { name: "Catalogue", exact: true }).click();
+  await add.getByRole("button", { name: "Send invitation" }).click();
+  await expect(page.getByRole("heading", { name: "Waiting to accept" })).toBeVisible();
+  await expect(page.getByText(invitee, { exact: true })).toBeVisible();
 });

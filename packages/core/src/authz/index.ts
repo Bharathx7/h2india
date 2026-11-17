@@ -18,4 +18,6 @@ export {
   setRolePermission,
 } from "./company-roles";
 export type { RoleGridRow } from "./company-roles";
+export { accessPresets, grantablePermissions, MemberAccessError, setMemberAccess, storedAccess } from "./member-access";
+export type { AccessChoice, AccessPreset } from "./member-access";
 export type { WorkspaceKind } from "./identity";

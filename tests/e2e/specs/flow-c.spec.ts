@@ -121,8 +121,14 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   // In review, or the product editor when the datasheet left out commercial terms.
   await expect(page).toHaveURL(/\/supplier\/products(\?tab=in-review|\/[0-9a-f-]{36})/, { timeout: 30_000 });
   if (!page.url().includes("tab=in-review")) {
+    // The editor is in steps (founder QC, 17 Nov 2026): commercial terms are on Documents and terms, Submit on Review.
+    await page
+      .getByRole("navigation", { name: "Steps" })
+      .getByRole("button", { name: /Documents and terms/ })
+      .click();
     await page.getByLabel("Lead time, shortest").fill("14");
     await page.getByLabel("Lead time, longest").fill("16");
+    await page.getByRole("button", { name: /Next: Review/ }).click();
     await page.getByRole("button", { name: "Submit for review" }).click();
     await expect(page.getByText("Sent to H2 Economy for review. We'll email you when it's checked.")).toBeVisible();
   }

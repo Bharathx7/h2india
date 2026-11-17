@@ -38,10 +38,48 @@ export interface EditorStart {
   form: EditorForm;
 }
 
-function Section({ id, title, text, children }: { id: string; title: string; text: string; children: ReactNode }) {
+// Founder QC (17 Nov 2026): the editor is a set of steps (Category, Details, Specifications, Documents and terms,
+// Review) with Back and Next, instead of one long form. Every step keeps Save draft; a save that finds a problem opens
+// the step that holds it. Hidden steps stay mounted, so uploads in progress and typed values are kept.
+const STEPS = [
+  { key: "category", label: "Category", sections: ["category"] },
+  { key: "details", label: "Details", sections: ["details"] },
+  { key: "specifications", label: "Specifications", sections: ["specifications"] },
+  { key: "terms", label: "Documents and terms", sections: ["documents", "commercial"] },
+  { key: "review", label: "Review", sections: [] as string[] },
+] as const;
+
+/** Which step holds a field the save refused. */
+const stepOfError = (key: string, specKeys: string[]) =>
+  key === "categoryId"
+    ? 0
+    : key === "name" || key === "summary" || key === "model" || key === "brand" || key === "images"
+      ? 1
+      : specKeys.includes(key) || key.startsWith("note:")
+        ? 2
+        : ["pricePaise", "indicativeMinPaise", "leadTimeMinWeeks", "stockQty", "documents", "certifications"].includes(
+              key,
+            )
+          ? 3
+          : 4;
+
+function Section({
+  id,
+  title,
+  text,
+  children,
+  hidden = false,
+}: {
+  id: string;
+  title: string;
+  text: string;
+  children: ReactNode;
+  hidden?: boolean;
+}) {
   return (
     <section
       id={id}
+      hidden={hidden}
       className="grid scroll-mt-24 grid-cols-1 gap-4 rounded-card border border-default bg-page p-5 md:grid-cols-[220px_minmax(0,1fr)] md:p-6"
     >
       <div>
@@ -130,6 +168,14 @@ export function ProductEditor({
   const note = (field: string) => start.notes.find((n) => n.field === field)?.text;
   const groups = [...new Set(defs.map((d) => d.displayGroup))];
   const resubmit = start.status === "Needs changes";
+  // A new product starts on Details (the category was chosen on the page before); an existing one on its first step.
+  const [step, setStep] = useState(start.id ? 0 : 1);
+  const shows = (section: string) =>
+    (STEPS[step]?.sections as readonly string[] | undefined)?.includes(section) ?? false;
+  const go = (n: number) => {
+    setStep(Math.max(0, Math.min(STEPS.length - 1, n)));
+    window.scrollTo({ top: 0 });
+  };
 
   const save = (submit: boolean) => {
     const form: EditorForm = {
@@ -158,6 +204,15 @@ export function ProductEditor({
       } else {
         setErrors(r.errors);
         setMessage({ tone: "error", text: r.error });
+        // Open the step that holds the first problem.
+        const first = Object.keys(r.errors)[0];
+        if (first)
+          go(
+            stepOfError(
+              first,
+              defs.map((d) => d.key),
+            ),
+          );
       }
     });
   };
@@ -311,9 +366,21 @@ export function ProductEditor({
                 <span>
                   {i + 1}. {n.text}
                 </span>
-                <a href={`#${sectionOf[n.section] ?? "specifications"}`} className="type-label underline">
+                <button
+                  type="button"
+                  className="type-label underline"
+                  onClick={() => {
+                    const target = sectionOf[n.section] ?? "specifications";
+                    go(
+                      Math.max(
+                        0,
+                        STEPS.findIndex((x) => (x.sections as readonly string[]).includes(target)),
+                      ),
+                    );
+                  }}
+                >
                   Go to {n.section === "specifications" ? "specifications" : n.section}
-                </a>
+                </button>
               </li>
             ))}
           </ol>
@@ -333,7 +400,42 @@ export function ProductEditor({
       ) : null}
       {message ? <Alert tone={message.tone} title={message.text} live /> : null}
 
+      <nav aria-label="Steps" className="overflow-x-auto">
+        <ol className="flex min-w-max gap-2">
+          {STEPS.map((x, i) => (
+            <li key={x.key}>
+              <button
+                type="button"
+                aria-current={i === step ? "step" : undefined}
+                onClick={() => {
+                  go(i);
+                }}
+                className={cx(
+                  "inline-flex h-10 items-center gap-2 rounded-pill border-[1.5px] pr-4 pl-1.5 type-label",
+                  i === step ? "border-transparent bg-inverse text-inverse" : "border-control bg-page text-primary",
+                )}
+              >
+                <span
+                  className={cx(
+                    "flex size-7 items-center justify-center rounded-pill type-label-sm",
+                    i === step
+                      ? "bg-page text-primary"
+                      : i < step
+                        ? "bg-accent text-primary"
+                        : "bg-subtle text-secondary",
+                  )}
+                >
+                  {i < step ? <Icon name="check" size={14} /> : i + 1}
+                </span>
+                {x.label}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
       <Section
+        hidden={!shows("category")}
         id="category"
         title="Category"
         text="Decides which specification fields buyers can filter and compare on."
@@ -365,7 +467,12 @@ export function ProductEditor({
         </Field>
       </Section>
 
-      <Section id="details" title="Details" text="The name and summary buyers see on cards and search.">
+      <Section
+        hidden={!shows("details")}
+        id="details"
+        title="Details"
+        text="The name and summary buyers see on cards and search."
+      >
         <Field label="Product name" required error={errors.name} note={note("name")}>
           <Input
             value={f.name}
@@ -438,6 +545,7 @@ export function ProductEditor({
       </Section>
 
       <Section
+        hidden={!shows("specifications")}
         id="specifications"
         title="Specifications"
         text="Grouped as buyers compare them. Every value needs a unit, and test conditions where the category asks for them."
@@ -481,6 +589,7 @@ export function ProductEditor({
       </Section>
 
       <Section
+        hidden={!shows("documents")}
         id="documents"
         title="Documents and compliance"
         text="Datasheets and certificates buyers can download. Certificates are checked by H2 Economy."
@@ -587,6 +696,7 @@ export function ProductEditor({
       </Section>
 
       <Section
+        hidden={!shows("commercial")}
         id="commercial"
         title="Commercial terms"
         text="Choose how buyers see price. Price, stock and lead time changes go live straight away."
@@ -725,6 +835,85 @@ export function ProductEditor({
         </Alert>
       </Section>
 
+      {step === STEPS.length - 1 ? (
+        <section
+          aria-labelledby="review-title"
+          className="flex flex-col gap-4 rounded-card border border-default bg-page p-5 md:p-6"
+        >
+          <div>
+            <h2 id="review-title" className="type-h4">
+              Review
+            </h2>
+            <p className="type-caption text-secondary">Check what buyers will see, then send it for review.</p>
+          </div>
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-[200px_minmax(0,1fr)]">
+            {(
+              [
+                ["Category", categories.find((c) => c.id === f.categoryId)?.label ?? "Not chosen", 0],
+                ["Name", f.name.trim() || "Not given", 1],
+                ["Model", f.model.trim() || "Not given", 1],
+                [
+                  "Photos",
+                  `${String(f.images.length + photos.items.filter((i) => i.state === "uploaded").length)} added`,
+                  1,
+                ],
+                [
+                  "Specifications",
+                  (() => {
+                    const filled = defs.filter((d) => {
+                      const v = f.attributes[d.key];
+                      return v !== undefined && v !== null && v !== "";
+                    });
+                    const missing = defs.filter((d) => d.required && !filled.includes(d)).map((d) => d.label);
+                    return `${String(filled.length)} of ${String(defs.length)} filled${missing.length ? ` · required still empty: ${missing.join(", ")}` : ""}`;
+                  })(),
+                  2,
+                ],
+                [
+                  "Documents",
+                  `${String(f.documents.length + docs.items.filter((i) => i.state === "uploaded").length)} datasheets · ${String(f.certificates.length)} certificates`,
+                  3,
+                ],
+                [
+                  "Price",
+                  f.pricing === "fixed"
+                    ? `Fixed: ₹${f.price || "not given"}`
+                    : f.pricing === "indicative"
+                      ? `Range: ₹${f.indicativeMin || "?"} to ₹${f.indicativeMax || "?"}`
+                      : "On request (buyers ask for a quote)",
+                  3,
+                ],
+                [
+                  "Lead time",
+                  f.leadTimeMinWeeks || f.leadTimeMaxWeeks
+                    ? `${f.leadTimeMinWeeks || "?"} to ${f.leadTimeMaxWeeks || "?"} weeks`
+                    : "Not given",
+                  3,
+                ],
+              ] as [string, string, number][]
+            ).map(([term, value, at]) => (
+              <div key={term} className="contents">
+                <dt className="type-body-sm text-secondary">{term}</dt>
+                <dd className="flex flex-wrap items-baseline justify-between gap-2 type-body-sm text-primary">
+                  {value}
+                  {!readOnly ? (
+                    <button
+                      type="button"
+                      className="type-label-sm text-link underline"
+                      onClick={() => {
+                        go(at);
+                      }}
+                    >
+                      Change<span className="sr-only"> {term.toLowerCase()}</span>
+                    </button>
+                  ) : null}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
+
       {!readOnly ? (
         <div className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-card border border-default bg-page p-4 shadow-ink-float-sm">
           <p className="type-caption text-secondary">
@@ -732,7 +921,18 @@ export function ProductEditor({
               ? "Resubmitting sends these changes to H2 Economy's catalogue team. Your live listing stays up until they approve."
               : "H2 Economy checks every new listing before buyers see it, usually within 2 working days."}
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            {step > 0 ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  go(step - 1);
+                }}
+              >
+                <Icon name="arrow-left" size={16} />
+                Back
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               disabled={pending}
@@ -742,18 +942,29 @@ export function ProductEditor({
             >
               Save draft
             </Button>
-            <Button
-              disabled={
-                pending ||
-                photos.items.some((i) => i.state === "uploading") ||
-                docs.items.some((i) => i.state === "uploading")
-              }
-              onClick={() => {
-                save(true);
-              }}
-            >
-              {resubmit ? "Resubmit" : "Submit for review"}
-            </Button>
+            {step < STEPS.length - 1 ? (
+              <Button
+                onClick={() => {
+                  go(step + 1);
+                }}
+              >
+                Next: {STEPS[step + 1]?.label}
+                <Icon name="arrow-right" size={16} />
+              </Button>
+            ) : (
+              <Button
+                disabled={
+                  pending ||
+                  photos.items.some((i) => i.state === "uploading") ||
+                  docs.items.some((i) => i.state === "uploading")
+                }
+                onClick={() => {
+                  save(true);
+                }}
+              >
+                {resubmit ? "Resubmit" : "Submit for review"}
+              </Button>
+            )}
           </div>
         </div>
       ) : null}

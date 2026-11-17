@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { catalogue } from "@/marketplace/data";
 import { CategoryRequestForm } from "@/supplier/CategoryRequestForm";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Request a category (supplier QC, 16 Nov 2026). No Figma frame: built from the Add a product page and the
@@ -18,7 +20,11 @@ export const dynamic = "force-dynamic";
 const TONE = { Pending: "progress", Approved: "success", Rejected: "error" } as const;
 const WORD = { Pending: "Waiting for review", Approved: "Approved", Rejected: "Not approved" } as const;
 
-export default async function CategoryRequestsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function CategoryRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string; perPage?: string }>;
+}) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/products/categories");
   const org = page.supplier.organisationId;
@@ -56,7 +62,7 @@ export default async function CategoryRequestsPage({ searchParams }: { searchPar
         </h2>
         {requests.length ? (
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
-            {requests.map((r) => (
+            {pageOf(requests, pageRequest(sp)).rows.map((r) => (
               <li key={r.id} id={r.id} className="flex flex-col gap-1 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="type-label">{r.label}</span>
@@ -82,6 +88,9 @@ export default async function CategoryRequestsPage({ searchParams }: { searchPar
               </li>
             ))}
           </ul>
+        ) : null}
+        {requests.length ? (
+          <ListPager paged={pageOf(requests, pageRequest(sp))} query={pagingQuery(sp)} />
         ) : (
           <p className="type-body-sm text-secondary">You haven&apos;t requested a category yet.</p>
         )}
