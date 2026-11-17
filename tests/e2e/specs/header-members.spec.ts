@@ -136,6 +136,18 @@ test("the wrong page signs a supplier in to their own dashboard, with a note", a
   await expect(page.getByText("This email isn't registered as a buyer.", { exact: false })).toBeVisible();
 });
 
+test("a buyer who isn't a member signs in on the member page and is offered Join as member", async ({ page }) => {
+  // Founder QC, 17 Nov 2026: one account; a buyer joins as a member in one click instead of making a second account.
+  test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
+  const d = await setup();
+  await page.goto("/member/sign-in");
+  await enterCode(page, await requestCode(page, d.buyerEmail));
+  await expect(page).toHaveURL(/\/member\/join\?next=%2Fmember$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Join as a member" })).toBeVisible();
+  await page.getByRole("button", { name: "Join as member" }).click();
+  await page.waitForURL(/\/member(\/welcome)?$/);
+});
+
 test("a new supplier confirms their email and carries on in Create a supplier account, not the shared Join", async ({
   page,
 }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { MEMBER_JOIN_PATH } from "@h2india/core/members/rules";
 import { ACCOUNT_KINDS, ACCOUNT_PAGES, type AccountKind } from "@h2india/core/sign-in";
 import { Alert, Icon, type WorkspaceArea } from "@h2india/ui";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -35,11 +36,24 @@ export function SignedInAsNote({ area }: { area: WorkspaceArea }) {
           </button>
         }
       >
-        This email isn&apos;t registered as {NOUN[tried]}. To create {NOUN[tried]} account, use{" "}
-        <a className="underline underline-offset-2" href={ACCOUNT_PAGES[tried].join}>
-          {tried === "member" ? "Join as a member" : `Create ${NOUN[tried]} account`}
-        </a>
-        .
+        {tried === "member" ? (
+          // Founder QC (17 Nov 2026): a buyer or supplier joins as a member with this same account, in one click.
+          <>
+            You aren&apos;t a member yet. You can{" "}
+            <a className="underline underline-offset-2" href={MEMBER_JOIN_PATH}>
+              join as a member with this account
+            </a>{" "}
+            and keep your {own} workspace.
+          </>
+        ) : (
+          <>
+            This email isn&apos;t registered as {NOUN[tried]}. To create {NOUN[tried]} account, use{" "}
+            <a className="underline underline-offset-2" href={ACCOUNT_PAGES[tried].join}>
+              {`Create ${NOUN[tried]} account`}
+            </a>
+            .
+          </>
+        )}
       </Alert>
     </div>
   );
