@@ -47,6 +47,7 @@ for (const [path, title] of [
 // Public QC, 16 Nov 2026: members have their own sign-in page.
 test("route group /member asks a signed-out visitor to sign in on the member page", async ({ page }) => {
   await page.goto("/member");
-  await expect(page).toHaveURL(/\/member\/sign-in$/);
+  // Founder QC (17 Nov 2026): like the buyer and supplier areas, it comes back to the member home after sign-in.
+  await expect(page).toHaveURL(/\/member\/sign-in\?next=(%2F|\/)member$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Member sign in");
 });
