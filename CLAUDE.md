@@ -206,7 +206,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 - Classes, categories, sub-categories, applications and attribute schemas are data in `core.catalogue_*`; change them only through `@h2india/core/catalogue/taxonomy` (checks `catalogue.edit`, audits, writes the change history). The launch catalogue is migration 0022 (A103); never write categories or attributes in pages or seeds except the sample ones in `catalogue/samples.ts`.
 - Check product attribute values only with `checkAttributeValues()` / `schemaFor()` from `@h2india/core/catalogue/attributes`, built from `categorySchema()`. Filters use `filterable`, compare and the table view `comparable`, the spec table `displayGroup` and order.
-- An attribute's key never changes. Type and unit can't change, and the attribute can't be removed, once products use it (`productsUsingAttribute()`, filled in at step 8.3, A107).
+- An attribute's key never changes. Type and unit can't change, and the attribute can't be removed, once products use it (`productsUsingAttribute(db, attribute)`: products in its category and, for a parent's attribute, its sub-categories; A107).
+- Admin Catalogue (founder QC, 17 Nov 2026): tree with live counts and filters, tabs Attributes · Details · Applications · History (`?tab=`), flag ticks held in a Save bar, a sub-category shows its inherited attributes. Sub-categories move with `moveSubCategory()`, siblings reorder with `reorderCategory()`, and the applications list changes only through `addApplication()` (starts hidden), `updateApplication()` and `setApplicationHidden()` (catalogue.edit, audited).
 - Product search documents keep attribute values under `attributes` (already filterable), so a new filterable attribute needs no index change.
 - A scrolling table that holds Radix checkboxes needs `relative` on its scroll box, or their hidden inputs widen the page on phones.
 

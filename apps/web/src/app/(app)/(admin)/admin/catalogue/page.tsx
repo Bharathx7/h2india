@@ -9,7 +9,7 @@ import {
 } from "@h2india/core/catalogue/taxonomy";
 import type { Metadata } from "next";
 import { AdminShell, requireOperator } from "@/admin/shell";
-import { CatalogueView, type CatalogueData } from "./CatalogueView";
+import { CatalogueView, type CatalogueData, type CatalogueTab } from "./CatalogueView";
 import { categoryMeta, historyLine } from "./format";
 
 // Admin Catalogue · Taxonomy (636:596) with Add attribute (637:417), step 6.1. Operators with catalogue.view see it;
@@ -30,13 +30,15 @@ function pick(tree: TreeClass[], wanted: string | undefined): string | null {
 export default async function CataloguePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; state?: string }>;
+  searchParams: Promise<{ category?: string; state?: string; tab?: string }>;
 }) {
   // The standard back-office gate and frame (founder QC, 17 Nov 2026): the operator's own session (never a viewed
   // person), the staff password sign-in, and the larger-screen cover.
   const { userId, actor } = await requireOperator("catalogue.view", "/admin/catalogue");
   const db = getDb();
-  const { category, state } = await searchParams;
+  const { category, state, tab: askedTab } = await searchParams;
+  const tab: CatalogueTab =
+    askedTab === "details" || askedTab === "applications" || askedTab === "history" ? askedTab : "attributes";
 
   const [tree, applications] = await Promise.all([
     catalogueTree(db, actor),
@@ -44,7 +46,10 @@ export default async function CataloguePage({
   ]);
   const selectedId = pick(tree, category);
   const [detail, history] = selectedId
-    ? await Promise.all([categoryDetail(db, actor, selectedId), categoryHistory(db, actor, selectedId, 3)])
+    ? await Promise.all([
+        categoryDetail(db, actor, selectedId),
+        categoryHistory(db, actor, selectedId, tab === "history" ? 500 : 1),
+      ])
     : [null, []];
 
   // ?state= shows the designed loading, empty and error states in development (playbook step 2.5).
@@ -52,6 +57,7 @@ export default async function CataloguePage({
   const data: CatalogueData = {
     tree,
     canEdit: can(actor, "catalogue.edit"),
+    tab,
     applications: applications.map((a) => ({ id: a.id, label: a.shortLabel, hidden: a.hidden })),
     category: detail
       ? {
