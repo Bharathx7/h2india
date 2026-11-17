@@ -125,11 +125,29 @@ describe.skipIf(!url)("supplier workspace", () => {
     );
     await decideDocument(h.db, op, { documentId: gst.id, outcome: "Verified" });
     await decideDocument(h.db, op, { documentId: pan.id, outcome: "Verified" });
+    // Founder QC (17 Nov 2026): the supplier's admins hear that a document is verified (in the app).
+    const events = (
+      await h.db
+        .select({ event: schema.notifications.event })
+        .from(schema.notifications)
+        .where(eq(schema.notifications.userId, a.admin.id))
+    ).map((n) => n.event);
+    expect(events).toContain("verification.document_verified");
+    // An open Submit for review is answered by the badge (it stayed in Needs action before).
+    const [review] = await h.db
+      .insert(schema.supplierReviews)
+      .values({ organisationId: a.org.id, submittedBy: a.admin.id })
+      .returning();
     await grantBadge(h.db, op, {
       organisationId: a.org.id,
       kind: "verified_supplier",
       evidence: "GST and PAN checked",
     });
+    const [closed] = await h.db
+      .select({ status: schema.supplierReviews.status })
+      .from(schema.supplierReviews)
+      .where(eq(schema.supplierReviews.id, review?.id ?? ""));
+    expect(closed?.status).toBe("Approved");
     const shown = await publicBadges(h.db, a.org.id);
     expect(shown.map((b) => b.label)).toEqual(["Verified supplier"]);
     expect(shown[0]?.lastCheckedAt.toDateString()).toBe(new Date().toDateString());

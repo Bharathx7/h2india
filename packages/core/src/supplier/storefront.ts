@@ -6,6 +6,7 @@ import { assertCan } from "../authz/can";
 import { inScope, type Scope } from "../authz/scope";
 import { slugifyCompany } from "../companies/import";
 import { attachFile } from "../files/files";
+import { notify } from "../notify/notify";
 import { queueIndexChange } from "../search/outbox";
 import { queueProductsOf } from "../search/products";
 import { storefrontProblems, type StorefrontField } from "./storefront-rules";
@@ -285,6 +286,24 @@ export async function decideStorefront(
       context: input.context,
     });
   });
+  // Founder QC (17 Nov 2026): the supplier never heard the answer. In the app only until the email wording is
+  // approved (M21); a failed notice never undoes the decision.
+  if (rev.submittedBy)
+    await notify({
+      event: input.approve ? "storefront.approved" : "storefront.needs_changes",
+      topic: "company.verification",
+      userId: rev.submittedBy,
+      scope: rev.organisationId,
+      inApp: {
+        category: "account",
+        icon: input.approve ? "check-circle" : "pencil",
+        title: input.approve ? "Your storefront changes are live" : "Your storefront changes need a few edits",
+        body: note || undefined,
+        href: "/supplier/storefront",
+      },
+    }).catch((error: unknown) => {
+      console.error("storefront notice failed", error);
+    });
 }
 
 /**

@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb } from "@h2india/core";
+import { getDb, StatusConflictError } from "@h2india/core";
 import { ForbiddenError, loadActor } from "@h2india/core/authz";
 import { ClaimError, decideClaim } from "@h2india/core/companies";
 import { revalidatePath } from "next/cache";
@@ -24,6 +24,8 @@ export async function decideClaimAction(claimId: string, approve: boolean, reaso
   } catch (error) {
     if (error instanceof ForbiddenError) return { ok: false as const, error: "You can't decide claims." };
     if (error instanceof ClaimError) return { ok: false as const, error: error.message };
+    if (error instanceof StatusConflictError)
+      return { ok: false as const, error: "Someone else decided this a moment ago. Refresh to see what they chose." };
     throw error;
   }
 }

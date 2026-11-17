@@ -1,8 +1,10 @@
 import { createDb, schema, type DbHandle } from "@h2india/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
+import { loadActor } from "../authz/actor";
+import { decideTakedown, listTakedowns, TakedownError } from "../compliance";
 import { askQuestion, productDetail, reportListing } from "./detail";
 
 // Step 6.4 DONE WHEN: both product types show what their frames show; the price rule holds; Ask a question and
@@ -150,5 +152,52 @@ describe.skipIf(!url)("product page", () => {
         userId: null,
       }),
     ).toEqual({ ok: true });
+  });
+
+  it("a listing report is resolved (pausing the listing) or rejected, by compliance only (founder QC)", async () => {
+    const reporter = await makeUser(h.db, "Reporter");
+    await reportListing(h.db, {
+      slug: `fixed-${tag}`,
+      problem: "counterfeit",
+      details: "The nameplate photo is from another maker.",
+      email: "",
+      userId: reporter.id,
+    });
+    const role = async (name: string) => {
+      const u = await makeUser(h.db, `Takedown ${name}`);
+      const [r] = await h.db
+        .select({ id: schema.roles.id })
+        .from(schema.roles)
+        .where(and(eq(schema.roles.scope, "operator"), eq(schema.roles.name, name)));
+      await h.db.insert(schema.operatorRoles).values({ userId: u.id, roleId: r?.id ?? "" });
+      return loadActor(h.db, u.id);
+    };
+    const officer = await role("Super admin");
+    const [report] = (await listTakedowns(h.db, officer)).filter((t) => t.slug === `fixed-${tag}`);
+    expect(report?.status).toBe("Received");
+    const editor = await role("Content editor");
+    await expect(
+      decideTakedown(h.db, editor, { reportId: report?.id ?? "", outcome: "Rejected", note: "Fine" }),
+    ).rejects.toThrow("Not allowed");
+    await expect(
+      decideTakedown(h.db, officer, { reportId: report?.id ?? "", outcome: "Resolved", note: " " }),
+    ).rejects.toBeInstanceOf(TakedownError);
+    await decideTakedown(h.db, officer, {
+      reportId: report?.id ?? "",
+      outcome: "Resolved",
+      pauseListing: true,
+      note: "Photo copied from another maker's catalogue.",
+    });
+    const [after] = (await listTakedowns(h.db, officer)).filter((t) => t.slug === `fixed-${tag}`);
+    expect(after).toMatchObject({ status: "Resolved", productStatus: "Paused" });
+    // Decided once: a second decision finds it already moved on.
+    await expect(
+      decideTakedown(h.db, officer, { reportId: report?.id ?? "", outcome: "Rejected", note: "Again" }),
+    ).rejects.toThrow();
+    const told = await h.db
+      .select({ event: schema.notifications.event })
+      .from(schema.notifications)
+      .where(eq(schema.notifications.userId, reporter.id));
+    expect(told.map((n) => n.event)).toContain("listing_report.resolved");
   });
 });

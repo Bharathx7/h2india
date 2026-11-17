@@ -1,8 +1,7 @@
 import { getDb, getSetting } from "@h2india/core";
-import { can, loadActor, type Actor } from "@h2india/core/authz";
+import { can, type Actor } from "@h2india/core/authz";
 import { pendingClaims } from "@h2india/core/companies";
 import { formatIstDateTime } from "@h2india/core/companies/client";
-import { listNotifications, unreadCount } from "@h2india/core/notify";
 import {
   BADGE_KINDS,
   deskCompany,
@@ -18,11 +17,7 @@ import { formatIstDate } from "@h2india/core/time";
 import { cx, EmptyState, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
-import { toRows } from "../../../(workspace)/notifications/rows";
+import { AdminShell, requireOperator } from "@/admin/shell";
 import { ClaimDecision } from "./ClaimDecision";
 import { DocumentDecision, GrantBadge, ReviewDecision, RevokeBadge, RunChecks } from "./DeskControls";
 import { ListPager } from "@/components/ListPager";
@@ -197,26 +192,23 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
 export default async function VerificationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; company?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<{ tab?: string; company?: string; org?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
-  const session = await getSession();
-  if (!session) redirect("/sign-in?next=/admin/verification");
+  const { userId, actor } = await requireOperator("verification.view", "/admin/verification");
   const db = getDb();
-  const actor = await loadActor(db, session.user.id);
-  if (!can(actor, "verification.view")) notFound();
   const tab = TABS.find((t) => t.key === sp.tab)?.key ?? "action";
-  const [shell, unread, bell, claims, list, counts] = await Promise.all([
-    shellFor(session.user.id),
-    unreadCount(db, session.user.id),
-    listNotifications(db, session.user.id, { limit: 5 }),
+  const [claims, list, counts] = await Promise.all([
     pendingClaims(db, actor),
     verificationDesk(db, actor, tab),
     deskCounts(db, actor),
   ]);
   const canDecide = can(actor, "verification.edit");
   const paged = pageOf(list, pageRequest(sp));
-  const selected = sp.company && /^[0-9a-f-]{36}$/i.test(sp.company) ? sp.company : paged.rows[0]?.organisationId;
+  // ?company= opens that company; ?org= is the older name some links used (founder QC, 17 Nov 2026: the Suppliers
+  // queue's Review opened whichever company came first).
+  const asked = sp.company ?? sp.org;
+  const selected = asked && /^[0-9a-f-]{36}$/i.test(asked) ? asked : paged.rows[0]?.organisationId;
   // Opening a company keeps the desk list on the same page.
   const companyHref = (id: string) =>
     `/admin/verification?${new URLSearchParams({
@@ -226,15 +218,8 @@ export default async function VerificationPage({
       ...(sp.perPage ? { perPage: String(paged.perPage) } : {}),
     }).toString()}`;
   return (
-    <WorkspaceFrame
-      area="admin"
-      groups={shell.groups}
-      current="/admin/verification"
-      user={shell.user}
-      home="/admin"
-      bell={{ unread, items: toRows(bell) }}
-    >
-      <div className="flex flex-col gap-6 p-4 md:p-8">
+    <AdminShell userId={userId} current="/admin/verification">
+      <div className="flex flex-col gap-6">
         <div>
           <h1 className="type-h2">Verification</h1>
           <p className="type-body text-secondary">
@@ -350,6 +335,6 @@ export default async function VerificationPage({
           </ul>
         )}
       </div>
-    </WorkspaceFrame>
+    </AdminShell>
   );
 }

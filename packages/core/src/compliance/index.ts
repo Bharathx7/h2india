@@ -8,6 +8,7 @@ export * from "./data-rights";
 export * from "./escalation";
 export * from "./inventory";
 export * from "./retention";
+export * from "./takedowns";
 
 /** The acknowledge clock of each grievance (Grievances 660:281): when it's due and whether it was met. Read-only. */
 export async function grievanceClocks(db: Executor, actor: Actor, ids: string[]) {
@@ -25,7 +26,7 @@ export async function grievanceClocks(db: Executor, actor: Actor, ids: string[])
 
 /**
  * Takedown requests (660:851): reports from listing pages ("Report this listing", step 6.3), newest first, with the
- * listing they are about. Read-only; there's no takedown clock until M2 sets the time limits.
+ * listing they are about. Decided with decideTakedown(); there's no takedown clock until M2 sets the time limits.
  */
 export async function listTakedowns(db: Executor, actor: Actor) {
   assertCan(actor, "compliance.view");
@@ -41,6 +42,7 @@ export async function listTakedowns(db: Executor, actor: Actor) {
       createdAt: lr.createdAt,
       product: p.name,
       slug: p.slug,
+      productStatus: p.status,
     })
     .from(lr)
     .innerJoin(p, eq(p.id, lr.productId))

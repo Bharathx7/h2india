@@ -240,6 +240,21 @@ export async function decideDocument(
         }),
       { title: `${documentTitle(doc)}: ${input.outcome.toLowerCase()}`, body: reason },
     );
+  } else {
+    // Founder QC (17 Nov 2026): a checked document was silent. In the app only (no approved email wording, M21).
+    for (const a of await admins(db, doc.organisationId))
+      await notify({
+        event: "verification.document_verified",
+        topic: "company.verification",
+        userId: a.id,
+        scope: doc.organisationId,
+        inApp: {
+          category: "account",
+          icon: "shield-check",
+          href: "/supplier/verification",
+          title: `${documentTitle(doc)} is verified`,
+        },
+      });
   }
 }
 
@@ -276,7 +291,14 @@ async function syncCompanyVerified(tx: Executor, organisationId: string) {
 export async function grantBadge(
   db: Database,
   actor: Actor,
-  input: { organisationId: string; kind: string; evidence: string; context?: RequestContext },
+  input: {
+    organisationId: string;
+    kind: string;
+    evidence: string;
+    context?: RequestContext;
+    /** The supplier review that grants it (decideSupplierReview closes that one itself). */
+    fromReview?: string;
+  },
 ) {
   assertCan(actor, "verification.edit");
   if (!isBadgeKind(input.kind)) throw new VerificationError("No such badge");
@@ -326,6 +348,32 @@ export async function grantBadge(
     await syncCompanyVerified(tx, input.organisationId);
   });
   if (input.kind === "verified_supplier") {
+    // Founder QC (17 Nov 2026): granting the badge from the desk left the supplier's Submit for review open, so it
+    // stayed in Needs action and the Suppliers queue. The badge answers it.
+    const sr = schema.supplierReviews;
+    const open = await db
+      .select({ id: sr.id })
+      .from(sr)
+      .where(and(eq(sr.organisationId, input.organisationId), eq(sr.status, "Submitted")));
+    for (const review of open.filter((x) => x.id !== input.fromReview))
+      await changeStatus(db, {
+        table: sr,
+        entityType: "supplier_review",
+        id: review.id,
+        from: "Submitted",
+        to: "Approved",
+        actorId: actor.userId,
+        companyId: input.organisationId,
+        reason: "Verified supplier badge granted",
+        transitions: REVIEW_TRANSITIONS,
+        context: input.context,
+        also: async (tx) => {
+          await tx
+            .update(sr)
+            .set({ decidedBy: actor.userId, decidedAt: new Date(), updatedAt: new Date() })
+            .where(eq(sr.id, review.id));
+        },
+      });
     const names = await companyName(db, input.organisationId);
     await tellAdmins(
       db,
@@ -419,6 +467,7 @@ export async function decideSupplierReview(
         .map(([k]) => k)
         .join(", ")}`,
       context: input.context,
+      fromReview: review.id,
     });
   }
   await changeStatus(db, {

@@ -1,8 +1,9 @@
 import { schema, type Database, type Executor, type StorefrontData } from "@h2india/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, or } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { notify } from "../notify/notify";
 import { checkCode, RecoveryCodeError, sendCode } from "../recovery/codes";
 import { changeStatus } from "../status";
 
@@ -249,6 +250,13 @@ export async function decideClaim(
   if (!claim) throw new ClaimError("No such claim");
   const reason = input.reason?.trim() ?? "";
   if (!input.approve && !reason) throw new ClaimError("Say why, so the person knows what to send", "reason");
+  // Other people waiting on the same profile: an approval closes their claims, and they're told too.
+  const others = input.approve
+    ? await db
+        .select({ id: c.id, claimantId: c.claimantId })
+        .from(c)
+        .where(and(eq(c.organisationId, claim.organisationId), eq(c.status, "Pending"), ne(c.id, claim.id)))
+    : [];
   await changeStatus(db, {
     table: c,
     entityType: "company_claim",
@@ -275,6 +283,21 @@ export async function decideClaim(
           target: [schema.memberships.organisationId, schema.memberships.userId],
           set: { role: "Admin" },
         });
+      // As a join approval does: a member (or someone who hasn't finished Join) becomes the company's kind, so the
+      // workspace the claim page points to opens for them (founder QC, 17 Nov 2026).
+      const [org] = await tx
+        .select({ kind: schema.organisations.kind })
+        .from(schema.organisations)
+        .where(eq(schema.organisations.id, claim.organisationId));
+      await tx
+        .update(schema.users)
+        .set({ profileType: org?.kind === "supplier" ? "supplier" : "buyer" })
+        .where(
+          and(
+            eq(schema.users.id, claim.claimantId),
+            or(eq(schema.users.profileType, "member"), isNull(schema.users.profileType)),
+          ),
+        );
       await tx
         .update(c)
         .set({ status: "Rejected", reason: "Another person's claim was approved first.", decidedAt: new Date() })
@@ -291,6 +314,38 @@ export async function decideClaim(
       });
     },
   });
+  // The claim page promises an answer (founder QC, 17 Nov 2026). In the app only until the email wording is approved
+  // (M21); a failed notice never undoes the decision.
+  const [profile] = await db
+    .select({ name: p.tradeName, slug: p.slug, kind: schema.organisations.kind })
+    .from(p)
+    .innerJoin(schema.organisations, eq(schema.organisations.id, p.organisationId))
+    .where(eq(p.organisationId, claim.organisationId));
+  const company = profile?.name ?? "the company";
+  const tellClaimant = async (userId: string, approved: boolean, body?: string) => {
+    try {
+      await notify({
+        event: approved ? "claim.approved" : "claim.rejected",
+        topic: "company.verification",
+        userId,
+        inApp: {
+          category: "account",
+          icon: approved ? "check-circle" : "alert-circle",
+          title: approved ? `Your claim for ${company} is approved` : `Your claim for ${company} wasn't approved`,
+          body,
+          href: approved
+            ? profile?.kind === "supplier"
+              ? "/supplier"
+              : "/buyer"
+            : `/directory/companies/${profile?.slug ?? ""}`,
+        },
+      });
+    } catch (error) {
+      console.error("claim notice failed", error);
+    }
+  };
+  await tellClaimant(claim.claimantId, input.approve, input.approve ? "You're now an admin of the company." : reason);
+  for (const o of others) await tellClaimant(o.claimantId, false, "Another person's claim was approved first.");
 }
 
 export interface CompanyProfileView {

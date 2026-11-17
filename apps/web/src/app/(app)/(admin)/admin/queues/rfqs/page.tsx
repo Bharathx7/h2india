@@ -184,7 +184,7 @@ export default async function RfqQueuePage({
           </EmptyState>
         </div>
       )}
-      <p className="type-caption text-secondary">Showing all {lines.length} · moderate within 1 working day</p>
+      <p className="type-caption text-secondary">{lines.length} waiting · moderate within 1 working day</p>
     </AdminShell>
   );
 }

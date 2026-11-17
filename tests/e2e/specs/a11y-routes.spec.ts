@@ -154,6 +154,8 @@ const ADMIN = [
   "/admin/queues",
   "/admin/queues/listings",
   "/admin/queues/rfqs",
+  "/admin/queues/rfqs/unanswered",
+  "/admin/queues/inbox",
   "/admin/reports",
   "/admin/settings",
   "/admin/settings/search",
@@ -162,6 +164,7 @@ const ADMIN = [
   "/admin/users/appeals",
   "/admin/users/audit",
   "/admin/users/roles",
+  "/admin/users/support",
   "/admin/verification",
 ];
 

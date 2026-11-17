@@ -3,7 +3,7 @@
 import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { loadActor } from "@h2india/core/authz";
-import { sendChangesNeeded, sendEventLive, sendJobLive } from "@h2india/core/notify";
+import { notify, sendChangesNeeded, sendEventLive, sendJobLive } from "@h2india/core/notify";
 import {
   addFieldComment,
   claimItem,
@@ -72,10 +72,16 @@ export async function decideAction(queue: QueueKey, id: string, decision: Decisi
         overrideAccess: true,
       });
       if (decision === "approve") {
+        // Publishing approves it; its post state goes back to Draft ("not waiting for review"), or the published job
+        // stayed in the jobs queue and its count (founder QC, 17 Nov 2026).
         await payload.update({
           collection: "jobs",
           id: Number(id),
-          data: { _status: "published", postedAt: new Date().toISOString() } as never,
+          data: {
+            _status: "published",
+            postedAt: new Date().toISOString(),
+            post: { ...job.post, state: "Draft" },
+          } as never,
           overrideAccess: true,
         });
         if (to)
@@ -113,7 +119,21 @@ export async function decideAction(queue: QueueKey, id: string, decision: Decisi
       return;
     }
     const sub = await payload.findByID({ collection: "submissions", id: Number(id), depth: 0, overrideAccess: true });
+    if (queue === "inbox") {
+      // The operator has replied by email (or there's nothing to say): the message is closed, nothing is sent.
+      await payload.update({
+        collection: "submissions",
+        id: Number(id),
+        data: { status: decision === "approve" ? "Answered" : "Declined", reviewNote: text || null },
+        overrideAccess: true,
+      });
+      return;
+    }
     const status = decision === "approve" ? "Published" : decision === "changes" ? "Needs changes" : "Declined";
+    // Write for us doesn't need an account: someone who sent it signed out is answered at the email they gave
+    // (founder QC, 17 Nov 2026: they were never told).
+    const reply = to ?? (sub.contactEmail ? { email: sub.contactEmail, userId: null as string | null } : null);
+    const replyName = item.submitter?.name ?? sub.contactName ?? "";
     if (queue === "events" && decision === "approve") {
       const v = (sub.details ?? {}) as Record<string, string | undefined>;
       const venue = v.venue ?? "";
@@ -159,13 +179,36 @@ export async function decideAction(queue: QueueKey, id: string, decision: Decisi
       data: { status, reviewNote: text || null },
       overrideAccess: true,
     });
-    if (decision === "changes" && to)
-      await sendChangesNeeded(to, {
-        name: item.submitter?.name ?? "",
+    if (decision === "changes" && reply)
+      await sendChangesNeeded(reply, {
+        name: replyName,
         reference: item.reference,
         title: item.title,
         changes: text,
         listed: item.listed,
+      });
+    // A decline or an approval used to be silent. In the app only, for people with an account, until the email wording
+    // is approved (M21); a failed notice never undoes the decision.
+    if (decision !== "changes" && to?.userId)
+      await notify({
+        event: decision === "approve" ? "submission.approved" : "submission.declined",
+        topic: "company.verification",
+        userId: to.userId,
+        inApp: {
+          category: "account",
+          icon: decision === "approve" ? "check-circle" : "alert-circle",
+          title:
+            decision === "approve"
+              ? queue === "events"
+                ? `${sub.title} is live`
+                : `${sub.title} is approved. Our editors will publish it.`
+              : `${sub.title} wasn't accepted`,
+          body: decision === "approve" ? undefined : text,
+          // A company's submissions are listed on its Content page; others have no page to open.
+          href: sub.organisationId ? "/supplier/content" : undefined,
+        },
+      }).catch((e: unknown) => {
+        console.error("submission notice failed", e);
       });
   };
   try {

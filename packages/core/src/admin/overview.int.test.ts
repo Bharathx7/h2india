@@ -5,7 +5,8 @@ import { loadActor } from "../authz/actor";
 import { listingQueue } from "../products/editor";
 import { moderationQueue } from "../rfq/moderation";
 import { makeUser, useTestEnv } from "../testing/factory";
-import { adminAreas, overviewTiles } from "./overview";
+import { storefrontQueue } from "../supplier/storefront";
+import { adminAreas, adminCounts, overviewTiles, unansweredRfqs } from "./overview";
 
 // Step 11.1 DONE WHEN: a Content editor sees Content and Queues but not Money; Overview counts match the queues.
 const url = process.env.TEST_DATABASE_URL;
@@ -49,6 +50,19 @@ describe.skipIf(!url)("admin overview", () => {
     const count = (k: string) => tiles.find((t) => t.key === k)?.count;
     expect(count("listings")).toBe((await listingQueue(h.db, admin)).length);
     expect(count("rfqs")).toBe((await moderationQueue(h.db, admin)).length);
+    // Founder QC (17 Nov 2026): the unanswered tile opens its own list, and the sidebar's Queues count includes every
+    // core-held tab (listings with storefront changes, RFQs, suppliers, category requests).
+    expect(count("unanswered")).toBe((await unansweredRfqs(h.db, admin)).length);
+    expect(tiles.find((t) => t.key === "unanswered")?.href).toBe("/admin/queues/rfqs/unanswered");
+    expect(tiles.find((t) => t.key === "suppliers")?.href).toBe("/admin/queues/suppliers");
+    const sidebar = await adminCounts(h.db);
+    expect(sidebar.queues).toBe(
+      (count("listings") ?? 0) +
+        (await storefrontQueue(h.db, admin)).length +
+        (count("rfqs") ?? 0) +
+        (count("suppliers") ?? 0) +
+        (count("categories") ?? 0),
+    );
     // A Content editor gets no verification tile.
     const editor = await operator(h, "Content editor");
     expect((await overviewTiles(h.db, editor)).some((t) => t.key === "suppliers")).toBe(false);

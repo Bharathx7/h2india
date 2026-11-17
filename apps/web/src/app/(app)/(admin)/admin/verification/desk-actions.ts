@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb } from "@h2india/core";
+import { getDb, StatusConflictError } from "@h2india/core";
 import { ForbiddenError, loadActor } from "@h2india/core/authz";
 import {
   decideDocument,
@@ -29,6 +29,9 @@ async function run(
   } catch (error) {
     if (error instanceof ForbiddenError) return { ok: false, error: "You can see this but not decide it." };
     if (error instanceof VerificationError) return { ok: false, error: error.message };
+    // Two operators on the same item (founder QC, 17 Nov 2026: the second got an error page).
+    if (error instanceof StatusConflictError)
+      return { ok: false, error: "Someone else decided this a moment ago. Refresh to see what they chose." };
     throw error;
   }
   revalidatePath("/admin/verification");

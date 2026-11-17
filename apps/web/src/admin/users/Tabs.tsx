@@ -10,6 +10,8 @@ const TABS = [
   { key: "roles", label: "Operator roles", href: "/admin/users/roles" },
   { key: "audit", label: "Audit log", href: "/admin/users/audit" },
   { key: "appeals", label: "Appeals", href: "/admin/users/appeals" },
+  // Founder QC (17 Nov 2026): lost-email and recovery requests that need H2 Economy reached support only by email.
+  { key: "support", label: "Support requests", href: "/admin/users/support" },
 ] as const;
 
 export function UsersHeader({ action }: { action?: ReactNode }) {
@@ -34,7 +36,7 @@ export function UserTabs({
   counts?: Partial<Record<(typeof TABS)[number]["key"], number>>;
 }) {
   return (
-    <nav aria-label="Users" className="flex gap-6 border-b border-default">
+    <nav aria-label="Users" className="flex gap-6 overflow-x-auto border-b border-default">
       {TABS.map((t) => (
         <Link
           key={t.key}

@@ -3,6 +3,7 @@ import type { Actor } from "@h2india/core/authz";
 import { listingQueue } from "@h2india/core/products";
 import { QUEUES, type QueueKey } from "@h2india/core/queues";
 import { moderationQueue } from "@h2india/core/rfq";
+import { storefrontQueue } from "@h2india/core/supplier";
 import { cx } from "@h2india/ui";
 import Link from "next/link";
 import { queueItems } from "@/admin/queues/data";
@@ -11,21 +12,26 @@ import { queueItems } from "@/admin/queues/data";
 
 export async function queueCounts(actor: Actor): Promise<Record<QueueKey, number>> {
   const db = getDb();
-  const [listings, rfqs, ...rest] = await Promise.all([
+  const [listings, storefronts, rfqs, ...rest] = await Promise.all([
     listingQueue(db, actor),
+    storefrontQueue(db, actor),
     moderationQueue(db, actor),
-    ...(["suppliers", "content", "events", "jobs", "comments", "categories"] as const).map((q) => queueItems(actor, q)),
+    ...(["suppliers", "content", "events", "jobs", "comments", "categories", "inbox"] as const).map((q) =>
+      queueItems(actor, q),
+    ),
   ]);
-  const [suppliers, content, events, jobs, comments, categories] = rest;
+  const [suppliers, content, events, jobs, comments, categories, inbox] = rest;
   return {
     suppliers: suppliers?.length ?? 0,
-    listings: listings.length,
+    // The Listings tab holds storefront changes too (founder QC, 17 Nov 2026: its count left them out).
+    listings: listings.length + storefronts.length,
     rfqs: rfqs.length,
     content: content?.length ?? 0,
     events: events?.length ?? 0,
     jobs: jobs?.length ?? 0,
     comments: comments?.length ?? 0,
     categories: categories?.length ?? 0,
+    inbox: inbox?.length ?? 0,
   };
 }
 

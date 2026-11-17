@@ -1,6 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "../fixtures";
-import { asEditorInChief, cms, publishedHelpArticle, publishedLegalPage, signInOperator } from "../helpers/cms";
+import {
+  asEditorInChief,
+  backOfficeContext,
+  cms,
+  publishedHelpArticle,
+  publishedLegalPage,
+  signInOperator,
+} from "../helpers/cms";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 5.8 DONE WHEN: a grievance gets a GRV ticket and the acknowledgement email, and its status shows only for the
@@ -74,7 +81,8 @@ test("contact and partnership messages reach the queue with a reference", async 
   await page.goto("/contact?about=supplier");
   expect(await seriousIssues(page)).toEqual([]);
   await expect(page.getByRole("button", { name: "Supplier onboarding" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByPlaceholder("Full name").fill("Rohan Mehta");
+  const sender = `Rohan Mehta ${String(Date.now())}`;
+  await page.getByPlaceholder("Full name").fill(sender);
   await page.getByPlaceholder("you@company.com").fill(newEmail("contact"));
   await page.getByPlaceholder("Company name").fill("Konkan Test Works");
   await page.getByRole("textbox", { name: "Message" }).fill("We make Type IV cylinders and want to list them.");
@@ -101,11 +109,28 @@ test("contact and partnership messages reach the queue with a reference", async 
   const ep = await editor.newPage();
   await signInOperator(ep, "Content editor");
   const queue = await cms(ep.request, "GET", `submissions?where[reference][equals]=${reference}`);
-  expect((queue.body as unknown as { docs: { kind: string; status: string }[] }).docs[0]).toMatchObject({
-    kind: "contact",
-    status: "Under review",
-  });
+  const doc = (queue.body as unknown as { docs: { id: number; kind: string; status: string }[] }).docs[0];
+  expect(doc).toMatchObject({ kind: "contact", status: "Under review" });
   await editor.close();
+
+  // Founder QC (17 Nov 2026): it reaches the back office's Inbox (it was only in the raw CMS list), and an operator
+  // replies by email and marks it answered.
+  const op = await backOfficeContext(browser);
+  const opPage = await op.newPage();
+  await signInOperator(opPage, "Super admin");
+  await opPage.goto(`/admin/queues/inbox?q=${encodeURIComponent(sender)}`);
+  await expect(opPage.getByRole("region", { name: "Inbox waiting" }).getByText(sender)).toBeVisible();
+  await opPage.goto(`/admin/queues/inbox/${String(doc?.id ?? 0)}`);
+  await expect(opPage.getByRole("link", { name: "Reply by email" })).toHaveAttribute("href", /^mailto:/);
+  await opPage.getByRole("button", { name: "Mark answered" }).click();
+  await expect(opPage).toHaveURL(/\/admin\/queues\/inbox/);
+  await expect
+    .poll(async () => {
+      const again = await cms(opPage.request, "GET", `submissions?where[reference][equals]=${reference}`);
+      return (again.body as unknown as { docs: { status: string }[] }).docs[0]?.status;
+    })
+    .toBe("Answered");
+  await op.close();
 });
 
 test("legal pages, help search and the company pages", async ({ page, browser }, info) => {

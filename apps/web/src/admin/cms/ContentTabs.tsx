@@ -76,7 +76,18 @@ export function ContentHeader({ intro, actions }: { intro: string; actions?: Rea
         <h1 className="type-h2">Content</h1>
         <p className="type-body-sm text-secondary">{intro}</p>
       </div>
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* The advanced editor stays for what the native screens don't do (A26); it moved here from Overview (founder
+            QC, 17 Nov 2026). */}
+        <Link
+          href="/cms"
+          prefetch={false}
+          className="type-label text-secondary underline underline-offset-2 hover:text-body"
+        >
+          Advanced editor (CMS)
+        </Link>
+        {actions}
+      </div>
     </div>
   );
 }

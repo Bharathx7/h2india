@@ -2,7 +2,6 @@ import { getDb } from "@h2india/core";
 import { isEnabled } from "@h2india/config";
 import { can, hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
 import { buttonClasses, Icon, Logo } from "@h2india/ui";
-import Link from "next/link";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -10,6 +9,7 @@ import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { operatorSession, staffSignedIn } from "@/server/auth";
 import { navFor, shellFor } from "@/server/workspace";
+import { absolute } from "@/seo/site";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
 // so its existence isn't revealed.
@@ -71,9 +71,10 @@ function LargerScreen() {
       <p className="type-body text-body">
         The H2 Economy back office needs a screen at least 1024 px wide. Open it on a laptop or desktop.
       </p>
-      <Link href="/" className={buttonClasses({ variant: "outline" })}>
+      {/* The public home is on the other domain; "/" on the admin domain is this page again (founder QC, 17 Nov 2026). */}
+      <a href={absolute("/")} className={buttonClasses({ variant: "outline" })}>
         Go to H2 Economy home
-      </Link>
+      </a>
     </div>
   );
 }

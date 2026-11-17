@@ -9,6 +9,7 @@ import {
   type JobPostInput,
   type JobPostValues,
 } from "@h2india/core/opportunities";
+import { reopenQueueItem } from "@h2india/core/queues";
 import { getPayload } from "payload";
 import { STATE_OPTIONS } from "@/cms/records/states";
 import { slugify } from "@/cms/slug";
@@ -166,6 +167,8 @@ export async function saveJobPost(
       after: { reference, role: v.role, closesAt: v.closesAt },
       context: await requestContext(),
     });
+    // Sent again after changes: the earlier decision no longer applies, so the jobs queue can decide it afresh.
+    await reopenQueueItem(getDb(), "jobs", String(doc.id));
   }
   return { ok: true, id: doc.id, reference };
 }

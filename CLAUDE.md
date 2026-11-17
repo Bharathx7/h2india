@@ -293,7 +293,11 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Admin back office (Stage 11)
 
-- Admin pages call `requireOperator(permission, path)` and render in `AdminShell`; the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.
+- Every admin page, Catalogue and Verification included, calls `requireOperator(permission, path)` and renders in `AdminShell` (never `getSession()` or `WorkspaceFrame` directly); the sidebar shows only `adminAreas(actor)` (Commerce only with `transactions` on). Overview tiles come from `overviewTiles()` (`@h2india/core/admin`), counting the same records as their queues, aged against the `queueAmber` and `queueRed` clocks.
+- Sidebar counts match their pages: `adminCounts()` counts the core-held queue tabs and the desk's Needs action companies plus profile claims; `navFor()` adds the CMS-held tabs (content, events, jobs, inbox). Overview tiles open native screens only, never `/cms`.
+- Queues · Inbox holds reader corrections and contact, partnership and advertising messages (`INBOX_KINDS`); an operator replies by email and marks it Answered, or closes it. A job sent again after changes calls `reopenQueueItem()` so it can be decided afresh; approving a job sets its post state back to Draft.
+- Every operator decision tells the person in the app (A190): no new email until its wording is approved (M21). A new decision path does the same, after the change is saved, and a failed notice never undoes it.
+- Takedowns are decided only with `decideTakedown()` (`@h2india/core/compliance`, compliance.edit): Resolved (optionally pausing the live listing) or Rejected, with a note. Support requests are listed with `supportRequests()` (`@h2india/core/recovery`) and answered on `/account/recovery/<id>`.
 - Moderation decisions go through `decideItem()` (`@h2india/core/queues`): it claims, refuses a second decision and runs `apply` (the CMS change and the message) once; never change a queued item from a page without it. Moderators never edit the item itself; they return it with reasons.
 - Newsletter issues are sent only through `@h2india/core/newsletter/sends` (`scheduleSend()` starts a `newsletterSend` deadline; `sendBatch()` sends to confirmed subscribers, each once, with unsubscribe headers). Core renders the email; the web app only builds `IssueContent` (`admin/content/issue.ts`).
 - Search synonyms and boosted results are the settings `SEARCH_SYNONYMS` and `SEARCH_BOOSTS`; change them only with `saveSynonyms()`/`saveBoosts()` (they apply to the live indexes, and `ensureIndexes()` keeps them).
@@ -307,6 +311,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Workspace shell (founder QC, 17 Nov 2026)
 
+- `WorkspaceShell` draws its links with the app's link (`linkComponent`; `WorkspaceFrame` passes Next.js Link), so a sidebar click swaps the page without reloading the document; the area badge sits under the logo (founder QC, 17 Nov 2026: it was cut in half beside it).
 - Every workspace page (buyer, supplier, member, admin, `/account`, `/notifications`) takes its sidebar from `navFor(area, userId)` (`apps/web/src/server/workspace.ts`): money pages only with `transactions` on, admin only the operator's areas with counts. Never pass `WORKSPACE_NAV` to `WorkspaceFrame` directly.
 - The top bar has no welcome line and no help button; the profile shows the avatar and name. Search opens the site search (`HeaderSearch`, Request a quote only for buyers) or, in the back office, `searchLinks` to Users, Listings and RFQs.
 - The sidebar must fit a 650 px tall window without scrolling (`workspace-shell.spec.ts`): Log out lives in the profile menu, items are 34 px. Adding a menu item means checking that test.

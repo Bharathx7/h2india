@@ -2,11 +2,11 @@ import { WORK_ID_KEEP_DAYS } from "@h2india/config/files";
 import { parseServerEnv } from "@h2india/config";
 import { schema } from "@h2india/db";
 import { renderRecovery } from "@h2india/emails";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
-import { can } from "../authz/can";
+import { assertCan, can } from "../authz/can";
 import { hashToken } from "../companies/drafts";
 import { getDb } from "../db";
 import { attachFile, scheduleFileDeletion } from "../files/files";
@@ -153,4 +153,55 @@ export async function closeSupportRequest(input: { actor: Actor; requestId: stri
       context: input.context,
     });
   });
+}
+
+export interface SupportListRow {
+  id: string;
+  kind: string;
+  reference: string | null;
+  status: string;
+  name: string;
+  company: string;
+  email: string;
+  createdAt: Date;
+  decidedAt: Date | null;
+}
+
+/**
+ * Requests for H2 Economy support (founder QC, 17 Nov 2026: they reached support only as an email): lost-email support
+ * requests, and recovery requests from people whose company has no admin to approve them. Open ones (Waiting for
+ * support) first, oldest first; `done` lists the answered ones, newest first. Operators with Users access.
+ */
+export async function supportRequests(actor: Actor, done = false): Promise<SupportListRow[]> {
+  assertCan(actor, "users.view");
+  const db = getDb();
+  const open = ["Waiting for support"];
+  const rows = await db
+    .select({
+      r: rr,
+      userName: schema.users.name,
+      userEmail: schema.users.email,
+      company: schema.organisations.legalName,
+    })
+    .from(rr)
+    .leftJoin(schema.users, eq(schema.users.id, rr.userId))
+    .leftJoin(schema.organisations, eq(schema.organisations.id, rr.organisationId))
+    .where(
+      done
+        ? and(inArray(rr.status, ["Closed", "Approved", "Declined", "Completed"]), eq(rr.kind, "support"))
+        : inArray(rr.status, open),
+    )
+    .orderBy(done ? desc(rr.updatedAt) : rr.createdAt)
+    .limit(done ? 500 : 1000);
+  return rows.map(({ r, userName, userEmail, company }) => ({
+    id: r.id,
+    kind: r.kind,
+    reference: r.reference,
+    status: r.status,
+    name: r.contactName ?? userName ?? "",
+    company: r.contactCompany ?? company ?? "",
+    email: r.contactEmail ?? userEmail ?? "",
+    createdAt: r.createdAt,
+    decidedAt: r.decidedAt,
+  }));
 }

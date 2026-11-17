@@ -6,7 +6,8 @@ import { claimsFor, companiesBrief, submitters, supplierQueue, type QueueKey } f
 import { getPayload } from "payload";
 
 // Queue items that live in the CMS (step 11.2): content (press releases and pitches), events (submitted through the
-// public form) and jobs companies post. Suppliers come from core; listings and RFQs have their own pages.
+// public form), jobs companies post, and the inbox (reader corrections, contact, partnership and advertising messages;
+// founder QC, 17 Nov 2026). Suppliers come from core; listings and RFQs have their own pages.
 
 export interface QueueItem {
   id: string;
@@ -27,11 +28,17 @@ export interface Check {
 }
 
 const CONTENT_KINDS = ["press_release", "pitch"];
+export const INBOX_KINDS = ["correction", "contact", "partnership", "advertising"];
 const KIND_LABEL: Record<string, string> = {
   press_release: "Press release",
   pitch: "Contributor article",
   event: "Event",
+  correction: "Correction request",
+  contact: "Contact message",
+  partnership: "Partnership enquiry",
+  advertising: "Advertising enquiry",
 };
+const kindsOf = (queue: QueueKey) => (queue === "events" ? ["event"] : queue === "inbox" ? INBOX_KINDS : CONTENT_KINDS);
 
 const s = (v: unknown) => (typeof v === "string" ? v : "");
 
@@ -53,7 +60,7 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
       submittedAt: r.submittedAt,
       claimedBy: claims.get(r.id)?.claimedBy ?? null,
       claimer: claims.get(r.id)?.name ?? null,
-      href: `/admin/verification?org=${r.organisationId}`,
+      href: `/admin/verification?company=${r.organisationId}`,
     }));
   }
   if (queue === "categories") {
@@ -78,7 +85,16 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
   }
   if (queue === "comments") return []; // Public comments are off at launch (C9).
   const payload = await getPayload({ config });
-  const docs: { id: string; title: string; kind: string; by: string; org: string; at: string | null }[] = [];
+  const docs: {
+    id: string;
+    title: string;
+    kind: string;
+    by: string;
+    org: string;
+    at: string | null;
+    /** Who wrote in, for a message sent without an account. */
+    contact?: string;
+  }[] = [];
   if (queue === "jobs") {
     const res = await payload.find({
       collection: "jobs",
@@ -102,13 +118,10 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
     const res = await payload.find({
       collection: "submissions",
       where: {
-        and: [
-          { status: { equals: "Under review" } },
-          queue === "events" ? { kind: { equals: "event" } } : { kind: { in: CONTENT_KINDS } },
-        ],
+        and: [{ status: { equals: "Under review" } }, { kind: { in: kindsOf(queue) } }],
       },
       depth: 0,
-      limit: 200,
+      limit: 500,
       sort: "createdAt",
       overrideAccess: true,
     });
@@ -120,6 +133,7 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
         by: d.submittedBy ?? "",
         org: d.organisationId ?? "",
         at: d.createdAt,
+        contact: d.contactName ?? d.contactEmail ?? "",
       });
   }
   const [people, companies, claims] = await Promise.all([
@@ -145,7 +159,7 @@ export async function queueItems(actor: Actor, queue: QueueKey): Promise<QueueIt
       id: d.id,
       title: d.title,
       line: [d.kind, org].filter(Boolean).join(" · "),
-      submitter: people.get(d.by)?.name ?? "",
+      submitter: people.get(d.by)?.name ?? d.contact ?? "",
       organisation: org,
       submittedAt: d.at ? new Date(d.at) : null,
       claimedBy: claims.get(d.id)?.claimedBy ?? null,
@@ -168,10 +182,12 @@ export interface ItemDetail {
   checks: Check[];
   /** What the approved item is called in the outcome note. */
   listed: string;
+  /** Where to reply, for an inbox message. */
+  replyTo?: string;
 }
 
 export async function itemDetail(actor: Actor, queue: QueueKey, id: string): Promise<ItemDetail | null> {
-  if (!/^\d+$/.test(id) || (queue !== "content" && queue !== "events" && queue !== "jobs")) return null;
+  if (!/^\d+$/.test(id) || !["content", "events", "jobs", "inbox"].includes(queue)) return null;
   const db = getDb();
   const payload = await getPayload({ config });
   if (queue === "jobs") {
@@ -240,8 +256,7 @@ export async function itemDetail(actor: Actor, queue: QueueKey, id: string): Pro
     .findByID({ collection: "submissions", id: Number(id), depth: 0, overrideAccess: true })
     .catch(() => null);
   if (!d) return null;
-  if ((queue === "events") !== (d.kind === "event") || (queue === "content" && !CONTENT_KINDS.includes(d.kind)))
-    return null;
+  if (!kindsOf(queue).includes(d.kind)) return null;
   const v = (d.details ?? {}) as Record<string, unknown>;
   const by = d.submittedBy ?? "";
   const [people, companies] = await Promise.all([
@@ -259,6 +274,20 @@ export async function itemDetail(actor: Actor, queue: QueueKey, id: string): Pro
     organisation: companies.get(d.organisationId ?? "")?.name ?? "",
     submittedAt: new Date(d.createdAt),
   };
+  if (queue === "inbox") {
+    const email = d.contactEmail ?? p?.email ?? "";
+    return {
+      ...base,
+      listed: "answer",
+      replyTo: email || undefined,
+      rows: [
+        ["Kind", KIND_LABEL[d.kind] ?? d.kind],
+        ["From", [d.contactName ?? p?.name, email, d.contactPhone].filter(Boolean).join(" · ")],
+        ...detailRows(v),
+      ],
+      checks: [],
+    };
+  }
   if (queue === "events") {
     const venue = s(v.venue);
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
@@ -288,22 +317,27 @@ export async function itemDetail(actor: Actor, queue: QueueKey, id: string): Pro
   return {
     ...base,
     listed: "publish",
-    rows: Object.entries(v)
-      .filter(([k, x]) => typeof x === "string" && x && !["title", "logo"].includes(k))
-      .map(
-        ([k, x]) =>
-          [
-            k.charAt(0).toUpperCase() +
-              k
-                .slice(1)
-                .replace(/([A-Z])/g, " $1")
-                .toLowerCase(),
-            String(x),
-          ] as [string, string],
-      ),
+    rows: detailRows(v),
     checks: [
       { label: "Sender's company is verified", ok: companies.get(d.organisationId ?? "")?.verified ?? false },
       { label: "Sender's email and mobile verified", ok: p?.verified ?? false },
     ],
   };
+}
+
+/** What a form sent, as labelled rows ("companyName" → "Company name"). */
+function detailRows(v: Record<string, unknown>): [string, string][] {
+  return Object.entries(v)
+    .filter(([k, x]) => typeof x === "string" && x && !["title", "logo"].includes(k))
+    .map(
+      ([k, x]) =>
+        [
+          k.charAt(0).toUpperCase() +
+            k
+              .slice(1)
+              .replace(/([A-Z])/g, " $1")
+              .toLowerCase(),
+          String(x),
+        ] as [string, string],
+    );
 }

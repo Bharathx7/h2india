@@ -9,6 +9,7 @@ import { inScope, type Scope } from "../authz/scope";
 import { cancelDeadline, completeDeadline, onDeadline, startClock, startDeadline } from "../clocks/clocks";
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
+import { notify } from "../notify/notify";
 import { sendQuoteReceived, sendRfqChecked, sendRfqReceived, tellSuppliers } from "./notices";
 import { Money } from "../money";
 import { quoteFigures, scheduleProblem, type PaymentLine } from "./totals";
@@ -479,6 +480,22 @@ export async function rejectRfq(
       },
     },
   );
+  // Founder QC (17 Nov 2026): a rejection reached nobody. In the app only until the email wording is approved (M21).
+  await tell(async () => {
+    await notify({
+      event: "rfq.rejected",
+      topic: "rfq.checked",
+      userId: row.createdBy,
+      scope: row.organisationId,
+      inApp: {
+        category: "quotes",
+        icon: "alert-circle",
+        title: `${row.reference} wasn't sent to suppliers`,
+        body: reason,
+        href: `/buyer/rfqs/${rfqId}`,
+      },
+    });
+  });
 }
 
 /** Assign to me (629:1148), or reassign. */
