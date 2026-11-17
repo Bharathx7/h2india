@@ -113,7 +113,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
                 </h2>
                 <p className="type-body-sm text-secondary">Every SIGHT round SECI has run, newest results first</p>
               </div>
-              <div className="overflow-x-auto rounded-card border border-default">
+              <div className="relative overflow-x-auto rounded-card border border-default">
                 <table className="w-full min-w-200 text-left">
                   <thead className="bg-subtle type-label-sm text-secondary">
                     <tr>
@@ -193,7 +193,7 @@ export default async function SightPage({ searchParams }: { searchParams: Promis
                   ))}
                 </nav>
               </div>
-              <div className="overflow-x-auto rounded-card border border-default">
+              <div className="relative overflow-x-auto rounded-card border border-default">
                 <table className="w-full min-w-170 text-left">
                   <thead className="bg-subtle type-label-sm text-secondary">
                     <tr>

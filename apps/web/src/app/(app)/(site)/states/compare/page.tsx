@@ -82,7 +82,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           ) : null}
         </div>
         {states.length ? (
-          <div className="overflow-x-auto rounded-card border border-default">
+          <div className="relative overflow-x-auto rounded-card border border-default">
             <table className="w-full min-w-200 text-left">
               <thead className="sticky top-0 bg-subtle">
                 <tr>

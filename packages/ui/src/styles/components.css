@@ -87,6 +87,15 @@
   }
 }
 
+/* Printing never waits for a scroll: sections the reveal hasn't shown yet print as they are (site audit, 17 Nov 2026). */
+@media print {
+  .reveal-section[data-reveal="armed"],
+  .reveal-section[data-reveal="armed"] [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Logo strip: continuous sideways scroll, 90 s a loop, linear. */
 @keyframes h2-marquee {
   to {

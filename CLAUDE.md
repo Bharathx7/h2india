@@ -209,7 +209,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - An attribute's key never changes. Type and unit can't change, and the attribute can't be removed, once products use it (`productsUsingAttribute(db, attribute)`: products in its category and, for a parent's attribute, its sub-categories; A107).
 - Admin Catalogue (founder QC, 17 Nov 2026): tree with live counts and filters, tabs Attributes · Details · Applications · History (`?tab=`), flag ticks held in a Save bar, a sub-category shows its inherited attributes. Sub-categories move with `moveSubCategory()`, siblings reorder with `reorderCategory()`, and the applications list changes only through `addApplication()` (starts hidden), `updateApplication()` and `setApplicationHidden()` (catalogue.edit, audited).
 - Product search documents keep attribute values under `attributes` (already filterable), so a new filterable attribute needs no index change.
-- A scrolling table that holds Radix checkboxes needs `relative` on its scroll box, or their hidden inputs widen the page on phones.
+- A table's scroll box (`overflow-x-auto`) always gets `relative`: otherwise anything absolutely placed inside (Radix checkboxes' hidden inputs, `sr-only` labels) escapes it and widens the page on phones (site audit, 17 Nov 2026: `/opportunities` was 501 px wide on a 390 px phone).
 
 ## Marketplace pages (step 6.2)
 

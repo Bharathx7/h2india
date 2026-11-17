@@ -253,7 +253,7 @@ function Cards({ items, signedIn }: { items: GrantView[]; signedIn: boolean }) {
 
 function Table({ items }: { items: GrantView[] }) {
   return (
-    <div className="overflow-x-auto rounded-card border border-default">
+    <div className="relative overflow-x-auto rounded-card border border-default">
       <table className="w-full min-w-180 text-left">
         <thead className="bg-subtle type-label-sm text-secondary">
           <tr>

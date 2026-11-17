@@ -84,7 +84,7 @@ export default async function ChangesPage({ searchParams }: { searchParams: Prom
           />
         </div>
         {list.length ? (
-          <div className="overflow-x-auto rounded-card border border-default p-3">
+          <div className="relative overflow-x-auto rounded-card border border-default p-3">
             <table className="w-full min-w-220 text-left">
               <thead className="bg-subtle type-label-sm text-secondary">
                 <tr>

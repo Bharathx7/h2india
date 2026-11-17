@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
 
 function Table({ view, rows }: { view: SubView; rows: Row[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full min-w-200 text-left">
         <thead className="bg-subtle type-label-sm text-secondary">
           <tr>
