@@ -1,5 +1,5 @@
 import { schema, type Database } from "@h2india/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { Money } from "../money";
@@ -45,7 +45,9 @@ export async function checkoutView(db: Database, actor: Actor, organisationId: s
   const gstins = await db
     .select()
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId));
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    );
   const [org] = await db.select().from(schema.organisations).where(eq(schema.organisations.id, organisationId));
   const route = cart.totalPaise > 0n ? await approvalRoute(db, organisationId, userId, cart.totalPaise) : [];
   const ids = [...new Set(route.flatMap((r) => r.approverIds))];
@@ -129,6 +131,7 @@ export async function saveCheckout(db: Database, actor: Actor, organisationId: s
         and(
           eq(schema.organisationGstins.id, patch.billingGstinId),
           eq(schema.organisationGstins.organisationId, organisationId),
+          isNull(schema.organisationGstins.retiredAt),
         ),
       );
     if (!g) errors.billingGstinId = "Choose one of your GSTINs";

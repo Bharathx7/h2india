@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "organisation_gstins_one_per_company" ON "core"."organisation_gstins" USING btree ("organisation_id") WHERE "core"."organisation_gstins"."retired_at" is null;

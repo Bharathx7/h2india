@@ -182,6 +182,7 @@ async function checkPlaces(ex: Executor, organisationId: string, input: Checkout
       and(
         eq(schema.organisationGstins.id, input.billingGstinId),
         eq(schema.organisationGstins.organisationId, organisationId),
+        isNull(schema.organisationGstins.retiredAt),
       ),
     );
   if (!g) errors.billingGstinId = "Choose a billing GSTIN";
@@ -253,6 +254,7 @@ export async function placeCartOrder(
         and(
           eq(schema.organisationGstins.organisationId, cart.supplierId),
           eq(schema.organisationGstins.portalStatus, "Active"),
+          isNull(schema.organisationGstins.retiredAt),
         ),
       )
       .orderBy(desc(schema.organisationGstins.isDefault), asc(schema.organisationGstins.createdAt))

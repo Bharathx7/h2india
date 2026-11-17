@@ -3,15 +3,14 @@ import { roleGrid, scopeFor } from "@h2india/core/authz";
 import { companySessions, companySettings, delegationsOf } from "@h2india/core/buyer";
 import { companyRoles, teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
-import { Alert, cx, Icon, StatusBadge, type IconName } from "@h2india/ui";
+import { cx, Icon, StatusBadge, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  AddGstin,
   Delegation,
   EndDelegation,
-  GstinActions,
+  GstinCard,
   LimitDialog,
   ProfileForm,
   RemoveSite,
@@ -30,7 +29,7 @@ export const dynamic = "force-dynamic";
 
 const SECTIONS: { key: string; label: string; icon: IconName }[] = [
   { key: "profile", label: "Company profile", icon: "building" },
-  { key: "gstins", label: "GSTINs", icon: "file-text" },
+  { key: "gstins", label: "GSTIN", icon: "file-text" },
   { key: "sites", label: "Delivery sites", icon: "map-pin" },
   { key: "users", label: "Users and roles", icon: "users" },
   { key: "rules", label: "Approval rules", icon: "check" },
@@ -98,8 +97,11 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
   const canManage = b.seat.permissions.has("company.manage");
   const canTeam = b.seat.permissions.has("team.manage");
   const role = b.seat.role;
-  const gstinLabel = new Map(data.gstins.map((g) => [g.id, `${g.gstin}${g.place ? ` · ${g.place}` : ""}`]));
-  const defaultGstin = data.gstins.find((g) => g.isDefault);
+  // One GSTIN per company (A189): every delivery site bills to it.
+  const companyGstinRow = data.gstins[0];
+  const companyGstinLabel = companyGstinRow
+    ? `${companyGstinRow.gstin}${companyGstinRow.place ? ` · ${companyGstinRow.place}` : ""}`
+    : null;
 
   let body: React.ReactNode;
   if (section === "profile") {
@@ -120,84 +122,36 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else if (section === "gstins") {
+    // One GSTIN per company (founder QC, 17 Nov 2026, A189).
+    const g = data.gstins[0];
     body = (
       <>
         <Heading
-          title="GSTINs"
-          detail="Add each state registration you buy under. Orders are billed to the default GSTIN unless you choose another."
-          action={canManage ? <AddGstin /> : undefined}
+          title="GSTIN"
+          detail="Your company's GSTIN. Quotes, orders and invoices use it, for every delivery site."
         />
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="GSTINs"
-          className="relative overflow-x-auto rounded-card border border-default bg-page"
-        >
-          <table className="w-full min-w-[640px]">
-            <thead>
-              <tr className="bg-subtle text-left type-caption text-secondary">
-                <th scope="col" className="px-4 py-3">
-                  GSTIN
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  State and place of business
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.gstins.map((g) => (
-                <tr key={g.id} className="border-t border-default">
-                  <td className="px-4 py-3">
-                    <span className="block type-mono">{g.gstin}</span>
-                    {g.isDefault ? <StatusBadge status="Default" tone="neutral" /> : null}
-                  </td>
-                  <td className="px-2 py-3 type-body-sm">{g.place ?? "—"}</td>
-                  <td className="px-2 py-3">
-                    {g.portalStatus === "Active" ? (
-                      <StatusBadge
-                        status={g.checkedAt ? `Verified ${formatIstDayMonth(g.checkedAt)}` : "Verified"}
-                        tone="success"
-                      />
-                    ) : g.portalStatus === "Pending" ? (
-                      <StatusBadge status="Checking with GST records" tone="progress" />
-                    ) : (
-                      <StatusBadge status={g.portalStatus} tone="error" />
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {canManage ? (
-                      <GstinActions
-                        id={g.id}
-                        gstin={g.gstin}
-                        isDefault={g.isDefault}
-                        active={g.portalStatus === "Active"}
-                      />
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Alert tone="info" title="Verification runs in the background">
-          You can request quotes while we check a new GSTIN. Orders can be billed to it once it&apos;s verified.
-        </Alert>
+        <GstinCard
+          canEdit={canManage}
+          current={
+            g
+              ? {
+                  gstin: g.gstin,
+                  place: g.place,
+                  status: g.portalStatus,
+                  checkedOn: g.checkedAt ? formatIstDayMonth(g.checkedAt) : null,
+                }
+              : null
+          }
+        />
       </>
     );
   } else if (section === "sites") {
-    const gstins = data.gstins.map((g) => ({ id: g.id, label: gstinLabel.get(g.id) ?? g.gstin }));
     body = (
       <>
         <Heading
           title="Delivery sites"
           detail="Where suppliers deliver. Receiving contacts get the delivery code by SMS and confirm what arrived."
-          action={canManage ? <SiteDialog gstins={gstins} label="Add a delivery site" /> : undefined}
+          action={canManage ? <SiteDialog label="Add a delivery site" /> : undefined}
         />
         {data.sites.length === 0 ? (
           <div className="flex flex-col items-start gap-2 rounded-card border border-default bg-page p-5">
@@ -218,7 +172,6 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
               {canManage ? (
                 <span className="flex items-center gap-2">
                   <SiteDialog
-                    gstins={gstins}
                     label="Edit"
                     start={{
                       id: s.id,
@@ -227,7 +180,6 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
                       city: s.city ?? "",
                       state: s.state ?? "",
                       pincode: s.pincode ?? "",
-                      gstinId: s.gstinId ?? "",
                       hours: s.hours ?? "",
                       contacts: s.contacts.length ? s.contacts : [{ name: "", role: "", mobile: "" }],
                       isDefault: s.isDefault,
@@ -241,7 +193,7 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
               <dt className="type-body-sm text-secondary">Address</dt>
               <dd className="type-body-sm">{[s.address, s.city, s.state, s.pincode].filter(Boolean).join(", ")}</dd>
               <dt className="type-body-sm text-secondary">Bills to GSTIN</dt>
-              <dd className="type-body-sm">{s.gstinId ? gstinLabel.get(s.gstinId) : (defaultGstin?.gstin ?? "—")}</dd>
+              <dd className="type-body-sm">{companyGstinLabel ?? "Add your company GSTIN first"}</dd>
               <dt className="type-body-sm text-secondary">Receiving hours</dt>
               <dd className="type-body-sm">{s.hours || "—"}</dd>
             </dl>

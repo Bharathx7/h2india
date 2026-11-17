@@ -1,6 +1,6 @@
 "use server";
 
-import { addGstin, BuyerSettingsError, removeGstin, setDefaultGstin } from "@h2india/core/buyer";
+import { addGstin, BuyerSettingsError, replaceGstin } from "@h2india/core/buyer";
 import { CategoryRequestError, requestCategory } from "@h2india/core/catalogue/taxonomy";
 import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
@@ -33,16 +33,11 @@ export async function addSupplierGstinAction(gstin: string, place: string): Prom
   return run(() => addGstin(db, actor, supplier.organisationId, { gstin, place }, context), COMPANY);
 }
 
-export async function defaultSupplierGstinAction(id: string): Promise<Result> {
+/** Correct the company's GSTIN while it is still being checked (A189). */
+export async function replaceSupplierGstinAction(gstin: string, place: string): Promise<Result> {
   const { db, actor, supplier } = await supplierActor();
   const context = await requestContext();
-  return run(() => setDefaultGstin(db, actor, supplier.organisationId, id, context), COMPANY);
-}
-
-export async function removeSupplierGstinAction(id: string): Promise<Result> {
-  const { db, actor, supplier } = await supplierActor();
-  const context = await requestContext();
-  return run(() => removeGstin(db, actor, supplier.organisationId, id, context), COMPANY);
+  return run(() => replaceGstin(db, actor, supplier.organisationId, { gstin, place }, context), COMPANY);
 }
 
 export async function requestCategoryAction(input: {

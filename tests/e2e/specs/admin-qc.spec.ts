@@ -54,7 +54,7 @@ test("a Super admin adds a supplier; the new owner accepts the invitation and ge
   await op.getByRole("button", { name: "Add supplier and invite owner" }).click();
   await expect(op).toHaveURL(/\/admin\/users\/companies\/[0-9a-f-]{36}\?added=1$/);
   await expect(op.getByText("was added")).toBeVisible();
-  await expect(op.getByRole("region", { name: "GSTINs (1)" }).getByText(gstin)).toBeVisible();
+  await expect(op.getByRole("region", { name: "GSTIN", exact: true }).getByText(gstin)).toBeVisible();
   await expect(op.getByText(`${owner} · Admin`)).toBeVisible();
   // The same GSTIN again is refused, with a link to the company that has it.
   await op.goto("/admin/users/companies/new");

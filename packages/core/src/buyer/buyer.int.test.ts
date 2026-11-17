@@ -22,16 +22,17 @@ import {
 import {
   addGstin,
   BuyerSettingsError,
+  changeGstinByOperator,
+  companyGstin,
   companySettings,
   deliverySitesOf,
-  removeGstin,
+  replaceGstin,
   saveApprovalRules,
   saveDeliverySite,
-  setDefaultGstin,
 } from "./settings";
 
 // Step 9.1 DONE WHEN: the checklist updates as steps finish; only a buyer Admin can invite, change roles or remove
-// people (checked at the API, not only hidden); a second GSTIN shows its states; and company B can't read or change
+// people (checked at the API, not only hidden); the company has one GSTIN (A189); and company B can't read or change
 // company A's delivery sites, settings or lists.
 const url = process.env.TEST_DATABASE_URL;
 const tag = randomBytes(3).toString("hex");
@@ -101,25 +102,52 @@ describe.skipIf(!url)("buyer workspace", () => {
     expect(list.complete).toBe(false);
   });
 
-  it("a second GSTIN is checked, can become the default once verified, and must share the PAN", async () => {
+  it("one GSTIN per company: no second one, replaced while being checked, locked once verified (A189)", async () => {
     const admin = await loadActor(h.db, a.admin.id);
-    await expect(addGstin(h.db, admin, a.org.id, { gstin: gstin("24", randomPan()), place: "Kandla" })).rejects.toThrow(
-      "different PAN",
+    // The checklist test above added the company's GSTIN and marked it verified.
+    await expect(addGstin(h.db, admin, a.org.id, { gstin: gstin("24", pan), place: "Kandla" })).rejects.toThrow(
+      "A company has one GSTIN",
     );
-    const second = await addGstin(h.db, admin, a.org.id, { gstin: gstin("24", pan), place: "Kandla, Kutch" });
+    await expect(replaceGstin(h.db, admin, a.org.id, { gstin: gstin("24", pan) })).rejects.toThrow(
+      "verified and locked",
+    );
+
+    // An operator without verification.edit can't change it; with it, a reason is needed and the old one is retired.
+    const outsider = await loadActor(h.db, a.requester.id);
+    await expect(
+      changeGstinByOperator(h.db, outsider, a.org.id, { gstin: gstin("24", pan), reason: "Moved to Gujarat" }),
+    ).rejects.toThrow("Not allowed");
+    const operator = { ...admin, userId: a.admin.id, operator: new Set(["verification.edit"]) };
+    await expect(
+      changeGstinByOperator(h.db, operator, a.org.id, { gstin: gstin("24", pan), reason: " " }),
+    ).rejects.toThrow("Say why");
+    const before = await companyGstin(h.db, a.org.id);
+    const changed = await changeGstinByOperator(h.db, operator, a.org.id, {
+      gstin: gstin("24", pan),
+      reason: "Registered office moved to Gujarat",
+    });
     const settings = await companySettings(h.db, scopeFor(admin), a.org.id);
-    const row = settings?.gstins.find((x) => x.id === second?.id);
-    expect(row?.portalStatus).toBe("Pending");
-    expect(row?.isDefault).toBe(false);
-    await expect(setDefaultGstin(h.db, admin, a.org.id, second?.id ?? "")).rejects.toBeInstanceOf(BuyerSettingsError);
-    await h.db
-      .update(schema.organisationGstins)
-      .set({ portalStatus: "Active", checkedAt: new Date() })
-      .where(eq(schema.organisationGstins.id, second?.id ?? ""));
-    await setDefaultGstin(h.db, admin, a.org.id, second?.id ?? "");
-    const after = await companySettings(h.db, scopeFor(admin), a.org.id);
-    expect(after?.gstins.filter((x) => x.isDefault).map((x) => x.id)).toEqual([second?.id]);
-    await expect(removeGstin(h.db, admin, a.org.id, second?.id ?? "")).rejects.toThrow("another default");
+    expect(settings?.gstins.map((x) => x.id)).toEqual([changed?.id]);
+    expect(settings?.gstins[0]?.portalStatus).toBe("Pending");
+    const [old] = await h.db
+      .select()
+      .from(schema.organisationGstins)
+      .where(eq(schema.organisationGstins.id, before?.id ?? ""));
+    expect(old?.retiredAt).not.toBeNull();
+
+    // While the new one is being checked, the company admin may correct it; the mistake is retired too.
+    const fixed = await replaceGstin(h.db, admin, a.org.id, { gstin: gstin("08", pan), place: "Jaipur" });
+    expect((await companyGstin(h.db, a.org.id))?.id).toBe(fixed?.id);
+    // The database itself refuses a second live GSTIN.
+    await expect(
+      h.db
+        .insert(schema.organisationGstins)
+        .values({ organisationId: a.org.id, gstin: gstin("29", pan), stateCode: "29" }),
+    ).rejects.toThrow();
+    // A retired GSTIN can't simply come back; H2 Economy decides that.
+    await expect(replaceGstin(h.db, admin, a.org.id, { gstin: gstin("24", pan) })).rejects.toBeInstanceOf(
+      BuyerSettingsError,
+    );
   });
 
   it("the last Admin can't make themselves anything else (founder QC, 17 Nov 2026)", async () => {

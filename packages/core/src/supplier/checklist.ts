@@ -44,7 +44,9 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
   const [gst] = await db
     .select({ number: schema.organisationGstins.gstin, status: schema.organisationGstins.portalStatus })
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId))
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    )
     .limit(1);
   const items = await db
     .select({ status: schema.products.status })

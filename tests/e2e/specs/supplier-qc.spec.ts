@@ -4,7 +4,7 @@ import { signInExisting } from "../helpers/rfq";
 import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 
 // Supplier QC (16 Nov 2026): a supplier requests a category the catalogue lacks; a Catalogue moderator approves it in
-// the Category requests queue, which adds it; the supplier sees it approved. Company details lists the GSTINs.
+// the Category requests queue, which adds it; the supplier sees it approved. Company details shows the one GSTIN.
 
 test.beforeEach(async ({ context }, info) => {
   await ownIp(context, info);
@@ -81,14 +81,14 @@ test("a supplier requests a category; a catalogue moderator approves it; the sup
   await expect(page).toHaveURL(/\/supplier\/products\/new\?category=/);
 });
 
-test("Company details lists the supplier's GSTINs with the default", async ({ page }) => {
+test("Company details shows the company's one GSTIN, verified and locked (A189)", async ({ page }) => {
   const s = await supplier();
   await signInExisting(page, s.email, "/supplier/company");
-  await expect(page.getByRole("heading", { level: 1, name: "GSTINs" })).toBeVisible();
-  const table = page.getByRole("region", { name: "GSTINs" });
-  await expect(table.getByText(`24QCSUP${s.tag}1Z5`.slice(0, 15))).toBeVisible();
-  await expect(table.getByText("Default")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add a GSTIN" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "GSTIN" })).toBeVisible();
+  const card = page.getByRole("region", { name: "Company GSTIN", exact: true });
+  await expect(card.getByText(`24QCSUP${s.tag}1Z5`.slice(0, 15))).toBeVisible();
+  await expect(card.getByText("Your GSTIN is verified and locked.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Add|Replace/ })).toHaveCount(0);
 });
 
 test("a supplier admin changes a team member's role from the row's actions", async ({ page }) => {

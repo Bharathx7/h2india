@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { ChangeGstin } from "@/admin/users/ChangeGstin";
 import { actionWords, kindWord, roleWord } from "@/admin/users/words";
 
 // Company detail (admin QC, 16 Nov 2026): everything about one buyer or supplier company in one place. No Figma frame
@@ -82,7 +83,16 @@ export default async function CompanyPage({
           </dl>
         </Panel>
 
-        <Panel id="gstins" title={`GSTINs (${String(d.gstins.length)})`}>
+        {/* One GSTIN per company (founder QC, 17 Nov 2026, A189); operators with verification.edit can change it. */}
+        <Panel
+          id="gstins"
+          title="GSTIN"
+          action={
+            actor.operator.has("verification.edit") ? (
+              <ChangeGstin organisationId={id} current={d.gstins[0]?.gstin ?? null} />
+            ) : null
+          }
+        >
           {d.gstins.length ? (
             <ul className="flex flex-col divide-y divide-default">
               {d.gstins.map((g) => (
@@ -92,7 +102,6 @@ export default async function CompanyPage({
                     <span className="block type-caption text-secondary">{g.place ?? "—"}</span>
                   </span>
                   <span className="flex gap-2">
-                    {g.isDefault ? <StatusBadge status="Default" tone="neutral" /> : null}
                     <StatusBadge
                       status={g.portalStatus === "Active" ? "Verified" : g.portalStatus}
                       tone={
@@ -208,15 +217,31 @@ export default async function CompanyPage({
   );
 }
 
-function Panel({ id, title, wide, children }: { id: string; title: string; wide?: boolean; children: ReactNode }) {
+function Panel({
+  id,
+  title,
+  wide,
+  action,
+  children,
+}: {
+  id: string;
+  title: string;
+  wide?: boolean;
+  /** A button beside the title (Change GSTIN). */
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section
       aria-labelledby={id}
       className={`flex min-w-0 flex-col gap-3 rounded-card border border-default bg-page p-5 ${wide ? "lg:col-span-2" : ""}`}
     >
-      <h2 id={id} className="type-h4">
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id={id} className="type-h4">
+          {title}
+        </h2>
+        {action}
+      </div>
       {children}
     </section>
   );

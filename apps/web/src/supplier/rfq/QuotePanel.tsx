@@ -228,20 +228,11 @@ export function QuoteBuilder({
         </Select>
       </Field>
       {gstins.length ? (
+        // One GSTIN per company (founder QC, 17 Nov 2026, A189): the quote is issued under the company's GSTIN.
         <Field label="Issued under GSTIN" error={errors.supplierGstinId}>
-          <Select
-            value={f.supplierGstinId}
-            onChange={(e) => {
-              set({ supplierGstinId: e.target.value });
-            }}
-          >
-            <option value="">Choose</option>
-            {gstins.map((g) => (
-              <option key={g.id} value={g.id} disabled={!g.active}>
-                {g.active ? g.label : `${g.label} (being checked)`}
-              </option>
-            ))}
-          </Select>
+          <p className="flex min-h-11.5 items-center rounded-control bg-subtle px-4 type-body text-primary">
+            {gstins[0]?.active ? gstins[0].label : `${gstins[0]?.label ?? ""} (being checked)`}
+          </p>
         </Field>
       ) : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

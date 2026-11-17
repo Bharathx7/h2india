@@ -20,7 +20,8 @@ export class CompanyError extends Error {
       | "GSTIN_NOT_FOUND"
       | "SUPPLIER_NEEDS_ACTIVE_GSTIN"
       | "NAME_REQUIRED"
-      | "MIXED_PANS",
+      | "MIXED_PANS"
+      | "ONE_GSTIN",
     message: string,
     readonly organisationId?: string,
   ) {
@@ -54,7 +55,7 @@ export async function searchCompanies(ex: Executor, query: string): Promise<Comp
       members: sql<number>`(select count(*)::int from ${m} where ${m.organisationId} = ${o.id})`,
     })
     .from(o)
-    .leftJoin(g, eq(g.organisationId, o.id))
+    .leftJoin(g, and(eq(g.organisationId, o.id), isNull(g.retiredAt)))
     .where(
       and(
         isNull(o.deletedAt),
@@ -72,7 +73,7 @@ export async function searchCompanies(ex: Executor, query: string): Promise<Comp
 export interface CreateCompany {
   userId: string;
   kind: "buyer" | "supplier";
-  /** The GSTINs to add (state 7 can add several under one PAN); empty for "no GSTIN yet". */
+  /** The company's GSTIN as a one-item list (A189: one per company); empty for "no GSTIN yet". */
   gstins: string[];
   /** Required when the GST portal cannot give the legal name. */
   name?: string;
@@ -99,6 +100,9 @@ function isUniqueViolation(error: unknown): boolean {
 export async function createCompany(input: CreateCompany): Promise<{ organisationId: string; legalName: string }> {
   const db = getDb();
   const gstins = [...new Set(input.gstins.map(normaliseGstin))];
+  // One GSTIN per company (founder QC, 17 Nov 2026, A189): a PAN with several GSTINs picks the one for this account.
+  if (gstins.length > 1)
+    throw new CompanyError("ONE_GSTIN", "A company has one GSTIN. Choose the one for this account.");
   if (gstins.some((x) => !isValidGstin(x))) throw new CompanyError("INVALID_GSTIN", "A GSTIN is not valid");
   const pans = new Set(gstins.map(panOf));
   if (pans.size > 1) throw new CompanyError("MIXED_PANS", "All GSTINs of a company share one PAN");

@@ -10,6 +10,7 @@ import {
   Input,
   Modal,
   Select,
+  StatusBadge,
   Switch,
   Textarea,
 } from "@h2india/ui";
@@ -17,12 +18,11 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   addGstinAction,
-  defaultGstinAction,
   delegationAction,
   endDelegationAction,
   limitAction,
   profileAction,
-  removeGstinAction,
+  replaceGstinAction,
   removeSiteAction,
   rulesAction,
   saveSiteAction,
@@ -192,14 +192,110 @@ export function ProfileForm({ start, canEdit }: { start: ProfileStart; canEdit: 
   );
 }
 
-/** Add a GSTIN. Buyers by default; the supplier's Company details passes its own action and wording (supplier QC). */
-export function AddGstin({
-  action = addGstinAction,
-  description = "We check it with GST records in the background. You can request quotes while we check.",
+/** The company's GSTIN as one card (founder QC, 17 Nov 2026, A189: one GSTIN per company). */
+export interface GstinCardData {
+  gstin: string;
+  place: string | null;
+  status: string;
+  /** "17 Nov" when the GST records confirmed it. */
+  checkedOn: string | null;
+}
+
+/**
+ * Add the GSTIN (none yet), Replace it (while it is being checked), or the locked state once verified. Buyers by
+ * default; the supplier's Company details passes its own actions.
+ */
+export function GstinCard({
+  current,
+  canEdit,
+  add = addGstinAction,
+  replace = replaceGstinAction,
 }: {
-  action?: (gstin: string, place: string) => Promise<R>;
-  description?: string;
-} = {}) {
+  current: GstinCardData | null;
+  canEdit: boolean;
+  add?: (gstin: string, place: string) => Promise<R>;
+  replace?: (gstin: string, place: string) => Promise<R>;
+}) {
+  const verified = current?.status === "Active";
+  return (
+    <section
+      aria-labelledby="gstin"
+      className="flex max-w-3xl flex-col gap-4 rounded-card border border-default bg-page p-5"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h3 id="gstin" className="type-h4">
+            Company GSTIN
+          </h3>
+          {current ? (
+            <>
+              <p className="type-mono text-primary">{current.gstin}</p>
+              <p className="type-body-sm text-secondary">{current.place ?? "—"}</p>
+            </>
+          ) : (
+            <p className="type-body-sm text-body">Your company hasn&apos;t added its GSTIN yet.</p>
+          )}
+        </div>
+        {current ? (
+          verified ? (
+            <StatusBadge status={current.checkedOn ? `Verified ${current.checkedOn}` : "Verified"} tone="success" />
+          ) : current.status === "Pending" ? (
+            <StatusBadge status="Checking with GST records" tone="progress" />
+          ) : (
+            <StatusBadge status={current.status} tone="error" />
+          )
+        ) : null}
+      </div>
+      {verified ? (
+        <p className="flex items-start gap-2 type-body-sm text-body">
+          <Icon name="lock" size={16} className="mt-0.5 shrink-0" />
+          <span>
+            Your GSTIN is verified and locked. To change it, write to H2 Economy through{" "}
+            <a href="/contact" className="text-link underline">
+              Contact
+            </a>
+            ; our team checks and makes the change.
+          </span>
+        </p>
+      ) : canEdit ? (
+        <div>
+          {current ? (
+            <GstinDialog
+              title="Replace your GSTIN"
+              button="Replace"
+              description="Correct it while we're still checking it. Once it's verified, it's locked."
+              action={replace}
+            />
+          ) : (
+            <GstinDialog
+              title="Add your GSTIN"
+              button="Add your GSTIN"
+              description="We check it with GST records in the background. You can request quotes while we check."
+              action={add}
+            />
+          )}
+        </div>
+      ) : (
+        <p className="type-caption text-secondary">Only a company admin can change the GSTIN.</p>
+      )}
+      <p className="type-caption text-secondary">
+        Each company on H2 Economy has one GSTIN. Every quote, order and invoice uses it.
+      </p>
+    </section>
+  );
+}
+
+function GstinDialog({
+  title,
+  button,
+  description,
+  action,
+}: {
+  title: string;
+  button: string;
+  description: string;
+  action: (gstin: string, place: string) => Promise<R>;
+}) {
   const r = useRun();
   const [open, setOpen] = useState(false);
   const [gstin, setGstin] = useState("");
@@ -207,18 +303,18 @@ export function AddGstin({
   return (
     <>
       <Button
+        variant="outline"
         onClick={() => {
           setOpen(true);
         }}
       >
-        <Icon name="plus" size={18} />
-        Add a GSTIN
+        {button}
       </Button>
       <Modal
         open={open}
         onOpenChange={setOpen}
         width={480}
-        title="Add a GSTIN"
+        title={title}
         description={description}
         footer={
           <div className="flex justify-end gap-3">
@@ -241,7 +337,7 @@ export function AddGstin({
                 );
               }}
             >
-              Add GSTIN
+              Save GSTIN
             </Button>
           </div>
         }
@@ -260,7 +356,7 @@ export function AddGstin({
           <span className="type-label">Place of business</span>
           <Input
             value={place}
-            placeholder="Kandla, Kutch"
+            placeholder="Pune, Maharashtra"
             onChange={(e) => {
               setPlace(e.target.value);
             }}
@@ -271,52 +367,6 @@ export function AddGstin({
   );
 }
 
-export function GstinActions({
-  id,
-  isDefault,
-  active,
-  gstin,
-  setDefault = defaultGstinAction,
-  remove = removeGstinAction,
-}: {
-  id: string;
-  isDefault: boolean;
-  active: boolean;
-  gstin: string;
-  setDefault?: (id: string) => Promise<R>;
-  remove?: (id: string) => Promise<R>;
-}) {
-  const r = useRun();
-  return (
-    <span className="flex items-center justify-end gap-2">
-      {!isDefault && active ? (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={r.pending}
-          onClick={() => {
-            r.go(() => setDefault(id));
-          }}
-        >
-          Set as default
-        </Button>
-      ) : null}
-      {!isDefault ? (
-        <IconButton
-          icon="trash"
-          look="outline"
-          size="sm"
-          label={`Remove ${gstin}`}
-          onClick={() => {
-            r.go(() => remove(id));
-          }}
-        />
-      ) : null}
-      {r.error ? <span className="type-caption text-error">{r.error}</span> : null}
-    </span>
-  );
-}
-
 export interface SiteForm {
   id?: string;
   name: string;
@@ -324,7 +374,6 @@ export interface SiteForm {
   city: string;
   state: string;
   pincode: string;
-  gstinId: string;
   hours: string;
   contacts: { name: string; role: string; mobile: string }[];
   isDefault: boolean;
@@ -336,21 +385,12 @@ const BLANK: SiteForm = {
   city: "",
   state: "",
   pincode: "",
-  gstinId: "",
   hours: "",
   contacts: [{ name: "", role: "", mobile: "" }],
   isDefault: false,
 };
 
-export function SiteDialog({
-  start,
-  gstins,
-  label,
-}: {
-  start?: SiteForm;
-  gstins: { id: string; label: string }[];
-  label: string;
-}) {
+export function SiteDialog({ start, label }: { start?: SiteForm; label: string }) {
   const r = useRun();
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<SiteForm>(start ?? BLANK);
@@ -388,7 +428,7 @@ export function SiteDialog({
               disabled={r.pending}
               onClick={() => {
                 r.go(
-                  () => saveSiteAction({ ...f, gstinId: f.gstinId || null }),
+                  () => saveSiteAction({ ...f, gstinId: null }),
                   () => {
                     setOpen(false);
                   },
@@ -448,22 +488,6 @@ export function SiteDialog({
             }}
           />
         </div>
-        <label className="flex flex-col gap-1.5">
-          <span className="type-label">Bills to GSTIN</span>
-          <Select
-            value={f.gstinId}
-            onChange={(e) => {
-              set({ gstinId: e.target.value });
-            }}
-          >
-            <option value="">Default GSTIN</option>
-            {gstins.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.label}
-              </option>
-            ))}
-          </Select>
-        </label>
         <label className="flex flex-col gap-1.5">
           <span className="type-label">Receiving hours</span>
           <Input

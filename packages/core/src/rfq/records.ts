@@ -950,7 +950,7 @@ export async function supplierGstins(ex: Executor, scope: Scope, supplierId: str
   return ex
     .select({ id: sg.id, gstin: sg.gstin, place: sg.place, portalStatus: sg.portalStatus, isDefault: sg.isDefault })
     .from(sg)
-    .where(and(inScope(scope, sg.organisationId), eq(sg.organisationId, supplierId)))
+    .where(and(inScope(scope, sg.organisationId), eq(sg.organisationId, supplierId), isNull(sg.retiredAt)))
     .orderBy(desc(sg.isDefault), asc(sg.gstin));
 }
 
@@ -1016,14 +1016,14 @@ export async function saveQuoteDraft(
       const [own] = await tx
         .select({ id: sg.id })
         .from(sg)
-        .where(and(eq(sg.id, input.supplierGstinId), eq(sg.organisationId, supplierId)));
+        .where(and(eq(sg.id, input.supplierGstinId), eq(sg.organisationId, supplierId), isNull(sg.retiredAt)));
       if (!own) throw new RfqError("Choose one of your company's GSTINs", { supplierGstinId: "Choose a GSTIN" });
       supplierGstinId = own.id;
     } else if (!supplierGstinId) {
       const [def] = await tx
         .select({ id: sg.id })
         .from(sg)
-        .where(and(eq(sg.organisationId, supplierId), eq(sg.portalStatus, "Active")))
+        .where(and(eq(sg.organisationId, supplierId), eq(sg.portalStatus, "Active"), isNull(sg.retiredAt)))
         .orderBy(desc(sg.isDefault), asc(sg.gstin))
         .limit(1);
       supplierGstinId = def?.id ?? null;
@@ -1112,7 +1112,12 @@ export async function quoteProblems(
   // Supplier QC: once the supplier has a verified GSTIN, a quote is issued under one of them. (While the only GSTIN
   // is still being checked, quoting works as before.)
   const [quote] = await ex.select({ organisationId: q.organisationId }).from(q).where(eq(q.id, v.quoteId));
-  const gstins = quote ? await ex.select().from(sg).where(eq(sg.organisationId, quote.organisationId)) : [];
+  const gstins = quote
+    ? await ex
+        .select()
+        .from(sg)
+        .where(and(eq(sg.organisationId, quote.organisationId), isNull(sg.retiredAt)))
+    : [];
   if (gstins.some((x) => x.portalStatus === "Active")) {
     const chosen = gstins.find((x) => x.id === v.supplierGstinId);
     if (!chosen) e.supplierGstinId = "Choose the GSTIN this quote is issued under";
