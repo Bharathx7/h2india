@@ -100,7 +100,8 @@ export async function changeMemberRole(
       if ((admins?.n ?? 0) <= 1) throw new LastAdminError();
     }
     const orderLimitPaise = input.orderLimitPaise !== undefined ? input.orderLimitPaise : before.orderLimitPaise;
-    await tx.update(m).set({ role: input.role, orderLimitPaise }).where(seat);
+    // A role chosen by name takes the role's defaults again (the member's own ticks are cleared).
+    await tx.update(m).set({ role: input.role, permissions: null, orderLimitPaise }).where(seat);
     const money = (v: bigint | null) => (v === null ? null : v.toString());
     await audit(tx, {
       actorId: actor.userId,

@@ -21,7 +21,14 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { currentTermsVersion } from "@/trust/terms";
-import { loadActor, RolePermissionError, setRolePermission } from "@h2india/core/authz";
+import {
+  loadActor,
+  MemberAccessError,
+  RolePermissionError,
+  setMemberAccess,
+  setRolePermission,
+  type AccessChoice,
+} from "@h2india/core/authz";
 
 /** The company whose team this person manages: their supplier company, else their buyer company. */
 async function teamActor() {
@@ -51,7 +58,8 @@ async function run(work: () => Promise<unknown>, path: string, also?: string): P
       error instanceof StorefrontError ||
       error instanceof JoinRequestError ||
       error instanceof LastAdminError ||
-      error instanceof RolePermissionError
+      error instanceof RolePermissionError ||
+      error instanceof MemberAccessError
     ) {
       return { ok: false, error: error.message };
     }
@@ -69,6 +77,41 @@ export async function inviteMemberAction(email: string, role: string) {
   const context = await requestContext();
   return run(
     () => inviteMember(db, actor, supplier.organisationId, { email, role, context }),
+    "/supplier/team",
+    "/buyer/company",
+  );
+}
+
+/** The access a form sends, checked for shape (callable from any browser); core checks the permissions themselves. */
+function accessOf(input: unknown): AccessChoice | null {
+  if (typeof input !== "object" || input === null) return null;
+  const { admin, permissions } = input as { admin?: unknown; permissions?: unknown };
+  if (typeof admin !== "boolean" || !Array.isArray(permissions)) return null;
+  if (!permissions.every((p): p is string => typeof p === "string")) return null;
+  return { admin, permissions };
+}
+
+/** Add member (founder QC, 17 Nov 2026): email plus the ticked access, sent as an invitation. */
+export async function inviteWithAccessAction(email: string, access: AccessChoice) {
+  const choice = accessOf(access);
+  if (typeof email !== "string" || !choice) return { ok: false as const, error: "Something went wrong. Try again." };
+  const { db, actor, supplier } = await teamActor();
+  const context = await requestContext();
+  return run(
+    () => inviteMember(db, actor, supplier.organisationId, { email, access: choice, context }),
+    "/supplier/team",
+    "/buyer/company",
+  );
+}
+
+/** Edit access for one member (founder QC, 17 Nov 2026). Core keeps at least one Admin. */
+export async function setMemberAccessAction(userId: string, access: AccessChoice) {
+  const choice = accessOf(access);
+  if (typeof userId !== "string" || !choice) return { ok: false as const, error: "Something went wrong. Try again." };
+  const { db, actor, supplier } = await teamActor();
+  const context = await requestContext();
+  return run(
+    () => setMemberAccess(db, actor, { organisationId: supplier.organisationId, userId, access: choice }, context),
     "/supplier/team",
     "/buyer/company",
   );

@@ -25,3 +25,4 @@ packages/ui/tokens.figma.json
 
 # Redis snapshot written when redis-server runs from apps/web
 dump.rdb
+qc-screens/

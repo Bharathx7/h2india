@@ -123,6 +123,11 @@ export const memberships = core.table(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     role: text("role").notNull(), // owner | admin | member (step 3.4)
+    /**
+     * This person's own access (founder QC, 17 Nov 2026: Team gives each member ticked permissions, with presets).
+     * Null: the role's defaults with the company's changes (company_role_permissions). Never set for Admin.
+     */
+    permissions: text("permissions").array(),
     orderLimitPaise: bigint("order_limit_paise", { mode: "bigint" }),
     ...timestamps,
   },
@@ -189,6 +194,8 @@ export const invitations = core.table(
       .references(() => organisations.id, { onDelete: "cascade" }),
     email: text("email").notNull(),
     role: text("role").notNull(),
+    /** The access the member gets on joining (memberships.permissions); null keeps the role's defaults. */
+    permissions: text("permissions").array(),
     tokenHash: text("token_hash").notNull().unique(),
     invitedBy: uuid("invited_by").references(() => users.id),
     expiresAt: utc("expires_at").notNull(),

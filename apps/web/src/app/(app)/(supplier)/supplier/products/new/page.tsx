@@ -56,6 +56,29 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
           Start with the category. It decides which spec fields buyers filter and compare on.
         </p>
       </div>
+      {/* Founder QC (17 Nov 2026): adding a product is a set of steps; this page is step 1. */}
+      <ol aria-label="Steps" className="flex flex-wrap gap-2">
+        {["Category", "Details", "Specifications", "Documents and terms", "Review"].map((label, i) => (
+          <li
+            key={label}
+            aria-current={i === 0 ? "step" : undefined}
+            className={cx(
+              "inline-flex h-10 items-center gap-2 rounded-pill border-[1.5px] pr-4 pl-1.5 type-label",
+              i === 0 ? "border-transparent bg-inverse text-inverse" : "border-control bg-page text-secondary",
+            )}
+          >
+            <span
+              className={cx(
+                "flex size-7 items-center justify-center rounded-pill type-label-sm",
+                i === 0 ? "bg-page text-primary" : "bg-subtle text-secondary",
+              )}
+            >
+              {i + 1}
+            </span>
+            {label}
+          </li>
+        ))}
+      </ol>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-subtle p-4">
         <div>
           <p className="type-label">Other ways to add</p>

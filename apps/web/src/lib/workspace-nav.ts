@@ -73,7 +73,7 @@ export const WORKSPACE_NAV: Record<WorkspaceArea, WorkspaceNavGroup[]> = {
       items: [
         { label: "RFQs", href: "/buyer/rfqs", icon: "file-text" },
         { label: "Orders", href: "/buyer/orders", icon: "shopping-bag" },
-        { label: "Payments & invoices", href: "/buyer/payments", icon: "table" },
+        { label: "Payments", href: "/buyer/payments", icon: "table" },
         { label: "Messages", href: "/buyer/messages", icon: "message-square" },
       ],
     },
@@ -108,7 +108,7 @@ export const WORKSPACE_NAV: Record<WorkspaceArea, WorkspaceNavGroup[]> = {
       items: [
         { label: "Profile", href: "/member/profile", icon: "user" },
         { label: "Preferences", href: "/member/preferences", icon: "mail" },
-        { label: "Sign-in and security", href: "/member/security", icon: "lock" },
+        { label: "Security", href: "/member/security", icon: "lock" },
         { label: "Join a company", href: "/member/join-company", icon: "building" },
       ],
     },

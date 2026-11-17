@@ -6,6 +6,9 @@ import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { COMPANY_PERMISSIONS, type CompanyPermission } from "../authz/catalogue";
+import { applyChanges, defaultPermissions, kindOf, roleChangesFor } from "../authz/company-roles";
+import { ownPermissions, storedAccess, type AccessChoice } from "../authz/member-access";
 import { looksLikeEmail } from "../sign-in/rules";
 import { inScope, type Scope } from "../authz/scope";
 import { clockDuration, workingCalendar } from "../clocks/clocks";
@@ -48,6 +51,7 @@ export async function teamView(db: Executor, scope: Scope, organisationId: strin
       name: u.name,
       email: u.email,
       role: m.role,
+      own: m.permissions,
       orderLimitPaise: m.orderLimitPaise,
       lastActive: sql<Date | null>`(select max(s.updated_at) from core.sessions s where s.user_id = ${u.id})`,
     })
@@ -55,8 +59,32 @@ export async function teamView(db: Executor, scope: Scope, organisationId: strin
     .innerJoin(u, eq(u.id, m.userId))
     .where(and(inScope(scope, m.organisationId), eq(m.organisationId, organisationId)))
     .orderBy(u.name);
+  // What each person can do, as loadActor() works it out: Admin everything, their own ticks, or their role's
+  // defaults with the company's changes (founder QC, 17 Nov 2026: Team shows and edits each member's access).
+  const [org] = await db
+    .select({ kind: schema.organisations.kind })
+    .from(schema.organisations)
+    .where(eq(schema.organisations.id, organisationId));
+  const kind = kindOf(org?.kind);
+  const changes = await roleChangesFor(
+    db,
+    members.map((x) => ({ organisationId, role: x.role })),
+  );
+  const accessOf = (role: string, own: string[] | null) =>
+    [
+      ...(own && role !== "Admin"
+        ? ownPermissions(kind, own)
+        : applyChanges(defaultPermissions(kind, role), changes.get(`${organisationId}|${role}`) ?? [])),
+    ] as CompanyPermission[];
   const invitations = await db
-    .select({ id: inv.id, email: inv.email, role: inv.role, expiresAt: inv.expiresAt, createdAt: inv.createdAt })
+    .select({
+      id: inv.id,
+      email: inv.email,
+      role: inv.role,
+      own: inv.permissions,
+      expiresAt: inv.expiresAt,
+      createdAt: inv.createdAt,
+    })
     .from(inv)
     .where(
       and(
@@ -75,7 +103,12 @@ export async function teamView(db: Executor, scope: Scope, organisationId: strin
     .innerJoin(u, eq(u.id, jr.userId))
     .where(and(inScope(scope, jr.organisationId), eq(jr.organisationId, organisationId), eq(jr.status, "Pending")))
     .orderBy(jr.createdAt);
-  return { members, invitations, requests };
+  return {
+    kind,
+    members: members.map((x) => ({ ...x, admin: x.role === "Admin", access: accessOf(x.role, x.own) })),
+    invitations: invitations.map((x) => ({ ...x, admin: x.role === "Admin", access: accessOf(x.role, x.own) })),
+    requests,
+  };
 }
 
 /** Invite member: an email to the address with a link that works for 14 days (673:155). */
@@ -83,16 +116,27 @@ export async function inviteMember(
   db: Database,
   actor: Actor,
   organisationId: string,
-  input: { email: string; role: string; context?: RequestContext },
+  input: { email: string; role?: string; access?: AccessChoice; context?: RequestContext },
   now: Date = new Date(),
 ): Promise<{ id: string; token: string }> {
   assertCan(actor, "team.manage", { organisationId });
+  // Founder QC (17 Nov 2026): the admin ticks what the person may do (presets tick boxes); a role name still works.
+  let role = input.role ?? "";
+  let permissions: string[] | null = null;
+  if (input.access) {
+    const [org] = await db
+      .select({ kind: schema.organisations.kind })
+      .from(schema.organisations)
+      .where(eq(schema.organisations.id, organisationId));
+    ({ role, permissions } = storedAccess(kindOf(org?.kind), input.access));
+  }
   return sendInvitation(
     db,
     {
       organisationId,
       email: input.email,
-      role: input.role,
+      role,
+      permissions,
       invitedBy: actor.userId,
       inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
       context: input.context,
@@ -111,6 +155,8 @@ export async function sendInvitation(
     organisationId: string;
     email: string;
     role: string;
+    /** The member's own access (storedAccess()); null keeps the role's defaults. */
+    permissions?: string[] | null;
     invitedBy: string | null;
     /** How the email names the inviter's role, for example "Admin" or "H2 Economy team". */
     inviterRole: string;
@@ -122,8 +168,17 @@ export async function sendInvitation(
   const email = input.email.trim().toLowerCase();
   if (!looksLikeEmail(email)) throw new TeamError("Enter a full email address");
   const roles = await companyRoles(db, organisationId);
-  const role = roles.find((r) => r.name === input.role);
-  if (!role) throw new TeamError("Choose a role");
+  const own = input.permissions ?? null;
+  const role =
+    roles.find((r) => r.name === input.role) ??
+    // Ticks that match no preset (founder QC, 17 Nov 2026): the email lists what they can do.
+    (input.role === "Custom" && own?.length
+      ? {
+          name: "Custom",
+          description: `Can: ${own.map((p) => (COMPANY_PERMISSIONS as Record<string, string | undefined>)[p] ?? p).join(", ")}.`,
+        }
+      : null);
+  if (!role) throw new TeamError("Choose what they can do");
   const already = await db
     .select({ id: m.userId })
     .from(m)
@@ -134,7 +189,15 @@ export async function sendInvitation(
   const expiresAt = (await workingCalendar(db)).add(now, await clockDuration(db, "teamInvitation"));
   const [row] = await db
     .insert(inv)
-    .values({ organisationId, email, role: role.name, tokenHash: hash(token), invitedBy: input.invitedBy, expiresAt })
+    .values({
+      organisationId,
+      email,
+      role: role.name,
+      permissions: role.name === "Admin" ? null : own,
+      tokenHash: hash(token),
+      invitedBy: input.invitedBy,
+      expiresAt,
+    })
     .returning({ id: inv.id });
   if (!row) throw new Error("invitation not saved");
   await audit(db, {
@@ -143,7 +206,7 @@ export async function sendInvitation(
     resourceType: "invitation",
     resourceId: row.id,
     companyId: organisationId,
-    after: { email, role: role.name },
+    after: { email, role: role.name, permissions: own },
     context: input.context,
   });
   const [inviter] = await db
@@ -241,6 +304,7 @@ export async function invitationFor(db: Executor, token: string, now: Date = new
     id: row.inv.id,
     email: row.inv.email,
     role: row.inv.role,
+    permissions: row.inv.permissions,
     company: row.trade ?? row.legal,
     organisationId: row.inv.organisationId,
     /** Where the person lands after accepting. */
@@ -292,15 +356,18 @@ export async function acceptInvitation(
         .where(eq(u.id, userId));
     await tx
       .insert(m)
-      .values({ organisationId: found.organisationId, userId, role: found.role })
-      .onConflictDoUpdate({ target: [m.organisationId, m.userId], set: { role: found.role } });
+      .values({ organisationId: found.organisationId, userId, role: found.role, permissions: found.permissions })
+      .onConflictDoUpdate({
+        target: [m.organisationId, m.userId],
+        set: { role: found.role, permissions: found.permissions },
+      });
     await audit(tx, {
       actorId: userId,
       action: "team.joined",
       resourceType: "invitation",
       resourceId: found.id,
       companyId: found.organisationId,
-      after: { role: found.role },
+      after: { role: found.role, permissions: found.permissions },
       context,
     });
   });

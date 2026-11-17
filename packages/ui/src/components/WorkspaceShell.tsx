@@ -138,7 +138,7 @@ function SidebarBody({
         <Link href={homeHref} aria-label="H2 Economy home" className="rounded-control" onClick={onNavigate}>
           <Logo version="primary-on-dark" height={24} title="" />
         </Link>
-        <span className="rounded-[4px] bg-accent px-1.5 type-label-sm whitespace-nowrap text-primary">
+        <span className="rounded-pill bg-accent px-2 py-px type-label-sm whitespace-nowrap text-primary">
           {AREA_LABEL[area]} workspace
         </span>
       </div>

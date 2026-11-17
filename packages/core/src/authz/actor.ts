@@ -1,7 +1,8 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { OperatorPermission, Permission } from "./catalogue";
-import { applyChanges, roleChangesFor } from "./company-roles";
+import { applyChanges, kindOf, roleChangesFor } from "./company-roles";
+import { ownPermissions } from "./member-access";
 
 // Who is asking (step 3.4). Loaded from the database on every request, so a role change applies at once.
 
@@ -57,6 +58,7 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
       role: m.role,
       kind: o.kind,
       orderLimitPaise: m.orderLimitPaise,
+      own: m.permissions,
       permissions: sql<
         string[]
       >`coalesce(array_agg(${rp.permissionKey}) filter (where ${rp.permissionKey} is not null), '{}')`,
@@ -69,7 +71,7 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
     )
     .leftJoin(rp, eq(rp.roleId, r.id))
     .where(eq(m.userId, userId))
-    .groupBy(m.organisationId, m.role, o.kind, m.orderLimitPaise);
+    .groupBy(m.organisationId, m.role, o.kind, m.orderLimitPaise, m.permissions);
   const stored = await ex
     .select({ key: rp.permissionKey })
     .from(or)
@@ -100,7 +102,11 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
         {
           role: s.role,
           kind: s.kind,
-          permissions: applyChanges(s.permissions, changes.get(`${s.organisationId}|${s.role}`) ?? []),
+          // A member's own ticks (founder QC, 17 Nov 2026) replace the role's defaults; Admin always keeps its own.
+          permissions:
+            s.own && s.role !== "Admin"
+              ? ownPermissions(kindOf(s.kind), s.own)
+              : applyChanges(s.permissions, changes.get(`${s.organisationId}|${s.role}`) ?? []),
           orderLimitPaise: s.orderLimitPaise,
         },
       ]),
