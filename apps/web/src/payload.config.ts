@@ -6,6 +6,7 @@ import { isAwsS3, parseServerEnv } from "@h2india/config";
 import { createHmac } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { withArchive } from "./cms/archive";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { Articles } from "./cms/collections/Articles";
@@ -81,7 +82,8 @@ export default buildConfig({
       graphics: { Logo: "@/cms/admin/Brand#Logo", Icon: "@/cms/admin/Brand#Icon" },
     },
   },
-  collections: [
+  // Archive (founder QC, 17 Nov 2026): trash on the content records the back office can archive (cms/archive.ts).
+  collections: withArchive([
     Articles,
     Corrections,
     Schemes,
@@ -122,7 +124,7 @@ export default buildConfig({
     Media,
     MediaFiles,
     Editors,
-  ],
+  ]),
   globals: [
     TrackerMethodology,
     TrackerOverview,

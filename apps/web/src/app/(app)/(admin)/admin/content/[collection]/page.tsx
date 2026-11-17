@@ -1,5 +1,5 @@
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
-import { buttonClasses, EmptyState, Icon, StatusBadge } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -7,6 +7,8 @@ import { contentType, listRecords } from "@/admin/cms/records";
 import { VERIFIED_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
+import { RestoreRecord } from "@/admin/cms/Archive";
+import { isArchivable } from "@/cms/archive";
 import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { ListPager } from "@/components/ListPager";
@@ -22,7 +24,7 @@ export default async function LibraryPage({
   searchParams,
 }: {
   params: Promise<{ collection: string }>;
-  searchParams: Promise<{ q?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; perPage?: string; view?: string }>;
 }) {
   const { collection } = await params;
   const sp = await searchParams;
@@ -33,7 +35,15 @@ export default async function LibraryPage({
   if (!type) notFound();
   const q = sp.q?.trim() ?? "";
   const req = pageRequest(sp);
-  const list = await listRecords(cms, type, { q, page: req.page, perPage: req.perPage });
+  // Archive (founder QC, 17 Nov 2026): ?view=archived lists archived records, each with Restore.
+  const archivable = isArchivable(collection);
+  const archived = archivable && sp.view === "archived";
+  const list = await listRecords(cms, type, { q, page: req.page, perPage: req.perPage, archived });
+  const archivedCount = archivable
+    ? archived
+      ? list.total
+      : (await listRecords(cms, type, { page: 1, perPage: 1, archived: true })).total
+    : 0;
   const query = pagingQuery(sp);
   // A page past the end (the list shrank, or an old link) goes to the last page, like the other workspace lists.
   if (!list.rows.length && list.total > 0 && req.page > 1) {
@@ -128,7 +138,36 @@ export default async function LibraryPage({
         />
       ) : null}
 
+      {archivable ? (
+        <nav aria-label="Show" className="flex flex-wrap gap-2">
+          {[
+            { key: "", label: "Current" },
+            { key: "archived", label: `Archived · ${archivedCount.toLocaleString("en-IN")}` },
+          ].map((v) => (
+            <Link
+              key={v.key || "current"}
+              href={v.key ? `/admin/content/${collection}?view=archived` : `/admin/content/${collection}`}
+              aria-current={(v.key === "archived") === archived ? "page" : undefined}
+              className={cx(
+                "inline-flex h-9 items-center rounded-pill border-[1.5px] px-3 type-label",
+                (v.key === "archived") === archived
+                  ? "border-transparent bg-inverse text-inverse"
+                  : "border-control bg-page",
+              )}
+            >
+              {v.label}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+      {archived ? (
+        <p className="type-body-sm text-secondary">
+          Archived records are off the site and search. Restore one to bring it back as it was.
+        </p>
+      ) : null}
+
       <form action={`/admin/content/${collection}`} role="search" className="flex gap-2">
+        {archived ? <input type="hidden" name="view" value="archived" /> : null}
         <label htmlFor="library-search" className="sr-only">
           Search {type.plural.toLowerCase()}
         </label>
@@ -154,9 +193,21 @@ export default async function LibraryPage({
           <EmptyState
             kind={q ? "no-results" : "first-use"}
             icon="folder"
-            title={q ? `No ${type.plural.toLowerCase()} match` : `No ${type.plural.toLowerCase()} yet`}
+            title={
+              q
+                ? `No ${type.plural.toLowerCase()} match`
+                : archived
+                  ? `No archived ${type.plural.toLowerCase()}`
+                  : `No ${type.plural.toLowerCase()} yet`
+            }
           >
-            {q ? "Try other words." : type.upload ? "Upload the first file above." : "Add the first one."}
+            {q
+              ? "Try other words."
+              : archived
+                ? "Records you archive show here, ready to restore."
+                : type.upload
+                  ? "Upload the first file above."
+                  : "Add the first one."}
           </EmptyState>
         </div>
       ) : gallery ? (
@@ -289,9 +340,16 @@ export default async function LibraryPage({
               {list.rows.map((r) => (
                 <tr key={r.id} className="border-t border-default">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/content/${collection}/${String(r.id)}`} className="type-label hover:underline">
-                      {r.title}
-                    </Link>
+                    {archived ? (
+                      <span className="type-label">{r.title}</span>
+                    ) : (
+                      <Link
+                        href={`/admin/content/${collection}/${String(r.id)}`}
+                        className="type-label hover:underline"
+                      >
+                        {r.title}
+                      </Link>
+                    )}
                     {r.sample ? <span className="ml-2 type-caption text-secondary">Sample</span> : null}
                   </td>
                   {type.drafts ? (
@@ -310,13 +368,19 @@ export default async function LibraryPage({
                   ) : null}
                   <td className="px-2 py-3 type-body-sm">{formatIstDateTime(new Date(r.updatedAt))}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/content/${collection}/${String(r.id)}`}
-                      className={buttonClasses({ variant: "outline", size: "sm" })}
-                    >
-                      <Icon name="pencil" size={14} />
-                      Edit<span className="sr-only"> {r.title}</span>
-                    </Link>
+                    {archived ? (
+                      cms.can("content.delete") ? (
+                        <RestoreRecord slug={collection} id={r.id} name={r.title} />
+                      ) : null
+                    ) : (
+                      <Link
+                        href={`/admin/content/${collection}/${String(r.id)}`}
+                        className={buttonClasses({ variant: "outline", size: "sm" })}
+                      >
+                        <Icon name="pencil" size={14} />
+                        Edit<span className="sr-only"> {r.title}</span>
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}

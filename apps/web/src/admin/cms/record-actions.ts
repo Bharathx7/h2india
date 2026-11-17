@@ -4,6 +4,7 @@ import { audit, getDb } from "@h2india/core";
 import { revalidatePath } from "next/cache";
 import { APIError } from "payload";
 import { requestContext } from "@/server/request-context";
+import { isArchivable } from "@/cms/archive";
 import { toStored } from "./fields";
 import { contentType, settingType } from "./records";
 import { cmsSession } from "./session";
@@ -89,6 +90,72 @@ export async function unpublishRecordAction(slug: string, id: number): Promise<S
       resourceId: String(id),
       before: { status: "published" },
       after: { status: "draft" },
+      context: await requestContext(),
+    });
+    revalidatePath(`/admin/content/${slug}`);
+    return { ok: true, id };
+  } catch (e) {
+    return problem(e);
+  }
+}
+
+/**
+ * Archive a record (founder QC, 17 Nov 2026): Payload's trash keeps it with a deletedAt date, so it leaves the site,
+ * search and the lists, and can be restored. Needs content.delete; runs as the editor; audited with the reason.
+ */
+export async function archiveRecordAction(slug: string, id: number, reason: string): Promise<SaveResult> {
+  const cms = await cmsSession();
+  if (!cms?.can("content.delete")) return { ok: false, error: "Your role can't archive content." };
+  if (typeof id !== "number" || !isArchivable(slug) || !contentType(cms.payload, slug))
+    return { ok: false, error: "This content can't be archived." };
+  const why = typeof reason === "string" ? reason.trim().slice(0, 500) : "";
+  if (!why) return { ok: false, error: "Say why it's archived, for the record." };
+  try {
+    await cms.payload.update({
+      collection: slug as "schemes",
+      id,
+      data: { deletedAt: new Date().toISOString() },
+      user: cms.user,
+      overrideAccess: false,
+    });
+    await audit(getDb(), {
+      actorId: cms.userId,
+      action: "content.archive",
+      resourceType: slug,
+      resourceId: String(id),
+      after: { archived: true },
+      reason: why,
+      context: await requestContext(),
+    });
+    revalidatePath(`/admin/content/${slug}`);
+    return { ok: true, id };
+  } catch (e) {
+    return problem(e);
+  }
+}
+
+/** Restore an archived record. It comes back as it was (a published record is on the site again). Audited. */
+export async function restoreRecordAction(slug: string, id: number): Promise<SaveResult> {
+  const cms = await cmsSession();
+  if (!cms?.can("content.delete")) return { ok: false, error: "Your role can't restore content." };
+  if (typeof id !== "number" || !isArchivable(slug) || !contentType(cms.payload, slug))
+    return { ok: false, error: "This content can't be restored." };
+  try {
+    await cms.payload.update({
+      collection: slug as "schemes",
+      id,
+      data: { deletedAt: null },
+      trash: true,
+      user: cms.user,
+      overrideAccess: false,
+    });
+    await audit(getDb(), {
+      actorId: cms.userId,
+      action: "content.restore",
+      resourceType: slug,
+      resourceId: String(id),
+      before: { archived: true },
+      after: { archived: false },
       context: await requestContext(),
     });
     revalidatePath(`/admin/content/${slug}`);
