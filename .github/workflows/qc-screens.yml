@@ -1,0 +1,97 @@
+# QC screens (founder QC, 17 Nov 2026): screenshots of every supplier, buyer and member page at 1440 and 390, on a
+# throwaway database with sample content, for the founder's review. Nothing here touches the live server. Run it from
+# the Actions tab (Run workflow), or by pushing to step/qc-screens; the pictures are the "qc-screens" artifact.
+name: QC screens
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [step/qc-screens]
+
+permissions:
+  contents: read
+
+jobs:
+  screens:
+    name: QC screens
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: h2india
+          POSTGRES_PASSWORD: change-me-postgres
+          POSTGRES_DB: h2india
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U h2india" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      # Search (step 5.2). The key matches .env.example, which CI copies to .env.local for the app.
+      meilisearch:
+        image: getmeili/meilisearch:v1.56
+        env:
+          MEILI_MASTER_KEY: change-me-meili-master-key
+          MEILI_ENV: development
+          MEILI_NO_ANALYTICS: "true"
+        ports: ["7700:7700"]
+      # Catches every email the app sends; the sign-in tests read their codes from it (step 3.2).
+      mailpit:
+        image: axllent/mailpit:v1.33.1
+        ports: ["1025:1025", "8025:8025"]
+    env:
+      DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india
+      TEST_DATABASE_URL: postgresql://h2india:change-me-postgres@localhost:5432/h2india_test
+      REDIS_URL: redis://localhost:6379
+      MAILPIT_URL: http://localhost:8025
+      # The search integration tests use their own prefixed indexes on this engine (step 5.2).
+      TEST_MEILI_MASTER_KEY: change-me-meili-master-key
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Throwaway values only. CI never holds real secrets.
+      - run: cp .env.example .env.local
+      # File storage and the virus scanner (step 3.7), started here because they need start-up commands. The scanner
+      # downloads its signatures first, so it starts early and the wait comes just before the tests.
+      - name: Start file storage and virus scanner
+        run: |
+          docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=h2india -e MINIO_ROOT_PASSWORD=change-me-minio cgr.dev/chainguard/minio:latest server /data
+          docker run -d --name clamav -p 3310:3310 clamav/clamav:1.5
+          for i in $(seq 1 60); do curl -fsS localhost:9000/minio/health/live && break; sleep 2; done
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest mb --ignore-existing local/h2india-private local/h2india-public local/h2india-quarantine
+          docker run --rm --network host -e MC_HOST_local=http://h2india:change-me-minio@localhost:9000 --entrypoint mc cgr.dev/chainguard/minio:latest anonymous set download local/h2india-public
+      - name: Migrations and sample content
+        run: pnpm db:migrate && pnpm db:seed
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Install browser
+        run: pnpm --filter @h2india/e2e exec playwright install --with-deps chromium
+      - name: Wait for the virus scanner
+        run: for i in $(seq 1 100); do (echo PING | nc -q1 localhost 3310 | grep -q PONG) && exit 0; sleep 3; done; docker logs clamav; exit 1
+      - name: Screenshots
+        run: pnpm --filter @h2india/e2e exec playwright test -c playwright.qc.config.ts
+        env:
+          E2E_START_SERVER: "1"
+          FLAG_TRANSACTIONS: "true"
+          FLAG_OPERATOR_PASSWORD: "false"
+          PAYMENT_SIM_ALLOWED: "true"
+          CI: "true"
+      - name: Upload the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: qc-screens
+          path: qc-screens
+          retention-days: 30
+          if-no-files-found: warn
