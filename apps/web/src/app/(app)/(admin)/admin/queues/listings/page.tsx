@@ -165,7 +165,7 @@ export default async function ListingsQueuePage({
         </section>
       ) : null}
       <p className="type-caption text-secondary">
-        Showing all {lines.length} · amber after {hours(amber)} h, red after {hours(red)} h
+        {lines.length} waiting · amber after {hours(amber)} h, red after {hours(red)} h
       </p>
     </AdminShell>
   );

@@ -3,7 +3,7 @@ import { schema, type Executor } from "@h2india/db";
 import { and, asc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { Actor } from "../authz/actor";
 import type { OperatorPermission } from "../authz/catalogue";
-import { can } from "../authz/can";
+import { assertCan, can } from "../authz/can";
 import { clockDuration } from "../clocks/clocks";
 
 // Overview (626:8), step 11.1: what needs a decision today, across the queues the operator may see. Each tile counts
@@ -96,17 +96,20 @@ export async function overviewTiles(db: Executor, actor: Actor, now: Date = new 
           oldest === null
             ? "No supplier is waiting"
             : `Oldest waiting ${ageText(oldest)} · review within 2 working days`,
-        href: "/admin/verification",
+        // The Suppliers queue lists exactly these reviews; the desk's Needs action also holds documents.
+        href: "/admin/queues/suppliers",
       }),
     );
   }
 
   if (can(actor, "queues.view")) {
     const pr = schema.productRevisions;
+    // As the Listings queue: a product the supplier deleted isn't waiting any more.
     const listings = await db
       .select({ at: pr.submittedAt })
       .from(pr)
-      .where(eq(pr.status, "In review"))
+      .innerJoin(schema.products, eq(schema.products.id, pr.productId))
+      .where(and(eq(pr.status, "In review"), isNull(schema.products.deletedAt)))
       .orderBy(asc(pr.submittedAt));
     const lo = age(listings[0]?.at ?? null);
     tiles.push(
@@ -158,22 +161,8 @@ export async function overviewTiles(db: Executor, actor: Actor, now: Date = new 
     );
 
     // Open RFQs where a chosen supplier has neither quoted nor declined a day after it went out.
-    const cutoff = new Date(now.getTime() - amber * 3_600_000);
-    const rs = schema.rfqSuppliers;
-    const unanswered = await db
-      .select({ reference: r.reference, sentAt: r.sentAt })
-      .from(r)
-      .innerJoin(rs, eq(rs.rfqId, r.id))
-      .where(
-        and(
-          inArray(r.status, ["Sent", "Quotes received"]),
-          lt(r.sentAt, cutoff),
-          inArray(rs.status, ["Sent", "Viewed"]),
-          sql`(${r.offerDeadline} is null or ${r.offerDeadline} > ${now})`,
-        ),
-      )
-      .orderBy(asc(r.sentAt));
-    const refs = [...new Set(unanswered.map((u) => u.reference))];
+    const unanswered = await unansweredRfqs(db, actor, now);
+    const refs = unanswered.map((u) => u.reference);
     const uo = age(unanswered[0]?.sentAt ?? null);
     tiles.push({
       key: "unanswered",
@@ -187,26 +176,104 @@ export async function overviewTiles(db: Executor, actor: Actor, now: Date = new 
         refs.length && uo !== null
           ? `${refs[0] ?? ""} has no quote after ${ageText(uo)}`
           : "Every open RFQ has an answer",
-      href: "/admin/queues/rfqs",
+      // Founder QC (17 Nov 2026): this opened the moderation queue, which never lists these RFQs.
+      href: "/admin/queues/rfqs/unanswered",
     });
   }
   return tiles;
 }
 
-/** Counts on the admin sidebar (626:8): items waiting in Queues (listings, RFQs and category requests) and Verification. */
+export interface UnansweredRfq {
+  id: string;
+  reference: string;
+  title: string;
+  buyer: string;
+  sentAt: Date | null;
+  /** Chosen suppliers that have neither quoted nor declined. */
+  waitingOn: string[];
+}
+
+/**
+ * Open RFQs where a chosen supplier has neither quoted nor declined once the queueAmber clock has passed since it went
+ * out (and the offer deadline hasn't), oldest first: the Overview tile and its list.
+ */
+export async function unansweredRfqs(db: Executor, actor: Actor, now: Date = new Date()): Promise<UnansweredRfq[]> {
+  assertCan(actor, "queues.view");
+  const amber = hoursOf(await clockDuration(db, "queueAmber"));
+  const cutoff = new Date(now.getTime() - amber * 3_600_000);
+  const r = schema.rfqs;
+  const rs = schema.rfqSuppliers;
+  const rows = await db
+    .select({
+      id: r.id,
+      reference: r.reference,
+      title: r.title,
+      sentAt: r.sentAt,
+      buyer: sql<string>`(select coalesce(cp.trade_name, o.legal_name) from core.organisations o
+        left join core.company_profiles cp on cp.organisation_id = o.id where o.id = ${r.organisationId})`,
+      supplier: sql<string>`(select coalesce(cp.trade_name, o.legal_name) from core.organisations o
+        left join core.company_profiles cp on cp.organisation_id = o.id where o.id = ${rs.organisationId})`,
+    })
+    .from(r)
+    .innerJoin(rs, eq(rs.rfqId, r.id))
+    .where(
+      and(
+        inArray(r.status, ["Sent", "Quotes received"]),
+        isNull(r.deletedAt),
+        lt(r.sentAt, cutoff),
+        inArray(rs.status, ["Sent", "Viewed"]),
+        sql`(${r.offerDeadline} is null or ${r.offerDeadline} > ${now})`,
+      ),
+    )
+    .orderBy(asc(r.sentAt));
+  const out = new Map<string, UnansweredRfq>();
+  for (const x of rows) {
+    const one = out.get(x.id) ?? {
+      id: x.id,
+      reference: x.reference,
+      title: x.title,
+      buyer: x.buyer,
+      sentAt: x.sentAt,
+      waitingOn: [],
+    };
+    one.waitingOn.push(x.supplier);
+    out.set(x.id, one);
+  }
+  return [...out.values()];
+}
+
+/**
+ * Counts on the admin sidebar (626:8). Founder QC (17 Nov 2026): each matches its page. Queues = every queue tab held
+ * in core tables (suppliers, listings with storefront changes, RFQs, category requests); the web app adds the tabs that
+ * live in the CMS (content, events, jobs, inbox). Verification = the desk's Needs action companies plus profile claims.
+ */
 export async function adminCounts(db: Executor): Promise<Partial<Record<string, number>>> {
   const n = sql<number>`count(*)::int`;
-  const [listings, rfqs, reviews, categories] = await Promise.all([
-    db.select({ n }).from(schema.productRevisions).where(eq(schema.productRevisions.status, "In review")),
+  const pr = schema.productRevisions;
+  const [listings, storefronts, rfqs, reviews, categories, desk, claims] = await Promise.all([
+    db
+      .select({ n })
+      .from(pr)
+      .innerJoin(schema.products, eq(schema.products.id, pr.productId))
+      .where(and(eq(pr.status, "In review"), isNull(schema.products.deletedAt))),
+    db.select({ n }).from(schema.storefrontRevisions).where(eq(schema.storefrontRevisions.status, "In review")),
     db
       .select({ n })
       .from(schema.rfqs)
       .where(and(eq(schema.rfqs.status, "In moderation"), isNull(schema.rfqs.deletedAt))),
     db.select({ n }).from(schema.supplierReviews).where(eq(schema.supplierReviews.status, "Submitted")),
     db.select({ n }).from(schema.categoryRequests).where(eq(schema.categoryRequests.status, "Pending")),
+    db.execute<{ n: number }>(sql`
+      select count(*)::int as n from (
+        select organisation_id from core.supplier_reviews where status = 'Submitted'
+        union select organisation_id from core.verification_documents where status = 'Submitted' and deleted_at is null
+        union select organisation_id from core.payout_bank_accounts where status = 'Held'
+      ) x`),
+    db.select({ n }).from(schema.companyClaims).where(eq(schema.companyClaims.status, "Pending")),
   ]);
+  const one = (r: { n: number }[]) => r[0]?.n ?? 0;
   return {
-    queues: (listings[0]?.n ?? 0) + (rfqs[0]?.n ?? 0) + (categories[0]?.n ?? 0),
-    verification: reviews[0]?.n ?? 0,
+    queues: one(listings) + one(storefronts) + one(rfqs) + one(reviews) + one(categories),
+    verification: (desk.rows[0]?.n ?? 0) + one(claims),
   };
 }

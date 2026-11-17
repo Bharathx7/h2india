@@ -216,7 +216,7 @@ export default async function QueuePage({
         <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
       <p className="type-caption text-secondary">
-        Showing {rows.length} · {queue.sla}
+        {rows.length} waiting · {queue.sla}
       </p>
     </AdminShell>
   );

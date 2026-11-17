@@ -379,7 +379,7 @@ export async function askQuestion(
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Report this listing (755:15048): goes to the Listings queue (step 11.2); the supplier never sees who sent it. */
+/** Report this listing (755:15048): goes to Compliance, Takedowns (decideTakedown); the supplier never sees who sent it. */
 export async function reportListing(
   db: Database,
   input: {

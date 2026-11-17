@@ -12,6 +12,7 @@ import {
   fieldComments,
   QueueError,
   queueViews,
+  reopenQueueItem,
   saveQueueView,
 } from "./index";
 
@@ -63,6 +64,21 @@ describe.skipIf(!url)("queue claims and decisions", () => {
       "already decided",
     );
     expect(sent).toBe(1);
+  });
+
+  it("an item sent again under the same id waits for a fresh decision (founder QC, 17 Nov 2026)", async () => {
+    const id = subject();
+    await decideItem(h.db, a, { queue: "jobs", subjectId: id, decision: "changes", reasons: ["Add the pay"] }, tick);
+    await expect(decideItem(h.db, b, { queue: "jobs", subjectId: id, decision: "approve" }, tick)).rejects.toThrow(
+      "already decided",
+    );
+    await reopenQueueItem(h.db, "jobs", id);
+    await decideItem(h.db, b, { queue: "jobs", subjectId: id, decision: "approve" }, tick);
+    const [row] = await h.db
+      .select()
+      .from(schema.queueClaims)
+      .where(and(eq(schema.queueClaims.queue, "jobs"), eq(schema.queueClaims.subjectId, id)));
+    expect(row).toMatchObject({ decision: "approve", decidedBy: b.userId });
   });
 
   it("two operators deciding at the same moment: exactly one wins", async () => {

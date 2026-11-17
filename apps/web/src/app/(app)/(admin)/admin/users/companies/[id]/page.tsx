@@ -63,7 +63,7 @@ export default async function CompanyPage({
           </Link>
         ) : null}
         {supplier && can(actor, "verification.view") ? (
-          <Link href={`/admin/verification?org=${org.id}`} className="type-label text-link underline">
+          <Link href={`/admin/verification?company=${org.id}`} className="type-label text-link underline">
             Verification desk
           </Link>
         ) : null}

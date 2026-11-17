@@ -5,16 +5,21 @@ import {
   Toaster,
   WorkspaceShell,
   type WorkspaceArea,
+  type WorkspaceLink,
   type WorkspaceNavGroup,
   type WorkspaceSearchLink,
   type WorkspaceUser,
 } from "@h2india/ui";
+import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
 import type { Row } from "@/app/(app)/(workspace)/notifications/rows";
 import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { SignedInAsNote } from "./SignedInAsNote";
+
+/** The shell's links as the app's own links, so moving between workspace pages doesn't reload the document. */
+const AppLink: WorkspaceLink = ({ children, ...rest }) => <NextLink {...rest}>{children}</NextLink>;
 
 // The workspace shell with the live bell (97:3168): unread count, latest five, Mark all read. Refreshes every minute
 // and whenever the panel opens. Search (founder QC, 17 Nov 2026): buyers, suppliers and members open the site search
@@ -92,7 +97,10 @@ export function WorkspaceFrame(props: {
       switchTo={props.switchTo}
       profileHref="/account"
       logoutHref="/sign-out"
-      homeHref="/"
+      // The admin domain has no public home ("/" redirects to /admin), so staff go to Overview.
+      homeHref={staff ? "/admin" : "/"}
+      // Founder QC (17 Nov 2026): sidebar clicks reloaded the whole page; the app's own link swaps only the page.
+      linkComponent={AppLink}
       notifications={
         <BellPanel
           items={bell.items}

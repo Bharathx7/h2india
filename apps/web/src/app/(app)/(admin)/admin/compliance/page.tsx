@@ -9,11 +9,12 @@ import { Alert, buttonClasses, CountChip, cx, EmptyState, Icon, StatusBadge } fr
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPayload } from "payload";
-import { NewRequest } from "@/admin/compliance/Controls";
+import { DecideTakedown, NewRequest } from "@/admin/compliance/Controls";
 import { clockBadge, dueBadge, durationWords, type Tone } from "@/admin/compliance/views";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { absolute } from "@/seo/site";
 
 // Compliance requests (660:8), step 11.7: Grievances (660:281), Takedowns (660:851), Corrections (660:1301) and Data
 // rights (660:1786), each against its clock, with the states on 661:948. Clock lengths come from the clock settings.
@@ -133,9 +134,8 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
   );
   const footer = (n: number, noun: string) => (
     <p className="type-caption text-secondary">
-      Showing {n === 2 ? "both" : `all ${String(n)}`}{" "}
-      {status === "open" ? "open " : status === "closed" ? "closed " : ""}
-      {noun}
+      {n.toLocaleString("en-IN")} {status === "open" ? "open " : status === "closed" ? "closed " : ""}
+      {noun} in all
     </p>
   );
   const none = (title: string, body: string) => (
@@ -253,17 +253,25 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
               {badge({ text: "Time limit not set", tone: "neutral" })}
               {badge({ text: t.status, tone: tone(t.status) })}
               <td className="px-4 py-3 text-right align-top">
-                {t.attachments.map((f, i) => (
-                  <a key={f} href={`/api/v1/files/${f}/link`} className="mr-3 type-label-sm underline">
-                    Evidence {i + 1}
+                <span className="inline-flex flex-wrap items-center justify-end gap-2">
+                  {t.attachments.map((f, i) => (
+                    <a key={f} href={`/api/v1/files/${f}/link`} className="type-label-sm underline">
+                      Evidence {i + 1}
+                    </a>
+                  ))}
+                  {/* The listing is on the public site (the admin domain serves no marketplace pages). */}
+                  <a
+                    href={absolute(`/marketplace/products/${t.slug}`)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={buttonClasses({ variant: "outline", size: "sm" })}
+                  >
+                    Open listing<span className="sr-only"> {t.product} (opens the public site)</span>
                   </a>
-                ))}
-                <Link
-                  href={`/marketplace/products/${t.slug}`}
-                  className={buttonClasses({ variant: "outline", size: "sm" })}
-                >
-                  Open listing<span className="sr-only"> {t.product}</span>
-                </Link>
+                  {t.status === "Received" && can(actor, "compliance.edit") ? (
+                    <DecideTakedown id={t.id} product={t.product} live={t.productStatus === "Live"} />
+                  ) : null}
+                </span>
               </td>
             </tr>
           )),

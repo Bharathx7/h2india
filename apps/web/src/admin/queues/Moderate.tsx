@@ -16,6 +16,7 @@ export function Moderate({
   approveLabel,
   after,
   next,
+  inbox = false,
 }: {
   queue: QueueKey;
   id: string;
@@ -23,6 +24,8 @@ export function Moderate({
   approveLabel: string;
   after: string;
   next: string | null;
+  /** An inbox message: Answered or Close without a reply; nothing goes back to the sender from here. */
+  inbox?: boolean;
 }) {
   const router = useRouter();
   const [decision, setDecision] = useState<Decision>("approve");
@@ -30,6 +33,7 @@ export function Moderate({
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const needs = decision !== "approve";
+  const optional = inbox && decision === "approve";
   return (
     <div className="flex flex-col gap-3">
       {error ? <Alert tone="error" title={error} live /> : null}
@@ -40,14 +44,20 @@ export function Moderate({
         }}
         aria-label="Decision"
       >
-        <Radio value="approve" label="Approve" />
-        <Radio value="changes" label="Request changes" />
-        <Radio value="reject" label="Reject" />
+        <Radio value="approve" label={inbox ? "Answered" : "Approve"} />
+        {inbox ? null : <Radio value="changes" label="Request changes" />}
+        <Radio value="reject" label={inbox ? "Close without a reply" : "Reject"} />
       </RadioGroup>
-      {needs ? (
+      {needs || optional ? (
         <label className="flex flex-col gap-1.5">
           <span className="type-label">
-            {decision === "changes" ? `What needs to change (sent to ${person})` : "Why it's rejected"}
+            {optional
+              ? "What you replied (for the team, optional)"
+              : decision === "changes"
+                ? `What needs to change (sent to ${person})`
+                : inbox
+                  ? "Why it's closed (for the team)"
+                  : "Why it's rejected"}
           </span>
           <Textarea
             rows={4}
@@ -57,7 +67,7 @@ export function Moderate({
               setText(e.target.value);
             }}
           />
-          <span className="type-caption text-secondary">Required.</span>
+          {optional ? null : <span className="type-caption text-secondary">Required.</span>}
         </label>
       ) : null}
       <Button
@@ -75,7 +85,13 @@ export function Moderate({
           });
         }}
       >
-        {decision === "approve" ? approveLabel : decision === "changes" ? "Send back for changes" : "Reject"}
+        {decision === "approve"
+          ? approveLabel
+          : decision === "changes"
+            ? "Send back for changes"
+            : inbox
+              ? "Close without a reply"
+              : "Reject"}
       </Button>
       <p className="type-caption text-secondary">{after}</p>
     </div>

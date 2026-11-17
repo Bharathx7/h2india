@@ -98,6 +98,8 @@ describe.skipIf(!url)("claim this profile", () => {
 
     const verifier = await operator("Supplier verifier");
     expect((await pendingClaims(h.db, verifier)).filter((r) => r.slug === `shakti-${tag}`)).toHaveLength(2);
+    // A member who claims the company becomes the company's kind, as a join approval does.
+    await h.db.update(schema.users).set({ profileType: "member" }).where(eq(schema.users.id, claimer.id));
     await decideClaim(h.db, verifier, { claimId, approve: true });
 
     expect((await claimTarget(h.db, `shakti-${tag}`))?.claimed).toBe(true);
@@ -108,6 +110,21 @@ describe.skipIf(!url)("claim this profile", () => {
     expect(member?.role).toBe("Admin");
     // The rival's claim is closed, and nobody can claim it again: they're offered a join request instead.
     expect((await myClaim(h.db, rival.id, orgId))?.status).toBe("Rejected");
+    // Founder QC (17 Nov 2026): both hear the answer in the app, and the claimant can open the company's workspace.
+    const told = async (userId: string) =>
+      (
+        await h.db
+          .select({ event: schema.notifications.event })
+          .from(schema.notifications)
+          .where(eq(schema.notifications.userId, userId))
+      ).map((n) => n.event);
+    expect(await told(claimer.id)).toContain("claim.approved");
+    expect(await told(rival.id)).toContain("claim.rejected");
+    const [who] = await h.db
+      .select({ profileType: schema.users.profileType })
+      .from(schema.users)
+      .where(eq(schema.users.id, claimer.id));
+    expect(who?.profileType).toBe("supplier");
     const late = await makeUser(h.db, "Late");
     await expect(
       submitGstinClaim(h.db, { slug: `shakti-${tag}`, userId: late.id, gstin: "33AABCS1234M1Z5", letterFileId: "f" }),

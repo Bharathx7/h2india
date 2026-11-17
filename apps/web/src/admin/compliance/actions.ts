@@ -5,11 +5,13 @@ import { can, loadActor } from "@h2india/core/authz";
 import {
   correctForRequest,
   DataRightsError,
+  decideTakedown,
   eraseForRequest,
   erasurePlan,
   exportForRequest,
   receiveRequest,
   rejectRequest,
+  TakedownError,
   type Kind,
 } from "@h2india/core/compliance";
 import { moveGrievance } from "@h2india/core/grievances";
@@ -32,7 +34,7 @@ async function run(work: () => Promise<unknown>, path: string): Promise<R> {
   try {
     await work();
   } catch (error) {
-    if (error instanceof DataRightsError) return { ok: false, error: error.message };
+    if (error instanceof DataRightsError || error instanceof TakedownError) return { ok: false, error: error.message };
     if (error instanceof Error && /Not allowed|not allowed|may have changed/.test(error.message))
       return { ok: false, error: error.message };
     throw error;
@@ -124,4 +126,20 @@ export async function exportAction(id: string): Promise<{ ok: true; json: string
     if (error instanceof DataRightsError) return { ok: false, error: error.message };
     throw error;
   }
+}
+
+/** A listing report: resolved (optionally pausing the listing) or rejected, with what was found (founder QC). */
+export async function decideTakedownAction(
+  reportId: string,
+  outcome: "Resolved" | "Rejected",
+  note: string,
+  pauseListing: boolean,
+): Promise<R> {
+  // Callable from any browser: core accepts only Resolved or Rejected (TAKEDOWN_TRANSITIONS) and pauses only on true.
+  const { actor } = await operator();
+  const context = await requestContext();
+  return run(
+    () => decideTakedown(getDb(), actor, { reportId, outcome, note, pauseListing, context }),
+    "/admin/compliance",
+  );
 }

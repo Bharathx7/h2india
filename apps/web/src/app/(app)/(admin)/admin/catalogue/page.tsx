@@ -1,5 +1,5 @@
 import { getDb } from "@h2india/core";
-import { can, loadActor } from "@h2india/core/authz";
+import { can } from "@h2india/core/authz";
 import {
   catalogueApplications,
   catalogueTree,
@@ -7,13 +7,8 @@ import {
   categoryHistory,
   type TreeClass,
 } from "@h2india/core/catalogue/taxonomy";
-import { listNotifications, unreadCount } from "@h2india/core/notify";
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
-import { toRows } from "../../../(workspace)/notifications/rows";
+import { AdminShell, requireOperator } from "@/admin/shell";
 import { CatalogueView, type CatalogueData } from "./CatalogueView";
 import { categoryMeta, historyLine } from "./format";
 
@@ -37,17 +32,13 @@ export default async function CataloguePage({
 }: {
   searchParams: Promise<{ category?: string; state?: string }>;
 }) {
-  const session = await getSession();
-  if (!session) redirect("/sign-in?next=/admin/catalogue");
+  // The standard back-office gate and frame (founder QC, 17 Nov 2026): the operator's own session (never a viewed
+  // person), the staff password sign-in, and the larger-screen cover.
+  const { userId, actor } = await requireOperator("catalogue.view", "/admin/catalogue");
   const db = getDb();
-  const actor = await loadActor(db, session.user.id);
-  if (!can(actor, "catalogue.view")) notFound();
   const { category, state } = await searchParams;
 
-  const [shell, unread, bell, tree, applications] = await Promise.all([
-    shellFor(session.user.id),
-    unreadCount(db, session.user.id),
-    listNotifications(db, session.user.id, { limit: 5 }),
+  const [tree, applications] = await Promise.all([
     catalogueTree(db, actor),
     catalogueApplications(db, { includeHidden: true }),
   ]);
@@ -76,18 +67,11 @@ export default async function CataloguePage({
   };
 
   return (
-    <WorkspaceFrame
-      area="admin"
-      groups={shell.groups}
-      current="/admin/catalogue"
-      user={shell.user}
-      home="/admin"
-      bell={{ unread, items: toRows(bell) }}
-    >
+    <AdminShell userId={userId} current="/admin/catalogue">
       <CatalogueView
         data={data}
         demoState={demo === "loading" || demo === "empty" || demo === "error" ? demo : undefined}
       />
-    </WorkspaceFrame>
+    </AdminShell>
   );
 }

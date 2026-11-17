@@ -1,10 +1,11 @@
 "use client";
 
-import { Alert, Button, FormField, Input, Select, Textarea } from "@h2india/ui";
+import { Alert, Button, Checkbox, FormField, Input, Modal, Radio, RadioGroup, Select, Textarea } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   correctAction,
+  decideTakedownAction,
   dryRunAction,
   eraseAction,
   exportAction,
@@ -290,5 +291,91 @@ export function DataRightsActions({
         </Button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Decide a listing report (founder QC, 17 Nov 2026: reports could never be closed). Resolved: the report was right,
+ * and a live listing can be paused while the supplier fixes it. Rejected: nothing to change. The note is kept in the
+ * history; the reporter (if signed in) and, when paused, the supplier are told in the app.
+ */
+export function DecideTakedown({ id, product, live }: { id: string; product: string; live: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [outcome, setOutcome] = useState<"Resolved" | "Rejected">("Resolved");
+  const [pause, setPause] = useState(live);
+  const [note, setNote] = useState("");
+  const { msg, pending, go } = useRun();
+  return (
+    <>
+      <Button
+        size="sm"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        Decide<span className="sr-only"> report about {product}</span>
+      </Button>
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        width={480}
+        title={`Report about ${product}`}
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={outcome === "Rejected" ? "outline" : "primary"}
+              disabled={pending || !note.trim()}
+              onClick={() => {
+                go(
+                  () => decideTakedownAction(id, outcome, note, outcome === "Resolved" && pause),
+                  outcome === "Resolved" ? "Report resolved." : "Report rejected.",
+                );
+              }}
+            >
+              {outcome === "Resolved" ? "Resolve report" : "Reject report"}
+            </Button>
+          </div>
+        }
+      >
+        {msg ? <Alert tone={msg.tone} title={msg.text} live /> : null}
+        <RadioGroup
+          value={outcome}
+          onValueChange={(v) => {
+            setOutcome(v as "Resolved" | "Rejected");
+          }}
+          aria-label="Outcome"
+        >
+          <Radio value="Resolved" label="The report is right" />
+          <Radio value="Rejected" label="Nothing wrong with the listing" />
+        </RadioGroup>
+        {outcome === "Resolved" && live ? (
+          <Checkbox
+            checked={pause}
+            onCheckedChange={(v) => {
+              setPause(v === true);
+            }}
+            label="Pause the listing until the supplier fixes it"
+          />
+        ) : null}
+        <FormField label="What you found" helper="Kept in the history. Shown to the supplier if you pause the listing.">
+          <Textarea
+            rows={4}
+            maxLength={1000}
+            value={note}
+            onChange={(e) => {
+              setNote(e.target.value);
+            }}
+          />
+        </FormField>
+      </Modal>
+    </>
   );
 }

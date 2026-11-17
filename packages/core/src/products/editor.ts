@@ -605,6 +605,8 @@ export async function listingQueue(
     .where(
       and(
         eq(r.status, "In review"),
+        // A product the supplier deleted leaves the queue (founder QC, 17 Nov 2026: approving it said "is live").
+        isNull(p.deletedAt),
         opts.view === "mine"
           ? eq(r.assigneeId, actor.userId ?? "")
           : opts.view === "unassigned"
@@ -699,7 +701,8 @@ export async function revisionDetail(db: Executor, actor: Actor, id: string) {
   return { revision: rev, product, isNew, defs, rows, history };
 }
 
-async function supplierCatalogueTeam(db: Executor, organisationId: string) {
+/** The supplier people who look after listings (Admin and Catalogue), told about decisions on them. */
+export async function supplierCatalogueTeam(db: Executor, organisationId: string) {
   return db
     .select({ id: schema.users.id, name: schema.users.name })
     .from(schema.memberships)
@@ -735,7 +738,8 @@ export async function decideRevision(
   const [rev] = await db.select().from(r).where(eq(r.id, input.id));
   if (!rev || rev.status !== "In review") throw new ProductError("This review has already been decided");
   const [product] = await db.select().from(p).where(eq(p.id, rev.productId));
-  if (!product) throw new ProductError("No such product");
+  if (!product || product.deletedAt)
+    throw new ProductError("The supplier deleted this product, so there is nothing to decide.");
   const notes = (input.notes ?? []).filter((n) => n.text.trim());
   const reason = input.reason?.trim() ?? "";
   if (input.outcome === "Needs changes" && !notes.length)
@@ -824,7 +828,24 @@ export async function decideRevision(
     .from(schema.companyProfiles)
     .where(eq(schema.companyProfiles.organisationId, rev.organisationId));
   details.company = prof?.name ?? "";
-  if (input.outcome === "Rejected") return;
+  if (input.outcome === "Rejected") {
+    // Founder QC (17 Nov 2026): a rejection reached nobody. In the app only until the email wording is approved (M21).
+    for (const person of await supplierCatalogueTeam(db, rev.organisationId))
+      await notify({
+        event: "listing.rejected",
+        topic: "company.verification",
+        userId: person.id,
+        scope: rev.organisationId,
+        inApp: {
+          category: "account",
+          icon: "alert-circle",
+          title: `${product.name} wasn't approved`,
+          body: notes.map((n) => n.text).join(" · ") || undefined,
+          href: `/supplier/products/${product.id}`,
+        },
+      });
+    return;
+  }
   for (const person of await supplierCatalogueTeam(db, rev.organisationId)) {
     const mail =
       input.outcome === "Approved"

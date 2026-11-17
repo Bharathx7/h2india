@@ -3,16 +3,17 @@ import { getDb } from "@h2india/core";
 import { ageText, overviewTiles, slaBadge, type OverviewTile } from "@h2india/core/admin";
 import { can } from "@h2india/core/authz";
 import { clockDuration } from "@h2india/core/clocks";
-import { buttonClasses, cx, Icon, StatusBadge } from "@h2india/ui";
+import { buttonClasses, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPayload } from "payload";
+import { INBOX_KINDS } from "@/admin/queues/data";
 import { AdminShell, requireOperator } from "@/admin/shell";
-import { ARTICLE_TYPES } from "@/cms/types";
 import { publishingCalendar } from "@/cms/workflow";
 
 // Overview (626:8), step 11.1: what needs a decision today across the queues this operator may see, with the age of
-// the oldest item against the SLA clocks, and the week's publishing calendar. ?week=-1|1 moves the calendar.
+// the oldest item against the SLA clocks. Founder QC (17 Nov 2026): the week's publishing is a short card that opens
+// Content → Calendar (the full calendar), and "Open CMS" moved to Content.
 export const metadata: Metadata = { title: "Overview · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -23,45 +24,40 @@ const dayKey = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: IST }).
 const fmt = (d: Date, o: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: IST, ...o }).format(d);
 
-/** Monday 00:00 IST of the week containing `now`, moved by `offset` weeks. */
-function weekStart(now: Date, offset: number) {
+/** Monday 00:00 IST of the week containing `now`. */
+function weekStart(now: Date) {
   const today = new Date(`${dayKey(now)}T00:00:00+05:30`);
   // 12:00 IST is the same calendar day in UTC, so getUTCDay() gives the IST weekday (Monday = 0 here).
   const weekday = (new Date(`${dayKey(now)}T12:00:00+05:30`).getUTCDay() + 6) % 7;
-  return new Date(today.getTime() - weekday * 86_400_000 + offset * 7 * 86_400_000);
+  return new Date(today.getTime() - weekday * 86_400_000);
 }
 
-const TONE: Record<string, "success" | "progress" | "warning" | "neutral"> = {
-  Sent: "success",
-  Published: "success",
-  Scheduled: "progress",
-  "In review": "neutral",
-  "Legal check": "warning",
-};
-
-export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
-  const sp = await searchParams;
+export default async function OverviewPage() {
   const { userId, actor } = await requireOperator("overview.view", "/admin");
   const db = getDb();
   const now = new Date();
   const tiles: OverviewTile[] = await overviewTiles(db, actor, now);
 
-  // Content submissions and corrections live in the CMS.
+  // Content submissions and inbox messages live in the CMS; each tile opens its native queue (founder QC, 17 Nov
+  // 2026: they opened the raw CMS, and the corrections tile read a collection only editors fill).
   const showContent = can(actor, "content.view");
-  const payload = showContent || can(actor, "compliance.view") ? await getPayload({ config }) : null;
+  const showQueues = can(actor, "queues.view");
+  const payload = showContent || showQueues ? await getPayload({ config }) : null;
   const [amberD, redD] = await Promise.all([clockDuration(db, "queueAmber"), clockDuration(db, "queueRed")]);
   const amber = hoursOf(amberD);
   const red = hoursOf(redD);
   const age = (iso: string | null | undefined) => (iso ? (now.getTime() - new Date(iso).getTime()) / 3_600_000 : null);
-  if (payload && showContent) {
-    const subs = await payload.find({
-      collection: "submissions",
-      where: { status: { equals: "Under review" } },
-      sort: "createdAt",
-      limit: 1,
-      depth: 0,
-      overrideAccess: true,
-    });
+  if (payload && showQueues) {
+    const waiting = async (kinds: string[]) =>
+      payload.find({
+        collection: "submissions",
+        where: { and: [{ status: { equals: "Under review" } }, { kind: { in: kinds } }] },
+        sort: "createdAt",
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      });
+    const [subs, inbox] = await Promise.all([waiting(["press_release", "pitch", "event"]), waiting([...INBOX_KINDS])]);
     const oldest = age(subs.docs[0]?.createdAt);
     tiles.push({
       key: "submissions",
@@ -70,75 +66,32 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       oldestHours: oldest,
       ...slaBadge(oldest, amber, red),
       line: oldest === null ? "Nothing waiting" : `Oldest waiting ${ageText(oldest)} · review within 1 working day`,
-      href: "/cms/collections/submissions",
+      href: "/admin/queues/content",
     });
-  }
-  if (payload && (can(actor, "compliance.view") || showContent)) {
-    const corr = await payload.find({
-      collection: "corrections",
-      where: { status: { equals: "Open" } },
-      sort: "createdAt",
-      limit: 1,
-      depth: 0,
-      overrideAccess: true,
-    });
-    const oldest = age(corr.docs[0]?.createdAt);
-    const left = oldest === null ? null : amber - oldest;
+    const io = age(inbox.docs[0]?.createdAt);
     tiles.push({
-      key: "corrections",
-      label: "Corrections requests",
-      count: corr.totalDocs,
-      oldestHours: oldest,
-      ...(oldest === null
-        ? { tone: "success" as const, badge: "Nothing waiting" }
-        : left !== null && left > 0
-          ? { tone: "warning" as const, badge: "Due today" }
-          : { tone: "error" as const, badge: "Past SLA" }),
-      line:
-        oldest === null
-          ? "Nothing waiting"
-          : `Acknowledge within ${String(amber)} h · ${left !== null && left > 0 ? `${ageText(left)} left` : "overdue"}`,
-      href: "/cms/collections/corrections",
+      key: "inbox",
+      label: "Inbox: corrections and messages",
+      count: inbox.totalDocs,
+      oldestHours: io,
+      ...slaBadge(io, amber, red),
+      line: io === null ? "Nothing waiting" : `Oldest waiting ${ageText(io)}`,
+      href: "/admin/queues/inbox",
     });
   }
 
-  // The publishing calendar: articles (scheduled, published, in review, legal check) and newsletter issues sent.
-  const offset = Math.max(-52, Math.min(52, Number(sp.week ?? 0) || 0));
-  const from = weekStart(now, offset);
+  // This week's publishing, as two numbers; the full calendar is Content → Calendar (founder QC, 17 Nov 2026).
+  const from = weekStart(now);
   const to = new Date(from.getTime() + 7 * 86_400_000);
-  const items: { day: string; at: Date | null; kind: string; title: string; status: string }[] = [];
+  let scheduled = 0;
+  let waitingArticles = 0;
   if (payload && showContent) {
-    const articles = await publishingCalendar(payload, from, to);
-    for (const a of articles) {
+    for (const a of await publishingCalendar(payload, from, to)) {
       const at = a.at ? new Date(a.at) : null;
-      const inWeek = at && at >= from && at < to;
-      // Items in review or legal check without a date show today (this week only).
-      const day = inWeek ? dayKey(at) : offset === 0 ? dayKey(now) : "";
-      if (!day) continue;
-      items.push({
-        day,
-        at: inWeek ? at : null,
-        kind: ARTICLE_TYPES.find((t) => t.value === a.type)?.label ?? "Article",
-        title: a.title,
-        status: a.status,
-      });
-    }
-    const issues = await payload.find({
-      collection: "newsletter-issues",
-      where: {
-        and: [{ sentOn: { greater_than_equal: from.toISOString() } }, { sentOn: { less_than: to.toISOString() } }],
-      },
-      depth: 0,
-      limit: 50,
-      overrideAccess: true,
-    });
-    for (const i of issues.docs) {
-      const at = new Date(i.sentOn);
-      items.push({ day: dayKey(at), at, kind: "Newsletter", title: i.title, status: at <= now ? "Sent" : "Scheduled" });
+      if (at && at >= from && at < to) scheduled += 1;
+      else waitingArticles += 1;
     }
   }
-  const days = Array.from({ length: 7 }, (_, n) => new Date(from.getTime() + n * 86_400_000));
-  const today = dayKey(now);
 
   return (
     <AdminShell userId={userId} current="/admin" title="Overview">
@@ -177,75 +130,26 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       )}
       {showContent ? (
         <section
-          className="flex flex-col gap-4 rounded-card border border-default bg-page p-5"
-          aria-labelledby="calendar"
+          aria-labelledby="this-week"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-card border border-default bg-page p-5"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-pill bg-mint">
+              <Icon name="calendar" size={20} />
+            </span>
             <div>
-              <h2 id="calendar" className="type-h4">
-                Publishing calendar
+              <h2 id="this-week" className="type-h4">
+                Publishing this week
               </h2>
-              <p className="type-caption text-secondary">
-                {offset === 0 ? "This week" : offset < 0 ? "Earlier" : "Later"} · {fmt(from, { day: "numeric" })}–
-                {fmt(new Date(to.getTime() - 1), { day: "numeric", month: "short" })} · times in IST
+              <p className="type-body-sm text-secondary">
+                {scheduled} scheduled · {waitingArticles} waiting for review or a legal check
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/admin?week=${String(offset - 1)}`}
-                className={buttonClasses({ variant: "outline", size: "sm" })}
-                aria-label="Previous week"
-              >
-                <Icon name="chevron-left" size={16} />
-              </Link>
-              <Link
-                href={`/admin?week=${String(offset + 1)}`}
-                className={buttonClasses({ variant: "outline", size: "sm" })}
-                aria-label="Next week"
-              >
-                <Icon name="chevron-right" size={16} />
-              </Link>
-              <Link href="/cms" className={buttonClasses({ variant: "outline", size: "sm" })}>
-                Open CMS
-              </Link>
-            </div>
           </div>
-          <ol className="grid grid-cols-7 gap-2">
-            {days.map((d) => {
-              const key = dayKey(d);
-              const mine = items
-                .filter((i) => i.day === key)
-                .sort((a, b) => (a.at?.getTime() ?? 0) - (b.at?.getTime() ?? 0));
-              return (
-                <li
-                  key={key}
-                  className={cx(
-                    "flex min-h-60 flex-col gap-2 rounded-card p-2",
-                    key === today ? "bg-mint" : "bg-subtle",
-                  )}
-                >
-                  <p className="type-eyebrow">
-                    {fmt(d, { weekday: "short" })} <span className="type-label">{fmt(d, { day: "numeric" })}</span>
-                    {key === today ? " · today" : ""}
-                  </p>
-                  {mine.length ? (
-                    mine.map((i) => (
-                      <div key={`${i.title}${i.kind}`} className="flex flex-col gap-1 rounded-input bg-page p-2">
-                        <p className="type-caption text-secondary">
-                          {i.at ? `${fmt(i.at, { hour: "numeric", minute: "2-digit" })} · ` : ""}
-                          {i.kind}
-                        </p>
-                        <p className="type-label-sm">{i.title}</p>
-                        <StatusBadge status={i.status} tone={TONE[i.status] ?? "neutral"} />
-                      </div>
-                    ))
-                  ) : (
-                    <p className="type-caption text-secondary">Nothing scheduled</p>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+          <Link href="/admin/content/calendar" className={buttonClasses({ variant: "outline", size: "sm" })}>
+            Open calendar
+            <Icon name="arrow-right" size={16} />
+          </Link>
         </section>
       ) : null}
     </AdminShell>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as RDialog } from "radix-ui";
-import { useId, useState, type ReactNode } from "react";
+import { useId, useState, type ComponentType, type ReactNode } from "react";
 import { Logo } from "../brand/Logo";
 import { Icon, type IconName } from "../icons/Icon";
 import { cx } from "../lib/cx";
@@ -37,10 +37,39 @@ const AREA_LABEL: Record<WorkspaceArea, string> = {
   admin: "Admin",
 };
 
-function SidebarItem({ item, active, compact }: { item: WorkspaceNavItem; active: boolean; compact: boolean }) {
+/**
+ * The link the app navigates with (founder QC, 17 Nov 2026): Next.js passes its own Link so a sidebar click changes only
+ * the page, not the whole document. Plain <a> otherwise.
+ */
+export type WorkspaceLink = ComponentType<{
+  href: string;
+  className?: string;
+  title?: string;
+  "aria-current"?: "page";
+  "aria-label"?: string;
+  onClick?: () => void;
+  children: ReactNode;
+}>;
+
+const PlainLink: WorkspaceLink = ({ children, ...rest }) => <a {...rest}>{children}</a>;
+
+function SidebarItem({
+  item,
+  active,
+  compact,
+  Link,
+  onNavigate,
+}: {
+  item: WorkspaceNavItem;
+  active: boolean;
+  compact: boolean;
+  Link: WorkspaceLink;
+  onNavigate?: () => void;
+}) {
   return (
-    <a
+    <Link
       href={item.href}
+      onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       title={compact ? item.label : undefined}
       className={cx(
@@ -71,7 +100,7 @@ function SidebarItem({ item, active, compact }: { item: WorkspaceNavItem; active
           <span className="sr-only"> waiting</span>
         </span>
       ) : null}
-    </a>
+    </Link>
   );
 }
 
@@ -81,12 +110,17 @@ function SidebarBody({
   currentHref,
   homeHref,
   compact,
+  Link,
+  onNavigate,
 }: {
   area: WorkspaceArea;
   groups: WorkspaceNavGroup[];
   currentHref: string;
   homeHref: string;
   compact: boolean;
+  Link: WorkspaceLink;
+  /** Closes the phone drawer after a choice. */
+  onNavigate?: () => void;
 }) {
   // One active item: the longest address that holds the current page, so Overview (/admin) is not lit on
   // /admin/catalogue.
@@ -96,13 +130,16 @@ function SidebarBody({
     .filter(matches)
     .sort((a, b) => b.length - a.length)[0];
   return (
-    <div data-surface="inverse" className="flex h-full flex-col gap-4 bg-inverse px-4 pt-5 pb-4">
-      <div className={cx("flex items-center gap-2.5 pl-2", compact && "max-lg:hidden")}>
-        <a href={homeHref} aria-label="H2 Economy home" className="rounded-control">
-          <Logo version="primary-on-dark" height={32} title="" />
-        </a>
-        <span className={cx("rounded-[4px] bg-accent px-1.5 type-label-sm text-primary", compact && "max-lg:hidden")}>
-          {AREA_LABEL[area]}
+    <div data-surface="inverse" className="flex h-full flex-col gap-3 bg-inverse px-4 pt-4 pb-4">
+      {/* Founder QC (17 Nov 2026): the logo and the area badge didn't fit side by side in the 240 px rail and the badge
+          was cut in half; the badge now sits under the logo, both whole. */}
+      {/* Kept compact so the longest menu (member) still fits a 650 px tall window (workspace-shell.spec.ts). */}
+      <div className={cx("flex flex-col items-start gap-1.5 pl-2", compact && "max-lg:hidden")}>
+        <Link href={homeHref} aria-label="H2 Economy home" className="rounded-control" onClick={onNavigate}>
+          <Logo version="primary-on-dark" height={24} title="" />
+        </Link>
+        <span className="rounded-[4px] bg-accent px-1.5 type-label-sm whitespace-nowrap text-primary">
+          {AREA_LABEL[area]} workspace
         </span>
       </div>
       {/* Scrolls only on a very short window; the scrollbar stays hidden so the rail never looks like it moves. */}
@@ -119,7 +156,13 @@ function SidebarBody({
               <ul className="flex flex-col gap-px">
                 {g.items.map((item) => (
                   <li key={item.href}>
-                    <SidebarItem item={item} active={item.href === activeHref} compact={compact} />
+                    <SidebarItem
+                      item={item}
+                      active={item.href === activeHref}
+                      compact={compact}
+                      Link={Link}
+                      onNavigate={onNavigate}
+                    />
                   </li>
                 ))}
               </ul>
@@ -171,6 +214,8 @@ export interface WorkspaceShellProps {
   homeHref?: string;
   /** The top bar's main button, for example the supplier's Add product (584:961). */
   action?: ReactNode;
+  /** The app's link component (Next.js Link), so moving between pages doesn't reload the document. */
+  linkComponent?: WorkspaceLink;
   children: ReactNode;
 }
 
@@ -189,6 +234,7 @@ export function WorkspaceShell({
   logoutHref,
   homeHref = "/",
   action,
+  linkComponent: Link = PlainLink,
   children,
 }: WorkspaceShellProps) {
   const [drawer, setDrawer] = useState(false);
@@ -196,7 +242,7 @@ export function WorkspaceShell({
     <RDialog.Root open={drawer} onOpenChange={setDrawer}>
       <div className="flex min-h-dvh bg-page">
         <aside className="sticky top-0 hidden h-dvh shrink-0 md:block md:w-18 lg:w-60">
-          <SidebarBody area={area} groups={groups} currentHref={currentHref} homeHref={homeHref} compact />
+          <SidebarBody area={area} groups={groups} currentHref={currentHref} homeHref={homeHref} compact Link={Link} />
         </aside>
 
         <RDialog.Portal>
@@ -206,7 +252,17 @@ export function WorkspaceShell({
             className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:hidden"
           >
             <RDialog.Title className="sr-only">{AREA_LABEL[area]} menu</RDialog.Title>
-            <SidebarBody area={area} groups={groups} currentHref={currentHref} homeHref={homeHref} compact={false} />
+            <SidebarBody
+              area={area}
+              groups={groups}
+              currentHref={currentHref}
+              homeHref={homeHref}
+              compact={false}
+              Link={Link}
+              onNavigate={() => {
+                setDrawer(false);
+              }}
+            />
             <RDialog.Close
               aria-label="Close menu"
               className="absolute top-2 right-2 rounded-control p-1 text-icon-inverse"
@@ -222,9 +278,9 @@ export function WorkspaceShell({
               <Icon name="menu" size={24} />
             </RDialog.Trigger>
             {/* Phones and tablets: the wordmark does not fit the icon rail, so it sits in the top bar. */}
-            <a href={homeHref} aria-label="H2 Economy home" className="rounded-control lg:hidden">
+            <Link href={homeHref} aria-label="H2 Economy home" className="rounded-control lg:hidden">
               <Logo height={28} title="" />
-            </a>
+            </Link>
             {searchLinks ? (
               <LinkSearch placeholder={searchPlaceholder} links={searchLinks} />
             ) : (

@@ -5,6 +5,7 @@ import {
   changeMemberRole,
   JoinRequestError,
   LastAdminError,
+  notifyRequester,
   rejectJoinRequest,
 } from "@h2india/core/companies";
 import {
@@ -97,13 +98,19 @@ export async function removeMemberAction(userId: string) {
 export async function answerJoinRequestAction(requestId: string, approve: boolean) {
   const { actor } = await teamActor();
   const context = await requestContext();
-  return run(
+  const result = await run(
     () =>
       approve
         ? approveJoinRequest({ adminId: actor.userId ?? "", requestId, context })
         : rejectJoinRequest({ adminId: actor.userId ?? "", requestId, context }),
     "/supplier/team",
   );
+  // The person who asked is told the answer (founder QC, 17 Nov 2026: nobody was); a failed send doesn't undo it.
+  if (result.ok)
+    await notifyRequester(requestId).catch((e: unknown) => {
+      console.error("join answer notice failed", e);
+    });
+  return result;
 }
 
 export async function acceptInvitationAction(token: string, agreedToTerms: boolean): Promise<Result> {

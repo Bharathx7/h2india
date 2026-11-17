@@ -15,5 +15,11 @@ export {
   verifyFactor,
 } from "./recovery";
 export type { Factor, RecoveryKind, RecoveryView } from "./recovery";
-export { canHandleSupport, closeSupportRequest, submitSupportRequest, SupportRequestError } from "./support";
-export type { SupportField, SupportRequestInput } from "./support";
+export {
+  canHandleSupport,
+  closeSupportRequest,
+  submitSupportRequest,
+  SupportRequestError,
+  supportRequests,
+} from "./support";
+export type { SupportField, SupportListRow, SupportRequestInput } from "./support";

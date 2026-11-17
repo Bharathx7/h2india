@@ -2,6 +2,7 @@ import { schema, type Database } from "@h2india/db";
 import { and, eq, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { completeDeadline, startClock } from "../clocks/clocks";
+import { notify } from "../notify/notify";
 import { nextReference } from "../reference";
 import { changeStatus } from "../status";
 import {
@@ -176,4 +177,21 @@ export async function moveGrievance(
       }
     },
   });
+  // Founder QC (17 Nov 2026): the complainant heard nothing after the receipt. Someone signed in when they raised it
+  // is told in the app (no approved email wording yet, M21); everyone can still look it up with the ticket.
+  if (row.userId && (input.to === "Acknowledged" || input.to === "Resolved"))
+    await notify({
+      event: input.to === "Resolved" ? "grievance.resolved" : "grievance.acknowledged",
+      topic: "account.security",
+      userId: row.userId,
+      inApp: {
+        category: "account",
+        icon: input.to === "Resolved" ? "check-circle" : "clipboard-check",
+        title: `${row.reference}: ${input.to === "Resolved" ? "resolved" : "we're looking into it"}`,
+        body: input.to === "Resolved" ? input.outcome?.trim() : input.publicNote?.trim() || undefined,
+        href: `/legal/grievance-officer?ticket=${encodeURIComponent(row.reference)}`,
+      },
+    }).catch((error: unknown) => {
+      console.error("grievance notice failed", error);
+    });
 }

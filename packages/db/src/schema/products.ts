@@ -219,7 +219,7 @@ export const productQuestions = core.table(
   (t) => [index("product_questions_supplier").on(t.organisationId, t.createdAt)],
 );
 
-/** Report this listing (755:15048), step 6.4: goes to the Listings queue (step 11.2). The supplier never sees who. */
+/** Report this listing (755:15048), step 6.4: goes to Compliance, Takedowns. The supplier never sees who. */
 export const listingReports = core.table(
   "listing_reports",
   {

@@ -2,7 +2,7 @@ import { can } from "@h2india/core/authz";
 import { getDb } from "@h2india/core";
 import { fieldComments, QUEUES } from "@h2india/core/queues";
 import { formatIstDateTime } from "@h2india/core/time";
-import { Icon, StatusBadge } from "@h2india/ui";
+import { buttonClasses, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -27,6 +27,11 @@ const AFTER: Record<string, { approve: string; after: string; heading: string }>
     heading: "Event details",
   },
   jobs: { approve: "Approve and publish", after: "The job goes live on Jobs straight away.", heading: "Job details" },
+  inbox: {
+    approve: "Mark answered",
+    after: "Reply by email first; marking it answered only closes it here.",
+    heading: "Message",
+  },
 };
 
 export default async function ModerationPage({ params }: { params: Promise<{ queue: string; id: string }> }) {
@@ -109,37 +114,48 @@ export default async function ModerationPage({ params }: { params: Promise<{ que
                 ))}
             </dl>
           </section>
-          <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="type-h4">Checks</h2>
-              <StatusBadge
-                status={failed ? `${String(failed)} to fix` : "All passed"}
-                tone={failed ? "warning" : "success"}
-              />
-            </div>
-            <ul className="flex flex-col gap-3">
-              {d.checks.map((c) => (
-                <li key={c.label} className="flex items-start gap-2">
-                  <Icon
-                    name={c.ok ? "check-circle" : "alert-circle"}
-                    size={18}
-                    className={c.ok ? "text-icon-primary" : "text-icon-error"}
-                  />
-                  <span>
-                    <span className="block type-label">{c.label}</span>
-                    {c.detail ? (
-                      <span className={c.ok ? "block type-caption text-secondary" : "block type-caption text-error"}>
-                        {c.detail}
-                      </span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {d.checks.length ? (
+            <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="type-h4">Checks</h2>
+                <StatusBadge
+                  status={failed ? `${String(failed)} to fix` : "All passed"}
+                  tone={failed ? "warning" : "success"}
+                />
+              </div>
+              <ul className="flex flex-col gap-3">
+                {d.checks.map((c) => (
+                  <li key={c.label} className="flex items-start gap-2">
+                    <Icon
+                      name={c.ok ? "check-circle" : "alert-circle"}
+                      size={18}
+                      className={c.ok ? "text-icon-primary" : "text-icon-error"}
+                    />
+                    <span>
+                      <span className="block type-label">{c.label}</span>
+                      {c.detail ? (
+                        <span className={c.ok ? "block type-caption text-secondary" : "block type-caption text-error"}>
+                          {c.detail}
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
         <section className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">Decision</h2>
+          {d.replyTo ? (
+            <a
+              href={`mailto:${d.replyTo}?subject=${encodeURIComponent(`Re: ${d.title} (${d.reference})`)}`}
+              className={buttonClasses({ variant: "outline", size: "sm" })}
+            >
+              <Icon name="mail" size={16} />
+              Reply by email
+            </a>
+          ) : null}
           {open && can(actor, "queues.edit") ? (
             <Moderate
               queue={queue.key}
@@ -148,6 +164,7 @@ export default async function ModerationPage({ params }: { params: Promise<{ que
               approveLabel={words.approve}
               after={words.after}
               next={next}
+              inbox={queue.key === "inbox"}
             />
           ) : (
             <p className="type-body-sm text-body">This item is {d.status}.</p>

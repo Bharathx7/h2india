@@ -1,9 +1,11 @@
+import config from "@payload-config";
 import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { adminAreas, adminCounts } from "@h2india/core/admin";
 import { identityOf, loadActor } from "@h2india/core/authz";
 import { isMember, MEMBER_JOIN_PATH } from "@h2india/core/members";
 import type { WorkspaceArea, WorkspaceNavGroup, WorkspaceUser } from "@h2india/ui";
+import { getPayload } from "payload";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 
 // The workspace shell for a signed-in person (Workspace sidebar and top bar v2, 194:1190 and 194:1191).
@@ -24,7 +26,8 @@ export async function navFor(area: WorkspaceArea, userId: string): Promise<Works
       .filter((g) => g.items.length);
   }
   const db = getDb();
-  const [actor, counts] = await Promise.all([loadActor(db, userId), adminCounts(db)]);
+  const [actor, core, cms] = await Promise.all([loadActor(db, userId), adminCounts(db), cmsQueueCount()]);
+  const counts: Partial<Record<string, number>> = { ...core, queues: (core.queues ?? 0) + cms };
   const areas = adminAreas(actor);
   const key = (href: string) => (href === "/admin" ? "overview" : href.split("/")[2]) as keyof typeof areas;
   return WORKSPACE_NAV.admin
@@ -76,4 +79,30 @@ export function backToWorkspace(area: WorkspaceArea): { label: string; href: str
     : area === "supplier"
       ? { label: "Supplier workspace", href: "/supplier" }
       : null;
+}
+
+/**
+ * Queue items that live in the CMS (content, events, jobs, inbox), for the sidebar's Queues count: every submission
+ * under review and every job sent for review, so the count is the sum of the queue tabs (founder QC, 17 Nov 2026).
+ */
+async function cmsQueueCount(): Promise<number> {
+  try {
+    const payload = await getPayload({ config });
+    const [subs, jobs] = await Promise.all([
+      payload.count({ collection: "submissions", where: { status: { equals: "Under review" } }, overrideAccess: true }),
+      payload.find({
+        collection: "jobs",
+        where: { "post.state": { equals: "Submitted for review" } },
+        draft: true,
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+      }),
+    ]);
+    return subs.totalDocs + jobs.totalDocs;
+  } catch (error) {
+    // A count is never worth a broken page.
+    console.error("queue count failed", error);
+    return 0;
+  }
 }

@@ -19,7 +19,7 @@ interface Row {
   key: string;
   title: string;
   type: "Press release" | "Event" | "Job";
-  status: "Draft" | "Under review" | "Published" | "Needs changes" | "Declined" | "Answered";
+  status: "Draft" | "Under review" | "Approved" | "Published" | "Needs changes" | "Declined" | "Answered";
   note: string | null;
   sub: string | null;
   updated: Date;
@@ -30,6 +30,7 @@ interface Row {
 const TONE: Record<Row["status"], BadgeTone> = {
   Draft: "neutral",
   "Under review": "progress",
+  Approved: "success",
   Published: "success",
   "Needs changes": "warning",
   Declined: "error",
@@ -84,13 +85,16 @@ export default async function ContentPage({
           ? s.status
           : "Under review";
       const again = s.kind === "event" ? "/events/submit" : "/news/submit";
+      // An approved press release isn't live yet: an editor writes and publishes the article from it (founder QC,
+      // 17 Nov 2026: it showed Published with nothing on the site). An approved event is created live at once.
+      const approvedOnly = status === "Published" && s.kind !== "event";
       return {
         key: `s${String(s.id)}`,
         title: s.title,
         type: s.kind === "event" ? "Event" : "Press release",
-        status,
+        status: approvedOnly ? "Approved" : status,
         note: s.reviewNote ?? null,
-        sub: s.reference,
+        sub: approvedOnly ? `${s.reference} · Approved. Our editors will publish it.` : s.reference,
         updated: new Date(s.updatedAt),
         // The editors' note shows under the title; Needs changes offers to send it again.
         href: status === "Needs changes" ? again : null,
@@ -123,7 +127,7 @@ export default async function ContentPage({
       ? r.status === "Draft"
       : tab === "review"
         ? r.status === "Under review" || r.status === "Needs changes"
-        : r.status === "Published");
+        : r.status === "Published" || r.status === "Approved");
   const shown = rows.filter((r) => inTab(r) && (!sp.type || r.type === sp.type));
   const paged = pageOf(shown, pageRequest(sp));
   const count = (k: (typeof TABS)[number]["key"]) =>
@@ -134,7 +138,7 @@ export default async function ContentPage({
           ? r.status === "Draft"
           : k === "review"
             ? r.status === "Under review" || r.status === "Needs changes"
-            : r.status === "Published"),
+            : r.status === "Published" || r.status === "Approved"),
     ).length;
   return (
     <SupplierShell page={page} current="/supplier/content" title="Content">

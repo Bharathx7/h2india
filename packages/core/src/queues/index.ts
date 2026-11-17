@@ -18,6 +18,9 @@ export const QUEUES = [
   { key: "comments", label: "Comments", sla: "review within 1 working day" },
   // Supplier QC, 16 Nov 2026: a supplier asks for a category the catalogue lacks.
   { key: "categories", label: "Category requests", sla: "review within 2 working days" },
+  // Founder QC (17 Nov 2026): reader corrections and contact, partnership and advertising messages were only in the
+  // raw CMS list. An operator replies by email and marks each one answered, or closes it without a reply.
+  { key: "inbox", label: "Inbox", sla: "answer and close" },
 ] as const;
 export type QueueKey = (typeof QUEUES)[number]["key"];
 export type Decision = "approve" | "changes" | "reject";
@@ -122,6 +125,18 @@ export async function decideItem(
     await db.update(c).set({ decision: null, decidedBy: null, decidedAt: null }).where(eq(c.id, claimId));
     throw error;
   }
+}
+
+/**
+ * The submitter sent the item again under the same id (a job post sent back for changes): its earlier decision no
+ * longer applies, so it waits for a fresh one (founder QC, 17 Nov 2026: a resubmitted job could never be decided).
+ * The earlier decision stays in the audit log.
+ */
+export async function reopenQueueItem(db: Executor, queue: QueueKey, subjectId: string) {
+  await db
+    .update(c)
+    .set({ claimedBy: null, claimedAt: null, decision: null, reasons: [], decidedBy: null, decidedAt: null })
+    .where(and(eq(c.queue, queue), eq(c.subjectId, subjectId)));
 }
 
 /** Claims for items in a queue, for the Assignee and Status columns. */

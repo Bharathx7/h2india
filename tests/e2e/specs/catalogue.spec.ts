@@ -8,6 +8,9 @@ import { expectStates } from "../helpers/states";
 // an attribute and it appears as a filter without a deploy (the schema is read live: the new row is filterable at
 // once); a value outside the range is refused (unit and integration tests); the seeded examples are flagged sample.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
+// The back office is desktop only (627:1001): Catalogue now has the larger-screen cover like every admin page (founder
+// QC, 17 Nov 2026), so the phone project runs these at desktop size, as backOfficeContext() does.
+test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
 
 test.beforeEach(async ({ context }, info) => {
   await ownIp(context, info);
@@ -30,7 +33,7 @@ test("a catalogue moderator sees the launch schema and adds a category and an at
   await expect(table.getByRole("rowheader", { name: "Flow rate" })).toBeVisible();
   await expect(table.getByRole("row", { name: /Flow rate/ })).toContainText("1–5,000");
   expect(await seriousIssues(page)).toEqual([]);
-  // The wide table scrolls inside its own region; the page itself never scrolls sideways (390 included).
+  // The wide table scrolls inside its own region; the page itself never scrolls sideways.
   // A phone browser widens its layout to fit wide content, so compare with the screen, not with innerWidth.
   const screen = page.viewportSize()?.width ?? 0;
   expect(await page.evaluate(() => Math.max(window.innerWidth, document.documentElement.scrollWidth))).toBe(screen);

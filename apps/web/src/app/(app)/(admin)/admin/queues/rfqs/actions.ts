@@ -44,7 +44,7 @@ export async function decideRfqAction(
   const db = getDb();
   return run(() => {
     if (outcome === "approve") return approveRfq(db, actor, id, context, new Date(), addSuppliers);
-    if (outcome === "changes") return returnRfq(db, actor, id, { reasons: [text], note: text }, context);
+    if (outcome === "changes") return returnRfq(db, actor, id, { reasons: [text] }, context);
     return rejectRfq(db, actor, id, { reason: text }, context);
   }, id);
 }

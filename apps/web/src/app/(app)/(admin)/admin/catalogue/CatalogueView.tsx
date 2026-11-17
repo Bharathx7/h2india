@@ -91,7 +91,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-page p-4 md:p-8">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start gap-4">
         <div className="min-w-0 flex-1">
           <h1 className="type-h2">Catalogue</h1>
