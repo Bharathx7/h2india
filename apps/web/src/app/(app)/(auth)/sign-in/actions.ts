@@ -4,6 +4,7 @@ import { parseServerEnv } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { hasOperatorRole } from "@h2india/core/authz";
 import { joinProfile, membershipsOf } from "@h2india/core/companies";
+import { isMember } from "@h2india/core/members";
 import { ACCOUNT_KINDS, landingAfterSignIn, safeReturnPath, siteSignIn, type AccountKind } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
@@ -47,6 +48,11 @@ export async function whereNext(next: string, audience?: AccountKind): Promise<s
   if (!page) {
     if (!profile?.profileType) return "/join";
     return has ? back : "/join";
+  }
+  // A buyer or supplier who also joined as a member signs in to the member area from the member page (founder QC,
+  // 17 Nov 2026), instead of being told they used the wrong page.
+  if (page === "member" && has !== "member" && has !== null && (await isMember(getDb(), session.user.id))) {
+    return landingAfterSignIn("member", "member", back).to;
   }
   // Staff who use a public page go where they were going.
   if (!has && (await hasOperatorRole(getDb(), session.user.id))) return back;

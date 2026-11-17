@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 
 // Step 7.3: a member creates, pauses and deletes an alert; a "Create alert" link opens the modal filled in; a turn-off
@@ -12,7 +12,7 @@ test.beforeEach(async ({ context }, info) => {
 
 async function member(page: import("@playwright/test").Page, name: string) {
   const email = newEmail(name);
-  await signInNew(page, email);
+  await signInMember(page, email);
   await page.goto("/member/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/member$/);

@@ -59,6 +59,11 @@ export interface SiteUser {
   workspace: string;
   workspaceHref: string;
   unread: number;
+  /**
+   * A second destination under Dashboard (founder QC, 17 Nov 2026): "Member area" for a buyer or supplier who also
+   * joined as a member, or "Join as member" for one who hasn't.
+   */
+  extra?: { label: string; href: string };
 }
 
 export interface SiteLinks {

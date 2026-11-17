@@ -38,16 +38,17 @@ describe("the Knowledge menu card", () => {
   });
 });
 
-// Public QC (16 Nov 2026): the Directory is for signed-in people; the top strip adds For Members.
+// Public QC (16 Nov 2026): the top strip adds For Members. Founder QC (17 Nov 2026): the Directory is for members
+// and staff only; buyers and suppliers join as members to see it.
 describe("the Directory in the menus", () => {
-  const links = (signedIn: boolean) => footerFor(FOOTER_COLUMNS, signedIn).flatMap((c) => c.links.map((l) => l.href));
+  const links = (directory: boolean) => footerFor(FOOTER_COLUMNS, directory).flatMap((c) => c.links.map((l) => l.href));
 
-  it("is left out of the menus and the footer for visitors", () => {
+  it("is left out of the menus and the footer for visitors, buyers and suppliers who aren't members", () => {
     expect(menusFor(MEGA_MENUS, false).map((m) => m.id)).not.toContain("directory");
     expect(links(false).filter((h) => h.startsWith("/directory"))).toEqual([]);
   });
 
-  it("is there for signed-in people", () => {
+  it("is there for members and staff", () => {
     expect(menusFor(MEGA_MENUS, true).map((m) => m.id)).toContain("directory");
     expect(links(true)).toContain("/directory");
   });

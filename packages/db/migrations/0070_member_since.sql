@@ -1,0 +1,1 @@
+ALTER TABLE "core"."users" ADD COLUMN "member_since" timestamp with time zone;

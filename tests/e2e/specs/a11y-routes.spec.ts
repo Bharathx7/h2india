@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "../fixtures";
 import { signInOperator } from "../helpers/cms";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { setup } from "../helpers/orders";
 import { signInExisting } from "../helpers/rfq";
 import { newEmail, ownIp } from "../helpers/sign-in";
@@ -198,7 +198,7 @@ test.describe("accessibility of every page (step 12.4)", () => {
 
   test("member workspace", async ({ page }) => {
     test.setTimeout(300_000);
-    await signInNew(page, newEmail("a11y-member"));
+    await signInMember(page, newEmail("a11y-member"));
     expect(await sweep(page, MEMBER)).toEqual([]);
   });
 

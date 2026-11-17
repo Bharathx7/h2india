@@ -1,16 +1,29 @@
 import { getDb } from "@h2india/core";
+import { mayUseMember, memberJoinHref } from "@h2india/core/members";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { getSession } from "@/server/auth";
-import { navFor, shellFor } from "@/server/workspace";
+import { backToWorkspace, navFor, shellFor } from "@/server/workspace";
 
-/** The signed-in member, or a trip to sign in that comes back here. */
-export async function requireMember(path: string): Promise<string> {
+/**
+ * The signed-in member, or a trip to sign in that comes back here. Founder QC (17 Nov 2026): the member area is for
+ * members only; a buyer or supplier who hasn't joined as a member goes to Join as member and comes back afterwards,
+ * with the page's query (a Save or Follow from a public page) kept. Staff may open it too.
+ */
+export async function requireMember(
+  path: string,
+  query: Record<string, string | string[] | undefined> = {},
+): Promise<string> {
+  const q = new URLSearchParams(
+    Object.entries(query).flatMap(([k, v]) => (typeof v === "string" && v ? [[k, v] as [string, string]] : [])),
+  ).toString();
+  const back = q ? `${path}?${q}` : path;
   const session = await getSession();
-  if (!session) redirect(`/member/sign-in?next=${encodeURIComponent(path)}`);
+  if (!session) redirect(`/member/sign-in?next=${encodeURIComponent(back)}`);
+  if (!(await mayUseMember(getDb(), session.user.id))) redirect(memberJoinHref(back));
   return session.user.id;
 }
 
@@ -49,6 +62,8 @@ async function WorkspaceShell({
       user={shell.user}
       home={`/${area}`}
       bell={{ unread, items: toRows(bell) }}
+      // A buyer or supplier who is also a member goes back to their own workspace from here, and the other way.
+      switchTo={shell.area === area ? shell.switchTo : area === "member" ? backToWorkspace(shell.area) : null}
     >
       <div className="flex flex-col gap-6 p-4 md:p-8">{children}</div>
     </WorkspaceFrame>

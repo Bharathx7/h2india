@@ -8,6 +8,8 @@ import { people } from "@/directory/data";
 import { forcedState } from "@/lib/dev-state";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { needsMembership } from "@/directory/gate";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // People in India's hydrogen industry (756:12213), step 6.6. Only people whose consent to be listed is recorded (M24
 // safe default). Contact goes through H2 Economy; emails are never shown. Filters are a plain form in the address.
@@ -30,6 +32,8 @@ const initials = (name: string) =>
     .join("");
 
 export default async function PeoplePage({ searchParams }: { searchParams: Search }) {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const s = await searchParams;
   const forced = forcedState(all(s.ui)[0]);
   const q = (all(s.q)[0] ?? "").trim().toLowerCase();

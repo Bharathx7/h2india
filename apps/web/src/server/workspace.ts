@@ -2,6 +2,7 @@ import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { adminAreas, adminCounts } from "@h2india/core/admin";
 import { identityOf, loadActor } from "@h2india/core/authz";
+import { isMember, MEMBER_JOIN_PATH } from "@h2india/core/members";
 import type { WorkspaceArea, WorkspaceNavGroup, WorkspaceUser } from "@h2india/ui";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 
@@ -35,7 +36,7 @@ export async function navFor(area: WorkspaceArea, userId: string): Promise<Works
 }
 
 export async function shellFor(userId: string) {
-  const who = await identityOf(getDb(), userId);
+  const [who, member] = await Promise.all([identityOf(getDb(), userId), isMember(getDb(), userId)]);
   const name = who.name || who.email || "You";
   const words = name.split(/\s+/).filter(Boolean);
   const initials =
@@ -54,5 +55,25 @@ export async function shellFor(userId: string) {
     home: `/${who.area}`,
     email: who.email,
     mobile: who.mobile,
+    member,
+    /**
+     * The other place this person can go from the profile menu (founder QC, 17 Nov 2026): a buyer or supplier who is
+     * also a member switches to the member area and back; one who isn't is offered Join as member.
+     */
+    switchTo:
+      who.area === "buyer" || who.area === "supplier"
+        ? member
+          ? { label: "Member area", href: "/member" }
+          : { label: "Join as member", href: MEMBER_JOIN_PATH }
+        : null,
   };
+}
+
+/** From the member area back to a buyer's or supplier's own workspace. */
+export function backToWorkspace(area: WorkspaceArea): { label: string; href: string } | null {
+  return area === "buyer"
+    ? { label: "Buyer workspace", href: "/buyer" }
+    : area === "supplier"
+      ? { label: "Supplier workspace", href: "/supplier" }
+      : null;
 }

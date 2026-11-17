@@ -1,5 +1,6 @@
 import { expect, test } from "../fixtures";
 import { cms, signInOperator } from "../helpers/cms";
+import { makeMember } from "../helpers/join";
 import { enterCode, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
 // Flow D (Figma page 18, playbook step 7.6): tender alert to action. Tenders listing with filters → Create alert →
@@ -31,8 +32,9 @@ test("flow D: a tender alert leads to the tender", async ({ page, browser }, inf
   // 3 The member joins with an email code.
   const email = newEmail("flow-d");
   await enterCode(page, await requestCode(page, email));
-  // A new person goes on to Join H2 Economy, as in signInNew().
+  // A new person goes on to Join H2 Economy, as in signInNew(), and joins as a member (alerts are for members).
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
+  await makeMember(email);
 
   // 4 The alert is saved: instant, by email.
   await page.goto("/member/alerts?type=tenders");

@@ -18,6 +18,12 @@ export const users = core.table("users", {
   jobRole: text("job_role"),
   /** buyer | supplier | member: the path chosen in Join step 1. Null until the person has joined. */
   profileType: text("profile_type"),
+  /**
+   * When a buyer or supplier also joined as a member (founder QC, 17 Nov 2026): membership is a yes/no beside the
+   * profile type, so one account can be a buyer and a member. Everyone with profile type "member" is a member too.
+   * Read only through isMember() (@h2india/core/members).
+   */
+  memberSince: utc("member_since"),
   termsAcceptedAt: utc("terms_accepted_at"),
   /** The Terms of use version accepted (step 5.8), or "unpublished" while the text waits for M2. */
   termsVersion: text("terms_version"),

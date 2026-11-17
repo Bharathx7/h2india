@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 7.4: a member fills in their profile and turns on Public profile; only then do signed-in visitors find them in
@@ -12,7 +12,7 @@ test.beforeEach(async ({ context }, info) => {
 
 test("profile, public listing and preferences", async ({ page }) => {
   const name = `Rohan ${String(Date.now())}`;
-  await signInNew(page, newEmail("profile"));
+  await signInMember(page, newEmail("profile"));
   await page.goto("/member/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
   await page.goto("/member/profile");

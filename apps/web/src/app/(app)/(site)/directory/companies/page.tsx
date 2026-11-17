@@ -8,6 +8,8 @@ import { DirectoryFilters } from "@/directory/DirectoryFilters";
 import { forcedState } from "@/lib/dev-state";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { needsMembership } from "@/directory/gate";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // The company directory (477:40; phones 480:8; map view 478:708; empty 128:23393, loading 128:23411, error 128:23436),
 // step 6.6. List and map read the same filtered companies, so they always agree. The map is the state-bubble stand-in (A176) with its list by state
@@ -23,6 +25,8 @@ export const dynamic = "force-dynamic";
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function DirectoryPage({ searchParams }: { searchParams: Search }) {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const params = await searchParams;
   const forced = forcedState(
     params.state === "loading" || params.state === "error" || params.state === "empty" ? params.state : undefined,

@@ -33,11 +33,14 @@ const FOOTER_TOPICS: Record<string, string> = {
 export function SiteChrome({
   user,
   operator = false,
+  member = false,
   menus = MEGA_MENUS,
   children,
 }: {
   user: SiteUser | null;
   operator?: boolean;
+  /** May open member features, so the Directory shows in the menus (members and staff). */
+  member?: boolean;
   /** The mega menus with the live catalogue (menusWithCatalogue); the fixed lists otherwise. */
   menus?: MegaSection[];
   children: ReactNode;
@@ -45,8 +48,8 @@ export function SiteChrome({
   const search = useHeaderSearch();
   // Request a quote is for buyers and signed-out visitors (public QC 4).
   const quote = canRequestQuote(user);
-  const sections = menusFor(quote ? menus : menusWithoutQuote(menus), user !== null);
-  const columns = footerFor(quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS), user !== null);
+  const sections = menusFor(quote ? menus : menusWithoutQuote(menus), member);
+  const columns = footerFor(quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS), member);
   return (
     <>
       <a

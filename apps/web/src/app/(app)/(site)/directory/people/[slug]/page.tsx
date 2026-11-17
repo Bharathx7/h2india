@@ -6,8 +6,9 @@ import { person } from "@/directory/data";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
 import { absolute } from "@/seo/site";
-import { GATED_METADATA } from "@/directory/gate";
+import { GATED_METADATA, needsMembership } from "@/directory/gate";
 import { siteViewer } from "@/server/site";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // A person's profile (756:12711), step 6.6: only with their consent recorded (M24), or a member who chose to be listed
 // (step 7.4, seen only by signed-in visitors). No email or phone, ever.
@@ -26,6 +27,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export const dynamic = "force-dynamic";
 
 export default async function PersonPage({ params }: { params: Params }) {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const p = await person((await params).slug);
   if (!p) notFound();
   return (

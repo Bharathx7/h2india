@@ -55,14 +55,17 @@ export function footerWithoutQuote(columns: FooterColumn[]): FooterColumn[] {
   return columns.map((c) => ({ ...c, links: c.links.filter((l) => !isQuoteLink(l.href)) }));
 }
 
-/** The mega menus a visitor sees: without the Directory menu when nobody is signed in. */
-export function menusFor(menus: MegaSection[], signedIn: boolean): MegaSection[] {
-  return signedIn ? menus : menus.filter((m) => m.id !== "directory");
+/**
+ * The mega menus: the Directory menu only for people who may open it (founder QC, 17 Nov 2026: members and staff;
+ * before, anyone signed in).
+ */
+export function menusFor(menus: MegaSection[], directory: boolean): MegaSection[] {
+  return directory ? menus : menus.filter((m) => m.id !== "directory");
 }
 
-/** The footer columns a visitor sees: without Directory links when nobody is signed in. */
-export function footerFor(columns: FooterColumn[], signedIn: boolean): FooterColumn[] {
-  return signedIn ? columns : columns.map((c) => ({ ...c, links: c.links.filter((l) => !isDirectoryLink(l.href)) }));
+/** The footer columns: Directory links only for people who may open the Directory (members and staff). */
+export function footerFor(columns: FooterColumn[], directory: boolean): FooterColumn[] {
+  return directory ? columns : columns.map((c) => ({ ...c, links: c.links.filter((l) => !isDirectoryLink(l.href)) }));
 }
 
 export const MEGA_MENUS: MegaSection[] = [

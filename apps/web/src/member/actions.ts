@@ -8,6 +8,7 @@ import { follow, removeSaved, saveItem, setFollowLevel, unfollow } from "@h2indi
 import { topicLabel, TOPICS, STATES } from "@h2india/core/members/rules";
 import { revalidatePath } from "next/cache";
 import { showSample } from "@/cms/sample";
+import { mayUseMember } from "@h2india/core/members";
 import { getSession } from "@/server/auth";
 import { resolveSave } from "./feed";
 
@@ -16,6 +17,8 @@ import { resolveSave } from "./feed";
 async function me() {
   const s = await getSession();
   if (!s) throw new Error("Sign in again.");
+  // Members only (founder QC, 17 Nov 2026): buyers and suppliers join as members first.
+  if (!(await mayUseMember(getDb(), s.user.id))) throw new Error("Join as a member to use this.");
   return s.user.id;
 }
 
