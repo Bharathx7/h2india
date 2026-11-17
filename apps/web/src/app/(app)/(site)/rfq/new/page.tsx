@@ -161,6 +161,8 @@ export default async function RequestQuotePage({
       start.deliveryState = site.state;
     } else if (site) start.deliveryState = site.state;
     if (!start.gstinId) start.gstinId = site?.gstinId || (gstins.find((g) => g.isDefault)?.id ?? "");
+    // One GSTIN per company (A189): a draft that named a retired GSTIN bills to the company's GSTIN instead.
+    if (!gstins.some((g) => g.id === start.gstinId)) start.gstinId = gstins[0]?.id ?? "";
   }
 
   const setup: WizardSetup = {

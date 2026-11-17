@@ -11,6 +11,7 @@ import {
   userIdByEmail,
 } from "@h2india/core/admin/users";
 import { grantOperatorRole, loadActor, OperatorRoleError, revokeOperatorRole } from "@h2india/core/authz";
+import { BuyerSettingsError, changeGstinByOperator } from "@h2india/core/buyer";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -30,7 +31,8 @@ async function operator() {
 }
 
 const fail = (error: unknown): R => {
-  if (error instanceof UserAdminError || error instanceof OperatorRoleError) return { ok: false, error: error.message };
+  if (error instanceof UserAdminError || error instanceof OperatorRoleError || error instanceof BuyerSettingsError)
+    return { ok: false, error: error.message };
   if (error instanceof Error && /Not allowed/.test(error.message))
     return { ok: false, error: "Your role can't do this." };
   throw error;
@@ -130,4 +132,14 @@ async function sendStaffPasswordLink(email: string) {
   } catch (error) {
     console.error("staff password link not sent", error instanceof Error ? error.message : error);
   }
+}
+
+/** Change a company's GSTIN (founder QC, 17 Nov 2026, A189): verification.edit, with a reason; the old one is retired. */
+export async function changeCompanyGstinAction(organisationId: string, gstin: string, place: string, reason: string) {
+  const { actor } = await operator();
+  const context = await requestContext();
+  return run(
+    () => changeGstinByOperator(getDb(), actor, organisationId, { gstin, place, reason }, context),
+    `/admin/users/companies/${organisationId}`,
+  );
 }

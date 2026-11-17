@@ -29,7 +29,9 @@ export async function buyerFacts(db: Executor, organisationId: string): Promise<
       checkedAt: schema.organisationGstins.checkedAt,
     })
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId))
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    )
     .orderBy(sql`${schema.organisationGstins.isDefault} desc`)
     .limit(1);
   const [site] = await db

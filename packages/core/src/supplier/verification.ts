@@ -252,7 +252,9 @@ async function syncCompanyVerified(tx: Executor, organisationId: string) {
   const gst = await tx
     .select({ status: schema.organisationGstins.portalStatus })
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId));
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    );
   const value =
     badge?.status === "Active"
       ? "Verified"
@@ -469,7 +471,9 @@ export async function runAutomatedChecks(db: Database, actor: Actor, organisatio
   const gst = await db
     .select()
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId));
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    );
   const docs = await listDocuments(db, scopeFor(actor, { operatorArea: "verification" }), organisationId);
   const results: { check: string; result: string; detail: string }[] = [];
   results.push(
@@ -736,7 +740,9 @@ export async function deskCompany(db: Executor, actor: Actor, organisationId: st
   const [gst] = await db
     .select()
     .from(schema.organisationGstins)
-    .where(eq(schema.organisationGstins.organisationId, organisationId))
+    .where(
+      and(eq(schema.organisationGstins.organisationId, organisationId), isNull(schema.organisationGstins.retiredAt)),
+    )
     .limit(1);
   const [documents, badges, checks, review] = await Promise.all([
     listDocuments(db, scope, organisationId),

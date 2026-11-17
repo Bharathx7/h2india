@@ -90,11 +90,25 @@ export const organisationGstins = core.table(
     portalStatus: text("portal_status").notNull().default("Pending"),
     legalName: text("legal_name"),
     checkedAt: utc("checked_at"),
-    /** Orders are billed to the default GSTIN unless the buyer chooses another (574:638). */
+    /**
+     * The company's GSTIN (founder QC, 17 Nov 2026: one GSTIN per company). Every live company has exactly one
+     * default, unretired GSTIN.
+     */
     isDefault: boolean("is_default").notNull().default(false),
+    /**
+     * A GSTIN the company no longer uses (founder QC, 17 Nov 2026): replaced, or an extra from before one-per-company.
+     * Kept so old quotes and orders still show what they were issued under; never listed or chosen again.
+     */
+    retiredAt: utc("retired_at"),
     ...timestamps,
   },
-  (t) => [index("organisation_gstins_organisation_idx").on(t.organisationId)],
+  (t) => [
+    index("organisation_gstins_organisation_idx").on(t.organisationId),
+    // One GSTIN per company (A189): the database refuses a second one that isn't retired.
+    uniqueIndex("organisation_gstins_one_per_company")
+      .on(t.organisationId)
+      .where(sql`${t.retiredAt} is null`),
+  ],
 );
 
 /** A person in a company. Roles and order limits are refined in step 3.4. */

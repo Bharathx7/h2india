@@ -150,11 +150,11 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
 }
 
 export function BillingStep({ v, organisationId }: { v: CheckoutView; organisationId: string }) {
-  const [gstinId, setGstinId] = useState(v.choices.billingGstinId ?? "");
+  // The company's GSTIN (A189), when it is verified: the only one an order can be billed to.
+  const gstinId = v.choices.billingGstinId ?? (v.gstins[0]?.active ? v.gstins[0].id : "");
   const [po, setPo] = useState(v.choices.poNumber ?? "");
   const uploads = useUploads("order_document", { organisationId, max: 1 });
   const file = uploads.items[0];
-  const site = v.sites.find((x) => x.id === v.choices.deliverySiteId);
   const s = useStep();
   return (
     <>
@@ -177,27 +177,15 @@ export function BillingStep({ v, organisationId }: { v: CheckoutView; organisati
           <FormField
             label="GSTIN on this invoice"
             required
-            helper={
-              site?.state
-                ? `Matches your ${site.name} in ${site.state}. Pick another GSTIN only if this order belongs to another state's registration.`
-                : undefined
-            }
+            helper="Your company's GSTIN. To change it, contact H2 Economy."
             error={s.problem?.fields.billingGstinId}
           >
-            <Select
-              value={gstinId}
-              onChange={(e) => {
-                setGstinId(e.target.value);
-              }}
-            >
-              <option value="">Choose a GSTIN</option>
-              {v.gstins.map((g) => (
-                <option key={g.id} value={g.id} disabled={!g.active}>
-                  {g.gstin} · {g.state}
-                  {g.active ? "" : " (not verified)"}
-                </option>
-              ))}
-            </Select>
+            {/* One GSTIN per company (founder QC, 17 Nov 2026, A189): the company's, shown, not chosen. */}
+            <p className="flex min-h-11.5 items-center rounded-control bg-subtle px-4 type-body text-primary">
+              {v.gstins[0]
+                ? `${v.gstins[0].gstin} · ${v.gstins[0].state}${v.gstins[0].active ? "" : " (not verified yet: orders wait until it is)"}`
+                : "Add your company GSTIN in Company settings first"}
+            </p>
           </FormField>
           <FormField label="Purchase order number" helper="Optional. Printed on the GST invoice.">
             <Input

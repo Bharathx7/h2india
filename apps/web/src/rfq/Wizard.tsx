@@ -709,21 +709,13 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
                 </Field>
               </div>
               {setup.buyer ? (
+                // One GSTIN per company (founder QC, 17 Nov 2026, A189): the company's, shown, not chosen.
                 <Field label="Billing GSTIN" required error={errors.gstinId}>
-                  <Select
-                    value={s.gstinId}
-                    invalid={Boolean(errors.gstinId)}
-                    onChange={(e) => {
-                      set({ gstinId: e.target.value });
-                    }}
-                  >
-                    <option value="">Choose</option>
-                    {setup.gstins.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.label}
-                      </option>
-                    ))}
-                  </Select>
+                  <p className="flex min-h-11.5 items-center rounded-control bg-subtle px-4 type-body text-primary">
+                    {setup.gstins.find((g) => g.id === s.gstinId)?.label ??
+                      setup.gstins[0]?.label ??
+                      "Add your company GSTIN in Company settings first"}
+                  </p>
                 </Field>
               ) : null}
             </>

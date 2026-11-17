@@ -127,6 +127,13 @@ describe.skipIf(!url)("companies and join requests", () => {
     });
   });
 
+  it("creates a company with one GSTIN only (founder QC, 17 Nov 2026, A189)", async () => {
+    const p = await person("Two Gstins");
+    await expect(
+      createCompany({ userId: p.id, kind: "buyer", gstins: [testGstin("27"), testGstin("24")] }),
+    ).rejects.toMatchObject({ code: "ONE_GSTIN" });
+  });
+
   it("runs a join request from asking to approval, and only that company's admin may answer", async () => {
     const owner = await person("Owner One");
     const { organisationId } = await createCompany({ userId: owner.id, kind: "buyer", gstins: [testGstin()] });

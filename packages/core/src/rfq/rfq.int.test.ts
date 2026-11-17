@@ -3,7 +3,8 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor, type Actor } from "../authz/actor";
 import { scopeFor } from "../authz/scope";
-import { removeGstin } from "../buyer/settings";
+import { changeGstinByOperator } from "../buyer/settings";
+import { gstinCheckChar } from "../companies/gstin";
 import { runDeadlines } from "../clocks/clocks";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
@@ -471,27 +472,25 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     const second = await draft([sup(1).org.id]);
     await expect(editSentRfq(h.db, admin, buyer.org.id, second, edit)).rejects.toThrow("Only an open RFQ");
   });
-  it("supplier QC: a quote is issued under one of the supplier's own verified GSTINs; the buyer sees which", async () => {
+  it("a quote is issued under the supplier's own GSTIN; the buyer sees which; a retired one stays on old quotes", async () => {
     const admin = await loadActor(h.db, buyer.admin.id);
     const id = await draft([sup(2).org.id]);
     // One supplier: sent straight away, unless moderation applies.
     if ((await submitRfq(h.db, admin, buyer.org.id, id)) === "In moderation") await approveRfq(h.db, moderator, id);
     const c = await loadActor(h.db, sup(2).admin.id);
     const tail = String(Date.now()).slice(-4);
-    const [main, other] = await h.db
+    // One GSTIN per company (A189).
+    const [main] = await h.db
       .insert(schema.organisationGstins)
-      .values([
-        {
-          organisationId: sup(2).org.id,
-          gstin: `27AAKCG${tail}M1Z3`,
-          stateCode: "27",
-          portalStatus: "Active",
-          isDefault: true,
-        },
-        { organisationId: sup(2).org.id, gstin: `33AAKCG${tail}M1Z9`, stateCode: "33", portalStatus: "Active" },
-      ])
+      .values({
+        organisationId: sup(2).org.id,
+        gstin: `27AAKCG${tail}M1Z3`,
+        stateCode: "27",
+        portalStatus: "Active",
+        isDefault: true,
+      })
       .returning();
-    // Left out: the verified default.
+    // Left out: the company's GSTIN.
     const saved = await saveQuoteDraft(h.db, c, sup(2).org.id, id, quoteInput(300_000_000n));
     const [v1] = await h.db.select().from(schema.quoteVersions).where(eq(schema.quoteVersions.id, saved.versionId));
     expect(v1?.supplierGstinId).toBe(main?.id);
@@ -504,7 +503,6 @@ describe.skipIf(!url)("RFQs and quotes", () => {
       await expect(
         saveQuoteDraft(h.db, c, sup(2).org.id, id, quoteInput(300_000_000n, { supplierGstinId: foreign.id })),
       ).rejects.toThrow("your company's GSTINs");
-    await saveQuoteDraft(h.db, c, sup(2).org.id, id, quoteInput(300_000_000n, { supplierGstinId: other?.id }));
     await sendQuote(h.db, c, sup(2).org.id, saved.quoteId);
     const seen = await quoteVersion(
       h.db,
@@ -512,8 +510,24 @@ describe.skipIf(!url)("RFQs and quotes", () => {
       { organisationId: buyer.org.id, side: "buyer" },
       saved.quoteId,
     );
-    expect(seen?.supplierGstin?.gstin).toBe(other?.gstin);
-    // A GSTIN a quote was issued under can't be removed.
-    await expect(removeGstin(h.db, c, sup(2).org.id, other?.id ?? "")).rejects.toThrow("quote was issued");
+    expect(seen?.supplierGstin?.gstin).toBe(main?.gstin);
+    // H2 Economy changes the supplier's GSTIN: the old one is retired, can't be chosen, and the sent quote keeps it.
+    const operator = { ...c, operator: new Set(["verification.edit"]) };
+    // A valid GSTIN: the change checks the format and the check character.
+    const next14 = `33AAKCG${tail}M1Z`;
+    await changeGstinByOperator(h.db, operator, sup(2).org.id, {
+      gstin: `${next14}${gstinCheckChar(next14)}`,
+      reason: "New registration in Tamil Nadu",
+    });
+    await expect(
+      saveQuoteDraft(h.db, c, sup(2).org.id, id, quoteInput(310_000_000n, { supplierGstinId: main?.id })),
+    ).rejects.toThrow("your company's GSTINs");
+    const still = await quoteVersion(
+      h.db,
+      scopeFor(admin),
+      { organisationId: buyer.org.id, side: "buyer" },
+      saved.quoteId,
+    );
+    expect(still?.supplierGstin?.gstin).toBe(main?.gstin);
   });
 });

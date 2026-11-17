@@ -61,7 +61,7 @@ export async function companyDetail(db: Executor, actor: Actor, organisationId: 
       db
         .select({ id: g.id, gstin: g.gstin, place: g.place, portalStatus: g.portalStatus, isDefault: g.isDefault })
         .from(g)
-        .where(and(inScope(scope, g.organisationId), eq(g.organisationId, organisationId)))
+        .where(and(inScope(scope, g.organisationId), eq(g.organisationId, organisationId), isNull(g.retiredAt)))
         .orderBy(desc(g.isDefault), g.gstin),
       db
         .select({

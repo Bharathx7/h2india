@@ -34,7 +34,6 @@ export function CompanyStep(props: {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string>();
   const [chosen, setChosen] = useState("");
-  const [addAll, setAddAll] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string>();
   const latest = useRef("");
@@ -280,33 +279,20 @@ export function CompanyStep(props: {
       {!without && result?.state === "several" ? (
         <>
           <p className="type-body text-body">
-            Your PAN {result.pan} has {result.gstins.length} GSTINs. Choose the one for this account, or add all of
-            them.
+            Your PAN {result.pan} has {result.gstins.length} GSTINs. Choose the one for this account: each company on H2
+            Economy has one GSTIN.
           </p>
           <RadioGroup
             aria-label="GSTIN for this account"
             value={chosen}
             onValueChange={setChosen}
-            disabled={addAll}
             className="flex flex-col gap-4"
           >
             {result.gstins.map((x) => (
               <Radio key={x.gstin} value={x.gstin} label={`${x.gstin} · ${x.stateName} · ${x.city}`} />
             ))}
           </RadioGroup>
-          <Checkbox
-            checked={addAll}
-            onCheckedChange={(v) => {
-              setAddAll(v === true);
-            }}
-            label={`Add all ${String(result.gstins.length)} GSTINs to this company`}
-          />
-          <Button
-            size="lg"
-            className="w-full"
-            disabled={busy}
-            onClick={() => void create(addAll ? result.gstins.map((x) => x.gstin) : [chosen], false)}
-          >
+          <Button size="lg" className="w-full" disabled={busy} onClick={() => void create([chosen], false)}>
             Continue
           </Button>
         </>

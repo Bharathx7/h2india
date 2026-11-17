@@ -498,6 +498,20 @@
       "when": 1794902355911,
       "tag": "0070_member_since",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1794908849057,
+      "tag": "0071_one_gstin_per_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1794908858756,
+      "tag": "0072_one_gstin_index",
+      "breakpoints": true
     }
   ]
 }

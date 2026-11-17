@@ -100,7 +100,8 @@ test("the GSTIN step reaches every designed state", async ({ page, isMobile }) =
   await typeGstin(page, GSTIN.several);
   await expect(page.getByText("Your PAN AAKCS4410N has 3 GSTINs.")).toBeVisible();
   await expect(page.getByRole("radio")).toHaveCount(3);
-  await expect(page.getByRole("checkbox", { name: "Add all 3 GSTINs to this company" })).toBeVisible();
+  // One GSTIN per company (founder QC, 17 Nov 2026, A189): choose one, no "add all".
+  await expect(page.getByRole("checkbox", { name: /Add all/ })).toHaveCount(0);
   await axe(page);
   // 6 · the portal is down: continue, checked in the background
   await typeGstin(page, freshGstin("AAKCP"));

@@ -1,11 +1,11 @@
 import { schema, type Database, type Executor, type ReceivingContact } from "@h2india/db";
-import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { inScope, type Scope } from "../authz/scope";
 import { enqueueGstinCheck } from "../companies/jobs";
-import { isValidGstin, normaliseGstin, panOf, stateOf } from "../companies/gstin";
+import { isValidGstin, normaliseGstin, stateOf } from "../companies/gstin";
 
 // Company settings for buyers (step 9.1; 574:8 to 577:729 and their dialogs). Company profile, GSTINs and delivery
 // sites, approval rules and security need company.manage (the buyer Admin); users and roles use team.manage
@@ -26,7 +26,12 @@ export async function companySettings(db: Executor, scope: Scope, organisationId
     .where(and(inScope(scope, schema.organisations.id), eq(schema.organisations.id, organisationId)));
   if (!org) return null;
   const [gstins, sites, settings, profile] = await Promise.all([
-    db.select().from(g).where(eq(g.organisationId, organisationId)).orderBy(asc(g.createdAt)),
+    // The company's GSTIN only (A189): retired ones stay for history and aren't listed.
+    db
+      .select()
+      .from(g)
+      .where(and(eq(g.organisationId, organisationId), isNull(g.retiredAt)))
+      .orderBy(asc(g.createdAt)),
     db
       .select()
       .from(ds)
@@ -98,7 +103,68 @@ export async function updateCompanyProfile(
 
 // ------------------------------------------------------------------------------------------------ GSTINs
 
-/** Add a GSTIN (580:8): same PAN as the company's; checked in the background through the GSTIN adapter (3.3). */
+// One GSTIN per company (founder QC, 17 Nov 2026, A189). A company adds its GSTIN once (Join usually does); while it is
+// still being checked the company admin may replace it; once verified (portal status Active) it is locked and only an
+// H2 Economy operator with verification.edit can change it, with a reason. A replaced GSTIN is retired, not deleted, so
+// quotes and orders issued under it keep showing it. The database allows one unretired GSTIN per company.
+
+const live = (organisationId: string) => and(eq(g.organisationId, organisationId), isNull(g.retiredAt));
+
+/** The company's GSTIN, or null before it has one. */
+export async function companyGstin(db: Executor, organisationId: string) {
+  const [row] = await db.select().from(g).where(live(organisationId));
+  return row ?? null;
+}
+
+async function checkNewGstin(db: Executor, value: string) {
+  const gstin = normaliseGstin(value);
+  if (!isValidGstin(gstin)) throw new BuyerSettingsError("A GSTIN has 15 characters, like 27AAKCG5521M1Z3");
+  const [taken] = await db.select({ id: g.id, retiredAt: g.retiredAt }).from(g).where(eq(g.gstin, gstin));
+  if (taken) throw new BuyerSettingsError("This GSTIN is already on H2 Economy");
+  return gstin;
+}
+
+/** Retire the current GSTIN and put the new one in its place, in one transaction; sites bill to the new one. */
+async function swapGstin(
+  db: Database,
+  organisationId: string,
+  current: typeof g.$inferSelect | null,
+  input: { gstin: string; place?: string },
+  log: { actorId: string | null; action: string; reason?: string; context?: RequestContext },
+) {
+  const row = await db.transaction(async (tx) => {
+    if (current) {
+      await tx.update(g).set({ retiredAt: new Date(), isDefault: false }).where(eq(g.id, current.id));
+      await tx.update(ds).set({ gstinId: null }).where(eq(ds.gstinId, current.id));
+    }
+    const [added] = await tx
+      .insert(g)
+      .values({
+        organisationId,
+        gstin: input.gstin,
+        stateCode: input.gstin.slice(0, 2),
+        place: input.place?.trim() || stateOf(input.gstin),
+        isDefault: true,
+      })
+      .returning({ id: g.id });
+    await audit(tx, {
+      actorId: log.actorId,
+      action: log.action,
+      resourceType: "organisation_gstin",
+      resourceId: added?.id ?? "",
+      companyId: organisationId,
+      before: current ? { gstin: current.gstin, status: current.portalStatus } : null,
+      after: { gstin: input.gstin },
+      reason: log.reason ?? null,
+      context: log.context,
+    });
+    return added;
+  });
+  await enqueueGstinCheck(input.gstin);
+  return row;
+}
+
+/** Add the company's GSTIN (580:8), when it has none yet. Checked in the background through the GSTIN adapter (3.3). */
 export async function addGstin(
   db: Database,
   actor: Actor,
@@ -107,108 +173,83 @@ export async function addGstin(
   context?: RequestContext,
 ) {
   assertCan(actor, "company.manage", { organisationId });
-  const gstin = normaliseGstin(input.gstin);
-  if (!isValidGstin(gstin)) throw new BuyerSettingsError("A GSTIN has 15 characters, like 27AAKCG5521M1Z3");
-  const existing = await db.select().from(g).where(eq(g.organisationId, organisationId));
-  if (existing.some((x) => x.gstin === gstin)) throw new BuyerSettingsError("This GSTIN is already added");
-  const first = existing[0];
-  if (first && panOf(first.gstin) !== panOf(gstin))
-    throw new BuyerSettingsError("This GSTIN belongs to a different PAN. Add GSTINs of your own company only.");
-  const [taken] = await db.select({ id: g.id }).from(g).where(eq(g.gstin, gstin));
-  if (taken) throw new BuyerSettingsError("This GSTIN belongs to another company on H2 Economy");
-  const [row] = await db
-    .insert(g)
-    .values({
-      organisationId,
-      gstin,
-      stateCode: gstin.slice(0, 2),
-      place: input.place?.trim() || stateOf(gstin),
-      isDefault: existing.length === 0,
-    })
-    .returning({ id: g.id });
-  await audit(db, {
-    actorId: actor.userId,
-    action: "gstin.added",
-    resourceType: "organisation_gstin",
-    resourceId: row?.id ?? "",
-    companyId: organisationId,
-    after: { gstin },
-    context,
-  });
-  await enqueueGstinCheck(gstin);
-  return row;
-}
-
-export async function setDefaultGstin(
-  db: Database,
-  actor: Actor,
-  organisationId: string,
-  id: string,
-  context?: RequestContext,
-) {
-  assertCan(actor, "company.manage", { organisationId });
-  const [row] = await db
-    .select()
-    .from(g)
-    .where(and(eq(g.id, id), eq(g.organisationId, organisationId)));
-  if (!row) throw new BuyerSettingsError("No such GSTIN");
-  if (row.portalStatus !== "Active") throw new BuyerSettingsError("Only a verified GSTIN can be the default");
-  await db.transaction(async (tx) => {
-    await tx.update(g).set({ isDefault: false }).where(eq(g.organisationId, organisationId));
-    await tx.update(g).set({ isDefault: true }).where(eq(g.id, id));
-    await audit(tx, {
+  if (await companyGstin(db, organisationId))
+    throw new BuyerSettingsError(
+      "A company has one GSTIN. Replace it while it's being checked, or ask H2 Economy to change a verified one.",
+    );
+  const gstin = await checkNewGstin(db, input.gstin);
+  return swapGstin(
+    db,
+    organisationId,
+    null,
+    { gstin, place: input.place },
+    {
       actorId: actor.userId,
-      action: "gstin.default",
-      resourceType: "organisation_gstin",
-      resourceId: id,
-      companyId: organisationId,
+      action: "gstin.added",
       context,
-    });
-  });
+    },
+  );
 }
 
-export async function removeGstin(
+/** Correct the company's GSTIN while it is still being checked (not verified yet). */
+export async function replaceGstin(
   db: Database,
   actor: Actor,
   organisationId: string,
-  id: string,
+  input: { gstin: string; place?: string },
   context?: RequestContext,
 ) {
   assertCan(actor, "company.manage", { organisationId });
-  const [row] = await db
-    .select()
-    .from(g)
-    .where(and(eq(g.id, id), eq(g.organisationId, organisationId)));
-  if (!row) throw new BuyerSettingsError("No such GSTIN");
-  if (row.isDefault) throw new BuyerSettingsError("Choose another default GSTIN first");
-  const [used] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(ds)
-    .where(and(eq(ds.gstinId, id), isNull(ds.deletedAt)));
-  if ((used?.n ?? 0) > 0) throw new BuyerSettingsError("A delivery site bills to this GSTIN. Change the site first.");
-  // Supplier QC: a quote was issued under it, so its orders and invoices still need it.
-  const [quoted] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(schema.quoteVersions)
-    .where(eq(schema.quoteVersions.supplierGstinId, id));
-  if ((quoted?.n ?? 0) > 0)
-    throw new BuyerSettingsError("A quote was issued under this GSTIN, so it can't be removed.");
-  // Founder QC (17 Nov 2026): orders now record the GSTIN they're invoiced or billed under.
-  const [ordered] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(schema.orders)
-    .where(or(eq(schema.orders.supplierGstinId, id), eq(schema.orders.billingGstinId, id)));
-  if ((ordered?.n ?? 0) > 0) throw new BuyerSettingsError("An order uses this GSTIN, so it can't be removed.");
-  await db.delete(g).where(eq(g.id, id));
-  await audit(db, {
-    actorId: actor.userId,
-    action: "gstin.removed",
-    resourceType: "organisation_gstin",
-    resourceId: id,
-    companyId: organisationId,
-    before: { gstin: row.gstin },
-    context,
-  });
+  const current = await companyGstin(db, organisationId);
+  if (current?.portalStatus === "Active")
+    throw new BuyerSettingsError("Your GSTIN is verified and locked. To change it, contact H2 Economy.");
+  const gstin = await checkNewGstin(db, input.gstin);
+  return swapGstin(
+    db,
+    organisationId,
+    current,
+    { gstin, place: input.place },
+    {
+      actorId: actor.userId,
+      action: "gstin.replaced",
+      context,
+    },
+  );
+}
+
+/**
+ * An operator changes a company's GSTIN, verified or not (verification.edit), with a reason (A189). The old one is
+ * retired. Badges aren't touched here; verification staff review them as usual.
+ */
+export async function changeGstinByOperator(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  input: { gstin: string; place?: string; reason: string },
+  context?: RequestContext,
+) {
+  if (!actor.userId || !actor.operator.has("verification.edit")) throw new BuyerSettingsError("Not allowed");
+  const reason = input.reason.trim();
+  if (reason.length < 5) throw new BuyerSettingsError("Say why the GSTIN is changing");
+  const [org] = await db
+    .select({ id: schema.organisations.id })
+    .from(schema.organisations)
+    .where(eq(schema.organisations.id, organisationId));
+  if (!org) throw new BuyerSettingsError("No such company");
+  const current = await companyGstin(db, organisationId);
+  const gstin = await checkNewGstin(db, input.gstin);
+  return swapGstin(
+    db,
+    organisationId,
+    current,
+    { gstin, place: input.place },
+    {
+      actorId: actor.userId,
+      action: "gstin.changed_by_operator",
+      reason,
+      context,
+    },
+  );
 }
 
 // ------------------------------------------------------------------------------------------------ delivery sites
@@ -252,7 +293,7 @@ export async function saveDeliverySite(
     const [own] = await db
       .select({ id: g.id })
       .from(g)
-      .where(and(eq(g.id, input.gstinId), eq(g.organisationId, organisationId)));
+      .where(and(eq(g.id, input.gstinId), eq(g.organisationId, organisationId), isNull(g.retiredAt)));
     if (!own) throw new BuyerSettingsError("Choose one of your GSTINs");
   }
   const values = {

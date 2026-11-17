@@ -16,10 +16,9 @@ import {
   ListError,
   removeDeliverySite,
   removeFromList,
-  removeGstin,
+  replaceGstin,
   saveApprovalRules,
   saveDeliverySite,
-  setDefaultGstin,
   signOutSessions,
   updateCompanyProfile,
   type ProfileInput,
@@ -73,15 +72,11 @@ export async function addGstinAction(gstin: string, place: string) {
   const context = await requestContext();
   return run(() => addGstin(db, actor, org, { gstin, place }, context));
 }
-export async function defaultGstinAction(id: string) {
+/** Correct the company's GSTIN while it is still being checked (A189). */
+export async function replaceGstinAction(gstin: string, place: string) {
   const { db, actor, org } = await buyer();
   const context = await requestContext();
-  return run(() => setDefaultGstin(db, actor, org, id, context));
-}
-export async function removeGstinAction(id: string) {
-  const { db, actor, org } = await buyer();
-  const context = await requestContext();
-  return run(() => removeGstin(db, actor, org, id, context));
+  return run(() => replaceGstin(db, actor, org, { gstin, place }, context));
 }
 export async function saveSiteAction(input: SiteInput & { id?: string }) {
   const { db, actor, org } = await buyer();
