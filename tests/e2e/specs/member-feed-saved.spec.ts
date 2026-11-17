@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 7.2 DONE WHEN: the feed shows items from what the member follows, saving from a link lands in Saved items and
@@ -17,7 +17,7 @@ async function skipOnboarding(page: import("@playwright/test").Page) {
 }
 
 test("an empty feed points to follows, and topics can be followed and set to digest", async ({ page }) => {
-  await signInNew(page, newEmail("feed"));
+  await signInMember(page, newEmail("feed"));
   await skipOnboarding(page);
   await expect(page.getByText("Your feed is empty")).toBeVisible();
   await page.getByRole("link", { name: "Follow topics and companies" }).click();
@@ -32,7 +32,7 @@ test("an empty feed points to follows, and topics can be followed and set to dig
 });
 
 test("a save link that points at nothing says so and saves nothing", async ({ page }) => {
-  await signInNew(page, newEmail("saved"));
+  await signInMember(page, newEmail("saved"));
   await skipOnboarding(page);
   await page.goto("/member/saved?tender=no-such-tender");
   await expect(page.getByText("That item isn't available any more.")).toBeVisible();
@@ -42,7 +42,7 @@ test("a save link that points at nothing says so and saves nothing", async ({ pa
 
 test("saved items and follows work on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await signInNew(page, newEmail("saved-phone"));
+  await signInMember(page, newEmail("saved-phone"));
   await skipOnboarding(page);
   await page.goto("/member/saved?state=loading");
   await expect(page.getByRole("heading", { name: "Saved items" })).toBeVisible();

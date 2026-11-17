@@ -32,7 +32,7 @@ export default async function SavedPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
-  const userId = await requireMember("/member/saved");
+  const userId = await requireMember("/member/saved", sp);
   const forced = forcedState(sp.state);
   const pendingType = LINK_TYPES.find((t) => sp[t]);
   const all = await listSaved(getDb(), userId);

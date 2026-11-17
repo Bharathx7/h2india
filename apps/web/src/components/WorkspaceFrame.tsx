@@ -45,6 +45,8 @@ export function WorkspaceFrame(props: {
   home: string;
   bell: { unread: number; items: Row[] };
   action?: ReactNode;
+  /** Another workspace for this person in the profile menu (founder QC, 17 Nov 2026). */
+  switchTo?: { label: string; href: string } | null;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -87,6 +89,7 @@ export function WorkspaceFrame(props: {
       }
       searchLinks={staff ? adminSearch : undefined}
       action={props.action}
+      switchTo={props.switchTo}
       profileHref="/account"
       logoutHref="/sign-out"
       homeHref="/"

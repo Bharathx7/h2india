@@ -5,6 +5,8 @@ import Link from "next/link";
 import { companies } from "@/directory/data";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { needsMembership } from "@/directory/gate";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // The ecosystem map (756:13075), step 6.6: every listed organisation by state. Tiles wait for M7; the map's place shows
 // the state-bubble stand-in (A176) until M7, with the list by state as its keyboard alternative (A76).
@@ -16,6 +18,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function EcosystemMap() {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const result = filterDirectory(await companies(), parseDirectory({}));
   return (
     <main id="main" className={cx(wrap, "flex flex-col gap-6 py-8 pb-16")}>

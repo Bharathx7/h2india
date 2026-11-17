@@ -4,6 +4,7 @@ import { parseServerEnv } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { hasOperatorRole } from "@h2india/core/authz";
 import { joinProfile, membershipsOf } from "@h2india/core/companies";
+import { isMember, memberJoinHref } from "@h2india/core/members";
 import { ACCOUNT_KINDS, landingAfterSignIn, safeReturnPath, siteSignIn, type AccountKind } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
@@ -47,6 +48,13 @@ export async function whereNext(next: string, audience?: AccountKind): Promise<s
   if (!page) {
     if (!profile?.profileType) return "/join";
     return has ? back : "/join";
+  }
+  // The member page and a buyer or supplier (founder QC, 17 Nov 2026): one who joined as a member signs in to the
+  // member area; one who hasn't goes to Join as member (one click, same account), then on to where they were going.
+  // Before, they landed on their own dashboard with a note to create a separate member account.
+  if (page === "member" && has !== "member" && has !== null) {
+    const to = landingAfterSignIn("member", "member", back).to;
+    return (await isMember(getDb(), session.user.id)) ? to : memberJoinHref(to);
   }
   // Staff who use a public page go where they were going.
   if (!has && (await hasOperatorRole(getDb(), session.user.id))) return back;

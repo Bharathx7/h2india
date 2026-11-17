@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { enterCode, latestCode, requestCode } from "./sign-in";
+import { enterCode, latestCode, requestCode, withDb } from "./sign-in";
 
 // Helpers for the Join flow (step 3.3). SMS and emails are read from Mailpit (MAILPIT_URL).
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
@@ -110,6 +110,27 @@ export async function signInNew(page: Page, email: string): Promise<void> {
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible({ timeout: 15_000 });
+}
+
+/**
+ * Makes an account a member, as finishing Join as a member does (founder QC, 17 Nov 2026: the Directory and the member
+ * area are for members). `as` keeps a buyer or supplier profile and switches membership on instead.
+ */
+export async function makeMember(email: string, as: "member" | "buyer-member" = "member"): Promise<void> {
+  await withDb((db) =>
+    db.query(
+      as === "member"
+        ? `UPDATE core.users SET profile_type = coalesce(profile_type, 'member') WHERE email = $1`
+        : `UPDATE core.users SET profile_type = coalesce(profile_type, 'buyer'), member_since = now() WHERE email = $1`,
+      [email.trim().toLowerCase()],
+    ),
+  );
+}
+
+/** Signs a brand-new person in and makes them a member, for tests of member features. */
+export async function signInMember(page: Page, email: string): Promise<void> {
+  await signInNew(page, email);
+  await makeMember(email);
 }
 
 /** Join steps 1 to 4 for a signed-in person creating a new buyer or supplier company. */

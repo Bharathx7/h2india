@@ -38,7 +38,7 @@ export default async function AlertsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
-  const userId = await requireMember("/member/alerts");
+  const userId = await requireMember("/member/alerts", sp);
   const db = getDb();
   const now = new Date();
   const forced = forcedState(sp.state);

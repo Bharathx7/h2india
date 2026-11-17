@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Member Sign-in and security and Join a company (founder QC, 17 Nov 2026): both menu items led to "not found".
@@ -10,7 +10,7 @@ test.beforeEach(async ({ context }, info) => {
 
 test("Sign-in and security shows how the member signs in and this device", async ({ page }) => {
   const email = newEmail("member-security");
-  await signInNew(page, email);
+  await signInMember(page, email);
   await page.goto("/member/security");
   await expect(page.getByRole("heading", { level: 1, name: "Sign-in and security" })).toBeVisible();
   await expect(page.getByRole("region", { name: "How you sign in" }).getByText(email).first()).toBeVisible();
@@ -21,7 +21,7 @@ test("Sign-in and security shows how the member signs in and this device", async
 });
 
 test("Join a company searches companies and explains when none match", async ({ page }) => {
-  await signInNew(page, newEmail("member-join"));
+  await signInMember(page, newEmail("member-join"));
   await page.goto("/member/join-company");
   await expect(page.getByRole("heading", { level: 1, name: "Join a company" })).toBeVisible();
   await page.getByLabel("Company name or GSTIN").fill("zz-no-such-company-anywhere");
@@ -30,7 +30,7 @@ test("Join a company searches companies and explains when none match", async ({ 
 
 test("the member menu's Sign-in and security and Join a company open real pages", async ({ page, isMobile }) => {
   test.skip(isMobile, "the desktop sidebar");
-  await signInNew(page, newEmail("member-menu"));
+  await signInMember(page, newEmail("member-menu"));
   await page.goto("/member/saved");
   for (const [name, heading] of [
     ["Sign-in and security", "Sign-in and security"],

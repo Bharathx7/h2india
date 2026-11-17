@@ -2,6 +2,7 @@ import config from "@payload-config";
 import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { identityOf } from "@h2india/core/authz";
+import { isMemberFacts, MEMBER_JOIN_PATH, membershipFacts } from "@h2india/core/members";
 import { unreadCount } from "@h2india/core/notify";
 import type { SiteUser } from "@h2india/ui";
 import { getPayload } from "payload";
@@ -19,13 +20,25 @@ export interface Viewer {
   firstName: string;
   email: string;
   operator: boolean;
+  /**
+   * May open member features: the Directory, the member area, Follow, Save and alerts (founder QC, 17 Nov 2026).
+   * Members, buyers and suppliers who joined as members, and staff.
+   */
+  member: boolean;
 }
 
 export const siteViewer = cache(async (): Promise<Viewer | null> => {
   const session = await getSession().catch(() => null);
   if (!session) return null;
   const db = getDb();
-  const [who, unread] = await Promise.all([identityOf(db, session.user.id), unreadCount(db, session.user.id)]);
+  const [who, unread, facts] = await Promise.all([
+    identityOf(db, session.user.id),
+    unreadCount(db, session.user.id),
+    membershipFacts(db, session.user.id),
+  ]);
+  const joined = isMemberFacts(facts);
+  // A buyer or supplier: the member area if they joined, otherwise the way to join (founder QC, 17 Nov 2026).
+  const company = who.area === "buyer" || who.area === "supplier";
   const name = who.name || who.email || "You";
   const words = name.split(/\s+/).filter(Boolean);
   const initials =
@@ -39,14 +52,20 @@ export const siteViewer = cache(async (): Promise<Viewer | null> => {
       name,
       initials,
       organisation: who.company ?? (who.area === "admin" ? "H2 Economy" : ""),
-      workspace: WORKSPACE[who.area] ?? "Member",
+      workspace: `${WORKSPACE[who.area] ?? "Member"}${company && joined ? " · Member" : ""}`,
       workspaceHref: `/${who.area}`,
       unread,
+      extra: company
+        ? joined
+          ? { label: "Member area", href: "/member" }
+          : { label: "Join as member", href: MEMBER_JOIN_PATH }
+        : undefined,
     },
     // Someone who hasn't joined yet has no name: the greeting is then just "For you".
     firstName: who.name ? (who.name.split(/\s+/)[0] ?? "") : "",
     email: who.email.toLowerCase(),
     operator: who.area === "admin",
+    member: facts.operator || joined,
   };
 });
 

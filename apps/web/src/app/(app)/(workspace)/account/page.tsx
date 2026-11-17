@@ -56,6 +56,7 @@ export default async function AccountPage() {
       user={shell.user}
       home={shell.home}
       bell={{ unread, items: toRows(items) }}
+      switchTo={shell.switchTo}
     >
       <div className="flex flex-col gap-6 p-4 md:p-8">
         <header className="flex flex-col gap-4 rounded-card border border-default bg-page p-5 sm:flex-row sm:items-center">

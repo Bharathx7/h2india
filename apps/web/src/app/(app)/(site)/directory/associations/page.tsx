@@ -8,6 +8,8 @@ import { associations } from "@/directory/data";
 import { forcedState } from "@/lib/dev-state";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { needsMembership } from "@/directory/gate";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // Associations and bodies (498:8; phones 499:1430), step 6.6: kept by editors in the CMS.
 export const metadata: Metadata = {
@@ -22,6 +24,8 @@ export default async function AssociationsPage({
 }: {
   searchParams: Promise<{ kind?: string; state?: string; page?: string }>;
 }) {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const s = await searchParams;
   const forced = forcedState(s.state);
   const list = await associations();

@@ -166,6 +166,16 @@ function Desktop({
                   >
                     Dashboard
                   </MenuItem>
+                  {user.extra ? (
+                    <MenuItem
+                      icon="users"
+                      onSelect={() => {
+                        if (user.extra) window.location.assign(user.extra.href);
+                      }}
+                    >
+                      {user.extra.label}
+                    </MenuItem>
+                  ) : null}
                   <MenuDivider />
                   <MenuItem
                     icon="log-out"
@@ -284,6 +294,15 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
                   <Icon name="layout-dashboard" size={18} />
                   Dashboard
                 </a>
+                {user.extra ? (
+                  <a
+                    href={user.extra.href}
+                    className="flex items-center gap-2 rounded-control py-2 type-label-lg text-primary"
+                  >
+                    <Icon name="users" size={18} />
+                    {user.extra.label}
+                  </a>
+                ) : null}
                 <a
                   href={links.notifications}
                   className="flex items-center justify-between rounded-control py-2 type-label-lg text-primary"

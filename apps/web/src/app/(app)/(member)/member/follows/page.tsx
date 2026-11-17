@@ -30,7 +30,7 @@ export default async function FollowsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
-  const userId = await requireMember("/member/follows");
+  const userId = await requireMember("/member/follows", sp);
   const linkType = (["company", "topic", "state"] as const).find((t) => sp[t]);
   const follows = await listFollows(getDb(), userId);
   const tab = TABS.find((t) => t.value === sp.tab) ?? TABS[0];

@@ -10,6 +10,7 @@ import {
   type ProfileInput,
 } from "@h2india/core/members";
 import { revalidatePath } from "next/cache";
+import { mayUseMember } from "@h2india/core/members";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 
@@ -18,6 +19,8 @@ import { requestContext } from "@/server/request-context";
 async function me() {
   const s = await getSession();
   if (!s) throw new Error("Sign in again.");
+  // Members only (founder QC, 17 Nov 2026): buyers and suppliers join as members first.
+  if (!(await mayUseMember(getDb(), s.user.id))) throw new Error("Join as a member to use this.");
   return s.user.id;
 }
 

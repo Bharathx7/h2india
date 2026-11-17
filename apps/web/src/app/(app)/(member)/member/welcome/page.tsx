@@ -2,6 +2,7 @@ import { getDb } from "@h2india/core";
 import { memberProfile } from "@h2india/core/members";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { requireMember } from "@/member/shell";
 import { getSession } from "@/server/auth";
 import { Onboarding } from "./Onboarding";
 
@@ -10,11 +11,12 @@ export const metadata: Metadata = { title: "Welcome · H2 Economy", robots: { in
 export const dynamic = "force-dynamic";
 
 export default async function WelcomePage() {
+  // Members only (founder QC, 17 Nov 2026), like the rest of the member area.
+  const userId = await requireMember("/member/welcome");
   const session = await getSession();
-  if (!session) redirect("/member/sign-in?next=/member/welcome");
-  const p = await memberProfile(getDb(), session.user.id);
+  const p = await memberProfile(getDb(), userId);
   if (p?.onboardedAt) redirect("/member");
-  const firstName = (session.user.name || "").split(/\s+/)[0] ?? "";
+  const firstName = (session?.user.name || "").split(/\s+/)[0] ?? "";
   return (
     <Onboarding
       firstName={firstName}

@@ -53,6 +53,7 @@ export async function BuyerWorkspace({
       user={{ ...shell.user, role: page.buyer.legalName }}
       home="/buyer"
       bell={{ unread, items: toRows(bell) }}
+      switchTo={shell.switchTo}
       action={
         <Link href="/rfq/new" className={buttonClasses({})}>
           Request a quote

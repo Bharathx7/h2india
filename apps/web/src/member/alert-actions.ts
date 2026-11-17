@@ -3,6 +3,7 @@
 import { getDb } from "@h2india/core";
 import { deleteAlert, isAlertType, previewAlert, saveAlert, setAlertOn } from "@h2india/core/alerts";
 import { revalidatePath } from "next/cache";
+import { mayUseMember } from "@h2india/core/members";
 import { getSession } from "@/server/auth";
 
 // Alerts (step 7.3; 534:8, 534:587, 79:3425, 275:23289). Every action works on the signed-in person's own alerts.
@@ -32,6 +33,10 @@ export interface AlertForm {
 export async function saveAlertAction(form: AlertForm): Promise<{ ok: true } | { ok: false; error: string }> {
   const userId = await me();
   if (!isAlertType(form.type)) return { ok: false, error: "Choose what to be alerted about" };
+  // Founder QC (17 Nov 2026): tender, scheme, grant, job, news and event alerts are for members; a buyer's product
+  // alerts stay in the buyer workspace.
+  if (form.type !== "products" && !(await mayUseMember(getDb(), userId)))
+    return { ok: false, error: "Join as a member to create this alert." };
   if (!form.channels.length) return { ok: false, error: "Choose at least one way to reach you" };
   try {
     await saveAlert(getDb(), userId, {

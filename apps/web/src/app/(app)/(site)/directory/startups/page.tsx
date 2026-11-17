@@ -8,6 +8,8 @@ import { companies } from "@/directory/data";
 import { forcedState } from "@/lib/dev-state";
 import { wrap } from "@/marketplace/parts";
 import { Crumbs } from "@/opportunities/parts";
+import { needsMembership } from "@/directory/gate";
+import { MembersOnly } from "@/directory/MembersOnly";
 
 // Start-up spotlight (497:7060; phones 499:515), step 6.6: company profiles typed Start-up, newest first. The weekly
 // featured story joins when editors start the series (A135); "Apply to be featured" goes to Contact.
@@ -23,6 +25,8 @@ export default async function StartupsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Founder QC (17 Nov 2026): Directory browsing is for members; buyers and suppliers join first.
+  if (await needsMembership()) return <MembersOnly />;
   const params = await searchParams;
   const forced = forcedState(typeof params.ui === "string" ? params.ui : undefined);
   const result = filterDirectory(await companies(), parseDirectory({ ...params, type: "startup", ui: undefined }));

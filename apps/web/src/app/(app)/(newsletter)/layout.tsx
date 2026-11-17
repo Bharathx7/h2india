@@ -7,7 +7,7 @@ import { siteViewer } from "@/server/site";
 export default async function NewsletterLayout({ children }: { children: ReactNode }) {
   const viewer = await siteViewer();
   return (
-    <SiteChrome user={viewer?.user ?? null} operator={viewer?.operator ?? false}>
+    <SiteChrome user={viewer?.user ?? null} operator={viewer?.operator ?? false} member={viewer?.member ?? false}>
       {children}
     </SiteChrome>
   );

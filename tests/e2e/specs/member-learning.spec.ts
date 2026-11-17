@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 7.5 DONE WHEN: reading to the end of a chapter updates progress on both pages; the three member pages show
@@ -11,7 +11,7 @@ test.beforeEach(async ({ context }, info) => {
 });
 
 async function member(page: import("@playwright/test").Page, name: string) {
-  await signInNew(page, newEmail(name));
+  await signInMember(page, newEmail(name));
   await page.goto("/member/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/member$/);

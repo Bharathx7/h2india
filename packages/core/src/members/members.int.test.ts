@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { makeUser, useTestEnv } from "../testing/factory";
 import { createAlert, listAlerts } from "./alerts";
+import { isMember, joinAsMember, mayUseMember, MembershipError } from "./membership";
 import {
   completeOnboarding,
   follow,
@@ -42,6 +43,23 @@ describe.skipIf(!url)("member onboarding and follows", () => {
   });
   afterAll(async () => {
     await h.pool.end();
+  });
+
+  it("a buyer joins as a member once, audited; someone who hasn't finished Join can't (founder QC, 17 Nov 2026)", async () => {
+    const buyer = await makeUser(h.db, "Kavya");
+    expect(await isMember(h.db, buyer.id)).toBe(false);
+    expect(await mayUseMember(h.db, buyer.id)).toBe(false);
+    await joinAsMember(h.db, buyer.id);
+    await joinAsMember(h.db, buyer.id);
+    expect(await isMember(h.db, buyer.id)).toBe(true);
+    const audits = await h.db.select().from(schema.auditLog).where(eq(schema.auditLog.resourceId, buyer.id));
+    expect(audits.filter((a) => a.action === "member.joined")).toHaveLength(1);
+    const [row] = await h.db.select().from(schema.users).where(eq(schema.users.id, buyer.id));
+    expect(row?.profileType).toBe("buyer");
+
+    const unfinished = await makeUser(h.db, "Ishaan");
+    await h.db.update(schema.users).set({ profileType: null }).where(eq(schema.users.id, unfinished.id));
+    await expect(joinAsMember(h.db, unfinished.id)).rejects.toBeInstanceOf(MembershipError);
   });
 
   it("stores persona, topics and states, follows them, and isn't offered again", async () => {

@@ -165,6 +165,8 @@ export interface WorkspaceShellProps {
   notifications?: ReactNode;
   profileHref: string;
   settingsHref?: string;
+  /** Another workspace for the same person, in the profile menu (Member area, Buyer workspace, Join as member). */
+  switchTo?: { label: string; href: string } | null;
   logoutHref: string;
   homeHref?: string;
   /** The top bar's main button, for example the supplier's Add product (584:961). */
@@ -183,6 +185,7 @@ export function WorkspaceShell({
   notifications,
   profileHref,
   settingsHref,
+  switchTo,
   logoutHref,
   homeHref = "/",
   action,
@@ -268,6 +271,16 @@ export function WorkspaceShell({
                   >
                     Profile
                   </MenuItem>
+                  {switchTo ? (
+                    <MenuItem
+                      icon="users"
+                      onSelect={() => {
+                        window.location.assign(switchTo.href);
+                      }}
+                    >
+                      {switchTo.label}
+                    </MenuItem>
+                  ) : null}
                   {settingsHref ? (
                     <MenuItem
                       icon="sliders"

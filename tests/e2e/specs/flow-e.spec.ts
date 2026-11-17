@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "../fixtures";
+import { makeMember } from "../helpers/join";
 import { enterCode, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
 // Flow E (Figma page 18, playbook step 7.6): enthusiast to subscriber and member. Explainer article → glossary term
@@ -64,8 +65,9 @@ test("flow E: a reader becomes a subscriber and a member", async ({ page }) => {
   // 6 Member onboarding: the same address becomes a member.
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  // A new person goes on to Join H2 Economy, as in signInNew().
+  // A new person goes on to Join H2 Economy, as in signInNew(), and joins as a member.
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
+  await makeMember(email);
   await page.goto("/member");
   await expect(page).toHaveURL(/\/member$/);
   await page.goto("/member/welcome");

@@ -59,6 +59,7 @@ export async function SupplierShell({
       user={{ ...shell.user, role: page.supplier.tradeName }}
       home="/supplier"
       bell={{ unread, items: toRows(bell) }}
+      switchTo={shell.switchTo}
       action={
         page.supplier.seat.permissions.has("product.manage") ? (
           <Link href="/supplier/products/new" className={buttonClasses({})}>

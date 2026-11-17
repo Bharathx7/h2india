@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp } from "../helpers/sign-in";
 
 // Step 7.1 DONE WHEN: a new member completes onboarding and their choices appear on the home; skipping leaves a usable
@@ -11,7 +11,7 @@ test.beforeEach(async ({ context }, info) => {
 });
 
 test("a new member picks a persona, topics and states, and lands on the home", async ({ page }) => {
-  await signInNew(page, newEmail("onboard"));
+  await signInMember(page, newEmail("onboard"));
   // Founder QC (17 Nov 2026): the home opens straight away; onboarding is offered, not forced.
   await page.goto("/member");
   await expect(page).toHaveURL(/\/member$/);
@@ -34,7 +34,7 @@ test("a new member picks a persona, topics and states, and lands on the home", a
 });
 
 test("skipping leaves a usable, empty home", async ({ page }) => {
-  await signInNew(page, newEmail("skip"));
+  await signInMember(page, newEmail("skip"));
   await page.goto("/member/welcome");
   await page.getByRole("button", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/member$/);

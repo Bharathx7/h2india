@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/server/auth";
+import { requireMember } from "@/member/shell";
 import { MemberHome } from "./MemberHome";
 
 // The member home (step 7.2). Founder QC (17 Nov 2026): no steps before the dashboard; onboarding (step 7.1,
@@ -7,7 +6,6 @@ import { MemberHome } from "./MemberHome";
 export const dynamic = "force-dynamic";
 
 export default async function MemberPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
-  const session = await getSession();
-  if (!session) redirect("/member/sign-in");
-  return <MemberHome userId={session.user.id} searchParams={searchParams} />;
+  const userId = await requireMember("/member");
+  return <MemberHome userId={userId} searchParams={searchParams} />;
 }

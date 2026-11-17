@@ -1,6 +1,6 @@
 import { expect, test } from "../fixtures";
 import { cms, signInOperator } from "../helpers/cms";
-import { signInNew } from "../helpers/join";
+import { signInMember } from "../helpers/join";
 import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 import { expectStates } from "../helpers/states";
 
@@ -32,7 +32,7 @@ test("the list and the map show the same filtered companies", async ({ page }) =
   const tag = Math.random().toString(36).slice(2, 8);
   await company(`${tag}a`, "Kerala", "Manufacturer", true);
   await company(`${tag}b`, "Kerala", "Research institute", false);
-  await signInNew(page, newEmail("dir-list"));
+  await signInMember(page, newEmail("dir-list"));
   await page.goto(`/directory/companies?q=${tag}&state=Kerala`);
   await expect(page.getByRole("link", { name: /View profile of Dir/ })).toHaveCount(2);
   await page.goto(`/directory/companies?q=${tag}&state=Kerala&type=research`);
@@ -108,12 +108,12 @@ test("signed-out visitors are asked to sign in or join, and the menu has no Dire
 
 test("signed in, the Directory menu is back", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop-1440", "The section nav is desktop; the phone menu reads the same list");
-  await signInNew(page, newEmail("dir-menu"));
+  await signInMember(page, newEmail("dir-menu"));
   await page.goto("/news");
   await expect(page.getByRole("button", { name: "Directory" })).toBeVisible();
 });
 
 test("the directory has its designed states", async ({ page }) => {
-  await signInNew(page, newEmail("dir-states"));
+  await signInMember(page, newEmail("dir-states"));
   await expectStates(page, "/directory/companies");
 });
