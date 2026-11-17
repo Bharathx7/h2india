@@ -66,7 +66,7 @@ export function SiteChrome({
           search.setOpen(true);
         }}
       />
-      <HeaderSearch search={search} />
+      <HeaderSearch search={search} canQuote={quote} />
       {children}
       <SiteFooter
         columns={columns}

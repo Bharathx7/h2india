@@ -73,11 +73,11 @@ describe("feature flags", () => {
   });
 });
 
-describe("operator passkey flag (step 12.1)", () => {
+describe("operator password flag (step 12.1, A183)", () => {
   it("is on in a production build unless switched off, and off in development", () => {
-    expect(readFlags({ NODE_ENV: "production" }).operatorPasskey).toBe(true);
-    expect(readFlags({ NODE_ENV: "production", FLAG_OPERATOR_PASSKEY: "false" }).operatorPasskey).toBe(false);
-    expect(readFlags({ NODE_ENV: "development" }).operatorPasskey).toBe(false);
-    expect(readFlags({ FLAG_OPERATOR_PASSKEY: "true" }).operatorPasskey).toBe(true);
+    expect(readFlags({ NODE_ENV: "production" }).operatorPassword).toBe(true);
+    expect(readFlags({ NODE_ENV: "production", FLAG_OPERATOR_PASSWORD: "false" }).operatorPassword).toBe(false);
+    expect(readFlags({ NODE_ENV: "development" }).operatorPassword).toBe(false);
+    expect(readFlags({ FLAG_OPERATOR_PASSWORD: "true" }).operatorPassword).toBe(true);
   });
 });

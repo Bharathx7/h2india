@@ -1,15 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "../fixtures";
-import {
-  addAuthenticator,
-  emailCount,
-  enterCode,
-  latestCode,
-  newEmail,
-  ownIp,
-  requestCode,
-  withDb,
-} from "../helpers/sign-in";
+import { emailCount, enterCode, latestCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
 
 // Step 3.2: Sign in (Figma 524:1773, 526:508), Enter code (524:1840), wrong code (524:1930), locked (524:2036),
 // the sign-in code email (671:428), and decisions A1 to A3.
@@ -23,22 +14,19 @@ async function axe(page: Page) {
   expect(results.violations.map((v) => `${v.id}: ${String(v.nodes.length)} × ${v.help}`)).toEqual([]);
 }
 
-test("a new user signs in with an email code, adds a passkey, signs out and signs back in with it", async ({
+test("a new user signs in with an email code, goes on to Join with no passkey offer, and signs out", async ({
   page,
   isMobile,
 }) => {
   test.skip(isMobile, "the full journey runs once, at desktop width");
-  await addAuthenticator(page);
   const email = newEmail("new-buyer");
 
-  // Decision A1: an email with no account still gets a code; the account is made when the code is entered,
-  // and the new person goes on to Join (step 3.3).
+  // Signing in never creates an account (public QC 2): requestCode() makes one as Join's confirm link would, and the
+  // person goes on to Join (step 3.3). Passkeys were removed on 17 Nov 2026 (A183): nothing is offered in between.
   await page.goto("/sign-in?next=/buyer");
   await enterCode(page, await requestCode(page, email));
-
-  await expect(page.getByRole("heading", { name: "Set up a passkey" })).toBeVisible();
-  await page.getByRole("button", { name: "Create passkey" }).click();
   await expect(page).toHaveURL(/\/join$/);
+  await expect(page.getByRole("heading", { name: "Set up a passkey" })).toHaveCount(0);
 
   const cookies = await page.context().cookies();
   const session = cookies.find((c) => c.name === "h2.session_token");
@@ -52,28 +40,6 @@ test("a new user signs in with an email code, adds a passkey, signs out and sign
   await page.goto("/sign-out");
   await expect(page).toHaveURL(/\/$/);
   expect((await page.context().cookies()).some((c) => c.name === "h2.session_token")).toBe(false);
-
-  // Back with only the passkey: no email needed.
-  await page.goto("/sign-in?next=/buyer");
-  await page.getByRole("button", { name: "Continue with passkey" }).click();
-  await expect(page).toHaveURL(/\/join$/);
-});
-
-test("Not now skips the passkey offer, and it is not offered again on this device", async ({ page, isMobile }) => {
-  test.skip(isMobile, "desktop only");
-  test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL to skip the 30-second resend wait");
-  await addAuthenticator(page);
-  const email = newEmail("later");
-  await page.goto("/sign-in?next=/member");
-  await enterCode(page, await requestCode(page, email));
-  await page.getByRole("button", { name: "Not now" }).click();
-  await expect(page).toHaveURL(/\/join$/);
-
-  await page.goto("/sign-out");
-  await withDb((db) => db.query("DELETE FROM core.sign_in_throttle WHERE key = $1", [`sign-in:gap:${email}`]));
-  await page.goto("/sign-in?next=/member");
-  await enterCode(page, await requestCode(page, email));
-  await expect(page).toHaveURL(/\/join$/);
 });
 
 test("a wrong code says how many tries are left; five pause sign-in for 15 minutes", async ({ page }) => {
@@ -130,7 +96,7 @@ test("an expired code says so, and Resend code sends a new one", async ({ page, 
   await page.getByRole("button", { name: "Resend code" }).click();
   const fresh = await latestCode(page, email, sentAfter, code);
   await enterCode(page, fresh);
-  await expect(page.getByRole("heading", { name: "Set up a passkey" })).toBeVisible();
+  await expect(page).toHaveURL(/\/join$/);
 });
 
 test("Resend code waits 30 seconds, on the screen and on the server", async ({ page, isMobile }) => {
@@ -157,7 +123,6 @@ test("after signing in you come back to the page you were on, but never to anoth
   const email = newEmail("return");
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  await page.getByRole("button", { name: "Not now" }).click();
   await expect(page).toHaveURL(/\/join$/);
   // A person who has finished Join (here a member) returns to where they started.
   await withDb(async (db) => {
@@ -196,8 +161,6 @@ test("the sign-in screens have no accessibility problems and work by keyboard", 
   await page.goto("/sign-in");
   await axe(page);
   await page.keyboard.press("Tab"); // logo
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Continue with passkey" })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByLabel("Work email")).toBeFocused();
   await page.keyboard.type(newEmail("keys"));

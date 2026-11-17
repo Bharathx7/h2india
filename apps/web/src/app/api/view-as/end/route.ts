@@ -3,6 +3,7 @@ import { endViewAs } from "@h2india/core/admin/users";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { operatorSession, VIEW_AS_COOKIE } from "@/server/auth";
+import { siteUrl } from "@/server/origin";
 import { requestContext } from "@/server/request-context";
 
 // POST /api/view-as/end: ends View as user (657:486) and returns the operator to the person's page in Users.
@@ -18,5 +19,5 @@ export async function POST(request: Request) {
   }
   jar.delete(VIEW_AS_COOKIE);
   jar.delete("h2_view_as_display");
-  return NextResponse.redirect(new URL(back, request.url), { status: 303 });
+  return NextResponse.redirect(siteUrl(back), { status: 303 });
 }

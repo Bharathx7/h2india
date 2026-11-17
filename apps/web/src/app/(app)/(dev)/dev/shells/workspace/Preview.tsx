@@ -27,8 +27,6 @@ export function WorkspacePreview({
       groups={groups}
       currentHref={current}
       user={user}
-      welcome={`Welcome, ${user.name.split(" ")[0] ?? ""}`}
-      helpHref="#help"
       profileHref="#profile"
       settingsHref="#settings"
       logoutHref="#logout"

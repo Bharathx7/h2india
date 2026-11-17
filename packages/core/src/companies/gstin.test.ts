@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normaliseMobile, shortCompanyName } from "./rules";
-import { gstinCheckChar, isValidGstin, normaliseGstin, panOf, stateOf } from "./gstin";
+import { gstinCheckChar, gstinLabel, isValidGstin, normaliseGstin, panOf, stateOf } from "./gstin";
 
 describe("GSTIN rules", () => {
   it("accepts a GSTIN with the right check character and state", () => {
@@ -40,5 +40,13 @@ describe("join helpers", () => {
   it("writes company names the way the screens do", () => {
     expect(shortCompanyName("Greenfield Mobility Solutions Private Limited")).toBe("Greenfield Mobility Solutions");
     expect(shortCompanyName("Greenfield Energy Systems LLP")).toBe("Greenfield Energy Systems");
+  });
+});
+
+describe("gstinLabel (founder QC, 17 Nov 2026)", () => {
+  it("adds the state from the first two digits, and is empty for none", () => {
+    expect(gstinLabel("27AAKCG5521M1Z9")).toBe("27AAKCG5521M1Z9 · Maharashtra");
+    expect(gstinLabel(null)).toBe("");
+    expect(gstinLabel("00AAKCG5521M1Z9")).toBe("00AAKCG5521M1Z9");
   });
 });

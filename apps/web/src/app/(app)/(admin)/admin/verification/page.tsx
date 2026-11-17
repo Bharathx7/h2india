@@ -20,12 +20,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { toRows } from "../../../(workspace)/notifications/rows";
 import { ClaimDecision } from "./ClaimDecision";
 import { DocumentDecision, GrantBadge, ReviewDecision, RevokeBadge, RunChecks } from "./DeskControls";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Verification desk (635:9; Revoke badge 636:436), step 8.2: documents, automated checks and expiry dates in one
 // place, and badges granted only from recorded evidence. Profile claims (step 6.7) follow below. Operators with
@@ -196,7 +197,7 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
 export default async function VerificationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; company?: string }>;
+  searchParams: Promise<{ tab?: string; company?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const session = await getSession();
@@ -214,14 +215,22 @@ export default async function VerificationPage({
     deskCounts(db, actor),
   ]);
   const canDecide = can(actor, "verification.edit");
-  const selected = sp.company && /^[0-9a-f-]{36}$/i.test(sp.company) ? sp.company : list[0]?.organisationId;
+  const paged = pageOf(list, pageRequest(sp));
+  const selected = sp.company && /^[0-9a-f-]{36}$/i.test(sp.company) ? sp.company : paged.rows[0]?.organisationId;
+  // Opening a company keeps the desk list on the same page.
+  const companyHref = (id: string) =>
+    `/admin/verification?${new URLSearchParams({
+      tab,
+      company: id,
+      ...(sp.page ? { page: String(paged.page) } : {}),
+      ...(sp.perPage ? { perPage: String(paged.perPage) } : {}),
+    }).toString()}`;
   return (
     <WorkspaceFrame
       area="admin"
-      groups={WORKSPACE_NAV.admin}
+      groups={shell.groups}
       current="/admin/verification"
       user={shell.user}
-      welcome="Verification"
       home="/admin"
       bell={{ unread, items: toRows(bell) }}
     >
@@ -249,37 +258,40 @@ export default async function VerificationPage({
         </nav>
         <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           {list.length ? (
-            <ul className="flex flex-col gap-3 self-start">
-              {list.map((r) => (
-                <li key={r.organisationId}>
-                  <Link
-                    href={`/admin/verification?tab=${tab}&company=${r.organisationId}`}
-                    aria-current={selected === r.organisationId ? "true" : undefined}
-                    className={cx(
-                      "flex flex-col gap-1 rounded-card border p-4",
-                      selected === r.organisationId ? "border-focus bg-mint" : "border-default bg-page",
-                    )}
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="type-label text-primary">{r.name}</span>
-                      <StatusBadge
-                        status={r.tag}
-                        tone={
-                          r.tag === "Expiring"
-                            ? "warning"
-                            : r.tag === "Revoked"
-                              ? "error"
-                              : r.tag === "Verified"
-                                ? "success"
-                                : "progress"
-                        }
-                      />
-                    </span>
-                    <span className="type-caption text-secondary">{r.line}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col gap-4 self-start">
+              <ul className="flex flex-col gap-3">
+                {paged.rows.map((r) => (
+                  <li key={r.organisationId}>
+                    <Link
+                      href={companyHref(r.organisationId)}
+                      aria-current={selected === r.organisationId ? "true" : undefined}
+                      className={cx(
+                        "flex flex-col gap-1 rounded-card border p-4",
+                        selected === r.organisationId ? "border-focus bg-mint" : "border-default bg-page",
+                      )}
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="type-label text-primary">{r.name}</span>
+                        <StatusBadge
+                          status={r.tag}
+                          tone={
+                            r.tag === "Expiring"
+                              ? "warning"
+                              : r.tag === "Revoked"
+                                ? "error"
+                                : r.tag === "Verified"
+                                  ? "success"
+                                  : "progress"
+                          }
+                        />
+                      </span>
+                      <span className="type-caption text-secondary">{r.line}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <ListPager paged={paged} query={pagingQuery(sp)} />
+            </div>
           ) : (
             <div className="rounded-card border border-default bg-page">
               <EmptyState title="Nothing here">Companies show here as they need a check.</EmptyState>

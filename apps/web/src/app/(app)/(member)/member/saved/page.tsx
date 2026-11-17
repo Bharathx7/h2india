@@ -3,8 +3,10 @@ import { listSaved } from "@h2india/core/members";
 import { cx, EmptyState, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ListPager } from "@/components/ListPager";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { RemoveSaved } from "@/member/controls";
 import { FromLink } from "@/member/FromLink";
 import { MemberShell, requireMember } from "@/member/shell";
@@ -42,6 +44,7 @@ export default async function SavedPage({
     .sort((a, b) =>
       sp.sort === "title" ? a.title.localeCompare(b.title) : b.createdAt.getTime() - a.createdAt.getTime(),
     );
+  const paged = pageOf(shown, pageRequest(sp));
   return (
     <MemberShell userId={userId} current="/member/saved">
       <FromLink kind="save" type={pendingType ?? null} value={pendingType ? (sp[pendingType] ?? "") : ""} />
@@ -104,7 +107,7 @@ export default async function SavedPage({
         }
       >
         <ul className="flex flex-col gap-3">
-          {shown.map((s) => (
+          {paged.rows.map((s) => (
             <li key={s.id} className="flex items-center gap-4 rounded-card border border-default bg-page p-4">
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 {s.meta ? <span className="type-eyebrow text-secondary">{s.meta}</span> : null}
@@ -119,6 +122,7 @@ export default async function SavedPage({
             </li>
           ))}
         </ul>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </MemberShell>
   );

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requestContext } from "@/server/request-context";
 import { supplierActor } from "./actor";
 
-// Payout bank account (step 8.6). Core checks payout_bank.change, the passkey step-up and writes the audit log.
+// Payout bank account (step 8.6). Core checks payout_bank.change, the Confirm it's you step-up and writes the audit log.
 
 type Result = { ok: true } | { ok: false; error: string };
 

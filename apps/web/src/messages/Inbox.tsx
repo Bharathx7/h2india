@@ -7,6 +7,8 @@ import Link from "next/link";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { Conversation } from "./Conversation";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Messages (572:8; phones 573:8 list and 573:467 conversation; states 573:571), step 9.7, for both buyers and
 // suppliers. The list and the open conversation share the page; on phones one shows at a time.
@@ -46,7 +48,7 @@ export async function Inbox({
   organisationId: string;
   ownName: string;
   base: string;
-  sp: { thread?: string; kind?: string; q?: string; state?: string };
+  sp: { thread?: string; kind?: string; q?: string; state?: string; page?: string; perPage?: string };
 }) {
   const db = getDb();
   const kind = FILTERS.find((f) => f.key === sp.kind)?.key || undefined;
@@ -56,9 +58,12 @@ export async function Inbox({
   const open = sp.thread ? await threadMessages(db, actor, sp.thread) : null;
   if (open) await markThreadRead(db, actor, open.thread.id);
   const current = open ? all.find((x) => x.id === open.thread.id) : undefined;
+  const paged = pageOf(threads, pageRequest(sp));
   const link = (p: Record<string, string | undefined>) => {
     const q = new URLSearchParams(
-      Object.entries({ kind, q: sp.q, ...p }).filter((e): e is [string, string] => Boolean(e[1])),
+      Object.entries({ kind, q: sp.q, page: sp.page, perPage: sp.perPage, ...p }).filter((e): e is [string, string] =>
+        Boolean(e[1]),
+      ),
     );
     const s = q.toString();
     return s ? `${base}?${s}` : base;
@@ -120,7 +125,7 @@ export async function Inbox({
                 {FILTERS.map((f) => (
                   <Link
                     key={f.key}
-                    href={link({ kind: f.key || undefined, thread: undefined })}
+                    href={link({ kind: f.key || undefined, thread: undefined, page: undefined })}
                     aria-current={(kind ?? "") === f.key ? "page" : undefined}
                     className={cx(
                       "inline-flex h-8 items-center rounded-pill border-[1.5px] px-3 type-label-sm",
@@ -133,39 +138,42 @@ export async function Inbox({
               </div>
             </div>
             {threads.length ? (
-              <ul className="flex flex-col divide-y divide-default overflow-y-auto">
-                {threads.map((x) => (
-                  <li key={x.id}>
-                    <Link
-                      href={link({ thread: x.id })}
-                      aria-current={x.id === open?.thread.id ? "page" : undefined}
-                      className={cx("flex gap-3 p-3 hover:bg-subtle", x.id === open?.thread.id ? "bg-mint" : "")}
-                    >
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-subtle type-label">
-                        {initials(x.with)}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex justify-between gap-2">
-                          <span className="truncate type-label">{x.with}</span>
-                          <span className="shrink-0 type-caption text-secondary">{when(x.lastAt)}</span>
+              <>
+                <ul className="flex flex-col divide-y divide-default overflow-y-auto">
+                  {paged.rows.map((x) => (
+                    <li key={x.id}>
+                      <Link
+                        href={link({ thread: x.id })}
+                        aria-current={x.id === open?.thread.id ? "page" : undefined}
+                        className={cx("flex gap-3 p-3 hover:bg-subtle", x.id === open?.thread.id ? "bg-mint" : "")}
+                      >
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-subtle type-label">
+                          {initials(x.with)}
                         </span>
-                        <span className="block type-mono text-secondary">
-                          {x.reference ?? (x.kind === "question" ? "Technical question" : "")}
+                        <span className="min-w-0 flex-1">
+                          <span className="flex justify-between gap-2">
+                            <span className="truncate type-label">{x.with}</span>
+                            <span className="shrink-0 type-caption text-secondary">{when(x.lastAt)}</span>
+                          </span>
+                          <span className="block type-mono text-secondary">
+                            {x.reference ?? (x.kind === "question" ? "Technical question" : "")}
+                          </span>
+                          <span className="flex justify-between gap-2">
+                            <span className="truncate type-body-sm">{x.last}</span>
+                            {x.unread ? (
+                              <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-inverse type-caption text-inverse">
+                                {x.unread}
+                                <span className="sr-only"> unread</span>
+                              </span>
+                            ) : null}
+                          </span>
                         </span>
-                        <span className="flex justify-between gap-2">
-                          <span className="truncate type-body-sm">{x.last}</span>
-                          {x.unread ? (
-                            <span className="flex size-5 shrink-0 items-center justify-center rounded-pill bg-inverse type-caption text-inverse">
-                              {x.unread}
-                              <span className="sr-only"> unread</span>
-                            </span>
-                          ) : null}
-                        </span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <ListPager paged={paged} query={pagingQuery(sp)} className="mt-auto border-t border-default p-3" />
+              </>
             ) : (
               <EmptyState kind="no-results" title={sp.q ? `No messages match "${sp.q}"` : "Nothing here"}>
                 Try the {side === "buyer" ? "supplier's" : "buyer's"} name or an RFQ or order number.

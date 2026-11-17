@@ -1,12 +1,12 @@
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { parseServerEnv, requireFlag } from "@h2india/config";
 import { schema, type Database, type Executor } from "@h2india/db";
-import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { VISITOR, type Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { cancelDeadline, completeDeadline, onDeadline, startClock } from "../clocks/clocks";
-import { passkeyConfirmedRecently } from "../sign-in/step-up";
+import { stepUpConfirmedRecently } from "../sign-in/step-up";
 import { nextReference } from "../reference";
 import { attachFile } from "../files/files";
 import { deliverSms } from "../notify/channels";
@@ -245,9 +245,22 @@ export async function placeCartOrder(
     }));
     const total = orderFigures(lines).totalPaise;
     const route = await approvalRoute(tx, organisationId, userId, total);
+    // The supplier's verified default GSTIN (founder QC, 17 Nov 2026): a cart has no quote to name one.
+    const [supplierGstin] = await tx
+      .select({ id: schema.organisationGstins.id })
+      .from(schema.organisationGstins)
+      .where(
+        and(
+          eq(schema.organisationGstins.organisationId, cart.supplierId),
+          eq(schema.organisationGstins.portalStatus, "Active"),
+        ),
+      )
+      .orderBy(desc(schema.organisationGstins.isDefault), asc(schema.organisationGstins.createdAt))
+      .limit(1);
     const order = await insertOrder(tx, {
       buyerOrganisationId: organisationId,
       supplierOrganisationId: cart.supplierId,
+      supplierGstinId: supplierGstin?.id ?? null,
       placedBy: userId,
       source: "cart",
       deliverySiteId: input.deliverySiteId,
@@ -345,6 +358,7 @@ export async function orderFromQuote(
     quoteVersionId: input.version.id,
     deliverySiteId: input.rfq.deliverySiteId,
     billingGstinId: input.rfq.billingGstinId,
+    supplierGstinId: input.version.supplierGstinId,
     receiverName,
     receiverMobile,
     paymentMethod: "bank_transfer",
@@ -374,7 +388,7 @@ export async function afterQuoteOrder(db: Database, order: OrderRow) {
 // ------------------------------------------------------------------------------------------------ approval (10.3)
 
 /**
- * Approve an order (806:14572). Needs a passkey confirmed in the last few minutes, never by the requester, by someone
+ * Approve an order (806:14572). Needs a confirmation code entered in the last few minutes, never by the requester, by someone
  * the route names for the next step. The last step moves the order to Pending acceptance and tells the supplier.
  * If the quote it came from has expired, approval is refused (G4 default: ask for a revised quote).
  */
@@ -394,7 +408,7 @@ export async function approveOrder(
   const order = await ownOrder(db, organisationId, orderId, "buyer");
   if (order.status !== "Awaiting approval") throw new OrderError("This order isn't waiting for approval");
   if (order.placedBy === userId) throw new OrderError("You can't approve your own order");
-  if (!(await passkeyConfirmedRecently(db, userId))) throw new OrderError("step_up");
+  if (!(await stepUpConfirmedRecently(db, userId))) throw new OrderError("step_up");
   if (order.quoteVersionId) {
     const [v] = await db.select().from(schema.quoteVersions).where(eq(schema.quoteVersions.id, order.quoteVersionId));
     if (v?.validUntil && v.validUntil <= now) throw new OrderError("quote_expired");

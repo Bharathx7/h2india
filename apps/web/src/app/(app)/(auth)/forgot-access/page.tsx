@@ -4,7 +4,8 @@ import Link from "next/link";
 import { AUTH_LINKS } from "@/lib/auth-links";
 import { AuthCard } from "../AuthCard";
 
-// Forgot access hub (Figma 528:9; 390: 528:766), step 3.5.
+// Forgot access hub (Figma 528:9; 390: 528:766), step 3.5. "I lost my passkey or device" was removed with passkeys
+// (17 Nov 2026, A183); staff who forget their password use Set or forgot your password on the staff sign-in.
 export const metadata: Metadata = { title: "Get back into your account · H2 Economy", robots: { index: false } };
 
 const PATHS: { href: string; icon: IconName; title: string; text: string }[] = [
@@ -13,12 +14,6 @@ const PATHS: { href: string; icon: IconName; title: string; text: string }[] = [
     icon: "mail",
     title: "I lost access to my email",
     text: "Verify with your mobile and your company admin, or send us a support request.",
-  },
-  {
-    href: "/forgot-access/passkey",
-    icon: "lock",
-    title: "I lost my passkey or device",
-    text: "Verify with email and mobile codes, then create a new passkey.",
   },
   {
     href: "/forgot-access/mobile",

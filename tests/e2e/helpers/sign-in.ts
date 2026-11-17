@@ -35,11 +35,11 @@ export async function latestCode(
   email: string,
   after = 0,
   previous?: string,
-  purpose: "sign-in" | "verification" | "any" = "any",
+  purpose: "sign-in" | "verification" | "confirmation" | "any" = "any",
 ): Promise<string> {
   const subject =
     purpose === "any"
-      ? /^(\d{6}) is your H2 Economy (?:sign-in|verification) code$/
+      ? /^(\d{6}) is your H2 Economy (?:sign-in|verification|confirmation) code$/
       : new RegExp(`^(\\d{6}) is your H2 Economy ${purpose} code$`);
   let found = "";
   await expect
@@ -87,20 +87,15 @@ export async function withDb<T>(run: (db: pg.Client) => Promise<T>): Promise<T> 
   }
 }
 
-/** Chrome's virtual authenticator: a device with a fingerprint reader, so passkeys work without hardware. */
-export async function addAuthenticator(page: Page): Promise<void> {
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send("WebAuthn.enable");
-  await cdp.send("WebAuthn.addVirtualAuthenticator", {
-    options: {
-      protocol: "ctap2",
-      transport: "internal",
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-      automaticPresenceSimulation: true,
-    },
-  });
+/**
+ * Confirm it's you (A183): asks for the code with the page's button, reads it from Mailpit and enters it. `button` is
+ * the action's label, for example "Confirm change" or "Approve".
+ */
+export async function confirmItsYou(page: Page, email: string, button: string): Promise<void> {
+  const sentAfter = Date.now() - 1000;
+  await page.getByRole("button", { name: button }).click();
+  await expect(page.getByRole("heading", { name: "Confirm it's you", level: 3 })).toBeVisible();
+  await enterCode(page, await latestCode(page, email, sentAfter, undefined, "confirmation"));
 }
 
 /** Sign in page: enter the email and ask for a code. Returns the code from the email. */

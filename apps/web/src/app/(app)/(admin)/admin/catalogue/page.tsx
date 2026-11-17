@@ -11,7 +11,6 @@ import { listNotifications, unreadCount } from "@h2india/core/notify";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { toRows } from "../../../(workspace)/notifications/rows";
@@ -79,10 +78,9 @@ export default async function CataloguePage({
   return (
     <WorkspaceFrame
       area="admin"
-      groups={WORKSPACE_NAV.admin}
+      groups={shell.groups}
       current="/admin/catalogue"
       user={shell.user}
-      welcome="Catalogue"
       home="/admin"
       bell={{ unread, items: toRows(bell) }}
     >

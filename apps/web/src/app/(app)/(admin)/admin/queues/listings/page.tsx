@@ -11,6 +11,8 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { QueueTabs } from "../QueueTabs";
 import { QueueTable, type QueueRow } from "./QueueTable";
 import { StorefrontDecision } from "./StorefrontDecision";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Queues · Listings (629:367), step 8.3: every new listing and listing change waiting for a decision, oldest first.
 // Age turns amber at the queueAmber clock and red at queueRed (System settings 707:793). The other queues are 11.2.
@@ -30,7 +32,7 @@ const hours = (d: { hours?: number; days?: number; workingDays?: number }) =>
 export default async function ListingsQueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; q?: string; kind?: string }>;
+  searchParams: Promise<{ view?: string; q?: string; kind?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("queues.view", "/admin/queues/listings");
@@ -62,6 +64,7 @@ export default async function ListingsQueuePage({
       };
     })
     .filter((r) => view !== "late" || r.ageTone === "error");
+  const paged = pageOf(lines, pageRequest(sp));
   const canDecide = can(actor, "queues.edit");
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
@@ -112,7 +115,11 @@ export default async function ListingsQueuePage({
         </select>
       </form>
       {lines.length ? (
-        <QueueTable rows={lines} canDecide={canDecide} />
+        <div className="flex flex-col gap-4">
+          {/* Keyed by page so a selection never carries over to rows that aren't shown. */}
+          <QueueTable key={`${String(paged.page)}-${String(paged.perPage)}`} rows={paged.rows} canDecide={canDecide} />
+          <ListPager paged={paged} query={pagingQuery(sp)} />
+        </div>
       ) : (
         <div className="rounded-card border border-default bg-page">
           <EmptyState title="Nothing waiting">
@@ -141,15 +148,14 @@ export default async function ListingsQueuePage({
                       </>
                     ) : null}
                   </p>
+                  {/* Founder QC (17 Nov 2026): labelled fields in the editor's words, not raw JSON keys. */}
                   <dl className="mt-2 grid gap-1 type-caption">
-                    {Object.entries(s.r.data)
-                      .filter(([, v]) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length))
-                      .map(([k, v]) => (
-                        <div key={k} className="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
-                          <dt className="text-secondary">{k}</dt>
-                          <dd>{typeof v === "string" ? v : JSON.stringify(v)}</dd>
-                        </div>
-                      ))}
+                    {storefrontLines(s.r.data).map(([label, value]) => (
+                      <div key={label} className="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
+                        <dt className="text-secondary">{label}</dt>
+                        <dd className="break-words">{value}</dd>
+                      </div>
+                    ))}
                   </dl>
                 </div>
                 {canDecide ? <StorefrontDecision id={s.r.id} /> : null}
@@ -163,4 +169,35 @@ export default async function ListingsQueuePage({
       </p>
     </AdminShell>
   );
+}
+
+/** A storefront change as the operator reads it: the editor's labels, lists joined, the logo as "New logo". */
+function storefrontLines(data: Record<string, unknown>): [string, string][] {
+  const LABELS: Record<string, string> = {
+    logoFileId: "Logo",
+    about: "About",
+    city: "City",
+    foundedYear: "Founded",
+    categories: "Makes or offers",
+    capabilities: "Capabilities",
+    capacity: "Yearly capacity",
+    leadTime: "Lead time",
+    industries: "Industries",
+    locations: "Locations",
+    website: "Website",
+    contactEmail: "Sales email",
+    contactPhone: "Sales phone",
+  };
+  const text = (k: string, v: unknown): string => {
+    if (k === "logoFileId") return "Uploaded (opens from the company's profile once approved)";
+    if (k === "locations" && Array.isArray(v))
+      return (v as { name: string; city: string; state: string; kind: string }[])
+        .map((l) => `${l.name} (${[l.kind, l.city, l.state].filter(Boolean).join(", ")})`)
+        .join("; ");
+    if (Array.isArray(v)) return v.join(", ");
+    return typeof v === "string" || typeof v === "number" ? String(v) : "";
+  };
+  return Object.entries(LABELS)
+    .map(([k, label]): [string, string] => [label, text(k, data[k])])
+    .filter(([, v]) => v !== "");
 }

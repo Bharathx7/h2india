@@ -10,6 +10,8 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { requireTransactionsPage } from "@/orders/guard";
 import { buyerNextStep } from "@/orders/views";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // My orders (77:673; phones 81:8334; states 128:9187 empty, 128:9220 loading, 128:9259 error), step 10.1. Built
 // from the supplier pipeline's patterns while Figma is out of reach (A178).
@@ -19,7 +21,7 @@ export const dynamic = "force-dynamic";
 export default async function BuyerOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; state?: string }>;
+  searchParams: Promise<{ tab?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   requireTransactionsPage();
   const sp = await searchParams;
@@ -31,6 +33,7 @@ export default async function BuyerOrdersPage({
   const now = new Date();
   const tab = BUYER_ORDER_TABS.find((t) => t.key === sp.tab) ?? BUYER_ORDER_TABS[0];
   const shown = all.filter((o) => (tab.statuses as readonly string[]).includes(o.status));
+  const paged = pageOf(shown, pageRequest(sp));
   const count = (k: (typeof BUYER_ORDER_TABS)[number]) =>
     all.filter((o) => (k.statuses as readonly string[]).includes(o.status)).length;
   return (
@@ -122,7 +125,7 @@ export default async function BuyerOrdersPage({
               </tr>
             </thead>
             <tbody>
-              {shown.map((o) => {
+              {paged.rows.map((o) => {
                 const next = buyerNextStep(o, now);
                 return (
                   <tr key={o.id} className="border-b border-default last:border-b-0">
@@ -146,7 +149,7 @@ export default async function BuyerOrdersPage({
           </table>
         </div>
         <ul className="flex flex-col gap-3 md:hidden">
-          {shown.map((o) => {
+          {paged.rows.map((o) => {
             const next = buyerNextStep(o, now);
             return (
               <li key={o.id}>
@@ -168,6 +171,7 @@ export default async function BuyerOrdersPage({
             );
           })}
         </ul>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </BuyerWorkspace>
   );

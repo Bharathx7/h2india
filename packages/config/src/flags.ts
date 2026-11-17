@@ -11,12 +11,12 @@ export const FLAG_DEFAULTS = {
   devPages: false, // /dev pages (tokens, component gallery). Always on in development; on for staging only (step 2.6)
   sampleContent: false, // F9, A37: show sample-flagged content. On for local and staging only; never in production
   searchIndexing: false, // step 5.10: lets search engines index the site (robots.txt, meta robots). On at Launch 1 only
-  operatorPasskey: false, // step 12.1 (review H2, A172): the back office needs a passkey sign-in. On in production
+  operatorPassword: false, // step 12.1 (review H2), A183: the back office needs the staff password sign-in. On in production
   buyerChecklist: false, // public QC, 16 Nov 2026: the buyer's five-step checklist before the dashboard, off until the steps are chosen
 } as const;
 
 /** Safer defaults for a production build (NODE_ENV=production) when the variable isn't set. */
-const PRODUCTION_DEFAULTS: Partial<Record<keyof typeof FLAG_DEFAULTS, boolean>> = { operatorPasskey: true };
+const PRODUCTION_DEFAULTS: Partial<Record<keyof typeof FLAG_DEFAULTS, boolean>> = { operatorPassword: true };
 
 export type FlagName = keyof typeof FLAG_DEFAULTS;
 
@@ -29,7 +29,7 @@ const ENV_NAMES: Record<FlagName, string> = {
   devPages: "FLAG_DEV_PAGES",
   sampleContent: "FLAG_SAMPLE_CONTENT",
   searchIndexing: "FLAG_SEARCH_INDEXING",
-  operatorPasskey: "FLAG_OPERATOR_PASSKEY",
+  operatorPassword: "FLAG_OPERATOR_PASSWORD",
   buyerChecklist: "FLAG_BUYER_CHECKLIST",
 };
 

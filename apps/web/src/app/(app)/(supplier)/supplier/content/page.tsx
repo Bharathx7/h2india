@@ -4,11 +4,14 @@ import { buttonClasses, cx, EmptyState, Icon, StatusBadge, type BadgeTone } from
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPayload } from "payload";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Content submissions (592:916; phones 594:843), step 8.7: press releases and events the company sent through the
 // public forms (step 5.7, the Content queue) and the jobs it posted (step 5.5). Editors review each before it's
-// published; their note shows here.
+// published; their note shows here. Founder QC (17 Nov 2026): Drafts counts returned jobs, every status shows as stored,
+// and Needs changes offers to send again.
 export const metadata: Metadata = { title: "Content · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,7 @@ interface Row {
   key: string;
   title: string;
   type: "Press release" | "Event" | "Job";
-  status: "Draft" | "Under review" | "Published" | "Needs changes" | "Declined";
+  status: "Draft" | "Under review" | "Published" | "Needs changes" | "Declined" | "Answered";
   note: string | null;
   sub: string | null;
   updated: Date;
@@ -30,6 +33,7 @@ const TONE: Record<Row["status"], BadgeTone> = {
   Published: "success",
   "Needs changes": "warning",
   Declined: "error",
+  Answered: "neutral",
 };
 const TABS = [
   { key: "all", label: "All" },
@@ -47,7 +51,7 @@ const TYPES = [
 export default async function ContentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; type?: string }>;
+  searchParams: Promise<{ tab?: string; type?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/content");
@@ -74,9 +78,12 @@ export default async function ContentPage({
   ]);
   const rows: Row[] = [
     ...subs.docs.map((s): Row => {
-      const status = (
-        s.status === "Published" || s.status === "Needs changes" || s.status === "Declined" ? s.status : "Under review"
-      ) as Row["status"];
+      // Founder QC (17 Nov 2026): every stored status shows as itself (Answered fell through to Under review).
+      const status: Row["status"] =
+        s.status === "Published" || s.status === "Needs changes" || s.status === "Declined" || s.status === "Answered"
+          ? s.status
+          : "Under review";
+      const again = s.kind === "event" ? "/events/submit" : "/news/submit";
       return {
         key: `s${String(s.id)}`,
         title: s.title,
@@ -85,22 +92,27 @@ export default async function ContentPage({
         note: s.reviewNote ?? null,
         sub: s.reference,
         updated: new Date(s.updatedAt),
-        href: null,
-        action: status === "Needs changes" || status === "Declined" ? "Read feedback" : null,
+        // The editors' note shows under the title; Needs changes offers to send it again.
+        href: status === "Needs changes" ? again : null,
+        action: status === "Needs changes" ? "Send again" : null,
       };
     }),
     ...jobs.docs.map((j): Row => {
       const live = j._status === "published";
+      // A job waits as "Submitted for review"; editors who return or decline it set it back to Draft and email the
+      // poster (admin/queues/actions.ts), so a draft that was once submitted is the company's to fix.
+      const submitted = j.post?.state === "Submitted for review";
+      const returned = !live && !submitted && Boolean(j.post?.submittedAt);
       return {
         key: `j${String(j.id)}`,
         title: j.role,
         type: "Job",
-        status: live ? "Published" : "Under review",
-        note: null,
+        status: live ? "Published" : submitted ? "Under review" : "Draft",
+        note: returned ? "Returned by our editors. Their note is in the email we sent you." : null,
         sub: `Closes ${formatIstDayMonth(new Date(j.closesAt))}`,
         updated: new Date(j.updatedAt),
-        href: live ? `/opportunities/jobs/${j.slug}` : null,
-        action: live ? "View" : null,
+        href: live ? `/opportunities/jobs/${j.slug}` : returned ? "/opportunities/jobs/post" : null,
+        action: live ? "View" : returned ? "Post again" : null,
       };
     }),
   ].sort((a, b) => b.updated.getTime() - a.updated.getTime());
@@ -113,6 +125,7 @@ export default async function ContentPage({
         ? r.status === "Under review" || r.status === "Needs changes"
         : r.status === "Published");
   const shown = rows.filter((r) => inTab(r) && (!sp.type || r.type === sp.type));
+  const paged = pageOf(shown, pageRequest(sp));
   const count = (k: (typeof TABS)[number]["key"]) =>
     rows.filter(
       (r) =>
@@ -209,7 +222,7 @@ export default async function ContentPage({
               </tr>
             </thead>
             <tbody>
-              {shown.map((r) => (
+              {paged.rows.map((r) => (
                 <tr key={r.key} className="border-t border-default align-top">
                   <th scope="row" className="px-4 py-3 text-left font-normal">
                     <span className="block type-label">{r.title}</span>
@@ -219,6 +232,7 @@ export default async function ContentPage({
                           r.status === "Declined" ? "block type-caption text-error" : "block type-caption text-warning"
                         }
                       >
+                        {r.type === "Job" ? null : <span className="font-semibold">Feedback from our editors: </span>}
                         {r.note}
                       </span>
                     ) : r.sub ? (
@@ -242,6 +256,9 @@ export default async function ContentPage({
             </tbody>
           </table>
         </div>
+      ) : null}
+      {shown.length ? (
+        <ListPager paged={paged} query={pagingQuery(sp)} />
       ) : (
         <div className="rounded-card border border-default bg-page">
           <EmptyState title="Nothing here yet">

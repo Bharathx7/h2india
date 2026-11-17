@@ -1,9 +1,9 @@
 "use client";
 
-import { Alert, Button, cx, FileRow, FileUpload, FormField, Icon, Input, Modal, Textarea, useToast } from "@h2india/ui";
+import { Alert, Button, cx, FileRow, FileUpload, FormField, Input, Modal, Textarea, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { authClient } from "@/lib/auth-client";
+import { ConfirmItsYou } from "@/components/ConfirmItsYou";
 import { checkFile, useUploads } from "@/lib/uploads";
 import {
   acceptDeliveryAction,
@@ -50,13 +50,14 @@ function Footer({ onCancel, children }: { onCancel: () => void; children: React.
   );
 }
 
-/** Approve order (806:14572) with "Confirm it's you" (744:29031): a fresh passkey, then the approval. */
+/** Approve order (806:14572) with "Confirm it's you" (744:29031): a code to the approver's email, then the approval. */
 export function ApprovePanel({ orderId, requester }: { orderId: string; requester: string }) {
   const [note, setNote] = useState("");
   const [declining, setDeclining] = useState(false);
   const [reason, setReason] = useState("");
   const a = useAction();
   const r = useAction();
+  const router = useRouter();
   return (
     <section className="flex flex-col gap-4 self-start rounded-card border border-default bg-page p-5">
       <h2 className="type-h4">Your decision</h2>
@@ -70,25 +71,15 @@ export function ApprovePanel({ orderId, requester }: { orderId: string; requeste
           }}
         />
       </FormField>
-      <Button
-        size="lg"
-        className="w-full"
+      <ConfirmItsYou
+        actionLabel="Approve"
         disabled={a.pending}
-        onClick={() => {
-          a.go(async () => {
-            const pk = await authClient.signIn.passkey();
-            if (pk.error)
-              return {
-                ok: false,
-                error: "The passkey wasn't confirmed. Try again, or add a passkey in Sign-in and security.",
-              };
-            return approveAction(orderId, note);
-          });
+        onConfirmed={async () => {
+          const result = await approveAction(orderId, note);
+          if (result.ok) router.refresh();
+          return result.ok ? { ok: true } : { ok: false, error: result.error };
         }}
-      >
-        <Icon name="lock" size={18} />
-        Approve with passkey
-      </Button>
+      />
       <Button
         variant="outline"
         size="lg"

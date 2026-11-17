@@ -33,3 +33,41 @@ export function pagingQuery(params: Record<string, string | string[] | undefined
   }
   return out;
 }
+
+// Workspace lists (founder QC, 17 Nov 2026: "pagination, common"): 25 a page, with 50 and 100 to choose from. The
+// address holds the page (?page=2&perPage=50), so a page can be shared and Back works.
+
+export const PER_PAGE_OPTIONS = [25, 50, 100] as const;
+export const WORKSPACE_PER_PAGE = 25;
+
+export interface PageRequest {
+  page: number;
+  perPage: number;
+}
+
+/** The page asked for in the address; anything odd falls back to page 1 of 25. */
+export function pageRequest(sp: { page?: string | string[]; perPage?: string | string[] }): PageRequest {
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const per = Number(one(sp.perPage));
+  const perPage = (PER_PAGE_OPTIONS as readonly number[]).includes(per) ? per : WORKSPACE_PER_PAGE;
+  const page = Math.max(1, Math.floor(Number(one(sp.page)) || 1));
+  return { page, perPage };
+}
+
+/** Offset and limit for a database query that pages itself. */
+export function pageWindow(req: PageRequest): { offset: number; limit: number } {
+  return { offset: (req.page - 1) * req.perPage, limit: req.perPage };
+}
+
+export interface Paged<T> extends PageRequest {
+  rows: T[];
+  total: number;
+}
+
+/** One page of an already loaded workspace list. A page past the end shows the last page. */
+export function pageOf<T>(rows: readonly T[], req: PageRequest): Paged<T> {
+  const total = rows.length;
+  const page = Math.min(req.page, Math.max(1, Math.ceil(total / req.perPage)));
+  const start = (page - 1) * req.perPage;
+  return { rows: rows.slice(start, start + req.perPage), total, page, perPage: req.perPage };
+}

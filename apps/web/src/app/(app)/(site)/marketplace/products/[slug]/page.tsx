@@ -82,7 +82,8 @@ export default async function ProductPage({
     similarProducts(db, p, { includeSample: showSample() }),
     guidesFor([p.category.label], 3),
   ]);
-  const company = session ? (await identityOf(db, session.user.id)).company : null;
+  const who = session ? await identityOf(db, session.user.id) : null;
+  const company = who?.company ?? null;
   const transactions = isEnabled("transactions");
   const ref = { id: p.id, slug: p.slug, name: p.name, supplier: p.supplier.name, category: p.category.slug };
   const stateNames = STATE_OPTIONS.filter((s) => s.value !== "all-india").map((s) => s.label);
@@ -199,7 +200,7 @@ export default async function ProductPage({
                 />
               )}
               <AskQuestion product={ref} signedIn={Boolean(session)} company={company} className="w-full" />
-              <CompareSave product={ref} signedIn={Boolean(session)} />
+              <CompareSave product={ref} signedIn={Boolean(session)} buyer={who?.area === "buyer"} />
             </section>
             <div>
               <ReportListing product={ref} />

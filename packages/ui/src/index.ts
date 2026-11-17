@@ -90,6 +90,7 @@ export type {
   WorkspaceArea,
   WorkspaceNavGroup,
   WorkspaceNavItem,
+  WorkspaceSearchLink,
   WorkspaceShellProps,
   WorkspaceUser,
 } from "./components/WorkspaceShell";

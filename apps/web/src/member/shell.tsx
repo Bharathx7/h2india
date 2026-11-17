@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
+import { navFor, shellFor } from "@/server/workspace";
 
 /** The signed-in member, or a trip to sign in that comes back here. */
 export async function requireMember(path: string): Promise<string> {
@@ -45,10 +44,9 @@ async function WorkspaceShell({
   return (
     <WorkspaceFrame
       area={area}
-      groups={WORKSPACE_NAV[area]}
+      groups={shell.area === area ? shell.groups : await navFor(area, userId)}
       current={current}
       user={shell.user}
-      welcome={shell.welcome}
       home={`/${area}`}
       bell={{ unread, items: toRows(bell) }}
     >

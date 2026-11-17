@@ -1,7 +1,7 @@
 "use server";
 
 import { getDb, Money } from "@h2india/core";
-import { loadActor } from "@h2india/core/authz";
+import { loadActor, scopeFor } from "@h2india/core/authz";
 import {
   addDelegation,
   addGstin,
@@ -10,6 +10,8 @@ import {
   BuyerSettingsError,
   createList,
   deleteList,
+  listsForProduct,
+  renameList,
   endDelegation,
   ListError,
   removeDeliverySite,
@@ -18,13 +20,12 @@ import {
   saveApprovalRules,
   saveDeliverySite,
   setDefaultGstin,
-  setPasskeyRoles,
   signOutSessions,
   updateCompanyProfile,
   type ProfileInput,
   type SiteInput,
 } from "@h2india/core/buyer";
-import { changeMemberRole } from "@h2india/core/companies";
+import { changeMemberRole, LastAdminError } from "@h2india/core/companies";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -47,6 +48,7 @@ async function run(work: () => Promise<unknown>, path = "/buyer/company"): Promi
   try {
     await work();
   } catch (error) {
+    if (error instanceof LastAdminError) return { ok: false, error: error.message };
     if (error instanceof BuyerSettingsError || error instanceof ListError) {
       return { ok: false, error: error.message, errors: (error as { errors?: Record<string, string> }).errors };
     }
@@ -139,11 +141,6 @@ export async function endDelegationAction(id: string) {
   const context = await requestContext();
   return run(() => endDelegation(db, actor, org, id, context));
 }
-export async function passkeyRolesAction(roles: string[]) {
-  const { db, actor, org } = await buyer();
-  const context = await requestContext();
-  return run(() => setPasskeyRoles(db, actor, org, roles, context));
-}
 export async function signOutAction(sessionId: string | null) {
   const { db, actor, org, sessionId: mine } = await buyer();
   const context = await requestContext();
@@ -156,9 +153,14 @@ export async function limitAction(userId: string, role: string, limit: string) {
     changeMemberRole(db, actor, { organisationId: org, userId, role, orderLimitPaise: paise(limit) }, context),
   );
 }
-export async function newListAction(name: string) {
+/** New list; returns its id so the page can open it (founder QC, 17 Nov 2026). */
+export async function newListAction(name: string): Promise<Result & { id?: string }> {
   const { db, actor, org } = await buyer();
-  return run(() => createList(db, actor, org, name), "/buyer/lists");
+  let id: string | undefined;
+  const r = await run(async () => {
+    id = (await createList(db, actor, org, name))?.id;
+  }, "/buyer/lists");
+  return r.ok ? { ...r, id } : r;
 }
 export async function addToListAction(listId: string, productId: string) {
   const { db, actor, org } = await buyer();
@@ -168,6 +170,30 @@ export async function removeFromListAction(listId: string, productIds: string[])
   const { db, actor, org } = await buyer();
   return run(() => removeFromList(db, actor, org, listId, productIds), "/buyer/lists");
 }
+export async function renameListAction(listId: string, name: string) {
+  const { db, actor, org } = await buyer();
+  return run(() => renameList(db, actor, org, listId, name), "/buyer/lists");
+}
+
+/** Save to project list on a product page (founder QC, 17 Nov 2026): the company's lists, and which hold the product. */
+export async function listsForProductAction(
+  productId: string,
+): Promise<{ id: string; name: string; count: number; has: boolean }[]> {
+  if (typeof productId !== "string" || !/^[0-9a-f-]{36}$/i.test(productId)) return [];
+  const { db, actor, org } = await buyer();
+  return listsForProduct(db, scopeFor(actor), org, productId);
+}
+
+/** Adds the product to a list, making the list first when a new name is given. */
+export async function saveToListAction(input: { listId?: string; newName?: string; productId: string }) {
+  const { db, actor, org } = await buyer();
+  return run(async () => {
+    const listId = input.newName ? (await createList(db, actor, org, input.newName))?.id : input.listId;
+    if (!listId) throw new ListError("Choose a list");
+    await addToList(db, actor, org, listId, input.productId);
+  }, "/buyer/lists");
+}
+
 export async function deleteListAction(listId: string) {
   const { db, actor, org } = await buyer();
   return run(() => deleteList(db, actor, org, listId), "/buyer/lists");

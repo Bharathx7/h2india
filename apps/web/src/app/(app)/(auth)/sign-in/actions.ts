@@ -19,7 +19,7 @@ export async function whereNext(next: string, audience?: AccountKind): Promise<s
   const back = safeReturnPath(next);
   if (!session) return back;
   // The admin domain signs in H2 Economy staff only (public QC, 16 Nov 2026). Anyone else is signed out again here
-  // and told to use the public site; staff go on to the back office, where the passkey step still applies.
+  // and told to use the public site; staff go on to the back office.
   const role = parseServerEnv().SITE_ROLE;
   if (role === "admin") {
     const site = siteSignIn(role, await hasOperatorRole(getDb(), session.user.id), back);

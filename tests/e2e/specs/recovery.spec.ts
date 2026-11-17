@@ -1,7 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "../fixtures";
 import { latestSmsCode, newMobile, signInNew } from "../helpers/join";
-import { addAuthenticator, enterCode, latestCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
+import { enterCode, latestCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
 
 // Step 3.5: account recovery (Figma 528:8), Flow I. Needs DATABASE_URL to set up the company.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL to set up accounts");
@@ -57,55 +56,16 @@ async function signedIn(browser: Browser, email: string) {
   const page = await context.newPage();
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow).toBeVisible();
-  await notNow.click();
   await expect(page).not.toHaveURL(/\/sign-in/);
   return { context, page };
 }
 
-test("lost passkey: both codes are needed, then a new passkey; the company admins are told", async ({ page }) => {
-  const admin = await person(page, { role: "Admin" });
-  const me = await person(page, { role: "Requester", admin: admin.email });
-  await addAuthenticator(page);
-
+test("the recovery hub no longer offers a lost-passkey path (passkeys removed, A183)", async ({ page }) => {
   await page.goto("/forgot-access");
-  await expect(page.getByRole("heading", { name: "Get back into your account" })).toBeVisible();
-  const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(axe.violations.map((v) => v.id)).toEqual([]);
-  await page.getByRole("link", { name: /I lost my passkey or device/ }).click();
-
-  const sentAfter = Date.now() - 1000;
-  await page.getByLabel("Work email").fill(me.email);
-  await page.getByRole("button", { name: "Send codes" }).click();
-  await expect(page.getByText("We sent codes to your work email and your mobile. Enter both.")).toBeVisible();
-  await expect(page.getByText(new RegExp(`Code from SMS \\(\\+91 ••••• ${me.mobile.slice(5)}\\)`))).toBeVisible();
-
-  // One factor is not enough.
-  await page
-    .getByRole("textbox", { name: "Digit 1 of 6" })
-    .first()
-    .fill(await latestCode(page, me.email, sentAfter, undefined, "verification"));
-  await expect(page.getByText("Email verified")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
-
-  await page
-    .getByRole("textbox", { name: "Digit 1 of 6" })
-    .first()
-    .fill(await latestSmsCode(page, me.mobile, sentAfter));
-  await expect(page.getByText("Mobile verified")).toBeVisible();
-  await page.getByRole("button", { name: "Continue" }).click();
-
-  await expect(page.getByRole("heading", { name: "Create a new passkey" })).toBeVisible();
-  await page.getByRole("button", { name: "Create passkey" }).click();
-  await expect(page).not.toHaveURL(/forgot-access/);
-
-  await expect
-    .poll(async () => {
-      const res = await page.request.get(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${admin.email}"`)}`);
-      return ((await res.json()) as { messages?: { Subject: string }[] }).messages?.map((m) => m.Subject) ?? [];
-    })
-    .toContain("Requester Person reset their passkey");
+  await expect(page.getByRole("link", { name: /I lost access to my email/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /passkey/i })).toHaveCount(0);
+  const gone = await page.request.get("/forgot-access/passkey");
+  expect(gone.status()).toBe(404);
 });
 
 test("changed mobile: the new number waits for the company admin, who approves it", async ({ page, browser }) => {

@@ -6,6 +6,7 @@ import { formatIstDate } from "@h2india/core/time";
 import { buyerChecklist } from "@h2india/core/buyer";
 import { companyRoles } from "@h2india/core/supplier";
 import { listAlerts } from "@h2india/core/members";
+import { buyerRfqs } from "@h2india/core/rfq";
 import { Alert, buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -30,12 +31,15 @@ export default async function BuyerHome() {
   const page = await requireBuyer("/buyer");
   const db = getDb();
   const b = page.buyer;
-  const [checklist, roles, alerts, feed] = await Promise.all([
+  const [checklist, roles, alerts, feed, rfqs] = await Promise.all([
     buyerChecklist(db, b.organisationId),
     companyRoles(db, b.organisationId),
     listAlerts(db, page.userId),
     buildFeed(page.userId),
+    buyerRfqs(db, scopeFor(page.actor), b.organisationId),
   ]);
+  // Founder QC (17 Nov 2026): Recent activity shows the company's latest quote requests instead of a placeholder.
+  const recent = rfqs.slice(0, 5);
   if (isEnabled("buyerChecklist") && !checklist.complete) {
     const next = checklist.items.findIndex((i) => i.state === "todo");
     return (
@@ -163,10 +167,42 @@ export default async function BuyerHome() {
       ) : null}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-          <h2 className="type-h4">Recent activity</h2>
-          <p className="type-body-sm text-body">
-            Quotes, approvals and deliveries show here as your team uses H2 Economy.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="type-h4">Recent quote requests</h2>
+            {recent.length ? (
+              <Link href="/buyer/rfqs" className="type-label text-link">
+                All RFQs
+              </Link>
+            ) : null}
+          </div>
+          {recent.length ? (
+            <ul className="flex flex-col divide-y divide-default">
+              {recent.map((x) => {
+                const draft = x.rfq.status === "Draft" || x.rfq.status === "Returned";
+                return (
+                  <li key={x.rfq.id} className="flex flex-wrap items-center gap-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={draft ? `/rfq/new?draft=${x.rfq.id}` : `/buyer/rfqs/${x.rfq.id}`}
+                        className="block truncate type-label text-primary hover:underline"
+                      >
+                        {x.rfq.title || "Untitled request"}
+                      </Link>
+                      <span className="block type-caption text-secondary">
+                        {x.rfq.reference} · {formatIstDate(x.rfq.createdAt)}
+                        {draft ? "" : ` · ${String(x.quoted)} of ${String(x.suppliers)} quoted`}
+                      </span>
+                    </div>
+                    <StatusBadge status={x.rfq.status} tone={x.quoted ? "success" : draft ? "neutral" : "progress"} />
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="type-body-sm text-body">
+              Your quote requests and the quotes suppliers send show here. Start with what you need.
+            </p>
+          )}
           <Link href="/rfq/new" className={buttonClasses({ size: "sm" }) + " self-start"}>
             Request a quote
           </Link>

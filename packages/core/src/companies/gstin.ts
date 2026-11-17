@@ -78,3 +78,13 @@ export function stateOf(gstin: string): string {
 
 /** The format message shown under the field (Figma 526:8, state 2). */
 export const GSTIN_FORMAT_MESSAGE = "A GSTIN has 15 characters, like 27AAKCG5521M1Z3";
+
+/**
+ * A GSTIN with its state, "27AAKCG5521M1Z9 · Maharashtra" (founder QC, 17 Nov 2026), so buyers and suppliers can see
+ * which state each side bills from. Empty for none. Display only: the tax split stays with decision A185.
+ */
+export function gstinLabel(gstin: string | null | undefined): string {
+  if (!gstin) return "";
+  const state = stateOf(gstin);
+  return state ? `${gstin} · ${state}` : gstin;
+}

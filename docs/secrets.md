@@ -22,7 +22,7 @@ Playbook step 1.6. This file lists **where** each value lives. It never holds th
 | PAYMENT_PARTNER, PAYMENT_SIM_ALLOWED   | Payment partner (`sim` until M3, A176)                 | defaults (`sim`)        | Staging: `PAYMENT_SIM_ALLOWED=true`; live: never                  | Not secret            |
 | HEALTH_TOKEN                           | `/api/health/deep` for the outside uptime check (13.3) | empty (endpoint off)    | Server env file and the GitHub secret `HEALTH_TOKEN` (same value) | Founder, on-call      |
 | OPS_ALERT_EMAIL                        | Who hears when an alarm starts failing (13.3)          | empty (nobody)          | Server env file                                                   | Not secret            |
-| FLAG_OPERATOR_PASSKEY                  | Back office needs a passkey sign-in (A181)             | off                     | On by default in production builds                                | Not secret            |
+| FLAG_OPERATOR_PASSWORD                 | Back office needs the staff password sign-in (A183)    | off                     | On by default in production builds                                | Not secret            |
 
 Later stages add provider keys (verification M4, SMS and WhatsApp M5, email M6, maps M7, datasheet reader M8). Each is added here, in `.env.example` and in `packages/config/src/env.ts` in the same pull request.
 

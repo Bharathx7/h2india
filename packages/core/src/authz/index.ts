@@ -8,4 +8,14 @@ export { inScope, scopeFor } from "./scope";
 export type { Scope } from "./scope";
 export { bootstrapSuperAdmin, grantOperatorRole, OperatorRoleError, revokeOperatorRole, SUPER_ADMIN } from "./grants";
 export { identityOf } from "./identity";
+export {
+  ADMIN_ONLY,
+  applyChanges,
+  GRANTABLE,
+  LOCKED_ROLE,
+  roleGrid,
+  RolePermissionError,
+  setRolePermission,
+} from "./company-roles";
+export type { RoleGridRow } from "./company-roles";
 export type { WorkspaceKind } from "./identity";

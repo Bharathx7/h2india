@@ -1,4 +1,3 @@
-import { passkey } from "@better-auth/passkey";
 import { parseServerEnv } from "@h2india/config";
 import { schema } from "@h2india/db";
 import { betterAuth, type BetterAuthPlugin } from "better-auth";
@@ -10,13 +9,14 @@ import { sendVerifyEmail } from "../companies/notify";
 import { JOIN } from "../companies/rules";
 import { getDb } from "../db";
 import { recoveryPlugin } from "../recovery/plugin";
-import { afterSignIn, beforeSignIn } from "./hooks";
+import { afterSignIn, beforeSignIn, isStaffEmail } from "./hooks";
 import { maySignIn } from "./accounts";
-import { sendNoAccount, sendSignInCode } from "./mail";
+import { sendNoAccount, sendSignInCode, sendStaffPasswordLink } from "./mail";
 import { normaliseEmail, SIGN_IN } from "./rules";
 
-// Sign-in (step 3.2, ADR 0003): passkey, six-digit email code and Google, with users and sessions in our
-// PostgreSQL. Server only. The web app adds its framework plugin (cookies for Next.js) through `plugins`.
+// Sign-in (step 3.2, ADR 0003): six-digit email code and Google for everyone, and email and password for H2 Economy
+// staff on the back office (17 Nov 2026, A183; passkeys removed). Users and sessions in our PostgreSQL. Server only.
+// The web app adds its framework plugin (cookies for Next.js) through `plugins`.
 
 export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
   const env = parseServerEnv();
@@ -44,7 +44,6 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
         session: schema.sessions,
         account: schema.accounts,
         verification: schema.verifications,
-        passkey: schema.passkeys,
         rateLimit: schema.rateLimits,
       },
     }),
@@ -68,11 +67,29 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
       customRules: {
         "/email-otp/send-verification-otp": { window: 60, max: 10 },
         "/sign-in/email-otp": { window: 60, max: 20 },
+        "/sign-in/email": { window: 60, max: 20 },
+        "/request-password-reset": { window: 60, max: 10 },
+        "/reset-password": { window: 60, max: 10 },
       },
     },
     account: { accountLinking: { enabled: true, trustedProviders: ["google"] } },
+    // Staff only (A183): nobody signs up with a password; a password is set only from the emailed link, and the link
+    // goes only to staff (hooks.ts also turns away non-staff emails at the password sign-in).
+    emailAndPassword: {
+      enabled: true,
+      disableSignUp: true,
+      minPasswordLength: SIGN_IN.passwordMinLength,
+      maxPasswordLength: SIGN_IN.passwordMaxLength,
+      resetPasswordTokenExpiresIn: SIGN_IN.passwordLinkMinutes * 60,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: async ({ user, url }) => {
+        const to = normaliseEmail(user.email);
+        if (!(await isStaffEmail(db, to))) return;
+        await sendStaffPasswordLink({ to, url, name: user.name.trim().split(/\s+/)[0] || undefined });
+      },
+    },
     hooks: { before: beforeSignIn, after: afterSignIn },
-    // A suspended account gets no session by any route: passkey, Google, a Join or recovery link (review H1).
+    // A suspended account gets no session by any route: password, Google, a Join or recovery link (review H1).
     // beforeSignIn also refuses email codes early, with the message the design asks for.
     databaseHooks: {
       session: {
@@ -118,12 +135,6 @@ export function createAuth(options: { plugins?: BetterAuthPlugin[] } = {}) {
         sendMagicLink: async ({ email, url }) => {
           await sendVerifyEmail(normaliseEmail(email), url);
         },
-      }),
-      passkey({
-        rpID: new URL(env.APP_URL).hostname,
-        rpName: "H2 Economy",
-        origin: env.APP_URL,
-        authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
       }),
       recoveryPlugin(),
       ...(options.plugins ?? []),

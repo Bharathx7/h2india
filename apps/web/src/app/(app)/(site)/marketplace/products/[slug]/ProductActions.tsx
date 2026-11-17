@@ -20,6 +20,7 @@ import { useState, useTransition } from "react";
 import { useFormGuard } from "@/lib/form-guard";
 import { checkFile, useUploads, type UploadItem } from "@/lib/uploads";
 import { useCompare, useCompareSync } from "@/marketplace/compare";
+import { SaveToList } from "@/buyer/SaveToList";
 import { saveCompareAction } from "../../compare/actions";
 import { askQuestionAction, reportListingAction } from "./actions";
 
@@ -63,7 +64,16 @@ export function QuoteForm({ product, states }: { product: ProductRef; states: st
   );
 }
 
-export function CompareSave({ product, signedIn }: { product: ProductRef; signedIn: boolean }) {
+export function CompareSave({
+  product,
+  signedIn,
+  buyer = false,
+}: {
+  product: ProductRef;
+  signedIn: boolean;
+  /** A buyer saves to a company project list (founder QC, 17 Nov 2026); everyone else to their own Saved. */
+  buyer?: boolean;
+}) {
   const compare = useCompare();
   useCompareSync(signedIn, saveCompareAction);
   const [note, setNote] = useState<string | null>(null);
@@ -82,17 +92,21 @@ export function CompareSave({ product, signedIn }: { product: ProductRef; signed
           <Icon name="compare" size={18} />
           {on ? "In compare" : "Compare"}
         </button>
-        <Link
-          href={
-            signedIn
-              ? `/member/saved?product=${product.slug}`
-              : `/sign-in?next=${encodeURIComponent(`/member/saved?product=${product.slug}`)}`
-          }
-          className="inline-flex items-center gap-2 rounded-control px-2 py-1 type-label text-primary hover:bg-subtle"
-        >
-          <Icon name="heart" size={18} />
-          Save to list
-        </Link>
+        {buyer ? (
+          <SaveToList productId={product.id} productName={product.name} />
+        ) : (
+          <Link
+            href={
+              signedIn
+                ? `/member/saved?product=${product.slug}`
+                : `/sign-in?next=${encodeURIComponent(`/member/saved?product=${product.slug}`)}`
+            }
+            className="inline-flex items-center gap-2 rounded-control px-2 py-1 type-label text-primary hover:bg-subtle"
+          >
+            <Icon name="heart" size={18} />
+            Save to list
+          </Link>
+        )}
       </div>
       {note ? (
         <p role="alert" className="type-caption text-error">

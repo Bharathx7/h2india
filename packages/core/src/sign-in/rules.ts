@@ -9,6 +9,16 @@ export const SIGN_IN = {
   codesPerEmailPerHour: 5,
   resendSeconds: 30,
   sessionDays: 7,
+  /**
+   * Staff sign in to the back office with email and password (founder, 17 Nov 2026; passkeys removed). The length is
+   * Better Auth's default until the founder chooses a number (OPEN: A183).
+   */
+  passwordMinLength: 8,
+  passwordMaxLength: 128,
+  /** How long a "set your password" link works. Better Auth's default (OPEN: A183). */
+  passwordLinkMinutes: 60,
+  /** A confirmation code (bank change, order approval) counts for this long once entered. */
+  stepUpMinutes: 5,
 } as const;
 
 /** Error codes the sign-in screens map to the designed messages. */
@@ -19,6 +29,8 @@ export const SIGN_IN_ERROR = {
   tooManyCodes: "TOO_MANY_CODES",
   resendTooSoon: "RESEND_TOO_SOON",
   suspended: "ACCOUNT_SUSPENDED",
+  /** Better Auth's own code for a wrong email or password; also what a non-staff email gets on the staff sign-in. */
+  wrongPassword: "INVALID_EMAIL_OR_PASSWORD",
 } as const;
 
 /**

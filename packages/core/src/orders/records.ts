@@ -206,6 +206,8 @@ export interface NewOrder {
   quoteVersionId?: string | null;
   deliverySiteId?: string | null;
   billingGstinId?: string | null;
+  /** The supplier GSTIN it's invoiced under (founder QC, 17 Nov 2026). */
+  supplierGstinId?: string | null;
   receiverName?: string | null;
   receiverMobile?: string | null;
   paymentMethod: string;
@@ -260,6 +262,7 @@ export async function insertOrder(tx: Executor, input: NewOrder): Promise<OrderR
       tier: "A",
       deliverySiteId: input.deliverySiteId ?? null,
       billingGstinId: input.billingGstinId ?? null,
+      supplierGstinId: input.supplierGstinId ?? null,
       receiverName: input.receiverName ?? null,
       receiverMobile: input.receiverMobile ?? null,
       paymentMethod: input.paymentMethod,
@@ -433,6 +436,9 @@ export async function orderDetail(scope: Scope, db: Database, orderId: string, n
       gstin: sql<
         string | null
       >`(select g.gstin from core.organisation_gstins g where g.id = core.orders.billing_gstin_id)`,
+      supplierGstin: sql<
+        string | null
+      >`(select g.gstin from core.organisation_gstins g where g.id = core.orders.supplier_gstin_id)`,
     })
     .from(o)
     .where(and(eq(o.id, orderId), or(inScope(scope, o.buyerOrganisationId), inScope(scope, o.supplierOrganisationId))));

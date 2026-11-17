@@ -2,16 +2,14 @@ import { getDb } from "@h2india/core";
 import { loadActor, type Actor } from "@h2india/core/authz";
 import { buyerOf, type BuyerContext } from "@h2india/core/buyer";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
-import { isEnabled } from "@h2india/config";
-import { buttonClasses, Icon, type WorkspaceNavGroup } from "@h2india/ui";
+import { buttonClasses, Icon } from "@h2india/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
-import { WORKSPACE_NAV } from "@/lib/workspace-nav";
 import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
+import { navFor, shellFor } from "@/server/workspace";
 
 // The buyer workspace (Figma page 13, Stage 9): Workspace sidebar v2, buyer variant, with Request a quote in the top
 // bar. Orders and payments are left out while transactions are off.
@@ -32,14 +30,6 @@ export async function requireBuyer(path: string): Promise<BuyerPage> {
   return { userId: session.user.id, actor, buyer };
 }
 
-function nav(): WorkspaceNavGroup[] {
-  const money = isEnabled("transactions");
-  return WORKSPACE_NAV.buyer.map((g) => ({
-    ...g,
-    items: g.items.filter((i) => money || (i.href !== "/buyer/orders" && i.href !== "/buyer/payments")),
-  }));
-}
-
 export async function BuyerWorkspace({
   page,
   current,
@@ -58,13 +48,11 @@ export async function BuyerWorkspace({
   return (
     <WorkspaceFrame
       area="buyer"
-      groups={nav()}
+      groups={await navFor("buyer", page.userId)}
       current={current}
       user={{ ...shell.user, role: page.buyer.legalName }}
-      welcome={shell.welcome}
       home="/buyer"
       bell={{ unread, items: toRows(bell) }}
-      searchPlaceholder="Search products, suppliers or specs"
       action={
         <Link href="/rfq/new" className={buttonClasses({})}>
           Request a quote

@@ -100,7 +100,14 @@ export function useHeaderSearch() {
   return { open, setOpen, query, setQuery, scope, setScope, answer, state, retry };
 }
 
-export function HeaderSearch({ search }: { search: ReturnType<typeof useHeaderSearch> }) {
+export function HeaderSearch({
+  search,
+  canQuote = true,
+}: {
+  search: ReturnType<typeof useHeaderSearch>;
+  /** Request a quote shows only to visitors and buyers (canRequestQuote); the workspaces pass false for the rest. */
+  canQuote?: boolean;
+}) {
   const router = useRouter();
   const { open, setOpen, query, setQuery, scope, setScope, answer, state, retry } = search;
   return (
@@ -116,7 +123,7 @@ export function HeaderSearch({ search }: { search: ReturnType<typeof useHeaderSe
       total={answer.total}
       state={state}
       related={answer.related}
-      quoteHref={quoteHrefFor(query)}
+      quoteHref={canQuote ? quoteHrefFor(query) : undefined}
       onOpenItem={(item) => {
         setOpen(false);
         router.push(item.href);

@@ -6,7 +6,7 @@ import { Alert, cx, EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { requireTransactionsPage } from "@/orders/guard";
+import { isEnabled } from "@h2india/config";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Fees and invoices (365:34452), step 10.11: Overview (816:12052; phones 822:14186), Orders and fees (816:12500),
@@ -55,9 +55,27 @@ function Table({ label, head, children }: { label: string; head: string[]; child
 }
 
 export default async function FeesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  requireTransactionsPage();
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/invoices");
+  // Founder QC (17 Nov 2026): with ordering off the page explains itself instead of "not found". It loads no money
+  // data and offers no action; the statement download and payout pages still need transactions (A184).
+  if (!isEnabled("transactions")) {
+    return (
+      <SupplierShell page={page} current="/supplier/invoices" title="Fees & invoices">
+        <div>
+          <h1 className="type-h2">Fees and invoices</h1>
+          <p className="type-body-sm text-secondary">Your orders, H2 Economy fees, payouts and tax documents.</p>
+        </div>
+        <section className="rounded-card border border-default bg-page">
+          <EmptyState icon="clock" title="Coming when ordering opens">
+            Buyers place orders and pay through H2 Economy once ordering opens. From then on, this page shows each
+            order&apos;s fees, your payouts, fee invoices, tax credits and monthly statements. Until then there is
+            nothing to pay or receive here.
+          </EmptyState>
+        </section>
+      </SupplierShell>
+    );
+  }
   const s = page.supplier;
   if (!s.seat.permissions.has("money.view")) {
     return (

@@ -10,12 +10,12 @@ import { inScope, type Scope } from "../authz/scope";
 import { cancelDeadline, onDeadline, startClock } from "../clocks/clocks";
 import { deliverSms } from "../notify/channels";
 import { notify } from "../notify/notify";
-import { passkeyConfirmedRecently } from "../sign-in/step-up";
+import { stepUpConfirmedRecently } from "../sign-in/step-up";
 import { formatIstDateTime } from "../time";
 import { bankAdapter } from "./adapters/bank";
 
 // Payout bank account (step 8.6; 588:222): where payout fraud happens, so every change is suspicious until the hold
-// ends. A change needs a passkey confirmed in the last few minutes (step-up), is checked through the bank adapter
+// ends. A change needs a confirmation code entered in the last few minutes (step-up), is checked through the bank adapter
 // (name match against the GST legal name), notifies every admin of the company by email and SMS, and holds payouts
 // for the bankChangeHold clock (C5, default 72 hours). Only the last four digits are ever shown or logged.
 
@@ -23,7 +23,7 @@ const a = schema.payoutBankAccounts;
 
 export class BankError extends Error {}
 
-export { passkeyConfirmedRecently, recordPasskeyStepUp, STEP_UP_SECONDS } from "../sign-in/step-up";
+export { confirmStepUpCode, recordStepUp, sendStepUpCode, stepUpConfirmedRecently } from "../sign-in/step-up";
 
 // ------------------------------------------------------------------------------------------------ encryption
 
@@ -172,7 +172,8 @@ async function admins(db: Executor, organisationId: string) {
 }
 
 /**
- * Step 3 (588:748 "Confirm with your passkey"): needs a passkey sign-in within the last few minutes. The first account
+ * Step 3 (588:748 "Confirm it's you"): needs a confirmation code from the person's email entered in the last few
+ * minutes (passkeys removed 17 Nov 2026). The first account
  * becomes active at once; a change starts the hold and tells every admin by email and SMS.
  */
 export async function confirmBankAccount(
@@ -184,8 +185,8 @@ export async function confirmBankAccount(
 ) {
   if (!can(actor, "payout_bank.change", { organisationId }))
     throw new BankError("Only a company admin can change the payout account");
-  if (!actor.userId || !(await passkeyConfirmedRecently(db, actor.userId))) {
-    throw new BankError("Confirm with your passkey first. A bank change can't be made without it.");
+  if (!actor.userId || !(await stepUpConfirmedRecently(db, actor.userId))) {
+    throw new BankError("Confirm it's you with the code we email you first. A bank change can't be made without it.");
   }
   const [row] = await db
     .select()

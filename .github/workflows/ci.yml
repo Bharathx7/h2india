@@ -103,9 +103,9 @@ jobs:
           # Ordering is on in local and staging with the simulated payment partner (A176); flows A, B and H use it.
           FLAG_TRANSACTIONS: "true"
           E2E_VIDEO: ${{ github.event_name == 'schedule' && '1' || '' }}
-          # Browser tests sign operators in with email codes; the passkey rule (on in production) is proven in
-          # authz/gate.int.test.ts and the passkey step page by hand (step 12.1, review H2).
-          FLAG_OPERATOR_PASSKEY: "false"
+          # Browser tests sign operators in with email codes; the staff password rule (on in production) is proven in
+          # authz/gate.int.test.ts and sign-in-staff.spec.ts (step 12.1, review H2, A183).
+          FLAG_OPERATOR_PASSWORD: "false"
           # The built app runs as production, which refuses the simulated partner unless allowed (as on staging).
           PAYMENT_SIM_ALLOWED: "true"
           CI: "true"

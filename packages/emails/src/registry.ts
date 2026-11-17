@@ -390,6 +390,22 @@ export const TEMPLATES = {
     step: "3.5",
     built: true,
   },
+  "email.step_up_code": {
+    channel: "email",
+    key: "step_up_code",
+    name: "Confirm it's you code (bank change, order approval)",
+    frame: null,
+    step: "QC 17 Nov",
+    built: true,
+  },
+  "email.staff_password_link": {
+    channel: "email",
+    key: "staff_password_link",
+    name: "Set your back-office password",
+    frame: null,
+    step: "QC 17 Nov",
+    built: true,
+  },
   "email.claim_code": {
     channel: "email",
     key: "claim_code",

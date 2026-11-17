@@ -1,24 +1,26 @@
 "use server";
 
-import { approveJoinRequest, changeMemberRole, JoinRequestError, rejectJoinRequest } from "@h2india/core/companies";
+import {
+  approveJoinRequest,
+  changeMemberRole,
+  JoinRequestError,
+  LastAdminError,
+  rejectJoinRequest,
+} from "@h2india/core/companies";
 import {
   acceptInvitation,
   inviteMember,
-  publishStorefront,
   removeMember,
   revokeInvitation,
-  saveStorefrontDraft,
   StorefrontError,
   TeamError,
-  type StorefrontForm,
 } from "@h2india/core/supplier";
 import { getDb } from "@h2india/core";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { currentTermsVersion } from "@/trust/terms";
-import { loadActor } from "@h2india/core/authz";
-import { supplierActor } from "./actor";
+import { loadActor, RolePermissionError, setRolePermission } from "@h2india/core/authz";
 
 /** The company whose team this person manages: their supplier company, else their buyer company. */
 async function teamActor() {
@@ -43,7 +45,13 @@ async function run(work: () => Promise<unknown>, path: string, also?: string): P
   try {
     await work();
   } catch (error) {
-    if (error instanceof TeamError || error instanceof StorefrontError || error instanceof JoinRequestError) {
+    if (
+      error instanceof TeamError ||
+      error instanceof StorefrontError ||
+      error instanceof JoinRequestError ||
+      error instanceof LastAdminError ||
+      error instanceof RolePermissionError
+    ) {
       return { ok: false, error: error.message };
     }
     if (error instanceof Error && /Not allowed|not in the company|No role/.test(error.message))
@@ -110,11 +118,27 @@ export async function acceptInvitationAction(token: string, agreedToTerms: boole
   );
 }
 
-export async function saveStorefrontAction(form: StorefrontForm, publish: boolean) {
-  const { db, actor, supplier } = await supplierActor();
+/** Team's permission grid (founder QC, 17 Nov 2026): tick or clear one permission for one role of this company. */
+export async function setRolePermissionAction(role: string, permission: string, on: boolean) {
+  // Callable from any browser: core checks the role and permission against the catalogue and team.manage.
+  if (typeof role !== "string" || typeof permission !== "string" || typeof on !== "boolean")
+    return { ok: false as const, error: "Something went wrong. Try again." };
+  const { db, actor, supplier } = await teamActor();
   const context = await requestContext();
-  return run(async () => {
-    await saveStorefrontDraft(db, actor, supplier.organisationId, form);
-    if (publish) await publishStorefront(db, actor, supplier.organisationId, context);
-  }, "/supplier/storefront");
+  return run(
+    () =>
+      setRolePermission(
+        db,
+        actor,
+        {
+          organisationId: supplier.organisationId,
+          role,
+          permission,
+          on,
+        },
+        context,
+      ),
+    "/supplier/team",
+    "/buyer/company",
+  );
 }

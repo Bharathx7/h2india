@@ -1,6 +1,7 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { OperatorPermission, Permission } from "./catalogue";
+import { applyChanges, roleChangesFor } from "./company-roles";
 
 // Who is asking (step 3.4). Loaded from the database on every request, so a role change applies at once.
 
@@ -33,7 +34,7 @@ const { memberships: m, organisations: o, roles: r, rolePermissions: rp, operato
 
 /**
  * Operator access gate (step 12.1, review H2): the web app registers a check that this request's session was made with
- * a passkey (A172). Without it (worker, scripts, tests) operator roles count as stored. A failing check drops the
+ * the back-office password sign-in (A183; passkeys removed 17 Nov 2026). Without it (worker, scripts, tests) operator roles count as stored. A failing check drops the
  * operator permissions only; the person keeps their company and member access.
  */
 let operatorGate: ((userId: string) => Promise<boolean>) | null = null;
@@ -42,7 +43,7 @@ export function setOperatorGate(gate: ((userId: string) => Promise<boolean>) | n
   operatorGate = gate;
 }
 
-/** Whether a person holds any operator role, whatever the gate says (to send them to the passkey step). */
+/** Whether a person holds any operator role, whatever the gate says (to send them to the staff sign-in). */
 export async function hasOperatorRole(ex: Executor, userId: string): Promise<boolean> {
   const rows = await ex.select({ userId: or.userId }).from(or).where(eq(or.userId, userId)).limit(1);
   return rows.length > 0;
@@ -82,6 +83,9 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
   // A suspended person can do nothing, whatever session they still hold (review H1, step 11.4).
   if (profile?.suspendedAt) return VISITOR;
 
+  // Each company's own changes to its roles (founder QC, 17 Nov 2026; Team's permission grid).
+  const changes = await roleChangesFor(ex, seats);
+
   const platform = new Set<PlatformRole>();
   if (profile?.type) platform.add("member");
   if (seats.length > 0) platform.add("company_user");
@@ -93,7 +97,12 @@ export async function loadActor(ex: Executor, userId: string | null | undefined)
     companies: new Map(
       seats.map((s) => [
         s.organisationId,
-        { role: s.role, kind: s.kind, permissions: new Set(s.permissions), orderLimitPaise: s.orderLimitPaise },
+        {
+          role: s.role,
+          kind: s.kind,
+          permissions: applyChanges(s.permissions, changes.get(`${s.organisationId}|${s.role}`) ?? []),
+          orderLimitPaise: s.orderLimitPaise,
+        },
       ]),
     ),
     operator: new Set(ops.map((x) => x.key)),

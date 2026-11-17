@@ -127,7 +127,7 @@ export async function viewCart(db: Database, actor: Actor, organisationId: strin
           gstin: sql<
             string | null
           >`(select g.gstin from core.organisation_gstins g where g.organisation_id = ${cart.supplierId}
-            order by g.is_default desc, g.created_at limit 1)`,
+            and g.portal_status = 'Active' order by g.is_default desc, g.created_at limit 1)`,
         })
         .from(schema.organisations)
         .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, schema.organisations.id))

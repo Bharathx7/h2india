@@ -9,6 +9,8 @@ import Link from "next/link";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // RFQs (557:8; phones 558:124; states 558:8), step 9.6: the company's requests by tab, with quotes in, the offer
 // deadline countdown and the designed badge. ?state= forces the loading, empty and error states.
@@ -31,7 +33,7 @@ function countdown(deadline: Date | null, now: Date) {
 export default async function BuyerRfqsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; state?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const page = await requireBuyer("/buyer/rfqs");
@@ -47,6 +49,7 @@ export default async function BuyerRfqsPage({
   const shown = rows.filter(
     (x) => inTab(x.rfq.status, tab) && (!q || `${x.rfq.reference} ${x.rfq.title}`.toLowerCase().includes(q)),
   );
+  const paged = pageOf(shown, pageRequest(sp));
   return (
     <BuyerWorkspace page={page} current="/buyer/rfqs">
       <div>
@@ -140,7 +143,7 @@ export default async function BuyerRfqsPage({
               </tr>
             </thead>
             <tbody>
-              {shown.map((x) => {
+              {paged.rows.map((x) => {
                 const badge = rfqBadge(
                   {
                     status: x.rfq.status as RfqStatus,
@@ -198,6 +201,7 @@ export default async function BuyerRfqsPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
       <p className="type-caption text-secondary">
         RFQs sent to more than one supplier are checked by H2 Economy within 1 working day before suppliers see them.

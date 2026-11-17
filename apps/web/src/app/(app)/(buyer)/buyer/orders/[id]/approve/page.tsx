@@ -11,7 +11,7 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { requireTransactionsPage } from "@/orders/guard";
 
 // Approve order (806:14572; phones 806:14918) with Confirm it's you (744:29031), step 10.3. Nobody approves their own
-// order; the server checks the route, the passkey and an expired quote again (G4). Built without its frame (A178).
+// order; the server checks the route, the Confirm it's you code and an expired quote again (G4). Built without its frame (A178).
 export const metadata: Metadata = { title: "Approve order · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 

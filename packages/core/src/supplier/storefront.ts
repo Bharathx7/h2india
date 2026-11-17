@@ -8,6 +8,7 @@ import { slugifyCompany } from "../companies/import";
 import { attachFile } from "../files/files";
 import { queueIndexChange } from "../search/outbox";
 import { queueProductsOf } from "../search/products";
+import { storefrontProblems, type StorefrontField } from "./storefront-rules";
 
 // The storefront editor (590:8; phones 594:8), step 8.7. Changes are saved as a draft ("Nothing changes for buyers
 // until you publish"); Publish changes sends them to H2 Economy, and the public profile (482:8) updates on approval.
@@ -16,7 +17,14 @@ import { queueProductsOf } from "../search/products";
 const r = schema.storefrontRevisions;
 const prof = schema.companyProfiles;
 
-export class StorefrontError extends Error {}
+export class StorefrontError extends Error {
+  constructor(
+    message: string,
+    readonly problems: Partial<Record<StorefrontField, string>> = {},
+  ) {
+    super(message);
+  }
+}
 
 export interface StorefrontForm extends StorefrontData {
   /** Product categories (590:8 "Goes to review"). */
@@ -74,7 +82,19 @@ export async function storefrontView(db: Executor, scope: Scope, organisationId:
     .where(and(eq(r.organisationId, organisationId), eq(r.status, "Approved")))
     .orderBy(desc(r.decidedAt))
     .limit(1);
-  const live: StorefrontForm = p
+  const live = liveForm(p);
+  const working = { ...live, ...((open?.data ?? {}) as StorefrontForm) };
+  const changed = Object.keys(open?.data ?? {}).filter(
+    (k) =>
+      JSON.stringify((live as Record<string, unknown>)[k] ?? null) !==
+      JSON.stringify((working as Record<string, unknown>)[k] ?? null),
+  );
+  return { profile: p ?? null, live, working, open: open ?? null, changed, lastPublished: published?.at ?? null };
+}
+
+/** The storefront buyers see now, in the editor's shape. */
+function liveForm(p: typeof prof.$inferSelect | undefined): StorefrontForm {
+  return p
     ? {
         ...p.storefront,
         about: p.storefront.about ?? p.summary ?? undefined,
@@ -84,13 +104,15 @@ export async function storefrontView(db: Executor, scope: Scope, organisationId:
         foundedYear: p.foundedYear,
       }
     : {};
-  const working = { ...live, ...((open?.data ?? {}) as StorefrontForm) };
-  const changed = Object.keys(open?.data ?? {}).filter(
-    (k) =>
-      JSON.stringify((live as Record<string, unknown>)[k] ?? null) !==
-      JSON.stringify((working as Record<string, unknown>)[k] ?? null),
+}
+
+/** Whether a saved draft differs from the live storefront (cleaned the same way, so blanks compare equal). */
+function differs(live: StorefrontForm, draft: StorefrontForm): boolean {
+  const a = clean(live) as Record<string, unknown>;
+  const b = clean(draft) as Record<string, unknown>;
+  return [...new Set([...Object.keys(a), ...Object.keys(b)])].some(
+    (k) => JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null),
   );
-  return { profile: p ?? null, live, working, open: open ?? null, changed, lastPublished: published?.at ?? null };
 }
 
 /** A supplier who joined (step 3.3) has no public profile yet: the first storefront save makes one. */
@@ -113,6 +135,8 @@ async function ensureProfile(db: Executor, organisationId: string) {
 /** Saved as a draft: nothing changes for buyers. */
 export async function saveStorefrontDraft(db: Database, actor: Actor, organisationId: string, form: StorefrontForm) {
   assertCan(actor, "storefront.manage", { organisationId });
+  const problems = storefrontProblems(form);
+  if (Object.keys(problems).length) throw new StorefrontError("Check the highlighted fields", problems);
   await ensureProfile(db, organisationId);
   const data = clean(form);
   if (data.logoFileId) {
@@ -143,9 +167,16 @@ export async function saveStorefrontDraft(db: Database, actor: Actor, organisati
       .values({ organisationId, status: "Draft", data: data as Record<string, unknown>, submittedBy: actor.userId });
 }
 
-/** Publish changes (590:8): to the Listings queue. */
+/** Publish changes (590:8): to the Listings queue. A draft that matches the live storefront isn't sent. */
 export async function publishStorefront(db: Database, actor: Actor, organisationId: string, context?: RequestContext) {
   assertCan(actor, "storefront.manage", { organisationId });
+  const [p] = await db.select().from(prof).where(eq(prof.organisationId, organisationId));
+  const [draft] = await db
+    .select({ data: r.data })
+    .from(r)
+    .where(and(eq(r.organisationId, organisationId), eq(r.status, "Draft")));
+  if (draft && !differs(liveForm(p), draft.data))
+    throw new StorefrontError("Nothing has changed since your storefront was last approved");
   const done = await db
     .update(r)
     .set({ status: "In review", submittedAt: new Date(), submittedBy: actor.userId })
@@ -155,6 +186,25 @@ export async function publishStorefront(db: Database, actor: Actor, organisation
   await audit(db, {
     actorId: actor.userId,
     action: "storefront.submitted",
+    resourceType: "storefront_revision",
+    resourceId: done[0]?.id ?? "",
+    companyId: organisationId,
+    context,
+  });
+}
+
+/** Take changes back from review (founder QC, 17 Nov 2026), to edit them again before H2 Economy decides. */
+export async function withdrawStorefront(db: Database, actor: Actor, organisationId: string, context?: RequestContext) {
+  assertCan(actor, "storefront.manage", { organisationId });
+  const done = await db
+    .update(r)
+    .set({ status: "Draft" })
+    .where(and(eq(r.organisationId, organisationId), eq(r.status, "In review")))
+    .returning({ id: r.id });
+  if (!done.length) throw new StorefrontError("Nothing is waiting for review");
+  await audit(db, {
+    actorId: actor.userId,
+    action: "storefront.withdrawn",
     resourceType: "storefront_revision",
     resourceId: done[0]?.id ?? "",
     companyId: organisationId,
@@ -195,6 +245,8 @@ export async function decideStorefront(
       })
       .where(eq(r.id, rev.id));
     if (input.approve) {
+      // A revision always holds the whole form (saveStorefrontDraft cleans every field), so an empty field means the
+      // supplier cleared it. Founder QC (17 Nov 2026): cleared fields used to fall back to the old values here.
       const d = rev.data as StorefrontForm;
       const [p] = await tx.select().from(prof).where(eq(prof.organisationId, rev.organisationId));
       const storefront: StorefrontData = {
@@ -213,11 +265,11 @@ export async function decideStorefront(
         .update(prof)
         .set({
           storefront,
-          summary: d.about ?? p?.summary ?? null,
-          categories: d.categories ?? p?.categories ?? [],
-          website: d.website ?? p?.website ?? null,
-          city: d.city ?? p?.city ?? null,
-          foundedYear: d.foundedYear ?? p?.foundedYear ?? null,
+          summary: d.about ?? null,
+          categories: d.categories ?? [],
+          website: d.website ?? null,
+          city: d.city ?? null,
+          foundedYear: d.foundedYear ?? null,
         })
         .where(eq(prof.organisationId, rev.organisationId));
       await queueIndexChange(tx, "companies", [rev.organisationId]);

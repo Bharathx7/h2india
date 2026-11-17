@@ -9,6 +9,8 @@ import { forcedState } from "@/lib/dev-state";
 import { pipelineBadge, supplierNextStep } from "@/orders/views";
 import { requireTransactionsPage } from "@/orders/guard";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Supplier orders pipeline (810:12156; phones 811:12343; states 811:12517), step 10.7. The stage tiles filter the
 // open orders (?stage=); Paid out counts orders closed this month. ?state= forces the designed states.
@@ -18,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function SupplierOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stage?: string; state?: string }>;
+  searchParams: Promise<{ stage?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   requireTransactionsPage();
   const sp = await searchParams;
@@ -42,6 +44,7 @@ export default async function SupplierOrdersPage({
   );
   const stage = SUPPLIER_PIPELINE.find((x) => x.key === sp.stage)?.key ?? null;
   const shown = stage ? inStage(stage) : open;
+  const paged = pageOf(shown, pageRequest(sp));
   const paid = inStage("paid").length;
   const overdue = inStage("pending").filter((o) => o.overdue).length;
   const state = forcedState(sp.state) ?? (all.length ? "ready" : "empty");
@@ -173,7 +176,7 @@ export default async function SupplierOrdersPage({
                     </tr>
                   </thead>
                   <tbody>
-                    {shown.map((o) => {
+                    {paged.rows.map((o) => {
                       const next = supplierNextStep(o, now);
                       const badge = pipelineBadge(o);
                       return (
@@ -200,7 +203,7 @@ export default async function SupplierOrdersPage({
                 </table>
               </div>
               <ul className="flex flex-col gap-3 md:hidden">
-                {shown.map((o) => {
+                {paged.rows.map((o) => {
                   const next = supplierNextStep(o, now);
                   const badge = pipelineBadge(o);
                   return (
@@ -225,6 +228,7 @@ export default async function SupplierOrdersPage({
                   );
                 })}
               </ul>
+              <ListPager paged={paged} query={pagingQuery(sp)} />
             </>
           ) : (
             <div className="rounded-card border border-default bg-page">

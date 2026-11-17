@@ -8,7 +8,7 @@ import {
   SIGN_IN_ERROR,
   type AccountKind,
 } from "@h2india/core/sign-in";
-import { Alert, Button, buttonClasses, FormField, Icon, Input, OtpInput, TextLink } from "@h2india/ui";
+import { Alert, Button, FormField, Icon, Input, OtpInput, TextLink } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type SyntheticEvent, type ReactNode } from "react";
@@ -18,18 +18,18 @@ import { AuthCard } from "../AuthCard";
 import { whereNext } from "./actions";
 
 // The sign-in screens of Figma section 524:1772, as one flow so nothing has to travel in the address bar.
-// Copy is the frames'. Messages the design does not show (rate limits, passkey failures, Google not set up) are
-// short and plain; they are listed in docs/design-fidelity.md.
+// Copy is the frames'. Messages the design does not show (rate limits, Google not set up) are short and plain; they are
+// listed in docs/design-fidelity.md. Passkeys were removed on 17 Nov 2026 (A183): everyone signs in with an email code
+// (or Google here), and staff use the password sign-in (staff/StaffSignIn.tsx).
 
-type Step = "start" | "code" | "paused" | "offer";
+type Step = "start" | "code" | "paused";
 
 interface Problem {
   title: string;
   body?: ReactNode;
 }
 
-const OFFER_COOKIE = "h2_passkey_offer";
-/** Each account page's words (public QC 2, 16 Nov 2026): email only, no passkey or Google. */
+/** Each account page's words (public QC 2, 16 Nov 2026): email only, no Google. */
 const AUDIENCE: Record<AccountKind, { title: string; lead: string; label: string; join: string; other: string }> = {
   buyer: {
     title: "Buyer sign in",
@@ -53,8 +53,6 @@ const AUDIENCE: Record<AccountKind, { title: string; lead: string; label: string
     other: "Member",
   },
 };
-const OFFER_LATER_DAYS = 30;
-
 const linkButton = "cursor-pointer";
 
 /** The error body carries our extra fields (code, triesLeft, until, retryAt) next to Better Auth's own. */
@@ -68,55 +66,13 @@ function retryIn(iso: string | undefined): string {
   return seconds < 90 ? `${String(seconds)} seconds` : `${String(Math.ceil(seconds / 60))} minutes`;
 }
 
-/** "MacBook · Chrome", so people can tell their passkeys apart later (Security page). */
-function deviceName(): string {
-  const ua = navigator.userAgent;
-  const os = /iPhone/.test(ua)
-    ? "iPhone"
-    : /iPad/.test(ua)
-      ? "iPad"
-      : /Android/.test(ua)
-        ? "Android"
-        : /Mac OS X/.test(ua)
-          ? "Mac"
-          : /Windows/.test(ua)
-            ? "Windows"
-            : /Linux/.test(ua)
-              ? "Linux"
-              : "This device";
-  const browser = /Edg\//.test(ua)
-    ? "Edge"
-    : /Firefox\//.test(ua)
-      ? "Firefox"
-      : /Chrome\//.test(ua)
-        ? "Chrome"
-        : /Safari\//.test(ua)
-          ? "Safari"
-          : "Browser";
-  return `${os} · ${browser}`;
-}
-
-function offerSnoozed(): boolean {
-  return document.cookie.split("; ").some((c) => c === `${OFFER_COOKIE}=later`);
-}
-
-function snoozeOffer() {
-  document.cookie = `${OFFER_COOKIE}=later; max-age=${String(OFFER_LATER_DAYS * 86400)}; path=/; samesite=lax`;
-}
-
 export function SignInFlow({
   next,
   initialError,
-  staffOnly = false,
-  signedInElsewhere = false,
   audience,
 }: {
   next: string;
   initialError?: Problem;
-  /** The admin domain (public QC, 16 Nov 2026): staff wording, no Google and no Join. */
-  staffOnly?: boolean;
-  /** Admin domain, already signed in as someone who isn't staff: only Sign out is offered. */
-  signedInElsewhere?: boolean;
   /** The buyer, supplier or member sign-in page (public QC 2): email code only, that page's words and sign-up. */
   audience?: AccountKind;
 }) {
@@ -130,7 +86,7 @@ export function SignInFlow({
   const [pausedUntil, setPausedUntil] = useState<Date>();
   const [resendAt, setResendAt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
-  const [busy, setBusy] = useState<"passkey" | "send" | "verify" | "google" | "create">();
+  const [busy, setBusy] = useState<"send" | "verify" | "google">();
   const heading = useRef<HTMLHeadingElement>(null);
   const words = audience ? AUDIENCE[audience] : null;
   const others = ACCOUNT_KINDS.filter((k) => k !== audience);
@@ -181,7 +137,7 @@ export function SignInFlow({
     if (detail.code === SIGN_IN_ERROR.tooManyCodes || detail.status === 429) {
       return {
         title: "Too many codes requested",
-        body: `Try again in ${retryIn(detail.retryAt)}${audience ? "." : ", or use a passkey."}`,
+        body: `Try again in ${retryIn(detail.retryAt)}.`,
       };
     }
     return { title: "We couldn't send a code", body: "Check your connection and try again." };
@@ -222,31 +178,13 @@ export function SignInFlow({
     }
   };
 
-  const afterCodeSignIn = async () => {
-    // The buyer, supplier and member pages offer no passkey (public QC 2); suppliers set one up for bank changes.
-    if (audience) {
-      finish();
-      return;
-    }
-    const canPasskey = typeof window.PublicKeyCredential === "function";
-    if (canPasskey && !offerSnoozed()) {
-      const { data } = await authClient.passkey.listUserPasskeys();
-      if (data?.length === 0) {
-        setStep("offer");
-        return;
-      }
-    }
-    finish();
-  };
-
   const verify = async (value: string) => {
     if (value.length < SIGN_IN.codeLength || busy === "verify") return;
     setBusy("verify");
     setProblem(undefined);
     const { error } = await authClient.signIn.emailOtp({ email: email.trim(), otp: value });
     if (!error) {
-      await afterCodeSignIn();
-      setBusy(undefined);
+      finish();
       return;
     }
     setBusy(undefined);
@@ -275,21 +213,6 @@ export function SignInFlow({
     }
   };
 
-  const passkeySignIn = async () => {
-    setBusy("passkey");
-    setProblem(undefined);
-    const result = await authClient.signIn.passkey();
-    setBusy(undefined);
-    if (!result.error) {
-      finish();
-      return;
-    }
-    // Closing the browser's passkey window is not an error worth a message.
-    const message = result.error.message ?? "";
-    if (/cancel|abort|not allowed|NotAllowed/i.test(message)) return;
-    setProblem({ title: "That passkey didn't work", body: "Try again, or sign in with an email code." });
-  };
-
   const google = async () => {
     setBusy("google");
     setProblem(undefined);
@@ -300,22 +223,8 @@ export function SignInFlow({
     });
     if (error) {
       setBusy(undefined);
-      setProblem({ title: "Google sign-in isn't available yet", body: "Use a passkey or an email code." });
+      setProblem({ title: "Google sign-in isn't available yet", body: "Use an email code." });
     }
-  };
-
-  const createPasskey = async () => {
-    setBusy("create");
-    setProblem(undefined);
-    const result = await authClient.passkey.addPasskey({ name: deviceName() });
-    setBusy(undefined);
-    if (!result.error) {
-      finish();
-      return;
-    }
-    const message = result.error.message ?? "";
-    if (/cancel|abort|not allowed|NotAllowed/i.test(message)) return;
-    setProblem({ title: "We couldn't create the passkey", body: "Try again, or choose Not now." });
   };
 
   const alert = problem ? (
@@ -349,41 +258,6 @@ export function SignInFlow({
         </Button>
         <TextLink asChild showIcon={false} className="self-start">
           <Link href={AUTH_LINKS.contactSupport}>Not you trying? Contact support</Link>
-        </TextLink>
-      </AuthCard>
-    );
-  }
-
-  if (step === "offer") {
-    return (
-      <AuthCard>
-        <h1 ref={heading} tabIndex={-1} className="type-h2 text-primary outline-none">
-          Set up a passkey
-        </h1>
-        <p className="type-body text-body">
-          Use this device&apos;s fingerprint, face or screen lock to sign in next time.
-        </p>
-        {alert}
-        <Button
-          size="lg"
-          leadingIcon="lock"
-          className="w-full"
-          disabled={busy === "create"}
-          onClick={() => void createPasskey()}
-        >
-          Create passkey
-        </Button>
-        <TextLink asChild showIcon={false} className="self-start">
-          <button
-            type="button"
-            className={linkButton}
-            onClick={() => {
-              snoozeOffer();
-              finish();
-            }}
-          >
-            Not now
-          </button>
         </TextLink>
       </AuthCard>
     );
@@ -478,18 +352,6 @@ export function SignInFlow({
     );
   }
 
-  if (signedInElsewhere) {
-    return (
-      <AuthCard>
-        <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
-        {alert}
-        <a href="/sign-out" className={`${buttonClasses({ variant: "outline", size: "lg" })} w-full`}>
-          Sign out
-        </a>
-      </AuthCard>
-    );
-  }
-
   // Buyer, supplier and member pages (public QC 2): one email box, then the code. Nothing else to choose.
   if (audience && words) {
     const keep = next !== ACCOUNT_PAGES[audience].home && next !== "/";
@@ -545,40 +407,15 @@ export function SignInFlow({
 
   return (
     <AuthCard>
-      {staffOnly ? (
-        <>
-          <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
-          <p className="type-body text-body">
-            For H2 Economy staff. Use your passkey, or a code sent to your work email.
-          </p>
-        </>
-      ) : (
-        <>
-          <h1 className="type-h2 text-primary">Sign in to H2 Economy</h1>
-          <p className="type-body text-body">You&apos;ll come back to the page you were on.</p>
-        </>
-      )}
+      <h1 className="type-h2 text-primary">Sign in to H2 Economy</h1>
+      <p className="type-body text-body">You&apos;ll come back to the page you were on.</p>
       {alert}
-      <Button
-        size="lg"
-        leadingIcon="lock"
-        className="w-full"
-        disabled={busy === "passkey"}
-        onClick={() => void passkeySignIn()}
-      >
-        Continue with passkey
-      </Button>
-      <div className="flex items-center gap-3" aria-hidden="true">
-        <span className="flex-1 border-t border-default" />
-        <span className="type-body-sm text-secondary">or</span>
-        <span className="flex-1 border-t border-default" />
-      </div>
       <form className="flex flex-col gap-5" onSubmit={(event) => void onEmail(event)} noValidate>
         <FormField label="Work email" error={emailError}>
           <Input
             type="email"
             name="email"
-            autoComplete="email webauthn"
+            autoComplete="email"
             placeholder="you@company.com"
             value={email}
             onChange={(event) => {
@@ -587,39 +424,41 @@ export function SignInFlow({
             }}
           />
         </FormField>
-        <Button type="submit" variant="outline" size="lg" className="w-full" disabled={busy === "send"}>
+        <Button type="submit" size="lg" className="w-full" disabled={busy === "send"}>
           Send code
         </Button>
       </form>
-      {staffOnly ? null : (
-        <button
-          type="button"
-          onClick={() => void google()}
-          disabled={busy === "google"}
-          className="flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-card border border-default bg-page px-3.5 type-label text-primary transition-colors duration-(--motion-duration-fast) ease-standard hover:border-hover disabled:cursor-default disabled:text-secondary"
+      <button
+        type="button"
+        onClick={() => void google()}
+        disabled={busy === "google"}
+        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-card border border-default bg-page px-3.5 type-label text-primary transition-colors duration-(--motion-duration-fast) ease-standard hover:border-hover disabled:cursor-default disabled:text-secondary"
+      >
+        <span
+          aria-hidden="true"
+          className="flex size-5 items-center justify-center rounded-pill border border-control type-label-sm"
         >
-          <span
-            aria-hidden="true"
-            className="flex size-5 items-center justify-center rounded-pill border border-control type-label-sm"
-          >
-            G
-          </span>
-          Continue with Google
-        </button>
-      )}
+          G
+        </span>
+        Continue with Google
+      </button>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <TextLink asChild showIcon={false}>
           <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
         </TextLink>
-        {staffOnly ? null : (
-          <p className="flex items-center gap-1 type-body-sm text-body">
-            New to H2 Economy?{" "}
-            <TextLink asChild showIcon={false}>
-              <Link href={AUTH_LINKS.join}>Join free</Link>
-            </TextLink>
-          </p>
-        )}
+        <p className="flex items-center gap-1 type-body-sm text-body">
+          New to H2 Economy?{" "}
+          <TextLink asChild showIcon={false}>
+            <Link href={AUTH_LINKS.join}>Join free</Link>
+          </TextLink>
+        </p>
       </div>
+      <p className="border-t border-default pt-4 type-body-sm text-body">
+        H2 Economy staff?{" "}
+        <TextLink asChild showIcon={false}>
+          <Link href={`${AUTH_LINKS.staffSignIn}?next=${encodeURIComponent(next)}`}>Sign in with your password</Link>
+        </TextLink>
+      </p>
     </AuthCard>
   );
 }

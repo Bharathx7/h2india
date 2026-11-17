@@ -102,9 +102,14 @@ export async function MemberHome({
                     : "Your feed is empty"
                 }
                 action={
-                  <Link href="/member/follows" className={buttonClasses({})}>
-                    Follow topics and companies
-                  </Link>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <Link href="/member/welcome" className={buttonClasses({})}>
+                      Personalise your feed
+                    </Link>
+                    <Link href="/member/follows" className={buttonClasses({ variant: "outline" })}>
+                      Follow topics and companies
+                    </Link>
+                  </div>
                 }
               >
                 Follow topics, states and companies, and new articles, tenders, schemes and events show here.

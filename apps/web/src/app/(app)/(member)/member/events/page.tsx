@@ -5,9 +5,11 @@ import { buttonClasses, EmptyState, Icon, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPayload } from "payload";
+import { ListPager } from "@/components/ListPager";
 import { LiveSection } from "@/components/LiveSection";
 import { timeRange } from "@/events/views";
 import { forcedState } from "@/lib/dev-state";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { CancelRegistration } from "@/member/RegistrationRow";
 import { MemberShell, requireMember } from "@/member/shell";
 import { dayMonthYear } from "@/news/format";
@@ -25,7 +27,11 @@ const month = (iso: string) =>
 const weekday = (iso: string) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short" }).format(new Date(iso));
 
-export default async function EventRegistrationsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+export default async function EventRegistrationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const sp = await searchParams;
   const userId = await requireMember("/member/events");
   const regs = await myRegistrations(getDb(), userId);
@@ -45,6 +51,10 @@ export default async function EventRegistrationsPage({ searchParams }: { searchP
   const end = (e: Event) => Date.parse(e.endsAt ?? e.startsAt);
   const upcoming = rows.filter((x) => end(x.e) >= now).sort((a, b) => a.e.startsAt.localeCompare(b.e.startsAt));
   const past = rows.filter((x) => end(x.e) < now).sort((a, b) => b.e.startsAt.localeCompare(a.e.startsAt));
+  // One page across both lists (upcoming first); the headings keep the full counts.
+  const paged = pageOf([...upcoming, ...past], pageRequest(sp));
+  const pageUpcoming = paged.rows.filter((x) => end(x.e) >= now);
+  const pagePast = paged.rows.filter((x) => end(x.e) < now);
   const eyebrow = (e: Event) =>
     [e.eventType === "Webinar" ? "Webinar" : e.eventType, e.attendance === "Online" ? "Online" : e.city, e.organiser]
       .filter(Boolean)
@@ -100,11 +110,11 @@ export default async function EventRegistrationsPage({ searchParams }: { searchP
         }
       >
         <div className="flex flex-col gap-6">
-          {upcoming.length ? (
+          {pageUpcoming.length ? (
             <section className="rounded-card border border-default bg-page p-5 md:p-6">
               <h2 className="type-h4 pb-3">Upcoming · {upcoming.length}</h2>
               <ul>
-                {upcoming.map(({ r, e }) => (
+                {pageUpcoming.map(({ r, e }) => (
                   <Row
                     key={r.id}
                     e={e}
@@ -120,11 +130,11 @@ export default async function EventRegistrationsPage({ searchParams }: { searchP
               </ul>
             </section>
           ) : null}
-          {past.length ? (
+          {pagePast.length ? (
             <section className="rounded-card border border-default bg-page p-5 md:p-6">
               <h2 className="type-h4 pb-3">Past · {past.length}</h2>
               <ul>
-                {past.map(({ r, e }) => (
+                {pagePast.map(({ r, e }) => (
                   <Row key={r.id} e={e} line={`${weekday(e.startsAt)} ${dayMonthYear(e.startsAt)}`}>
                     {e.webinar?.replay?.url ? (
                       <Link href={`/events/${e.slug}`} className={buttonClasses({ variant: "outline", size: "sm" })}>
@@ -137,6 +147,7 @@ export default async function EventRegistrationsPage({ searchParams }: { searchP
               </ul>
             </section>
           ) : null}
+          <ListPager paged={paged} query={pagingQuery(sp)} />
         </div>
       </LiveSection>
     </MemberShell>

@@ -286,7 +286,13 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
                   </span>
                 </p>
               </div>
-              <div className="overflow-x-auto rounded-card border border-default">
+              {/* Scrolls sideways on phones, so it takes keyboard focus (axe scrollable-region-focusable). */}
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Events calendar"
+                className="relative overflow-x-auto rounded-card border border-default"
+              >
                 <table className="w-full min-w-170 table-fixed">
                   <thead className="bg-subtle type-label-sm text-secondary">
                     <tr>

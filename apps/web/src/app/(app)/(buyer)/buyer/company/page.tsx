@@ -1,5 +1,5 @@
 import { getDb, Money } from "@h2india/core";
-import { scopeFor } from "@h2india/core/authz";
+import { roleGrid, scopeFor } from "@h2india/core/authz";
 import { companySessions, companySettings, delegationsOf } from "@h2india/core/buyer";
 import { companyRoles, teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
@@ -13,7 +13,6 @@ import {
   EndDelegation,
   GstinActions,
   LimitDialog,
-  PasskeyPolicy,
   ProfileForm,
   RemoveSite,
   RulesForm,
@@ -21,6 +20,7 @@ import {
   SiteDialog,
 } from "@/buyer/Settings";
 import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
+import { RolePermissions } from "@/supplier/RolePermissions";
 import { InviteMember, JoinRequest, MemberMenu, RevokeInvite } from "@/supplier/TeamControls";
 
 // Company settings (step 9.1): Company profile 574:8, GSTINs 574:638, Delivery sites 575:331, Users and roles 575:696,
@@ -273,9 +273,10 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else if (section === "users") {
-    const [team, roles] = await Promise.all([
+    const [team, roles, grid] = await Promise.all([
       teamView(db, scope, b.organisationId),
       companyRoles(db, b.organisationId),
+      roleGrid(db, page.actor, b.organisationId),
     ]);
     const today = new Date().toDateString();
     const active = (d: Date | null) =>
@@ -414,6 +415,12 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
           </Link>
           .
         </p>
+        <section aria-labelledby="permissions" className="flex flex-col gap-3">
+          <h3 id="permissions" className="type-h4">
+            Roles and permissions
+          </h3>
+          <RolePermissions permissions={grid.permissions} roles={grid.roles} canEdit={canTeam} />
+        </section>
       </>
     );
   } else if (section === "rules") {
@@ -468,28 +475,15 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else {
-    const [team, sessions] = await Promise.all([
-      teamView(db, scope, b.organisationId),
-      canManage ? companySessions(db, page.actor, b.organisationId) : Promise.resolve([]),
-    ]);
-    const counts = Object.fromEntries(
-      ["Admin", "Approver", "Requester"].map((r) => {
-        const of = team.members.filter((m) => m.role === r);
-        return [r, `${String(of.filter((m) => m.passkey).length)} of ${String(of.length)} has a passkey`];
-      }),
-    );
+    const sessions = canManage ? await companySessions(db, page.actor, b.organisationId) : [];
     body = (
       <>
         <Heading title="Security" detail={`Sign-in rules for everyone at ${b.legalName}, and who is signed in now.`} />
         <section className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
-          <h3 className="type-h4">Require a passkey</h3>
+          <h3 className="type-h4">How people sign in</h3>
           <p className="type-body-sm text-secondary">
-            A passkey signs people in with their fingerprint, face or screen lock. Approvers also confirm each approval
-            with it.
-          </p>
-          <PasskeyPolicy roles={data.settings?.passkeyRoles ?? []} counts={counts} canEdit={canManage} />
-          <p className="type-caption text-secondary">
-            People without a passkey are asked to add one the next time they sign in.
+            Everyone signs in with a code sent to their work email. Approvers and admins also confirm approvals and bank
+            changes with a fresh code.
           </p>
         </section>
         {canManage ? (

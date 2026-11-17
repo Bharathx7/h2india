@@ -19,6 +19,8 @@ export default async function BuyerMessagesPage({
     state?: string;
     rfq?: string;
     supplier?: string;
+    page?: string;
+    perPage?: string;
   }>;
 }) {
   const sp = await searchParams;

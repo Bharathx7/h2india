@@ -3,8 +3,10 @@ import { listApplications, listSaved } from "@h2india/core/members";
 import { Alert, buttonClasses, EmptyState, Icon, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ListPager } from "@/components/ListPager";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { ApplicationStatus, RemoveSavedJob } from "@/member/ApplicationControls";
 import { MemberShell, requireMember } from "@/member/shell";
 
@@ -17,7 +19,11 @@ export const dynamic = "force-dynamic";
 const dm = (d: Date) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short" }).format(d);
 
-export default async function ApplicationsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+export default async function ApplicationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const sp = await searchParams;
   const userId = await requireMember("/member/applications");
   const db = getDb();
@@ -25,6 +31,13 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
   const applied = new Set(apps.map((a) => a.jobSlug));
   const savedJobs = saved.filter((s) => s.targetType === "job" && !applied.has(s.targetId));
   const now = new Date().getTime();
+  // One page across both lists (applied first); the headings keep the full counts.
+  const paged = pageOf(
+    [...apps.map((a) => ({ app: a, saved: null })), ...savedJobs.map((s) => ({ app: null, saved: s }))],
+    pageRequest(sp),
+  );
+  const pageApps = paged.rows.flatMap((x) => (x.app ? [x.app] : []));
+  const pageSaved = paged.rows.flatMap((x) => (x.saved ? [x.saved] : []));
   return (
     <MemberShell userId={userId} current="/member/applications">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -68,7 +81,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
         }
       >
         <div className="flex flex-col gap-6">
-          {apps.length ? (
+          {pageApps.length ? (
             <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5 md:p-6">
               <h2 className="type-h4">Applied · {apps.length}</h2>
               <div tabIndex={0} role="region" aria-label="Jobs you applied for" className="relative overflow-x-auto">
@@ -96,7 +109,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                     </tr>
                   </thead>
                   <tbody>
-                    {apps.map((a) => {
+                    {pageApps.map((a) => {
                       const closed = a.closesAt ? a.closesAt.getTime() < now : false;
                       return (
                         <tr key={a.id} className="border-b border-default last:border-0">
@@ -128,12 +141,12 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
               </div>
             </section>
           ) : null}
-          {savedJobs.length ? (
+          {pageSaved.length ? (
             <section className="flex flex-col gap-1 rounded-card border border-default bg-page p-5 md:p-6">
               <h2 className="type-h4">Saved jobs · {savedJobs.length}</h2>
               <p className="type-caption text-secondary">Jobs you saved but haven't applied for yet.</p>
               <ul className="pt-2">
-                {savedJobs.map((s) => (
+                {pageSaved.map((s) => (
                   <li key={s.id} className="flex flex-wrap items-center gap-3 border-t border-default py-3">
                     <div className="min-w-0 flex-1">
                       <Link href={s.href} className="type-label text-primary hover:underline">
@@ -156,6 +169,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
               </ul>
             </section>
           ) : null}
+          <ListPager paged={paged} query={pagingQuery(sp)} />
         </div>
       </LiveSection>
     </MemberShell>

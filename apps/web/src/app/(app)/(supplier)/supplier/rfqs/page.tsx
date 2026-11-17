@@ -9,6 +9,8 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 import { dueBadge, inboxTab, quoteBadge, type InboxTab } from "@/supplier/rfq/views";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // RFQ inbox (615:8; phones 616:346; states 621:1030), step 9.5: every RFQ sent to the company, by tab. ?state= forces
 // the designed loading, empty and error states.
@@ -26,7 +28,7 @@ const TABS: { key: InboxTab; label: string }[] = [
 export default async function SupplierRfqsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; state?: string }>;
+  searchParams: Promise<{ tab?: string; q?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/rfqs");
@@ -52,6 +54,7 @@ export default async function SupplierRfqsPage({
       (tab === "all" || r.tab === tab) &&
       (!q || `${r.x.rfq.reference} ${r.x.rfq.title} ${r.x.buyer}`.toLowerCase().includes(q)),
   );
+  const paged = pageOf(shown, pageRequest(sp));
   const count = (k: InboxTab) => (k === "all" ? facts.length : facts.filter((r) => r.tab === k).length);
   return (
     <SupplierShell page={page} current="/supplier/rfqs" title="RFQs">
@@ -136,7 +139,7 @@ export default async function SupplierRfqsPage({
               </tr>
             </thead>
             <tbody>
-              {shown.map(({ x, badge, tab: t }) => {
+              {paged.rows.map(({ x, badge, tab: t }) => {
                 const due = x.rfq.status === "Closed" ? null : dueBadge(x.rfq.offerDeadline, now);
                 const action =
                   t === "quote"
@@ -189,6 +192,7 @@ export default async function SupplierRfqsPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </SupplierShell>
   );

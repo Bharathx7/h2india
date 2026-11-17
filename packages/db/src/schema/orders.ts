@@ -86,6 +86,11 @@ export const orders = core.table(
     tier: text("tier").notNull().default("A"),
     deliverySiteId: uuid("delivery_site_id").references(() => deliverySites.id),
     billingGstinId: uuid("billing_gstin_id").references(() => organisationGstins.id),
+    /**
+     * The supplier GSTIN the order is invoiced under (founder QC, 17 Nov 2026): the quote version's for a quote, the
+     * supplier's verified default for a cart. Shown to both sides on the order.
+     */
+    supplierGstinId: uuid("supplier_gstin_id").references(() => organisationGstins.id),
     /** Who receives at site: gets the delivery code by SMS (step 10.9). */
     receiverName: text("receiver_name"),
     receiverMobile: text("receiver_mobile"),

@@ -19,6 +19,8 @@ import {
 } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, type PageRequest } from "@/lib/paging";
 import { inbox, markAllRead, markOneRead, saveChoices } from "./actions";
 import type { Row } from "./rows";
 import { TOPIC_LABELS, topicsFor } from "./topics";
@@ -44,6 +46,9 @@ export function NotificationsView(props: {
   demoState?: "loading" | "empty" | "error";
   choices: Choices;
   contact: { email: string; mobile: string | null };
+  /** The page of the Activity list asked for in the address (?page=&perPage=), and the address's other parameters. */
+  paging: PageRequest;
+  query: Record<string, string>;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<string>(props.tab);
@@ -56,6 +61,11 @@ export function NotificationsView(props: {
   const load = (f: Filter) => {
     const ticket = ++latest.current;
     setFilter(f);
+    // A new filter starts again from page 1 (the address keeps the rows per page).
+    if (props.paging.page > 1) {
+      const qs = new URLSearchParams({ ...props.query, perPage: String(props.paging.perPage) }).toString();
+      router.replace(`/notifications?${qs}`, { scroll: false });
+    }
     setState("loading");
     inbox(f)
       .then((d) => {
@@ -68,6 +78,8 @@ export function NotificationsView(props: {
       });
   };
 
+  // The list holds the newest 100 notifications (and each filter's newest 100); this pages through them.
+  const paged = pageOf(data.items, props.paging);
   const shownState = props.demoState ?? (state === "ready" && data.items.length === 0 ? "empty" : state);
 
   return (
@@ -152,7 +164,7 @@ export function NotificationsView(props: {
           >
             <div className="flex flex-col gap-6">
               {GROUPS.map((g) => {
-                const rows = data.items.filter((i) => i.group === g);
+                const rows = paged.rows.filter((i) => i.group === g);
                 if (rows.length === 0) return null;
                 return (
                   <section key={g} className="flex flex-col gap-2.5" aria-labelledby={`group-${g}`}>
@@ -174,6 +186,7 @@ export function NotificationsView(props: {
                   </section>
                 );
               })}
+              <ListPager paged={paged} query={props.query} />
             </div>
           </AsyncSection>
           <p className="flex items-start gap-2 type-body-sm text-secondary">

@@ -48,6 +48,26 @@ export async function latestSmsCode(page: Page, mobile: string, after: number): 
   return code;
 }
 
+/** The link in the newest "Set your H2 Economy back-office password" message (A183). */
+export async function latestPasswordLink(page: Page, email: string, after: number): Promise<string> {
+  let link = "";
+  await expect
+    .poll(
+      async () => {
+        const m = await newest(page, email, after);
+        if (m?.Subject !== "Set your H2 Economy back-office password") return "";
+        const res = await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`);
+        link =
+          /(https?:\/\/[^\s"]+\/reset-password\/[^\s"\]]+)/.exec(((await res.json()) as { Text: string }).Text)?.[1] ??
+          "";
+        return link;
+      },
+      { message: `a set-password link for ${email}`, timeout: 10_000 },
+    )
+    .toContain("/reset-password/");
+  return link;
+}
+
 /** The link in the newest "Confirm your email" message. */
 export async function latestConfirmLink(page: Page, email: string, after: number): Promise<string> {
   let link = "";
@@ -89,9 +109,6 @@ export async function fillDetails(page: Page, opts: { email?: string; name: stri
 export async function signInNew(page: Page, email: string): Promise<void> {
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
-  if (await notNow.isVisible()) await notNow.click();
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible({ timeout: 15_000 });
 }
 

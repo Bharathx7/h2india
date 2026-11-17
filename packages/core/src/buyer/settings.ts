@@ -1,5 +1,5 @@
 import { schema, type Database, type Executor, type ReceivingContact } from "@h2india/db";
-import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -193,6 +193,12 @@ export async function removeGstin(
     .where(eq(schema.quoteVersions.supplierGstinId, id));
   if ((quoted?.n ?? 0) > 0)
     throw new BuyerSettingsError("A quote was issued under this GSTIN, so it can't be removed.");
+  // Founder QC (17 Nov 2026): orders now record the GSTIN they're invoiced or billed under.
+  const [ordered] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.orders)
+    .where(or(eq(schema.orders.supplierGstinId, id), eq(schema.orders.billingGstinId, id)));
+  if ((ordered?.n ?? 0) > 0) throw new BuyerSettingsError("An order uses this GSTIN, so it can't be removed.");
   await db.delete(g).where(eq(g.id, id));
   await audit(db, {
     actorId: actor.userId,
@@ -475,31 +481,6 @@ export async function delegationsOf(db: Executor, scope: Scope, organisationId: 
 }
 
 // ------------------------------------------------------------------------------------------------ security
-
-/** Require a passkey for roles (576:662). People without one are asked to add one the next time they sign in. */
-export async function setPasskeyRoles(
-  db: Database,
-  actor: Actor,
-  organisationId: string,
-  roles: string[],
-  context?: RequestContext,
-) {
-  assertCan(actor, "company.manage", { organisationId });
-  const clean = roles.filter((r) => ["Admin", "Approver", "Requester"].includes(r));
-  await db
-    .insert(bs)
-    .values({ organisationId, passkeyRoles: clean })
-    .onConflictDoUpdate({ target: bs.organisationId, set: { passkeyRoles: clean, updatedAt: new Date() } });
-  await audit(db, {
-    actorId: actor.userId,
-    action: "security.passkey_roles",
-    resourceType: "buyer_settings",
-    resourceId: organisationId,
-    companyId: organisationId,
-    after: { roles: clean },
-    context,
-  });
-}
 
 /** Signed in now (576:662): the company's people and their active sessions. */
 export async function companySessions(db: Executor, actor: Actor, organisationId: string, now: Date = new Date()) {

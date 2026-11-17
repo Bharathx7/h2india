@@ -5,7 +5,7 @@ import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
 import { Alert, cx, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CancelChange, ConfirmWithPasskey, NewAccountForm, TryAnother } from "@/supplier/BankControls";
+import { CancelChange, ConfirmChange, NewAccountForm, TryAnother } from "@/supplier/BankControls";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 
 // Payout bank account (588:222): Current account 588:223, Change account confirm 588:748, Hold period 588:1179 and
@@ -112,7 +112,7 @@ export default async function BankPage() {
               We sent ₹1. The bank returned the name {change.bankName}, which matches your GST legal name.
             </Alert>
             {canChange ? (
-              <ConfirmWithPasskey id={change.id} holdUntil={state.current ? "the hold period ends" : null} />
+              <ConfirmChange id={change.id} holdUntil={state.current ? "the hold period ends" : null} />
             ) : null}
           </>
         ) : null}
@@ -129,7 +129,7 @@ export default async function BankPage() {
               extra={[
                 [
                   "Changed",
-                  `${change.confirmedAt ? formatIstDateTime(change.confirmedAt) : ""}, confirmed with passkey`,
+                  `${change.confirmedAt ? formatIstDateTime(change.confirmedAt) : ""}, confirmed by email code`,
                 ],
               ]}
             />
@@ -172,7 +172,8 @@ export default async function BankPage() {
               )
             ) : null}
             <Alert tone="success" title="Changing your account pauses payouts">
-              We check the new account with a ₹1 test deposit and your passkey, then hold payouts before switching.
+              We check the new account with a ₹1 test deposit and a code to your email, then hold payouts before
+              switching.
             </Alert>
           </>
         ) : null}

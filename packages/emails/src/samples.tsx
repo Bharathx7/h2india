@@ -13,6 +13,7 @@ import {
   renderAlertDigest,
   renderDocumentExpiring,
   renderSignInCode,
+  renderStaffPasswordLink,
   renderVerifyEmail,
 } from "./index";
 import { Notice } from "./notice";
@@ -44,6 +45,19 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
           expiresAt: "8:51 AM IST",
         }),
       );
+    case "email.step_up_code":
+      return email(
+        renderSignInCode({
+          appUrl,
+          code: "482913",
+          name: "Ravi",
+          purpose: "confirm",
+          expiresIn: "10 minutes",
+          expiresAt: "8:51 AM IST",
+        }),
+      );
+    case "email.staff_password_link":
+      return email(renderStaffPasswordLink(appUrl, { url, name: "Ravi", minutes: 60 }));
     case "email.passkey_reset_admin":
       return email(
         renderRecovery(appUrl, "passkeyReset", {

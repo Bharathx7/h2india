@@ -118,6 +118,26 @@ export const memberships = core.table(
   ],
 );
 
+/**
+ * A company's own changes to a role's default permissions (founder QC, 17 Nov 2026): a ticked box on Team that the
+ * defaults don't have (granted true), or a default the company took away (granted false). Admin is never changed.
+ * Read by loadActor(); changed only through setRolePermission() (@h2india/core/authz), audited.
+ */
+export const companyRolePermissions = core.table(
+  "company_role_permissions",
+  {
+    organisationId: uuid("organisation_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    role: text("role").notNull(),
+    permissionKey: text("permission_key").notNull(),
+    granted: boolean("granted").notNull(),
+    changedBy: uuid("changed_by").references(() => users.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex("company_role_permissions_unique").on(t.organisationId, t.role, t.permissionKey)],
+);
+
 /** A request to join an existing company: Pending · Approved · Rejected · Expired · Cancelled (365:27779). */
 export const joinRequests = core.table(
   "join_requests",

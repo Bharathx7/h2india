@@ -5,14 +5,17 @@ import { formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, EmptyState, Icon, Skeleton, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { AutoSelect } from "@/admin/users/Controls";
 import { Initials, UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
+import { ListPager } from "@/components/ListPager";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Users (651:8; states 657:1313), step 11.4: find anyone by name, email, mobile, company or GSTIN; filter by type,
-// status and passkey.
+// status.
 export const metadata: Metadata = { title: "Users · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -28,12 +31,6 @@ const STATUSES = [
   { value: "active", label: "Active" },
   { value: "suspended", label: "Suspended" },
 ];
-const PASSKEYS = [
-  { value: "", label: "Passkey: any" },
-  { value: "with", label: "Has a passkey" },
-  { value: "none", label: "No passkey" },
-];
-const PER = 50;
 
 const typeOf = (x: { operator: string | null; kind: string | null }) =>
   x.operator
@@ -55,8 +52,8 @@ export default async function UsersPage({
     q?: string;
     type?: string;
     status?: string;
-    passkey?: string;
     page?: string;
+    perPage?: string;
     state?: string;
   }>;
 }) {
@@ -64,27 +61,28 @@ export default async function UsersPage({
   const { userId, actor } = await requireOperator("users.view", "/admin/users");
   const type = (["buyer", "supplier", "member", "operator"] as const).find((t) => t === sp.type);
   const status = sp.status === "suspended" || sp.status === "active" ? sp.status : undefined;
-  const passkey = sp.passkey === "with" || sp.passkey === "none" ? sp.passkey : undefined;
-  const page = Math.max(1, Number(sp.page) || 1);
+  const req = pageRequest(sp);
   const db = getDb();
   const [{ rows, total }, everyone, roles] = await Promise.all([
     listUsers(db, actor, {
       q: sp.q?.trim() || undefined,
       type,
       status,
-      passkey,
-      limit: PER,
-      offset: (page - 1) * PER,
+      ...pageWindow(req),
     }),
     listUsers(db, actor, { limit: 1 }),
     operatorRoleGrid(db, actor),
   ]);
-  const qs = (p: Record<string, string | undefined>) =>
-    new URLSearchParams(
-      Object.entries({ q: sp.q, type, status, passkey, ...p }).filter((e): e is [string, string] => Boolean(e[1])),
-    ).toString();
+  const query = pagingQuery(sp);
+  // A page past the end (the list shrank, or an old link) goes to the last page, like the other workspace lists.
+  const last = Math.max(1, Math.ceil(total / req.perPage));
+  if (req.page > last) {
+    redirect(
+      `/admin/users?${new URLSearchParams({ ...query, page: String(last), perPage: String(req.perPage) }).toString()}`,
+    );
+  }
   const today = ist(new Date(), { dateStyle: "short" });
-  const filtered = Boolean(sp.q?.trim() || type || status || passkey);
+  const filtered = Boolean(sp.q?.trim() || type || status);
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <UsersHeader
@@ -111,7 +109,6 @@ export default async function UsersPage({
         </label>
         <AutoSelect name="type" label="Type" value={type ?? ""} options={TYPES} />
         <AutoSelect name="status" label="Status" value={status ?? ""} options={STATUSES} />
-        <AutoSelect name="passkey" label="Passkey" value={passkey ?? ""} options={PASSKEYS} />
         <button type="submit" className="sr-only">
           Search
         </button>
@@ -164,9 +161,6 @@ export default async function UsersPage({
                   Type
                 </th>
                 <th scope="col" className="px-2 py-3">
-                  Passkey
-                </th>
-                <th scope="col" className="px-2 py-3">
                   Last active
                 </th>
                 <th scope="col" className="px-2 py-3">
@@ -207,16 +201,6 @@ export default async function UsersPage({
                       )}
                     </td>
                     <td className="px-2 py-3 type-body-sm">{typeOf(x)}</td>
-                    <td className="px-2 py-3">
-                      <StatusBadge
-                        status={
-                          x.passkeys
-                            ? `${String(x.passkeys)} ${x.passkeys === 1 ? "passkey" : "passkeys"}`
-                            : "No passkey"
-                        }
-                        tone={x.passkeys ? "success" : "warning"}
-                      />
-                    </td>
                     <td className="px-2 py-3 type-body-sm">
                       {last
                         ? ist(last, { dateStyle: "short" }) === today
@@ -241,32 +225,8 @@ export default async function UsersPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={{ page: req.page, perPage: req.perPage, total }} query={query} className="mt-4" />
       </LiveSection>
-      <div className="flex items-center justify-between type-caption text-secondary">
-        <span>
-          {total
-            ? `Showing ${String((page - 1) * PER + 1)}–${String(Math.min(page * PER, total))} of ${total.toLocaleString("en-IN")}`
-            : ""}
-        </span>
-        <span className="flex gap-2">
-          {page > 1 ? (
-            <Link
-              href={`/admin/users?${qs({ page: String(page - 1) })}`}
-              className={buttonClasses({ variant: "outline", size: "sm" })}
-            >
-              Previous
-            </Link>
-          ) : null}
-          {page * PER < total ? (
-            <Link
-              href={`/admin/users?${qs({ page: String(page + 1) })}`}
-              className={buttonClasses({ variant: "outline", size: "sm" })}
-            >
-              Next
-            </Link>
-          ) : null}
-        </span>
-      </div>
     </AdminShell>
   );
 }

@@ -1,5 +1,5 @@
 import { schema, type Executor } from "@h2india/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -60,6 +60,12 @@ export async function renameOrganisation(
   });
 }
 
+export class LastAdminError extends Error {
+  constructor() {
+    super("A company needs at least one admin. Make someone else an admin first.");
+  }
+}
+
 /** Team settings: change someone's role or order limit. Audited with the values before and after. */
 export async function changeMemberRole(
   ex: Executor,
@@ -84,6 +90,15 @@ export async function changeMemberRole(
       .where(seat)
       .for("update");
     if (!before) throw new Error("This person is not in the company");
+    // Never the last admin (founder QC, 17 Nov 2026: the last Admin could make themselves Sales and lock the company
+    // out of its own team and settings). removeMember() has the same rule.
+    if (before.role === "Admin" && input.role !== "Admin") {
+      const [admins] = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(m)
+        .where(and(eq(m.organisationId, input.organisationId), eq(m.role, "Admin")));
+      if ((admins?.n ?? 0) <= 1) throw new LastAdminError();
+    }
     const orderLimitPaise = input.orderLimitPaise !== undefined ? input.orderLimitPaise : before.orderLimitPaise;
     await tx.update(m).set({ role: input.role, orderLimitPaise }).where(seat);
     const money = (v: bigint | null) => (v === null ? null : v.toString());

@@ -13,6 +13,8 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { QueueTabs } from "../QueueTabs";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Queues · Suppliers (627:8), Content (629:1625), Events (630:8), Jobs (630:570) and Comments (630:968), with their
 // states (630:1593), step 11.2. Listings and RFQs have their own pages. Age turns amber at 24 hours and red at 48.
@@ -33,7 +35,7 @@ export default async function QueuePage({
   searchParams,
 }: {
   params: Promise<{ queue: string }>;
-  searchParams: Promise<{ view?: string; q?: string; state?: string }>;
+  searchParams: Promise<{ view?: string; q?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   const { queue: key } = await params;
   const queue = QUEUES.find((q) => q.key === key);
@@ -67,6 +69,7 @@ export default async function QueuePage({
           (view === "mine" ? x.claimedBy === userId : view === "unassigned" ? !x.claimedBy : x.tone === "error")) &&
         (!q || `${x.title} ${x.organisation} ${x.submitter}`.toLowerCase().includes(q)),
     );
+  const paged = pageOf(rows, pageRequest(sp));
   const canDecide = can(actor, "queues.edit");
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
@@ -177,7 +180,7 @@ export default async function QueuePage({
               </tr>
             </thead>
             <tbody>
-              {rows.map((x) => (
+              {paged.rows.map((x) => (
                 <tr key={x.id} className="border-t border-default align-top">
                   <td className="px-4 py-3">
                     <span className="block type-label">{x.title}</span>
@@ -210,6 +213,7 @@ export default async function QueuePage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
       <p className="type-caption text-secondary">
         Showing {rows.length} · {queue.sla}

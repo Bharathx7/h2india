@@ -12,7 +12,15 @@ export const dynamic = "force-dynamic";
 export default async function SupplierMessagesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ thread?: string; kind?: string; q?: string; state?: string; rfq?: string }>;
+  searchParams: Promise<{
+    thread?: string;
+    kind?: string;
+    q?: string;
+    state?: string;
+    rfq?: string;
+    page?: string;
+    perPage?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/messages");
