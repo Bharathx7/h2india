@@ -208,7 +208,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
                       </span>
                       <span className="flex min-w-0 flex-col gap-0.5">
                         <span className="type-label text-primary">{s.title}</span>
-                        <span className="line-clamp-1 type-caption text-secondary">{s.text}</span>
+                        <span className="line-clamp-2 type-caption text-secondary">{s.text}</span>
                       </span>
                     </li>
                   ))}
