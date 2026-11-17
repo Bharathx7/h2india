@@ -27,7 +27,11 @@ test("a new member picks a persona, topics and states, and lands on the home", a
   await expect(page.getByText("Research calls and grants").first()).toBeVisible();
   await page.getByRole("button", { name: "Go to my feed" }).click();
   await expect(page).toHaveURL(/\/member$/);
-  await expect(page.getByText(/Electrolysers/).first()).toBeVisible();
+  // Their choices are on the home and in Follows. (Matching articles appear only when such content exists; with the
+  // browser tests split across machines, no other test publishes it first, so the test doesn't rely on it.)
+  await expect(page.getByText(/Updates from 1 topic, 1 state/)).toBeVisible();
+  await page.goto("/member/follows?tab=topic");
+  await expect(page.getByRole("main").getByText("Electrolysers", { exact: true }).first()).toBeVisible();
   // Not offered again.
   await page.goto("/member/welcome");
   await expect(page).toHaveURL(/\/member$/);
