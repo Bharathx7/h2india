@@ -136,6 +136,11 @@
   }
 }
 
+/* FAQ answers fade in when opened (site alignment, 17 Nov 2026); reduced motion makes it instant (base.css). */
+@utility faq-answer {
+  animation: h2-fade var(--motion-duration-base) var(--ease-enter) both;
+}
+
 /* Hero network detail box: the text changes with the focus (400 ms). */
 @keyframes h2-fade {
   from {

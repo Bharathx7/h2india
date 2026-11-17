@@ -41,7 +41,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
           <form
             action="/search"
             role="search"
-            className="flex max-w-210 items-center gap-3 rounded-pill border-[1.5px] border-control bg-page py-1.5 pr-1.5 pl-5"
+            className="flex max-w-210 items-center gap-3 rounded-pill border-[1.5px] border-control bg-page py-1.5 pr-1.5 pl-5 focus-within:field-focus"
           >
             <input type="hidden" name="scope" value="products" />
             <Icon name="search" size={24} className="shrink-0 text-icon-secondary" />

@@ -28,7 +28,7 @@ export function ErrorPage({
         <h1 className="type-h1 text-primary">{title}</h1>
         <p className="type-body text-body">{text}</p>
         <form action="/search" method="get" role="search" className="w-full">
-          <label className="flex h-11 items-center gap-2 rounded-control border border-control bg-page px-3">
+          <label className="flex h-11 items-center gap-2 rounded-control border border-control bg-page px-3 focus-within:field-focus">
             <Icon name="search" size={18} className="text-icon-secondary" />
             <span className="sr-only">Search</span>
             <input

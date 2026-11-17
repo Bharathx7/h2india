@@ -107,7 +107,7 @@ export function CategoryTile({
       >
         <Icon name={icon} size={size === "class" ? 48 : 22} />
       </span>
-      <span className="flex items-center gap-2 pr-1">
+      <span className="flex items-start gap-2 pr-1">
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="type-label-lg text-primary">{title}</span>
           {detail ? <span className="type-caption text-secondary">{detail}</span> : null}
@@ -115,7 +115,7 @@ export function CategoryTile({
         <Icon
           name="arrow-right"
           size={18}
-          className="text-icon-primary transition-transform duration-(--motion-duration-fast) group-hover:translate-x-1"
+          className="mt-0.75 shrink-0 text-icon-primary transition-transform duration-(--motion-duration-fast) group-hover:translate-x-1"
         />
       </span>
     </a>
@@ -171,7 +171,7 @@ export function TenderCard(t: {
   return (
     <article
       data-reveal-item=""
-      className="group card-lift relative flex flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
+      className="group card-lift relative flex h-full flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -194,7 +194,7 @@ export function TenderCard(t: {
       </div>
       <p className="type-caption text-secondary">{t.money}</p>
       <p className="type-caption text-secondary">{t.category}</p>
-      <div className="flex items-center justify-between">
+      <div className="mt-auto flex items-center justify-between">
         <a
           href={t.documentsHref}
           target="_blank"
@@ -238,7 +238,7 @@ export function SchemeCard(s: {
   return (
     <article
       data-reveal-item=""
-      className="group card-lift relative flex flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
+      className="group card-lift relative flex h-full flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
     >
       <div className="flex items-center justify-between gap-2">
         <p className="min-w-0 truncate type-eyebrow text-secondary">{s.level}</p>
@@ -260,7 +260,7 @@ export function SchemeCard(s: {
       ) : null}
       <Meta icon="calendar">{s.deadline}</Meta>
       {s.verified ? <p className="type-caption text-secondary">Last verified {s.verified}</p> : null}
-      <div className="flex items-center justify-between">
+      <div className="mt-auto flex items-center justify-between">
         <a href={s.href} className={cx(arrowLink, stretch)}>
           {s.actionLabel ?? "Check eligibility"}
           <Icon name="arrow-right" size={16} />

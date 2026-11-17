@@ -67,7 +67,7 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
             dealers.
           </p>
           <form method="get" role="search" className="flex flex-wrap items-center gap-3">
-            <label className="flex h-11 min-w-60 flex-1 items-center gap-2 rounded-control border-[1.5px] border-control bg-page px-3">
+            <label className="flex h-11 min-w-60 flex-1 items-center gap-2 rounded-control border-[1.5px] border-control bg-page px-3 focus-within:field-focus">
               <Icon name="search" size={18} className="text-icon-secondary" />
               <span className="sr-only">Search brands</span>
               <input
