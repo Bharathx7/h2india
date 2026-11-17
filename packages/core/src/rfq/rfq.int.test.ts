@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor, type Actor } from "../authz/actor";
 import { scopeFor } from "../authz/scope";
 import { changeGstinByOperator } from "../buyer/settings";
+import { gstinCheckChar } from "../companies/gstin";
 import { runDeadlines } from "../clocks/clocks";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
@@ -512,8 +513,10 @@ describe.skipIf(!url)("RFQs and quotes", () => {
     expect(seen?.supplierGstin?.gstin).toBe(main?.gstin);
     // H2 Economy changes the supplier's GSTIN: the old one is retired, can't be chosen, and the sent quote keeps it.
     const operator = { ...c, operator: new Set(["verification.edit"]) };
+    // A valid GSTIN: the change checks the format and the check character.
+    const next14 = `33AAKCG${tail}M1Z`;
     await changeGstinByOperator(h.db, operator, sup(2).org.id, {
-      gstin: `33AAKCG${tail}M1Z9`,
+      gstin: `${next14}${gstinCheckChar(next14)}`,
       reason: "New registration in Tamil Nadu",
     });
     await expect(
