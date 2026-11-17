@@ -121,7 +121,7 @@ export async function LiveFigures({ fail }: { fail: Fail }) {
       ) : (
         <div
           data-testid="live-figures"
-          className="relative grid w-full grid-cols-2 gap-x-4 gap-y-7 md:flex md:items-center md:gap-6"
+          className="relative grid w-full grid-cols-2 gap-x-4 gap-y-7 md:flex md:items-start md:gap-6"
         >
           {figures.data.map((f, i) => (
             <div key={f.label} className="contents">

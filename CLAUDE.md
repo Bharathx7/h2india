@@ -60,6 +60,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Never change a token value in code. If a value looks wrong (contrast, size), raise it; the designer changes Figma.
 - Green fills (`bg-accent`) take ink text, never white.
 - Every list or panel that loads data shows loading, empty and error states (step 2.5).
+- Cards in a row line up (site alignment, 17 Nov 2026): a card fills its cell (`h-full`) and its action row sits on the bottom edge (`mt-auto`); an arrow beside a title that may wrap aligns to its first line. A search box's wrapper carries `focus-within:field-focus` whenever its input sets `outline-none`.
 
 ## Sign-in (step 3.2)
 

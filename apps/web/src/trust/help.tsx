@@ -15,7 +15,7 @@ export function HelpSearch({ q }: { q: string }) {
         <p className="type-eyebrow text-secondary">Help centre</p>
         <h1 className="type-h1 text-primary">How can we help?</h1>
         <form action="/help" method="get" role="search" className="w-full max-w-108">
-          <label className="flex h-11 items-center gap-2 rounded-control border border-control bg-page px-3">
+          <label className="flex h-11 items-center gap-2 rounded-control border border-control bg-page px-3 focus-within:field-focus">
             <Icon name="search" size={18} className="text-icon-secondary" />
             <span className="sr-only">Search help</span>
             <input

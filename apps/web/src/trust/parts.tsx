@@ -179,9 +179,13 @@ export function Faqs({
           <details key={q.question} open={i === 0} className="group border-b border-default py-4">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 type-label text-primary">
               {q.question}
-              <Icon name="chevron-down" size={18} className="shrink-0 transition-transform group-open:rotate-180" />
+              <Icon
+                name="chevron-down"
+                size={18}
+                className="shrink-0 transition-transform duration-(--motion-duration-base) ease-standard group-open:rotate-180"
+              />
             </summary>
-            <p className="pt-2 type-body-sm text-body">{q.answer}</p>
+            <p className="faq-answer pt-2 type-body-sm text-body">{q.answer}</p>
           </details>
         ))}
       </div>
