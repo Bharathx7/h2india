@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, hydrated, test } from "../fixtures";
 import { latestPasswordLink } from "../helpers/join";
 import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 
@@ -33,6 +33,8 @@ test("staff set a password from the emailed link, then sign in to the back offic
   const email = await operator();
   await page.goto("/sign-in/staff");
   await page.getByRole("link", { name: "Set or forgot your password?" }).click();
+  await expect(page.getByRole("heading", { name: "Set or reset your password" })).toBeVisible();
+  await hydrated(page);
   await page.getByLabel("Work email").fill(email);
   const sentAfter = Date.now() - 1000;
   await page.getByRole("button", { name: "Send link" }).click();
@@ -51,6 +53,8 @@ test("staff set a password from the emailed link, then sign in to the back offic
   await expect(page.getByRole("heading", { name: "Password set" })).toBeVisible();
 
   await page.getByRole("link", { name: "Sign in" }).click();
+  await expect(page.getByRole("heading", { name: "Sign in to the H2 Economy back office" })).toBeVisible();
+  await hydrated(page);
   await page.getByLabel("Work email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();

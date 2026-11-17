@@ -68,7 +68,9 @@ export async function SignInScreen({
  * sign-in is for staff, with Sign out.
  */
 export async function StaffSignInScreen({ next: raw, error }: { next?: string; error?: string }) {
-  const next = await returnPath(raw, "/admin");
+  // Staff go to the back office unless a page asked for somewhere else; the page before is often a sign-in or
+  // password page, which is never returned to (safeReturnPath), so it isn't used.
+  const next = raw ? safeReturnPath(raw, "/admin") : "/admin";
   const session = await getSession();
   if (session) {
     const staff = await hasOperatorRole(getDb(), session.user.id);
