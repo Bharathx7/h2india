@@ -4,6 +4,7 @@ import { publicCatalogue, type PublicCatalogue } from "@h2india/core/catalogue/t
 import type { CompanyDocument } from "@h2india/core/search";
 import { getPayload, type Where } from "payload";
 import { cache } from "react";
+import { APPLICATION_OPTIONS } from "@/cms/marketplace/collections";
 import { publicWhere, showSample } from "@/cms/sample";
 import { listArticles, topicRecords, type ArticleSummary, type TopicRecord } from "@/news/data";
 import { companiesFor } from "@/opportunities/data";
@@ -21,6 +22,9 @@ const payload = () => getPayload({ config });
 
 /** The published page for an application, or null (the template then shows its categories only). */
 export const applicationPage = cache(async (id: string): Promise<ApplicationPage | null> => {
+  // An application added in admin Catalogue (founder QC, 17 Nov 2026) has no CMS page option yet; asking the CMS
+  // for it failed the whole page (the field is a fixed list). It shows its categories and the quote request.
+  if (!APPLICATION_OPTIONS.some((o) => o.value === id)) return null;
   const p = await payload();
   const found = await p.find({
     collection: "application-pages",
