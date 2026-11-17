@@ -72,12 +72,17 @@ export interface RecordRow {
 export async function listRecords(
   cms: Cms,
   type: ContentType,
-  opts: { q?: string; page?: number; perPage?: number },
+  opts: { q?: string; page?: number; perPage?: number; archived?: boolean },
 ): Promise<{ rows: RecordRow[]; total: number; pages: number; page: number }> {
-  const where: Where | undefined =
+  const search: Where | undefined =
     opts.q && type.titleField !== "id" ? { [type.titleField]: { like: opts.q } } : undefined;
+  // Archived records (Payload's trash) are left out of every read unless asked for (founder QC, 17 Nov 2026).
+  const where: Where | undefined = opts.archived
+    ? { and: [{ deletedAt: { exists: true } }, ...(search ? [search] : [])] }
+    : search;
   const res = await cms.payload.find({
     collection: type.slug as "schemes",
+    ...(opts.archived ? { trash: true } : {}),
     draft: type.drafts,
     depth: 0,
     limit: opts.perPage ?? 50,

@@ -1,5 +1,5 @@
 import { expect, test } from "../fixtures";
-import { newAuthor, signInOperator } from "../helpers/cms";
+import { backOfficeContext, newAuthor, signInOperator } from "../helpers/cms";
 import { ownIp, withDb } from "../helpers/sign-in";
 
 // Step 4.6: the content screens in the back office (638:8, 639:8, 640:8 to 649:730). An Editor-in-chief writes an
@@ -91,4 +91,59 @@ test("the publishing calendar and site settings open", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Publishing calendar" })).toBeVisible();
   await page.goto("/admin/content/settings");
   await expect(page.getByRole("heading", { level: 1, name: "Site settings" })).toBeVisible();
+});
+
+// Archive (founder QC, 17 Nov 2026): an Editor-in-chief archives a record with a reason; it leaves the list and shows
+// under Archived, where Restore brings it back. Both are audited. A Content editor has no Archive button.
+test("an Editor-in-chief archives a glossary term and restores it", async ({ page, browser }) => {
+  test.setTimeout(120_000);
+  await signInOperator(page, "Editor-in-chief");
+  const term = `Archive check ${String(Date.now())}`;
+  await page.goto("/admin/content/glossary/new");
+  await page.getByLabel("Term").fill(term);
+  await page.getByLabel("Short definition").fill("A term made by the archive test.");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/glossary\/\d+$/, { timeout: 20_000 });
+  const id = Number(/\/glossary\/(\d+)$/.exec(page.url())?.[1]);
+
+  await page.getByRole("button", { name: "Archive" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel(/Why/).fill("Duplicate of another term.");
+  await dialog.getByRole("button", { name: "Archive" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/glossary$/, { timeout: 20_000 });
+  await expect(page.getByRole("link", { name: term })).toHaveCount(0);
+
+  const archived = async () =>
+    withDb(async (db) => {
+      const r = await db.query<{ archived: boolean }>(
+        `SELECT deleted_at IS NOT NULL AS archived FROM cms.glossary WHERE id = $1`,
+        [id],
+      );
+      return r.rows[0]?.archived;
+    });
+  expect(await archived()).toBe(true);
+
+  await page.goto("/admin/content/glossary?view=archived");
+  await expect(page.getByText(term)).toBeVisible();
+  await page.getByRole("button", { name: `Restore ${term}` }).click();
+  await expect.poll(archived, { timeout: 20_000 }).toBe(false);
+  const audited = await withDb(async (db) => {
+    const r = await db.query<{ action: string }>(
+      `SELECT action FROM core.audit_log WHERE resource_type = 'glossary' AND resource_id = $1 ORDER BY at`,
+      [String(id)],
+    );
+    return r.rows.map((x) => x.action);
+  });
+  expect(audited).toEqual(expect.arrayContaining(["content.archive", "content.restore"]));
+  await page.goto("/admin/content/glossary");
+  await expect(page.getByRole("link", { name: term })).toBeVisible();
+
+  // Archiving needs content.delete: a Content editor sees the record without the button.
+  const other = await backOfficeContext(browser);
+  const editor = await other.newPage();
+  await signInOperator(editor, "Content editor");
+  await editor.goto(`/admin/content/glossary/${String(id)}`);
+  await expect(editor.getByRole("button", { name: "Save changes" })).toBeVisible();
+  await expect(editor.getByRole("button", { name: "Archive" })).toHaveCount(0);
+  await other.close();
 });

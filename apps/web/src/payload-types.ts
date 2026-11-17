@@ -827,6 +827,7 @@ export interface Scheme {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1054,6 +1055,7 @@ export interface Tender {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1214,6 +1216,7 @@ export interface Grant {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1369,6 +1372,7 @@ export interface Job {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1616,6 +1620,7 @@ export interface Event {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1754,6 +1759,7 @@ export interface Chapter {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1820,6 +1826,7 @@ export interface Glossary {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1884,6 +1891,7 @@ export interface Standard {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1937,6 +1945,7 @@ export interface Guide {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1995,6 +2004,7 @@ export interface Report {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2108,6 +2118,7 @@ export interface Video {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2163,6 +2174,7 @@ export interface Podcast {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2313,6 +2325,7 @@ export interface TrackerProject {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2449,6 +2462,7 @@ export interface TrackerFactory {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2602,6 +2616,7 @@ export interface TrackerPilot {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2741,6 +2756,7 @@ export interface TrackerStation {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2837,6 +2853,7 @@ export interface TrackerPrice {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -2970,6 +2987,7 @@ export interface TrackerPolicy {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3075,6 +3093,7 @@ export interface TrackerHub {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3148,6 +3167,7 @@ export interface EarlyListing {
   status?: ('New' | 'Contacted' | 'Listed' | 'Not a fit') | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Past issues shown in the newsletter archive. Sending arrives with step 11.3.
@@ -3311,6 +3331,7 @@ export interface HelpArticle {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3340,6 +3361,7 @@ export interface TeamMember {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3420,6 +3442,7 @@ export interface ApplicationPage {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3470,6 +3493,7 @@ export interface Person {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3496,6 +3520,7 @@ export interface Association {
   sample?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -3987,6 +4012,7 @@ export interface SchemesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4083,6 +4109,7 @@ export interface TendersSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4147,6 +4174,7 @@ export interface GrantsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4218,6 +4246,7 @@ export interface JobsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4364,6 +4393,7 @@ export interface EventsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4434,6 +4464,7 @@ export interface ChaptersSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4460,6 +4491,7 @@ export interface GuidesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4484,6 +4516,7 @@ export interface GlossarySelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4515,6 +4548,7 @@ export interface StandardsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4553,6 +4587,7 @@ export interface ReportsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4627,6 +4662,7 @@ export interface VideosSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4663,6 +4699,7 @@ export interface PodcastsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4725,6 +4762,7 @@ export interface TrackerProjectsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4782,6 +4820,7 @@ export interface TrackerFactoriesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4847,6 +4886,7 @@ export interface TrackerPilotsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4904,6 +4944,7 @@ export interface TrackerStationsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4942,6 +4983,7 @@ export interface TrackerPricesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -4994,6 +5036,7 @@ export interface TrackerPoliciesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5032,6 +5075,7 @@ export interface TrackerHubsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5068,6 +5112,7 @@ export interface EarlyListingsSelect<T extends boolean = true> {
   status?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5163,6 +5208,7 @@ export interface HelpArticlesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5180,6 +5226,7 @@ export interface TeamMembersSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5224,6 +5271,7 @@ export interface ApplicationPagesSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5247,6 +5295,7 @@ export interface PeopleSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -5264,6 +5313,7 @@ export interface AssociationsSelect<T extends boolean = true> {
   sample?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
