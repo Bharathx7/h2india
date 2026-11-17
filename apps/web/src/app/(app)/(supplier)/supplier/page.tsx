@@ -236,10 +236,6 @@ export default async function SupplierHome() {
             <Icon name="file-text" size={18} />
             RFQs
           </Link>
-          <Link href="/supplier/products/new" className={buttonClasses({})}>
-            <Icon name="plus" size={18} />
-            Add product
-          </Link>
         </div>
       </div>
       {setup}

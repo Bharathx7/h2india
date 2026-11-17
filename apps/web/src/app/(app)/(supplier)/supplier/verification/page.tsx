@@ -226,7 +226,9 @@ export default async function VerificationPage({
             <div className="flex flex-wrap gap-2">
               {active.some((b) => b.kind === "verified_supplier") ? <VerifiedBadge kind="supplier" /> : null}
               {s.verification === "Verified" || s.verification === "GST verified" ? <VerifiedBadge kind="gst" /> : null}
-              {active.length === 0 && s.verification !== "GST verified" ? (
+              {!active.some((b) => b.kind === "verified_supplier") &&
+              s.verification !== "Verified" &&
+              s.verification !== "GST verified" ? (
                 <span className="type-caption text-secondary">Not verified yet</span>
               ) : null}
             </div>
