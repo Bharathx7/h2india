@@ -97,8 +97,8 @@ if (isEnabled("devPages")) problems.push("FLAG_DEV_PAGES is on");
 if (launch === 1 && isEnabled("transactions")) problems.push("transactions is on (ordering opens at Launch 2)");
 if (launch === 2 && (process.env.PAYMENT_PARTNER ?? "sim") === "sim")
   problems.push("PAYMENT_PARTNER is still the simulated partner (M3)");
-if (!isEnabled("operatorPasskey"))
-  notes.push("operatorPasskey is off: operators can use the back office without a passkey");
+if (!isEnabled("operatorPassword"))
+  notes.push("operatorPassword is off: operators can use the back office without the staff password sign-in");
 
 // 5 Decisions.
 if (existsSync(decisionsPath)) {

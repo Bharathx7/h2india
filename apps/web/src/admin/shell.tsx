@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { WORKSPACE_NAV } from "@/lib/workspace-nav";
-import { operatorSession, passkeySignedIn } from "@/server/auth";
+import { operatorSession, staffSignedIn } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
@@ -20,9 +20,10 @@ export async function requireOperator(permission: Permission, path: string): Pro
   // The operator's own session: admin screens never take on a viewed person (step 11.4).
   const session = await operatorSession();
   if (!session) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
-  // The back office needs a passkey sign-in (A172, review H2): an operator without one goes to the passkey step.
-  if (isEnabled("operatorPasskey") && !(await passkeySignedIn()) && (await hasOperatorRole(getDb(), session.user.id)))
-    redirect(`/sign-in/passkey?next=${encodeURIComponent(path)}`);
+  // The back office needs the staff password sign-in (A183, review H2): an operator signed in any other way (an email
+  // code on the public site) signs in again with their password.
+  if (isEnabled("operatorPassword") && !(await staffSignedIn()) && (await hasOperatorRole(getDb(), session.user.id)))
+    redirect(`/sign-in/staff?next=${encodeURIComponent(path)}`);
   const actor = await loadActor(getDb(), session.user.id);
   if (!can(actor, permission)) notFound();
   return { userId: session.user.id, actor };

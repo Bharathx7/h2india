@@ -3,7 +3,7 @@ import { viewAsGrant } from "@h2india/core/admin/users";
 import { isEnabled } from "@h2india/config";
 import { createAuth } from "@h2india/core/auth";
 import { setOperatorGate } from "@h2india/core/authz";
-import { isPasskeySession } from "@h2india/core/sign-in/step-up";
+import { isStaffSession } from "@h2india/core/sign-in/step-up";
 import { nextCookies } from "better-auth/next-js";
 import { cookies, headers } from "next/headers";
 
@@ -18,19 +18,20 @@ async function realSession() {
 }
 
 /**
- * Operator permissions count only in a session made with a passkey (A172, review H2), when operatorPasskey is on (it
- * is in production). Every permission check goes through loadActor(), so this covers pages, actions and the CMS.
+ * Operator permissions count only in a session made with the staff password sign-in (A183, review H2), when
+ * operatorPassword is on (it is in production). Every permission check goes through loadActor(), so this covers pages,
+ * actions and the CMS.
  */
-export async function passkeySignedIn(): Promise<boolean> {
+export async function staffSignedIn(): Promise<boolean> {
   const session = await realSession();
-  return session ? isPasskeySession(getDb(), session.session.id) : false;
+  return session ? isStaffSession(getDb(), session.session.id) : false;
 }
 
 setOperatorGate(async (userId) => {
-  if (!isEnabled("operatorPasskey")) return true;
+  if (!isEnabled("operatorPassword")) return true;
   try {
     const session = await realSession();
-    return session?.user.id === userId && (await isPasskeySession(getDb(), session.session.id));
+    return session?.user.id === userId && (await isStaffSession(getDb(), session.session.id));
   } catch {
     // Outside a request (no headers): no session, so no operator access.
     return false;

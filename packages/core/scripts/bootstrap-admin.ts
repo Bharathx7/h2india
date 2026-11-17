@@ -3,7 +3,8 @@ import { bootstrapSuperAdmin, OperatorRoleError } from "../src/authz/grants";
 
 // Makes the first Super admin on a new server (step 1.7, docs/runbooks/deploy.md):
 //   pnpm admin:bootstrap you@example.com "Your Name"
-// Refuses once any Super admin exists. The person then signs in with an email code.
+// Refuses once any Super admin exists. The person then sets a password from the staff sign-in (A183):
+// /sign-in/staff/password on the admin domain.
 const [email, ...nameParts] = process.argv.slice(2);
 const name = nameParts.join(" ").trim();
 if (!email?.includes("@") || !name) {
@@ -17,7 +18,7 @@ const { db, pool } = createDb(url, { max: 1 });
 try {
   const result = await bootstrapSuperAdmin(db, { email, name });
   console.log(
-    `Super admin ready (${result.created ? "new account" : "existing account"}). Sign in with an email code.`,
+    `Super admin ready (${result.created ? "new account" : "existing account"}). Open /sign-in/staff/password on the admin domain to set a password, then sign in.`,
   );
 } catch (error) {
   if (error instanceof OperatorRoleError) {

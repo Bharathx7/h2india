@@ -8,7 +8,7 @@ import { signSimWebhook } from "../adapters/payments/sim";
 import { loadActor, type Actor } from "../authz/actor";
 import { scopeFor } from "../authz/scope";
 import { monthlyIdentity, orderLedgerProblems } from "../ledger";
-import { recordPasskeyStepUp } from "../sign-in/step-up";
+import { recordStepUp } from "../sign-in/step-up";
 import { TransitionNotAllowedError } from "../status";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import { addToCart, OtherSupplierInCart, viewCart } from "./cart";
@@ -280,7 +280,7 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
       // The approver places an order above the limit: they can't approve it themselves, even with a passkey.
       const own = await placeOne(approver);
       expect(own.status).toBe("Awaiting approval");
-      await recordPasskeyStepUp(h.db, buyer.requester.id);
+      await recordStepUp(h.db, buyer.requester.id);
       await expect(approveOrder(h.db, approver, buyer.org.id, own.id, {}, undefined, ON)).rejects.toThrow(
         "can't approve your own order",
       );
@@ -294,7 +294,7 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
         .delete(schema.signInThrottle)
         .where(eq(schema.signInThrottle.key, `step-up:passkey:${buyer.requester.id}`));
       await expect(approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON)).rejects.toThrow("step_up");
-      await recordPasskeyStepUp(h.db, buyer.requester.id);
+      await recordStepUp(h.db, buyer.requester.id);
       const approved = await approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON);
       expect(approved.status).toBe("Pending acceptance");
       await cancelOrder(h.db, admin, buyer.org.id, o2.id, "Test done", undefined, ON);

@@ -34,8 +34,10 @@ export async function sendCode(input: {
   to: string;
   name?: string;
   /** Another code email that follows the same rules, for example Claim this profile (step 6.7). */
-  template?: "email.recovery_code" | "email.claim_code";
+  template?: "email.recovery_code" | "email.claim_code" | "email.step_up_code";
   event?: string;
+  /** The code email's wording: recovery and claims are "verification"; Confirm it's you is "confirm". */
+  purpose?: "verification" | "confirm";
 }): Promise<void> {
   const db = getDb();
   const dest = destinationKey(input.to);
@@ -63,7 +65,7 @@ export async function sendCode(input: {
     appUrl: env.APP_URL,
     code,
     name: input.name,
-    purpose: "verification",
+    purpose: input.purpose ?? "verification",
     expiresIn: `${String(SIGN_IN.codeMinutes)} minutes`,
     expiresAt: `${formatIstTime(new Date(Date.now() + SIGN_IN.codeMinutes * 60_000))} IST`,
   });

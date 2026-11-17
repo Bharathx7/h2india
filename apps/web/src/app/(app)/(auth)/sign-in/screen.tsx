@@ -4,13 +4,15 @@ import { hasOperatorRole } from "@h2india/core/authz";
 import { ACCOUNT_PAGES, safeReturnPath, type AccountKind } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getSession } from "@/server/auth";
+import { getSession, staffSignedIn } from "@/server/auth";
 import { whereNext } from "./actions";
 import { SignInFlow } from "./SignInFlow";
+import { StaffSignIn } from "./staff/StaffSignIn";
 
 // The sign-in screen behind every sign-in page (public QC 2, 16 Nov 2026): /buyer/sign-in, /supplier/sign-in and
-// /member/sign-in (email code only), and /sign-in (staff on the admin domain; locally the full screen with passkeys;
-// on the public site it sends people to Buyer sign in). Same accounts and codes; the words and landing differ.
+// /member/sign-in (email code only), and /sign-in (staff email and password on the admin domain, A183; locally the
+// email code and Google screen with a link to the staff sign-in; on the public site it sends people to Buyer sign in).
+// Passkeys were removed on 17 Nov 2026.
 
 /** "You'll come back to the page you were on": ?next=, otherwise the page they clicked Sign in on (same site only). */
 async function returnPath(next: string | undefined, fallback: string): Promise<string> {
@@ -46,22 +48,32 @@ export async function SignInScreen({
   const next = audience ? (raw ? safeReturnPath(raw) : ACCOUNT_PAGES[audience].home) : await returnPath(raw, "/");
   const role = parseServerEnv().SITE_ROLE;
   const staffOnly = role === "admin";
-  // The admin domain has only the staff sign-in.
+  // The admin domain has only the staff sign-in, email and password.
   if (audience && staffOnly) redirect("/sign-in");
+  if (staffOnly) return <StaffSignInScreen next={raw} error={error} />;
   const session = await getSession();
   if (session) {
-    // On the admin domain a signed-in person who isn't staff is shown why, with Sign out: a page can't sign them out
-    // while it draws (whereNext does it after a fresh sign-in).
-    if (staffOnly && !(await hasOperatorRole(getDb(), session.user.id))) {
-      return <SignInFlow next={next} staffOnly signedInElsewhere initialError={NOT_STAFF} />;
-    }
     redirect(await whereNext(next, audience));
   }
   const initialError =
     error === "google"
-      ? { title: "Google sign-in didn't finish", body: "Try again, or use a passkey or an email code." }
-      : error === "not-staff"
-        ? NOT_STAFF
-        : undefined;
-  return <SignInFlow next={next} staffOnly={staffOnly} audience={audience} initialError={initialError} />;
+      ? { title: "Google sign-in didn't finish", body: "Try again, or use an email code." }
+      : undefined;
+  return <SignInFlow next={next} audience={audience} initialError={initialError} />;
+}
+
+/**
+ * The staff sign-in (A183): the admin domain's /sign-in and /sign-in/staff. Someone already signed in with a password
+ * goes on; staff signed in another way (an email code) sign in again with their password; anyone else is told this
+ * sign-in is for staff, with Sign out.
+ */
+export async function StaffSignInScreen({ next: raw, error }: { next?: string; error?: string }) {
+  const next = await returnPath(raw, "/admin");
+  const session = await getSession();
+  if (session) {
+    const staff = await hasOperatorRole(getDb(), session.user.id);
+    if (!staff) return <StaffSignIn next={next} signedInElsewhere initialError={NOT_STAFF} />;
+    if (await staffSignedIn()) redirect(await whereNext(next));
+  }
+  return <StaffSignIn next={next} initialError={error === "not-staff" ? NOT_STAFF : undefined} />;
 }

@@ -7,7 +7,8 @@ import { SignInScreen } from "./screen";
 // Step 3.2: Sign in (Figma 524:1773, 390: 526:508), Enter code (524:1840), wrong code (524:1930),
 // locked (524:2036). Since public QC 2 (16 Nov 2026) buyers, suppliers and members have their own pages; on the public
 // site /sign-in (old links, "sign in to continue" redirects) opens Buyer sign in, which links to the other two. The
-// admin domain keeps the staff sign-in here, and locally (SITE_ROLE=both) it is the full screen with passkeys.
+// admin domain keeps the staff sign-in here (email and password, A183), and locally (SITE_ROLE=both) it is the email
+// code and Google screen with a link to the staff sign-in.
 
 export const metadata: Metadata = { title: "Sign in · H2 Economy", robots: { index: false } };
 

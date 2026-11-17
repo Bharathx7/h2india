@@ -79,9 +79,6 @@ export default async function TeamPage() {
                     Role
                   </th>
                   <th scope="col" className="px-2 py-3">
-                    Passkey
-                  </th>
-                  <th scope="col" className="px-2 py-3">
                     Last active
                   </th>
                   <th scope="col" className="px-2 py-3">
@@ -108,9 +105,6 @@ export default async function TeamPage() {
                     </td>
                     <td className="px-2 py-3">
                       <StatusBadge status={x.role} tone="neutral" />
-                    </td>
-                    <td className="px-2 py-3">
-                      <StatusBadge status={x.passkey ? "Added" : "Not yet"} tone={x.passkey ? "success" : "warning"} />
                     </td>
                     <td className="px-2 py-3 type-body-sm">{active(x.lastActive)}</td>
                     <td className="px-2 py-3 text-right">
@@ -163,7 +157,9 @@ export default async function TeamPage() {
               </div>
             ))}
           </dl>
-          <p className="type-caption text-warning">Admins need a passkey to change the payout bank account.</p>
+          <p className="type-caption text-secondary">
+            Admins confirm payout bank changes with a code sent to their email.
+          </p>
         </aside>
       </div>
     </SupplierShell>

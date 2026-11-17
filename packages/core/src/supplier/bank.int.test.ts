@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor } from "../authz/actor";
 import { scopeFor } from "../authz/scope";
 import { runDeadlines } from "../clocks/clocks";
-import { recordPasskeyStepUp } from "../sign-in/step-up";
+import { recordStepUp } from "../sign-in/step-up";
 import { makeCompany, makeUser, useTestEnv } from "../testing/factory";
 import {
   addBankAccount,
@@ -65,7 +65,7 @@ describe.skipIf(!url)("payout bank account", () => {
     });
     expect(one.status).toBe("Pending");
     await expect(confirmBankAccount(h.db, actor, a.org.id, { id: one.id })).rejects.toThrow("passkey");
-    await recordPasskeyStepUp(h.db, a.admin.id);
+    await recordStepUp(h.db, a.admin.id);
     expect((await confirmBankAccount(h.db, actor, a.org.id, { id: one.id })).holdUntil).toBeNull();
 
     // The change: checked, confirmed with the passkey, held for the clock.

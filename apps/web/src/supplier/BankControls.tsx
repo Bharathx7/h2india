@@ -1,13 +1,14 @@
 "use client";
 
-import { Alert, Button, Icon, Input } from "@h2india/ui";
+import { Alert, Button, Input } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { authClient } from "@/lib/auth-client";
+import { ConfirmItsYou } from "@/components/ConfirmItsYou";
 import { addBankAccountAction, cancelBankChangeAction, confirmBankAccountAction } from "./bank-actions";
 
-// The payout bank account steps (588:748): new account → test deposit → confirm it's you (passkey) → hold period.
+// The payout bank account steps (588:748): new account → test deposit → confirm it's you (a code to your email, since
+// passkeys were removed on 17 Nov 2026) → hold period.
 
 function useRun() {
   const router = useRouter();
@@ -86,83 +87,37 @@ export function NewAccountForm({ defaultHolder }: { defaultHolder: string }) {
   );
 }
 
-export function ConfirmWithPasskey({ id, holdUntil }: { id: string; holdUntil: string | null }) {
+export function ConfirmChange({ id, holdUntil }: { id: string; holdUntil: string | null }) {
   const r = useRun();
+  const router = useRouter();
   return (
     <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-      <h2 className="type-h4">Confirm with your passkey</h2>
+      <h2 className="type-h4">Confirm it&apos;s you</h2>
       <p className="type-body-sm text-body">
-        To protect your payouts, confirm this change with the passkey on this device.
+        To protect your payouts, confirm this change with a code we email you.
         {holdUntil ? ` After that, payouts are held until ${holdUntil} IST.` : ""}
       </p>
       {r.error ? <Alert tone="error" title={r.error} live /> : null}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          disabled={r.pending}
-          onClick={() => {
-            r.go(async () => {
-              const pk = await authClient.signIn.passkey();
-              if (pk.error)
-                return {
-                  ok: false,
-                  error: "The passkey wasn't confirmed. Try again, or add a passkey in Sign-in and security.",
-                };
-              return confirmBankAccountAction(id);
-            });
-          }}
-        >
-          <Icon name="lock" size={16} />
-          Confirm with passkey
-        </Button>
-        <button
-          type="button"
-          className="type-label"
-          disabled={r.pending}
-          onClick={() => {
-            r.go(() => cancelBankChangeAction(id));
-          }}
-        >
-          Cancel change
-        </button>
-      </div>
-      <SetUpPasskey />
-    </section>
-  );
-}
-
-/**
- * Sign-in is by email code only (public QC 2, 16 Nov 2026), so a supplier may have no passkey yet: they set one up
- * here, on this device, the first time they change the payout account.
- */
-function SetUpPasskey() {
-  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
-  if (state === "done")
-    return <Alert tone="success" title="Passkey set up on this device. Now choose Confirm with passkey." live />;
-  return (
-    <div className="flex flex-col gap-2 border-t border-default pt-3">
-      <p className="type-body-sm text-body">
-        No passkey on this device yet? Set one up with your fingerprint, face or screen lock. It takes a few seconds.
-      </p>
-      {state === "error" ? <Alert tone="error" title="We couldn't set up the passkey. Try again." live /> : null}
-      <Button
-        variant="outline"
-        className="self-start"
-        disabled={state === "busy"}
+      <ConfirmItsYou
+        actionLabel="Confirm change"
+        disabled={r.pending}
+        onConfirmed={async () => {
+          const result = await confirmBankAccountAction(id);
+          if (result.ok) router.refresh();
+          return result;
+        }}
+      />
+      <button
+        type="button"
+        className="self-start type-label"
+        disabled={r.pending}
         onClick={() => {
-          setState("busy");
-          void authClient.passkey.addPasskey({ name: "Payout confirmation" }).then((result) => {
-            if (!result.error) {
-              setState("done");
-              return;
-            }
-            const message = result.error.message ?? "";
-            setState(/cancel|abort|not allowed|NotAllowed/i.test(message) ? "idle" : "error");
-          });
+          r.go(() => cancelBankChangeAction(id));
         }}
       >
-        Set up a passkey
-      </Button>
-    </div>
+        Cancel change
+      </button>
+    </section>
   );
 }
 

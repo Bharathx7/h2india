@@ -13,7 +13,6 @@ import {
   EndDelegation,
   GstinActions,
   LimitDialog,
-  PasskeyPolicy,
   ProfileForm,
   RemoveSite,
   RulesForm,
@@ -468,28 +467,15 @@ export default async function CompanySettingsPage({ searchParams }: { searchPara
       </>
     );
   } else {
-    const [team, sessions] = await Promise.all([
-      teamView(db, scope, b.organisationId),
-      canManage ? companySessions(db, page.actor, b.organisationId) : Promise.resolve([]),
-    ]);
-    const counts = Object.fromEntries(
-      ["Admin", "Approver", "Requester"].map((r) => {
-        const of = team.members.filter((m) => m.role === r);
-        return [r, `${String(of.filter((m) => m.passkey).length)} of ${String(of.length)} has a passkey`];
-      }),
-    );
+    const sessions = canManage ? await companySessions(db, page.actor, b.organisationId) : [];
     body = (
       <>
         <Heading title="Security" detail={`Sign-in rules for everyone at ${b.legalName}, and who is signed in now.`} />
         <section className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
-          <h3 className="type-h4">Require a passkey</h3>
+          <h3 className="type-h4">How people sign in</h3>
           <p className="type-body-sm text-secondary">
-            A passkey signs people in with their fingerprint, face or screen lock. Approvers also confirm each approval
-            with it.
-          </p>
-          <PasskeyPolicy roles={data.settings?.passkeyRoles ?? []} counts={counts} canEdit={canManage} />
-          <p className="type-caption text-secondary">
-            People without a passkey are asked to add one the next time they sign in.
+            Everyone signs in with a code sent to their work email. Approvers and admins also confirm approvals and bank
+            changes with a fresh code.
           </p>
         </section>
         {canManage ? (

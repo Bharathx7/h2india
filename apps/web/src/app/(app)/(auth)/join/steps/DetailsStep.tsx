@@ -278,9 +278,6 @@ export function DetailsStep(props: {
       <Button size="lg" className="w-full" disabled={busy === "submit"} onClick={() => void submit()}>
         Continue
       </Button>
-      <p className="type-caption text-secondary">
-        After your first sign-in we&apos;ll offer to set up a passkey, so you can skip codes next time.
-      </p>
     </>
   );
 }

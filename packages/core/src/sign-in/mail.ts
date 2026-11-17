@@ -1,5 +1,5 @@
 import { parseServerEnv } from "@h2india/config";
-import { renderNoAccount, renderSignInCode } from "@h2india/emails";
+import { renderNoAccount, renderSignInCode, renderStaffPasswordLink } from "@h2india/emails";
 import { deliverEmail } from "../notify/channels";
 import { formatIstTime } from "../time";
 import { ACCOUNT_PAGES, SIGN_IN } from "./rules";
@@ -38,6 +38,22 @@ export async function sendNoAccount(to: string): Promise<void> {
         supplier: link(ACCOUNT_PAGES.supplier.join),
         member: link(ACCOUNT_PAGES.member.join),
       },
+    }),
+    security: true,
+  });
+}
+
+/** The back-office "set your password" link (17 Nov 2026). Only ever sent to staff; see auth.ts sendResetPassword. */
+export async function sendStaffPasswordLink(input: { to: string; url: string; name?: string }): Promise<void> {
+  const env = parseServerEnv();
+  await deliverEmail({
+    template: "email.staff_password_link",
+    event: "account.staff_password_link",
+    to: input.to,
+    mail: await renderStaffPasswordLink(env.APP_URL, {
+      url: input.url,
+      name: input.name,
+      minutes: SIGN_IN.passwordLinkMinutes,
     }),
     security: true,
   });

@@ -476,31 +476,6 @@ export async function delegationsOf(db: Executor, scope: Scope, organisationId: 
 
 // ------------------------------------------------------------------------------------------------ security
 
-/** Require a passkey for roles (576:662). People without one are asked to add one the next time they sign in. */
-export async function setPasskeyRoles(
-  db: Database,
-  actor: Actor,
-  organisationId: string,
-  roles: string[],
-  context?: RequestContext,
-) {
-  assertCan(actor, "company.manage", { organisationId });
-  const clean = roles.filter((r) => ["Admin", "Approver", "Requester"].includes(r));
-  await db
-    .insert(bs)
-    .values({ organisationId, passkeyRoles: clean })
-    .onConflictDoUpdate({ target: bs.organisationId, set: { passkeyRoles: clean, updatedAt: new Date() } });
-  await audit(db, {
-    actorId: actor.userId,
-    action: "security.passkey_roles",
-    resourceType: "buyer_settings",
-    resourceId: organisationId,
-    companyId: organisationId,
-    after: { roles: clean },
-    context,
-  });
-}
-
 /** Signed in now (576:662): the company's people and their active sessions. */
 export async function companySessions(db: Executor, actor: Actor, organisationId: string, now: Date = new Date()) {
   assertCan(actor, "company.manage", { organisationId });

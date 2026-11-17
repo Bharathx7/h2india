@@ -68,10 +68,8 @@ test("a Super admin adds a supplier; the new owner accepts the invitation and ge
   await page.goto(path);
   await page.getByRole("link", { name: "Sign in to accept" }).click();
   await enterCode(page, await requestCode(page, owner));
-  const notNow = page.getByRole("button", { name: "Not now" });
   const accept = page.getByRole("button", { name: "Accept invitation" });
-  await expect(notNow.or(accept)).toBeVisible({ timeout: 15_000 });
-  if (await notNow.isVisible()) await notNow.click();
+  await expect(accept).toBeVisible({ timeout: 15_000 });
   // They never went through Join, so they agree to the Terms here first.
   await accept.click();
   await expect(page.getByText("Agree to the Terms of use and Privacy policy to continue")).toBeVisible();

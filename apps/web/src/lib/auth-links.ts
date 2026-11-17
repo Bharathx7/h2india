@@ -5,6 +5,12 @@ import { ACCOUNT_PAGES } from "@h2india/core/sign-in";
 export const AUTH_LINKS = {
   /** Staff on the admin domain; on the public site it opens Buyer sign in. */
   signIn: "/sign-in",
+  /** H2 Economy staff: email and password (A183). The admin domain's /sign-in shows the same form. */
+  staffSignIn: "/sign-in/staff",
+  /** Staff: get a link to set or reset the password. */
+  staffPassword: "/sign-in/staff/password",
+  /** Where the emailed link lands to choose the new password. */
+  staffNewPassword: "/sign-in/staff/new",
   /** The choice of account for old links; new links go straight to a sign-up page. */
   join: "/join",
   buyerSignIn: ACCOUNT_PAGES.buyer.signIn,

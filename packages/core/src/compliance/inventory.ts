@@ -78,7 +78,7 @@ export const PERSONAL_TABLES: PersonalTable[] = [
   {
     table: "passkeys",
     fields: ["name", "public_key", "credential_id", "aaguid"],
-    purpose: "Passkey sign-in and step-up for money and bank changes",
+    purpose: "Old passkeys from before 17 Nov 2026; no longer used for sign-in or step-up, erased with the account",
     basis: "Legitimate use: security",
     retention: "Until removed or the account is erased",
     access: "The person",

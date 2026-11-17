@@ -12,7 +12,7 @@ import { Initials } from "@/admin/users/Tabs";
 import { actionWords, ago, deviceOf, kindWord, maskMobile, roleWord } from "@/admin/users/words";
 
 // User detail (651:1042), step 11.4: memberships, sign-in security, sessions, account actions and recent activity,
-// with Suspend user (653:568) and View as user (657:328). Reset passkeys, Export data, Sign out and Delete account
+// with Suspend user (653:568) and View as user (657:328). Export data, Sign out and Delete account
 // aren't on this screen yet: they have no server action (export and erasure run from Compliance).
 export const metadata: Metadata = { title: "User · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -127,24 +127,22 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Sign-in security</h2>
             <ul className="flex flex-col gap-3">
-              {d.passkeys.map((k) => (
-                <li key={k.createdAt.toISOString()} className="flex items-start gap-3">
-                  <Icon name="lock" size={16} className="mt-0.5" />
-                  <span>
-                    <span className="block type-label">Passkey · {k.name ?? k.deviceType}</span>
-                    <span className="block type-caption text-secondary">Added {formatIstDate(k.createdAt)}</span>
-                  </span>
-                </li>
-              ))}
               <li className="flex items-start gap-3">
                 <Icon name="mail" size={16} className="mt-0.5" />
                 <span>
                   <span className="block type-label">Email code</span>
-                  <span className="block type-caption text-secondary">
-                    {d.passkeys.length ? "Backup sign-in" : "Signs in with an email code; no passkey yet"} · {p.email}
-                  </span>
+                  <span className="block type-caption text-secondary">Signs in with a code to {p.email}</span>
                 </span>
               </li>
+              {d.operatorRoles.length ? (
+                <li className="flex items-start gap-3">
+                  <Icon name="lock" size={16} className="mt-0.5" />
+                  <span>
+                    <span className="block type-label">Password</span>
+                    <span className="block type-caption text-secondary">Back office sign-in for staff</span>
+                  </span>
+                </li>
+              ) : null}
             </ul>
           </section>
           <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">

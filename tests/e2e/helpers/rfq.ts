@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { enterCode, newEmail, requestCode, withDb } from "./sign-in";
 
 // RFQ test data written straight to the database (Launch 1 gaps): a buyer company with an Admin, a verified supplier
@@ -95,14 +95,6 @@ export async function rfqSetup(opts: { suggest?: boolean } = {}): Promise<RfqSet
 export async function signInExisting(page: Page, email: string, next = "/"): Promise<void> {
   await page.goto(`/sign-in?next=${encodeURIComponent(next)}`);
   await enterCode(page, await requestCode(page, email));
-  // The passkey offer (A1) is a step on the same page for someone without one; then the app redirects.
-  const notNow = page.getByRole("button", { name: "Not now" });
-  await expect
-    .poll(async () => (await notNow.isVisible()) || !new URL(page.url()).pathname.startsWith("/sign-in"), {
-      timeout: 20_000,
-    })
-    .toBe(true);
-  if (await notNow.isVisible()) await notNow.click();
   await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"), { timeout: 20_000 });
   await page.waitForLoadState("networkidle");
 }

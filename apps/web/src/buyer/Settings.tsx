@@ -21,7 +21,6 @@ import {
   delegationAction,
   endDelegationAction,
   limitAction,
-  passkeyRolesAction,
   profileAction,
   removeGstinAction,
   removeSiteAction,
@@ -854,41 +853,6 @@ export function EndDelegation({ id }: { id: string }) {
     >
       End now
     </Button>
-  );
-}
-
-export function PasskeyPolicy({
-  roles,
-  counts,
-  canEdit,
-}: {
-  roles: string[];
-  counts: Record<string, string>;
-  canEdit: boolean;
-}) {
-  const r = useRun();
-  const [on, setOn] = useState(roles);
-  const toggle = (role: string, v: boolean) => {
-    const next = v ? [...on, role] : on.filter((x) => x !== role);
-    setOn(next);
-    r.go(() => passkeyRolesAction(next));
-  };
-  return (
-    <ul className="flex flex-col divide-y divide-default">
-      {["Admin", "Approver", "Requester"].map((role) => (
-        <li key={role} className="flex items-center justify-between py-3">
-          <Switch
-            label={`Require for ${role}s`}
-            checked={on.includes(role)}
-            disabled={!canEdit}
-            onCheckedChange={(v) => {
-              toggle(role, v);
-            }}
-          />
-          <span className="type-caption text-secondary">{counts[role]}</span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

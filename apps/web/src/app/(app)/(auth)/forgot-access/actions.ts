@@ -82,7 +82,7 @@ export async function newMobile(mobile: string): Promise<Outcome<string>> {
   }
 }
 
-/** Lost passkey and lost email: both proofs given, so sign the person in once (recovery plugin). */
+/** Lost email: both proofs given, so sign the person in once (recovery plugin). */
 export async function signInWithRecovery(): Promise<Outcome> {
   try {
     await auth.api.recoverySession({ body: { token: await token() }, headers: await headers() });

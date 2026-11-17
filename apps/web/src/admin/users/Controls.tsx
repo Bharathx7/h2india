@@ -435,7 +435,7 @@ export function RoleMember({ roles }: { roles: string[] }) {
   );
 }
 
-/** A filter select that applies at once (651:8 "Type: all", "Status: all", "Passkey: any"). */
+/** A filter select that applies at once (651:8 "Type: all", "Status: all"). */
 export function AutoSelect({
   name,
   label,

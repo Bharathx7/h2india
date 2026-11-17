@@ -1,10 +1,10 @@
 import { expect, test, type Page } from "../fixtures";
 import { backOfficeContext, signInOperator } from "../helpers/cms";
 import { fillDetails, freshGstin, typeGstin } from "../helpers/join";
-import { addAuthenticator, enterCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
+import { confirmItsYou, enterCode, newEmail, ownIp, requestCode, withDb } from "../helpers/sign-in";
 
 // Flow C (Figma page 18, playbook step 8.8): a supplier from For Suppliers to a live listing. Join with company search
-// and GSTIN → onboarding checklist → verification documents → payout bank account (passkey) → storefront → datasheet
+// and GSTIN → onboarding checklist → verification documents → payout bank account (Confirm it's you by email code) → storefront → datasheet
 // upload and review → submit → an operator verifies the company and approves the listing → Listing approved email →
 // the product is live. Needs the app, the worker (GSTIN, file checks, datasheet reader), storage and Mailpit; runs in
 // CI at 1440 and 390 with video.
@@ -32,14 +32,11 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   test.setTimeout(420_000);
   const email = newEmail("flow-c");
 
-  // 1 For Suppliers → Join as a supplier, with a passkey for later.
+  // 1 For Suppliers → Join as a supplier.
   await page.goto("/for-suppliers");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await addAuthenticator(page);
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  await expect(page.getByRole("heading", { name: "Set up a passkey" })).toBeVisible();
-  await page.getByRole("button", { name: "Create passkey" }).click();
   await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
   await page.getByText("Supplier company", { exact: true }).click();
   await page.getByRole("button", { name: "Continue" }).click();
@@ -76,7 +73,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
     await expect(dialog).toBeHidden();
   }
 
-  // 4 Payout bank account, confirmed with the passkey.
+  // 4 Payout bank account, confirmed with a code to the supplier's email (A183).
   await page.goto("/supplier/bank");
   await page.getByLabel("Account number", { exact: true }).fill("50100234564417");
   await page.getByLabel("Account number again").fill("50100234564417");
@@ -84,7 +81,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   await page.getByLabel("Account holder").fill(company);
   await page.getByRole("button", { name: "Check this account" }).click();
   await expect(page.getByText("Test deposit matched")).toBeVisible();
-  await page.getByRole("button", { name: "Confirm with passkey" }).click();
+  await confirmItsYou(page, email, "Confirm change");
   await expect(page.getByText("Payouts active")).toBeVisible();
 
   // 5 Storefront basics: a logo and About, published for review.

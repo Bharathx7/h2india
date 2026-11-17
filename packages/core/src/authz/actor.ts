@@ -33,7 +33,7 @@ const { memberships: m, organisations: o, roles: r, rolePermissions: rp, operato
 
 /**
  * Operator access gate (step 12.1, review H2): the web app registers a check that this request's session was made with
- * a passkey (A172). Without it (worker, scripts, tests) operator roles count as stored. A failing check drops the
+ * the back-office password sign-in (A183; passkeys removed 17 Nov 2026). Without it (worker, scripts, tests) operator roles count as stored. A failing check drops the
  * operator permissions only; the person keeps their company and member access.
  */
 let operatorGate: ((userId: string) => Promise<boolean>) | null = null;
@@ -42,7 +42,7 @@ export function setOperatorGate(gate: ((userId: string) => Promise<boolean>) | n
   operatorGate = gate;
 }
 
-/** Whether a person holds any operator role, whatever the gate says (to send them to the passkey step). */
+/** Whether a person holds any operator role, whatever the gate says (to send them to the staff sign-in). */
 export async function hasOperatorRole(ex: Executor, userId: string): Promise<boolean> {
   const rows = await ex.select({ userId: or.userId }).from(or).where(eq(or.userId, userId)).limit(1);
   return rows.length > 0;

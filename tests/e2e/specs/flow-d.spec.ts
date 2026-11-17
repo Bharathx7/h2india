@@ -31,10 +31,8 @@ test("flow D: a tender alert leads to the tender", async ({ page, browser }, inf
   // 3 The member joins with an email code.
   const email = newEmail("flow-d");
   await enterCode(page, await requestCode(page, email));
-  // A new person is offered a passkey ("Not now") and then Join H2 Economy, as in signInNew().
-  const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
-  if (await notNow.isVisible()) await notNow.click();
+  // A new person goes on to Join H2 Economy, as in signInNew().
+  await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
 
   // 4 The alert is saved: instant, by email.
   await page.goto("/member/alerts?type=tenders");

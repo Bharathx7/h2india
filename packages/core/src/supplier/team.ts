@@ -40,7 +40,7 @@ export async function companyRoles(db: Executor, organisationId: string) {
   return rows.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
 }
 
-/** Members (with passkey and last active), open invitations and waiting join requests. Company-scoped. */
+/** Members (with last active), open invitations and waiting join requests. Company-scoped. */
 export async function teamView(db: Executor, scope: Scope, organisationId: string, now: Date = new Date()) {
   const members = await db
     .select({
@@ -49,7 +49,6 @@ export async function teamView(db: Executor, scope: Scope, organisationId: strin
       email: u.email,
       role: m.role,
       orderLimitPaise: m.orderLimitPaise,
-      passkey: sql<boolean>`exists (select 1 from core.passkeys pk where pk.user_id = ${u.id})`,
       lastActive: sql<Date | null>`(select max(s.updated_at) from core.sessions s where s.user_id = ${u.id})`,
     })
     .from(m)

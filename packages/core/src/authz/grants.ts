@@ -72,7 +72,7 @@ export async function grantOperatorRole(
 /**
  * The first Super admin on a new server (step 1.7). There is nobody yet who could grant the role, so this is run once
  * from the server's command line and refuses as soon as any Super admin exists; from then on roles change only through
- * grantOperatorRole(). The person signs in afterwards with an email code. Audited with no actor.
+ * grantOperatorRole(). The person then sets a back-office password from the staff sign-in (A183). Audited with no actor.
  */
 export async function bootstrapSuperAdmin(
   ex: Executor,

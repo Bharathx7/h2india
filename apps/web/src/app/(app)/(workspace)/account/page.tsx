@@ -95,8 +95,8 @@ export default async function AccountPage() {
 
         <Panel id="security" title="Sign-in and security">
           <p className="type-body text-body">
-            You sign in with a passkey or a code sent to your email. If you lost your passkey, your email or your
-            mobile, you can get back in through account recovery.
+            You sign in with a code sent to your email. If you lost access to your email or your mobile, you can get
+            back in through account recovery.
           </p>
           <div className="flex flex-wrap gap-3">
             <a href="/forgot-access" className={buttonClasses({ variant: "outline" })}>

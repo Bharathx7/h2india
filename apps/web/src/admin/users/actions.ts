@@ -14,7 +14,8 @@ import { grantOperatorRole, loadActor, OperatorRoleError, revokeOperatorRole } f
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { operatorSession, VIEW_AS_COOKIE } from "@/server/auth";
+import { AUTH_LINKS } from "@/lib/auth-links";
+import { auth, operatorSession, VIEW_AS_COOKIE } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 
 // Users (step 11.4): suspend and lift, suspend a company, View as user, and operator roles. Core checks permissions
@@ -109,11 +110,24 @@ export async function roleAction(email: string, role: string, add: boolean, reas
   const id = await userIdByEmail(getDb(), actor, email);
   if (!id) return { ok: false, error: "No account uses this email" };
   const context = await requestContext();
-  return run(
-    () =>
-      add
-        ? grantOperatorRole(getDb(), actor, { userId: id, role, reason }, context)
-        : revokeOperatorRole(getDb(), actor, { userId: id, role, reason }, context),
-    "/admin/users/roles",
-  );
+  return run(async () => {
+    if (!add) {
+      await revokeOperatorRole(getDb(), actor, { userId: id, role, reason }, context);
+      return;
+    }
+    await grantOperatorRole(getDb(), actor, { userId: id, role, reason }, context);
+    await sendStaffPasswordLink(email);
+  }, "/admin/users/roles");
+}
+
+/**
+ * New staff get a "set your password" link for the back office (A183). A failed send doesn't undo the role: they can
+ * ask again from Set or forgot your password on the staff sign-in.
+ */
+async function sendStaffPasswordLink(email: string) {
+  try {
+    await auth.api.requestPasswordReset({ body: { email, redirectTo: AUTH_LINKS.staffNewPassword } });
+  } catch (error) {
+    console.error("staff password link not sent", error instanceof Error ? error.message : error);
+  }
 }

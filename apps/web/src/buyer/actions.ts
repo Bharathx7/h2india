@@ -18,7 +18,6 @@ import {
   saveApprovalRules,
   saveDeliverySite,
   setDefaultGstin,
-  setPasskeyRoles,
   signOutSessions,
   updateCompanyProfile,
   type ProfileInput,
@@ -138,11 +137,6 @@ export async function endDelegationAction(id: string) {
   const { db, actor, org } = await buyer();
   const context = await requestContext();
   return run(() => endDelegation(db, actor, org, id, context));
-}
-export async function passkeyRolesAction(roles: string[]) {
-  const { db, actor, org } = await buyer();
-  const context = await requestContext();
-  return run(() => setPasskeyRoles(db, actor, org, roles, context));
 }
 export async function signOutAction(sessionId: string | null) {
   const { db, actor, org, sessionId: mine } = await buyer();

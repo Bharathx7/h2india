@@ -32,7 +32,7 @@ async function run(orderId: string, work: () => Promise<{ url?: string } | undef
   } catch (error) {
     if (error instanceof OrderError) {
       const messages: Record<string, string> = {
-        step_up: "Confirm it's you with your passkey first.",
+        step_up: "Confirm it's you with the code we email you first.",
         quote_expired: "The quote this order came from has expired. Ask the supplier for a revised quote.",
         retry_limit: "You've tried this payment 3 times. Pay by bank transfer instead, or try again tomorrow.",
       };

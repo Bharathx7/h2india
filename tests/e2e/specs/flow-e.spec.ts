@@ -64,10 +64,8 @@ test("flow E: a reader becomes a subscriber and a member", async ({ page }) => {
   // 6 Member onboarding: the same address becomes a member.
   await page.goto("/sign-in");
   await enterCode(page, await requestCode(page, email));
-  // A new person is offered a passkey ("Not now") and then Join H2 Economy, as in signInNew().
-  const notNow = page.getByRole("button", { name: "Not now" });
-  await expect(notNow.or(page.getByRole("heading", { name: "Join H2 Economy" }))).toBeVisible();
-  if (await notNow.isVisible()) await notNow.click();
+  // A new person goes on to Join H2 Economy, as in signInNew().
+  await expect(page.getByRole("heading", { name: "Join H2 Economy" })).toBeVisible();
   await page.goto("/member");
   await expect(page).toHaveURL(/\/member\/welcome$/);
   await page.getByRole("radio", { name: /Enthusiast/ }).click();
