@@ -303,7 +303,7 @@ function Cards({ rows }: { rows: TenderRow[] }) {
 
 function Table({ rows }: { rows: TenderRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-card border border-default">
+    <div className="relative overflow-x-auto rounded-card border border-default">
       <table className="w-full min-w-200 text-left">
         <thead className="bg-subtle type-label-sm text-secondary">
           <tr>

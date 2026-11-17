@@ -150,7 +150,7 @@ export default async function StatePage({ params }: { params: Params }) {
 
           {p ? (
             <Card title="Incentives" sub={`Summaries only. "Not specified" means the policy doesn't say.`}>
-              <div className="overflow-x-auto">
+              <div className="relative overflow-x-auto">
                 <table className="w-full min-w-120 text-left">
                   <thead className="bg-subtle type-label-sm text-secondary">
                     <tr>

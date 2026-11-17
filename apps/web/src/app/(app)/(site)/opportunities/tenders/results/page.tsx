@@ -120,7 +120,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             tabIndex={0}
             role="region"
             aria-label="Tender results"
-            className="overflow-x-auto rounded-card border border-default"
+            className="relative overflow-x-auto rounded-card border border-default"
           >
             <table className="w-full min-w-220 text-left">
               <thead className="bg-subtle type-label-sm text-secondary">

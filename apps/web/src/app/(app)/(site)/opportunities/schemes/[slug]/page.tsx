@@ -167,7 +167,7 @@ export default async function SchemePage({ params }: { params: Params }) {
 
           {(s.tranches ?? []).length ? (
             <Section id="tranches" title="Modes and tranches">
-              <div className="overflow-x-auto rounded-card border border-default">
+              <div className="relative overflow-x-auto rounded-card border border-default">
                 <table className="w-full min-w-150 text-left">
                   <thead className="bg-subtle type-label-sm text-secondary">
                     <tr>
