@@ -136,7 +136,7 @@ test("an Editor-in-chief archives a glossary term and restores it", async ({ pag
   });
   expect(audited).toEqual(expect.arrayContaining(["content.archive", "content.restore"]));
   await page.goto("/admin/content/glossary");
-  await expect(page.getByRole("link", { name: term })).toBeVisible();
+  await expect(page.getByRole("link", { name: term, exact: true })).toBeVisible();
 
   // Archiving needs content.delete: a Content editor sees the record without the button.
   const other = await backOfficeContext(browser);
