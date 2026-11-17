@@ -70,6 +70,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Throwaway values only. CI never holds real secrets.
       - run: cp .env.example .env.local
+      - name: The deploy script (ShellCheck)
+        run: shellcheck infra/deploy.sh
       - name: Types, lint and format
         run: pnpm check
         env:

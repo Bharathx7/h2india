@@ -75,19 +75,29 @@ your Mac: `ssh -L 8025:127.0.0.1:8025 <server>`, then open http://localhost:8025
 
 ## Every later deploy
 
-1. Push to `step/1.7-server` (later: merge to `main`). The **Image** workflow builds `ghcr.io/bharathx7/h2india:<tag>`.
-2. On the server:
+1. Merge to `main`. The **Image** workflow builds `ghcr.io/bharathx7/h2india:<tag>` (the first 12 characters of the
+   merge commit); the developer gives you the tag.
+2. On the server, one command (founder QC, 17 Nov 2026):
 
 ```sh
-cd /srv/h2india
-sed -i "s#^IMAGE=.*#IMAGE=ghcr.io/bharathx7/h2india:<tag>#" h2india.env
-dc pull web-public
-dc run --rm tools pnpm db:migrate
-dc up -d web-public web-admin worker
+/srv/h2india/deploy.sh <tag>
 ```
 
-**Roll back:** set the previous tag the same way and run `dc up -d web-public web-admin worker`. Migrations are not
-undone, so a rollback is only safe to a version that already worked with the current database.
+It checks the image exists, backs up the database (`backups/pre-deploy-<time>.dump`), runs the migrations, starts the
+new web-public, web-admin and worker, then checks `/api/health` on both apps, the key public and admin pages, and that
+the worker stays up. If anything fails it **puts the previous version back by itself** and says so; if the migrations
+fail, the old version was never stopped.
+
+Get the script once (and again when it changes):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Bharathx7/h2india/main/infra/deploy.sh -o /srv/h2india/deploy.sh
+chmod +x /srv/h2india/deploy.sh
+```
+
+**Roll back by hand:** `/srv/h2india/deploy.sh <previous tag>` (the script prints it after each deploy). Migrations are
+not undone, so a rollback is only safe to a version that already worked with the current database; they only add, so
+the previous version does.
 
 ## Logs, time and monitoring (step 13.3, before Launch 1)
 
