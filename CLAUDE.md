@@ -272,6 +272,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 - Company settings change only through `@h2india/core/buyer/settings` (company.manage, audited); people and roles through the team functions in `supplier/team.ts` (team.manage), shared by buyers and suppliers through `teamActor()`.
 - Delivery sites, RFQs and checkout bill to the company's one GSTIN (A189); there is no GSTIN picker.
 - Approval rules are stored now and enforced only when ordering opens (A162). Project lists never carry a price.
+- Company settings (`/buyer/company`) are tabs (`?section=`: profile, gstins, sites, users = Team, rules, security); the Team tab is the shared `TeamPanel` plus order limits (founder QC, 17 Nov 2026).
 - Every new buyer-owned table gets a case in `authz/authz.int.test.ts` and `buyer/buyer.int.test.ts`.
 - RFQs and quotes live in `@h2india/core/rfq` (pure rules in `/rfq/rules` and `/rfq/totals`). Statuses change only through `moveRfq()`/`moveQuote()` with a typed move from `transitions.ts` (A163); never set `status` directly.
 - A sent quote version is never changed; revising saves a new version. Buyers read only sent versions (`quoteVersion()`), suppliers see an RFQ only once `sentAt` is set.
