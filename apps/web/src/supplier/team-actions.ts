@@ -10,13 +10,10 @@ import {
 import {
   acceptInvitation,
   inviteMember,
-  publishStorefront,
   removeMember,
   revokeInvitation,
-  saveStorefrontDraft,
   StorefrontError,
   TeamError,
-  type StorefrontForm,
 } from "@h2india/core/supplier";
 import { getDb } from "@h2india/core";
 import { revalidatePath } from "next/cache";
@@ -24,7 +21,6 @@ import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { currentTermsVersion } from "@/trust/terms";
 import { loadActor, RolePermissionError, setRolePermission } from "@h2india/core/authz";
-import { supplierActor } from "./actor";
 
 /** The company whose team this person manages: their supplier company, else their buyer company. */
 async function teamActor() {
@@ -120,15 +116,6 @@ export async function acceptInvitationAction(token: string, agreedToTerms: boole
     () => acceptInvitation(getDb(), session.user.id, token, context, undefined, { termsVersion }),
     "/supplier",
   );
-}
-
-export async function saveStorefrontAction(form: StorefrontForm, publish: boolean) {
-  const { db, actor, supplier } = await supplierActor();
-  const context = await requestContext();
-  return run(async () => {
-    await saveStorefrontDraft(db, actor, supplier.organisationId, form);
-    if (publish) await publishStorefront(db, actor, supplier.organisationId, context);
-  }, "/supplier/storefront");
 }
 
 /** Team's permission grid (founder QC, 17 Nov 2026): tick or clear one permission for one role of this company. */

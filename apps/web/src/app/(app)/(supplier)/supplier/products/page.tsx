@@ -94,6 +94,11 @@ export default async function ProductsPage({
               <Icon name="file-text" size={18} />
               From a datasheet
             </Link>
+            {/* Founder QC (17 Nov 2026): asking for a missing category was only reachable from Add a product. */}
+            <Link href="/supplier/products/categories" className={buttonClasses({ variant: "ghost" })}>
+              <Icon name="folder" size={18} />
+              Request a category
+            </Link>
             <Link href="/supplier/products/import" className={buttonClasses({ variant: "outline" })}>
               <Icon name="upload" size={18} />
               Bulk upload

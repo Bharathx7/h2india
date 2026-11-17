@@ -8,5 +8,6 @@ export { useRegistry, type RegistryAdapter } from "./adapters/registry";
 export * from "./bank";
 export * from "./team";
 export * from "./storefront";
+export * from "./storefront-rules";
 export * from "./analytics";
 export { useBankAdapter, type BankAdapter } from "./adapters/bank";

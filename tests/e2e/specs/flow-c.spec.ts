@@ -52,7 +52,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   await page.getByRole("button", { name: "Create company" }).click();
   await expect(page.getByText(/ is set up as a supplier company\.$/)).toBeVisible();
 
-  // 2 The onboarding checklist.
+  // 2 The dashboard, with the onboarding checklist on top until the five steps are done.
   await page.goto("/supplier");
   await expect(page.getByRole("heading", { name: `Set up ${company} on H2 Economy` })).toBeVisible();
 
@@ -85,16 +85,15 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   await expect(page.getByText("Payouts active")).toBeVisible();
 
   // 5 Storefront basics: a logo and About, published for review.
+  // The editor opens on its first step, Logo and about (founder QC, 17 Nov 2026).
   await page.goto("/supplier/storefront");
-  await page.getByRole("button", { name: "Banner and logo" }).click();
   await page
     .locator("input[type=file]")
     .first()
     .setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: PNG });
   await expect(page.getByRole("img", { name: "Uploaded" })).toBeVisible({ timeout: 60_000 });
-  await page.getByRole("button", { name: "About" }).click();
   await page.getByLabel(`About ${company}`).fill("Diaphragm compressors made in India.");
-  await page.getByRole("button", { name: "Publish changes" }).click();
+  await page.getByRole("button", { name: "Send for review" }).click();
   await expect(page.getByText("In review", { exact: true }).first()).toBeVisible();
 
   // 6 A product from a datasheet: upload, check the fields, submit.

@@ -22,6 +22,7 @@
     "./rfq/rules": "./src/rfq/transitions.ts",
     "./rfq/totals": "./src/rfq/totals.ts",
     "./supplier/rules": "./src/supplier/verification-rules.ts",
+    "./supplier/storefront-rules": "./src/supplier/storefront-rules.ts",
     "./alerts/rules": "./src/alerts/rules.ts",
     "./auth": "./src/sign-in/auth.ts",
     "./sign-in": "./src/sign-in/rules.ts",
