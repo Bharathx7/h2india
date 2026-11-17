@@ -9,6 +9,8 @@ import { oldToNew } from "@/admin/users/changes";
 import { AutoSelect } from "@/admin/users/Controls";
 import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { actionWords, deviceOf } from "@/admin/users/words";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Audit log (656:872; states 657:1313), step 11.4: every recorded action with who, what, the change, why and from
 // where, newest first, and an export for those with users.export. Append-only. The Organisation filter the frame
@@ -26,7 +28,15 @@ const typeWord = (t: string) => {
 export default async function AuditPage({
   searchParams,
 }: {
-  searchParams: Promise<{ actor?: string; q?: string; type?: string; from?: string; to?: string }>;
+  searchParams: Promise<{
+    actor?: string;
+    q?: string;
+    type?: string;
+    from?: string;
+    to?: string;
+    page?: string;
+    perPage?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("users.view", "/admin/users/audit");
@@ -53,6 +63,8 @@ export default async function AuditPage({
           .includes(q),
       )
     : all;
+  // readAuditLog loads the newest LIMIT entries; this pages through them.
+  const paged = pageOf(rows, pageRequest(sp));
   const names = await actorLabels(
     db,
     actor,
@@ -122,84 +134,87 @@ export default async function AuditPage({
         </button>
       </form>
       {rows.length ? (
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="Audit log"
-          className="relative overflow-x-auto rounded-card border border-default bg-page"
-        >
-          <table className="w-full min-w-[1100px]">
-            <thead>
-              <tr className="bg-subtle text-left type-caption text-secondary">
-                <th scope="col" className="px-4 py-3">
-                  Time (IST)
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Actor
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Action
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Object
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Old → new
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Reason
-                </th>
-                <th scope="col" className="px-4 py-3">
-                  IP and device
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => {
-                const who = r.actorId ? names.get(r.actorId) : null;
-                return (
-                  <tr key={r.id} className="border-t border-default align-top">
-                    <td className="px-4 py-3">
-                      <span className="block type-mono">{ist(r.at, { day: "numeric", month: "short" })}</span>
-                      <span className="block type-caption text-secondary">
-                        {ist(r.at, { hour: "numeric", minute: "2-digit" })}
-                      </span>
-                    </td>
-                    <td className="px-2 py-3">
-                      {r.actorId ? (
-                        <Link href={`/admin/users/${r.actorId}`} className="block type-label hover:underline">
-                          {who?.name ?? "Former account"}
-                        </Link>
-                      ) : (
-                        <span className="block type-label">System</span>
-                      )}
-                      <span className="block type-caption text-secondary">
-                        {r.actorId ? (who?.detail ?? "") : "Automatic"}
-                      </span>
-                    </td>
-                    <td className="px-2 py-3 type-body-sm">
-                      {actionWords(r.action)}
-                      {r.actingAsId ? (
-                        <span className="block type-caption text-secondary">While viewing as someone</span>
-                      ) : null}
-                    </td>
-                    <td className="px-2 py-3">
-                      <span className="block type-caption text-secondary">{typeWord(r.resourceType)}</span>
-                      <span className="block type-mono">{r.resourceId?.slice(0, 13) ?? "—"}</span>
-                    </td>
-                    <td className="px-2 py-3 type-body-sm">{oldToNew(r.before, r.after)}</td>
-                    <td className="px-2 py-3 type-body-sm">{r.reason ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <span className="block type-mono">{r.ip ?? "—"}</span>
-                      {r.userAgent ? (
-                        <span className="block type-caption text-secondary">{deviceOf(r.userAgent)}</span>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="flex flex-col gap-4">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Audit log"
+            className="relative overflow-x-auto rounded-card border border-default bg-page"
+          >
+            <table className="w-full min-w-[1100px]">
+              <thead>
+                <tr className="bg-subtle text-left type-caption text-secondary">
+                  <th scope="col" className="px-4 py-3">
+                    Time (IST)
+                  </th>
+                  <th scope="col" className="px-2 py-3">
+                    Actor
+                  </th>
+                  <th scope="col" className="px-2 py-3">
+                    Action
+                  </th>
+                  <th scope="col" className="px-2 py-3">
+                    Object
+                  </th>
+                  <th scope="col" className="px-2 py-3">
+                    Old → new
+                  </th>
+                  <th scope="col" className="px-2 py-3">
+                    Reason
+                  </th>
+                  <th scope="col" className="px-4 py-3">
+                    IP and device
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.rows.map((r) => {
+                  const who = r.actorId ? names.get(r.actorId) : null;
+                  return (
+                    <tr key={r.id} className="border-t border-default align-top">
+                      <td className="px-4 py-3">
+                        <span className="block type-mono">{ist(r.at, { day: "numeric", month: "short" })}</span>
+                        <span className="block type-caption text-secondary">
+                          {ist(r.at, { hour: "numeric", minute: "2-digit" })}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3">
+                        {r.actorId ? (
+                          <Link href={`/admin/users/${r.actorId}`} className="block type-label hover:underline">
+                            {who?.name ?? "Former account"}
+                          </Link>
+                        ) : (
+                          <span className="block type-label">System</span>
+                        )}
+                        <span className="block type-caption text-secondary">
+                          {r.actorId ? (who?.detail ?? "") : "Automatic"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-3 type-body-sm">
+                        {actionWords(r.action)}
+                        {r.actingAsId ? (
+                          <span className="block type-caption text-secondary">While viewing as someone</span>
+                        ) : null}
+                      </td>
+                      <td className="px-2 py-3">
+                        <span className="block type-caption text-secondary">{typeWord(r.resourceType)}</span>
+                        <span className="block type-mono">{r.resourceId?.slice(0, 13) ?? "—"}</span>
+                      </td>
+                      <td className="px-2 py-3 type-body-sm">{oldToNew(r.before, r.after)}</td>
+                      <td className="px-2 py-3 type-body-sm">{r.reason ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="block type-mono">{r.ip ?? "—"}</span>
+                        {r.userAgent ? (
+                          <span className="block type-caption text-secondary">{deviceOf(r.userAgent)}</span>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <ListPager paged={paged} query={pagingQuery(sp)} />
         </div>
       ) : (
         <div className="rounded-card border border-default bg-page">

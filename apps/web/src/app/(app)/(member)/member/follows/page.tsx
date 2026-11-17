@@ -6,7 +6,9 @@ import { filterDirectory, parseDirectory } from "@h2india/core/directory/rules";
 import { cx, EmptyState, Icon } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ListPager } from "@/components/ListPager";
 import { companies as directory } from "@/directory/data";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { AddFollow, FollowLevel, Unfollow } from "@/member/controls";
 import { FromLink } from "@/member/FromLink";
 import { MemberShell, requireMember } from "@/member/shell";
@@ -33,6 +35,7 @@ export default async function FollowsPage({
   const follows = await listFollows(getDb(), userId);
   const tab = TABS.find((t) => t.value === sp.tab) ?? TABS[0];
   const mine = follows.filter((f) => f.targetType === tab.value);
+  const paged = pageOf(mine, pageRequest(sp));
   const count = (t: string) => follows.filter((f) => f.targetType === t).length;
   const q = (sp.q ?? "").trim();
   const followed = new Set(mine.map((f) => f.targetId));
@@ -106,29 +109,32 @@ export default async function FollowsPage({
             </ul>
           ) : null}
           {mine.length ? (
-            <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
-              {mine.map((f) => (
-                <li
-                  key={f.id}
-                  className="grid grid-cols-1 items-center gap-3 p-4 md:grid-cols-[minmax(0,1fr)_200px_auto]"
-                >
-                  <span className="flex flex-col">
-                    {f.href ? (
-                      <Link href={f.href} className="type-label text-primary hover:underline">
-                        {f.label}
-                      </Link>
-                    ) : (
-                      <span className="type-label text-primary">{f.label}</span>
-                    )}
-                    <span className="type-caption text-secondary">
-                      following since {formatIstDayMonth(f.createdAt)}
+            <>
+              <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
+                {paged.rows.map((f) => (
+                  <li
+                    key={f.id}
+                    className="grid grid-cols-1 items-center gap-3 p-4 md:grid-cols-[minmax(0,1fr)_200px_auto]"
+                  >
+                    <span className="flex flex-col">
+                      {f.href ? (
+                        <Link href={f.href} className="type-label text-primary hover:underline">
+                          {f.label}
+                        </Link>
+                      ) : (
+                        <span className="type-label text-primary">{f.label}</span>
+                      )}
+                      <span className="type-caption text-secondary">
+                        following since {formatIstDayMonth(f.createdAt)}
+                      </span>
                     </span>
-                  </span>
-                  <FollowLevel id={f.id} level={f.level} label={f.label} />
-                  <Unfollow type={f.targetType} targetId={f.targetId} label={f.label} />
-                </li>
-              ))}
-            </ul>
+                    <FollowLevel id={f.id} level={f.level} label={f.label} />
+                    <Unfollow type={f.targetType} targetId={f.targetId} label={f.label} />
+                  </li>
+                ))}
+              </ul>
+              <ListPager paged={paged} query={pagingQuery(sp)} />
+            </>
           ) : (
             <div className="rounded-card border border-default bg-page">
               <EmptyState title={`You don't follow any ${tab.label.toLowerCase()} yet`}>

@@ -72,7 +72,7 @@ export interface RecordRow {
 export async function listRecords(
   cms: Cms,
   type: ContentType,
-  opts: { q?: string; page?: number },
+  opts: { q?: string; page?: number; perPage?: number },
 ): Promise<{ rows: RecordRow[]; total: number; pages: number; page: number }> {
   const where: Where | undefined =
     opts.q && type.titleField !== "id" ? { [type.titleField]: { like: opts.q } } : undefined;
@@ -80,7 +80,7 @@ export async function listRecords(
     collection: type.slug as "schemes",
     draft: type.drafts,
     depth: 0,
-    limit: 50,
+    limit: opts.perPage ?? 50,
     page: opts.page ?? 1,
     sort: "-updatedAt",
     user: cms.user,

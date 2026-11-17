@@ -10,13 +10,19 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
 import { UploadDocument } from "@/supplier/UploadDocument";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Verification documents (586:8; phones 587:281), step 8.2: the checks H2 Economy runs on the company, with status,
 // expiry and what to fix. Only the company's own documents (scope). Uploads need verification.manage.
 export const metadata: Metadata = { title: "Verification · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-export default async function VerificationPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+export default async function VerificationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ state?: string; page?: string; perPage?: string }>;
+}) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/verification");
   const db = getDb();
@@ -39,6 +45,7 @@ export default async function VerificationPage({ searchParams }: { searchParams:
     { n: count((w) => w.startsWith("Expires in")), label: "expiring soon", tone: "warning" as const },
   ].filter((c) => c.n);
   const active = badges.filter((b) => b.status === "Active");
+  const paged = pageOf(docs, pageRequest(sp));
   return (
     <SupplierShell page={page} current="/supplier/verification" title="Verification">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -133,7 +140,7 @@ export default async function VerificationPage({ searchParams }: { searchParams:
               </tr>
             </thead>
             <tbody>
-              {docs.map((d) => {
+              {paged.rows.map((d) => {
                 const st = documentStatusWord(d, now, notice.days);
                 const fix = d.status === "Needs re-upload" || d.status === "Rejected" || d.status === "Expired";
                 return (
@@ -199,6 +206,7 @@ export default async function VerificationPage({ searchParams }: { searchParams:
             </tbody>
           </table>
         </div>
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </SupplierShell>
   );

@@ -5,11 +5,14 @@ import { formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, EmptyState, Icon, Skeleton, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { AutoSelect } from "@/admin/users/Controls";
 import { Initials, UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
+import { ListPager } from "@/components/ListPager";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Users (651:8; states 657:1313), step 11.4: find anyone by name, email, mobile, company or GSTIN; filter by type,
 // status.
@@ -28,7 +31,6 @@ const STATUSES = [
   { value: "active", label: "Active" },
   { value: "suspended", label: "Suspended" },
 ];
-const PER = 50;
 
 const typeOf = (x: { operator: string | null; kind: string | null }) =>
   x.operator
@@ -51,6 +53,7 @@ export default async function UsersPage({
     type?: string;
     status?: string;
     page?: string;
+    perPage?: string;
     state?: string;
   }>;
 }) {
@@ -58,23 +61,26 @@ export default async function UsersPage({
   const { userId, actor } = await requireOperator("users.view", "/admin/users");
   const type = (["buyer", "supplier", "member", "operator"] as const).find((t) => t === sp.type);
   const status = sp.status === "suspended" || sp.status === "active" ? sp.status : undefined;
-  const page = Math.max(1, Number(sp.page) || 1);
+  const req = pageRequest(sp);
   const db = getDb();
   const [{ rows, total }, everyone, roles] = await Promise.all([
     listUsers(db, actor, {
       q: sp.q?.trim() || undefined,
       type,
       status,
-      limit: PER,
-      offset: (page - 1) * PER,
+      ...pageWindow(req),
     }),
     listUsers(db, actor, { limit: 1 }),
     operatorRoleGrid(db, actor),
   ]);
-  const qs = (p: Record<string, string | undefined>) =>
-    new URLSearchParams(
-      Object.entries({ q: sp.q, type, status, ...p }).filter((e): e is [string, string] => Boolean(e[1])),
-    ).toString();
+  const query = pagingQuery(sp);
+  // A page past the end (the list shrank, or an old link) goes to the last page, like the other workspace lists.
+  const last = Math.max(1, Math.ceil(total / req.perPage));
+  if (req.page > last) {
+    redirect(
+      `/admin/users?${new URLSearchParams({ ...query, page: String(last), perPage: String(req.perPage) }).toString()}`,
+    );
+  }
   const today = ist(new Date(), { dateStyle: "short" });
   const filtered = Boolean(sp.q?.trim() || type || status);
   return (
@@ -219,32 +225,8 @@ export default async function UsersPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={{ page: req.page, perPage: req.perPage, total }} query={query} className="mt-4" />
       </LiveSection>
-      <div className="flex items-center justify-between type-caption text-secondary">
-        <span>
-          {total
-            ? `Showing ${String((page - 1) * PER + 1)}–${String(Math.min(page * PER, total))} of ${total.toLocaleString("en-IN")}`
-            : ""}
-        </span>
-        <span className="flex gap-2">
-          {page > 1 ? (
-            <Link
-              href={`/admin/users?${qs({ page: String(page - 1) })}`}
-              className={buttonClasses({ variant: "outline", size: "sm" })}
-            >
-              Previous
-            </Link>
-          ) : null}
-          {page * PER < total ? (
-            <Link
-              href={`/admin/users?${qs({ page: String(page + 1) })}`}
-              className={buttonClasses({ variant: "outline", size: "sm" })}
-            >
-              Next
-            </Link>
-          ) : null}
-        </span>
-      </div>
     </AdminShell>
   );
 }

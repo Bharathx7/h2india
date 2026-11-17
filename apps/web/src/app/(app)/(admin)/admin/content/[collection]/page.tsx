@@ -1,14 +1,16 @@
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
-import { buttonClasses, cx, EmptyState, Icon, StatusBadge } from "@h2india/ui";
+import { buttonClasses, EmptyState, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { contentType, listRecords } from "@/admin/cms/records";
 import { VERIFIED_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
 import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageRequest, pagingQuery } from "@/lib/paging";
 
 // A content library (step 4.6): every record of one type, newest change first, with search, its status and when it
 // was last verified. Media and report files also take uploads here.
@@ -20,7 +22,7 @@ export default async function LibraryPage({
   searchParams,
 }: {
   params: Promise<{ collection: string }>;
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; perPage?: string }>;
 }) {
   const { collection } = await params;
   const sp = await searchParams;
@@ -30,8 +32,15 @@ export default async function LibraryPage({
   const type = contentType(cms.payload, collection);
   if (!type) notFound();
   const q = sp.q?.trim() ?? "";
-  const page = Math.max(1, Number(sp.page) || 1);
-  const list = await listRecords(cms, type, { q, page });
+  const req = pageRequest(sp);
+  const list = await listRecords(cms, type, { q, page: req.page, perPage: req.perPage });
+  const query = pagingQuery(sp);
+  // A page past the end (the list shrank, or an old link) goes to the last page, like the other workspace lists.
+  if (!list.rows.length && list.total > 0 && req.page > 1) {
+    redirect(
+      `/admin/content/${collection}?${new URLSearchParams({ ...query, page: String(Math.max(1, list.pages)), perPage: String(req.perPage) }).toString()}`,
+    );
+  }
   const verified = VERIFIED_SLUGS.includes(collection);
   const gallery = type.upload && collection === "media";
   const tabbed = collection === "media" || collection === "authors";
@@ -63,8 +72,6 @@ export default async function LibraryPage({
         articleCounts.set(id, (articleCounts.get(id) ?? 0) + 1);
       }
   }
-  const href = (p: number) =>
-    `/admin/content/${collection}?${new URLSearchParams({ ...(q ? { q } : {}), page: String(p) }).toString()}`;
 
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
@@ -317,22 +324,8 @@ export default async function LibraryPage({
           </table>
         </div>
       )}
-      {list.pages > 1 ? (
-        <nav aria-label="Pages" className="flex items-center gap-2">
-          {page > 1 ? (
-            <Link href={href(page - 1)} className={buttonClasses({ variant: "outline", size: "sm" })}>
-              Previous
-            </Link>
-          ) : null}
-          <span className={cx("type-caption text-secondary")}>
-            Page {page} of {list.pages}
-          </span>
-          {page < list.pages ? (
-            <Link href={href(page + 1)} className={buttonClasses({ variant: "outline", size: "sm" })}>
-              Next
-            </Link>
-          ) : null}
-        </nav>
+      {list.rows.length ? (
+        <ListPager paged={{ page: list.page, perPage: req.perPage, total: list.total }} query={query} />
       ) : null}
     </AdminShell>
   );

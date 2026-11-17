@@ -9,6 +9,8 @@ import { BuyerWorkspace, requireBuyer } from "@/buyer/shell";
 import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { requireTransactionsPage } from "@/orders/guard";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Payments and invoices (720:8): Payments (720:281) and Refunds (720:881), step 10.8. GST invoices are on each order's
 // page under Documents. Built without its frames (A178).
@@ -34,7 +36,7 @@ const TONE: Record<string, "success" | "progress" | "error" | "warning"> = {
 export default async function BuyerPaymentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; state?: string }>;
+  searchParams: Promise<{ tab?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   requireTransactionsPage();
   const sp = await searchParams;
@@ -54,6 +56,9 @@ export default async function BuyerPaymentsPage({
     buyerRefunds(scope, db, page.buyer.organisationId),
   ]);
   const rows = tab === "payments" ? payments.length : refunds.length;
+  const req = pageRequest(sp);
+  const pagedPayments = pageOf(payments, req);
+  const pagedRefunds = pageOf(refunds, req);
   return (
     <BuyerWorkspace page={page} current="/buyer/payments">
       <div className="flex flex-col gap-1">
@@ -133,7 +138,7 @@ export default async function BuyerPaymentsPage({
             </thead>
             <tbody>
               {tab === "payments"
-                ? payments.map((p) => (
+                ? pagedPayments.rows.map((p) => (
                     <tr key={p.id} className="border-b border-default last:border-b-0 type-body-sm">
                       <td className="px-4 py-3">{formatIstDate(p.confirmedAt ?? p.at)}</td>
                       <td className="py-3">
@@ -152,7 +157,7 @@ export default async function BuyerPaymentsPage({
                       </td>
                     </tr>
                   ))
-                : refunds.map(({ refund: r, orderId, orderRef }) => (
+                : pagedRefunds.rows.map(({ refund: r, orderId, orderRef }) => (
                     <tr key={r.id} className="border-b border-default last:border-b-0 type-body-sm">
                       <td className="px-4 py-3 type-spec">{r.reference}</td>
                       <td className="py-3">
@@ -171,6 +176,7 @@ export default async function BuyerPaymentsPage({
             </tbody>
           </table>
         </div>
+        <ListPager paged={tab === "payments" ? pagedPayments : pagedRefunds} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </BuyerWorkspace>
   );

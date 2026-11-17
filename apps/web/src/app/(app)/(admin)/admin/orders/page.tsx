@@ -12,6 +12,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { requireTransactionsPage } from "@/orders/guard";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Admin Orders (step 11.5): orders needing Operations (a supplier late to answer, a locked delivery link, a dispute),
 // disputes, and every order. Built from the design system while Figma is out of reach (A178).
@@ -27,7 +29,7 @@ const TABS: { key: AdminOrderView; label: string }[] = [
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; q?: string }>;
+  searchParams: Promise<{ view?: string; q?: string; page?: string; perPage?: string }>;
 }) {
   requireTransactionsPage();
   const sp = await searchParams;
@@ -35,6 +37,8 @@ export default async function AdminOrdersPage({
   const view = TABS.find((t) => t.key === sp.view)?.key ?? "attention";
   const db = getDb();
   const [rows, counts] = await Promise.all([adminOrders(db, actor, { view, q: sp.q }), adminOrderCounts(db, actor)]);
+  // adminOrders loads at most 200 rows; this pages through what it loaded.
+  const paged = pageOf(rows, pageRequest(sp));
   return (
     <AdminShell userId={userId} current="/admin/orders" title="Orders">
       <div className="flex flex-col gap-1">
@@ -69,42 +73,45 @@ export default async function AdminOrdersPage({
         />
       </form>
       {rows.length ? (
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="Orders"
-          className="relative overflow-x-auto rounded-card border border-default bg-page"
-        >
-          <table className="w-full min-w-[900px] type-body-sm">
-            <thead>
-              <tr className="border-b border-default bg-subtle text-left type-label text-secondary">
-                {["Order", "Placed", "Buyer", "Supplier", "Total", "Status", "Dispute"].map((h, i) => (
-                  <th key={h} scope="col" className={i === 0 ? "px-4 py-2.5" : "py-2.5 pr-3"}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-default last:border-b-0">
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/orders/${r.id}`} className="type-spec hover:underline">
-                      {r.reference}
-                    </Link>
-                  </td>
-                  <td className="py-3 pr-3">{formatIstDate(r.createdAt)}</td>
-                  <td className="py-3 pr-3">{r.buyer}</td>
-                  <td className="py-3 pr-3">{r.supplier}</td>
-                  <td className="py-3 pr-3 type-spec">{Money.format(r.totalPaise)}</td>
-                  <td className="py-3 pr-3">
-                    <StatusBadge status={r.status} tone={ORDER_BADGE_TONE[r.status as OrderStatus]} />
-                  </td>
-                  <td className="py-3 pr-3">{r.dispute ?? "—"}</td>
+        <div className="flex flex-col gap-4">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Orders"
+            className="relative overflow-x-auto rounded-card border border-default bg-page"
+          >
+            <table className="w-full min-w-[900px] type-body-sm">
+              <thead>
+                <tr className="border-b border-default bg-subtle text-left type-label text-secondary">
+                  {["Order", "Placed", "Buyer", "Supplier", "Total", "Status", "Dispute"].map((h, i) => (
+                    <th key={h} scope="col" className={i === 0 ? "px-4 py-2.5" : "py-2.5 pr-3"}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paged.rows.map((r) => (
+                  <tr key={r.id} className="border-b border-default last:border-b-0">
+                    <td className="px-4 py-3">
+                      <Link href={`/admin/orders/${r.id}`} className="type-spec hover:underline">
+                        {r.reference}
+                      </Link>
+                    </td>
+                    <td className="py-3 pr-3">{formatIstDate(r.createdAt)}</td>
+                    <td className="py-3 pr-3">{r.buyer}</td>
+                    <td className="py-3 pr-3">{r.supplier}</td>
+                    <td className="py-3 pr-3 type-spec">{Money.format(r.totalPaise)}</td>
+                    <td className="py-3 pr-3">
+                      <StatusBadge status={r.status} tone={ORDER_BADGE_TONE[r.status as OrderStatus]} />
+                    </td>
+                    <td className="py-3 pr-3">{r.dispute ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ListPager paged={paged} query={pagingQuery(sp)} />
         </div>
       ) : (
         <div className="rounded-card border border-default bg-page">

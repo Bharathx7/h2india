@@ -3,6 +3,7 @@ import { getChoices, listNotifications, unreadCount } from "@h2india/core/notify
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { WorkspaceFrame } from "@/components/WorkspaceFrame";
+import { pageRequest, pagingQuery } from "@/lib/paging";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { NotificationsView } from "./NotificationsView";
@@ -14,11 +15,12 @@ export const metadata: Metadata = { title: "Notifications · H2 Economy", robots
 export default async function NotificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; state?: string }>;
+  searchParams: Promise<{ tab?: string; state?: string; page?: string; perPage?: string }>;
 }) {
   const session = await getSession();
   if (!session) redirect("/sign-in?next=/notifications");
-  const { tab, state } = await searchParams;
+  const sp = await searchParams;
+  const { tab, state } = sp;
   const db = getDb();
   const userId = session.user.id;
   const [shell, unread, items, choices] = await Promise.all([
@@ -46,6 +48,8 @@ export default async function NotificationsPage({
         demoState={demo === "loading" || demo === "empty" || demo === "error" ? demo : undefined}
         choices={choices}
         contact={{ email: shell.email, mobile: shell.mobile }}
+        paging={pageRequest(sp)}
+        query={pagingQuery(sp)}
       />
     </WorkspaceFrame>
   );

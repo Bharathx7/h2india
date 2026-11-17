@@ -11,6 +11,8 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { QueueTabs } from "../QueueTabs";
 import { QueueTable, type QueueRow } from "./QueueTable";
 import { StorefrontDecision } from "./StorefrontDecision";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Queues · Listings (629:367), step 8.3: every new listing and listing change waiting for a decision, oldest first.
 // Age turns amber at the queueAmber clock and red at queueRed (System settings 707:793). The other queues are 11.2.
@@ -30,7 +32,7 @@ const hours = (d: { hours?: number; days?: number; workingDays?: number }) =>
 export default async function ListingsQueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; q?: string; kind?: string }>;
+  searchParams: Promise<{ view?: string; q?: string; kind?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("queues.view", "/admin/queues/listings");
@@ -62,6 +64,7 @@ export default async function ListingsQueuePage({
       };
     })
     .filter((r) => view !== "late" || r.ageTone === "error");
+  const paged = pageOf(lines, pageRequest(sp));
   const canDecide = can(actor, "queues.edit");
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
@@ -112,7 +115,11 @@ export default async function ListingsQueuePage({
         </select>
       </form>
       {lines.length ? (
-        <QueueTable rows={lines} canDecide={canDecide} />
+        <div className="flex flex-col gap-4">
+          {/* Keyed by page so a selection never carries over to rows that aren't shown. */}
+          <QueueTable key={`${String(paged.page)}-${String(paged.perPage)}`} rows={paged.rows} canDecide={canDecide} />
+          <ListPager paged={paged} query={pagingQuery(sp)} />
+        </div>
       ) : (
         <div className="rounded-card border border-default bg-page">
           <EmptyState title="Nothing waiting">

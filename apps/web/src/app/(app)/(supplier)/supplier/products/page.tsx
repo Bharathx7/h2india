@@ -9,6 +9,8 @@ import { forcedState } from "@/lib/dev-state";
 import { catalogue } from "@/marketplace/data";
 import { ProductsTable, type ProductLine } from "@/supplier/ProductsTable";
 import { requireSupplier, SupplierShell } from "@/supplier/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Products (598:8; phones 599:8; states 600:8), step 8.3: the supplier's listings by status, with search, category,
 // bulk pause and archive. Views and enquiries arrive with analytics (8.8). Prices show here: this is the supplier's own
@@ -21,7 +23,14 @@ const rupees = (p: bigint) => Money.format(p);
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; q?: string; category?: string; state?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    q?: string;
+    category?: string;
+    state?: string;
+    page?: string;
+    perPage?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/products");
@@ -62,6 +71,7 @@ export default async function ProductsPage({
   const categories = cat.classes.flatMap((c) =>
     c.categories.map((k) => ({ id: k.id, label: `${c.label} › ${k.label}` })),
   );
+  const paged = pageOf(rows, pageRequest(sp));
   const searching = Boolean(sp.q?.trim() || sp.category);
   const total = counts.all ?? 0;
   return (
@@ -172,7 +182,14 @@ export default async function ProductsPage({
           </div>
         }
       >
-        <ProductsTable rows={rows} canEdit={canEdit} company={s.tradeName} />
+        {/* Keyed by page so a selection never carries over to rows that aren't shown. */}
+        <ProductsTable
+          key={`${String(paged.page)}-${String(paged.perPage)}`}
+          rows={paged.rows}
+          canEdit={canEdit}
+          company={s.tradeName}
+        />
+        <ListPager paged={paged} query={pagingQuery(sp)} className="mt-4" />
       </LiveSection>
     </SupplierShell>
   );

@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import { ResolveIssue } from "@/admin/orders/Controls";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { requireTransactionsPage } from "@/orders/guard";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Admin Money (step 11.6): payments, payouts, the ledger and reconciliation (705:8: collected = paid out + fees + GST
 // on fees + TCS + TDS + held), and the rate card and pilot list. Built from the design system (A178). Read with
@@ -48,13 +50,20 @@ function Table({ label, head, children }: { label: string; head: string[]; child
   );
 }
 
-export default async function AdminMoneyPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function AdminMoneyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; page?: string; perPage?: string }>;
+}) {
   requireTransactionsPage();
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("money.view", "/admin/money");
   const tab = TABS.find((t) => t.key === sp.tab)?.key ?? "ledger";
   const db = getDb();
   const canEdit = actor.operator.has("money.edit");
+  // Each tab's list pages through what core loaded (at most 200 differences, payments or payouts).
+  const req = pageRequest(sp);
+  const query = pagingQuery(sp);
   return (
     <AdminShell userId={userId} current="/admin/money" title="Money">
       <div className="flex flex-col gap-1">
@@ -87,6 +96,7 @@ export default async function AdminMoneyPage({ searchParams }: { searchParams: P
 
   async function Ledger() {
     const [months, issues] = await Promise.all([ledgerMonths(db, actor), reconciliationIssues(db, actor)]);
+    const paged = pageOf(issues, req);
     return (
       <>
         <Table
@@ -123,17 +133,20 @@ export default async function AdminMoneyPage({ searchParams }: { searchParams: P
         </Table>
         <h2 className="type-h3">Differences to resolve</h2>
         {issues.length ? (
-          <Table label="Reconciliation differences" head={["Found", "Kind", "What", "Partner reference", "Resolve"]}>
-            {issues.map((i) => (
-              <tr key={i.id} className="border-b border-default last:border-b-0 align-top">
-                <td className="px-4 py-3">{formatIstDateTime(i.createdAt)}</td>
-                <td className="py-3 pr-3">{i.kind}</td>
-                <td className="py-3 pr-3">{i.detail}</td>
-                <td className="py-3 pr-3 type-spec">{i.partnerRef ?? "—"}</td>
-                <td className="py-3 pr-3">{canEdit ? <ResolveIssue issueId={i.id} /> : "Finance resolves"}</td>
-              </tr>
-            ))}
-          </Table>
+          <>
+            <Table label="Reconciliation differences" head={["Found", "Kind", "What", "Partner reference", "Resolve"]}>
+              {paged.rows.map((i) => (
+                <tr key={i.id} className="border-b border-default last:border-b-0 align-top">
+                  <td className="px-4 py-3">{formatIstDateTime(i.createdAt)}</td>
+                  <td className="py-3 pr-3">{i.kind}</td>
+                  <td className="py-3 pr-3">{i.detail}</td>
+                  <td className="py-3 pr-3 type-spec">{i.partnerRef ?? "—"}</td>
+                  <td className="py-3 pr-3">{canEdit ? <ResolveIssue issueId={i.id} /> : "Finance resolves"}</td>
+                </tr>
+              ))}
+            </Table>
+            <ListPager paged={paged} query={query} />
+          </>
         ) : (
           <EmptyState title="No differences">
             The nightly reconciliation found the partner&apos;s report and the ledger in agreement.
@@ -145,28 +158,32 @@ export default async function AdminMoneyPage({ searchParams }: { searchParams: P
 
   async function Payments() {
     const rows = await adminPayments(db, actor);
+    const paged = pageOf(rows, req);
     return rows.length ? (
-      <Table label="Payments" head={["Date", "Order", "Method", "Amount", "Partner reference", "Status"]}>
-        {rows.map(({ payment: p, reference, orderId }) => (
-          <tr key={p.id} className="border-b border-default last:border-b-0">
-            <td className="px-4 py-3">{formatIstDateTime(p.confirmedAt ?? p.createdAt)}</td>
-            <td className="py-3 pr-3">
-              <Link href={`/admin/orders/${orderId}`} className="type-spec hover:underline">
-                {reference}
-              </Link>
-            </td>
-            <td className="py-3 pr-3">{p.method}</td>
-            <td className="py-3 pr-3 type-spec">{rupees(p.amountPaise)}</td>
-            <td className="py-3 pr-3 type-spec">{p.partnerPaymentId}</td>
-            <td className="py-3 pr-3">
-              <StatusBadge
-                status={p.status}
-                tone={p.status === "Succeeded" ? "success" : p.status === "Pending" ? "progress" : "error"}
-              />
-            </td>
-          </tr>
-        ))}
-      </Table>
+      <>
+        <Table label="Payments" head={["Date", "Order", "Method", "Amount", "Partner reference", "Status"]}>
+          {paged.rows.map(({ payment: p, reference, orderId }) => (
+            <tr key={p.id} className="border-b border-default last:border-b-0">
+              <td className="px-4 py-3">{formatIstDateTime(p.confirmedAt ?? p.createdAt)}</td>
+              <td className="py-3 pr-3">
+                <Link href={`/admin/orders/${orderId}`} className="type-spec hover:underline">
+                  {reference}
+                </Link>
+              </td>
+              <td className="py-3 pr-3">{p.method}</td>
+              <td className="py-3 pr-3 type-spec">{rupees(p.amountPaise)}</td>
+              <td className="py-3 pr-3 type-spec">{p.partnerPaymentId}</td>
+              <td className="py-3 pr-3">
+                <StatusBadge
+                  status={p.status}
+                  tone={p.status === "Succeeded" ? "success" : p.status === "Pending" ? "progress" : "error"}
+                />
+              </td>
+            </tr>
+          ))}
+        </Table>
+        <ListPager paged={paged} query={query} />
+      </>
     ) : (
       <EmptyState title="No payments yet">Payments appear once the partner confirms them.</EmptyState>
     );
@@ -174,24 +191,28 @@ export default async function AdminMoneyPage({ searchParams }: { searchParams: P
 
   async function Payouts() {
     const rows = await adminPayouts(db, actor);
+    const paged = pageOf(rows, req);
     return rows.length ? (
-      <Table label="Payouts" head={["Run", "Payout", "Supplier", "Amount", "UTR", "Status"]}>
-        {rows.map(({ payout: p, supplier }) => (
-          <tr key={p.id} className="border-b border-default last:border-b-0">
-            <td className="px-4 py-3">{formatIstDate(p.runAt)}</td>
-            <td className="py-3 pr-3 type-spec">{p.reference}</td>
-            <td className="py-3 pr-3">{supplier}</td>
-            <td className="py-3 pr-3 type-spec">{rupees(p.amountPaise)}</td>
-            <td className="py-3 pr-3 type-spec">{p.utr ?? "—"}</td>
-            <td className="py-3 pr-3">
-              <StatusBadge
-                status={p.status}
-                tone={p.status === "Paid" ? "success" : p.status === "Failed" ? "error" : "progress"}
-              />
-            </td>
-          </tr>
-        ))}
-      </Table>
+      <>
+        <Table label="Payouts" head={["Run", "Payout", "Supplier", "Amount", "UTR", "Status"]}>
+          {paged.rows.map(({ payout: p, supplier }) => (
+            <tr key={p.id} className="border-b border-default last:border-b-0">
+              <td className="px-4 py-3">{formatIstDate(p.runAt)}</td>
+              <td className="py-3 pr-3 type-spec">{p.reference}</td>
+              <td className="py-3 pr-3">{supplier}</td>
+              <td className="py-3 pr-3 type-spec">{rupees(p.amountPaise)}</td>
+              <td className="py-3 pr-3 type-spec">{p.utr ?? "—"}</td>
+              <td className="py-3 pr-3">
+                <StatusBadge
+                  status={p.status}
+                  tone={p.status === "Paid" ? "success" : p.status === "Failed" ? "error" : "progress"}
+                />
+              </td>
+            </tr>
+          ))}
+        </Table>
+        <ListPager paged={paged} query={query} />
+      </>
     ) : (
       <EmptyState title="No payouts yet">Payouts run at 11:00 and 16:00 IST on working days.</EmptyState>
     );
