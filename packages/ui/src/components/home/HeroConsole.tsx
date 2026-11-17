@@ -41,6 +41,9 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
   const [index, setIndex] = useState(0);
   const [stopped, setStopped] = useState(false);
   const [paused, setPaused] = useState(false);
+  // Rows appear at once on page load (no load choreography; the card also streams in late) and slide in only when
+  // the tab changes, which is when the motion explains something.
+  const [changed, setChanged] = useState(false);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const auto = !reduced && !stopped;
   const running = auto && !paused;
@@ -48,6 +51,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
   useEffect(() => {
     if (!running) return;
     const timer = setTimeout(() => {
+      setChanged(true);
       setIndex((i) => (i + 1) % panels.length);
     }, STEP_MS);
     return () => {
@@ -57,6 +61,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
 
   const choose = (i: number, focus = false) => {
     setStopped(true);
+    setChanged(true);
     setIndex(i);
     if (focus) tabs.current[i]?.focus();
   };
@@ -160,7 +165,10 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
         className="flex h-86 flex-col gap-4 rounded-card bg-page p-5 shadow-soft"
       >
         <div key={panel.id} className="flex min-h-0 flex-1 flex-col gap-4">
-          <p className="hero-item type-eyebrow text-secondary" style={{ ["--hero-i" as string]: 0 }}>
+          <p
+            className={cx(changed && "hero-item", "type-eyebrow text-secondary")}
+            style={{ ["--hero-i" as string]: 0 }}
+          >
             {panel.eyebrow}
           </p>
           {panel.rows.length ? (
@@ -168,7 +176,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
               {panel.rows.map((r, i) => (
                 <li
                   key={r.href + r.title}
-                  className="hero-item border-b border-default last:border-b-0"
+                  className={cx(changed && "hero-item", "border-b border-default last:border-b-0")}
                   style={{ ["--hero-i" as string]: i + 1 }}
                 >
                   <a href={r.href} className="group/row flex items-start gap-3 py-2.5 first:pt-0">
@@ -192,7 +200,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
                   {panel.steps.map((s, i) => (
                     <li
                       key={s.title}
-                      className="hero-item flex items-start gap-3"
+                      className={cx(changed && "hero-item", "flex items-start gap-3")}
                       style={{ ["--hero-i" as string]: i + 1 }}
                     >
                       <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
@@ -207,7 +215,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
                 </ol>
               ) : null}
               <ul
-                className="hero-item flex flex-wrap gap-2"
+                className={cx(changed && "hero-item", "flex flex-wrap gap-2")}
                 style={{ ["--hero-i" as string]: (panel.steps?.length ?? 0) + 1 }}
               >
                 {panel.chips.map((c) => (
@@ -229,7 +237,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
               </ul>
               {panel.note ? (
                 <p
-                  className="hero-item type-body-sm text-body"
+                  className={cx(changed && "hero-item", "type-body-sm text-body")}
                   style={{ ["--hero-i" as string]: (panel.steps?.length ?? 0) + 2 }}
                 >
                   {panel.note}
@@ -239,7 +247,10 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
           )}
           <a
             href={panel.cta.href}
-            className="group/cta hero-item mt-auto inline-flex items-center gap-1.5 self-start type-label text-link hover:text-link-hover"
+            className={cx(
+              changed && "hero-item",
+              "group/cta mt-auto inline-flex items-center gap-1.5 self-start type-label text-link hover:text-link-hover",
+            )}
             style={{ ["--hero-i" as string]: 6 }}
           >
             {panel.cta.label}
