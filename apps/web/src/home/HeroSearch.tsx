@@ -92,13 +92,27 @@ export function HeroSearch() {
           </Button>
         </span>
       </form>
-      <div className="hero-reveal flex flex-wrap items-center gap-2 [animation-delay:200ms]">
-        <p className="type-label-sm text-secondary">Popular:</p>
-        {POPULAR.map((p) => (
-          <Link key={p.label} href={p.href} className={cx(chip, "h-11 px-3.75 md:h-8 md:px-2.75")}>
-            {p.label}
-          </Link>
-        ))}
+      {/* Popular (founder QC, 17 Nov 2026): the label on its own line so every chip starts on one edge; a swipeable row
+          like the scope chips on phones and tablets, an even 3 + 2 grid of equal chips once the hero column is wide. */}
+      <div className="hero-reveal flex flex-col gap-2 [animation-delay:200ms]">
+        <p id="hero-popular" className="type-label-sm text-secondary">
+          Popular
+        </p>
+        <ul
+          aria-labelledby="hero-popular"
+          className="-mx-4 flex snap-x gap-2 overflow-x-auto scroll-px-4 px-4 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 xl:grid xl:grid-cols-3 xl:overflow-visible"
+        >
+          {POPULAR.map((p) => (
+            <li key={p.label} className="shrink-0 snap-start">
+              <Link
+                href={p.href}
+                className={cx(chip, "h-11 px-3.75 whitespace-nowrap md:h-8 md:px-2.75 xl:w-full xl:justify-center")}
+              >
+                {p.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );

@@ -18,3 +18,9 @@ overrides:
   "@esbuild-kit/core-utils>esbuild": "0.28.2"
   "esbuild-register>esbuild": "0.28.2"
   "drizzle-kit>esbuild": "0.28.2"
+# Founder, 17 Nov 2026: picomatch ReDoS (GHSA-fc5q-39xc-vjpf, high) reaches us only through build and dev tooling
+# (Next.js, Sass, chokidar) with fixed glob patterns, and no patched release exists yet. Ignored by ID only; every
+# other advisory still fails the audit. Remove this entry as soon as a fixed picomatch ships (docs/decisions.md A192).
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
