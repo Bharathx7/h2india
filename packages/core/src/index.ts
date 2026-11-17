@@ -6,7 +6,16 @@ export { Money } from "./money";
 export type { Paise } from "./money";
 export { formatReference, istYear, nextReference, REFERENCE_TYPES } from "./reference";
 export type { ReferenceType } from "./reference";
-export { audit, AUDIT_RETENTION_YEARS, exportAuditCsv, mask, pruneAuditLog, readAuditLog } from "./audit";
+export {
+  audit,
+  AUDIT_RETENTION_YEARS,
+  auditResourceTypes,
+  countAuditLog,
+  exportAuditCsv,
+  mask,
+  pruneAuditLog,
+  readAuditLog,
+} from "./audit";
 export type { AuditEntry, AuditFilter, RequestContext } from "./audit";
 export { declaredSettings, defineSetting, getSetting, setSetting } from "./settings";
 export type { SettingDef } from "./settings";

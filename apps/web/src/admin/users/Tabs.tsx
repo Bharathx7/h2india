@@ -2,11 +2,12 @@ import { cx } from "@h2india/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-// Users, Operator roles and Audit log share the System · Users area (651:8, 656:8, 656:872): one heading and tabs.
-// The frames also draw an Organisations tab; companies are looked after on the Verification desk until that screen
-// is built, so it is left out here.
+// Users, Companies, Operator roles, Audit log, Appeals and Support requests share the System · Users area (651:8,
+// 656:8, 656:872): one heading and tabs. Companies is the frames' Organisations tab (founder QC, 17 Nov 2026).
 const TABS = [
   { key: "people", label: "Users", href: "/admin/users" },
+  // Founder QC (17 Nov 2026): companies could only be reached through a person.
+  { key: "companies", label: "Companies", href: "/admin/users/companies" },
   { key: "roles", label: "Operator roles", href: "/admin/users/roles" },
   { key: "audit", label: "Audit log", href: "/admin/users/audit" },
   { key: "appeals", label: "Appeals", href: "/admin/users/appeals" },

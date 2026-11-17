@@ -1,6 +1,6 @@
 import { CLOCKS, type ClockName, type Duration } from "@h2india/config/clocks";
 import { schema, type Executor } from "@h2india/db";
-import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
@@ -86,6 +86,19 @@ export async function setHoliday(
     });
   });
   cached = undefined;
+}
+
+/**
+ * The holiday list for System settings (founder QC, 17 Nov 2026: M18 says operators keep it there, but there was no
+ * screen): from the start of last year, by date. Operators with settings.view.
+ */
+export async function listHolidays(ex: Executor, actor: Actor) {
+  assertCan(actor, "settings.view");
+  return ex
+    .select({ day: h.day, name: h.name, source: h.source })
+    .from(h)
+    .where(gte(h.day, sql`date_trunc('year', now() - interval '1 year')::date`))
+    .orderBy(asc(h.day));
 }
 
 export async function removeHoliday(ex: Executor, actor: Actor, day: string, context?: RequestContext) {

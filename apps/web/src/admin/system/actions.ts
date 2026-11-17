@@ -3,7 +3,15 @@
 import { ADMIN_FLAGS } from "@h2india/config";
 import type { ClockName } from "@h2india/config/clocks";
 import { getDb } from "@h2india/core";
-import { decideProposal, scheduleReport, setClock, switchFlag, SystemError } from "@h2india/core/admin/system";
+import {
+  cancelReportSchedule,
+  decideProposal,
+  scheduleReport,
+  setClock,
+  switchFlag,
+  SystemError,
+} from "@h2india/core/admin/system";
+import { removeHoliday, setHoliday } from "@h2india/core/clocks";
 import { loadActor } from "@h2india/core/authz";
 import { resolveDeadLetter } from "@h2india/core/queue";
 import { revalidatePath } from "next/cache";
@@ -27,7 +35,7 @@ async function run(work: () => Promise<unknown>, path: string): Promise<R> {
     note = typeof out === "string" ? out : undefined;
   } catch (error) {
     if (error instanceof SystemError) return { ok: false, error: error.message };
-    if (error instanceof Error && /Not allowed|isn't answering/.test(error.message))
+    if (error instanceof Error && /Not allowed|isn't answering|Enter the/.test(error.message))
       return { ok: false, error: error.message };
     if (error instanceof Error && error.name === "ZodError") return { ok: false, error: "Check the value." };
     throw error;
@@ -84,4 +92,30 @@ export async function scheduleReportAction(email: string, frequency: "weekly" | 
     await scheduleReport(getDb(), actor, { email, frequency }, await requestContext());
     return "Report scheduled";
   }, "/admin/reports");
+}
+
+/** Stop a scheduled report email (founder QC, 17 Nov 2026). */
+export async function cancelReportAction(id: string): Promise<R> {
+  const actor = await operator();
+  return run(async () => {
+    await cancelReportSchedule(getDb(), actor, id, await requestContext());
+    return "Report stopped";
+  }, "/admin/reports");
+}
+
+/** Holidays (M18): add or rename one day, or remove it. Core checks settings.edit and audits. */
+export async function holidayAction(day: string, name: string): Promise<R> {
+  const actor = await operator();
+  return run(async () => {
+    await setHoliday(getDb(), actor, { day, name }, await requestContext());
+    return "Holiday saved. New deadlines skip it.";
+  }, "/admin/settings");
+}
+
+export async function removeHolidayAction(day: string): Promise<R> {
+  const actor = await operator();
+  return run(async () => {
+    await removeHoliday(getDb(), actor, day, await requestContext());
+    return "Holiday removed";
+  }, "/admin/settings");
 }

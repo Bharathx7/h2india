@@ -91,6 +91,8 @@ export interface AuditFilter {
   resourceType?: string;
   resourceId?: string;
   companyId?: string;
+  /** Words to find in the action, record type, record id or reason (the Audit log's search box). */
+  text?: string;
 }
 
 function filterSql(f: AuditFilter): SQL | undefined {
@@ -102,6 +104,9 @@ function filterSql(f: AuditFilter): SQL | undefined {
     f.resourceType ? eq(auditLog.resourceType, f.resourceType) : undefined,
     f.resourceId ? eq(auditLog.resourceId, f.resourceId) : undefined,
     f.companyId ? eq(auditLog.companyId, f.companyId) : undefined,
+    f.text
+      ? sql`(${auditLog.action} ilike ${`%${f.text}%`} or ${auditLog.resourceType} ilike ${`%${f.text}%`} or ${auditLog.resourceId} ilike ${`%${f.text}%`} or ${auditLog.reason} ilike ${`%${f.text}%`})`
+      : undefined,
   );
 }
 
@@ -113,15 +118,26 @@ export async function readAuditLog(
   ex: Executor,
   actor: Actor,
   filter: AuditFilter,
-  page: { limit?: number; before?: Date } = {},
+  page: { limit?: number; before?: Date; offset?: number } = {},
 ) {
   assertCan(actor, "users.view");
   return ex
     .select()
     .from(auditLog)
     .where(and(filterSql(filter), page.before ? lt(auditLog.at, page.before) : undefined))
-    .orderBy(desc(auditLog.at))
-    .limit(Math.min(page.limit ?? 50, 500));
+    .orderBy(desc(auditLog.at), desc(auditLog.id))
+    .limit(Math.min(page.limit ?? 50, 500))
+    .offset(page.offset ?? 0);
+}
+
+/** How many entries match, for the Audit log's pager (founder QC, 17 Nov 2026: it stopped at the newest 200). */
+export async function countAuditLog(ex: Executor, actor: Actor, filter: AuditFilter): Promise<number> {
+  assertCan(actor, "users.view");
+  const [row] = await ex
+    .select({ n: sql<number>`count(*)::int` })
+    .from(auditLog)
+    .where(filterSql(filter));
+  return row?.n ?? 0;
 }
 
 const CSV_COLUMNS = [
@@ -170,4 +186,11 @@ export async function exportAuditCsv(
     context,
   });
   return lines.join("\n") + "\n";
+}
+
+/** The record types in the log, for the Audit log's Object type filter. */
+export async function auditResourceTypes(ex: Executor, actor: Actor): Promise<string[]> {
+  assertCan(actor, "users.view");
+  const rows = await ex.selectDistinct({ t: auditLog.resourceType }).from(auditLog).orderBy(auditLog.resourceType);
+  return rows.map((r) => r.t);
 }

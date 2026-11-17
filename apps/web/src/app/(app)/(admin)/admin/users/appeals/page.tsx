@@ -6,15 +6,24 @@ import type { Metadata } from "next";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { AppealDecision } from "@/admin/users/AppealDecision";
 import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Appeals against company suspensions (G10): read with users.view, decided with users.edit. Built without a frame
 // (A178).
 export const metadata: Metadata = { title: "Appeals · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-export default async function AppealsPage() {
+export default async function AppealsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; perPage?: string }>;
+}) {
+  const sp = await searchParams;
   const { userId, actor } = await requireOperator("users.view", "/admin/users/appeals");
   const rows = await listAppeals(getDb(), actor);
+  // Paged (founder QC, 17 Nov 2026); the tab's count stays the open appeals.
+  const paged = pageOf(rows, pageRequest(sp));
   const canEdit = actor.operator.has("users.edit");
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
@@ -22,7 +31,7 @@ export default async function AppealsPage() {
       <UserTabs current="appeals" counts={{ appeals: rows.filter((r) => r.appeal.status === "Open").length }} />
       {rows.length ? (
         <ul className="flex flex-col gap-3">
-          {rows.map(({ appeal, company, suspendReason, suspendedAt, sender }) => (
+          {paged.rows.map(({ appeal, company, suspendReason, suspendedAt, sender }) => (
             <li
               key={appeal.id}
               className="grid grid-cols-1 gap-4 rounded-card border border-default bg-page p-5 lg:grid-cols-[minmax(0,1fr)_320px]"
@@ -46,6 +55,9 @@ export default async function AppealsPage() {
             </li>
           ))}
         </ul>
+      ) : null}
+      {rows.length ? (
+        <ListPager paged={paged} query={pagingQuery(sp)} />
       ) : (
         <EmptyState title="No appeals">Appeals from suspended companies appear here.</EmptyState>
       )}

@@ -14,7 +14,7 @@ import {
   type DeskTab,
 } from "@h2india/core/supplier";
 import { formatIstDate } from "@h2india/core/time";
-import { cx, EmptyState, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
+import { buttonClasses, cx, EmptyState, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
@@ -28,6 +28,8 @@ import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 // verification.view see everything; verification.edit decides.
 export const metadata: Metadata = { title: "Verification · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
+
+const CLAIMS_PER_PAGE = 10;
 
 const TABS: { key: DeskTab; label: string }[] = [
   { key: "action", label: "Needs action" },
@@ -72,15 +74,14 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          {c.profile?.slug ? (
-            <Link
-              href={`/directory/companies/${c.profile.slug}`}
-              className="inline-flex items-center gap-1.5 type-label text-primary"
-            >
-              <Icon name="building" size={16} />
-              Open company
-            </Link>
-          ) : null}
+          {/* The back office's Company detail (founder QC, 17 Nov 2026: this opened the public directory). */}
+          <Link
+            href={`/admin/users/companies/${id}`}
+            className="inline-flex items-center gap-1.5 type-label text-primary"
+          >
+            <Icon name="building" size={16} />
+            Open company
+          </Link>
           {canDecide
             ? active.map((b) => (
                 <RevokeBadge
@@ -192,7 +193,14 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
 export default async function VerificationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; company?: string; org?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    company?: string;
+    org?: string;
+    page?: string;
+    perPage?: string;
+    claims?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("verification.view", "/admin/verification");
@@ -205,6 +213,12 @@ export default async function VerificationPage({
   ]);
   const canDecide = can(actor, "verification.edit");
   const paged = pageOf(list, pageRequest(sp));
+  // Profile claims page on their own (founder QC, 17 Nov 2026), oldest first, so the desk's pager stays the desk's.
+  const claimPages = Math.max(1, Math.ceil(claims.length / CLAIMS_PER_PAGE));
+  const claimPage = Math.min(claimPages, Math.max(1, Number(sp.claims) || 1));
+  const claimStart = (claimPage - 1) * CLAIMS_PER_PAGE;
+  const claimsHref = (n: number) =>
+    `/admin/verification?${new URLSearchParams({ ...pagingQuery(sp), claims: String(n) }).toString()}#claims`;
   // ?company= opens that company; ?org= is the older name some links used (founder QC, 17 Nov 2026: the Suppliers
   // queue's Review opened whichever company came first).
   const asked = sp.company ?? sp.org;
@@ -285,20 +299,30 @@ export default async function VerificationPage({
           {selected ? <Company actor={actor} id={selected} canDecide={canDecide} /> : null}
         </div>
 
-        <h2 className="type-h2">Profile claims</h2>
+        <h2 id="claims" className="type-h2">
+          Profile claims
+        </h2>
         <p className="type-body text-secondary">
           People claiming pre-seeded company profiles. Check the evidence, then approve or reject with a reason.
         </p>
+        {claims.length > CLAIMS_PER_PAGE ? (
+          <p className="type-caption text-secondary">
+            {claims.length} waiting · showing {claimStart + 1}–{Math.min(claimStart + CLAIMS_PER_PAGE, claims.length)}
+          </p>
+        ) : null}
         {claims.length === 0 ? (
           <div className="rounded-card border border-default">
             <EmptyState title="No claims waiting">New claims show here as people send them.</EmptyState>
           </div>
         ) : (
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default">
-            {claims.map((r) => (
+            {claims.slice(claimStart, claimStart + CLAIMS_PER_PAGE).map((r) => (
               <li key={r.claim.id} className="grid grid-cols-1 gap-4 p-5 md:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="flex flex-col gap-1">
-                  <Link href={`/directory/companies/${r.slug}`} className="type-label-lg text-link hover:underline">
+                  <Link
+                    href={`/admin/users/companies/${r.claim.organisationId}`}
+                    className="type-label-lg text-link hover:underline"
+                  >
                     {r.company}
                   </Link>
                   <p className="type-body-sm text-body">
@@ -334,6 +358,20 @@ export default async function VerificationPage({
             ))}
           </ul>
         )}
+        {claims.length > CLAIMS_PER_PAGE ? (
+          <nav aria-label="Claims pages" className="flex gap-3">
+            {claimPage > 1 ? (
+              <Link href={claimsHref(claimPage - 1)} className={buttonClasses({ variant: "outline", size: "sm" })}>
+                Newer claims
+              </Link>
+            ) : null}
+            {claimStart + CLAIMS_PER_PAGE < claims.length ? (
+              <Link href={claimsHref(claimPage + 1)} className={buttonClasses({ variant: "outline", size: "sm" })}>
+                Older claims
+              </Link>
+            ) : null}
+          </nav>
+        ) : null}
       </div>
     </AdminShell>
   );

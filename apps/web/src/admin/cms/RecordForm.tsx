@@ -517,7 +517,13 @@ export function RecordForm({
       }
       setDirty(false);
       setNotice(done);
-      if (kind === "record" && !meta.id) router.replace(`/admin/content/${slug}/${String(r.id)}`);
+      // A new newsletter issue carries on in its composer (founder QC, 17 Nov 2026), not the generic editor.
+      if (kind === "record" && !meta.id)
+        router.replace(
+          slug === "newsletter-issues"
+            ? `/admin/content/newsletter/${String(r.id)}`
+            : `/admin/content/${slug}/${String(r.id)}`,
+        );
       else router.refresh();
     });
   };
