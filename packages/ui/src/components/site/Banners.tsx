@@ -63,7 +63,10 @@ export function CookieBanner({
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end sm:gap-3 lg:shrink-0">
-          <a href={preferencesHref} className="order-last col-span-2 sm:order-first sm:mr-1 inline-flex h-8 items-center justify-center rounded-sm type-label text-primary underline underline-offset-4 transition-colors hover:text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 sm:h-10 sm:px-2">
+          <a
+            href={preferencesHref}
+            className="order-last col-span-2 sm:order-first sm:mr-1 inline-flex h-8 items-center justify-center rounded-sm type-label text-primary underline underline-offset-4 transition-colors hover:text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 sm:h-10 sm:px-2"
+          >
             Cookie preferences
           </a>
           <Button
