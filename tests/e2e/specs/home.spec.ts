@@ -104,19 +104,23 @@ test("forcing one module to fail shows its designed error while the rest of the 
 });
 
 test.describe("motion", () => {
-  test("with reduced motion the hero card stays on Buyers and nothing moves", async ({ page, isMobile }) => {
+  // Founder v2, 18 Nov 2026: the hero card is the 3D Quote journey (stages 0 to 4, "Order confirmed" last).
+  test("with reduced motion the quote card shows the finished journey and nothing moves", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "the hero card shows from 1024 px");
     await page.goto("/");
     const hero = page.getByTestId("hero-card");
-    await expect(hero).toHaveAttribute("data-focus", "buyers");
+    await expect(hero).toHaveAttribute("data-stage", "4");
     await expect(hero).toHaveAttribute("data-running", "false");
-    await expect(hero.getByRole("tab", { name: "Buyers" })).toHaveAttribute("aria-selected", "true");
-    await expect(hero.getByRole("button", { name: "Pause animation" })).toHaveCount(0);
-    await page.waitForTimeout(6000);
-    await expect(hero).toHaveAttribute("data-focus", "buyers");
+    await expect(hero).toContainText("Order confirmed");
+    await expect(hero).toContainText("Example request");
+    await page.waitForTimeout(4000);
+    await expect(hero).toHaveAttribute("data-stage", "4");
   });
 
-  test("the hero card advances, stops on a chosen tab and has no pause button; the logo strip holds on hover", async ({
+  test("the quote card plays, pauses on hover and has no pause button; the logo strip holds on hover", async ({
     page,
     isMobile,
   }) => {
@@ -125,15 +129,16 @@ test.describe("motion", () => {
     await page.goto("/");
     const hero = page.getByTestId("hero-card");
     await expect(hero).toHaveAttribute("data-running", "true");
-    // The tabs advance every 5 s (founder upgrade, 17 Nov 2026).
-    await expect(hero).not.toHaveAttribute("data-focus", "buyers", { timeout: 8000 });
-    // Choosing a tab stops the rotation for good (WCAG 2.2.2).
-    await hero.getByRole("tab", { name: "Tenders" }).click();
-    await expect(hero).toHaveAttribute("data-focus", "tenders");
+    // Each stage holds 1.6 s.
+    await expect(hero).not.toHaveAttribute("data-stage", "0", { timeout: 4000 });
+    // Hovering pauses it (WCAG 2.2.2); the link inside still works.
+    await hero.hover();
     await expect(hero).toHaveAttribute("data-running", "false");
+    const held = await hero.getAttribute("data-stage");
+    await page.waitForTimeout(2500);
+    await expect(hero).toHaveAttribute("data-stage", held ?? "");
+    await expect(hero.getByRole("link", { name: "Request a quote" })).toHaveAttribute("href", "/rfq/new");
     await page.mouse.move(0, 0);
-    await page.waitForTimeout(6000);
-    await expect(hero).toHaveAttribute("data-focus", "tenders");
     // Founder change to F6, 16 Nov 2026: no pause buttons on the home page.
     await expect(page.getByRole("button", { name: /^(Pause|Play) animation$/ })).toHaveCount(0);
 

@@ -57,15 +57,30 @@ export function PasswordInput({
   );
 }
 
+/** The staff form's words; the test-account sign-in (/sign-in/test) passes its own. */
+const STAFF_WORDS = {
+  title: "Sign in to the H2 Economy back office",
+  intro: "For H2 Economy staff. Use your work email and password.",
+  emailLabel: "Work email",
+};
+
 export function StaffSignIn({
   next,
   initialError,
   signedInElsewhere = false,
+  words = STAFF_WORDS,
+  passwordLink = true,
+  landing,
 }: {
   next: string;
   initialError?: Problem;
   /** Already signed in as someone who isn't staff: only Sign out is offered. */
   signedInElsewhere?: boolean;
+  words?: typeof STAFF_WORDS;
+  /** "Set or forgot your password?" (staff only: test accounts get their password from the founder). */
+  passwordLink?: boolean;
+  /** Where to go after signing in, instead of whereNext(next). */
+  landing?: () => Promise<string>;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -83,7 +98,7 @@ export function StaffSignIn({
   if (signedInElsewhere) {
     return (
       <AuthCard>
-        <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
+        <h1 className="type-h2 text-primary">{words.title}</h1>
         {alert}
         <a href="/sign-out" className={`${buttonClasses({ variant: "outline", size: "lg" })} w-full`}>
           Sign out
@@ -103,7 +118,7 @@ export function StaffSignIn({
     setProblem(undefined);
     const { error } = await authClient.signIn.email({ email: email.trim(), password });
     if (!error) {
-      const to = await whereNext(next);
+      const to = landing ? await landing() : await whereNext(next);
       router.replace(to);
       router.refresh();
       return;
@@ -139,11 +154,11 @@ export function StaffSignIn({
 
   return (
     <AuthCard>
-      <h1 className="type-h2 text-primary">Sign in to the H2 Economy back office</h1>
-      <p className="type-body text-body">For H2 Economy staff. Use your work email and password.</p>
+      <h1 className="type-h2 text-primary">{words.title}</h1>
+      <p className="type-body text-body">{words.intro}</p>
       {alert}
       <form className="flex flex-col gap-5" onSubmit={(event) => void submit(event)} noValidate>
-        <FormField label="Work email" error={errors.email}>
+        <FormField label={words.emailLabel} error={errors.email}>
           <Input
             type="email"
             name="email"
@@ -170,9 +185,11 @@ export function StaffSignIn({
           Sign in
         </Button>
       </form>
-      <TextLink asChild showIcon={false} className="self-start">
-        <Link href={AUTH_LINKS.staffPassword}>Set or forgot your password?</Link>
-      </TextLink>
+      {passwordLink ? (
+        <TextLink asChild showIcon={false} className="self-start">
+          <Link href={AUTH_LINKS.staffPassword}>Set or forgot your password?</Link>
+        </TextLink>
+      ) : null}
     </AuthCard>
   );
 }

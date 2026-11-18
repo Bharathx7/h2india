@@ -1,4 +1,4 @@
-import { buttonClasses, cx, Icon, Reveal, type IconName } from "@h2india/ui";
+import { buttonClasses, cx, Icon, Reveal, Steps3D, type IconName } from "@h2india/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Crumbs, wrap } from "@/opportunities/parts";
@@ -119,20 +119,9 @@ export function Feature({ icon, title, text }: { icon: IconName; title: string; 
   );
 }
 
+/** Numbered steps: the shared 3D steps (founder v2, 18 Nov 2026), so every "How it works" looks the same. */
 export function Steps({ steps }: { steps: { title: string; text: string }[] }) {
-  return (
-    <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {steps.map((s, i) => (
-        <li key={s.title} data-reveal-item="" className={cx(card, "flex flex-col gap-2 p-5")}>
-          <span className="flex size-6 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
-            {i + 1}
-          </span>
-          <h3 className="type-label text-primary">{s.title}</h3>
-          <p className="type-body-sm text-body">{s.text}</p>
-        </li>
-      ))}
-    </ol>
-  );
+  return <Steps3D steps={steps} />;
 }
 
 /** A figure with its source and date, always together (A45). */

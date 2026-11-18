@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AUTH_LINKS } from "@/lib/auth-links";
+import { MEMBER_BENEFITS, MEMBER_JOIN_STEPS } from "@/member/benefits";
 import { Block, DarkCta, Feature, Hero, main, Steps } from "@/trust/parts";
 
 // For Members (public QC, 16 Nov 2026). There is no Figma frame for this page: it follows the For Buyers layout
@@ -30,56 +31,13 @@ export default function ForMembersPage() {
       />
       <Block id="what" title="What members can do">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Feature
-            icon="heart"
-            title="Save for later"
-            text="Save products, news, schemes, tenders and jobs, and find them again in one list."
-          />
-          <Feature
-            icon="users"
-            title="Follow companies and topics"
-            text="Follow suppliers, companies and topics, and see their updates on your dashboard."
-          />
-          <Feature
-            icon="bell"
-            title="Alerts that match you"
-            text="Get an alert when a new tender, scheme, grant or job matches the filters you choose."
-          />
-          <Feature
-            icon="building"
-            title="Open the directory"
-            text="Browse companies, people and associations across India's hydrogen ecosystem."
-          />
-          <Feature
-            icon="file-text"
-            title="Learn with Hydrogen 101"
-            text="Short chapters and quizzes on how hydrogen is made, stored, moved and used. Your progress is saved."
-          />
-          <Feature
-            icon="calendar"
-            title="Events and webinars"
-            text="Register for webinars and keep your events, links and replays together."
-          />
-          <Feature
-            icon="clipboard-check"
-            title="Track job applications"
-            text="Keep a list of the jobs you applied to and when they close."
-          />
-          <Feature
-            icon="user"
-            title="Your profile, your choice"
-            text="Appear in the people directory only if you turn your profile on. Your email and phone are never shown."
-          />
+          {MEMBER_BENEFITS.map((b) => (
+            <Feature key={b.title} icon={b.icon} title={b.title} text={b.text} />
+          ))}
         </div>
       </Block>
       <Block id="how" title="How it works" lead="Ready in about two minutes.">
-        <Steps
-          steps={[
-            { title: "Join as a member", text: "Your name, what you do and your email." },
-            { title: "Confirm your email", text: "Open the link we email you. No password to remember." },
-            { title: "Start", text: "Save, follow and set your alerts from your member dashboard." },
-          ]}
-        />
+        <Steps steps={MEMBER_JOIN_STEPS} />
       </Block>
       <DarkCta
         eyebrow="For members"

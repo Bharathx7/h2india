@@ -142,6 +142,23 @@ Nightly database dump into `/srv/h2india/backups`, kept 14 days (`crontab -e`):
 Copy `/srv/h2india/backups` and the `h2india_miniodata` volume off the server too, and try a restore before go-live
 (ADR 0006). Restore: `dc exec -T postgres pg_restore -U h2india -d h2india --clean < backups/<file>.dump`.
 
+## Test accounts (founder, 18 Nov 2026)
+
+Shared buyer, supplier and member accounts for testers in other places. Sign-in codes are caught by Mailpit until
+the email provider is chosen (M6), so these three sign in with one password at `/sign-in/test` on the public site.
+
+```sh
+dc run --rm tools pnpm testers:create buyer@example.com supplier@example.com member@example.com
+```
+
+- It creates (or reuses) the three accounts, a buyer company and a supplier company (test GSTINs from
+  `docs/runbooks/test-gstins.md`), sets one new random password for all three, and prints it **once**. Running it
+  again replaces the password (do that if it leaks).
+- Turn sign-in on: admin **System settings → Test account sign-in** (or `FLAG_TESTER_SIGN_IN=true` in
+  `h2india.env`, then `dc up -d web-public`). Turn it off after testing; the accounts stay but can't use a password.
+- Test accounts never reach the back office: their sessions are not staff sessions.
+- Use addresses made for testing, not a customer's email; the list is kept in the `sign-in.testers` setting.
+
 ## Useful
 
 - Logs: `dc logs -f --tail 100 web-public` (also `web-admin`, `worker`).

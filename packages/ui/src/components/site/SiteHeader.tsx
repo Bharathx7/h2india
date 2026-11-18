@@ -487,8 +487,10 @@ export function SiteHeader(props: SiteHeaderProps) {
         }}
         className={cx(
           // Desktop: fixed, with the spacer below holding its full height, so hiding rows never moves the page.
-          "sticky top-0 z-40 border-b border-default bg-page transition-shadow duration-(--motion-duration-base) lg:fixed lg:inset-x-0",
-          scrolled && "shadow-ink-header",
+          "sticky top-0 z-40 border-b border-default transition-[background-color,box-shadow] duration-(--motion-duration-base) lg:fixed lg:inset-x-0",
+          // Founder v2, 18 Nov 2026: once the page scrolls, the bar turns lightly frosted (white at 90% over a small
+          // glass blur), so content shows faintly beneath it while text stays crisp.
+          scrolled ? "bg-page/90 shadow-ink-header backdrop-blur-glass-16" : "bg-page",
         )}
       >
         <Desktop {...props} collapsed={collapsed} onMenuChange={setMenuOpen} />
