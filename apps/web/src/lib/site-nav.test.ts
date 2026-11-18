@@ -2,11 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   canRequestQuote,
   FOOTER_COLUMNS,
-  footerFor,
   footerWithoutQuote,
   knowledgePromo,
   MEGA_MENUS,
-  menusFor,
   menusWithoutQuote,
   SITE_LINKS,
 } from "./site-nav";
@@ -38,19 +36,24 @@ describe("the Knowledge menu card", () => {
   });
 });
 
-// Public QC (16 Nov 2026): the top strip adds For Members. Founder QC (17 Nov 2026): the Directory is for members
-// and staff only; buyers and suppliers join as members to see it.
-describe("the Directory in the menus", () => {
-  const links = (directory: boolean) => footerFor(FOOTER_COLUMNS, directory).flatMap((c) => c.links.map((l) => l.href));
+// Public QC (16 Nov 2026): the top strip adds For Members. Founder (18 Nov 2026): the Directory lives only in the
+// member workspace, so the website never links to it, for members too. A single company profile stays linked.
+describe("the Directory on the website", () => {
+  const hrefs = [
+    ...MEGA_MENUS.flatMap((m) => [
+      ...(m.primary ?? []).map((l) => l.href),
+      ...(m.links ?? []).map((l) => l.href),
+      ...(m.tools ?? []).map((l) => l.href),
+    ]),
+    ...FOOTER_COLUMNS.flatMap((c) => c.links.map((l) => l.href)),
+  ];
 
-  it("is left out of the menus and the footer for visitors, buyers and suppliers who aren't members", () => {
-    expect(menusFor(MEGA_MENUS, false).map((m) => m.id)).not.toContain("directory");
-    expect(links(false).filter((h) => h.startsWith("/directory"))).toEqual([]);
+  it("has no menu", () => {
+    expect(MEGA_MENUS.map((m) => m.id)).not.toContain("directory");
   });
 
-  it("is there for members and staff", () => {
-    expect(menusFor(MEGA_MENUS, true).map((m) => m.id)).toContain("directory");
-    expect(links(true)).toContain("/directory");
+  it("isn't linked from the menus or the footer", () => {
+    expect(hrefs.filter((h) => h.startsWith("/directory") || h.startsWith("/member/directory"))).toEqual([]);
   });
 
   it("the top strip reads For Buyers, For Members, For Suppliers", () => {

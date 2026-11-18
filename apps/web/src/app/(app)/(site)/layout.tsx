@@ -16,7 +16,6 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     <SiteChrome
       user={viewer?.user ?? null}
       operator={viewer?.operator ?? false}
-      member={viewer?.member ?? false}
       menus={menusWithCatalogue(await catalogue(), await firstTrackerFigure())}
     >
       {children}

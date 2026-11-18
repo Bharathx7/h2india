@@ -19,16 +19,15 @@ async function signInBuyer(page: Parameters<typeof signInNew>[0]) {
   return email;
 }
 
-test("a buyer sees the Directory is for members, joins in one click and comes back", async ({ page }) => {
+test("a buyer opening the Directory joins as a member in one click and comes back", async ({ page }) => {
   await signInBuyer(page);
+  // Old website addresses redirect into the member workspace (founder, 18 Nov 2026), keeping the filters.
   await page.goto("/directory/companies?state=Gujarat");
-  await expect(page.getByRole("heading", { level: 1, name: "The Directory is for members" })).toBeVisible();
-  await page.getByRole("link", { name: "Join as member" }).click();
-  await expect(page).toHaveURL(/\/member\/join\?next=/);
+  await expect(page).toHaveURL(/\/member\/join\?next=%2Fmember%2Fdirectory%3Fstate%3DGujarat/);
   await expect(page.getByRole("heading", { level: 1, name: "Join as a member" })).toBeVisible();
   await page.getByRole("button", { name: "Join as member" }).click();
-  await page.waitForURL(/\/directory\/companies\?state=Gujarat/);
-  await expect(page.getByRole("heading", { level: 1, name: "The Directory is for members" })).toHaveCount(0);
+  await page.waitForURL(/\/member\/directory\?state=Gujarat/);
+  await expect(page.getByRole("navigation", { name: "Directory" })).toBeVisible();
 });
 
 test("the member area sends a buyer to Join as member, keeping where they were going", async ({ page }) => {
@@ -36,14 +35,4 @@ test("the member area sends a buyer to Join as member, keeping where they were g
   await page.goto("/member/alerts?type=tenders");
   await expect(page).toHaveURL(/\/member\/join\?next=%2Fmember%2Falerts%3Ftype%3Dtenders/);
   await expect(page.getByRole("heading", { level: 1, name: "Join as a member" })).toBeVisible();
-});
-
-test("a buyer without membership has no Directory menu; once a member, the menu is there", async ({ page }, info) => {
-  test.skip(info.project.name !== "desktop-1440", "The section nav is desktop");
-  const email = await signInBuyer(page);
-  await page.goto("/news");
-  await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
-  await withDb((db) => db.query(`UPDATE core.users SET member_since = now() WHERE email = $1`, [email]));
-  await page.goto("/news");
-  await expect(page.getByRole("button", { name: "Directory" })).toBeVisible();
 });

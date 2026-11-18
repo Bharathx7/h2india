@@ -27,15 +27,15 @@ test("profile, public listing and preferences", async ({ page }) => {
   await expect(page.getByText("Profile saved")).toBeVisible();
 
   // Private: not in the directory.
-  await page.goto(`/directory/people?q=${encodeURIComponent(name)}`);
-  await expect(page.getByText(name)).toHaveCount(0);
+  await page.goto(`/member/directory/people?q=${encodeURIComponent(name)}`);
+  await expect(page.locator("#main").getByText(name)).toHaveCount(0);
 
   await page.goto("/member/profile");
   await page.getByRole("switch", { name: "Public profile" }).click();
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Profile saved")).toBeVisible();
-  await page.goto(`/directory/people?q=${encodeURIComponent(name)}`);
-  await expect(page.getByText(name).first()).toBeVisible();
+  await page.goto(`/member/directory/people?q=${encodeURIComponent(name)}`);
+  await expect(page.locator("#main").getByText(name).first()).toBeVisible();
 
   await page.goto("/member/preferences");
   await expect(page.getByRole("heading", { name: "Newsletters and notifications" })).toBeVisible();

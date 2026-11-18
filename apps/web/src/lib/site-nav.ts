@@ -28,12 +28,6 @@ export const SITE_LINKS: SiteLinks = {
   ],
 };
 
-/** The Directory is for signed-in people only (public QC, 16 Nov 2026): every /directory page asks visitors to sign in. */
-export const DIRECTORY_PREFIX = "/directory";
-
-const isDirectoryLink = (href: string) =>
-  href === DIRECTORY_PREFIX || href.startsWith(`${DIRECTORY_PREFIX}/`) || href.startsWith(`${DIRECTORY_PREFIX}?`);
-
 /**
  * Request a quote is for buyers (public QC 4, 16 Nov 2026): only a buyer company can send a quote request. Signed-out
  * visitors still see it (sign-in or sign-up comes first); signed-in suppliers, members and staff don't.
@@ -53,19 +47,6 @@ export function menusWithoutQuote(menus: MegaSection[]): MegaSection[] {
 /** The footer without Request a quote, for signed-in people who aren't buyers. */
 export function footerWithoutQuote(columns: FooterColumn[]): FooterColumn[] {
   return columns.map((c) => ({ ...c, links: c.links.filter((l) => !isQuoteLink(l.href)) }));
-}
-
-/**
- * The mega menus: the Directory menu only for people who may open it (founder QC, 17 Nov 2026: members and staff;
- * before, anyone signed in).
- */
-export function menusFor(menus: MegaSection[], directory: boolean): MegaSection[] {
-  return directory ? menus : menus.filter((m) => m.id !== "directory");
-}
-
-/** The footer columns: Directory links only for people who may open the Directory (members and staff). */
-export function footerFor(columns: FooterColumn[], directory: boolean): FooterColumn[] {
-  return directory ? columns : columns.map((c) => ({ ...c, links: c.links.filter((l) => !isDirectoryLink(l.href)) }));
 }
 
 export const MEGA_MENUS: MegaSection[] = [
@@ -98,38 +79,6 @@ export const MEGA_MENUS: MegaSection[] = [
       { label: "Request a quote", href: "/rfq/new", icon: "file-text" },
     ],
     sponsor: null,
-  },
-  {
-    id: "directory",
-    label: "Directory",
-    eyebrow: "Directory",
-    primary: [
-      {
-        label: "Companies",
-        description: "Manufacturers, suppliers, EPCs, developers and labs",
-        href: "/directory/companies",
-      },
-      { label: "People & experts", description: "Researchers, engineers and advisors", href: "/directory/people" },
-      { label: "Ecosystem map", description: "Who is building what, state by state", href: "/directory/map" },
-      { label: "Associations", description: "Industry bodies and alliances", href: "/directory/associations" },
-    ],
-    linksTitle: "Companies by type",
-    links: [
-      { label: "Manufacturers", href: "/directory/companies?type=manufacturer" },
-      { label: "Suppliers & traders", href: "/directory/companies?type=supplier" },
-      { label: "EPC & integrators", href: "/directory/companies?type=epc" },
-      { label: "Developers & producers", href: "/directory/companies?type=developer" },
-      { label: "Service providers", href: "/directory/companies?type=service" },
-      { label: "Testing & certification", href: "/directory/companies?type=testing" },
-      { label: "Start-ups", href: "/directory/companies?type=startup" },
-      { label: "Research institutes", href: "/directory/companies?type=research" },
-    ],
-    promo: {
-      eyebrow: "For companies",
-      title: "Is your company listed?",
-      text: "Claim your free profile, add your products and get found by Indian buyers.",
-      action: { label: "List your company", href: "/join/supplier", style: "button" },
-    },
   },
   {
     id: "news",
@@ -300,10 +249,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     heading: "Platform",
     links: [
       { label: "Marketplace", href: "/marketplace" },
-      { label: "Directory", href: "/directory" },
       { label: "Request a quote", href: "/rfq/new" },
       { label: "Compare", href: "/marketplace/compare" },
-      { label: "Ecosystem map", href: "/directory/map" },
       { label: "India Hydrogen Tracker", href: "/tracker" },
     ],
   },

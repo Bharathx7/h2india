@@ -51,7 +51,7 @@ const PAGES = [
   "/knowledge/reports",
   "/knowledge/media",
   "/knowledge/insights",
-  // No /directory pages: the Directory needs sign-in (public QC, 16 Nov 2026).
+  // No /directory pages: browsing is in the member workspace and profiles need sign-in (founder, 18 Nov 2026).
   "/marketplace/brands",
   "/opportunities",
   "/opportunities/schemes",

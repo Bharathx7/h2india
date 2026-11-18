@@ -5,10 +5,8 @@ import type { ReactNode } from "react";
 import {
   canRequestQuote,
   FOOTER_COLUMNS,
-  footerFor,
   footerWithoutQuote,
   MEGA_MENUS,
-  menusFor,
   menusWithoutQuote,
   SITE_LINKS,
 } from "@/lib/site-nav";
@@ -33,14 +31,11 @@ const FOOTER_TOPICS: Record<string, string> = {
 export function SiteChrome({
   user,
   operator = false,
-  member = false,
   menus = MEGA_MENUS,
   children,
 }: {
   user: SiteUser | null;
   operator?: boolean;
-  /** May open member features, so the Directory shows in the menus (members and staff). */
-  member?: boolean;
   /** The mega menus with the live catalogue (menusWithCatalogue); the fixed lists otherwise. */
   menus?: MegaSection[];
   children: ReactNode;
@@ -48,8 +43,9 @@ export function SiteChrome({
   const search = useHeaderSearch();
   // Request a quote is for buyers and signed-out visitors (public QC 4).
   const quote = canRequestQuote(user);
-  const sections = menusFor(quote ? menus : menusWithoutQuote(menus), member);
-  const columns = footerFor(quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS), member);
+  // Founder (18 Nov 2026): the Directory lives only in the member workspace, so the website never links to it.
+  const sections = quote ? menus : menusWithoutQuote(menus);
+  const columns = quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS);
   return (
     <>
       <a

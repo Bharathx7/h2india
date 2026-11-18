@@ -29,17 +29,6 @@ const GROUPS: { title: string; links: [string, string][] }[] = [
     ],
   },
   {
-    title: "Directory",
-    links: [
-      ["Companies", "/directory/companies"],
-      ["Start-up spotlight", "/directory/companies?type=startup"],
-      ["Associations and bodies", "/directory/associations"],
-      ["People", "/directory/people"],
-      ["Ecosystem map", "/directory/map"],
-      ["List your company", "/join/supplier"],
-    ],
-  },
-  {
     title: "News and insights",
     links: [
       ["Latest news", "/news"],

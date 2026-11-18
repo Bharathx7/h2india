@@ -9,7 +9,6 @@ const PAGES = [
   "/",
   "/news",
   "/marketplace",
-  "/directory/companies",
   "/schemes",
   "/opportunities/tenders",
   "/events",

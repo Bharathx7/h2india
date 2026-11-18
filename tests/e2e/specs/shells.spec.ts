@@ -110,7 +110,7 @@ test("all header links stay visible between 1024 and 1279 wide", async ({ page, 
     for (const u of ["0", "1"]) {
       await page.goto(`/dev/shells/site?user=${u}`);
       const nav = page.getByRole("navigation", { name: "Main" });
-      for (const name of ["Marketplace", "Directory", "News", "Opportunities", "Knowledge", "Events"]) {
+      for (const name of ["Marketplace", "News", "Opportunities", "Knowledge", "Events"]) {
         await expect(nav.getByRole("button", { name, exact: true })).toBeInViewport();
       }
       await expect(page.getByRole("link", { name: "Request a quote" }).first()).toBeInViewport();

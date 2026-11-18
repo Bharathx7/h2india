@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { AUTH_LINKS } from "@/lib/auth-links";
 
-// What a signed-out visitor sees on any /directory page (public QC, 16 Nov 2026). Sign in brings them back to the
+// What a signed-out visitor sees on a company profile (public QC, 16 Nov 2026; founder, 18 Nov 2026). Sign in brings them back to the
 // page they asked for. No Figma frame: built from the auth card's parts (524:1772) inside the site chrome.
 
 /** Sign in, back to this page with its filters (the query needs a Suspense boundary; the fallback keeps the path). */
@@ -35,10 +35,9 @@ export function DirectoryGate() {
         <span className="flex size-12 items-center justify-center rounded-card bg-mint text-primary">
           <Icon name="building" size={24} />
         </span>
-        <h1 className="type-h2 text-primary">Sign in to open the Directory</h1>
+        <h1 className="type-h2 text-primary">Sign in to see this company</h1>
         <p className="type-body text-body">
-          The Directory of companies, people and associations in India&apos;s hydrogen ecosystem is for H2 Economy
-          members, buyers and suppliers.
+          Company profiles on H2 Economy are open to signed-in members, buyers and suppliers.
         </p>
         <div className="flex flex-wrap gap-3">
           <Suspense fallback={<PathOnly />}>

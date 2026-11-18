@@ -94,10 +94,7 @@ export default function VerificationPage() {
         eyebrow="Trust"
         title="How verification works"
         lead="Badges show what H2 Economy has checked about a company and when we last checked it. Badges are never sold."
-        actions={[
-          { label: "Browse verified suppliers", href: "/directory?verified=1", primary: true },
-          { label: "Report a listing", href: REPORT },
-        ]}
+        actions={[{ label: "Report a listing", href: REPORT, primary: true }]}
       />
       <Block id="badges" title="What each badge means" lead="Every badge on a profile opens the checks behind it.">
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
