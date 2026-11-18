@@ -1,5 +1,5 @@
 import { ACCOUNT_PAGES } from "@h2india/core/sign-in";
-import { FeatureCard, HeroConsole, LogoMarquee, StatFigure, type HeroPanel, type IconName } from "@h2india/ui";
+import { FeatureCard, HeroConsole, Icon, LogoMarquee, StatFigure, type HeroPanel, type IconName } from "@h2india/ui";
 import { Suspense } from "react";
 import Link from "next/link";
 import { loadBrands, loadFigures, loadNews, loadSchemes, loadTenders, settle, type HomeModule } from "./data";
@@ -11,25 +11,27 @@ import { container, HomeArrowLink, ModuleError, Section } from "./parts";
 type Fail = Set<HomeModule>;
 
 /** 01 Hero (783:7522): wording as drawn (A42). The "On H2 Economy now" card shows from 1024 px; phones have no card
- * (381:5864). The card streams in behind its own skeleton, so the heading and search never wait for it. */
+ * (381:5864). The card streams in behind its own skeleton, so the heading and search never wait for it.
+ * Founder upgrade, 18 Nov 2026: the hero is the dark ink band with the deep green glow the page's other dark bands
+ * already use, so the page opens on the brand's strongest surface instead of white. */
 export function Hero({ fail }: { fail: Fail }) {
   return (
-    <section aria-labelledby="hero-title" className="relative overflow-hidden bg-mint">
+    <section aria-labelledby="hero-title" className="relative isolate overflow-hidden bg-inverse">
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-30 bg-linear-to-b from-fresh-50 to-neutral-0 lg:h-40"
+        className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-150 lg:-top-80 lg:right-[-8%] lg:size-225"
       />
+      <div aria-hidden="true" className="depth-deep-glow absolute -bottom-90 -left-60 -z-10 size-160" />
       <div
         aria-hidden="true"
-        className="depth-accent-glow absolute -top-65 left-20 size-130 lg:-top-74 lg:left-[66.6%] lg:size-180"
+        className="depth-dot-grid absolute top-16 right-0 -z-10 size-100 opacity-40 lg:top-20 lg:left-[52%] lg:size-140"
       />
-      <div aria-hidden="true" className="depth-dot-grid absolute top-30 left-[59.7%] hidden size-120 lg:block" />
-      <div className={`${container} relative flex items-center gap-12 py-8 lg:py-16`}>
-        <div className="flex min-w-0 flex-1 flex-col gap-4 md:gap-6">
-          <h1 id="hero-title" className="hero-reveal type-h1 text-primary lg:type-display">
+      <div className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:pt-20 lg:pb-24`}>
+        <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-7">
+          <h1 id="hero-title" className="hero-reveal type-h1 text-inverse lg:type-display">
             India&rsquo;s hydrogen ecosystem, in one place
           </h1>
-          <p className="hero-reveal type-body text-body [animation-delay:60ms] md:type-body-lg">
+          <p className="hero-reveal max-w-140 type-body text-neutral-0/80 [animation-delay:60ms] md:type-body-lg">
             Find hydrogen products and verified suppliers, follow Indian hydrogen news, and act on schemes and tenders.
           </p>
           <HeroSearch />
@@ -52,15 +54,11 @@ function HeroCardSkeleton() {
     <div
       role="status"
       aria-label="Loading what's on H2 Economy"
-      className="flex w-full max-w-150 flex-col gap-5 rounded-feature bg-inverse p-6 shadow-ink-float xl:p-7"
+      className="flex w-full max-w-150 flex-col gap-5 rounded-feature border border-neutral-0/12 bg-neutral-0/6 p-5 shadow-ink-float xl:p-6"
     >
-      <span className="h-4 w-40 rounded-pill bg-ink-700" />
-      <span className="grid grid-cols-5 gap-1.5">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <span key={i} className="h-9 rounded-pill bg-ink-700" />
-        ))}
-      </span>
-      <span className="h-86 rounded-card bg-ink-700/60" />
+      <span className="h-5 w-40 rounded-pill bg-ink-700" />
+      <span className="h-11 rounded-pill bg-ink-700" />
+      <span className="h-96 rounded-card bg-ink-700/60" />
     </div>
   );
 }
@@ -81,12 +79,9 @@ async function HeroCard({ fail }: { fail: Fail }) {
       tab: "Buyers",
       eyebrow: "Buyers · find, compare, request",
       rows: [],
-      steps: STEPS.slice(0, 3),
-      chips: [
-        { label: "Electrolysers", href: "/marketplace/systems/electrolysers" },
-        { label: "Fuel cells", href: "/marketplace/systems/fuel-cell-systems" },
-        { label: "Storage tanks", href: "/marketplace/components/tanks-cylinders" },
-      ],
+      // All four steps (the search beside the card already offers the popular categories).
+      steps: STEPS,
+      chips: [],
       cta: { label: "Request a quote", href: "/rfq/new" },
     },
     {
@@ -153,13 +148,16 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
           <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 Economy</p>
           <p className="hidden type-caption text-secondary md:block">Badges are never sold.</p>
         </div>
-        <ul className="flex flex-1 flex-wrap gap-2" aria-label="What we check">
+        {/* Phones: an even two-column grid, every check the same width and height (founder upgrade, 18 Nov 2026;
+            the wrapped pills were uneven). From 768 px, one row of pills. */}
+        <ul className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 md:flex md:flex-wrap" aria-label="What we check">
           {CHECKS.map((c) => (
             <li
               key={c}
-              className="inline-flex h-8 items-center rounded-pill border-[1.5px] border-control bg-page px-2.75 type-label text-primary"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-fresh-200 bg-page px-2.5 py-1.5 type-label text-primary md:h-8 md:min-h-0 md:rounded-pill md:py-0"
             >
-              {c}
+              <Icon name="check" size={14} className="shrink-0 text-icon-success" />
+              <span className="min-w-0">{c}</span>
             </li>
           ))}
         </ul>
@@ -276,9 +274,8 @@ const PATHS: { eyebrow: string; title: string; text: string; link: string; href:
 /** 04 Choose your path (779:7142), for visitors. */
 export function ChoosePath() {
   return (
-    <Section id="paths" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
+    <Section id="paths" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
       <div className="flex flex-col items-center gap-2 md:items-start">
-        <p className="type-eyebrow text-secondary">Start here</p>
         <h2 id="paths-title" className="type-h2 text-primary">
           Choose your path
         </h2>

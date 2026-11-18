@@ -10,7 +10,7 @@ import {
   OpportunitiesSkeleton,
   WhyItMatters,
 } from "@/home/sections-content";
-import { FeaturedProducts, Marketplace, PlatformFeatures } from "@/home/sections-market";
+import { ProductShowcase } from "@/home/sections-market";
 import { ChoosePath, FiguresSkeleton, ForYou, Hero, HowItWorks, LiveFigures, TrustStrip } from "@/home/sections-top";
 import { forcedState } from "@/lib/dev-state";
 import { siteViewer } from "@/server/site";
@@ -19,6 +19,8 @@ import { JsonLd, organizationLd, websiteLd } from "@/seo/jsonld";
 // Home (Figma 365:27737): logged out 377:4917, logged in 379:4688, phones 381:5845, loading modules 381:12972, module
 // error and empty 381:13116, motion spec 781:7247. Every data section is its own server component with its own query,
 // streamed behind its loading skeleton, so a slow or failing module never holds up or blanks the page (step 5.1).
+// Founder upgrade, 18 Nov 2026: dark hero; one product showcase (popular categories, featured and latest products)
+// replaces the marketplace tiles, Featured products and the "Why buy and sell" bento; bands alternate ink, white, mint.
 // Development only: ?state=loading shows the drawn skeletons; ?fail=tenders,news… forces those modules to fail.
 
 export const metadata: Metadata = {
@@ -55,9 +57,7 @@ export default async function HomePage({
       )}
       {viewer ? <ForYou firstName={viewer.firstName} workspaceHref={viewer.user.workspaceHref} /> : <ChoosePath />}
       <HowItWorks />
-      <Marketplace />
-      <FeaturedProducts />
-      <PlatformFeatures />
+      <ProductShowcase />
       {loading ? (
         <OpportunitiesSkeleton />
       ) : (

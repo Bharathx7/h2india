@@ -1,309 +1,223 @@
+import type { ProductCard } from "@h2india/core/products";
 import { Button, CategoryTile, EmptyState, Icon, type IconName } from "@h2india/ui";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { catalogue } from "@/marketplace/data";
-import { applicationHref, categoryHref, classHref, HOME_APPLICATIONS, popularCategories } from "@/marketplace/views";
-import { Section, SectionTitle } from "./parts";
+import { categoryHref, popularCategories, productsLine } from "@/marketplace/views";
+import { HomeArrowLink, ModuleError, Section, SectionTitle } from "./parts";
+import { loadShowcase, SHOWCASE_SIZE } from "./showcase";
 
-// Home sections 06 to 08 (377:4917; phones 381:5845).
+// Home product showcase (founder upgrade, 18 Nov 2026; replaces sections 06 to 08: the class tiles, Browse by
+// application and the "Why buy and sell" bento). Three rows on one mint band: six popular categories, then five
+// featured and five latest products. Every card in a row is the same size: it fills its cell and its footer sits on
+// the bottom edge. Phones swipe the product rows; from 1024 px they are five across.
 
-/**
- * 06 Browse the marketplace (377:5143): the five classes, popular categories and browse by application, read from the
- * live catalogue (step 6.2) so admin Catalogue changes show here at once; without counts until there are listings
- * (A43, A109). Phones show the classes and applications (381:5966).
- */
-export async function Marketplace() {
-  const cat = await catalogue();
-  // The home draws six popular categories (377:5217); the marketplace landing draws eight.
-  const popular = popularCategories(cat).slice(0, 6);
-  return (
-    <Section id="marketplace" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-24">
-      <SectionTitle
-        id="marketplace"
-        eyebrow="Marketplace"
-        title="Browse the marketplace"
-        link={{ label: "Explore the marketplace", href: "/marketplace" }}
-        className="items-center text-center md:items-end md:text-left"
-      />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
-        {cat.classes.map((c) => (
-          <CategoryTile
-            key={c.id}
-            title={c.label}
-            href={classHref(c.id)}
-            icon="zap"
-            size="class"
-            className="max-md:[&>span:first-child]:h-11"
-          />
-        ))}
-      </div>
-      <h3 className="hidden type-h4 text-primary md:block">Popular categories</h3>
-      <div className="hidden gap-6 md:grid md:grid-cols-3 lg:grid-cols-6">
-        {popular.map((c) => (
-          <CategoryTile key={c.id} title={c.label} href={categoryHref(c)} icon={ICONS[c.slug] ?? "zap"} />
-        ))}
-      </div>
-      <h3 className="type-h4 text-primary">Browse by application</h3>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
-        {cat.applications
-          .filter((a) => HOME_APPLICATIONS.includes(a.id))
-          .map((a) => (
-            <CategoryTile
-              key={a.id}
-              title={a.shortLabel}
-              detail={a.examples || undefined}
-              href={applicationHref(a.id)}
-              icon={ICONS[a.id] ?? "zap"}
-            />
-          ))}
-      </div>
-    </Section>
-  );
-}
-
-/** The icons drawn on the home tiles (377:5217, 850:209). */
+/** The icons drawn on the popular category tiles. */
 const ICONS: Record<string, IconName> = {
-  "storage-transport": "package",
-  "refuelling-mobility": "truck",
-  "industrial-use": "clipboard-check",
-  "safety-testing": "shield-check",
+  electrolysers: "zap",
+  "fuel-cell-systems": "activity",
+  "compression-systems": "arrow-up-down",
+  "tanks-cylinders": "package",
+  "valves-regulators": "sliders",
+  "sensors-detectors": "bell",
+  catalysts: "grid",
+  "testing-certification": "clipboard-check",
 };
 
-/**
- * 07 Featured products (379:3897). The catalogue arrives in Stage 6, so the module shows its empty state (A43); the
- * carousel and its arrows appear with the first featured products.
- */
-export function FeaturedProducts() {
+export async function ProductShowcase() {
+  const cat = await catalogue();
+  const popular = popularCategories(cat).slice(0, 6);
   return (
-    <Section id="featured" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-24">
+    <Section id="marketplace" className="bg-mint" inner="flex flex-col gap-12 py-12 md:gap-16 md:py-24">
+      <div aria-hidden="true" className="depth-accent-glow absolute -top-60 -right-40 size-160" />
       <SectionTitle
-        id="featured"
-        eyebrow="Featured"
-        title="Featured products"
-        sub="Curated by H2 Economy. Prices appear only on product pages."
+        id="marketplace"
+        title="Browse the marketplace"
+        sub="Hydrogen equipment, components and services. Prices appear only on product pages."
         link={{ label: "Explore the marketplace", href: "/marketplace" }}
+        size="h1"
+        className="relative"
       />
-      <div className="rounded-card border border-default bg-subtle" data-testid="featured-empty">
-        <EmptyState
-          kind="first-use"
-          title="Featured products are on the way"
-          action={
-            <Button asChild>
-              <Link href="/list-your-company">List your products</Link>
-            </Button>
-          }
-        >
-          Products show here once suppliers list them and our team has checked them.
-        </EmptyState>
-      </div>
+      <Row title="Popular categories" id="popular">
+        <ul aria-labelledby="popular-title" className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
+          {popular.map((c) => (
+            <li key={c.id} className="flex">
+              <CategoryTile
+                title={c.label}
+                detail={productsLine(c.liveProducts)}
+                href={categoryHref(c)}
+                icon={ICONS[c.slug] ?? "zap"}
+                className="h-full w-full"
+              />
+            </li>
+          ))}
+        </ul>
+      </Row>
+      <Suspense fallback={<ProductRowsSkeleton />}>
+        <ProductRows />
+      </Suspense>
     </Section>
   );
 }
 
-function Tile({ className, children }: { className?: string; children: ReactNode }) {
+function Row({
+  id,
+  title,
+  sub,
+  link,
+  children,
+}: {
+  id: string;
+  title: string;
+  sub?: string;
+  link?: { label: string; href: string };
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative flex flex-col gap-5">
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 id={`${id}-title`} className="type-h3 text-primary">
+            {title}
+          </h3>
+          {sub ? <p className="type-body-sm text-body">{sub}</p> : null}
+        </div>
+        {link ? <HomeArrowLink href={link.href}>{link.label}</HomeArrowLink> : null}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+async function ProductRows() {
+  let data: Awaited<ReturnType<typeof loadShowcase>>;
+  try {
+    data = await loadShowcase();
+  } catch (error) {
+    console.error("[home] products failed", error);
+    return (
+      <Row id="featured" title="Featured products">
+        <ModuleError
+          title="We couldn't load the products"
+          text="This is on our side. Try again, or open the marketplace."
+        />
+      </Row>
+    );
+  }
+  if (!data.featured.length) {
+    return (
+      <Row id="featured" title="Featured products">
+        <div className="rounded-card border border-default bg-page" data-testid="featured-empty">
+          <EmptyState
+            kind="first-use"
+            title="Featured products are on the way"
+            action={
+              <Button asChild>
+                <Link href="/list-your-company">List your products</Link>
+              </Button>
+            }
+          >
+            Products show here once suppliers list them and our team has checked them.
+          </EmptyState>
+        </div>
+      </Row>
+    );
+  }
+  return (
+    <>
+      <Row
+        id="featured"
+        title="Featured products"
+        sub="Verified suppliers first, never paid placement."
+        link={{ label: "All products", href: "/marketplace" }}
+      >
+        <ProductRow label="Featured products" items={data.featured} />
+      </Row>
+      <Row id="latest" title="Latest products" sub="Newly listed on H2 Economy.">
+        <ProductRow label="Latest products" items={data.latest} />
+      </Row>
+    </>
+  );
+}
+
+/** Five cards across from 1024 px; a swipeable row below that (the scroll box is focusable for keyboards). */
+function ProductRow({ label, items }: { label: string; items: ProductCard[] }) {
   return (
     <div
-      data-reveal-item=""
-      className={`relative flex flex-col gap-6 overflow-hidden rounded-modal border border-default p-6 shadow-soft md:p-8 ${className ?? ""}`}
+      role="region"
+      aria-label={label}
+      tabIndex={0}
+      className="relative -mx-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-2 md:-mx-6 md:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pb-0"
     >
-      {children}
+      <ul className="grid snap-x snap-mandatory auto-cols-[72%] grid-flow-col gap-3 sm:auto-cols-[44%] md:auto-cols-[31%] md:gap-4 lg:grid-flow-row lg:grid-cols-5">
+        {items.slice(0, SHOWCASE_SIZE).map((p) => (
+          <li key={p.id} className="flex snap-start">
+            <ShowcaseCard product={p} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function TileText({ title, children, dark }: { title: string; children: ReactNode; dark?: boolean }) {
+/** A compact product card: no price (card rule), two lines kept for every name so the row lines up. */
+function ShowcaseCard({ product: p }: { product: ProductCard }) {
+  const category = p.subLabel ?? p.categoryLabel;
   return (
-    <div className="relative flex flex-col gap-2">
-      <h3 className={`type-h3 ${dark ? "text-inverse" : "text-primary"}`}>{title}</h3>
-      <p className={`type-body ${dark ? "text-neutral-0/80" : "text-body"}`}>{children}</p>
+    <article className="group card-lift relative flex h-full w-full flex-col overflow-hidden rounded-card border border-default bg-page">
+      <div className="relative flex aspect-[4/3] items-center justify-center bg-linear-to-br from-fresh-50 to-fresh-200">
+        <span className="flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
+          <Icon name="zap" size={28} />
+        </span>
+        {p.supplier.verified ? (
+          <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
+            <Icon name="shield-check" size={14} className="text-icon-success" />
+            Verified
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
+        <p className="line-clamp-1 type-caption text-secondary">{category}</p>
+        <h4 className="line-clamp-2 min-h-[2lh] type-label-lg text-primary">
+          <Link
+            href={p.href}
+            className="rounded-control after:absolute after:inset-0 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            {p.name}
+          </Link>
+        </h4>
+        <p className="line-clamp-1 type-body-sm text-secondary">{p.supplier.name}</p>
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-default pt-3">
+          {p.leadTime ? (
+            <span className="flex min-w-0 flex-col">
+              <span className="type-caption text-secondary">Lead time</span>
+              <span className="truncate type-label-sm text-success">{p.leadTime}</span>
+            </span>
+          ) : (
+            <span className="type-label-sm text-secondary">Lead time on request</span>
+          )}
+          <span
+            aria-hidden="true"
+            className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-inverse text-inverse transition-transform duration-(--motion-duration-fast) ease-standard group-hover:translate-x-0.5"
+          >
+            <Icon name="arrow-right" size={16} />
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/** The product rows while they load: the same cards' size, so nothing moves when they arrive. */
+function ProductRowsSkeleton() {
+  return (
+    <div role="status" aria-label="Loading products" className="relative flex flex-col gap-5">
+      <span className="block h-7 w-56 max-w-full rounded-control shimmer" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        {Array.from({ length: SHOWCASE_SIZE }, (_, i) => (
+          <span key={i} className={`block h-80 rounded-card shimmer ${i > 0 ? "max-sm:hidden" : ""}`} />
+        ))}
+      </div>
     </div>
-  );
-}
-
-const panel = "rounded-card border border-default bg-page shadow-ink-float-sm";
-
-const ORDER_STEPS: { title: string; note: string; state: "done" | "now" | "next" }[] = [
-  { title: "Confirmed by the supplier", note: "Within 48 h", state: "done" },
-  { title: "Paid into escrow", note: "Held by payment partner", state: "done" },
-  { title: "Dispatched", note: "Invoice and e-way bill attached", state: "now" },
-  { title: "Delivered", note: "Receiving contact enters the code", state: "next" },
-  { title: "Accepted by you", note: "Step-up check", state: "next" },
-  { title: "Supplier paid", note: "2 working days after acceptance", state: "next" },
-];
-
-const QUOTES = [
-  { supplier: "Hydrotek Systems", lead: "14–16 wk", fit: "92%" },
-  { supplier: "PEM Power India", lead: "18–20 wk", fit: "86%" },
-  { supplier: "Deccan Electrolysis", lead: "20–24 wk", fit: "81%" },
-];
-
-function Check({ children, icon = "check-circle" }: { children: ReactNode; icon?: IconName }) {
-  return (
-    <li className="flex items-center gap-2 type-label-sm text-primary">
-      <Icon name={icon} size={18} className="text-icon-success" />
-      {children}
-    </li>
-  );
-}
-
-/**
- * 08 Platform features (851:376): the bento of how an order runs. The visuals are illustrations labelled as an example
- * (Bento visual components 845:10886 to 845:10977), not data.
- */
-// Two columns from 1280 px: at 1024 the right column was too narrow for the quote table and the fixed-height tiles
-// clipped their lists (site audit, 17 Nov 2026), so 1024 stacks like tablets.
-export function PlatformFeatures() {
-  return (
-    <Section id="platform" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
-      <div className="flex flex-col gap-2">
-        <p className="type-eyebrow text-secondary">Why buy and sell on H2 Economy</p>
-        <h2 id="platform-title" className="type-h2 text-primary md:type-h1">
-          One process, from request to GST invoice
-        </h2>
-        <p className="type-body text-body md:type-body-lg">
-          Every order follows the same checked steps, so buyers and suppliers always know what happens next.
-        </p>
-      </div>
-      <div className="flex flex-col gap-5 md:gap-6">
-        <div className="grid grid-cols-1 gap-5 md:gap-6 xl:grid-cols-2">
-          <Tile className="bg-mint xl:h-171">
-            <div aria-hidden="true" className="depth-accent-glow absolute top-30 left-40 size-160" />
-            <TileText title="Confirm, then pay">
-              The supplier confirms your order before you pay. Your money is held by our payment partner and released
-              only after you accept delivery.
-            </TileText>
-            <div className="relative flex flex-1 items-end justify-end">
-              <div
-                className={`${panel} flex w-full max-w-115 flex-col gap-3.5 p-6`}
-                aria-label="Example order"
-                role="group"
-              >
-                <p className="type-eyebrow text-secondary">Example order · PEM electrolyser 1 MW</p>
-                <ol className="flex flex-col gap-3.5">
-                  {ORDER_STEPS.map((s) => (
-                    <li key={s.title} className="flex items-center gap-3">
-                      {s.state === "done" ? (
-                        <span className="flex size-6 items-center justify-center rounded-pill bg-accent text-icon-primary">
-                          <Icon name="check" size={14} />
-                        </span>
-                      ) : (
-                        <span
-                          className={`size-6 rounded-pill bg-page ${s.state === "now" ? "border-2 border-selected" : "border border-control"}`}
-                        />
-                      )}
-                      <span className="flex flex-col">
-                        <span className={`type-label ${s.state === "next" ? "text-secondary" : "text-primary"}`}>
-                          {s.title}
-                        </span>
-                        <span className="type-caption text-secondary">{s.note}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </Tile>
-          <div className="flex flex-col gap-5 md:gap-6">
-            <Tile className="bg-page md:flex-row xl:h-70">
-              <div className="md:w-55 md:shrink-0">
-                <TileText title="Compare quotes side by side">
-                  Every supplier answers in the same format: lead time, warranty, compliance and fit to spec.
-                </TileText>
-              </div>
-              <div className="flex flex-1 items-center">
-                <table
-                  className={`${panel} w-full overflow-hidden text-left type-caption whitespace-nowrap`}
-                  aria-label="Example quotes"
-                >
-                  <thead className="bg-subtle type-label-sm text-secondary">
-                    <tr className="border-b border-default">
-                      <th className="px-3.5 py-2.5 font-semibold">Supplier</th>
-                      <th className="px-3.5 py-2.5 font-semibold">Lead time</th>
-                      <th className="px-3.5 py-2.5 font-semibold">Fit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {QUOTES.map((q, i) => (
-                      <tr
-                        key={q.supplier}
-                        className={i === 0 ? "border-b border-default bg-mint" : i < 2 ? "border-b border-default" : ""}
-                      >
-                        <td className="px-3.5 py-2.5 type-label-sm text-primary">{q.supplier}</td>
-                        <td className="px-3.5 py-2.5 text-primary">{q.lead}</td>
-                        <td className={`px-3.5 py-2.5 ${i === 0 ? "text-link" : "text-primary"}`}>{q.fit}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Tile>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-              <Tile className="bg-page xl:h-95">
-                <TileText title="Documents checked">
-                  GSTIN, PAN, bank name match and certificates such as PESO and BIS, checked before a listing goes live.
-                </TileText>
-                <div className="flex flex-1 items-end">
-                  <ul className={`${panel} flex w-full flex-col gap-2.5 p-4`}>
-                    <Check>GSTIN and PAN</Check>
-                    <Check>Bank name match</Check>
-                    <Check>PESO and BIS certificates</Check>
-                  </ul>
-                </div>
-              </Tile>
-              <Tile className="bg-page xl:h-95">
-                <TileText title="GST-ready invoicing">
-                  A GST invoice on every order, with TCS and TDS shown on each payout.
-                </TileText>
-                <div className="flex flex-1 items-end">
-                  <div className={`${panel} flex w-full flex-col gap-2 p-4`}>
-                    <p className="flex items-center gap-2 type-label text-primary">
-                      <Icon name="file-text" size={18} className="text-icon-link" />
-                      Tax invoice
-                    </p>
-                    <dl className="flex flex-col gap-2">
-                      {[
-                        ["IRN", "Generated"],
-                        ["IGST", "18%"],
-                        ["TCS · TDS", "On payout"],
-                      ].map(([k, v]) => (
-                        <div key={k} className="flex items-baseline justify-between">
-                          <dt className="type-caption text-secondary">{k}</dt>
-                          <dd className="type-spec text-primary">{v}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                </div>
-              </Tile>
-            </div>
-          </div>
-        </div>
-        <div
-          data-reveal-item=""
-          className="relative flex flex-col gap-6 overflow-hidden rounded-modal bg-inverse p-6 md:p-8 xl:h-50 xl:flex-row"
-        >
-          <div aria-hidden="true" className="depth-deep-glow absolute -top-90 left-[56%] size-175" />
-          <div className="relative xl:w-96 xl:shrink-0">
-            <TileText title="Track every delivery" dark>
-              Invoice, e-way bill and carrier tracking in one place. The receiving contact confirms arrival with a
-              delivery code.
-            </TileText>
-          </div>
-          <div className="relative flex flex-1 items-center">
-            <ol
-              aria-label="Example delivery"
-              className="grid w-full grid-cols-2 gap-2 rounded-card border border-neutral-0/12 bg-neutral-0/6 p-5 backdrop-blur-glass-16 md:grid-cols-5"
-            >
-              {["Invoice", "E-way bill", "In transit", "Delivered", "Code confirmed"].map((stage, i) => (
-                <li key={stage} className="flex flex-col gap-2">
-                  <span className={`h-1 rounded-[2px] ${i < 3 ? "bg-accent" : "bg-neutral-0/16"}`} />
-                  <span className={`type-label-sm ${i < 3 ? "text-inverse" : "text-neutral-0/64"}`}>{stage}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </div>
-    </Section>
   );
 }
