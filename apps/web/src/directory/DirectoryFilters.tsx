@@ -4,6 +4,7 @@ import { directorySearch, type DirectoryQuery, type DirectoryResult } from "@h2i
 import { Checkbox, FilterGroup, FilterPanel } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { MEMBER_DIRECTORY } from "./tabs";
 
 // The directory's filter panel (477:40): state, technology and badges, each with counts. Choices go into the address.
 
@@ -14,7 +15,7 @@ export function DirectoryFilters({ query, facets }: { query: DirectoryQuery; fac
   const [allTech, setAllTech] = useState(false);
   const go = (change: Partial<DirectoryQuery>) => {
     start(() => {
-      router.push(`/directory/companies${directorySearch(query, { ...change, page: 1 })}`, { scroll: false });
+      router.push(`${MEMBER_DIRECTORY.companies}${directorySearch(query, { ...change, page: 1 })}`, { scroll: false });
     });
   };
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);

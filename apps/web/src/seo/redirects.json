@@ -102,5 +102,33 @@
   {
     "from": "/list-your-company",
     "to": "/join/supplier"
+  },
+  {
+    "from": "/directory",
+    "to": "/member/directory"
+  },
+  {
+    "from": "/directory/companies",
+    "to": "/member/directory"
+  },
+  {
+    "from": "/directory/people",
+    "to": "/member/directory/people"
+  },
+  {
+    "from": "/directory/people/:slug",
+    "to": "/member/directory/people/:slug"
+  },
+  {
+    "from": "/directory/map",
+    "to": "/member/directory/map"
+  },
+  {
+    "from": "/directory/associations",
+    "to": "/member/directory/associations"
+  },
+  {
+    "from": "/directory/startups",
+    "to": "/member/directory/startups"
   }
 ]

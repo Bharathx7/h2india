@@ -248,7 +248,7 @@ export function ForYou({ firstName, workspaceHref }: { firstName: string; worksp
       eyebrow: "Following",
       title: "Follow companies and topics",
       text: "Updates from what you follow will show here.",
-      href: "/directory/companies",
+      href: "/member/follows",
     },
   ];
   return (

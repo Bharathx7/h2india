@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const c = await load((await params).slug);
   if (!c) return { title: "Not found · H2 Economy" };
   return {
-    title: `${c.name} · Directory · H2 Economy`,
+    title: `${c.name} · H2 Economy`,
     description: c.summary ?? `${c.name}: ${[c.types[0], c.city, c.state].filter(Boolean).join(", ")}.`,
     alternates: { canonical: `/directory/companies/${c.slug}` },
   };
@@ -304,7 +304,7 @@ export default async function CompanyPage({
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
       <ViewBeacon type="profile_viewed" organisationId={c.organisationId} />
       <div className={cx(wrap, "flex flex-col gap-6 py-8 pb-16")}>
-        <Crumbs items={[{ label: "Directory", href: "/directory/companies" }, { label: c.name }]} />
+        <Crumbs items={[{ label: c.name }]} />
         {!c.claimed ? (
           <Alert tone="info" title="Is this your company?">
             This profile was set up by H2 Economy from public information.{" "}

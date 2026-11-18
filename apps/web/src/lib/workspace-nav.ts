@@ -87,7 +87,13 @@ export const WORKSPACE_NAV: Record<WorkspaceArea, WorkspaceNavGroup[]> = {
     { heading: "Company", items: [{ label: "Company", href: "/buyer/company", icon: "building" }] },
   ],
   member: [
-    { items: [{ label: "Home", href: "/member", icon: "home" }] },
+    {
+      items: [
+        { label: "Home", href: "/member", icon: "home" },
+        // Founder (18 Nov 2026): the Directory lives only here, never on the website. Its parts are tabs on the page.
+        { label: "Directory", href: "/member/directory", icon: "globe" },
+      ],
+    },
     {
       heading: "Following",
       items: [

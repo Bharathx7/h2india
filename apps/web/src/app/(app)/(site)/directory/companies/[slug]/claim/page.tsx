@@ -74,13 +74,7 @@ export default async function ClaimPage({ params }: { params: Params }) {
 
   return (
     <main id="main" className={cx(wrap, "flex flex-col gap-6 py-8 pb-16")}>
-      <Crumbs
-        items={[
-          { label: "Directory", href: "/directory/companies" },
-          { label: target.name, href: `/directory/companies/${slug}` },
-          { label: "Claim" },
-        ]}
-      />
+      <Crumbs items={[{ label: target.name, href: `/directory/companies/${slug}` }, { label: "Claim" }]} />
       <h1 className="type-h1 text-primary">Claim {target.name}</h1>
       <p className="type-body text-body">
         Prove you represent the company. With a company email it takes about two minutes.

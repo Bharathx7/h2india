@@ -35,7 +35,7 @@ export async function saveProfileAction(
     return { ok: false, problems: { _: "Your profile wasn't saved. Try again." } };
   }
   revalidatePath("/member/profile");
-  revalidatePath("/directory/people");
+  revalidatePath("/member/directory/people");
   return { ok: true };
 }
 

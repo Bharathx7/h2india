@@ -109,7 +109,6 @@ export default async function ClassPage({
         id="suppliers"
         title={`Top suppliers in ${c.label}`}
         sub="Ranked by verified listings and reply time, not by payment."
-        link={{ label: `All suppliers in ${c.label}`, href: `/directory?class=${c.id}` }}
         className="bg-mint"
       >
         <LiveSection

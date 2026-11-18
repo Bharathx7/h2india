@@ -5,8 +5,9 @@ import { newEmail, ownIp, withDb } from "../helpers/sign-in";
 import { expectStates } from "../helpers/states";
 
 // Step 6.6 DONE WHEN: directory filters and the map show the same companies; a person without a consent flag never
-// appears in lists, search or the map; keyboard users can use the list alternative to the map. Public QC, 16 Nov 2026:
-// the directory opens only for signed-in people.
+// appears in lists, search or the map; keyboard users can use the list alternative to the map. Founder, 18 Nov 2026:
+// browsing lives only in the member workspace; the website never links to it, and a single company profile stays on
+// the website for signed-in people.
 test.skip(!process.env.DATABASE_URL, "needs DATABASE_URL");
 
 test.beforeEach(async ({ context }, info) => {
@@ -33,13 +34,13 @@ test("the list and the map show the same filtered companies", async ({ page }) =
   await company(`${tag}a`, "Kerala", "Manufacturer", true);
   await company(`${tag}b`, "Kerala", "Research institute", false);
   await signInMember(page, newEmail("dir-list"));
-  await page.goto(`/directory/companies?q=${tag}&state=Kerala`);
+  await page.goto(`/member/directory?q=${tag}&state=Kerala`);
   await expect(page.getByRole("link", { name: /View profile of Dir/ })).toHaveCount(2);
-  await page.goto(`/directory/companies?q=${tag}&state=Kerala&type=research`);
+  await page.goto(`/member/directory?q=${tag}&state=Kerala&type=research`);
   await expect(page.getByRole("heading", { name: `Dir ${tag}b` })).toBeVisible();
   await expect(page.getByRole("heading", { name: `Dir ${tag}a` })).toHaveCount(0);
   // Map view: same filter, same company, as a keyboard-usable list by state.
-  await page.goto(`/directory/companies?q=${tag}&state=Kerala&type=research&view=map`);
+  await page.goto(`/member/directory?q=${tag}&state=Kerala&type=research&view=map`);
   // The state-bubble map (A176, until M7) names each state's count; the list by state is behind a toggle.
   await expect(page.getByRole("img", { name: /Kerala 1/ })).toBeVisible();
   await page.getByText("Show the list instead").click();
@@ -64,9 +65,9 @@ test("a person without recorded consent can't be published and never appears", a
   expect(refused.status).toBeGreaterThanOrEqual(400);
   const draft = await cms(page.request, "POST", "people?draft=true", { ...base, _status: "draft" });
   expect(draft.status).toBe(201);
-  await page.goto(`/directory/people?q=${tag}`);
+  await page.goto(`/member/directory/people?q=${tag}`);
   await expect(page.getByRole("link", { name: `Asha ${tag}` })).toHaveCount(0);
-  expect((await page.goto(`/directory/people/asha-${tag}`))?.status()).toBe(404);
+  expect((await page.goto(`/member/directory/people/asha-${tag}`))?.status()).toBe(404);
 
   const ok = await cms(page.request, "PATCH", `people/${String(draft.body.doc?.id)}`, {
     consentRecorded: true,
@@ -74,46 +75,46 @@ test("a person without recorded consent can't be published and never appears", a
     _status: "published",
   });
   expect(ok.status).toBe(200);
-  await page.goto(`/directory/people?q=${tag}`);
+  await page.goto(`/member/directory/people?q=${tag}`);
   await expect(page.getByRole("link", { name: `Asha ${tag}` })).toBeVisible();
-  expect(await page.locator("main").innerText()).not.toMatch(/@/);
+  expect(await page.locator("#main").innerText()).not.toMatch(/@/);
 });
 
-test("signed-out visitors are asked to sign in or join, and the menu has no Directory", async ({ page }) => {
-  for (const path of [
-    "/directory/companies",
-    "/directory/people",
-    "/directory/map",
-    `/directory/companies/no-such-${String(Date.now())}`,
-  ]) {
+test("signed out, browsing goes to member sign-in and a profile asks to sign in", async ({ page }) => {
+  for (const [path, member] of [
+    ["/directory/companies?state=Kerala", "/member/directory?state=Kerala"],
+    ["/directory/people", "/member/directory/people"],
+    ["/directory/map", "/member/directory/map"],
+    ["/member/directory/startups", "/member/directory/startups"],
+  ] as const) {
     await page.goto(path);
-    await expect(page.getByRole("heading", { level: 1, name: "Sign in to open the Directory" })).toBeVisible();
-    await expect(page.locator("#main").getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
-      "href",
-      `/sign-in?next=${encodeURIComponent(path)}`,
-    );
-    await expect(page.locator("#main").getByRole("link", { name: "Join as a member" })).toHaveAttribute(
-      "href",
-      "/join/member",
-    );
-    await expect(page.locator("#main").getByRole("link", { name: "Create a supplier account" })).toHaveAttribute(
-      "href",
-      "/join/supplier",
-    );
+    await expect(page).toHaveURL(`/member/sign-in?next=${encodeURIComponent(member)}`);
   }
+  const profile = `/directory/companies/no-such-${String(Date.now())}`;
+  await page.goto(profile);
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in to see this company" })).toBeVisible();
+  await expect(page.locator("#main").getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
+    "href",
+    `/sign-in?next=${encodeURIComponent(profile)}`,
+  );
+});
+
+test("the website never links to the Directory, even for members; the member sidebar does", async ({ page }) => {
   await page.goto("/news");
   await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
   await expect(page.locator("footer").getByRole("link", { name: "Directory" })).toHaveCount(0);
-});
-
-test("signed in, the Directory menu is back", async ({ page }, info) => {
-  test.skip(info.project.name !== "desktop-1440", "The section nav is desktop; the phone menu reads the same list");
   await signInMember(page, newEmail("dir-menu"));
   await page.goto("/news");
-  await expect(page.getByRole("button", { name: "Directory" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
+  await expect(page.locator('a[href^="/directory"]:not([href^="/directory/companies/"])')).toHaveCount(0);
+  await expect(page.locator('a[href^="/member/directory"]')).toHaveCount(0);
+  await page.goto("/member");
+  await page.getByRole("link", { name: "Directory", exact: true }).first().click();
+  await expect(page).toHaveURL("/member/directory");
+  await expect(page.getByRole("navigation", { name: "Directory" }).getByRole("link", { name: "People" })).toBeVisible();
 });
 
 test("the directory has its designed states", async ({ page }) => {
   await signInMember(page, newEmail("dir-states"));
-  await expectStates(page, "/directory/companies");
+  await expectStates(page, "/member/directory");
 });
