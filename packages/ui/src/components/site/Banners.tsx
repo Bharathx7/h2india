@@ -52,22 +52,23 @@ export function CookieBanner({
   return (
     <section
       aria-label="Cookies"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-page shadow-ink-float"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-page pb-[env(safe-area-inset-bottom)] shadow-ink-float"
     >
-      <div className="mx-auto flex max-w-300 flex-col gap-4 px-4 py-5 md:px-6 lg:flex-row lg:items-center lg:gap-8 xl:px-0">
-        <div className="flex-1">
+      <div className="mx-auto flex max-w-300 flex-col gap-3 px-4 py-4 sm:gap-4 sm:py-5 md:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 xl:px-0">
+        <div className="flex min-w-0 flex-col gap-1 lg:max-w-190">
           <p className="type-label-lg text-primary">We use cookies</p>
-          <p className="mt-1 type-body-sm text-secondary">
+          <p className="type-body-sm text-secondary">
             Necessary cookies keep you signed in and your cart safe. Optional cookies help us improve H2 Economy. Change
             this any time in Cookie preferences.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Button asChild variant="ghost">
-            <a href={preferencesHref}>Cookie preferences</a>
-          </Button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end sm:gap-3 lg:shrink-0">
+          <a href={preferencesHref} className="order-last col-span-2 sm:order-first sm:mr-1 inline-flex h-8 items-center justify-center rounded-sm type-label text-primary underline underline-offset-4 transition-colors hover:text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 sm:h-10 sm:px-2">
+            Cookie preferences
+          </a>
           <Button
             variant="secondary"
+            className="w-full sm:w-auto sm:min-w-36"
             onClick={() => {
               choose("necessary");
             }}
@@ -76,6 +77,7 @@ export function CookieBanner({
           </Button>
           <Button
             variant="secondary"
+            className="w-full sm:w-auto sm:min-w-36"
             onClick={() => {
               choose("all");
             }}
