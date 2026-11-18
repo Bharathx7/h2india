@@ -118,7 +118,7 @@ export const tokens = {
     "Label/Large": "type-label-lg",
     "Caption": "type-caption",
     "Spec/Default": "type-spec",
-    "Spec/Eyebrow": "type-label-sm",
+    "Spec/Eyebrow": "type-eyebrow",
     "Label/Small": "type-label-sm",
     "Label/Nav": "type-label-nav"
   },
