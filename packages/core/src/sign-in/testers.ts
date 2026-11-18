@@ -1,6 +1,6 @@
-import { isEnabled } from "@h2india/config";
 import type { Executor } from "@h2india/db";
 import { z } from "zod";
+import { flagNow } from "../admin/system";
 import { defineSetting, getSetting } from "../settings";
 import { normaliseEmail } from "./rules";
 
@@ -19,7 +19,8 @@ export const TESTER_ACCOUNTS = defineSetting<string[]>({
 
 /** Whether this email may use the password sign-in as a tester right now. */
 export async function isTesterEmail(ex: Executor, email: string): Promise<boolean> {
-  if (!isEnabled("testerSignIn")) return false;
+  // Read from the database on every attempt, so switching it off stops tester sign-in at once.
+  if (!(await flagNow(ex, "testerSignIn"))) return false;
   const list = await getSetting(ex, TESTER_ACCOUNTS);
   return list.map(normaliseEmail).includes(normaliseEmail(email));
 }

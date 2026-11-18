@@ -1,5 +1,6 @@
 import { isEnabled } from "@h2india/config";
 import { getDb, Money } from "@h2india/core";
+import { flagNow } from "@h2india/core/admin/system";
 import { scopeFor } from "@h2india/core/authz";
 import { listOrders } from "@h2india/core/orders";
 import { formatIstDate } from "@h2india/core/time";
@@ -42,7 +43,7 @@ export default async function BuyerHome() {
   ]);
   // Founder QC (17 Nov 2026): Recent activity shows the company's latest quote requests instead of a placeholder.
   const recent = rfqs.slice(0, 5);
-  if (isEnabled("buyerChecklist") && !checklist.complete) {
+  if ((await flagNow(db, "buyerChecklist")) && !checklist.complete) {
     const next = checklist.items.findIndex((i) => i.state === "todo");
     return (
       <BuyerWorkspace page={page} current="/buyer">

@@ -1,4 +1,4 @@
-import { ADMIN_FLAGS, parseServerEnv, setFlagOverrides, TWO_PERSON_FLAGS } from "@h2india/config";
+import { ADMIN_FLAGS, isEnabled, parseServerEnv, setFlagOverrides, TWO_PERSON_FLAGS } from "@h2india/config";
 import { CLOCKS, type ClockName, type Duration } from "@h2india/config/clocks";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, desc, eq, gte, isNull, lt, sql } from "drizzle-orm";
@@ -33,6 +33,17 @@ export async function refreshFlagOverrides(ex?: Executor) {
   } catch {
     // The database isn't reachable: keep the last known switches.
   }
+}
+
+/**
+ * A switch read now, for server code outside the proxy (pages, route handlers, sign-in rules). Each server bundle keeps
+ * its own copy of the switches and only the proxy's copy is refreshed, so a page asking `isEnabled()` never saw a
+ * switch flipped in System settings (founder report, 18 Nov 2026: /sign-in/test stayed 404 after switching it on).
+ * The database value wins; without one, the environment decides.
+ */
+export async function flagNow(ex: Executor, name: AdminFlag): Promise<boolean> {
+  const saved = await getSetting(ex, FLAG_OVERRIDES);
+  return saved[name] ?? isEnabled(name, process.env);
 }
 
 let lastRefresh = 0;
