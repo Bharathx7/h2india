@@ -123,7 +123,8 @@ export const WORKSPACE_NAV: Record<WorkspaceArea, WorkspaceNavGroup[]> = {
       items: [
         { label: "News", href: "/news", icon: "newspaper" },
         { label: "Opportunities", href: "/opportunities", icon: "file-text" },
-        { label: "Knowledge", href: "/knowledge", icon: "bar-chart" },
+        // Knowledge made room for Directory (founder, 18 Nov 2026): the sidebar must fit a 650 px window, and
+        // Knowledge stays in the website header.
       ],
     },
   ],

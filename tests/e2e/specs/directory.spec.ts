@@ -99,7 +99,10 @@ test("signed out, browsing goes to member sign-in and a profile asks to sign in"
   );
 });
 
-test("the website never links to the Directory, even for members; the member sidebar does", async ({ page }) => {
+test("the website never links to the Directory, even for members; the member sidebar does", async ({
+  page,
+  isMobile,
+}) => {
   await page.goto("/news");
   await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
   await expect(page.locator("footer").getByRole("link", { name: "Directory" })).toHaveCount(0);
@@ -108,9 +111,18 @@ test("the website never links to the Directory, even for members; the member sid
   await expect(page.getByRole("button", { name: "Directory" })).toHaveCount(0);
   await expect(page.locator('a[href^="/directory"]:not([href^="/directory/companies/"])')).toHaveCount(0);
   await expect(page.locator('a[href^="/member/directory"]')).toHaveCount(0);
-  await page.goto("/member");
-  await page.getByRole("link", { name: "Directory", exact: true }).first().click();
-  await expect(page).toHaveURL("/member/directory");
+  if (isMobile) {
+    // On phones the sidebar sits behind the menu button; the page itself is the same.
+    await page.goto("/member/directory");
+  } else {
+    await page.goto("/member");
+    await page
+      .getByRole("navigation", { name: /workspace$/ })
+      .first()
+      .getByRole("link", { name: "Directory" })
+      .click();
+    await expect(page).toHaveURL("/member/directory");
+  }
   await expect(page.getByRole("navigation", { name: "Directory" }).getByRole("link", { name: "People" })).toBeVisible();
 });
 

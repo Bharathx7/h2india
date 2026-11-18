@@ -35,9 +35,9 @@ test.beforeAll(async () => {
 test("flow J: claim by company email, an operator approves, and the profile is claimed", async ({ page, browser }) => {
   // Two people sign in and the whole journey runs, so it gets more than the default 30 seconds.
   test.setTimeout(120_000);
-  // Signed out, the profile (like the whole Directory, public QC 16 Nov 2026) asks to sign in and shows nothing of it.
+  // Signed out, the profile (public QC 16 Nov 2026) asks to sign in and shows nothing of it.
   await page.goto(`/directory/companies/${slug}?tab=contact`);
-  await expect(page.getByRole("heading", { level: 1, name: "Sign in to open the Directory" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sign in to see this company" })).toBeVisible();
   await expect(page.getByText(domain)).toHaveCount(0);
   await expect(page.getByText(`Shakti ${tag}`)).toHaveCount(0);
 
