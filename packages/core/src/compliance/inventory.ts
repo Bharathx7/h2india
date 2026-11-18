@@ -667,6 +667,7 @@ export const NOT_PERSONAL_TABLES: readonly string[] = [
   "search_misses",
   "search_outbox",
   "setting_proposals",
+  // sign-in.testers lists the shared test accounts' emails (accounts made for testing, not customers; 18 Nov 2026).
   "settings",
   "sim_partner_events",
   "storefront_revisions",

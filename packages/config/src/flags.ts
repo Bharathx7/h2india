@@ -13,6 +13,7 @@ export const FLAG_DEFAULTS = {
   searchIndexing: false, // step 5.10: lets search engines index the site (robots.txt, meta robots). On at Launch 1 only
   operatorPassword: false, // step 12.1 (review H2), A183: the back office needs the staff password sign-in. On in production
   buyerChecklist: false, // public QC, 16 Nov 2026: the buyer's five-step checklist before the dashboard, off until the steps are chosen
+  testerSignIn: false, // founder, 18 Nov 2026: password sign-in for the listed test accounts (sign-in.testers). Off unless testing
 } as const;
 
 /** Safer defaults for a production build (NODE_ENV=production) when the variable isn't set. */
@@ -31,6 +32,7 @@ const ENV_NAMES: Record<FlagName, string> = {
   searchIndexing: "FLAG_SEARCH_INDEXING",
   operatorPassword: "FLAG_OPERATOR_PASSWORD",
   buyerChecklist: "FLAG_BUYER_CHECKLIST",
+  testerSignIn: "FLAG_TESTER_SIGN_IN",
 };
 
 export function readFlags(source: Record<string, string | undefined> = process.env): Record<FlagName, boolean> {
@@ -66,6 +68,7 @@ export const ADMIN_FLAGS = [
   "payLater",
   "letterOfCredit",
   "buyerChecklist",
+  "testerSignIn",
 ] as const;
 /** Switching these needs a second operator to approve (they open or close money flows). */
 export const TWO_PERSON_FLAGS: readonly FlagName[] = ["transactions", "payLater", "letterOfCredit"];

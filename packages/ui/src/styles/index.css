@@ -6,3 +6,7 @@
 
 /* Let Tailwind find the class names used by the shared components. */
 @source "../";
+
+/* Short screens (founder v2, 18 Nov 2026): laptops whose window is under 860 px tall. The home hero steps its
+   heading down so the first screen fits; use as `short:lg:…`. */
+@custom-variant short (@media (max-height: 860px));

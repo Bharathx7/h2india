@@ -8,13 +8,15 @@ import { recordStaffSession } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
 import { isSuspended } from "../admin/users";
 import { maySignIn } from "./accounts";
+import { isTesterEmail } from "./testers";
 
 // The sign-in rules Better Auth does not have (ADR 0003, decision A2), run around its email-code routes:
 //  • a 15-minute pause for an email after 5 wrong codes, even with a new code (Figma 524:2036)
 //  • at most 5 codes an hour per email, and one every 30 seconds ("Resend code in 0:24", Figma 524:1840)
 //  • the number of tries left, for the wrong-code message (Figma 524:1930)
 // and around the staff password sign-in (17 Nov 2026, A183): staff only, the same pause after 5 wrong tries, and a
-// staff session mark so the back office can refuse sessions made any other way.
+// staff session mark so the back office can refuse sessions made any other way. Test accounts (18 Nov 2026) may use
+// the same password sign-in while testerSignIn is on (testers.ts); they never get the staff mark.
 
 const SEND = "/email-otp/send-verification-otp";
 const VERIFY = "/sign-in/email-otp";
@@ -83,9 +85,9 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
   }
   const pause = await readThrottle(db, key.paused(email));
   if (pause) throw pausedError(pause.expiresAt);
-  // The password sign-in is for staff only: anyone else gets the same answer as a wrong password.
+  // The password sign-in is for staff and listed test accounts: anyone else gets the same answer as a wrong password.
   if (ctx.path === PASSWORD) {
-    if (!(await isStaffEmail(db, email))) throw wrongPassword();
+    if (!(await isStaffEmail(db, email)) && !(await isTesterEmail(db, email))) throw wrongPassword();
     return;
   }
   // Signing in never creates an account (public QC 2): without an account or an invitation, no code works.
@@ -163,7 +165,9 @@ export const afterSignIn = createAuthMiddleware(async (ctx) => {
   });
 });
 
-/** Staff password sign-in: mark the session, or count a wrong try (5 pause the email, like wrong codes). */
+/**
+ * Password sign-in: mark a staff session (never a tester's), or count a wrong try (5 pause the email, like wrong codes).
+ */
 async function afterPassword(ctx: Ctx) {
   const email = emailOf(ctx);
   if (!email) return;
@@ -171,7 +175,9 @@ async function afterPassword(ctx: Ctx) {
   const created = ctx.context.newSession;
   if (created && !isAPIError(ctx.context.returned)) {
     await clearThrottle(db, key.wrong(email));
-    await recordStaffSession(db, created.session.id, SIGN_IN.sessionDays * 24 * 60 * 60);
+    if (await isStaffEmail(db, email)) {
+      await recordStaffSession(db, created.session.id, SIGN_IN.sessionDays * 24 * 60 * 60);
+    }
     return;
   }
   const returned = ctx.context.returned;

@@ -1,8 +1,6 @@
-import { ACCOUNT_PAGES } from "@h2india/core/sign-in";
-import { FeatureCard, HeroConsole, Icon, LogoMarquee, StatFigure, type HeroPanel, type IconName } from "@h2india/ui";
-import { Suspense } from "react";
+import { FeatureCard, Icon, LogoMarquee, QuoteJourney, StatFigure, Steps3D, type IconName } from "@h2india/ui";
 import Link from "next/link";
-import { loadBrands, loadFigures, loadNews, loadSchemes, loadTenders, settle, type HomeModule } from "./data";
+import { loadBrands, loadFigures, settle, type HomeModule } from "./data";
 import { HeroSearch } from "./HeroSearch";
 import { container, HomeArrowLink, ModuleError, Section } from "./parts";
 
@@ -10,11 +8,12 @@ import { container, HomeArrowLink, ModuleError, Section } from "./parts";
 
 type Fail = Set<HomeModule>;
 
-/** 01 Hero (783:7522): wording as drawn (A42). The "On H2 Economy now" card shows from 1024 px; phones have no card
- * (381:5864). The card streams in behind its own skeleton, so the heading and search never wait for it.
+/** 01 Hero (783:7522): wording as drawn (A42). The quote card shows from 1024 px; phones have no card (381:5864).
  * Founder upgrade, 18 Nov 2026: the hero is the dark ink band with the deep green glow the page's other dark bands
- * already use, so the page opens on the brand's strongest surface instead of white. */
-export function Hero({ fail }: { fail: Fail }) {
+ * already use. Founder v2, 18 Nov 2026: the card is the 3D Quote journey, and from 1024 px the hero fills exactly the
+ * first screen under the header (162 px), with its content centred, so a laptop never cuts it off and a large monitor
+ * never shows white under it. Short laptop screens (under 860 px tall) step the heading down to h1 and tighten gaps. */
+export function Hero() {
   return (
     <section aria-labelledby="hero-title" className="relative isolate overflow-hidden bg-inverse">
       <div
@@ -26,9 +25,11 @@ export function Hero({ fail }: { fail: Fail }) {
         aria-hidden="true"
         className="depth-dot-grid absolute top-16 right-0 -z-10 size-100 opacity-40 lg:top-20 lg:left-[52%] lg:size-140"
       />
-      <div className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:pt-20 lg:pb-24`}>
-        <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-7">
-          <h1 id="hero-title" className="hero-reveal type-h1 text-inverse lg:type-display">
+      <div
+        className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:min-h-[calc(100svh-10.125rem)] lg:py-12 xl:gap-20`}
+      >
+        <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-7 short:lg:gap-5">
+          <h1 id="hero-title" className="hero-reveal type-h1 text-inverse lg:type-display short:lg:type-h1">
             India&rsquo;s hydrogen ecosystem, in one place
           </h1>
           <p className="hero-reveal max-w-140 type-body text-neutral-0/80 [animation-delay:60ms] md:type-body-lg">
@@ -36,10 +37,8 @@ export function Hero({ fail }: { fail: Fail }) {
           </p>
           <HeroSearch />
         </div>
-        <div className="hidden w-[46%] shrink-0 lg:block xl:w-150">
-          <Suspense fallback={<HeroCardSkeleton />}>
-            <HeroCard fail={fail} />
-          </Suspense>
+        <div className="hero-reveal hidden w-[46%] shrink-0 justify-end py-6 [animation-delay:200ms] lg:flex xl:w-140">
+          <QuoteJourney ctaHref="/rfq/new" />
         </div>
       </div>
     </section>
@@ -47,88 +46,6 @@ export function Hero({ fail }: { fail: Fail }) {
 }
 
 const CHECKS = ["GSTIN", "PAN", "CIN", "Bank name match", "Site visit", "Certificates (PESO, BIS)"];
-
-/** The hero card's skeleton: the same box, so nothing moves when it arrives. */
-function HeroCardSkeleton() {
-  return (
-    <div
-      role="status"
-      aria-label="Loading what's on H2 Economy"
-      className="flex w-full max-w-150 flex-col gap-5 rounded-feature border border-neutral-0/12 bg-neutral-0/6 p-5 shadow-ink-float xl:p-6"
-    >
-      <span className="h-5 w-40 rounded-pill bg-ink-700" />
-      <span className="h-11 rounded-pill bg-ink-700" />
-      <span className="h-96 rounded-card bg-ink-700/60" />
-    </div>
-  );
-}
-
-/** Hero card (founder upgrade, 17 Nov 2026): the live tenders, schemes and news, the buyer's steps and the supplier's
- * checks. Copy comes from the sections below it; a module that fails or is empty falls back to its chips. */
-async function HeroCard({ fail }: { fail: Fail }) {
-  const now = new Date();
-  const [tenders, schemes, news] = await Promise.all([
-    settle("tenders", fail, () => loadTenders(now, 3)),
-    settle("schemes", fail, () => loadSchemes(now, 3)),
-    settle("news", fail, loadNews),
-  ]);
-  const articles = news.ok ? [news.data.lead, ...news.data.more].filter((a) => a !== null).slice(0, 3) : [];
-  const panels: HeroPanel[] = [
-    {
-      id: "buyers",
-      tab: "Buyers",
-      eyebrow: "Buyers · find, compare, request",
-      rows: [],
-      // All four steps (the search beside the card already offers the popular categories).
-      steps: STEPS,
-      chips: [],
-      cta: { label: "Request a quote", href: "/rfq/new" },
-    },
-    {
-      id: "suppliers",
-      tab: "Suppliers",
-      eyebrow: "Suppliers · verified with dated checks",
-      rows: [],
-      chips: CHECKS.map((label) => ({ label })),
-      note: "Each badge lists the checks we made and the date we made them. Badges are never sold.",
-      cta: { label: "List your company", href: ACCOUNT_PAGES.supplier.join },
-    },
-    {
-      id: "schemes",
-      tab: "Schemes",
-      eyebrow: "Schemes · central and state",
-      rows: schemes.ok
-        ? schemes.data.map((x) => ({ title: x.title, meta: x.deadline, href: x.href, status: x.status }))
-        : [],
-      chips: [{ label: "SIGHT" }, { label: "Hydrogen hubs" }, { label: "State policies" }, { label: "R&D calls" }],
-      cta: { label: "See all schemes", href: "/opportunities/schemes" },
-    },
-    {
-      id: "tenders",
-      tab: "Tenders",
-      eyebrow: "Tenders · closing soon",
-      rows: tenders.ok
-        ? tenders.data.map((t) => ({
-            title: t.title,
-            meta: `${t.issuer} · ${t.due}`,
-            href: t.href,
-            status: t.status,
-          }))
-        : [],
-      chips: [{ label: "SECI" }, { label: "PSUs" }, { label: "State agencies" }, { label: "Ports" }],
-      cta: { label: "See all tenders", href: "/opportunities/tenders" },
-    },
-    {
-      id: "news",
-      tab: "News",
-      eyebrow: "News · India first",
-      rows: articles.map((a) => ({ title: a.title, meta: a.section, href: a.href })),
-      chips: [{ label: "Policy" }, { label: "Projects" }, { label: "Technology" }, { label: "Mobility" }],
-      cta: { label: "Read the news", href: "/news" },
-    },
-  ];
-  return <HeroConsole panels={panels} />;
-}
 
 /** 02 Trust strip (379:4415): brands listed on H2 Economy and what "Verified" means. */
 export async function TrustStrip({ fail }: { fail: Fail }) {
@@ -143,26 +60,30 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
       ) : brands.data.length ? (
         <LogoMarquee brands={brands.data} label="Brands listed on H2 Economy" className="w-full" />
       ) : null}
-      <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:flex-row md:items-center md:gap-6 md:px-6">
+      <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:px-6 xl:flex-row xl:items-center xl:gap-6">
         <div className="flex flex-col gap-0.5">
           <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 Economy</p>
-          <p className="hidden type-caption text-secondary md:block">Badges are never sold.</p>
+          <p className="hidden type-caption text-secondary xl:block">Badges are never sold.</p>
         </div>
         {/* Phones: an even two-column grid, every check the same width and height (founder upgrade, 18 Nov 2026;
-            the wrapped pills were uneven). From 768 px, one row of pills. */}
-        <ul className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 md:flex md:flex-wrap" aria-label="What we check">
+            the wrapped pills were uneven), three across on tablets and small laptops. From 1280 px, the original single row of pills
+            (founder v2: keep it one line on desktop). */}
+        <ul
+          className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 xl:flex xl:flex-wrap"
+          aria-label="What we check"
+        >
           {CHECKS.map((c) => (
             <li
               key={c}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-fresh-200 bg-page px-2.5 py-1.5 type-label text-primary md:h-8 md:min-h-0 md:rounded-pill md:py-0"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-fresh-200 bg-page px-2.5 py-1.5 type-label text-primary xl:h-8 xl:min-h-0 xl:gap-0 xl:rounded-pill xl:border-[1.5px] xl:border-control xl:px-2.75 xl:py-0"
             >
-              <Icon name="check" size={14} className="shrink-0 text-icon-success" />
+              <Icon name="check" size={14} className="shrink-0 text-icon-success xl:hidden" />
               <span className="min-w-0">{c}</span>
             </li>
           ))}
         </ul>
-        <p className="type-caption text-secondary md:hidden">Badges are never sold.</p>
-        <HomeArrowLink href="/verification" className="self-start md:self-auto">
+        <p className="type-caption text-secondary xl:hidden">Badges are never sold.</p>
+        <HomeArrowLink href="/verification" className="self-start xl:self-auto">
           How we verify
         </HomeArrowLink>
       </div>
@@ -388,24 +309,7 @@ export function HowItWorks() {
           </Link>
         </div>
       </div>
-      <ol className="relative grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
-        {STEPS.map((s, i) => (
-          <li
-            key={s.title}
-            data-reveal-item=""
-            className="flex flex-col gap-2.5 rounded-card border border-neutral-0/12 bg-neutral-0/6 p-6 backdrop-blur-glass-16"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="rounded-pill bg-accent px-2.5 py-1 type-spec text-primary">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span aria-hidden="true" className="h-0.5 flex-1 bg-fresh-500/40" />
-            </div>
-            <h3 className="type-label-lg text-inverse">{s.title}</h3>
-            <p className="type-body-sm text-neutral-0/80">{s.text}</p>
-          </li>
-        ))}
-      </ol>
+      <Steps3D steps={STEPS} tone="dark" label="How a request for quotes works" className="relative" />
     </Section>
   );
 }

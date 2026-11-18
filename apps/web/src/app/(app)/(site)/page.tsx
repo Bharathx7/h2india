@@ -44,7 +44,7 @@ export default async function HomePage({
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
       <JsonLd data={organizationLd()} />
       <JsonLd data={websiteLd()} />
-      <Hero fail={fail} />
+      <Hero />
       <Suspense fallback={null}>
         <TrustStrip fail={fail} />
       </Suspense>
