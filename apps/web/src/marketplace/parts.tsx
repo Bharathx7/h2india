@@ -1,12 +1,12 @@
 import { LiveSection } from "@/components/LiveSection";
 import type { PublicClass } from "@h2india/core/catalogue/taxonomy";
-import { ArticleCard, buttonClasses, cx, EmptyState, Icon, Skeleton, type AsyncState } from "@h2india/ui";
+import { ArticleCard, buttonClasses, cx, EmptyState, Icon, Skeleton, Steps3D, type AsyncState } from "@h2india/ui";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { readMinutes } from "@/news/data";
 import { wrap } from "@/news/parts";
 import type { Guide } from "@/payload-types";
-import { classHref, classTileLine } from "./views";
+import { classHref, classTileLine, tileIcon } from "./views";
 
 // Pieces the marketplace pages share (390:7501, 391:4379, 754:14685).
 
@@ -53,24 +53,28 @@ export function PageSection({
   );
 }
 
-/** A class tile on the landing (390:7618): counts, the round arrow, name and what's inside. */
+/** A class tile on the landing (390:7618): its icon, name, what's inside and how many categories, with the round
+ *  arrow. Founder v2 (18 Nov 2026): the count is a plain caption under the text instead of a mono eyebrow. */
 export function ClassTile({ c }: { c: PublicClass }) {
   return (
     <Link
       href={classHref(c.id)}
-      className="group card-lift flex flex-col gap-3 rounded-feature bg-mint p-7 focus-visible:outline-offset-4"
+      className="group card-lift flex h-full flex-col gap-3 rounded-feature border border-fresh-200 bg-mint p-6 focus-visible:outline-offset-4"
     >
-      <span className="flex items-start gap-3">
-        <span className="min-w-0 flex-1 type-eyebrow text-secondary">{classTileLine(c)}</span>
+      <span className="flex items-start justify-between gap-3">
+        <span className="flex size-12 items-center justify-center rounded-card bg-page text-icon-link shadow-soft">
+          <Icon name={tileIcon(c.id)} size={24} />
+        </span>
         <span
           aria-hidden="true"
-          className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-inverse text-icon-inverse"
+          className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-inverse text-icon-inverse transition-transform duration-(--motion-duration-fast) ease-standard group-hover:translate-x-0.5"
         >
           <Icon name="arrow-right" size={14} />
         </span>
       </span>
       <span className="type-h3 text-primary">{c.label}</span>
-      <span className="type-body text-body">{c.description}</span>
+      <span className="type-body-sm text-body">{c.description}</span>
+      <span className="mt-auto pt-1 type-label-sm text-secondary">{classTileLine(c)}</span>
     </Link>
   );
 }
@@ -87,7 +91,6 @@ export function RfqBand() {
     <section aria-labelledby="rfq-title" className="py-12 md:py-16">
       <div className={cx(wrap, "grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center")}>
         <div className="flex flex-col items-start gap-4">
-          <p className="type-eyebrow text-secondary">Request a quote</p>
           <h2 id="rfq-title" className="type-h2 text-primary">
             Send one request to up to 5 verified suppliers
           </h2>
@@ -99,17 +102,7 @@ export function RfqBand() {
             Request a quote
           </Link>
         </div>
-        <ol className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="flex flex-col gap-2 rounded-card border border-default p-4">
-              <span className="flex size-7 items-center justify-center rounded-pill bg-mint type-spec text-primary">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="type-label text-primary">{s.title}</span>
-              <span className="type-body-sm text-body">{s.text}</span>
-            </li>
-          ))}
-        </ol>
+        <Steps3D steps={STEPS} label="How a request for quotes works" className="md:grid-cols-3 lg:grid-cols-3" />
       </div>
     </section>
   );

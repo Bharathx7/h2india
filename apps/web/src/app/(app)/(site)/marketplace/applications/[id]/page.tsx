@@ -6,7 +6,14 @@ import type { ReactNode } from "react";
 import { dayMonthYear } from "@/news/format";
 import { applicationLists, applicationPage, catalogue, guidesFor, suppliersFor } from "@/marketplace/data";
 import { wrap } from "@/marketplace/parts";
-import { allCategories, applicationHref, categoryBySlug, categoryHref, productsLine } from "@/marketplace/views";
+import {
+  allCategories,
+  applicationHref,
+  categoryBySlug,
+  categoryHref,
+  productsLine,
+  tileIcon,
+} from "@/marketplace/views";
 import { readMinutes } from "@/news/data";
 import { Crumbs } from "@/opportunities/parts";
 import type { Guide } from "@/payload-types";
@@ -145,7 +152,7 @@ export default async function ApplicationPage({ params }: { params: Params }) {
                   title={c.label}
                   detail={productsLine(c.liveProducts)}
                   href={categoryHref(c)}
-                  icon="zap"
+                  icon={tileIcon(c.slug)}
                 />
               ))}
             </div>

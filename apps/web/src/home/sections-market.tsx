@@ -1,9 +1,9 @@
 import type { ProductCard } from "@h2india/core/products";
-import { Button, CategoryTile, EmptyState, Icon, type IconName } from "@h2india/ui";
+import { Button, CategoryTile, EmptyState, Icon } from "@h2india/ui";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { catalogue } from "@/marketplace/data";
-import { categoryHref, popularCategories, productsLine } from "@/marketplace/views";
+import { categoryHref, popularCategories, productsLine, tileIcon } from "@/marketplace/views";
 import { HomeArrowLink, ModuleError, Section, SectionTitle } from "./parts";
 import { loadShowcase, SHOWCASE_SIZE } from "./showcase";
 
@@ -11,18 +11,6 @@ import { loadShowcase, SHOWCASE_SIZE } from "./showcase";
 // application and the "Why buy and sell" bento). Three rows on one mint band: six popular categories, then five
 // featured and five latest products. Every card in a row is the same size: it fills its cell and its footer sits on
 // the bottom edge. Phones swipe the product rows; from 1024 px they are five across.
-
-/** The icons drawn on the popular category tiles. */
-const ICONS: Record<string, IconName> = {
-  electrolysers: "zap",
-  "fuel-cell-systems": "activity",
-  "compression-systems": "arrow-up-down",
-  "tanks-cylinders": "package",
-  "valves-regulators": "sliders",
-  "sensors-detectors": "bell",
-  catalysts: "grid",
-  "testing-certification": "clipboard-check",
-};
 
 export async function ProductShowcase() {
   const cat = await catalogue();
@@ -46,7 +34,7 @@ export async function ProductShowcase() {
                 title={c.label}
                 detail={productsLine(c.liveProducts)}
                 href={categoryHref(c)}
-                icon={ICONS[c.slug] ?? "zap"}
+                icon={tileIcon(c.slug)}
                 className="h-full w-full"
               />
             </li>

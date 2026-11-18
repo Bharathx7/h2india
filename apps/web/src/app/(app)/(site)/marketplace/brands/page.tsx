@@ -153,7 +153,7 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
                       >
                         <span
                           aria-hidden="true"
-                          className="flex h-12 items-center justify-center rounded-control bg-subtle type-label text-primary"
+                          className="flex h-12 items-center justify-center rounded-control bg-linear-to-br from-fresh-50 to-fresh-200 type-label text-link"
                         >
                           {b.initials}
                         </span>

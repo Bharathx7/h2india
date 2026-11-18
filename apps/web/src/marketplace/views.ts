@@ -1,4 +1,5 @@
 import type { PublicCatalogue, PublicCategory, PublicClass } from "@h2india/core/catalogue/taxonomy";
+import type { IconName } from "@h2india/ui";
 
 // Addresses and words for the marketplace pages (steps 6.2 and 6.3). Pure, so they're unit-tested.
 //   /marketplace                                  landing (390:7501)
@@ -70,3 +71,32 @@ export const HOME_APPLICATIONS = [
   "industrial-use",
   "safety-testing",
 ];
+
+/**
+ * The icon a category, application or class tile shows (founder v2, 18 Nov 2026: every tile used the same bolt). Matched
+ * on words in the address, so new categories get a fitting icon without a code change; anything unknown keeps the bolt.
+ */
+const ICON_WORDS: [RegExp, IconName][] = [
+  [/electroly|production|generator/, "zap"],
+  [/fuel-cell|chp|power-conversion|rectifier/, "activity"],
+  [/compress|pump|booster/, "arrow-up-down"],
+  [/tank|cylinder|storage/, "package"],
+  [/valve|regulator/, "sliders"],
+  [/sensor|detector/, "bell"],
+  [/catalyst|membrane|material|coating|seal/, "grid"],
+  [/test|certif|bench|inspection/, "clipboard-check"],
+  [/safety/, "shield-check"],
+  [/dispens|refuel|mobility|trailer|transport/, "truck"],
+  [/purif|treatment|dryer|liquef/, "eye"],
+  [/stack|module/, "layout-dashboard"],
+  [/port|shipping/, "map-pin"],
+  [/industr|decarbon/, "building"],
+  [/service|epc|engineering|o-m/, "users"],
+  [/system/, "layout-dashboard"],
+  [/component/, "package"],
+  [/equipment/, "sliders"],
+];
+
+export function tileIcon(slug: string): IconName {
+  return ICON_WORDS.find(([words]) => words.test(slug))?.[1] ?? "zap";
+}
