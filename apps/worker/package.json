@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file-if-exists=../../.env.local src/index.ts",
+    "dev": "tsx watch --tsconfig tsconfig.runtime.json --env-file-if-exists=../../.env.local src/index.ts",
     "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --packages=external --alias:@h2india/core=../../packages/core/src --alias:@h2india/config=../../packages/config/src --alias:@h2india/db=../../packages/db/src/index.ts --alias:@h2india/emails=../../packages/emails/src --alias:@h2india/ui=../../packages/ui/src",
     "start": "node --env-file-if-exists=../../.env.local dist/index.js",
     "typecheck": "tsc -p tsconfig.json"
