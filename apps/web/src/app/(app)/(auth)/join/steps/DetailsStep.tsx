@@ -9,6 +9,8 @@ import { checkCode, sendCode, submitDetails, type Result } from "../actions";
 import { Progress } from "./Progress";
 
 // Join step 3 (Figma 525:207; mobile code error 526:384). Mobile is for verification and recovery only (C6).
+// Founder, 18 Nov 2026: while the SMS code is switched off (`mobileCode` false), the number is checked for shape and
+// saved with the details; there is no Send code button and no code field.
 
 export interface DetailsDraft {
   email: string | null;
@@ -29,6 +31,7 @@ function waitText(iso?: string): string {
 export function DetailsStep(props: {
   member: boolean;
   signedInEmail: string | null;
+  mobileCode: boolean;
   draft: DetailsDraft;
   onDone: (href: string) => void;
 }) {
@@ -123,7 +126,9 @@ export function DetailsStep(props: {
     if (!props.signedInEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       next.email = "Enter your work email, like you@company.com";
     }
-    if (!verified) next.mobile = "Confirm your mobile number with the code we send";
+    if (props.mobileCode) {
+      if (!verified) next.mobile = "Confirm your mobile number with the code we send";
+    } else if (!normaliseMobile(mobile)) next.mobile = "Enter a 10-digit mobile number";
     if (fullName.trim().length < 2) next.fullName = "Enter your full name";
     if (!jobRole) next.jobRole = "Choose your role from the list";
     if (!terms) next.terms = "Agree to the Terms of use and Privacy policy to continue";
@@ -131,13 +136,15 @@ export function DetailsStep(props: {
     if (Object.keys(next).length > 0) return;
     setBusy("submit");
     setFormProblem(undefined);
-    const r: Result<string> = await submitDetails({ email, fullName, jobRole, terms });
+    const r: Result<string> = await submitDetails({ email, mobile, fullName, jobRole, terms });
     setBusy(undefined);
     if (r.ok) {
       props.onDone(r.value);
       return;
     }
-    if (r.code === "RESEND_TOO_SOON" || r.code === "TOO_MANY_CODES") {
+    if (r.code === "INVALID_MOBILE") {
+      setErrors({ mobile: "Enter a 10-digit mobile number" });
+    } else if (r.code === "RESEND_TOO_SOON" || r.code === "TOO_MANY_CODES") {
       setFormProblem({
         title: "Please wait before asking again",
         body: `You can ask for a new link in ${waitText(r.retryAt)}.`,
@@ -185,14 +192,16 @@ export function DetailsStep(props: {
               }}
             />
           </FormField>
-          <Button
-            variant="outline"
-            className={(mobileError ?? errors.mobile) ? "mb-7" : ""}
-            disabled={busy === "send" || waiting > 0 || verified}
-            onClick={() => void send()}
-          >
-            {sentTo && waiting > 0 ? "Code sent" : sentTo && !verified ? "Resend code" : "Send code"}
-          </Button>
+          {props.mobileCode ? (
+            <Button
+              variant="outline"
+              className={(mobileError ?? errors.mobile) ? "mb-7" : ""}
+              disabled={busy === "send" || waiting > 0 || verified}
+              onClick={() => void send()}
+            >
+              {sentTo && waiting > 0 ? "Code sent" : sentTo && !verified ? "Resend code" : "Send code"}
+            </Button>
+          ) : null}
         </div>
       </div>
       {sendProblem ? (

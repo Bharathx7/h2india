@@ -16,7 +16,17 @@ export {
   requestToJoin,
 } from "./join-requests";
 export type { CompanyAdmin, JoinRequestView } from "./join-requests";
-export { applyDraft, discardDraft, joinProfile, readDraft, setProfileType, startDraft, updateDraft } from "./drafts";
+export {
+  applyDraft,
+  discardDraft,
+  joinProfile,
+  mobileCodeRequired,
+  readDraft,
+  saveDraftMobile,
+  setProfileType,
+  startDraft,
+  updateDraft,
+} from "./drafts";
 export type { DraftPatch, JoinDraft } from "./drafts";
 export { MobileCodeError, sendMobileCode, verifyMobileCode } from "./mobile";
 export { notifyAdminsOfRequest, notifyRequester } from "./notify";

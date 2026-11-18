@@ -67,6 +67,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Sign-in (step 3.2)
 
+- Join's mobile SMS code is behind the `mobileVerification` switch (founder, 18 Nov 2026), off until an SMS provider is connected: the number is saved unverified (`saveDraftMobile()`), `mobileCodeRequired()` decides, and RFQ moderation then checks the email only. Browser tests run with `FLAG_MOBILE_VERIFICATION=true` (CI) so the code path stays covered. Read switches outside the proxy with `flagNow()` (`@h2india/core/admin/system`), never `isEnabled()` alone.
 - The one Better Auth setup is `packages/core/src/sign-in/auth.ts`; the web app adds only its cookie plugin (`apps/web/src/server/auth.ts`). Our extra rules (pause, per-email limits, tries left) are hooks in `hooks.ts`.
 - Numbers live in `SIGN_IN` (`@h2india/core/sign-in`, decision A2). Never repeat them in pages.
 - After sign-in, send people only to `safeReturnPath(next)`.

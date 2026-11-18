@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { flagNow } from "../admin/system";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 
@@ -23,8 +24,11 @@ export function seriousness(f: {
   itemText: string;
   emailVerified: boolean;
   mobileVerified: boolean;
+  /** False while the Join SMS code is switched off: nobody's mobile is verified then, so only the email counts. */
+  mobileChecked?: boolean;
   duplicateOf: string | null;
 }): SeriousnessCheck[] {
+  const mobileChecked = f.mobileChecked ?? true;
   return [
     { key: "company", label: "Company or institution named", ok: f.companyNamed, flag: "no company" },
     { key: "site", label: "Delivery site given", ok: f.siteGiven, flag: "no site" },
@@ -38,9 +42,9 @@ export function seriousness(f: {
     },
     {
       key: "verified",
-      label: "Email and mobile verified",
-      ok: f.emailVerified && f.mobileVerified,
-      detail: f.emailVerified && !f.mobileVerified ? "Mobile not verified" : undefined,
+      label: mobileChecked ? "Email and mobile verified" : "Email verified",
+      ok: f.emailVerified && (f.mobileVerified || !mobileChecked),
+      detail: mobileChecked && f.emailVerified && !f.mobileVerified ? "Mobile not verified" : undefined,
       flag: "not verified",
     },
     {
@@ -76,6 +80,7 @@ async function factsFor(db: Executor, rfqIds: string[]) {
     .innerJoin(schema.organisations, eq(schema.organisations.id, r.organisationId))
     .innerJoin(schema.users, eq(schema.users.id, r.createdBy))
     .where(inArray(r.id, rfqIds));
+  const mobileChecked = await flagNow(db, "mobileVerification");
   return new Map(
     rows.map((x) => [
       x.id,
@@ -87,6 +92,7 @@ async function factsFor(db: Executor, rfqIds: string[]) {
         itemText: x.title,
         emailVerified: x.emailVerified,
         mobileVerified: x.mobileVerifiedAt !== null,
+        mobileChecked,
         duplicateOf: x.duplicate,
       }),
     ]),

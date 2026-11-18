@@ -11,10 +11,12 @@ import {
   JoinRequestError,
   membershipsOf,
   MobileCodeError,
+  mobileCodeRequired,
   notifyAdminsOfRequest,
   readDraft,
   remindJoinRequest,
   requestToJoin,
+  saveDraftMobile,
   searchCompanies,
   sendMobileCode,
   setProfileType,
@@ -24,6 +26,7 @@ import {
   type JoinPath,
 } from "@h2india/core/companies";
 import { getDb } from "@h2india/core";
+import { normaliseMobile } from "@h2india/core/companies/client";
 import { normaliseEmail } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
@@ -62,6 +65,8 @@ export async function pickCompany(organisationId: string | null): Promise<Result
 }
 
 export async function sendCode(mobile: string): Promise<Result<string>> {
+  // No SMS while the Join mobile check is off (founder, 18 Nov 2026): nothing to send, and nothing to throttle.
+  if (!(await mobileCodeRequired())) return fail("MOBILE_CODE_OFF");
   try {
     const { mobile: m } = await sendMobileCode({ draftToken: await ensureDraft(), mobile });
     return { ok: true, value: m };
@@ -86,6 +91,8 @@ export async function checkCode(mobile: string, code: string): Promise<Result> {
 
 export interface Details {
   email?: string;
+  /** The mobile as typed; saved without a code while the Join mobile check is off. */
+  mobile?: string;
   fullName: string;
   jobRole: string;
   terms: boolean;
@@ -130,7 +137,13 @@ export async function submitDetails(details: Details): Promise<Result<string>> {
   const token = await ensureDraft();
   const draft = await readDraft(token);
   if (!draft?.path) return fail("NO_PATH");
-  if (!draft.mobileVerified) return fail("MOBILE_NOT_VERIFIED");
+  if (await mobileCodeRequired()) {
+    if (!draft.mobileVerified) return fail("MOBILE_NOT_VERIFIED");
+  } else {
+    const mobile = normaliseMobile(details.mobile ?? "");
+    if (!mobile) return fail("INVALID_MOBILE");
+    await saveDraftMobile(token, mobile);
+  }
   const fullName = details.fullName.trim();
   if (fullName.length < 2) return fail("NAME_REQUIRED");
   if (!(JOB_ROLES as readonly string[]).includes(details.jobRole)) return fail("ROLE_REQUIRED");
