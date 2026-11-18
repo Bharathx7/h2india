@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createAuth } from "./auth";
 import { SIGN_IN_ERROR } from "./rules";
 import { isStaffSession } from "./step-up";
+import { FLAG_OVERRIDES } from "../admin/system";
 import { isTesterEmail, TESTER_ACCOUNTS } from "./testers";
 
 // Test accounts (founder, 18 Nov 2026) against a real PostgreSQL (TEST_DATABASE_URL): the password sign-in takes a
@@ -32,6 +33,14 @@ describe.skipIf(!url)("test-account password sign-in", () => {
       .insert(schema.settings)
       .values({ key: TESTER_ACCOUNTS.key, value: emails })
       .onConflictDoUpdate({ target: schema.settings.key, set: { value: emails } });
+  };
+  // The switch as System settings saves it: in the database, not in this process's copy (founder report, 18 Nov 2026).
+  const setSwitch = async (on: boolean) => {
+    const value = { testerSignIn: on };
+    await h.db
+      .insert(schema.settings)
+      .values({ key: FLAG_OVERRIDES.key, value })
+      .onConflictDoUpdate({ target: schema.settings.key, set: { value } });
   };
   const signIn = (email: string, password = PASSWORD) =>
     auth.api.signInEmail({ body: { email, password }, headers: new Headers({ "x-forwarded-for": "10.9.9.9" }) });
@@ -60,6 +69,7 @@ describe.skipIf(!url)("test-account password sign-in", () => {
   afterEach(async () => {
     setFlagOverrides({});
     await h.db.delete(schema.settings).where(eq(schema.settings.key, TESTER_ACCOUNTS.key));
+    await h.db.delete(schema.settings).where(eq(schema.settings.key, FLAG_OVERRIDES.key));
   });
   afterAll(async () => {
     await h.pool.end();
@@ -69,11 +79,11 @@ describe.skipIf(!url)("test-account password sign-in", () => {
     const tester = await person("tester");
     await listTesters([tester]);
 
-    setFlagOverrides({ testerSignIn: false });
+    await setSwitch(false);
     expect(await isTesterEmail(h.db, tester)).toBe(false);
     await expect(signIn(tester)).rejects.toMatchObject({ body: { code: SIGN_IN_ERROR.wrongPassword } });
 
-    setFlagOverrides({ testerSignIn: true });
+    await setSwitch(true);
     expect(await isTesterEmail(h.db, tester)).toBe(true);
     const result = await signIn(tester);
     expect(result.token).toBeTruthy();
@@ -85,8 +95,19 @@ describe.skipIf(!url)("test-account password sign-in", () => {
     expect(await isStaffSession(h.db, session?.id ?? "")).toBe(false);
   });
 
+  it("follows the switch saved in System settings even when this process's copy says off", async () => {
+    const tester = await person("saved");
+    await listTesters([tester]);
+    setFlagOverrides({ testerSignIn: false });
+    await setSwitch(true);
+    expect(await isTesterEmail(h.db, tester)).toBe(true);
+    expect((await signIn(tester)).token).toBeTruthy();
+    await setSwitch(false);
+    expect(await isTesterEmail(h.db, tester)).toBe(false);
+  });
+
   it("refuses a password from anyone who is neither staff nor on the list", async () => {
-    setFlagOverrides({ testerSignIn: true });
+    await setSwitch(true);
     const tester = await person("listed");
     const other = await person("other");
     await listTesters([tester]);
@@ -95,7 +116,7 @@ describe.skipIf(!url)("test-account password sign-in", () => {
   });
 
   it("counts a tester's wrong password like any other", async () => {
-    setFlagOverrides({ testerSignIn: true });
+    await setSwitch(true);
     const tester = await person("wrong");
     await listTesters([tester]);
     await expect(signIn(tester, "not-the-password-at-all")).rejects.toMatchObject({

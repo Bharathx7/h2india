@@ -1,4 +1,6 @@
-import { isEnabled, parseServerEnv } from "@h2india/config";
+import { parseServerEnv } from "@h2india/config";
+import { getDb } from "@h2india/core";
+import { flagNow } from "@h2india/core/admin/system";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { StaffSignIn } from "../staff/StaffSignIn";
@@ -18,7 +20,7 @@ const WORDS = {
   emailLabel: "Email",
 };
 
-export default function TesterSignInPage() {
-  if (!isEnabled("testerSignIn") || parseServerEnv().SITE_ROLE === "admin") notFound();
+export default async function TesterSignInPage() {
+  if (parseServerEnv().SITE_ROLE === "admin" || !(await flagNow(getDb(), "testerSignIn"))) notFound();
   return <StaffSignIn next="/" words={WORDS} passwordLink={false} landing={testerLanding} />;
 }
