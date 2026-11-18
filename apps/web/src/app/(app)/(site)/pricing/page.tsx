@@ -72,7 +72,7 @@ export default async function PricingPage() {
                   plan.highlight ? "border-2 border-accent" : "border-default",
                 )}
               >
-                <p className={cx("type-eyebrow", plan.highlight ? "text-link" : "text-secondary")}>{plan.name}</p>
+                <p className={cx("type-label-sm", plan.highlight ? "text-link" : "text-secondary")}>{plan.name}</p>
                 <p className="flex items-baseline gap-2">
                   <span className="type-h1 text-primary">{plan.price}</span>
                   {plan.period ? <span className="type-caption text-secondary">{plan.period}</span> : null}
@@ -109,7 +109,7 @@ export default async function PricingPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {c.launchValue ? (
                 <div className={cx(card, "flex flex-col gap-1 p-5")}>
-                  <p className="type-eyebrow text-secondary">Launch offer</p>
+                  <p className="type-label-sm text-secondary">Launch offer</p>
                   <p className="type-h1 text-primary">{c.launchValue}</p>
                   {c.launchNote ? <p className="type-label text-primary">{c.launchNote}</p> : null}
                   <p className="type-body-sm text-body">No commission on any order while the launch offer runs.</p>
@@ -117,7 +117,7 @@ export default async function PricingPage() {
               ) : null}
               {c.afterValue ? (
                 <div className={cx(card, "flex flex-col gap-1 p-5")}>
-                  <p className="type-eyebrow text-secondary">After launch</p>
+                  <p className="type-label-sm text-secondary">After launch</p>
                   <p className="type-h1 text-primary">{c.afterValue}</p>
                   {c.afterNote ? <p className="type-label text-primary">{c.afterNote}</p> : null}
                   {c.afterDetail ? <p className="type-body-sm text-body">{c.afterDetail}</p> : null}

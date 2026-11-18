@@ -206,7 +206,7 @@ async function Results({
                   key={`${a.kind}-${String(a.id)}`}
                   className="flex flex-col gap-1 border-b border-default py-3 last:border-0"
                 >
-                  <p className="type-eyebrow text-secondary">{eyebrow(a)}</p>
+                  <p className="type-label-sm text-secondary">{eyebrow(a)}</p>
                   <Link href={a.href} className="type-label text-primary hover:text-link-hover hover:underline">
                     {a.title}
                   </Link>
@@ -266,7 +266,7 @@ function FeaturedCard({ a }: { a: ArticleSummary }) {
         <Icon name="newspaper" size={52} />
       </div>
       <div className="flex flex-col gap-3 p-5 md:p-6">
-        <p className="type-eyebrow text-secondary">{eyebrow(a, true)}</p>
+        <p className="type-label-sm text-secondary">{eyebrow(a, true)}</p>
         <h2 className="type-h3 text-primary">{a.title}</h2>
         <p className="type-body text-body">{a.dek}</p>
         <p className="type-caption text-secondary">

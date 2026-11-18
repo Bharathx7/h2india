@@ -63,10 +63,10 @@ export default async function EventRegistrationsPage({
     <li className="flex flex-wrap items-center gap-4 border-t border-default py-4">
       <span className="flex w-14 flex-col items-center rounded-control bg-mint py-2">
         <span className="type-h4 text-primary">{day(e.startsAt)}</span>
-        <span className="type-eyebrow text-secondary">{month(e.startsAt)}</span>
+        <span className="type-label-sm text-secondary">{month(e.startsAt)}</span>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="type-eyebrow text-secondary">{eyebrow(e)}</p>
+        <p className="type-label-sm text-secondary">{eyebrow(e)}</p>
         <Link href={`/events/${e.slug}`} className="type-label text-primary hover:underline">
           {e.name}
         </Link>

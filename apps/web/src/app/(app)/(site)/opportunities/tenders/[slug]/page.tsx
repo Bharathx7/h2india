@@ -64,7 +64,7 @@ function Facts({ facts }: { facts: { label: string; value: string }[] }) {
       <dl className="flex flex-col gap-3">
         {facts.map((f) => (
           <div key={f.label} className="flex flex-col gap-0.5">
-            <dt className="type-eyebrow text-secondary">{f.label}</dt>
+            <dt className="type-label-sm text-secondary">{f.label}</dt>
             <dd className="type-body-sm text-primary">{f.value}</dd>
           </div>
         ))}
@@ -211,14 +211,14 @@ export default async function TenderPage({ params }: { params: Params }) {
                   { label: "Bidders", value: result.bidders?.trim() || "Not public" },
                 ].map((f) => (
                   <div key={f.label} className="flex flex-col gap-1 rounded-card bg-subtle p-4">
-                    <dt className="type-eyebrow text-secondary">{f.label}</dt>
+                    <dt className="type-label-sm text-secondary">{f.label}</dt>
                     <dd className="type-spec text-primary">{f.value}</dd>
                   </div>
                 ))}
               </dl>
               {winners.length ? (
                 <>
-                  <p className="type-eyebrow text-secondary">{winners.length > 1 ? "Awardees" : "Awardee"}</p>
+                  <p className="type-label-sm text-secondary">{winners.length > 1 ? "Awardees" : "Awardee"}</p>
                   <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {winners.map((w) => {
                       const p = w.profileSlug ? profiles.get(w.profileSlug) : undefined;

@@ -367,7 +367,7 @@ export default async function SupplierHome() {
           <ul className="flex flex-col divide-y divide-default">
             {articles.map((a) => (
               <li key={a.id} className="py-3">
-                <p className="type-eyebrow text-secondary">
+                <p className="type-label-sm text-secondary">
                   {a.typeLabel} · {dayMonthYear(a.publishedAt)}
                 </p>
                 <Link href={a.href} className="type-label text-primary hover:underline">

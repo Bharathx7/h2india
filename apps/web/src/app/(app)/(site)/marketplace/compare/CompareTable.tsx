@@ -138,7 +138,7 @@ export function CompareTable({
           {groups.map((g) => (
             <div key={g.group} role="rowgroup">
               <div role="row" className="grid border-t border-default bg-subtle" style={width}>
-                <div role="rowheader" className="px-4 py-2 type-eyebrow text-secondary">
+                <div role="rowheader" className="px-4 py-2 type-label-sm text-secondary">
                   {g.group}
                 </div>
               </div>

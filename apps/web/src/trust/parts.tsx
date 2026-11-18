@@ -7,6 +7,9 @@ import type { Figure } from "./data";
 // Pieces the step 5.8 pages share (Figma page 12): the mint hero (66:4251, 93:906), the plain page head with crumbs
 // (741:5605), feature cards, numbered steps, figure tiles with source and date, the questions accordion, and the dark
 // call-to-action band ("Ready to sell?", 93:1331).
+// Founder v2 (18 Nov 2026): the hero is the full-width dark ink band with the deep glow (as on the home page), the
+// page head sits on a soft mint fade, feature cards lift and carry a green icon tile, and labels above headings are
+// plain words in the body face rather than mono capitals.
 
 export { wrap };
 export const main = "min-h-screen bg-page pb-16 [&_:is(h1,h2,h3)]:text-wrap";
@@ -14,14 +17,17 @@ export const card = "rounded-card border border-default bg-page";
 
 type Action = { label: string; href: string; primary?: boolean };
 
-function Actions({ actions }: { actions: Action[] }) {
+function Actions({ actions, dark = false }: { actions: Action[]; dark?: boolean }) {
   return (
     <div className="flex flex-wrap gap-3">
       {actions.map((a) => (
         <Link
           key={a.href + a.label}
           href={a.href}
-          className={buttonClasses({ variant: a.primary ? "primary" : "outline", size: "sm" })}
+          className={buttonClasses({
+            variant: a.primary ? "primary" : dark ? "inverse" : "outline",
+            size: dark ? "lg" : "sm",
+          })}
         >
           {a.label}
         </Link>
@@ -44,15 +50,17 @@ export function Hero({
   note?: string;
 }) {
   return (
-    <div className={cx(wrap, "pt-6 md:pt-8")}>
-      <div className="flex flex-col gap-4 rounded-card bg-mint px-6 py-10 md:px-12 md:py-14">
-        <p className="type-eyebrow text-secondary">{eyebrow}</p>
-        <h1 className="type-h1 text-primary">{title}</h1>
-        <div className="max-w-180 type-body text-body">{lead}</div>
-        {actions.length ? <Actions actions={actions} /> : null}
-        {note ? <p className="type-caption text-secondary">{note}</p> : null}
+    <section className="relative isolate overflow-hidden bg-inverse">
+      <div aria-hidden="true" className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-160" />
+      <div aria-hidden="true" className="depth-dot-grid absolute top-8 right-0 -z-10 size-110 opacity-40" />
+      <div className={cx(wrap, "flex flex-col gap-5 py-14 md:py-20")}>
+        <p className="type-label text-fresh-300">{eyebrow}</p>
+        <h1 className="max-w-200 type-h1 text-inverse md:type-display">{title}</h1>
+        <div className="max-w-180 type-body text-neutral-0/80 md:type-body-lg">{lead}</div>
+        {actions.length ? <Actions actions={actions} dark /> : null}
+        {note ? <p className="type-caption text-neutral-0/64">{note}</p> : null}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -68,14 +76,16 @@ export function PageHead({
   aside?: ReactNode;
 }) {
   return (
-    <div className={cx(wrap, "flex flex-col gap-2 pt-6 md:pt-8")}>
-      {crumbs ? <Crumbs items={crumbs} /> : null}
-      <div className="mt-2 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex max-w-200 flex-col gap-2">
-          <h1 className="type-h1 text-primary">{title}</h1>
-          {lead ? <div className="type-body text-body">{lead}</div> : null}
+    <div className="bg-linear-to-b from-fresh-50 to-neutral-0">
+      <div className={cx(wrap, "flex flex-col gap-2 pt-6 pb-2 md:pt-8 md:pb-4")}>
+        {crumbs ? <Crumbs items={crumbs} /> : null}
+        <div className="mt-2 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="flex max-w-200 flex-col gap-2">
+            <h1 className="type-h1 text-primary">{title}</h1>
+            {lead ? <div className="type-body text-body">{lead}</div> : null}
+          </div>
+          {aside}
         </div>
-        {aside}
       </div>
     </div>
   );
@@ -109,9 +119,9 @@ export function Block({
 
 export function Feature({ icon, title, text }: { icon: IconName; title: string; text: string }) {
   return (
-    <div data-reveal-item="" className={cx(card, "flex flex-col gap-3 p-5")}>
-      <span className="flex size-9 items-center justify-center rounded-control bg-mint text-icon-primary">
-        <Icon name={icon} size={18} />
+    <div data-reveal-item="" className={cx(card, "card-lift flex h-full flex-col gap-3 p-6")}>
+      <span className="flex size-11 items-center justify-center rounded-card bg-linear-to-b from-fresh-50 to-fresh-200 text-icon-link">
+        <Icon name={icon} size={22} />
       </span>
       <h3 className="type-h4 text-primary">{title}</h3>
       <p className="type-body-sm text-body">{text}</p>
@@ -199,10 +209,11 @@ export function DarkCta({
       <Reveal
         as="section"
         aria-label={title}
-        className="relative flex flex-col gap-6 overflow-hidden rounded-card bg-inverse px-6 py-10 md:flex-row md:items-center md:px-12"
+        className="relative isolate flex flex-col gap-6 overflow-hidden rounded-feature bg-inverse px-6 py-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-14"
       >
+        <div aria-hidden="true" className="depth-deep-glow absolute -top-60 left-1/2 -z-10 size-150" />
         <div className="flex flex-col gap-3 md:w-1/2">
-          <p className="type-eyebrow text-fresh-300">{eyebrow}</p>
+          <p className="type-label text-fresh-300">{eyebrow}</p>
           <h2 className="type-h1 text-inverse">{title}</h2>
           <p className="type-body text-neutral-0/80">{text}</p>
         </div>

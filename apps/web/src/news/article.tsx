@@ -178,7 +178,7 @@ function Header({ a }: { a: Article }) {
       ) : null}
       <p className="flex flex-wrap items-center gap-2">
         {label}
-        <span className="type-eyebrow text-link">{eyebrow}</span>
+        <span className="type-label-sm text-link">{eyebrow}</span>
       </p>
       <h1 className="type-h1 text-primary">{a.title}</h1>
       <p className="type-body-lg text-body">{a.dek}</p>
@@ -232,7 +232,7 @@ function Live({ a }: { a: Article }) {
           aria-label="What it means"
           className="flex flex-col gap-2.5 rounded-card bg-inverse px-6 py-5 text-inverse"
         >
-          <p className="type-eyebrow">What it means</p>
+          <p className="type-label-sm">What it means</p>
           <ul className="flex flex-col gap-2.5 type-body">
             {(live.meaning ?? []).map((m) => (
               <li key={m.id ?? m.point}>• {m.point}</li>
@@ -242,7 +242,7 @@ function Live({ a }: { a: Article }) {
       ) : null}
       {(live.summary ?? []).length ? (
         <section aria-label="Summary" className="flex flex-col gap-2.5 rounded-card bg-mint px-6 py-5">
-          <p className="type-eyebrow text-secondary">
+          <p className="type-label-sm text-secondary">
             Summary{live.summaryAt ? ` · updated ${clock12(live.summaryAt)} IST` : ""}
           </p>
           <ul className="flex flex-col gap-2.5 type-body text-primary">

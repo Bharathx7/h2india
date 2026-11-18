@@ -429,7 +429,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
               </div>
               {specs.length ? (
                 <>
-                  <p className="type-eyebrow text-secondary">Key specifications · from the category schema</p>
+                  <p className="type-label-sm text-secondary">Key specifications · from the category schema</p>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {specs.map((d) => (
                       <Field
@@ -843,7 +843,7 @@ export function RfqWizard({ setup, start }: { setup: WizardSetup; start: WizardS
         </section>
 
         <aside className="flex flex-col gap-3 self-start rounded-card bg-subtle p-5">
-          <p className="type-eyebrow text-secondary">Your request</p>
+          <p className="type-label-sm text-secondary">Your request</p>
           {[
             ["Category", s.categoryLabel || "Not chosen yet"],
             ["Request", s.title ? `${s.quantity || "?"} × ${s.title}` : "Not written yet"],

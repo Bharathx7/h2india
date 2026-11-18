@@ -52,7 +52,7 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
   const brands = await settle("brands", fail, loadBrands);
   return (
     <Section id="trust" className="bg-page" inner="flex flex-col gap-6 py-8 md:items-center md:py-14">
-      <h2 id="trust-title" className="text-center type-eyebrow text-secondary">
+      <h2 id="trust-title" className="text-center type-label-sm text-secondary">
         Brands listed on H2 Economy
       </h2>
       {!brands.ok ? (
@@ -285,7 +285,7 @@ export function HowItWorks() {
       <div aria-hidden="true" className="depth-deep-glow absolute top-75 -left-50 size-225" />
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-172.5 flex-col gap-4">
-          <p className="type-eyebrow text-fresh-300">Request a quote</p>
+          <p className="type-label-sm text-fresh-300">Request a quote</p>
           <h2 id="how-title" className="type-h2 text-inverse">
             Send one request to up to 5 verified suppliers
           </h2>

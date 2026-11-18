@@ -350,7 +350,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
               >
                 <span className="type-spec text-primary">{r.date}</span>
                 <span className="flex flex-col">
-                  <span className="type-eyebrow text-secondary">{r.eyebrow.toUpperCase()}</span>
+                  <span className="type-label-sm text-secondary">{r.eyebrow.toUpperCase()}</span>
                   <Link href={r.href} className="type-label text-primary hover:underline">
                     {r.title}
                   </Link>

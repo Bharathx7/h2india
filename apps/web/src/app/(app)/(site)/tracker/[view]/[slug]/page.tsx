@@ -105,7 +105,7 @@ export default async function TrackerRecordPage({ params }: { params: Params }) 
         />
         <p className="mt-2 flex items-center gap-2">
           {stage ? <StageBadge stage={stage} /> : null}
-          <span className="type-eyebrow text-secondary">
+          <span className="type-label-sm text-secondary">
             {view.tab.replace(/s$/, "").toUpperCase()}
             {typeof r.product === "string" ? ` · ${r.product.toUpperCase()}` : ""}
           </span>

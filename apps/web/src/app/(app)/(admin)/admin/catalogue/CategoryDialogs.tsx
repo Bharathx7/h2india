@@ -455,7 +455,7 @@ export function PreviewDialog(props: {
         <div className="flex flex-col gap-6">
           {groups.map((g) => (
             <fieldset key={g} className="flex flex-col gap-4 rounded-card border border-default p-4">
-              <legend className="px-1 type-eyebrow text-secondary">{g}</legend>
+              <legend className="px-1 type-label-sm text-secondary">{g}</legend>
               {props.attributes
                 .filter((a) => a.displayGroup === g)
                 .map((a) => (

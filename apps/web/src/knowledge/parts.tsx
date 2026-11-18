@@ -14,7 +14,7 @@ export function ReportCover({ report, size = "md" }: { report: Report; size?: "s
         size === "sm" ? "aspect-[3/4] w-24 gap-1 p-2.5" : "aspect-[16/9] w-full gap-2 p-4",
       )}
     >
-      <span className={cx("type-eyebrow opacity-80", size === "sm" && "text-[10px]")}>
+      <span className={cx("type-label-sm opacity-80", size === "sm" && "text-[10px]")}>
         {(report.kicker ?? "Report").toUpperCase()}
         {size === "sm" ? ` · ${new Date(report.publishedOn).getFullYear()}` : ""}
       </span>

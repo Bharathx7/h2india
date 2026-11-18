@@ -41,7 +41,7 @@ export function Row({
       }
       data-surface={surface === "inverse" ? "inverse" : undefined}
     >
-      <p className={`type-eyebrow ${surface === "inverse" ? "text-inverse" : "text-secondary"}`}>{label}</p>
+      <p className={`type-label-sm ${surface === "inverse" ? "text-inverse" : "text-secondary"}`}>{label}</p>
       <div className="mt-3 flex flex-wrap items-center gap-4">{children}</div>
     </div>
   );

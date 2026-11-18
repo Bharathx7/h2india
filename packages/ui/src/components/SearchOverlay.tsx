@@ -126,7 +126,7 @@ export function SearchOverlay({
     >
       {groups.map((g) => (
         <div key={g.label} role="group" aria-labelledby={`${id}-${g.label}`} className="flex flex-col">
-          <p id={`${id}-${g.label}`} className="px-3 pt-2 pb-1 type-eyebrow text-secondary">
+          <p id={`${id}-${g.label}`} className="px-3 pt-2 pb-1 type-label-sm text-secondary">
             {g.label}
           </p>
           {g.items.map((item) => {
@@ -168,7 +168,7 @@ export function SearchOverlay({
       <p className="type-body-sm text-body">Check the spelling or try a broader term.</p>
       {related.length ? (
         <div className="flex flex-col gap-2">
-          <p className="type-eyebrow text-secondary">Related categories</p>
+          <p className="type-label-sm text-secondary">Related categories</p>
           <div className="flex flex-wrap gap-2">
             {related.map((r) =>
               renderLink({

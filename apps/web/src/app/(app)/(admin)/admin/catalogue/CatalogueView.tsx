@@ -186,7 +186,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
             <section aria-labelledby="category-title" className="rounded-card border border-default p-5 md:px-6">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-4">
                 <div className="min-w-0 flex-1">
-                  <p className="type-eyebrow text-secondary">
+                  <p className="type-label-sm text-secondary">
                     {[c.classLabel, c.parentLabel].filter(Boolean).join(" › ")}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -751,7 +751,7 @@ function AttributeTable(props: {
               <th
                 scope="colgroup"
                 colSpan={10}
-                className="bg-page px-3 pt-4 pb-1 text-left type-eyebrow text-secondary"
+                className="bg-page px-3 pt-4 pb-1 text-left type-label-sm text-secondary"
               >
                 {g}
               </th>

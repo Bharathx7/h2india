@@ -12,7 +12,7 @@ export function HelpSearch({ q }: { q: string }) {
   return (
     <div className={cx(wrap, "pt-6 md:pt-8")}>
       <div className="flex flex-col items-center gap-4 rounded-card bg-mint px-6 py-10 text-center md:py-14">
-        <p className="type-eyebrow text-secondary">Help centre</p>
+        <p className="type-label-sm text-secondary">Help centre</p>
         <h1 className="type-h1 text-primary">How can we help?</h1>
         <form action="/help" method="get" role="search" className="w-full max-w-108">
           <label className="flex h-11 items-center gap-2 rounded-control border border-control bg-page px-3 focus-within:field-focus">

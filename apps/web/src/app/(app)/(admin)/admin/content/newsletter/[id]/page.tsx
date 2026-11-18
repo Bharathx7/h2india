@@ -72,7 +72,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
               <p className="type-caption text-secondary">{content.masthead}</p>
               {send?.editorNote ? (
                 <div className="rounded-input border border-dashed border-default p-3">
-                  <p className="type-eyebrow text-secondary">Editor&apos;s note</p>
+                  <p className="type-label-sm text-secondary">Editor&apos;s note</p>
                   <p className="type-body-sm">{send.editorNote}</p>
                 </div>
               ) : null}
@@ -83,7 +83,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
                 ))}
               {content.chart ? (
                 <div className="flex flex-col gap-2">
-                  <p className="type-eyebrow text-secondary">Chart of the week</p>
+                  <p className="type-label-sm text-secondary">Chart of the week</p>
                   <p className="type-label">{content.chart.title}</p>
                   <ul className="flex flex-col gap-1">
                     {content.chart.bars.map((b) => {
@@ -108,7 +108,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
               ) : null}
               {send?.sponsor ? (
                 <div className="flex flex-col gap-1 rounded-card bg-mint p-4">
-                  <p className="type-eyebrow text-secondary">Sponsored</p>
+                  <p className="type-label-sm text-secondary">Sponsored</p>
                   <p className="type-label">
                     {send.sponsor.name} · {send.sponsor.headline}
                   </p>
@@ -151,7 +151,7 @@ export default async function ComposerPage({ params }: { params: Promise<{ id: s
 function PreviewSection({ section: s }: { section: IssueSection }) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="flex items-center justify-between type-eyebrow text-secondary">
+      <p className="flex items-center justify-between type-label-sm text-secondary">
         {s.heading}
         <span className="rounded-pill bg-subtle px-2 py-0.5 type-caption normal-case">Auto-filled</span>
       </p>

@@ -138,7 +138,7 @@ export default async function GlossaryPage({ searchParams }: { searchParams: Pro
         <aside className="flex flex-col gap-4 lg:w-80 lg:shrink-0">
           {today ? (
             <section aria-labelledby="today" className="flex flex-col gap-2 rounded-card bg-mint p-5">
-              <p className="type-eyebrow text-secondary">TERM OF THE DAY</p>
+              <p className="type-label-sm text-secondary">TERM OF THE DAY</p>
               <h2 id="today" className="type-h4 text-primary">
                 {today.term}
               </h2>

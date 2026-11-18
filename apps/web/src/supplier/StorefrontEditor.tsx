@@ -632,7 +632,7 @@ export function StorefrontEditor({
         </section>
 
         <aside className="flex flex-col gap-2 self-start xl:sticky xl:top-24">
-          <p className="type-eyebrow text-secondary">Preview · how buyers see you</p>
+          <p className="type-label-sm text-secondary">Preview · how buyers see you</p>
           <Preview f={form} company={company} place={place} verified={verified} start={start} />
         </aside>
       </div>
@@ -736,7 +736,7 @@ function Preview({
       )}
       {(f.categories ?? []).length ? (
         <div className="flex flex-col gap-1.5">
-          <p className="type-eyebrow text-secondary">Makes or offers</p>
+          <p className="type-label-sm text-secondary">Makes or offers</p>
           <ul className="flex flex-wrap gap-2">
             {(f.categories ?? []).map((c) => (
               <li key={c} className="rounded-pill border-[1.5px] border-control px-3 py-1 type-label-sm">
@@ -749,7 +749,7 @@ function Preview({
       ) : null}
       {f.capabilities || f.capacity || f.leadTime ? (
         <div className="flex flex-col gap-1">
-          <p className="type-eyebrow text-secondary">Capabilities</p>
+          <p className="type-label-sm text-secondary">Capabilities</p>
           {f.capabilities ? <p className="type-body-sm text-body">{f.capabilities}</p> : null}
           {f.capacity || f.leadTime ? (
             <p className="type-caption text-secondary">{[f.capacity, f.leadTime].filter(Boolean).join(" · ")}</p>
@@ -761,7 +761,7 @@ function Preview({
       ) : null}
       {locations.length ? (
         <div className="flex flex-col gap-1">
-          <p className="type-eyebrow text-secondary">Locations</p>
+          <p className="type-label-sm text-secondary">Locations</p>
           <ul className="flex flex-col gap-1">
             {locations.map((l, i) => (
               <li key={String(i)} className="flex items-start gap-2 type-body-sm">
@@ -777,7 +777,7 @@ function Preview({
       ) : null}
       {f.website || f.contactEmail || f.contactPhone ? (
         <div className="flex flex-col gap-1 border-t border-default pt-3">
-          <p className="type-eyebrow text-secondary">Contact</p>
+          <p className="type-label-sm text-secondary">Contact</p>
           {f.website ? <p className="type-body-sm text-link">{f.website}</p> : null}
           {f.contactEmail ? <p className="type-body-sm">{f.contactEmail}</p> : null}
           {f.contactPhone ? <p className="type-body-sm">{f.contactPhone}</p> : null}

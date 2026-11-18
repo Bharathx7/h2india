@@ -113,7 +113,7 @@ export function DatasheetReview({
       </div>
       {error ? <Alert tone="error" title={error} live /> : null}
       <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-        <p className="type-eyebrow text-secondary">Product</p>
+        <p className="type-label-sm text-secondary">Product</p>
         <label className="flex flex-col gap-1.5">
           <span className="type-label">Product name</span>
           <Input
@@ -138,7 +138,7 @@ export function DatasheetReview({
       </section>
       {groups.map((g) => (
         <section key={g} className="flex flex-col rounded-card border border-default bg-page">
-          <p className="border-b border-default px-5 py-3 type-eyebrow text-secondary">{g}</p>
+          <p className="border-b border-default px-5 py-3 type-label-sm text-secondary">{g}</p>
           {fields
             .filter((f) => f.group === g)
             .map((f) => {

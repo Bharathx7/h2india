@@ -67,7 +67,7 @@ export default async function TrackerPreview({ params }: { params: Promise<{ col
       <header className="flex flex-col gap-2">
         <p className="flex items-center gap-2">
           {doc.stage ? <StatusBadge status={doc.stage} tone={STATUS_TONE[doc.stage]} /> : null}
-          <span className="type-eyebrow text-secondary">{viewOf(slug).toUpperCase()}</span>
+          <span className="type-label-sm text-secondary">{viewOf(slug).toUpperCase()}</span>
         </p>
         <h1 className="type-h1">{title}</h1>
       </header>

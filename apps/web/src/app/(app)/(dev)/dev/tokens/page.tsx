@@ -74,7 +74,7 @@ export default function TokensPage() {
 
   return (
     <main className="mx-auto max-w-[1312px] px-6 py-16">
-      <p className="type-eyebrow text-secondary">Developer · step 2.1</p>
+      <p className="type-label-sm text-secondary">Developer · step 2.1</p>
       <h1 className="type-h1 mt-2">Foundations</h1>
       <p className="type-body-lg mt-2 max-w-3xl">
         Generated from Figma page 01 (file swxSe4zWyngLYdZ2Qe9CWJ, node 10:2). Compare with the Figma frame at 1440. To

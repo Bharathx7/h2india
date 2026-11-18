@@ -81,7 +81,7 @@ export default async function AboutPage() {
       </Block>
       <div className={cx(wrap, "grid grid-cols-1 gap-4 pt-12 md:grid-cols-2 md:pt-16")}>
         <section aria-labelledby="independence" className="flex flex-col gap-2 rounded-card bg-mint p-6">
-          <p className="type-eyebrow text-link">Editorial independence</p>
+          <p className="type-label-sm text-link">Editorial independence</p>
           <h2 id="independence" className="type-h4 text-primary">
             Our newsroom decides what to cover
           </h2>
@@ -94,7 +94,7 @@ export default async function AboutPage() {
           </Link>
         </section>
         <section aria-labelledby="disclosure" className={cx(card, "flex flex-col gap-2 p-6")}>
-          <p className="type-eyebrow text-secondary">Disclosure</p>
+          <p className="type-label-sm text-secondary">Disclosure</p>
           <h2 id="disclosure" className="type-h4 text-primary">
             Who runs H2 Economy
           </h2>

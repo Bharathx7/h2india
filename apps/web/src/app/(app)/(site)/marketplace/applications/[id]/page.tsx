@@ -223,7 +223,7 @@ export default async function ApplicationPage({ params }: { params: Params }) {
           <aside className="flex flex-col gap-6" aria-label={`More on ${app.label}`}>
             {shownGuide ? (
               <div className="flex flex-col items-start gap-3 rounded-card bg-mint p-6">
-                <p className="type-eyebrow text-secondary">Buyer&apos;s guide · {readMinutes(shownGuide.body)} min</p>
+                <p className="type-label-sm text-secondary">Buyer&apos;s guide · {readMinutes(shownGuide.body)} min</p>
                 <h2 className="type-h4 text-primary">{shownGuide.title}</h2>
                 <p className="type-body-sm text-body">{shownGuide.summary}</p>
                 <Link

@@ -151,7 +151,7 @@ function SidebarBody({
           {groups.map((g, i) => (
             <li key={g.heading ?? String(i)}>
               {g.heading ? (
-                <p className={cx("pb-0.5 pl-8 type-eyebrow text-ink-400", compact && "max-lg:sr-only")}>{g.heading}</p>
+                <p className={cx("pb-0.5 pl-8 type-label-sm text-ink-400", compact && "max-lg:sr-only")}>{g.heading}</p>
               ) : null}
               <ul className="flex flex-col gap-px">
                 {g.items.map((item) => (

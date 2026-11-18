@@ -31,7 +31,7 @@ export function Quiz({
   const right = Number(choice) === q.answer;
   return (
     <section aria-labelledby="quiz" className="flex flex-col gap-3 rounded-card bg-subtle p-5">
-      <p className="type-eyebrow text-secondary">
+      <p className="type-label-sm text-secondary">
         CHECK YOUR UNDERSTANDING · {index + 1} OF {questions.length}
       </p>
       <h2 id="quiz" className="type-h4 text-primary">

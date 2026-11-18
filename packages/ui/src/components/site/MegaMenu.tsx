@@ -14,7 +14,7 @@ function Promo({ section }: { section: MegaSection }) {
   if (!p) return null;
   return (
     <div className="flex w-75 shrink-0 flex-col gap-3 bg-mint p-6">
-      <p className="type-eyebrow text-secondary">{p.eyebrow}</p>
+      <p className="type-label-sm text-secondary">{p.eyebrow}</p>
       <p className="type-h4">{p.title}</p>
       <p className="type-body-sm text-body">{p.text}</p>
       {p.action.style === "button" ? (
@@ -58,7 +58,7 @@ function Marketplace({ section }: { section: MegaSection }) {
   return (
     <>
       <div className="flex w-68 shrink-0 flex-col gap-1 bg-subtle px-4 py-6">
-        <p className="px-2 pb-2 type-eyebrow text-secondary">{section.eyebrow}</p>
+        <p className="px-2 pb-2 type-label-sm text-secondary">{section.eyebrow}</p>
         {classes.map((c) => (
           <button
             key={c.id}
@@ -103,7 +103,7 @@ function Marketplace({ section }: { section: MegaSection }) {
       ) : null}
       {section.applications?.length ? (
         <div className="flex w-50 shrink-0 flex-col gap-3 py-6 pr-6">
-          <p className="type-eyebrow text-secondary">Browse by application</p>
+          <p className="type-label-sm text-secondary">Browse by application</p>
           <ul className="flex flex-col gap-3">
             {section.applications.map((l) => (
               <li key={l.href}>
@@ -131,7 +131,7 @@ function Marketplace({ section }: { section: MegaSection }) {
         </ul>
         {section.sponsor ? (
           <div className="mt-auto flex flex-col gap-2 rounded-card bg-page p-4">
-            <p className="type-eyebrow text-secondary">Sponsored</p>
+            <p className="type-label-sm text-secondary">Sponsored</p>
             <p className="type-label-lg text-primary">{section.sponsor.name}</p>
             <p className="type-caption text-secondary">{section.sponsor.detail}</p>
             {section.sponsor.verified ? <VerifiedBadge kind="supplier" className="self-start" /> : null}
@@ -163,7 +163,7 @@ export function MegaMenuPanel({ section, id }: { section: MegaSection; id: strin
       ) : (
         <>
           <div className="flex w-80 shrink-0 flex-col gap-1 bg-subtle px-4 py-6">
-            <p className="px-2 pb-2 type-eyebrow text-secondary">{section.eyebrow}</p>
+            <p className="px-2 pb-2 type-label-sm text-secondary">{section.eyebrow}</p>
             {(section.primary ?? []).map((l) => (
               <a key={l.href} href={l.href} className="rounded-control px-2 py-2 hover:bg-page">
                 <span className="block type-label-lg text-primary">{l.label}</span>

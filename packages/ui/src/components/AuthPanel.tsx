@@ -26,7 +26,9 @@ const Initials = ({ children }: { children: string }) => (
     {children}
   </span>
 );
-const Eyebrow = ({ children }: { children: string }) => <span className="type-eyebrow text-secondary">{children}</span>;
+const Eyebrow = ({ children }: { children: string }) => (
+  <span className="type-label-sm text-secondary">{children}</span>
+);
 
 function BuyerPreview() {
   const rows: [string, string, string, string, string][] = [
@@ -215,7 +217,7 @@ export function AuthPanel({ role, eyebrow, headline, sub, strip = [], className 
       className={cx("flex flex-col rounded-[24px] px-14 pt-16 pb-12", dark ? "bg-inverse" : "bg-accent", className)}
     >
       <div className="flex flex-col items-start gap-3.5">
-        <span className={cx("rounded-pill px-2 py-0.5 type-eyebrow text-primary", dark ? "bg-accent" : "bg-page")}>
+        <span className={cx("rounded-pill px-2 py-0.5 type-label-sm text-primary", dark ? "bg-accent" : "bg-page")}>
           {eyebrow}
         </span>
         <h2 className={cx("type-h1", dark ? "text-inverse" : "text-primary")}>{headline}</h2>

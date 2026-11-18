@@ -947,7 +947,7 @@ export function ArticleEditor({
               <Input value={`/news/${meta?.slug ?? ""}`} readOnly disabled />
             </FormField>
             <div className="flex flex-col gap-1 rounded-input bg-subtle p-3">
-              <span className="type-eyebrow text-secondary">Search preview</span>
+              <span className="type-label-sm text-secondary">Search preview</span>
               <span className="type-label text-link">{(seoTitle || "Headline").slice(0, 60)} | H2 Economy</span>
               <span className="type-caption text-secondary">news › {meta?.slug ?? "…"}</span>
               <span className="type-caption text-body">

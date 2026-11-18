@@ -205,7 +205,7 @@ function Results({
   return (
     <>
       <div className="flex flex-col gap-3">
-        <p className="type-eyebrow text-secondary">Your matches</p>
+        <p className="type-label-sm text-secondary">Your matches</p>
         <h1 className="type-h1 text-primary">
           {words} {result.matches.length === 1 ? "match" : "matches"}
         </h1>
@@ -234,7 +234,7 @@ function Results({
                   <Icon name={m.strength === "strong" ? "check-circle" : "alert-triangle"} size={14} />
                   {m.strength === "strong" ? "Strong match" : "Possible match"}
                 </span>
-                <span className="type-eyebrow text-secondary">
+                <span className="type-label-sm text-secondary">
                   {v.level} · {v.status.label}
                 </span>
               </p>

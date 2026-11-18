@@ -16,7 +16,7 @@ export default async function AuthPanelPreview({ searchParams }: { searchParams:
         sub="Compare verified suppliers and get up to 5 quotes in one request."
       />
       <div className="flex flex-col justify-center gap-2">
-        <p className="type-eyebrow text-secondary">Sign-in form · built in Stage 3</p>
+        <p className="type-label-sm text-secondary">Sign-in form · built in Stage 3</p>
         <h1 className="type-h1">Sign in to H2 Economy</h1>
         <p className="type-body text-body">The panel on the left is the {role} variant from Figma 200:1205.</p>
       </div>

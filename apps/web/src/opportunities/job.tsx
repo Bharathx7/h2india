@@ -222,7 +222,7 @@ export function JobPage({
               <dl className="flex flex-col gap-3">
                 {facts.map((f) => (
                   <div key={f.label} className="flex flex-col gap-0.5">
-                    <dt className="type-eyebrow text-secondary">{f.label}</dt>
+                    <dt className="type-label-sm text-secondary">{f.label}</dt>
                     <dd className="type-body-sm text-primary">{f.value}</dd>
                   </div>
                 ))}

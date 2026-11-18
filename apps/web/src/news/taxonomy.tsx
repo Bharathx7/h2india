@@ -117,7 +117,7 @@ export async function TopicPage({
               { label: topic.name },
             ]}
           />
-          <p className="mt-2 type-eyebrow text-secondary">Topic</p>
+          <p className="mt-2 type-label-sm text-secondary">Topic</p>
           <h1 className="type-h1 text-primary">{topic.name}</h1>
           {topic.description ? <p className="max-w-180 type-body text-body">{topic.description}</p> : null}
         </div>
@@ -140,7 +140,7 @@ export async function TopicPage({
               <ul className="flex flex-col">
                 {records.map((r) => (
                   <li key={r.href} className="flex flex-col gap-0.5 border-b border-default py-3 last:border-0">
-                    <p className="type-eyebrow text-secondary">
+                    <p className="type-label-sm text-secondary">
                       {r.kind}
                       {r.status ? ` · ${r.status}` : ""}
                     </p>
@@ -176,7 +176,7 @@ export async function TagPage({ tag, page }: { tag: { name: string; slug: string
             { label: tag.name },
           ]}
         />
-        <p className="mt-2 type-eyebrow text-secondary">Tag</p>
+        <p className="mt-2 type-label-sm text-secondary">Tag</p>
         <h1 className="type-h1 text-primary">{tag.name}</h1>
         <p className="type-body text-secondary">
           {list.total} {list.total === 1 ? "story" : "stories"} tagged {tag.name}
@@ -213,7 +213,7 @@ export async function AuthorPage({ author, page }: { author: Author; page: numbe
             {initials(author.name)}
           </span>
           <div className="flex max-w-180 flex-col gap-3">
-            <p className="type-eyebrow text-secondary">
+            <p className="type-label-sm text-secondary">
               Author · {kind}
               {author.kind === "contributor" && author.organisation ? ` · ${author.organisation}` : ""}
             </p>
@@ -222,7 +222,7 @@ export async function AuthorPage({ author, page }: { author: Author; page: numbe
             {author.bio ? <p className="type-body text-body">{author.bio}</p> : null}
             {covers.length ? (
               <div className="flex flex-col gap-2">
-                <p className="type-eyebrow text-secondary">Covers</p>
+                <p className="type-label-sm text-secondary">Covers</p>
                 <Chips items={covers.map((c) => ({ label: c.name, href: c.href }))} />
               </div>
             ) : null}

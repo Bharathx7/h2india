@@ -15,7 +15,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   // as plain links: a prefetch across the two domains is blocked by the browser and logged as an error.
   const admin = parseServerEnv().SITE_ROLE === "admin";
   return (
-    <div className="flex min-h-dvh flex-col items-center gap-4 bg-mint px-4 py-6 md:justify-center md:gap-6 md:py-12">
+    <div className="relative isolate flex min-h-dvh flex-col items-center gap-4 overflow-hidden bg-mint px-4 py-6 md:justify-center md:gap-6 md:py-12">
+      {/* Founder v2 (18 Nov 2026): two soft accent glows behind the card, as on the home page's mint bands. */}
+      <div aria-hidden="true" className="depth-accent-glow absolute -top-60 -left-40 -z-10 size-160" />
+      <div aria-hidden="true" className="depth-accent-glow absolute -right-40 -bottom-60 -z-10 size-160" />
       <Link href="/" aria-label="H2 Economy home" className="rounded-control">
         <Logo title="" height={36} />
       </Link>

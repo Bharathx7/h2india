@@ -124,7 +124,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
                     href={`/knowledge/media/podcasts/${p.slug}`}
                     className="flex h-full flex-col gap-1 rounded-card border border-default p-4 hover:border-focus"
                   >
-                    <span className="type-eyebrow text-secondary">
+                    <span className="type-label-sm text-secondary">
                       {p.show.toUpperCase()}
                       {p.episode ? ` · EPISODE ${String(p.episode)}` : ""}
                     </span>
@@ -141,7 +141,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
           className="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-card bg-mint p-6"
         >
           <div className="flex flex-col gap-1">
-            <p className="type-eyebrow text-secondary">FOR SUPPLIERS</p>
+            <p className="type-label-sm text-secondary">FOR SUPPLIERS</p>
             <h2 id="film" className="type-h4 text-primary">
               Film a short talk with H2 Economy
             </h2>
@@ -158,7 +158,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
           className="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-card bg-inverse p-8 text-inverse"
         >
           <div className="flex max-w-150 flex-col gap-2">
-            <p className="type-eyebrow opacity-80">START SOURCING</p>
+            <p className="type-label-sm opacity-80">START SOURCING</p>
             <h2 id="buy" className="type-h2">
               Buy hydrogen equipment from verified Indian suppliers
             </h2>

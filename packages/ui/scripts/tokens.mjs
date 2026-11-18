@@ -54,7 +54,7 @@ const TYPE_UTILITY = {
   "Label/Nav": "type-label-nav",
   Caption: "type-caption",
   "Spec/Default": "type-spec",
-  "Spec/Eyebrow": "type-eyebrow",
+  "Spec/Eyebrow": "type-label-sm",
 };
 const FONT_VAR = { Manrope: "--font-display", Inter: "--font-sans", "IBM Plex Mono": "--font-mono" };
 

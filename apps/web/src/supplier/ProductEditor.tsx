@@ -555,7 +555,7 @@ export function ProductEditor({
         ) : null}
         {groups.map((g) => (
           <fieldset key={g} className="flex flex-col gap-3">
-            <legend className="mb-1 type-eyebrow text-secondary">{g}</legend>
+            <legend className="mb-1 type-label-sm text-secondary">{g}</legend>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {defs
                 .filter((d) => d.displayGroup === g)

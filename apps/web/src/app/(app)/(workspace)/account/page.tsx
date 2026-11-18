@@ -67,7 +67,7 @@ export default async function AccountPage() {
             {shell.user.initials}
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <p className="type-eyebrow text-secondary">Account</p>
+            <p className="type-label-sm text-secondary">Account</p>
             <h1 className="type-h2 break-words text-primary">{shell.user.name}</h1>
             <p className="type-body break-words text-secondary">{shell.email}</p>
           </div>

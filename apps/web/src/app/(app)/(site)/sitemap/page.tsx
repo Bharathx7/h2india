@@ -146,7 +146,7 @@ export default async function SitemapPage() {
       <div className={cx(wrap, "grid grid-cols-2 gap-x-6 gap-y-10 pt-8 md:grid-cols-3 lg:grid-cols-5")}>
         {groups.map((g) => (
           <nav key={g.title} aria-label={g.title} className="flex flex-col gap-2">
-            <h2 className="type-eyebrow text-secondary">{g.title}</h2>
+            <h2 className="type-label-sm text-secondary">{g.title}</h2>
             {g.links.map(([label, href]) => (
               <Link key={href} href={href} className="type-body-sm text-link hover:underline">
                 {label}

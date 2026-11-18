@@ -39,7 +39,7 @@ export default async function IssuePage({ params }: { params: Promise<{ slug: st
           items={[{ label: "Newsletters", href: "/newsletter" }, { label: `${list} · Issue ${String(i.number)}` }]}
         />
         <header className="flex flex-col gap-3">
-          <p className="type-eyebrow text-secondary">
+          <p className="type-label-sm text-secondary">
             {list} · Issue {i.number} · {issueDay(i.sentOn)}
           </p>
           <h1 className="type-h1 text-primary">{i.title}</h1>
@@ -77,7 +77,7 @@ export default async function IssuePage({ params }: { params: Promise<{ slug: st
           <nav aria-label="Other issues" className="flex justify-between gap-4">
             {previous ? (
               <Link href={`/newsletter/issues/${previous.slug}`} className="flex flex-col">
-                <span className="type-eyebrow text-secondary">← Previous issue</span>
+                <span className="type-label-sm text-secondary">← Previous issue</span>
                 <span className="type-label-sm text-link">
                   Issue {previous.number} · {previous.title}
                 </span>
@@ -87,7 +87,7 @@ export default async function IssuePage({ params }: { params: Promise<{ slug: st
             )}
             {next ? (
               <Link href={`/newsletter/issues/${next.slug}`} className="flex flex-col text-right">
-                <span className="type-eyebrow text-secondary">Next issue →</span>
+                <span className="type-label-sm text-secondary">Next issue →</span>
                 <span className="type-label-sm text-link">
                   Issue {next.number} · {next.title}
                 </span>

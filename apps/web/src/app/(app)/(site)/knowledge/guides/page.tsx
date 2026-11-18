@@ -40,7 +40,7 @@ export default async function GuidesPage({ searchParams }: { searchParams: Promi
                   href={`/knowledge/guides/${g.slug}`}
                   className="flex h-full flex-col gap-2 rounded-card border border-default p-5 hover:border-focus"
                 >
-                  <span className="type-eyebrow text-secondary">
+                  <span className="type-label-sm text-secondary">
                     BUYER&apos;S GUIDE · {(g.productCategories ?? [])[0]?.toUpperCase()}
                   </span>
                   <span className="type-h4 text-primary">{g.title}</span>

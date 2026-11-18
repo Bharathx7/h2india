@@ -24,7 +24,7 @@ interface KeyFactsBlock {
 export function KeyNumbers({ block }: { block: KeyNumbersBlock }) {
   return (
     <aside className="my-2 flex flex-col gap-4 rounded-card bg-subtle p-6" aria-label={block.heading ?? "Key numbers"}>
-      <p className="type-eyebrow text-secondary">{block.heading ?? "Key numbers"}</p>
+      <p className="type-label-sm text-secondary">{block.heading ?? "Key numbers"}</p>
       <dl className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {block.items.map((item) => (
           <div key={`${item.value}-${item.label}`} className="flex flex-col gap-1">
@@ -49,7 +49,7 @@ function KeyFacts({ block }: { block: KeyFactsBlock }) {
       <dl className="flex flex-col gap-3">
         {block.items.map((item) => (
           <div key={`${item.label}-${item.value}`} className="flex flex-col gap-0.5">
-            <dt className="type-eyebrow text-secondary">{item.label}</dt>
+            <dt className="type-label-sm text-secondary">{item.label}</dt>
             <dd className="type-body-sm text-primary">{item.value}</dd>
           </div>
         ))}

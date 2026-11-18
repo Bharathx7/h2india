@@ -125,7 +125,7 @@ export function SiteFooter({
         <nav aria-label="Footer" className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {columns.map((c) => (
             <div key={c.heading}>
-              <p className="type-eyebrow text-secondary">{c.heading}</p>
+              <p className="type-label-sm text-secondary">{c.heading}</p>
               <ul className="mt-3 flex flex-col gap-2.5">
                 {c.links.map((l) => (
                   <li key={l.href + l.label}>

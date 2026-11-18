@@ -39,7 +39,7 @@ export function ComingSoon({ launchLine }: { launchLine: string }) {
         <section aria-labelledby="coming-soon-title" className="bg-mint">
           <div className={`${wrap} flex flex-col gap-6 py-8 md:flex-row md:items-start md:gap-12 md:py-20`}>
             <div className="flex min-w-0 flex-1 flex-col gap-4">
-              <p className="type-eyebrow text-secondary">Coming soon</p>
+              <p className="type-label-sm text-secondary">Coming soon</p>
               <h1 id="coming-soon-title" className="type-h2 text-primary">
                 India&rsquo;s hydrogen ecosystem platform is coming
               </h1>

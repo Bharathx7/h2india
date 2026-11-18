@@ -358,11 +358,11 @@ function Table({ rows }: { rows: TenderRow[] }) {
             <tr id={`scope-${String(r.id)}`} hidden className="bg-subtle">
               <td />
               <td colSpan={3} className="px-3 pb-4">
-                <p className="type-eyebrow text-secondary">Scope</p>
+                <p className="type-label-sm text-secondary">Scope</p>
                 <p className="type-body-sm text-body">{r.scope}</p>
               </td>
               <td colSpan={3} className="px-3 pb-4">
-                <p className="type-eyebrow text-secondary">Key dates</p>
+                <p className="type-label-sm text-secondary">Key dates</p>
                 <p className="type-body-sm text-body">{r.keyDates}</p>
                 <Link href={r.href} className="type-label-sm text-link hover:underline">
                   View tender →<span className="sr-only"> {r.title}</span>

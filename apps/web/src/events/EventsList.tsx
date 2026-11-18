@@ -38,7 +38,7 @@ function DateTile({ e }: { e: EventCard }) {
   return (
     <span className="flex w-14 shrink-0 flex-col items-center justify-center rounded-control bg-mint py-2">
       <span className="type-h4 text-primary">{e.days}</span>
-      <span className="type-eyebrow text-secondary">{e.month}</span>
+      <span className="type-label-sm text-secondary">{e.month}</span>
     </span>
   );
 }
@@ -51,7 +51,7 @@ function Card({ e }: { e: EventCard }) {
     >
       <DateTile e={e} />
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="type-eyebrow text-secondary">{e.eyebrow}</span>
+        <span className="type-label-sm text-secondary">{e.eyebrow}</span>
         <span className="type-label text-primary group-hover:underline">{e.title}</span>
         <span className="type-caption text-secondary">{e.meta}</span>
         <span className="inline-flex items-center gap-1 type-label-sm text-link">
@@ -357,10 +357,10 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
                 >
                   <span className="flex flex-col items-center rounded-control bg-page px-3 py-2">
                     <span className="type-h4 text-primary">{featured.days}</span>
-                    <span className="type-eyebrow text-secondary">{featured.month}</span>
+                    <span className="type-label-sm text-secondary">{featured.month}</span>
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="flex flex-wrap items-center gap-2 type-eyebrow text-secondary">
+                    <span className="flex flex-wrap items-center gap-2 type-label-sm text-secondary">
                       <span className="inline-flex items-center gap-1 rounded-pill bg-page px-2 py-0.5 type-label-sm text-body">
                         <span aria-hidden="true" className="size-1.5 rounded-pill bg-ink-500" /> Featured
                       </span>
@@ -374,7 +374,7 @@ export async function EventsList({ preset, params }: { preset: Preset; params: P
               ) : null}
               {byMonth(shown.items).map((g) => (
                 <section key={g.month} aria-label={g.month} className="flex flex-col gap-3">
-                  <h2 className="type-eyebrow text-secondary">{g.month}</h2>
+                  <h2 className="type-label-sm text-secondary">{g.month}</h2>
                   <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {g.items.map((e) => (
                       <li key={e.id}>

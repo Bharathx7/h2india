@@ -65,7 +65,7 @@ export default async function BuyersGuidePage({ params }: { params: Params }) {
           <header className="flex flex-col gap-3 border-b border-default pb-5">
             <p className="flex items-center gap-2">
               <StatusBadge status="Buyer's guide" tone="success" />
-              <span className="type-eyebrow text-secondary">BUYER&apos;S GUIDE · {category.toUpperCase()}</span>
+              <span className="type-label-sm text-secondary">BUYER&apos;S GUIDE · {category.toUpperCase()}</span>
             </p>
             <h1 className="type-h1 text-primary">{g.title}</h1>
             <p className="type-body-lg text-body">{g.summary}</p>
@@ -139,7 +139,7 @@ export default async function BuyersGuidePage({ params }: { params: Params }) {
       <section aria-labelledby="rfq" className="border-t border-default">
         <div className={cx(wrap, "grid grid-cols-1 gap-6 py-12 lg:grid-cols-[22rem_1fr] lg:items-center")}>
           <div className="flex flex-col gap-3">
-            <p className="type-eyebrow text-secondary">REQUEST A QUOTE</p>
+            <p className="type-label-sm text-secondary">REQUEST A QUOTE</p>
             <h2 id="rfq" className="type-h2 text-primary">
               Send one request to up to 5 verified suppliers
             </h2>

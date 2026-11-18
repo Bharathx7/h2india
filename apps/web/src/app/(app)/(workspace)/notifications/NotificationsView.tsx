@@ -168,7 +168,7 @@ export function NotificationsView(props: {
                 if (rows.length === 0) return null;
                 return (
                   <section key={g} className="flex flex-col gap-2.5" aria-labelledby={`group-${g}`}>
-                    <h2 id={`group-${g}`} className="type-eyebrow text-secondary">
+                    <h2 id={`group-${g}`} className="type-label-sm text-secondary">
                       {g}
                     </h2>
                     <NotificationList label={g}>
@@ -261,11 +261,11 @@ function ChoicesForm(props: {
           <caption className="sr-only">Notifications by channel</caption>
           <thead>
             <tr className="border-b border-default">
-              <th scope="col" className="pb-3 text-left type-eyebrow text-secondary">
+              <th scope="col" className="pb-3 text-left type-label-sm text-secondary">
                 What happened
               </th>
               {CHANNELS.map((c) => (
-                <th key={c.value} scope="col" className="w-16 pb-3 text-center type-eyebrow text-secondary md:w-24">
+                <th key={c.value} scope="col" className="w-16 pb-3 text-center type-label-sm text-secondary md:w-24">
                   {c.label}
                 </th>
               ))}
@@ -274,7 +274,7 @@ function ChoicesForm(props: {
           {groups.map((g) => (
             <tbody key={g} className="border-b border-default last:border-b-0">
               <tr>
-                <th scope="colgroup" colSpan={4} className="pt-5 pb-1 text-left type-eyebrow text-secondary">
+                <th scope="colgroup" colSpan={4} className="pt-5 pb-1 text-left type-label-sm text-secondary">
                   {g}
                 </th>
               </tr>

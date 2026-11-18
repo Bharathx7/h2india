@@ -24,7 +24,7 @@ export function ErrorPage({
   return (
     <main id="main" className="flex flex-col items-center px-4 pt-12 pb-20 text-center md:pt-20 md:pb-24">
       <div className="flex w-full max-w-140 flex-col items-center gap-4">
-        <p className="type-eyebrow text-secondary">Error {code}</p>
+        <p className="type-label-sm text-secondary">Error {code}</p>
         <h1 className="type-h1 text-primary">{title}</h1>
         <p className="type-body text-body">{text}</p>
         <form action="/search" method="get" role="search" className="w-full">

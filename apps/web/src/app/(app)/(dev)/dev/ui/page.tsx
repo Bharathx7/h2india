@@ -47,7 +47,7 @@ export default async function GalleryPage({
   const forced = forcedState((await searchParams).state);
   return (
     <main className="mx-auto max-w-[1312px] px-6 py-16">
-      <p className="type-eyebrow text-secondary">Developer · steps 2.3 to 2.6</p>
+      <p className="type-label-sm text-secondary">Developer · steps 2.3 to 2.6</p>
       <h1 className="type-h1 mt-2">Component gallery</h1>
       <p className="type-body-lg mt-2 max-w-3xl">
         Rebuilt from Figma page 02 Components. Each section names the Figma component set it reproduces. Compare at 1440

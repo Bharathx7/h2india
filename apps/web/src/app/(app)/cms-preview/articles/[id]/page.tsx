@@ -33,7 +33,7 @@ export default async function ArticlePreview({ params }: { params: Promise<{ id:
         {formatIstDateTime(new Date(article.updatedAt))}
       </p>
       <header className="flex flex-col gap-3">
-        <p className="flex items-center gap-2 type-eyebrow text-secondary">
+        <p className="flex items-center gap-2 type-label-sm text-secondary">
           {badge ? <span className="rounded-pill bg-subtle px-2 py-0.5 text-primary">{badge}</span> : typeLabel}
         </p>
         <h1 className="type-h1">{article.title}</h1>

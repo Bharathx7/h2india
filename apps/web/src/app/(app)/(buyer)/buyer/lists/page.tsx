@@ -60,7 +60,7 @@ export default async function ListsPage({
           // Founder QC (17 Nov 2026): the lists on the left, the chosen list on the right.
           <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
             <nav aria-label="Lists" className="flex flex-col gap-1 rounded-card border border-default bg-page p-2">
-              <p className="px-3 pt-2 pb-1 type-eyebrow text-secondary">
+              <p className="px-3 pt-2 pb-1 type-label-sm text-secondary">
                 {lists.length} {lists.length === 1 ? "list" : "lists"}
               </p>
               {lists.map((l) => (

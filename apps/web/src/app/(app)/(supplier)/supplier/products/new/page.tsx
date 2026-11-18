@@ -143,7 +143,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-card border border-default bg-page md:grid-cols-[160px_minmax(0,1fr)_160px_minmax(0,1fr)]">
           <nav aria-label="Class" className={col}>
-            <p className="px-3 py-1 type-eyebrow text-secondary">Class</p>
+            <p className="px-3 py-1 type-label-sm text-secondary">Class</p>
             {cat.classes.map((c) => (
               <Link
                 key={c.id}
@@ -157,7 +157,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
             ))}
           </nav>
           <nav aria-label="Category" className={col}>
-            <p className="px-3 py-1 type-eyebrow text-secondary">Category in {klass?.label.toLowerCase()}</p>
+            <p className="px-3 py-1 type-label-sm text-secondary">Category in {klass?.label.toLowerCase()}</p>
             {categories.map((c) => (
               <Link
                 key={c.id}
@@ -171,7 +171,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
             ))}
           </nav>
           <nav aria-label="Type" className={col}>
-            <p className="px-3 py-1 type-eyebrow text-secondary">Type</p>
+            <p className="px-3 py-1 type-label-sm text-secondary">Type</p>
             {(category?.children ?? []).map((c) => (
               <Link
                 key={c.id}
@@ -185,7 +185,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: S
             ))}
           </nav>
           <section className="flex flex-col gap-3 p-4">
-            <p className="type-eyebrow text-secondary">What buyers compare</p>
+            <p className="type-label-sm text-secondary">What buyers compare</p>
             {chosen ? (
               <>
                 <h2 className="type-h4">{[klass?.label, category?.label, sub?.label].filter(Boolean).join(" › ")}</h2>

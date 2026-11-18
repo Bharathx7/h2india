@@ -63,7 +63,7 @@ export default async function JoinAsMemberPage({ searchParams }: { searchParams:
     >
       <div className="flex flex-col gap-6 p-4 md:p-8">
         <div className="flex max-w-3xl flex-col gap-2">
-          <p className="type-eyebrow text-secondary">Membership</p>
+          <p className="type-label-sm text-secondary">Membership</p>
           <h1 className="type-h2 text-primary">Join as a member</h1>
           <p className="type-body text-body">
             The Directory and these features are for members. Join with this account: it&apos;s free, takes one click,

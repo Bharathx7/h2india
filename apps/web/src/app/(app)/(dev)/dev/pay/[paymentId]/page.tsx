@@ -19,7 +19,7 @@ export default async function SimulatedCheckout({ params }: { params: Promise<{ 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-6 p-6 md:p-10">
       <header className="flex flex-col gap-2">
-        <p className="type-eyebrow text-secondary">Simulated payment partner</p>
+        <p className="type-label-sm text-secondary">Simulated payment partner</p>
         <h1 className="type-h2">Pay {Money.format(facts.amountPaise)}</h1>
         <p className="type-body text-body">
           {facts.reference} · {METHOD[facts.method] ?? facts.method}
