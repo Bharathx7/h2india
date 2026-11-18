@@ -97,13 +97,13 @@ describe("listing address", () => {
 });
 
 describe("default view and filter removal", () => {
-  it("opens Systems and Components as a table, keeps the address short, and names each filter to remove", () => {
+  it("keeps the default view out of the address, opens every class as a grid, and names each filter to remove", () => {
     const q = parseListing({ verified: "1", "min.rated_power": "500" }, DEFS, { defaultView: "table" });
     expect(q.view).toBe("table");
     expect(listingSearch(q)).not.toContain("view=");
     expect(listingSearch(q, { view: "grid" })).toContain("view=grid");
-    expect(defaultViewFor("systems")).toBe("table");
-    expect(defaultViewFor("services")).toBe("grid");
+    // Founder v2, 18 Nov 2026: every class opens as the grid; the table is one click away.
+    expect(defaultViewFor()).toBe("grid");
     expect(activeFilters(q, DEFS).map((f) => f.label)).toEqual(["Rated power at least 500 kW", "Verified only"]);
     expect(activeFilters(q, DEFS)[1]?.without).toEqual({ verified: false });
   });

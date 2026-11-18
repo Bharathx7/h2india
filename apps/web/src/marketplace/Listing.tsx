@@ -68,7 +68,12 @@ export function Listing(props: ListingProps) {
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[280px_minmax(0,1fr)]" aria-busy={pending}>
-      <div className="hidden lg:block">{filters}</div>
+      {/* The filter card stays in view beside the results and scrolls on its own when it is taller than the window. */}
+      <div className="hidden lg:block">
+        <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain rounded-card">
+          {filters}
+        </div>
+      </div>
 
       <div className="flex min-w-0 flex-col gap-4">
         {chips.length ? (
@@ -399,7 +404,12 @@ function Filters(props: ListingProps & { go: Go }) {
         .filter((d) => d.filterable)
         .map((d) =>
           d.type === "number" || d.type === "range" ? (
-            <FilterGroup key={d.key} title={d.label} note={d.testCondition ?? undefined}>
+            <FilterGroup
+              key={d.key}
+              title={d.label}
+              note={d.testCondition ?? undefined}
+              aside={d.unit ? <span className="type-caption text-secondary">{d.unit}</span> : undefined}
+            >
               <Range
                 key={JSON.stringify(q.ranges[d.key] ?? {})}
                 def={d}
@@ -515,7 +525,6 @@ function Range({
       aria-label={`${def.label}, ${which === "Min" ? "minimum" : "maximum"}${unit ? ` (${unit})` : ""}`}
       inputMode="decimal"
       placeholder={which}
-      suffix={unit || undefined}
       value={v}
       onChange={(e) => {
         set(e.target.value);
@@ -584,19 +593,20 @@ function ProductTable(props: ListingProps) {
       role="region"
       tabIndex={0}
       aria-label="Products as a table"
-      // Scrolls inside itself so the header and the sideways scrollbar stay in view (Doc 1 §9.2).
-      className="relative max-h-[75vh] overflow-auto rounded-card border border-default"
+      // Founder v2 (18 Nov 2026): the whole list shows on the page (it used to sit in a 75vh box that hid the lower
+      // rows); only wide tables scroll sideways, with the product name pinned on the left.
+      className="relative overflow-x-auto rounded-card border border-default bg-page"
     >
       <table className="w-full min-w-200 border-collapse">
-        <thead className="sticky top-0 z-10 bg-subtle type-caption text-secondary">
+        <thead className="bg-subtle type-label-sm text-secondary">
           <tr>
             <th scope="col" className={cx(th, "w-10 pl-3")}>
               <span className="sr-only">Compare</span>
             </th>
-            <th scope="col" className={th}>
+            <th scope="col" className={cx(th, "sticky left-0 z-10 min-w-56 bg-subtle")}>
               Product
             </th>
-            <th scope="col" className={th}>
+            <th scope="col" className={cx(th, "min-w-44")}>
               Supplier
             </th>
             {props.query.sub.length !== 1 && props.facets.sub.length ? (
@@ -621,7 +631,7 @@ function ProductTable(props: ListingProps) {
           {props.items.map((p) => {
             const on = compare.has(p.id);
             return (
-              <tr key={p.id} className={cx("border-t border-default", on && "bg-mint")}>
+              <tr key={p.id} className={cx("group/row border-t border-default hover:bg-subtle/60", on && "bg-mint")}>
                 <td className="py-3 pr-2 pl-3 align-middle">
                   <Checkbox
                     checked={on}
@@ -629,13 +639,19 @@ function ProductTable(props: ListingProps) {
                     label={<span className="sr-only">Compare {p.name}</span>}
                   />
                 </td>
-                <th scope="row" className="px-2 py-3 text-left align-middle font-normal">
+                <th
+                  scope="row"
+                  className={cx(
+                    "sticky left-0 z-10 min-w-56 px-2 py-3 text-left align-middle font-normal",
+                    on ? "bg-mint" : "bg-page group-hover/row:bg-subtle",
+                  )}
+                >
                   <Link href={p.href} className="type-label text-primary hover:underline">
                     {p.name}
                   </Link>
                   {p.variant ? <span className="block type-caption text-secondary">{p.variant}</span> : null}
                 </th>
-                <td className="px-2 py-3 align-middle">
+                <td className="min-w-44 px-2 py-3 align-middle">
                   <span className="inline-flex items-center gap-1.5">
                     {p.supplier.verified ? <Icon name="shield-check" size={16} className="text-icon-success" /> : null}
                     {p.supplier.name}
@@ -645,7 +661,7 @@ function ProductTable(props: ListingProps) {
                   <td className="px-2 py-3 align-middle">{p.subLabel ?? "—"}</td>
                 ) : null}
                 {cols.map((d) => (
-                  <td key={d.key} className="px-2 py-3 align-middle type-spec whitespace-nowrap">
+                  <td key={d.key} className="px-2 py-3 align-middle type-label whitespace-nowrap tabular-nums">
                     {p.values[d.key] ?? "—"}
                   </td>
                 ))}
@@ -680,6 +696,23 @@ function ProductTable(props: ListingProps) {
   );
 }
 
+/** Page numbers to show: the first, the last, and two either side of the current one; null marks a gap. */
+function pageWindow(page: number, pages: number): (number | null)[] {
+  const keep = new Set([1, pages, page - 2, page - 1, page, page + 1, page + 2].filter((p) => p >= 1 && p <= pages));
+  const sorted = [...keep].sort((x, y) => x - y);
+  const out: (number | null)[] = [];
+  sorted.forEach((p, i) => {
+    const prev = sorted[i - 1];
+    if (prev !== undefined && p - prev > 1) out.push(prev + 1 === p - 1 ? prev + 1 : null);
+    out.push(p);
+  });
+  return out;
+}
+
+/**
+ * The pager under the results (founder v2, 18 Nov 2026): a range line, Previous and Next as labelled buttons that are
+ * always there (dimmed at either end), and a window of page numbers with gaps, so 50 pages never make a 50-button row.
+ */
 function Pager(props: ListingProps & { go: Go }) {
   const { query: q, total } = props;
   const pages = Math.max(1, Math.ceil(total / q.perPage));
@@ -687,45 +720,66 @@ function Pager(props: ListingProps & { go: Go }) {
   const from = (q.page - 1) * q.perPage + 1;
   const to = Math.min(total, q.page * q.perPage);
   const href = (page: number) => `${props.basePath}${listingSearch(q, { page })}`;
-  const item = "inline-flex size-9 items-center justify-center rounded-control type-label tabular-nums";
+  const num = "inline-flex h-10 min-w-10 items-center justify-center rounded-pill px-3 type-label tabular-nums";
+  const step = cx(buttonClasses({ variant: "outline", size: "md" }), "gap-1.5");
+  const dim = "pointer-events-none opacity-40";
   return (
-    <nav aria-label="Pages" className="flex flex-wrap items-center justify-between gap-3 pt-2">
+    <nav
+      aria-label="Pages"
+      className="flex flex-col items-center gap-4 border-t border-default pt-5 sm:flex-row sm:justify-between"
+    >
       <p className="type-body-sm text-secondary">
-        Showing {from.toLocaleString("en-IN")}–{to.toLocaleString("en-IN")} of {total.toLocaleString("en-IN")}
+        Showing{" "}
+        <span className="type-label text-primary">
+          {from.toLocaleString("en-IN")}–{to.toLocaleString("en-IN")}
+        </span>{" "}
+        of {total.toLocaleString("en-IN")} {total === 1 ? "product" : "products"}
       </p>
       {pages > 1 ? (
-        <ol className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {q.page > 1 ? (
-            <li>
-              <Link
-                href={href(q.page - 1)}
-                rel="prev"
-                aria-label="Previous page"
-                className={cx(item, "hover:bg-subtle")}
-              >
-                <Icon name="chevron-left" size={18} />
-              </Link>
-            </li>
-          ) : null}
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <li key={p}>
-              <Link
-                href={href(p)}
-                aria-current={p === q.page ? "page" : undefined}
-                className={cx(item, p === q.page ? "bg-inverse text-inverse" : "border border-default hover:bg-subtle")}
-              >
-                {p}
-              </Link>
-            </li>
-          ))}
+            <Link href={href(q.page - 1)} rel="prev" aria-label="Previous page" className={step}>
+              <Icon name="chevron-left" size={16} />
+              <span className="max-sm:sr-only">Previous</span>
+            </Link>
+          ) : (
+            <span aria-hidden="true" className={cx(step, dim)}>
+              <Icon name="chevron-left" size={16} />
+              <span className="max-sm:sr-only">Previous</span>
+            </span>
+          )}
+          <ol className="flex items-center gap-1">
+            {pageWindow(q.page, pages).map((p, i) =>
+              p === null ? (
+                <li key={`gap-${String(i)}`} aria-hidden="true" className="px-1 type-label text-secondary">
+                  …
+                </li>
+              ) : (
+                <li key={p}>
+                  <Link
+                    href={href(p)}
+                    aria-current={p === q.page ? "page" : undefined}
+                    aria-label={`Page ${String(p)}`}
+                    className={cx(num, p === q.page ? "bg-inverse text-inverse" : "text-primary hover:bg-subtle")}
+                  >
+                    {p}
+                  </Link>
+                </li>
+              ),
+            )}
+          </ol>
           {q.page < pages ? (
-            <li>
-              <Link href={href(q.page + 1)} rel="next" aria-label="Next page" className={cx(item, "hover:bg-subtle")}>
-                <Icon name="chevron-right" size={18} />
-              </Link>
-            </li>
-          ) : null}
-        </ol>
+            <Link href={href(q.page + 1)} rel="next" aria-label="Next page" className={step}>
+              <span className="max-sm:sr-only">Next</span>
+              <Icon name="chevron-right" size={16} />
+            </Link>
+          ) : (
+            <span aria-hidden="true" className={cx(step, dim)}>
+              <span className="max-sm:sr-only">Next</span>
+              <Icon name="chevron-right" size={16} />
+            </span>
+          )}
+        </div>
       ) : null}
     </nav>
   );

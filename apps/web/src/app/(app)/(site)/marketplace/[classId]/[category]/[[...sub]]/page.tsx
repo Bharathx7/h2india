@@ -59,7 +59,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pa
   const includeSample = showSample();
   const db = getDb();
   const defs = await effectiveSchema(db, (sub ?? category).id, { includeSample });
-  const query = parseListing(search, defs, { defaultView: defaultViewFor(klass.id) });
+  const query = parseListing(search, defs, { defaultView: defaultViewFor() });
   const scopeCategories = sub
     ? [{ id: sub.id, slug: sub.slug, label: sub.label, parentId: category.id }]
     : [
