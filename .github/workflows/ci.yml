@@ -182,6 +182,9 @@ jobs:
           CI: "true"
           # The /dev pages (tokens, component gallery) are checked in CI, as on staging.
           FLAG_DEV_PAGES: "true"
+          # The Join SMS code is off by default until an SMS provider is connected (founder, 18 Nov 2026); the browser
+          # tests keep covering it with the switch on. The default (no code) is covered by companies.int.test.ts.
+          FLAG_MOBILE_VERIFICATION: "true"
       - name: Upload test report and screenshots
         if: always()
         uses: actions/upload-artifact@v7

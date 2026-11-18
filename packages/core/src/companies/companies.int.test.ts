@@ -4,7 +4,8 @@ import { uuidv7 } from "uuidv7";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { checkGstin } from "./check";
 import { CompanyError, createCompany, searchCompanies } from "./companies";
-import { applyDraft, startDraft, updateDraft } from "./drafts";
+import { FLAG_OVERRIDES } from "../admin/system";
+import { applyDraft, saveDraftMobile, startDraft, updateDraft } from "./drafts";
 import { gstinCheckChar } from "./gstin";
 import {
   approveJoinRequest,
@@ -211,5 +212,44 @@ describe.skipIf(!url)("companies and join requests", () => {
       mobile: "+91 98201 23456",
       termsVersion: "1.1",
     });
+  });
+  // Founder, 18 Nov 2026: the Join SMS code is off until an SMS provider is connected (System settings switch).
+  it("joins without an SMS code while the mobile check is off, and needs it when switched on", async () => {
+    const setSwitch = async (on: boolean) => {
+      const value = { mobileVerification: on };
+      await h.db
+        .insert(schema.settings)
+        .values({ key: FLAG_OVERRIDES.key, value })
+        .onConflictDoUpdate({ target: schema.settings.key, set: { value } });
+    };
+    const draftFor = async (who: { email: string }) => {
+      const token = await startDraft();
+      await updateDraft(token, {
+        path: "member",
+        email: who.email,
+        fullName: "No Code",
+        jobRole: "Engineering",
+        termsAccepted: true,
+        termsVersion: "1.1",
+      });
+      await saveDraftMobile(token, "+91 98201 65432");
+      return token;
+    };
+    try {
+      await setSwitch(true);
+      const strict = await person("Code Needed");
+      expect(await applyDraft(await draftFor(strict), { id: strict.id, email: strict.email })).toBeNull();
+
+      await setSwitch(false);
+      const relaxed = await person("No Code");
+      expect(await applyDraft(await draftFor(relaxed), { id: relaxed.id, email: relaxed.email })).toMatchObject({
+        path: "member",
+      });
+      const [after] = await h.db.select().from(schema.users).where(eq(schema.users.id, relaxed.id));
+      // The number is kept but not marked verified, so nothing is ever texted to it.
+      expect(after).toMatchObject({ mobile: "+91 98201 65432", mobileVerifiedAt: null, profileType: "member" });
+    } finally {
+      await h.db.delete(schema.settings).where(eq(schema.settings.key, FLAG_OVERRIDES.key));
+    }
   });
 });

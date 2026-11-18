@@ -2,6 +2,7 @@ import { parseServerEnv } from "@h2india/config";
 import { schema, type Executor } from "@h2india/db";
 import { createHmac, randomBytes } from "node:crypto";
 import { and, eq, gt, sql } from "drizzle-orm";
+import { flagNow } from "../admin/system";
 import { getDb } from "../db";
 import { normaliseEmail } from "../sign-in/rules";
 import type { JoinPath } from "./rules";
@@ -82,6 +83,20 @@ export async function updateDraft(token: string, patch: DraftPatch): Promise<voi
     .where(eq(d.tokenHash, hashToken(token)));
 }
 
+/**
+ * Saves the mobile on the draft without a code, while the Join SMS code is switched off (founder, 18 Nov 2026,
+ * `mobileVerification`). The number stays unverified: notifications never text it and recovery can't use it.
+ */
+export async function saveDraftMobile(token: string, mobile: string): Promise<void> {
+  await getDb()
+    .update(d)
+    .set({ mobile, mobileVerifiedAt: null })
+    .where(eq(d.tokenHash, hashToken(token)));
+}
+
+/** Whether Join asks for the SMS code (System settings switch "Mobile number check"). */
+export const mobileCodeRequired = (): Promise<boolean> => flagNow(getDb(), "mobileVerification");
+
 /** Marks the mobile as verified on the draft (called by mobile.ts after a correct code). */
 export async function markMobileVerified(ex: Executor, token: string, mobile: string): Promise<void> {
   await ex
@@ -96,14 +111,15 @@ export async function markMobileVerified(ex: Executor, token: string, mobile: st
  */
 export async function applyDraft(token: string, user: { id: string; email: string }): Promise<JoinDraft | null> {
   const draft = await readDraft(token);
-  if (!draft?.path || !draft.fullName || !draft.mobileVerified || !draft.termsAccepted) return null;
+  if (!draft?.path || !draft.fullName || !draft.mobile || !draft.termsAccepted) return null;
+  if (!draft.mobileVerified && (await mobileCodeRequired())) return null;
   if (draft.email && normaliseEmail(draft.email) !== normaliseEmail(user.email)) return null;
   await getDb()
     .update(u)
     .set({
       name: draft.fullName,
       mobile: draft.mobile,
-      mobileVerifiedAt: new Date(),
+      mobileVerifiedAt: draft.mobileVerified ? new Date() : null,
       jobRole: draft.jobRole,
       profileType: draft.path,
       termsAcceptedAt: new Date(),
