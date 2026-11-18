@@ -60,27 +60,30 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
       ) : brands.data.length ? (
         <LogoMarquee brands={brands.data} label="Brands listed on H2 Economy" className="w-full" />
       ) : null}
-      <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:flex-row md:items-center md:gap-6 md:px-6">
+      <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:px-6 xl:flex-row xl:items-center xl:gap-6">
         <div className="flex flex-col gap-0.5">
           <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 Economy</p>
-          <p className="hidden type-caption text-secondary md:block">Badges are never sold.</p>
+          <p className="hidden type-caption text-secondary xl:block">Badges are never sold.</p>
         </div>
         {/* Phones: an even two-column grid, every check the same width and height (founder upgrade, 18 Nov 2026;
-            the wrapped pills were uneven). From 768 px, the original single row of pills (founder v2: keep it one
-            line on desktop). */}
-        <ul className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 md:flex md:flex-wrap" aria-label="What we check">
+            the wrapped pills were uneven), three across on tablets and small laptops. From 1280 px, the original single row of pills
+            (founder v2: keep it one line on desktop). */}
+        <ul
+          className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 sm:grid-cols-3 xl:flex xl:flex-wrap"
+          aria-label="What we check"
+        >
           {CHECKS.map((c) => (
             <li
               key={c}
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-fresh-200 bg-page px-2.5 py-1.5 type-label text-primary md:h-8 md:min-h-0 md:gap-0 md:rounded-pill md:border-[1.5px] md:border-control md:px-2.75 md:py-0"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-control border border-fresh-200 bg-page px-2.5 py-1.5 type-label text-primary xl:h-8 xl:min-h-0 xl:gap-0 xl:rounded-pill xl:border-[1.5px] xl:border-control xl:px-2.75 xl:py-0"
             >
-              <Icon name="check" size={14} className="shrink-0 text-icon-success md:hidden" />
+              <Icon name="check" size={14} className="shrink-0 text-icon-success xl:hidden" />
               <span className="min-w-0">{c}</span>
             </li>
           ))}
         </ul>
-        <p className="type-caption text-secondary md:hidden">Badges are never sold.</p>
-        <HomeArrowLink href="/verification" className="self-start md:self-auto">
+        <p className="type-caption text-secondary xl:hidden">Badges are never sold.</p>
+        <HomeArrowLink href="/verification" className="self-start xl:self-auto">
           How we verify
         </HomeArrowLink>
       </div>
