@@ -1,0 +1,7 @@
+{
+  // Used only by tsx when the worker runs from source (dev and production). tsx applies a tsconfig's settings only
+  // to files its "include" covers, so the shared packages' .tsx (email templates) must be listed here or they are
+  // compiled with classic JSX and fail with "React is not defined". Type-checking still uses tsconfig.json.
+  "extends": "./tsconfig.json",
+  "include": ["src", "../../packages/*/src"]
+}
