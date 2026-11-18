@@ -202,7 +202,7 @@ export function NewsList({ items }: { items: ArticleSummary[] }) {
     <ul className="flex flex-col">
       {items.map((a) => (
         <li key={a.id} className="flex flex-col gap-1 border-b border-default py-4 first:pt-0">
-          <p className="type-eyebrow text-secondary">
+          <p className="type-label-sm text-secondary">
             {(a.section?.name.split(" & ")[0] ?? a.typeLabel).toUpperCase()} ·{" "}
             {dayMonthYear(a.publishedAt).toUpperCase()}
           </p>

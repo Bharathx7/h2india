@@ -354,7 +354,7 @@ export function PanelsDemo() {
         onDecision={() => undefined}
       />
       <div>
-        <p className="type-eyebrow text-secondary">Notification centre</p>
+        <p className="type-label-sm text-secondary">Notification centre</p>
         <div className="mt-3">
           <NotificationCentre
             items={items}

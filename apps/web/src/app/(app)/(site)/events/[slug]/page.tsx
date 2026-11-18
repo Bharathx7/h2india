@@ -77,7 +77,7 @@ function Agenda({ e }: { e: Event }) {
     >
       {[...groups].map(([day, list]) => (
         <div key={day || "all"} className="flex flex-col">
-          {day ? <p className="border-b border-default pb-1 type-eyebrow text-secondary">{day}</p> : null}
+          {day ? <p className="border-b border-default pb-1 type-label-sm text-secondary">{day}</p> : null}
           <ul className="flex flex-col">
             {list.map((a) => (
               <li
@@ -418,7 +418,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
           />
           <p className="mt-2 flex items-center gap-2">
             <StatusBadge status="Live" tone="error" />
-            <span className="type-eyebrow text-secondary">UPDATED EVERY FEW MINUTES DURING THE EXPO</span>
+            <span className="type-label-sm text-secondary">UPDATED EVERY FEW MINUTES DURING THE EXPO</span>
           </p>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -448,7 +448,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
                 <ul className="flex flex-col">
                   {(e.live.announcements ?? []).map((a) => (
                     <li key={a.id ?? a.text} className="grid grid-cols-[4rem_1fr] gap-3 border-t border-default py-2.5">
-                      <span className="type-eyebrow text-secondary">{a.day.toUpperCase()}</span>
+                      <span className="type-label-sm text-secondary">{a.day.toUpperCase()}</span>
                       <span className="flex flex-col">
                         <span className="type-label text-link">{a.company}</span>
                         <span className="type-body-sm text-body">{a.text}</span>

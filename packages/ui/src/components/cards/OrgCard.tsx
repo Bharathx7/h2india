@@ -47,7 +47,7 @@ export function OrgCard({
       className={cx("flex flex-col overflow-hidden rounded-card border border-default bg-page shadow-soft", className)}
     >
       <div className="flex flex-1 flex-col gap-3 p-5">
-        {type ? <p className="type-eyebrow text-link">{type}</p> : null}
+        {type ? <p className="type-label-sm text-link">{type}</p> : null}
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"

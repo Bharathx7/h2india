@@ -77,7 +77,7 @@ export default async function GrantPage({ params }: { params: Params }) {
               { label: g.title.split(":")[0] ?? g.title },
             ]}
           />
-          <p className="type-eyebrow text-secondary">CALL FOR PROPOSALS · {g.funder.toUpperCase()}</p>
+          <p className="type-label-sm text-secondary">CALL FOR PROPOSALS · {g.funder.toUpperCase()}</p>
           <h1 className="max-w-200 type-h1 text-primary">{g.title}</h1>
           <p className="flex flex-wrap items-center gap-3">
             <StatusBadge status={view.status.label} tone={view.status.tone} />
@@ -112,12 +112,12 @@ export default async function GrantPage({ params }: { params: Params }) {
             <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
               {glance.map((f) => (
                 <div key={f.label} className="flex flex-col gap-0.5">
-                  <dt className="type-eyebrow text-secondary">{f.label}</dt>
+                  <dt className="type-label-sm text-secondary">{f.label}</dt>
                   <dd className="type-body-sm text-primary">{f.value}</dd>
                 </div>
               ))}
               <div className="flex flex-col gap-0.5">
-                <dt className="type-eyebrow text-secondary">Official call</dt>
+                <dt className="type-label-sm text-secondary">Official call</dt>
                 <dd className="type-body-sm">
                   <a href={g.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
                     {host(g.sourceUrl)} ↗<span className="sr-only"> (opens in a new tab)</span>
@@ -125,7 +125,7 @@ export default async function GrantPage({ params }: { params: Params }) {
                 </dd>
               </div>
               <div className="flex flex-col gap-0.5">
-                <dt className="type-eyebrow text-secondary">Last verified</dt>
+                <dt className="type-label-sm text-secondary">Last verified</dt>
                 <dd className="type-body-sm text-primary">
                   {verified ? `${verified} by H2 Economy editors` : "Not yet verified"}
                 </dd>
@@ -292,7 +292,7 @@ export default async function GrantPage({ params }: { params: Params }) {
                     className="flex items-center justify-between gap-3 border-b border-default py-2 last:border-b-0"
                   >
                     <span className="flex min-w-0 flex-col">
-                      <span className="type-eyebrow text-secondary">CALL · {r.funder.toUpperCase()}</span>
+                      <span className="type-label-sm text-secondary">CALL · {r.funder.toUpperCase()}</span>
                       <Link href={r.href} className="type-label-sm text-primary hover:underline">
                         {r.title.split(":")[0]}
                       </Link>

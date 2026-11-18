@@ -140,7 +140,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
                   <tr key={r.id} className="border-t border-default">
                     <td className="px-4 py-3 type-spec whitespace-nowrap">{r.date}</td>
                     <td className="max-w-72 px-4 py-3">
-                      <p className="type-eyebrow text-secondary">{r.eyebrow.toUpperCase()}</p>
+                      <p className="type-label-sm text-secondary">{r.eyebrow.toUpperCase()}</p>
                       <Link href={r.href} className="type-label text-primary hover:underline">
                         {r.title}
                       </Link>

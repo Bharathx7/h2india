@@ -124,7 +124,7 @@ export async function NewsListing({
             <div className="flex flex-col gap-6">
               {[...days.entries()].map(([day, stories]) => (
                 <section key={day} aria-label={weekdayDay(`${day}T12:00:00+05:30`)} className="flex flex-col gap-3">
-                  <h2 className="border-b border-default pb-2 type-eyebrow text-secondary">
+                  <h2 className="border-b border-default pb-2 type-label-sm text-secondary">
                     {day === todayKey ? "Today · " : ""}
                     {weekdayDay(`${day}T12:00:00+05:30`)}
                   </h2>

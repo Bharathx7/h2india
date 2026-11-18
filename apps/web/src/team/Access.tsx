@@ -101,7 +101,7 @@ export function AccessPicker({
           <div className="flex flex-col gap-4">
             {groups.map((g) => (
               <fieldset key={g.title} className="flex flex-col gap-2">
-                <legend className="mb-1 type-eyebrow text-secondary">{g.title}</legend>
+                <legend className="mb-1 type-label-sm text-secondary">{g.title}</legend>
                 {g.items.map((o) => (
                   <Checkbox
                     key={o.key}

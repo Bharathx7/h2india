@@ -177,7 +177,7 @@ export async function MemberHome({
                   Because you follow {i.because}
                 </p>
                 <article className="flex flex-col gap-1 rounded-card border border-default bg-page p-4">
-                  <p className="type-eyebrow text-secondary">{[i.eyebrow, i.meta].filter(Boolean).join(" · ")}</p>
+                  <p className="type-label-sm text-secondary">{[i.eyebrow, i.meta].filter(Boolean).join(" · ")}</p>
                   <h2 className="type-h4 text-primary">
                     <Link href={i.href} className="hover:underline">
                       {i.title}

@@ -110,7 +110,7 @@ export default async function SavedPage({
           {paged.rows.map((s) => (
             <li key={s.id} className="flex items-center gap-4 rounded-card border border-default bg-page p-4">
               <span className="flex min-w-0 flex-1 flex-col gap-1">
-                {s.meta ? <span className="type-eyebrow text-secondary">{s.meta}</span> : null}
+                {s.meta ? <span className="type-label-sm text-secondary">{s.meta}</span> : null}
                 <Link href={s.href} className="type-h4 text-primary hover:underline">
                   {s.title}
                 </Link>

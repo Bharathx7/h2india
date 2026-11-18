@@ -143,7 +143,7 @@ export default async function KnowledgeHome() {
         <Block id="start" title="Start here">
           <div className="grid grid-cols-1 gap-6 rounded-card border border-default p-5 md:grid-cols-[22rem_1fr]">
             <div className="flex flex-col gap-3">
-              <p className="type-eyebrow text-secondary">
+              <p className="type-label-sm text-secondary">
                 FREE COURSE · {chapters.length} CHAPTERS{minutes ? ` · ABOUT ${String(minutes)} MINUTES` : ""}
               </p>
               <h3 className="type-h3 text-primary">Hydrogen 101</h3>
@@ -258,7 +258,7 @@ export default async function KnowledgeHome() {
             </nav>
             {today ? (
               <div className="flex flex-col gap-2 rounded-card border border-default p-4">
-                <p className="type-eyebrow text-secondary">TERM OF THE DAY</p>
+                <p className="type-label-sm text-secondary">TERM OF THE DAY</p>
                 <p className="type-label text-primary">{today.term}</p>
                 <p className="type-body-sm text-body">{today.short}</p>
                 <ArrowLink asChild className="type-label-sm">
@@ -283,7 +283,7 @@ export default async function KnowledgeHome() {
                   href={`/knowledge/standards/${s.slug}`}
                   className="flex h-full flex-col gap-1 rounded-card border border-default p-4 hover:border-focus"
                 >
-                  <span className="type-eyebrow text-secondary">
+                  <span className="type-label-sm text-secondary">
                     {s.issuer.toUpperCase()} · {s.code.toUpperCase()}
                   </span>
                   <span className="type-label text-primary">{s.title}</span>
@@ -322,7 +322,7 @@ export default async function KnowledgeHome() {
               <li key={m.href}>
                 <Link href={m.href} className="group flex h-full flex-col gap-2 rounded-card bg-mint p-5">
                   <span className="flex items-start justify-between gap-2">
-                    <span className="type-eyebrow text-secondary">{m.eyebrow}</span>
+                    <span className="type-label-sm text-secondary">{m.eyebrow}</span>
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-inverse text-inverse">
                       <Icon name="arrow-right" size={14} />
                     </span>

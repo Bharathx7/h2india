@@ -41,7 +41,7 @@ export function FeatureCard({
         </span>
       ) : null}
       <div className="flex items-center gap-3">
-        <p className="min-w-0 flex-1 type-eyebrow text-secondary">{eyebrow}</p>
+        <p className="min-w-0 flex-1 type-label-sm text-secondary">{eyebrow}</p>
         {linkLabel ? null : (
           <span
             className="flex size-8 items-center justify-center rounded-pill bg-inverse text-icon-inverse"
@@ -178,7 +178,7 @@ export function TenderCard(t: {
           <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-mint type-label-sm text-primary">
             {initialsOf(t.issuer)}
           </span>
-          <p className="truncate type-eyebrow text-secondary">{t.issuer}</p>
+          <p className="truncate type-label-sm text-secondary">{t.issuer}</p>
         </div>
         <StatusBadge status={t.status.label} tone={t.status.tone} />
       </div>
@@ -241,7 +241,7 @@ export function SchemeCard(s: {
       className="group card-lift relative flex h-full flex-col gap-3 rounded-card border border-default bg-page p-5 shadow-soft"
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="min-w-0 truncate type-eyebrow text-secondary">{s.level}</p>
+        <p className="min-w-0 truncate type-label-sm text-secondary">{s.level}</p>
         <StatusBadge status={s.status.label} tone={s.status.tone} />
       </div>
       <h3 className="type-label-lg text-primary transition-colors duration-(--motion-duration-fast) group-hover:text-link-hover">
@@ -394,12 +394,15 @@ export function ArticleCard({
           className,
         )}
       >
-        <div className="flex h-50 w-full shrink-0 items-center justify-center bg-tint text-icon-primary md:h-75">
-          <Icon name="newspaper" size={52} />
+        <div className="relative flex h-50 w-full shrink-0 items-center justify-center overflow-hidden bg-linear-to-br from-fresh-50 to-fresh-200 md:h-75">
+          <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" />
+          <span className="relative flex size-20 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
+            <Icon name="newspaper" size={28} />
+          </span>
         </div>
         <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
           {badge ? <ContentLabel>{badge}</ContentLabel> : null}
-          <p className="type-eyebrow text-secondary">{section}</p>
+          <p className="type-label-sm text-secondary">{section}</p>
           <h3 className="type-h3 text-primary">{title}</h3>
           {excerpt ? <p className="type-body text-body">{excerpt}</p> : null}
           {meta ? <p className="type-caption text-secondary">{meta}</p> : null}
@@ -421,12 +424,12 @@ export function ArticleCard({
           className,
         )}
       >
-        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-control bg-mint text-icon-primary max-md:h-16 max-md:w-20">
+        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-control bg-linear-to-br from-fresh-50 to-fresh-200 text-icon-link max-md:h-16 max-md:w-20">
           <Icon name="newspaper" size={24} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           {badge ? <ContentLabel>{badge}</ContentLabel> : null}
-          <p className="type-eyebrow text-secondary">{section}</p>
+          <p className="type-label-sm text-secondary">{section}</p>
           <h3 className="type-h4 text-primary group-hover:text-link-hover">
             <a href={href} className={cx(stretch, "focus-visible:outline-none")}>
               {title}
@@ -443,7 +446,7 @@ export function ArticleCard({
         className={cx("group relative flex flex-col gap-2 border-b border-default py-4", className)}
       >
         {badge ? <ContentLabel>{badge}</ContentLabel> : null}
-        <p className="type-eyebrow text-secondary">{section}</p>
+        <p className="type-label-sm text-secondary">{section}</p>
         <h3 className="type-label-lg text-primary group-hover:text-link-hover">
           <a href={href} className={cx(stretch, "focus-visible:outline-none")}>
             {title}
@@ -460,17 +463,15 @@ export function ArticleCard({
         className,
       )}
     >
-      <div
-        className={cx(
-          "flex h-[202px] w-full shrink-0 items-center justify-center text-icon-link",
-          layout === "lead" ? "bg-linear-to-b from-fresh-50 to-fresh-200" : "bg-mint",
-        )}
-      >
-        <Icon name="newspaper" size={52} />
+      <div className="relative flex h-[202px] w-full shrink-0 items-center justify-center overflow-hidden bg-linear-to-br from-fresh-50 to-fresh-200">
+        {layout === "lead" ? <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" /> : null}
+        <span className="relative flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
+          <Icon name="newspaper" size={28} />
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
         {badge ? <ContentLabel>{badge}</ContentLabel> : null}
-        <p className="type-eyebrow text-secondary">{section}</p>
+        <p className="type-label-sm text-secondary">{section}</p>
         <h3 className="type-h4 text-primary">{title}</h3>
         <a href={href} className={cx(arrowLink, stretch)}>
           {readLabel ?? "Read"}
@@ -500,11 +501,11 @@ export function EventCard(e: {
     >
       <div className="flex w-16 shrink-0 flex-col items-center gap-1 self-start rounded-control bg-mint p-3">
         <span className="type-h3 text-primary">{e.day}</span>
-        <span className="type-eyebrow text-secondary">{e.month}</span>
+        <span className="type-label-sm text-secondary">{e.month}</span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         {e.sponsored ? <ContentLabel>Sponsored</ContentLabel> : null}
-        <p className="type-eyebrow text-secondary">{e.kind}</p>
+        <p className="type-label-sm text-secondary">{e.kind}</p>
         <h3 className="type-label-lg text-primary">{e.title}</h3>
         <p className="type-caption text-body">{e.meta}</p>
         <a href={e.href} className={cx(arrowLink, stretch)}>

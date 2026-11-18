@@ -18,7 +18,7 @@ export default async function MessagesPage() {
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 p-6 md:p-10">
       <header className="flex flex-col gap-2">
-        <p className="type-eyebrow text-secondary">Step 3.9 · Figma page 16 (365:21)</p>
+        <p className="type-label-sm text-secondary">Step 3.9 · Figma page 16 (365:21)</p>
         <h1 className="type-h1">Message templates</h1>
         <p className="type-body text-body">
           Built templates can be sent to you with sample content, through the real channels, approvals and delivery log.

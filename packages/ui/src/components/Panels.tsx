@@ -142,7 +142,7 @@ export function ReviewPanel({ status, checks, history, onDecision, busy }: Revie
         <h2 className="flex-1 type-h3">Decision</h2>
         <StatusBadge status={status} />
       </div>
-      <p className="type-eyebrow text-secondary">Checks</p>
+      <p className="type-label-sm text-secondary">Checks</p>
       <ul className="flex flex-col gap-2">
         {checks.map((c) => (
           <li key={c.text} className="flex items-start gap-2 type-body-sm text-primary">
@@ -201,7 +201,7 @@ export function ReviewPanel({ status, checks, history, onDecision, busy }: Revie
         </Button>
       </div>
       <div className="flex flex-col gap-1.5 border-t border-default pt-2">
-        <p className="type-eyebrow text-secondary">History</p>
+        <p className="type-label-sm text-secondary">History</p>
         <ul className="flex flex-col gap-1.5">
           {history.map((h) => (
             <li key={h} className="type-caption text-body">

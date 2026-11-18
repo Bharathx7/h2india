@@ -132,7 +132,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
 
         <article className="flex min-w-0 max-w-180 flex-1 flex-col gap-6">
           <header className="flex flex-col gap-3">
-            <p className="type-eyebrow text-secondary">
+            <p className="type-label-sm text-secondary">
               CHAPTER {chapter.order} OF {chapters.length}
               {chapter.readingMinutes ? ` · ${String(chapter.readingMinutes)} MIN READ` : ""}
             </p>
@@ -151,7 +151,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
           <ArticleBody data={chapter.body} glossary={glossary} />
           {terms.length ? (
             <section aria-labelledby="terms" className="flex flex-col gap-2">
-              <h2 id="terms" className="type-eyebrow text-secondary">
+              <h2 id="terms" className="type-label-sm text-secondary">
                 KEY TERMS IN THIS CHAPTER
               </h2>
               <ul className="flex flex-wrap gap-2">
@@ -176,7 +176,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
                 href={`/knowledge/hydrogen-101/${previous.slug}`}
                 className="flex flex-col gap-1 rounded-card border border-default p-4 hover:border-focus"
               >
-                <span className="type-eyebrow text-secondary">← PREVIOUS</span>
+                <span className="type-label-sm text-secondary">← PREVIOUS</span>
                 <span className="type-label text-link">
                   Chapter {previous.order}: {previous.title.split(":")[0]}
                 </span>
@@ -189,7 +189,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
                 href={`/knowledge/hydrogen-101/${next.slug}`}
                 className="flex flex-col items-end gap-1 rounded-card border border-default p-4 text-right hover:border-focus"
               >
-                <span className="type-eyebrow text-secondary">NEXT CHAPTER →</span>
+                <span className="type-label-sm text-secondary">NEXT CHAPTER →</span>
                 <span className="type-label text-link">
                   Chapter {next.order}: {next.title.split(":")[0]}
                 </span>

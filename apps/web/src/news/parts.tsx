@@ -140,7 +140,7 @@ export function ClosingPanel({ items, compact }: { items: Deadline[]; compact?: 
           {items.map((d) => (
             <li key={d.href} className="flex items-center gap-3 border-b border-default py-3">
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <p className="type-eyebrow text-secondary">{d.kind}</p>
+                <p className="type-label-sm text-secondary">{d.kind}</p>
                 <Link href={d.href} className="type-label text-primary hover:text-link-hover hover:underline">
                   {d.title}
                 </Link>
@@ -290,7 +290,7 @@ export function KeyFacts({
       <dl className="flex flex-col gap-3">
         {facts.map((f) => (
           <div key={`${f.label}-${f.value}`} className="flex flex-col gap-0.5">
-            <dt className="type-eyebrow text-secondary">{f.label}</dt>
+            <dt className="type-label-sm text-secondary">{f.label}</dt>
             <dd className="type-body-sm text-primary">{f.value}</dd>
           </div>
         ))}

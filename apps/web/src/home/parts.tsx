@@ -48,7 +48,7 @@ export function SectionTitle({
       className={cx("flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between md:gap-6", className)}
     >
       <div className="flex flex-col gap-2">
-        {eyebrow ? <p className="type-eyebrow text-secondary">{eyebrow}</p> : null}
+        {eyebrow ? <p className="type-label-sm text-secondary">{eyebrow}</p> : null}
         <h2 id={`${id}-title`} className={cx(size === "h1" ? "type-h1" : "type-h2", "text-primary")}>
           {title}
         </h2>

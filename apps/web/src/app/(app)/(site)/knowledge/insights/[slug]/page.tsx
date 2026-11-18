@@ -67,7 +67,7 @@ export default async function GuidePage({ params }: { params: Params }) {
                 <span aria-hidden="true" className="size-1.5 rounded-pill bg-current" />
                 Guide
               </span>
-              <span className="type-eyebrow text-link">Insights · Buyer&apos;s guide</span>
+              <span className="type-label-sm text-link">Insights · Buyer&apos;s guide</span>
             </p>
             <h1 className="type-h1 text-primary">{guide.title}</h1>
             <p className="type-body-lg text-body">{guide.summary}</p>
@@ -151,7 +151,7 @@ export default async function GuidePage({ params }: { params: Params }) {
               {guide.audience ? <p className="type-body-sm text-body">{guide.audience}</p> : null}
               {(guide.learn ?? []).length ? (
                 <>
-                  <p className="type-eyebrow text-secondary">You will learn</p>
+                  <p className="type-label-sm text-secondary">You will learn</p>
                   <ul className="flex flex-col gap-2">
                     {(guide.learn ?? []).map((l) => (
                       <li key={l.id ?? l.point} className="flex items-start gap-2 type-body-sm text-body">

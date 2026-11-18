@@ -60,7 +60,7 @@ export default async function TermPage({ params }: { params: Params }) {
       <div className={cx(wrap, "flex flex-col gap-6 pb-16 pt-6 lg:flex-row lg:items-start")}>
         <div className="flex min-w-0 max-w-180 flex-1 flex-col gap-4">
           <section aria-label="Definition" className="flex flex-col gap-1 rounded-card bg-mint p-5">
-            <p className="type-eyebrow text-secondary">DEFINITION</p>
+            <p className="type-label-sm text-secondary">DEFINITION</p>
             <p className="type-h4 text-primary">{t.short}</p>
           </section>
           {hasBody && t.body ? (

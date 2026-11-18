@@ -96,7 +96,7 @@ export default async function ClaimPage({ params }: { params: Params }) {
         <div className="flex flex-col gap-4">{content}</div>
         <aside className="flex flex-col gap-4 self-start">
           <div className="flex flex-col gap-1 rounded-card border border-default p-4">
-            <p className="type-eyebrow text-secondary">You&apos;re claiming</p>
+            <p className="type-label-sm text-secondary">You&apos;re claiming</p>
             <p className="type-label-lg text-primary">{target.name}</p>
             <p className="type-caption text-secondary">{[target.type, target.place].filter(Boolean).join(" · ")}</p>
           </div>

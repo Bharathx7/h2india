@@ -46,7 +46,7 @@ export function ServiceView({
         ) : null}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
           <div className="flex flex-col gap-4">
-            <p className="type-eyebrow text-secondary">
+            <p className="type-label-sm text-secondary">
               {[p.classLabel, p.category.label, p.sub?.label].filter(Boolean).join(" · ")}
             </p>
             <h1 className="type-h1 text-primary">{p.name}</h1>
@@ -174,7 +174,7 @@ export function ServiceView({
 function ChipList({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="type-eyebrow text-secondary">{title}</p>
+      <p className="type-label-sm text-secondary">{title}</p>
       <ul className="flex flex-wrap gap-2">
         {items.map((i) => (
           <li key={i} className="rounded-pill border-[1.5px] border-control px-3 py-1 type-label-sm text-primary">

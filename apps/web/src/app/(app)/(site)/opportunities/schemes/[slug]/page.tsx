@@ -121,7 +121,7 @@ export default async function SchemePage({ params }: { params: Params }) {
               </Link>
             )}
           />
-          <p className="type-eyebrow text-secondary">{eyebrow}</p>
+          <p className="type-label-sm text-secondary">{eyebrow}</p>
           <h1 className="max-w-200 type-h1 text-primary">{s.name}</h1>
           <p className="flex flex-wrap items-center gap-3">
             <StatusBadge status={status} tone={toneOf(status)} />
@@ -152,7 +152,7 @@ export default async function SchemePage({ params }: { params: Params }) {
             <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
               {glance.map((g) => (
                 <div key={g.label} className="flex flex-col gap-0.5">
-                  <dt className="type-eyebrow text-secondary">{g.label}</dt>
+                  <dt className="type-label-sm text-secondary">{g.label}</dt>
                   <dd className="type-body-sm text-primary">{g.value}</dd>
                 </div>
               ))}
@@ -234,7 +234,7 @@ export default async function SchemePage({ params }: { params: Params }) {
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {(s.benefitRates ?? []).map((b) => (
                     <li key={b.id ?? b.label} className="flex flex-col gap-1 rounded-card bg-subtle p-4">
-                      <span className="type-eyebrow text-secondary">{b.label}</span>
+                      <span className="type-label-sm text-secondary">{b.label}</span>
                       <span className="type-h3 text-primary">{b.value}</span>
                     </li>
                   ))}
@@ -357,7 +357,7 @@ export default async function SchemePage({ params }: { params: Params }) {
             </div>
           </div>
           <section aria-label="Official sources" className="flex flex-col gap-2 rounded-card bg-subtle p-4">
-            <p className="type-eyebrow text-secondary">Official sources</p>
+            <p className="type-label-sm text-secondary">Official sources</p>
             <a
               href={s.sourceUrl}
               target="_blank"

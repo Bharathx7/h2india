@@ -87,7 +87,7 @@ export default async function AssociationsPage({
                   {initials(a.name)}
                 </span>
                 <span className="flex flex-col gap-0.5">
-                  <span className="type-eyebrow text-secondary">
+                  <span className="type-label-sm text-secondary">
                     {[ASSOCIATION_KINDS.find((k) => k.value === a.kind)?.label, a.city].filter(Boolean).join(" · ")}
                   </span>
                   <h2 className="type-label-lg text-primary">{a.name}</h2>

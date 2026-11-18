@@ -363,7 +363,7 @@ export function JobPostForm({ initial, companies }: { initial: Values; companies
 
       <aside className="flex flex-col gap-4 lg:w-80 lg:shrink-0">
         <section aria-label="Posting as" className="flex flex-col gap-3 rounded-card border border-default bg-page p-4">
-          <p className="type-eyebrow text-secondary">POSTING AS</p>
+          <p className="type-label-sm text-secondary">POSTING AS</p>
           {companies.length > 1 ? (
             <label>
               <span className="sr-only">Company</span>

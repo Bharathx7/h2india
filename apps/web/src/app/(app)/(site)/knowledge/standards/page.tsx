@@ -125,7 +125,7 @@ export default async function StandardsPage({ searchParams }: { searchParams: Pr
                       {x.issuer.split(/\s/)[0]}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="type-eyebrow text-secondary">
+                      <span className="type-label-sm text-secondary">
                         {x.kind.toUpperCase()}
                         {x.dated ? ` · ${monthYear(x.dated)}` : yearOf(x) ? ` · ${String(yearOf(x))}` : ""}
                       </span>

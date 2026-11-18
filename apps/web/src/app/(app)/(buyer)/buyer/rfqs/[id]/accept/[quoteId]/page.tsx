@@ -134,7 +134,7 @@ export default async function AcceptQuotePage({ params }: { params: Promise<{ id
               <div tabIndex={0} role="region" aria-label="Payment schedule" className="relative overflow-x-auto">
                 <table className="w-full min-w-[480px]">
                   <thead>
-                    <tr className="bg-subtle text-left type-eyebrow text-secondary">
+                    <tr className="bg-subtle text-left type-label-sm text-secondary">
                       <th scope="col" className="px-3 py-2">
                         Milestone
                       </th>
@@ -182,7 +182,7 @@ export default async function AcceptQuotePage({ params }: { params: Promise<{ id
                 })}
               </ul>
               <div className="rounded-card bg-subtle p-3">
-                <p className="type-eyebrow text-secondary">What they see</p>
+                <p className="type-label-sm text-secondary">What they see</p>
                 <p className="type-body-sm">
                   Your quote for {d.rfq.reference} · {d.rfq.title} was not selected. Thank you for quoting.
                 </p>

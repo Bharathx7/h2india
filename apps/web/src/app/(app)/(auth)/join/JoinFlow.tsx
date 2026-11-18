@@ -79,7 +79,7 @@ export function JoinFlow(props: {
     <div ref={card}>
       <SkippedSteps.Provider value={fixed ? 1 : 0}>
         <AuthCard>
-          {fixed ? <p className="type-eyebrow text-secondary">{SIGN_UP[fixed].title}</p> : null}
+          {fixed ? <p className="type-label-sm text-secondary">{SIGN_UP[fixed].title}</p> : null}
           {step === "path" ? (
             <PathStep
               value={path}

@@ -86,7 +86,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             <table className="w-full min-w-200 text-left">
               <thead className="sticky top-0 bg-subtle">
                 <tr>
-                  <th scope="col" className="w-44 px-4 py-3 type-eyebrow text-secondary">
+                  <th scope="col" className="w-44 px-4 py-3 type-label-sm text-secondary">
                     <span className="sr-only">Row</span>
                   </th>
                   {states.map((s) => (

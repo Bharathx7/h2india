@@ -143,11 +143,11 @@ export function PreferencesForm({
           <table className="w-full min-w-[520px]">
             <thead>
               <tr className="border-b border-default">
-                <th scope="col" className="py-3 text-left type-eyebrow text-secondary">
+                <th scope="col" className="py-3 text-left type-label-sm text-secondary">
                   Notification
                 </th>
                 {CHANNELS.map((c) => (
-                  <th key={c.key} scope="col" className="w-24 py-3 type-eyebrow text-secondary">
+                  <th key={c.key} scope="col" className="w-24 py-3 type-label-sm text-secondary">
                     {c.label}
                   </th>
                 ))}

@@ -245,7 +245,7 @@ export async function Insights({ fail }: { fail: Fail }) {
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-6 rounded-modal border border-fresh-200 bg-page p-5 shadow-soft md:p-8 lg:flex-row lg:gap-12">
               <div className="flex flex-col gap-2.5 lg:w-96 lg:shrink-0">
-                <p className="type-eyebrow text-secondary">From the India Hydrogen Tracker</p>
+                <p className="type-label-sm text-secondary">From the India Hydrogen Tracker</p>
                 <h3 className="type-h4 text-primary">What SIGHT has awarded so far</h3>
                 <p className="type-body text-body">
                   {sameCount
@@ -295,7 +295,7 @@ export function WhyItMatters() {
         className="depth-dot-grid absolute -top-15 left-[68%] hidden size-120 opacity-40 lg:block"
       />
       <div className="relative flex flex-col gap-4 lg:w-121.5 lg:shrink-0">
-        <p className="type-eyebrow text-fresh-300">National Green Hydrogen Mission · 2030 targets</p>
+        <p className="type-label-sm text-fresh-300">National Green Hydrogen Mission · 2030 targets</p>
         <h2 id="mission-title" className="type-h2 text-inverse md:type-h1">
           India is building a 5 MMT green hydrogen economy
         </h2>
@@ -394,7 +394,7 @@ export async function EventsLearning({ fail }: { fail: Fail }) {
           className="flex flex-col gap-4 rounded-card border border-default bg-page p-6 lg:w-120 lg:shrink-0"
           data-testid="hubs-module"
         >
-          <p className="type-eyebrow text-secondary">India Hydrogen Tracker</p>
+          <p className="type-label-sm text-secondary">India Hydrogen Tracker</p>
           <h3 className="type-h4 text-primary">Where India&rsquo;s hydrogen is being built</h3>
           {!hubs.ok ? (
             <ModuleError title="We couldn't load the map" text="This is on our side. Try again, or open the tracker." />
@@ -484,7 +484,7 @@ export function FinalCta() {
               <span aria-hidden="true" className="relative h-px w-full bg-fresh-300 md:h-auto md:w-px" />
             ) : null}
             <div className="relative flex flex-1 flex-col items-start gap-3">
-              <p className="type-eyebrow text-link">{c.eyebrow}</p>
+              <p className="type-label-sm text-link">{c.eyebrow}</p>
               <h3 className="type-h2 text-primary">{c.title}</h3>
               <p className="type-body-lg text-body">{c.text}</p>
               <span className="h-2" />

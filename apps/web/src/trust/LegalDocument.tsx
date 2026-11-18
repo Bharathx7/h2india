@@ -27,7 +27,7 @@ export async function LegalDocument({ slug, after }: { slug: string; after?: Rea
         {contents.length ? (
           <nav aria-labelledby="contents" className="hidden shrink-0 lg:block lg:w-56 print:hidden">
             <div className="sticky top-24 flex flex-col gap-2">
-              <p id="contents" className="type-eyebrow text-secondary">
+              <p id="contents" className="type-label-sm text-secondary">
                 Contents
               </p>
               {contents.map((c) => (

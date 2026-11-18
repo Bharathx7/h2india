@@ -102,7 +102,7 @@ export function Checker({
     return (
       <div className="flex flex-col gap-6">
         <section className="flex flex-col gap-4 rounded-card bg-mint p-6 md:p-8">
-          <p className="type-eyebrow text-secondary">Scheme eligibility checker</p>
+          <p className="type-label-sm text-secondary">Scheme eligibility checker</p>
           <h1 className="type-h2 text-primary">Which hydrogen schemes could fit you?</h1>
           <p className="type-body text-body">
             Answer six short questions about your organisation and project. We&apos;ll match you against {schemeCount}{" "}
@@ -176,7 +176,7 @@ export function Checker({
       }}
     >
       <div className="flex flex-col gap-2">
-        <p className="type-eyebrow text-secondary">
+        <p className="type-label-sm text-secondary">
           Question {step} of {QUESTIONS.length}
         </p>
         <div

@@ -53,7 +53,7 @@ export default async function HelpArticlePage({ params }: { params: Promise<{ sl
           <p className="type-body-lg text-body">{a.intro}</p>
           {anchors.length > 1 ? (
             <nav aria-labelledby="on-page" className="flex flex-col gap-1.5 rounded-card border border-default p-4">
-              <p id="on-page" className="type-eyebrow text-secondary">
+              <p id="on-page" className="type-label-sm text-secondary">
                 On this page
               </p>
               {anchors.map((x) => (

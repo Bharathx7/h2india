@@ -45,7 +45,7 @@ export default async function MaintenancePage() {
     <main id="main" className="flex min-h-screen items-center justify-center bg-page px-4 py-16">
       <div className="flex w-full max-w-108 flex-col gap-4">
         <Logo />
-        <p className="type-eyebrow text-secondary">Planned maintenance</p>
+        <p className="type-label-sm text-secondary">Planned maintenance</p>
         <h1 className="type-h2 text-primary">We&apos;re upgrading H2 Economy</h1>
         <p className="type-body text-body">
           H2 Economy is offline for planned work on our servers. Your account, orders, quotes and payments are safe, and

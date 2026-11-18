@@ -133,7 +133,7 @@ export default async function CompanyPage({
                 .filter(([, v]) => v)
                 .map(([k, v]) => (
                   <div key={k}>
-                    <dt className="type-eyebrow text-secondary">{k}</dt>
+                    <dt className="type-label-sm text-secondary">{k}</dt>
                     <dd className="type-body text-primary">{v}</dd>
                   </div>
                 ))}
@@ -258,13 +258,13 @@ export default async function CompanyPage({
       <dl className="grid grid-cols-1 max-w-150 gap-4 rounded-card border border-default p-5 sm:grid-cols-2">
         {place ? (
           <div>
-            <dt className="type-eyebrow text-secondary">Location</dt>
+            <dt className="type-label-sm text-secondary">Location</dt>
             <dd className="type-body">{place}</dd>
           </div>
         ) : null}
         {c.website ? (
           <div>
-            <dt className="type-eyebrow text-secondary">Website</dt>
+            <dt className="type-label-sm text-secondary">Website</dt>
             <dd>
               <a href={c.website} target="_blank" rel="noopener noreferrer" className="type-body text-link underline">
                 {c.website.replace(/^https?:\/\//, "")}

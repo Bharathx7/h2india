@@ -128,7 +128,7 @@ export function SearchSuggest({
       >
         {shown.map((g) => (
           <div key={g.label} role="group" aria-labelledby={`${id}-${g.label}`}>
-            <p id={`${id}-${g.label}`} className="px-4 pt-2 pb-1 type-eyebrow text-secondary">
+            <p id={`${id}-${g.label}`} className="px-4 pt-2 pb-1 type-label-sm text-secondary">
               {g.label}
             </p>
             {g.items.map((item) => {

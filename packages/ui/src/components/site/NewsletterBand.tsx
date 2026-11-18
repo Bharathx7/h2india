@@ -87,7 +87,7 @@ export function NewsletterBand({
     <section aria-labelledby={id} className={cx("bg-tint", className)}>
       <div className="mx-auto flex w-full max-w-300 flex-col gap-6 px-4 py-12 md:px-6 lg:flex-row lg:items-center lg:justify-between lg:py-16 xl:px-0">
         <div className="flex max-w-130 flex-col gap-3">
-          <p className="type-eyebrow text-primary">Newsletter</p>
+          <p className="type-label-sm text-primary">Newsletter</p>
           <h2 id={id} className="type-h2 text-primary">
             {title}
           </h2>

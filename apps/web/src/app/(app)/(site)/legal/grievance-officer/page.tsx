@@ -55,7 +55,7 @@ export default async function GrievanceOfficerPage({
                 ["Address", t.registeredOffice],
               ].map(([k, v]) => (
                 <div key={k}>
-                  <dt className="type-eyebrow text-secondary">{k}</dt>
+                  <dt className="type-label-sm text-secondary">{k}</dt>
                   <dd className="type-body-sm text-primary">
                     <Value>{v ?? ""}</Value>
                   </dd>

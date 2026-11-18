@@ -200,7 +200,7 @@ export default async function CompanySettingsPage({
               <dt className="type-body-sm text-secondary">Receiving hours</dt>
               <dd className="type-body-sm">{s.hours || "—"}</dd>
             </dl>
-            <h4 className="type-eyebrow text-secondary">Receiving contacts</h4>
+            <h4 className="type-label-sm text-secondary">Receiving contacts</h4>
             {s.contacts.length ? (
               <ul className="flex flex-col gap-2">
                 {s.contacts.map((c) => (

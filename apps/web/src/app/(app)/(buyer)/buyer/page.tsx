@@ -301,7 +301,7 @@ export default async function BuyerHome() {
               <h2 className="type-h4">Tenders and schemes for you</h2>
               {opportunities.map((o) => (
                 <div key={o.key} className="border-t border-default pt-3">
-                  <p className="type-eyebrow text-secondary">{o.kind}</p>
+                  <p className="type-label-sm text-secondary">{o.kind}</p>
                   <Link href={o.href} className="type-label hover:underline">
                     {o.title}
                   </Link>

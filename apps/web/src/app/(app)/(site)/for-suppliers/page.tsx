@@ -111,7 +111,7 @@ export default async function ForSuppliersPage() {
             className="flex flex-col gap-3 rounded-card bg-mint p-6 md:flex-row md:items-center md:justify-between"
           >
             <div className="flex flex-col gap-1">
-              <p className="type-eyebrow text-link">Launch offer</p>
+              <p className="type-label-sm text-link">Launch offer</p>
               <h2 id="offer" className="type-h3 text-primary">
                 {offer.launchValue === "₹0" ? "Zero commission" : `${offer.launchValue} commission`} {offer.launchNote}
               </h2>
