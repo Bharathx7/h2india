@@ -181,22 +181,53 @@ export function QuoteJourney({ ctaHref, className }: { ctaHref: string; classNam
               <span>Lead time</span>
               <span className="w-10 text-right">Fit</span>
             </div>
-            {/* Before the quotes arrive, three placeholder rows wait in their place (the box never sits empty). */}
+            {/* Before the quotes arrive (founder v2: the box looked empty), the same box shows what the stage is doing:
+                the request itself while it is sent, then H2 Economy's checks ticking in one by one. */}
             <div
-              aria-hidden="true"
+              aria-hidden={quotesIn}
               className={cx(
-                "absolute inset-x-0 top-10 bottom-0 flex flex-col justify-center gap-3 px-4 transition-opacity duration-(--motion-duration-slow) ease-standard",
-                quotesIn ? "opacity-0" : "opacity-100",
+                "absolute inset-x-0 top-10 bottom-0 flex flex-col justify-center gap-2.5 px-4 transition-opacity duration-(--motion-duration-slow) ease-standard",
+                quotesIn ? "pointer-events-none opacity-0" : "opacity-100",
               )}
             >
-              {[0, 1, 2].map((i) => (
-                <span key={i} className="flex items-center gap-3">
-                  <span className="h-3 flex-1 rounded-pill shimmer" />
-                  <span className="h-3 w-16 rounded-pill shimmer" />
-                  <span className="h-3 w-8 rounded-pill shimmer" />
-                </span>
-              ))}
-              <span className="text-center type-caption text-secondary">Waiting for quotes…</span>
+              {shown === 0 ? (
+                <dl className="grid grid-cols-3 gap-2" aria-label="Example request details">
+                  {[
+                    ["Quantity", "1 unit"],
+                    ["Delivery", "Kutch, Gujarat"],
+                    ["Needed by", "March 2027"],
+                  ].map(([k, v], i) => (
+                    <div
+                      key={k}
+                      className="hero-item flex flex-col gap-0.5 rounded-control bg-subtle px-3 py-2"
+                      style={{ ["--hero-i" as string]: i }}
+                    >
+                      <dt className="type-caption text-secondary">{k}</dt>
+                      <dd className="type-label-sm text-primary">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <ul className="flex flex-col gap-2" aria-label="Checks by H2 Economy">
+                  {["Specifications complete", "Delivery site and date given", "Sent to 3 verified suppliers"].map(
+                    (t, i) => (
+                      <li
+                        key={t}
+                        className="hero-item flex items-center gap-2 type-label-sm text-primary"
+                        style={{ ["--hero-i" as string]: i * 3 }}
+                      >
+                        <span className="flex size-5 items-center justify-center rounded-pill bg-accent text-primary">
+                          <Icon name="check" size={12} />
+                        </span>
+                        {t}
+                      </li>
+                    ),
+                  )}
+                </ul>
+              )}
+              <p className="type-caption text-secondary">
+                {shown === 0 ? "Sending to suppliers who make this…" : "Waiting for quotes…"}
+              </p>
             </div>
             <ul aria-label="Example quotes">
               {QUOTES.map((q, i) => {

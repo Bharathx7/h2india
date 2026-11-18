@@ -264,9 +264,11 @@ export function listingSearch(q: ListingQuery, change: Partial<ListingQuery> = {
   return s ? `?${s}` : "";
 }
 
-/** Doc 1 §9.2: Systems and Components open as a table on desktop; phones always get the list. */
-export const defaultViewFor = (classId: string): "grid" | "table" =>
-  classId === "systems" || classId === "components" ? "table" : "grid";
+/**
+ * Every category opens as the grid of cards (founder v2, 18 Nov 2026; was: Systems and Components as a table, Doc 1
+ * §9.2). The table stays one click away for comparing specifications; phones always get the cards.
+ */
+export const defaultViewFor = (): "grid" | "table" => "grid";
 
 export interface ActiveFilter {
   label: string;

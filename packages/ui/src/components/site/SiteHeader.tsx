@@ -487,10 +487,12 @@ export function SiteHeader(props: SiteHeaderProps) {
         }}
         className={cx(
           // Desktop: fixed, with the spacer below holding its full height, so hiding rows never moves the page.
-          "sticky top-0 z-40 border-b border-default transition-[background-color,box-shadow] duration-(--motion-duration-base) lg:fixed lg:inset-x-0",
-          // Founder v2, 18 Nov 2026: once the page scrolls, the bar turns lightly frosted (white at 90% over a small
-          // glass blur), so content shows faintly beneath it while text stays crisp.
-          scrolled ? "bg-page/90 shadow-ink-header backdrop-blur-glass-16" : "bg-page",
+          "sticky top-0 z-40 border-b transition-[background-color,box-shadow,border-color] duration-(--motion-duration-base) lg:fixed lg:inset-x-0",
+          // Founder v2, 18 Nov 2026 (option C, mint glass): once the page scrolls, the bar turns a light brand-mint glass
+          // (fresh-50 at 80% over the glass blur) with a green edge, so content shows faintly beneath it.
+          scrolled
+            ? "border-fresh-200 bg-fresh-50/80 shadow-ink-header backdrop-blur-glass-16 backdrop-saturate-130"
+            : "border-default bg-page",
         )}
       >
         <Desktop {...props} collapsed={collapsed} onMenuChange={setMenuOpen} />

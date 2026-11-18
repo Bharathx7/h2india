@@ -24,10 +24,19 @@ export function FilterPanel({
   children: ReactNode;
   className?: string;
 }) {
+  // Founder v2 (18 Nov 2026): the filters sit on their own card, with a clear header, so they read as one tool.
   return (
-    <section aria-label="Filters" className={cx("flex w-full flex-col", className)}>
-      <div className="flex items-center justify-between border-b border-default pb-4">
-        <h2 className="type-h4">Filters</h2>
+    <section
+      aria-label="Filters"
+      className={cx("flex w-full flex-col rounded-card border border-default bg-page px-5 pt-4 pb-1", className)}
+    >
+      <div className="flex items-center justify-between gap-3 border-b border-default pb-3">
+        <h2 className="flex items-center gap-2 type-h4">
+          <span className="flex size-8 items-center justify-center rounded-control bg-mint text-icon-link">
+            <Icon name="sliders" size={16} />
+          </span>
+          Filters
+        </h2>
         {onClear ? (
           <button
             type="button"
@@ -43,26 +52,39 @@ export function FilterPanel({
   );
 }
 
+/** One filter group: collapsible (open by default), so long lists of filters stay easy to scan. */
 export function FilterGroup({
   title,
   aside,
   children,
   note,
+  defaultOpen = true,
 }: {
   title: string;
   aside?: ReactNode;
   children: ReactNode;
   note?: string;
+  defaultOpen?: boolean;
 }) {
   return (
-    <fieldset className="flex min-w-0 flex-col gap-3 border-b border-default py-4">
-      <div className="flex items-center justify-between">
-        <legend className="float-left type-label text-primary">{title}</legend>
-        {aside}
-      </div>
-      {children}
-      {note ? <p className="type-caption text-secondary">{note}</p> : null}
-    </fieldset>
+    <details open={defaultOpen} className="group/filter border-b border-default last:border-b-0">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-control py-3.5 [&::-webkit-details-marker]:hidden">
+        <span className="type-label text-primary">{title}</span>
+        <span className="flex items-center gap-2">
+          {aside}
+          <Icon
+            name="chevron-down"
+            size={16}
+            className="text-icon-secondary transition-transform duration-(--motion-duration-fast) ease-standard group-open/filter:rotate-180"
+          />
+        </span>
+      </summary>
+      <fieldset className="flex min-w-0 flex-col gap-3 pb-4">
+        <legend className="sr-only">{title}</legend>
+        {children}
+        {note ? <p className="type-caption text-secondary">{note}</p> : null}
+      </fieldset>
+    </details>
   );
 }
 
