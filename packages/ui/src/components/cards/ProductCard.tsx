@@ -5,7 +5,10 @@ import { buttonClasses } from "../Button";
 
 /* Figma "Product card v2" (392:5279): image with Compare and Save, class · category eyebrow, name, supplier with its
    verified mark, up to three spec chips, lead time and View product. It has no price prop on purpose: a card never
-   shows a price (playbook step 6.4 price rule). */
+   shows a price (playbook step 6.4 price rule).
+   Founder v2 (18 Nov 2026): the same look as the home showcase cards: a green image tile with the product mark on a
+   white coin and the Verified badge on it, the category as a plain caption, spec chips in mint, and the footer (lead
+   time, View product) on the card's bottom edge so cards in a row line up. Same props and the same controls. */
 
 export interface ProductCardProps {
   name: string;
@@ -42,54 +45,60 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <article
-      className={cx("flex flex-col gap-4 rounded-card border border-default bg-page p-2 shadow-soft", className)}
+      className={cx(
+        "group card-lift relative flex flex-col overflow-hidden rounded-card border border-default bg-page",
+        className,
+      )}
     >
-      <div className="relative flex aspect-[272/198] items-center justify-center rounded-card bg-subtle">
-        <Icon name="zap" size={56} className="text-ink-400" />
-        {actions ? <div className="absolute top-3 right-3 flex gap-2">{actions}</div> : null}
+      <div className="relative flex aspect-[16/9] items-center justify-center bg-linear-to-br from-fresh-50 to-fresh-200 sm:aspect-[4/3]">
+        <span className="flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
+          <Icon name="zap" size={28} />
+        </span>
+        {supplierVerified ? (
+          <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
+            <Icon name="shield-check" size={14} className="text-icon-success" />
+            Verified
+          </span>
+        ) : null}
+        {actions ? <div className="absolute top-3 right-3 z-10 flex gap-2">{actions}</div> : null}
       </div>
-      <div className="flex flex-1 flex-col gap-2 px-2">
-        <p className="type-eyebrow text-link">{eyebrow}</p>
-        <h3 className="type-h4 text-primary">
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <p className="line-clamp-1 type-caption text-secondary">{eyebrow}</p>
+        <h3 className="line-clamp-2 type-label-lg text-primary">
           {renderLink({ href, className: "rounded-control hover:underline underline-offset-2", children: name })}
         </h3>
-        <p className="flex items-center gap-1.5 type-body-sm text-secondary">
-          {supplier}
-          {supplierVerified ? (
-            <>
-              <Icon name="shield-check" size={16} className="text-icon-success" />
-              <span className="sr-only">(verified supplier)</span>
-            </>
-          ) : null}
+        <p className="flex min-w-0 items-center gap-1.5 type-body-sm text-secondary">
+          <span className="truncate">{supplier}</span>
+          {supplierVerified ? <span className="sr-only">(verified supplier)</span> : null}
         </p>
         {chips.length ? (
           <ul className="flex flex-wrap gap-1.5" aria-label="Key specifications">
             {chips.map((c) => (
-              <li key={c} className="rounded-control bg-subtle px-2 py-1 type-spec text-primary">
+              <li key={c} className="rounded-pill bg-mint px-2 py-0.5 type-label-sm text-primary">
                 {c}
               </li>
             ))}
           </ul>
         ) : null}
-      </div>
-      <div className="flex items-end justify-between gap-3 px-2 pb-2">
-        <div className="flex flex-col">
-          {leadTime ? (
-            <>
-              <span className="type-caption text-secondary">Lead time</span>
-              <span className="type-label-lg text-success">{leadTime}</span>
-            </>
-          ) : null}
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-default pt-3">
+          <div className="flex min-w-0 flex-col">
+            {leadTime ? (
+              <>
+                <span className="type-caption text-secondary">Lead time</span>
+                <span className="truncate type-label text-success">{leadTime}</span>
+              </>
+            ) : null}
+          </div>
+          {renderLink({
+            href,
+            className: buttonClasses({ variant: "secondary", size: "sm" }),
+            children: (
+              <>
+                View product<span className="sr-only"> {name}</span>
+              </>
+            ),
+          })}
         </div>
-        {renderLink({
-          href,
-          className: buttonClasses({ variant: "secondary" }),
-          children: (
-            <>
-              View product<span className="sr-only"> {name}</span>
-            </>
-          ),
-        })}
       </div>
     </article>
   );

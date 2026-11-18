@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { forcedState } from "@/lib/dev-state";
 import { catalogue, guidesFor, suppliersFor } from "@/marketplace/data";
 import { GuideCards, PageSection, RfqBand, wrap } from "@/marketplace/parts";
-import { categoryHref, classHref, productsLine } from "@/marketplace/views";
+import { categoryHref, classHref, productsLine, tileIcon } from "@/marketplace/views";
 import { Crumbs } from "@/opportunities/parts";
 
 // A product class (Systems 391:4379; phones 394:9055), step 6.2: one template for all five classes. Categories come
@@ -98,7 +98,7 @@ export default async function ClassPage({
                 title={x.label}
                 detail={productsLine(x.liveProducts, c.id === "services" ? "listings" : "products")}
                 href={categoryHref(x)}
-                icon="zap"
+                icon={tileIcon(x.slug)}
               />
             ))}
           </div>

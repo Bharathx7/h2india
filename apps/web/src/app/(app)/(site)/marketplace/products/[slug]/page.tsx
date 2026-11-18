@@ -13,7 +13,7 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { guidesFor } from "@/marketplace/data";
 import { GuideCards, wrap } from "@/marketplace/parts";
-import { applicationHref, categoryHref, classHref } from "@/marketplace/views";
+import { applicationHref, categoryHref, classHref, tileIcon } from "@/marketplace/views";
 import { Crumbs } from "@/opportunities/parts";
 import { STATE_OPTIONS } from "@/cms/records/states";
 import { JsonLd } from "@/seo/jsonld";
@@ -114,18 +114,35 @@ export default async function ProductPage({
           ]}
         />
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,600px)_minmax(0,1fr)] lg:gap-12">
-          <div className="flex flex-col gap-3">
+          {/* Founder v2 (18 Nov 2026): a branded tile until photos exist, and the key facts under it, so the left
+              column carries what a buyer checks first instead of an empty grey box. */}
+          <div className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
             <div
-              className="flex aspect-[4/3] items-center justify-center rounded-card bg-subtle"
+              className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-card bg-linear-to-br from-fresh-50 to-fresh-200 lg:aspect-[4/3]"
               role="img"
               aria-label={`No photos of ${p.name} yet`}
             >
-              <Icon name="zap" size={64} className="text-ink-400" />
+              <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" />
+              <span className="relative flex size-20 items-center justify-center rounded-pill bg-page text-icon-link shadow-ink-float lg:size-28">
+                <Icon name={tileIcon(p.category.slug)} size={40} />
+              </span>
             </div>
+            <dl className="grid grid-cols-2 gap-3" aria-label="Key facts">
+              <KeyFact label="Lead time" value={p.leadTime ?? "Ask the supplier"} />
+              <KeyFact
+                label="Warranty"
+                value={p.warranty ? `${String(p.warranty.months)} months` : "Ask the supplier"}
+              />
+              <KeyFact label="Made in India" value={p.madeInIndia ? "Yes" : "Not stated"} />
+              <KeyFact
+                label="Minimum order"
+                value={p.minOrder ? `${String(p.minOrder)} ${p.minOrder === 1 ? "unit" : "units"}` : "Ask the supplier"}
+              />
+            </dl>
           </div>
 
           <div className="flex flex-col gap-4">
-            <p className="type-eyebrow text-secondary">
+            <p className="type-label-sm text-secondary">
               {[p.classLabel, p.category.label, p.sub?.label].filter(Boolean).join(" · ")}
             </p>
             <h1 className="type-h1 text-primary">{p.name}</h1>
@@ -256,11 +273,15 @@ export default async function ProductPage({
               aria-label="Specifications"
               className="relative overflow-x-auto rounded-card border border-default"
             >
-              <table className="w-full min-w-150 border-collapse">
+              <table className="w-full border-collapse md:min-w-120">
                 <thead className="bg-subtle type-label-sm text-primary">
                   <tr>
-                    {["Parameter", "Value", "Unit", "Test condition"].map((h) => (
-                      <th key={h} scope="col" className="px-4 py-3 text-left font-normal">
+                    {["Parameter", "Value", "Test condition"].map((h) => (
+                      <th
+                        key={h}
+                        scope="col"
+                        className={cx("px-4 py-3 text-left font-normal", h === "Test condition" && "max-md:hidden")}
+                      >
                         {h}
                       </th>
                     ))}
@@ -271,8 +292,8 @@ export default async function ProductPage({
                     <tr className="border-t border-default">
                       <th
                         scope="rowgroup"
-                        colSpan={4}
-                        className="px-4 pt-5 pb-2 text-left type-eyebrow font-normal text-secondary"
+                        colSpan={3}
+                        className="bg-subtle/60 px-4 pt-4 pb-2 text-left type-label-sm text-secondary"
                       >
                         {g.group}
                       </th>
@@ -282,9 +303,16 @@ export default async function ProductPage({
                         <th scope="row" className="px-4 py-3 text-left font-normal text-primary">
                           {r.label}
                         </th>
-                        <td className="px-4 py-3 type-spec text-primary">{r.value}</td>
-                        <td className="px-4 py-3 type-spec text-secondary">{r.unit}</td>
-                        <td className="px-4 py-3 type-caption text-secondary">{r.condition}</td>
+                        <td className="px-4 py-3 type-label text-primary tabular-nums">
+                          {r.value}
+                          {r.unit && r.unit !== "—" ? <span className="ml-1 text-secondary">{r.unit}</span> : null}
+                          {r.condition ? (
+                            <span className="mt-0.5 block type-caption font-normal text-secondary md:hidden">
+                              {r.condition}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3 type-caption text-secondary max-md:hidden">{r.condition}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -533,14 +561,26 @@ function Facts({ rows }: { rows: [string, string, string, string][] }) {
       {rows.map(([label, value, unit, note]) => (
         <div
           key={label}
-          className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.6fr)_minmax(0,1.4fr)] gap-3 px-4 py-3 max-md:grid-cols-2"
+          className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] gap-3 px-4 py-3 max-md:grid-cols-2"
         >
           <dt className="type-body text-primary">{label}</dt>
-          <dd className="type-spec text-primary">{value}</dd>
-          <dd className="type-spec text-secondary">{unit || "—"}</dd>
-          <dd className="type-caption text-secondary">{note}</dd>
+          <dd className="type-label text-primary tabular-nums">
+            {value}
+            {unit && unit !== "—" ? <span className="ml-1 text-secondary">{unit}</span> : null}
+          </dd>
+          <dd className="type-caption text-secondary max-md:col-span-2">{note}</dd>
         </div>
       ))}
     </dl>
+  );
+}
+
+/** One of the key facts under the product tile. */
+function KeyFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-0.5 rounded-card border border-default bg-page px-4 py-3">
+      <dt className="type-caption text-secondary">{label}</dt>
+      <dd className="type-label text-primary">{value}</dd>
+    </div>
   );
 }

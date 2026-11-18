@@ -5,7 +5,14 @@ import Link from "next/link";
 import { forcedState } from "@/lib/dev-state";
 import { catalogue, guidesFor } from "@/marketplace/data";
 import { ClassTile, GuideCards, PageSection, RfqBand, wrap } from "@/marketplace/parts";
-import { applicationHref, categoryHref, classHref, popularCategories, productsLine } from "@/marketplace/views";
+import {
+  applicationHref,
+  categoryHref,
+  classHref,
+  popularCategories,
+  productsLine,
+  tileIcon,
+} from "@/marketplace/views";
 
 // Marketplace landing (390:7501; phones 394:8565), step 6.2. Classes, applications and categories come from the
 // catalogue an operator keeps in admin Catalogue (step 6.1), so a hidden category disappears here at once. No price
@@ -29,19 +36,21 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <section aria-labelledby="market-title" className="bg-mint">
-        <div className={cx(wrap, "flex flex-col gap-6 py-12 md:py-16")}>
-          <p className="type-eyebrow text-secondary">Marketplace</p>
-          <h1 id="market-title" className="max-w-210 type-display text-primary max-md:type-h1">
+      {/* Founder v2 (18 Nov 2026): the dark ink band with the deep glow, as on the home page. */}
+      <section aria-labelledby="market-title" className="relative isolate overflow-hidden bg-inverse">
+        <div aria-hidden="true" className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-160" />
+        <div aria-hidden="true" className="depth-dot-grid absolute top-10 right-0 -z-10 size-120 opacity-40" />
+        <div className={cx(wrap, "flex flex-col gap-6 py-12 md:py-20")}>
+          <h1 id="market-title" className="max-w-210 type-display text-inverse max-md:type-h1">
             Hydrogen equipment, components and services from verified suppliers
           </h1>
-          <p className="max-w-185 type-body-lg text-body">
+          <p className="max-w-185 type-body-lg text-neutral-0/80">
             Compare by specification, request quotes from up to 5 suppliers and pay only after delivery.
           </p>
           <form
             action="/search"
             role="search"
-            className="flex max-w-210 items-center gap-3 rounded-pill border-[1.5px] border-control bg-page py-1.5 pr-1.5 pl-5 focus-within:field-focus"
+            className="flex max-w-210 items-center gap-3 rounded-pill border-[1.5px] border-control bg-page py-1.5 pr-1.5 pl-5 shadow-ink-float focus-within:field-focus"
           >
             <input type="hidden" name="scope" value="products" />
             <Icon name="search" size={24} className="shrink-0 text-icon-secondary" />
@@ -63,7 +72,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
             <Link
               href="/marketplace"
               aria-current="page"
-              className={cx(chip, "border-transparent bg-inverse text-inverse")}
+              className={cx(chip, "border-transparent bg-accent text-primary")}
             >
               All classes
             </Link>
@@ -71,7 +80,10 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               <Link
                 key={c.id}
                 href={classHref(c.id)}
-                className={cx(chip, "border-control bg-page text-primary hover:border-focus")}
+                className={cx(
+                  chip,
+                  "border-neutral-0/24 bg-neutral-0/6 text-inverse hover:border-neutral-0/64 hover:bg-neutral-0/12",
+                )}
               >
                 {c.label}
               </Link>
@@ -109,7 +121,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               title={a.label}
               detail={productsLine(a.liveProducts)}
               href={applicationHref(a.id)}
-              icon="zap"
+              icon={tileIcon(a.id)}
             />
           ))}
         </div>
@@ -123,7 +135,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               title={c.label}
               detail={productsLine(c.liveProducts, c.classId === "services" ? "listings" : "products")}
               href={categoryHref(c)}
-              icon="zap"
+              icon={tileIcon(c.slug)}
             />
           ))}
         </div>
