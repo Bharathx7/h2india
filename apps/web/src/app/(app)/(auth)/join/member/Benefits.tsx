@@ -4,6 +4,9 @@ import { MEMBER_BENEFITS, MEMBER_JOIN_STEPS } from "@/member/benefits";
 // Member sign-up · what you get (founder v2, 18 Nov 2026): the full list of member benefits beside the form on
 // desktop and below it on phones, in the For members page's words (MEMBER_BENEFITS), plus the three steps.
 
+// On the sign-up page itself, step 1 is the form beside this panel, so it names the form, not the page.
+const STEPS = MEMBER_JOIN_STEPS.map((s, i) => (i === 0 ? { ...s, title: "Fill in your details" } : s));
+
 export function MemberBenefits() {
   return (
     <aside
@@ -36,7 +39,7 @@ export function MemberBenefits() {
       <div className="flex flex-col gap-3 border-t border-neutral-0/12 pt-5">
         <p className="type-label text-inverse">Ready in about two minutes</p>
         <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {MEMBER_JOIN_STEPS.map((s, i) => (
+          {STEPS.map((s, i) => (
             <li key={s.title} className="flex items-start gap-2.5">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-accent type-label-sm text-primary">
                 {i + 1}
