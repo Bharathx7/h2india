@@ -24,8 +24,8 @@ const SECTIONS = [
   "India’s hydrogen sector, live",
   "Send one request to up to 5 verified suppliers",
   "Browse the marketplace",
+  "Popular categories",
   "Featured products",
-  "One process, from request to GST invoice",
   "Opportunities this week",
   "Latest Indian hydrogen news",
   "India is building a 5 MMT green hydrogen economy",
@@ -48,9 +48,13 @@ test("logged out: every section, the drawn wording and the visitor's paths", asy
   // Live figures: open tenders are counted live with today's date (A45).
   await expect(page.getByTestId("live-figures")).toContainText("hydrogen tenders open this month");
   await expect(page.getByTestId("live-figures")).toContainText("H2 Economy tracker · as of");
-  // The catalogue arrives in Stage 6: tiles without counts, Featured products empty (A43).
-  await expect(page.getByRole("link", { name: /^Systems/ })).toBeVisible();
-  await expect(page.getByTestId("featured-empty")).toContainText("Featured products are on the way");
+  // Product showcase (founder upgrade, 18 Nov 2026): six popular categories, then five featured products, or the
+  // empty state while nothing is listed (A43). The "Why buy and sell" bento is gone.
+  await expect(page.locator("#marketplace").getByRole("link", { name: /^Electrolysers/ })).toBeVisible();
+  await expect(
+    page.getByTestId("featured-empty").or(page.getByRole("region", { name: "Featured products" })),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "One process, from request to GST invoice" })).toHaveCount(0);
   // No claims of our own (playbook WATCH OUT).
   await expect(page.getByRole("main")).not.toContainText(/\bfirst integrated\b|\bonly platform\b/i);
 });

@@ -11,6 +11,8 @@ import { useReducedMotion } from "./Motion";
 // live tenders, schemes and news, the buyer's steps and the supplier checks. Palette unchanged: ink card, accent tab,
 // white panel. The tabs advance every 5 s with a progress line; hovering or focusing the card pauses them, choosing a
 // tab stops them for good, and reduced motion never starts them (WCAG 2.2.2). Rows fade up 8 px, 40 ms apart.
+// Founder upgrade, 18 Nov 2026: the hero turned dark, so the card is a glass frame on it; the tabs sit in one track
+// with an accent marker that slides to the chosen tab (it answers the choice; reduced motion makes it jump).
 
 export type HeroTab = "buyers" | "suppliers" | "schemes" | "tenders" | "news";
 
@@ -92,7 +94,7 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
       data-focus={panel.id}
       data-running={running}
       className={cx(
-        "relative isolate flex w-full max-w-150 flex-col gap-5 overflow-hidden rounded-feature bg-inverse p-6 shadow-ink-float xl:p-7",
+        "relative isolate flex w-full max-w-150 flex-col gap-5 overflow-hidden rounded-feature border border-neutral-0/12 bg-neutral-0/6 p-5 shadow-ink-float backdrop-blur-glass-16 xl:p-6",
         className,
       )}
       onPointerEnter={() => {
@@ -108,15 +110,23 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
         if (!e.currentTarget.contains(e.relatedTarget)) setPaused(false);
       }}
     >
-      <div aria-hidden="true" className="depth-dot-grid absolute -top-24 -right-24 -z-10 size-96 opacity-25" />
       <div aria-hidden="true" className="depth-accent-glow absolute -bottom-40 -left-32 -z-10 size-96 opacity-60" />
 
-      <p className="flex h-4 items-center gap-2 font-mono text-xs font-medium tracking-wider text-fresh-300 uppercase">
+      <p className="flex items-center gap-2 px-1 type-label text-inverse">
         <span aria-hidden="true" className="hero-live-dot size-2 rounded-pill bg-accent" />
         On H2 Economy now
       </p>
 
-      <div role="tablist" aria-label="What H2 Economy holds" className="grid grid-cols-5 gap-1.5">
+      <div
+        role="tablist"
+        aria-label="What H2 Economy holds"
+        className="relative grid grid-cols-5 rounded-pill bg-neutral-0/8 p-1"
+      >
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/5)] rounded-pill bg-accent shadow-soft transition-transform duration-(--motion-duration-slow) ease-standard"
+          style={{ transform: `translateX(${String(index * 100)}%)` }}
+        />
         {panels.map((p, i) => {
           const selected = i === index;
           return (
@@ -139,9 +149,9 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
               }}
               className={cx(
                 "relative inline-flex h-9 items-center justify-center overflow-hidden rounded-pill px-1 type-label",
-                "transition-[background-color,color,transform] duration-(--motion-duration-base) ease-standard active:scale-[0.97]",
+                "transition-[color,transform] duration-(--motion-duration-base) ease-standard active:scale-[0.97]",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fresh-300",
-                selected ? "bg-accent text-primary" : "bg-ink-700 text-inverse hover:bg-ink-500",
+                selected ? "text-primary" : "text-neutral-0/80 hover:text-inverse",
               )}
             >
               {p.tab}
@@ -162,13 +172,10 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
         id="hero-panel"
         role="tabpanel"
         aria-labelledby={`hero-tab-${panel.id}`}
-        className="flex h-86 flex-col gap-4 rounded-card bg-page p-5 shadow-soft"
+        className="flex h-96 flex-col gap-4 rounded-card bg-page p-5 shadow-ink-float-sm"
       >
         <div key={panel.id} className="flex min-h-0 flex-1 flex-col gap-4">
-          <p
-            className={cx(changed && "hero-item", "type-eyebrow text-secondary")}
-            style={{ ["--hero-i" as string]: 0 }}
-          >
+          <p className={cx(changed && "hero-item", "type-label text-secondary")} style={{ ["--hero-i" as string]: 0 }}>
             {panel.eyebrow}
           </p>
           {panel.rows.length ? (
@@ -196,14 +203,15 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
           ) : (
             <>
               {panel.steps?.length ? (
-                <ol className="flex flex-col gap-3">
+                <ol className="relative flex flex-col gap-3.5">
+                  <span aria-hidden="true" className="absolute top-3 bottom-3 left-3 w-px bg-ink-200" />
                   {panel.steps.map((s, i) => (
                     <li
                       key={s.title}
-                      className={cx(changed && "hero-item", "flex items-start gap-3")}
+                      className={cx(changed && "hero-item", "relative flex items-start gap-3")}
                       style={{ ["--hero-i" as string]: i + 1 }}
                     >
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-accent type-label-sm text-primary ring-4 ring-neutral-0">
                         {i + 1}
                       </span>
                       <span className="flex min-w-0 flex-col gap-0.5">
@@ -214,27 +222,29 @@ export function HeroConsole({ panels, className }: { panels: HeroPanel[]; classN
                   ))}
                 </ol>
               ) : null}
-              <ul
-                className={cx(changed && "hero-item", "flex flex-wrap gap-2")}
-                style={{ ["--hero-i" as string]: (panel.steps?.length ?? 0) + 1 }}
-              >
-                {panel.chips.map((c) => (
-                  <li key={c.label}>
-                    {c.href ? (
-                      <a
-                        href={c.href}
-                        className="inline-flex h-8 items-center rounded-pill border border-control bg-page px-3 type-label text-primary transition-[border-color,background-color,transform] duration-(--motion-duration-fast) ease-standard hover:border-focus hover:bg-subtle active:scale-[0.97]"
-                      >
-                        {c.label}
-                      </a>
-                    ) : (
-                      <span className="inline-flex h-8 items-center rounded-pill bg-mint px-3 type-label text-primary">
-                        {c.label}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              {panel.chips.length ? (
+                <ul
+                  className={cx(changed && "hero-item", "flex flex-wrap gap-2")}
+                  style={{ ["--hero-i" as string]: (panel.steps?.length ?? 0) + 1 }}
+                >
+                  {panel.chips.map((c) => (
+                    <li key={c.label}>
+                      {c.href ? (
+                        <a
+                          href={c.href}
+                          className="inline-flex h-8 items-center rounded-pill border border-control bg-page px-3 type-label text-primary transition-[border-color,background-color,transform] duration-(--motion-duration-fast) ease-standard hover:border-focus hover:bg-subtle active:scale-[0.97]"
+                        >
+                          {c.label}
+                        </a>
+                      ) : (
+                        <span className="inline-flex h-8 items-center rounded-pill bg-mint px-3 type-label text-primary">
+                          {c.label}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {panel.note ? (
                 <p
                   className={cx(changed && "hero-item", "type-body-sm text-body")}

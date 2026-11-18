@@ -40,7 +40,7 @@ function Column({ title, count, children }: { title: string; count?: number; chi
 /** Opportunities · loading (381:13066). */
 export function OpportunitiesSkeleton() {
   return (
-    <section aria-label="Opportunities this week" aria-busy="true" className="bg-mint">
+    <section aria-label="Opportunities this week" aria-busy="true" className="bg-page">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-80 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -58,29 +58,32 @@ export function OpportunitiesSkeleton() {
 }
 
 /**
- * 09 Opportunities this week (378:3648): the three tenders closing soonest and three open schemes. Each column loads on
- * its own; a failed column shows the designed error, an empty one its empty state (381:13116). Phones show two of each.
+ * 09 Opportunities this week (378:3648): the two tenders closing soonest and two open schemes. Each column loads on
+ * its own; a failed column shows the designed error, an empty one its empty state (381:13116). The columns stretch to
+ * one height and their cards share it, so the four cards line up.
  */
+/** Two tenders and two schemes (founder upgrade, 18 Nov 2026): four cards, the columns the same height. */
+const OPPORTUNITIES_EACH = 2;
+
 export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: boolean }) {
   const now = new Date();
   const [tenders, schemes] = await Promise.all([
-    settle("tenders", fail, () => loadTenders(now)),
-    settle("schemes", fail, () => loadSchemes(now)),
+    settle("tenders", fail, () => loadTenders(now, OPPORTUNITIES_EACH)),
+    settle("schemes", fail, () => loadSchemes(now, OPPORTUNITIES_EACH)),
   ]);
   const gate = (href: string) => (signedIn ? href : `/sign-in?next=${encodeURIComponent(href)}`);
   return (
-    <Section id="opportunities" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
+    <Section id="opportunities" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
       <SectionTitle
         id="opportunities"
-        eyebrow="Opportunities"
         title="Opportunities this week"
         sub="Deadlines and status are checked against the official source."
         link={{ label: "See all opportunities", href: "/opportunities" }}
         className="[&>a]:max-md:hidden"
       />
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:gap-6">
-        <Column title="Tenders closing soon" count={tenders.ok ? tenders.data.length : undefined}>
-          <div data-testid="tenders-module" className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 md:flex-row md:items-stretch md:gap-6">
+        <Column title="Tenders closing soon">
+          <div data-testid="tenders-module" className="flex flex-1 flex-col gap-4 md:[&>article]:flex-1">
             {!tenders.ok ? (
               <ModuleError
                 title="We couldn't load this week's tenders"
@@ -99,16 +102,12 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
                 Set an alert and we&rsquo;ll tell you when a tender that fits you opens.
               </EmptyState>
             ) : (
-              tenders.data.map((t, i) => (
-                <div key={t.href} className={i > 1 ? "max-md:hidden" : undefined}>
-                  <TenderCard {...t} trackHref={gate(t.trackHref)} />
-                </div>
-              ))
+              tenders.data.map((t) => <TenderCard key={t.href} {...t} trackHref={gate(t.trackHref)} />)
             )}
           </div>
         </Column>
-        <Column title="Schemes and calls open" count={schemes.ok ? schemes.data.length : undefined}>
-          <div data-testid="schemes-module" className="flex flex-col gap-4">
+        <Column title="Schemes and calls open">
+          <div data-testid="schemes-module" className="flex flex-1 flex-col gap-4 md:[&>article]:flex-1">
             {!schemes.ok ? (
               <ModuleError
                 title="We couldn't load the open schemes"
@@ -127,10 +126,8 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
                 Set an alert and we&rsquo;ll tell you when a scheme that fits you opens.
               </EmptyState>
             ) : (
-              schemes.data.map((s, i) => (
-                <div key={s.href} className={i > 1 ? "max-md:hidden" : undefined}>
-                  <SchemeCard {...s} saveHref={gate(`${s.href}#save`)} alertHref={gate(`${s.href}#alert`)} />
-                </div>
+              schemes.data.map((s) => (
+                <SchemeCard key={s.href} {...s} saveHref={gate(`${s.href}#save`)} alertHref={gate(`${s.href}#alert`)} />
               ))
             )}
           </div>
@@ -146,7 +143,7 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
 /** Latest news · loading (381:13101). */
 export function NewsSkeleton() {
   return (
-    <section aria-label="Insights and news" aria-busy="true" className="bg-page">
+    <section aria-label="Insights and news" aria-busy="true" className="bg-mint">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-94 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -193,13 +190,8 @@ export async function Insights({ fail }: { fail: Fail }) {
   const counts = sight.ok && sight.data ? sight.data.charts.map((c) => c.bars.length) : [];
   const sameCount = counts.length === 2 && counts[0] === counts[1] ? WORDS[(counts[0] ?? 1) - 1] : null;
   return (
-    <Section id="insights" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
-      <SectionTitle
-        id="insights"
-        eyebrow="Insights and news"
-        title="Latest Indian hydrogen news"
-        link={{ label: "All news", href: "/news" }}
-      />
+    <Section id="insights" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
+      <SectionTitle id="insights" title="Latest Indian hydrogen news" link={{ label: "All news", href: "/news" }} />
       <div data-testid="news-module">
         {!news.ok ? (
           <ModuleError
@@ -216,7 +208,7 @@ export async function Insights({ fail }: { fail: Fail }) {
               <div className="flex w-172.5 shrink-0 flex-col gap-6">
                 <ArticleCard layout="lead" {...news.data.lead} />
                 {news.data.explainer ? (
-                  <div className="flex flex-col gap-2 rounded-card bg-mint p-4">
+                  <div className="flex flex-col gap-2 rounded-card border border-fresh-200 bg-page p-4">
                     <ArticleCard layout="compact" {...news.data.explainer} section="Policy explainer of the week" />
                     <HomeArrowLink href={news.data.explainer.href} className="self-start">
                       Read the explainer
@@ -251,7 +243,7 @@ export async function Insights({ fail }: { fail: Fail }) {
           />
         ) : sight.data ? (
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-6 rounded-modal border border-fresh-200 bg-mint p-5 shadow-soft md:p-8 lg:flex-row lg:gap-12">
+            <div className="flex flex-col gap-6 rounded-modal border border-fresh-200 bg-page p-5 shadow-soft md:p-8 lg:flex-row lg:gap-12">
               <div className="flex flex-col gap-2.5 lg:w-96 lg:shrink-0">
                 <p className="type-eyebrow text-secondary">From the India Hydrogen Tracker</p>
                 <h3 className="type-h4 text-primary">What SIGHT has awarded so far</h3>
@@ -376,12 +368,7 @@ export async function EventsLearning({ fail }: { fail: Fail }) {
   ]);
   return (
     <Section id="events" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
-      <SectionTitle
-        id="events"
-        eyebrow="Events and learning"
-        title="Upcoming events"
-        link={{ label: "All events", href: "/events" }}
-      />
+      <SectionTitle id="events" title="Upcoming events" link={{ label: "All events", href: "/events" }} />
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
         <div className="min-w-0 flex-1" data-testid="events-module">
           {!events.ok ? (
