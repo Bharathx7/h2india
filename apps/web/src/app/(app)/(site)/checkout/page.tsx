@@ -28,12 +28,14 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   const v = await checkoutView(me.db, me.actor, me.buyer.organisationId);
   if (!v.cart.supplier || !v.cart.items.some((i) => i.available)) redirect("/cart");
   const c = v.choices;
-  // A step opens only when the ones before it are done.
+  // A step opens only when the ones before it are done. The receiver's mobile counts only while the `mobileFields`
+  // switch is on (founder, 19 Nov 2026); off, a receiver's name is enough.
+  const contact = v.mobileFields ? Boolean(c.receiverMobile) : Boolean(c.receiverName);
   const ready: Record<Step, boolean> = {
     delivery: true,
-    billing: Boolean(c.deliverySiteId && c.receiverMobile),
-    payment: Boolean(c.deliverySiteId && c.receiverMobile && c.billingGstinId),
-    review: Boolean(c.deliverySiteId && c.receiverMobile && c.billingGstinId && c.paymentMethod),
+    billing: Boolean(c.deliverySiteId && contact),
+    payment: Boolean(c.deliverySiteId && contact && c.billingGstinId),
+    review: Boolean(c.deliverySiteId && contact && c.billingGstinId && c.paymentMethod),
   };
   const wanted = STEPS.find((s) => s.key === sp.step)?.key ?? "delivery";
   const step = ready[wanted] ? wanted : (STEPS.filter((s) => ready[s.key]).pop()?.key ?? "delivery");

@@ -34,12 +34,17 @@ export function PreferencesForm({
   start,
   rows,
   whatsappReady,
+  showWhatsapp,
 }: {
   start: MemberPreferences;
   rows: PreferenceRow[];
   /** A confirmed mobile number is on the account. */
   whatsappReady: boolean;
+  /** The `mobileFields` switch (founder, 19 Nov 2026): off, the WhatsApp column is hidden and its choices kept as they are. */
+  showWhatsapp: boolean;
 }) {
+  const shown = showWhatsapp ? CHANNELS : CHANNELS.filter((c) => c.key !== "whatsapp");
+  const stops = showWhatsapp ? "newsletters, alert emails and WhatsApp messages" : "newsletters and alert emails";
   const [newsletter, setNewsletter] = useState(start.newsletter);
   const [choices, setChoices] = useState(start.choices);
   const [quiet, setQuiet] = useState(start.quiet);
@@ -146,7 +151,7 @@ export function PreferencesForm({
                 <th scope="col" className="py-3 text-left type-label-sm text-secondary">
                   Notification
                 </th>
-                {CHANNELS.map((c) => (
+                {shown.map((c) => (
                   <th key={c.key} scope="col" className="w-24 py-3 type-label-sm text-secondary">
                     {c.label}
                   </th>
@@ -160,7 +165,7 @@ export function PreferencesForm({
                     <span className="block type-label text-primary">{r.label}</span>
                     <span className="block type-caption text-secondary">{r.hint}</span>
                   </th>
-                  {CHANNELS.map((c) => (
+                  {shown.map((c) => (
                     <td key={c.key} className="text-center">
                       <Checkbox
                         label={<span className="sr-only">{`${r.label} by ${c.label}`}</span>}
@@ -182,7 +187,9 @@ export function PreferencesForm({
       <section className="flex flex-col gap-4 rounded-card border border-default bg-page p-5 md:p-6">
         <h2 className="type-h3">Quiet hours</h2>
         <Switch
-          label="Pause WhatsApp and in-app notifications at night"
+          label={
+            showWhatsapp ? "Pause WhatsApp and in-app notifications at night" : "Pause in-app notifications at night"
+          }
           checked={quiet.quietHours}
           onCheckedChange={(v) => {
             setQuiet({ ...quiet, quietHours: v });
@@ -254,7 +261,7 @@ export function PreferencesForm({
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5 md:p-6">
           <h2 className="type-h3">Unsubscribe from everything</h2>
           <p className="type-body-sm text-body">
-            Stops all newsletters, alert emails and WhatsApp messages. You'll still get sign-in and security emails.
+            Stops all {stops}. You&apos;ll still get sign-in and security emails.
           </p>
           <div>
             <Button
@@ -273,7 +280,7 @@ export function PreferencesForm({
         onOpenChange={setConfirmAll}
         tone="destructive"
         title="Unsubscribe from everything?"
-        description="Newsletters, alert emails and WhatsApp messages stop. You'll still get sign-in and security emails."
+        description={`${stops.charAt(0).toUpperCase()}${stops.slice(1)} stop. You'll still get sign-in and security emails.`}
         confirmLabel="Unsubscribe from all"
         onConfirm={() => {
           setConfirmAll(false);

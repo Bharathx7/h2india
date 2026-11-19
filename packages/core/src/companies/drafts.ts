@@ -111,15 +111,14 @@ export async function markMobileVerified(ex: Executor, token: string, mobile: st
  */
 export async function applyDraft(token: string, user: { id: string; email: string }): Promise<JoinDraft | null> {
   const draft = await readDraft(token);
-  if (!draft?.path || !draft.fullName || !draft.mobile || !draft.termsAccepted) return null;
-  if (!draft.mobileVerified && (await mobileCodeRequired())) return null;
+  // Join asks for no mobile since 19 Nov 2026 (A195); a number on an older draft is still copied.
+  if (!draft?.path || !draft.fullName || !draft.termsAccepted) return null;
   if (draft.email && normaliseEmail(draft.email) !== normaliseEmail(user.email)) return null;
   await getDb()
     .update(u)
     .set({
       name: draft.fullName,
-      mobile: draft.mobile,
-      mobileVerifiedAt: draft.mobileVerified ? new Date() : null,
+      ...(draft.mobile ? { mobile: draft.mobile, mobileVerifiedAt: draft.mobileVerified ? new Date() : null } : {}),
       jobRole: draft.jobRole,
       profileType: draft.path,
       termsAcceptedAt: new Date(),

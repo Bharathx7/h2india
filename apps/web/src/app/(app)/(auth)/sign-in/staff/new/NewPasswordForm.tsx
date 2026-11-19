@@ -4,10 +4,10 @@ import { SIGN_IN } from "@h2india/core/sign-in";
 import { Alert, buttonClasses, Button, FormField, Icon, TextLink } from "@h2india/ui";
 import Link from "next/link";
 import { useState, type SyntheticEvent } from "react";
+import { PasswordInput } from "@/account/PasswordInput";
 import { AUTH_LINKS } from "@/lib/auth-links";
 import { authClient } from "@/lib/auth-client";
 import { AuthCard } from "../../../AuthCard";
-import { PasswordInput } from "../StaffSignIn";
 
 export function NewPasswordForm({ token }: { token?: string }) {
   const [password, setPassword] = useState("");

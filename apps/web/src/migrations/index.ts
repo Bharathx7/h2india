@@ -20,6 +20,7 @@ import * as migration_20261113_064225_directory_people_associations from './2026
 import * as migration_20261115_080037_media_files from './20261115_080037_media_files';
 import * as migration_20261116_150000_rename_h2economy from './20261116_150000_rename_h2economy';
 import * as migration_20261117_153952_archive_content from './20261117_153952_archive_content';
+import * as migration_20261119_090000_early_listing_mobile_optional from './20261119_090000_early_listing_mobile_optional';
 
 export const migrations = [
   {
@@ -130,6 +131,11 @@ export const migrations = [
   {
     up: migration_20261117_153952_archive_content.up,
     down: migration_20261117_153952_archive_content.down,
-    name: '20261117_153952_archive_content'
+    name: '20261117_153952_archive_content',
+  },
+  {
+    up: migration_20261119_090000_early_listing_mobile_optional.up,
+    down: migration_20261119_090000_early_listing_mobile_optional.down,
+    name: '20261119_090000_early_listing_mobile_optional',
   },
 ];

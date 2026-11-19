@@ -22,6 +22,8 @@ const MAINTENANCE_OPEN = [
   "/buyer/sign-in",
   "/supplier/sign-in",
   "/member/sign-in",
+  "/forgot-password",
+  "/reset-password",
   "/sign-out",
   "/newsletter",
   "/_next",

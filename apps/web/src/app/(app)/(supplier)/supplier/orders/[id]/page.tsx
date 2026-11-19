@@ -1,4 +1,5 @@
 import { getDb, Money } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { scopeFor } from "@h2india/core/authz";
 import {
   checklistFor,
@@ -97,7 +98,7 @@ function Summary({ d }: { d: OrderDetail }) {
   );
 }
 
-function deliverySteps(d: OrderDetail): StepItem[] {
+function deliverySteps(d: OrderDetail, showMobile: boolean): StepItem[] {
   const s = d.status;
   const shipped = d.shipment?.shippedAt;
   const order = ["Ready to dispatch", "Shipped", "Delivered", "Accepted by buyer", "Closed"];
@@ -129,7 +130,9 @@ function deliverySteps(d: OrderDetail): StepItem[] {
       status: d.receipt ? "complete" : d.shipment?.podAt ? "current" : "upcoming",
       detail: d.receipt
         ? `${d.receipt.condition} · ${formatIstDateTime(d.receipt.at)}`
-        : `${d.buyerName}'s receiving contact enters the SMS code`,
+        : showMobile
+          ? `${d.buyerName}'s receiving contact enters the SMS code`
+          : `${d.buyerName}'s receiving contact confirms what arrived`,
     },
     {
       label: "Accepted",
@@ -145,7 +148,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
   const page = await requireSupplier(`/supplier/orders/${id}`);
   const s = page.supplier;
   const db = getDb();
-  const d = await orderDetail(scopeFor(page.actor), db, id);
+  const [d, showMobile] = await Promise.all([orderDetail(scopeFor(page.actor), db, id), mobileFieldsShown(db)]);
   if (!d || d.order.supplierOrganisationId !== s.organisationId) notFound();
   const canManage = s.seat.permissions.has("order.manage");
   const item = d.lines[0];
@@ -238,7 +241,9 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
                   ["Deliver to", d.site ?? "Shared after you accept"],
                   [
                     "Receiving contact",
-                    `${d.order.receiverName ?? "The buyer's site"} · gets the delivery code by SMS`,
+                    showMobile
+                      ? `${d.order.receiverName ?? "The buyer's site"} · gets the delivery code by SMS`
+                      : (d.order.receiverName ?? "The buyer's site"),
                   ],
                   ["Payment", "Buyer pays into escrow after you accept. Dispatch only once payment shows as received."],
                 ]}
@@ -376,7 +381,7 @@ export default async function SupplierOrderPage({ params }: { params: Promise<{ 
               </Card>
             ) : null}
             <Card title="Delivery status">
-              <Stepper orientation="vertical" steps={deliverySteps(d)} />
+              <Stepper orientation="vertical" steps={deliverySteps(d, showMobile)} />
               <p className="type-caption text-secondary">
                 If the buyer reports a problem, the order moves to In dispute and the payout waits.
               </p>

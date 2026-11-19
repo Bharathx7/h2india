@@ -184,12 +184,15 @@ export function DataRightsActions({
   open,
   hasPlan,
   blockers,
+  showMobile,
 }: {
   id: string;
   kind: string;
   open: boolean;
   hasPlan: boolean;
   blockers: number;
+  /** The `mobileFields` switch (founder, 19 Nov 2026): off, only the name can be corrected here. */
+  showMobile: boolean;
 }) {
   const r = useRun();
   const [name, setName] = useState("");
@@ -228,14 +231,16 @@ export function DataRightsActions({
               setName(e.target.value);
             }}
           />
-          <Input
-            aria-label="Correct mobile"
-            placeholder="Correct mobile"
-            value={mobile}
-            onChange={(e) => {
-              setMobile(e.target.value);
-            }}
-          />
+          {showMobile ? (
+            <Input
+              aria-label="Correct mobile"
+              placeholder="Correct mobile"
+              value={mobile}
+              onChange={(e) => {
+                setMobile(e.target.value);
+              }}
+            />
+          ) : null}
           <Button
             className="self-start"
             disabled={r.pending || (!name && !mobile)}

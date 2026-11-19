@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { can } from "@h2india/core/authz";
 import { requestDetail, type PlanLine } from "@h2india/core/compliance";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
@@ -23,7 +24,8 @@ const ACTION: Record<PlanLine["action"], { label: string; tone: "error" | "warni
 export default async function DataRightsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { userId, actor } = await requireOperator("compliance.view", `/admin/compliance/data-rights/${id}`);
-  const x = await requestDetail(getDb(), actor, id);
+  const db = getDb();
+  const [x, showMobile] = await Promise.all([requestDetail(db, actor, id), mobileFieldsShown(db)]);
   if (!x) notFound();
   const plan = x.plan as { lines: PlanLine[]; blockers: string[]; at: string } | null;
   const open = x.status !== "Completed" && x.status !== "Rejected";
@@ -121,6 +123,7 @@ export default async function DataRightsPage({ params }: { params: Promise<{ id:
               open={open}
               hasPlan={Boolean(plan)}
               blockers={plan?.blockers.length ?? 0}
+              showMobile={showMobile}
             />
           ) : (
             <p className="type-body-sm text-secondary">Only operators with Compliance edit can act on this.</p>

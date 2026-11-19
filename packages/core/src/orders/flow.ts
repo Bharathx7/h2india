@@ -4,6 +4,7 @@ import { schema, type Database, type Executor } from "@h2india/db";
 import { and, asc, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { VISITOR, type Actor } from "../authz/actor";
+import { flagNow } from "../admin/system";
 import { assertCan } from "../authz/can";
 import { cancelDeadline, completeDeadline, onDeadline, startClock } from "../clocks/clocks";
 import { stepUpConfirmedRecently } from "../sign-in/step-up";
@@ -153,7 +154,8 @@ export interface CheckoutInput {
   deliverySiteId: string;
   billingGstinId: string;
   receiverName: string;
-  receiverMobile: string;
+  /** Required only while the `mobileFields` switch is on (founder, 19 Nov 2026); off, it's kept only when valid. */
+  receiverMobile: string | null;
   paymentMethod: "bank_transfer" | "online" | "pay_later" | "letter_of_credit";
   /** Purchase order number and PDF (768:47189), optional. */
   poNumber?: string | null;
@@ -188,9 +190,15 @@ async function checkPlaces(ex: Executor, organisationId: string, input: Checkout
   if (!g) errors.billingGstinId = "Choose a billing GSTIN";
   else if (g.portalStatus !== "Active") errors.billingGstinId = "Bill to a verified GSTIN";
   if (!input.receiverName.trim()) errors.receiverName = "Enter who receives the delivery";
-  if (!/^[6-9]\d{9}$/.test(input.receiverMobile.replace(/\D/g, "").slice(-10)))
+  if ((await flagNow(ex, "mobileFields")) && !receiverMobileOf(input.receiverMobile))
     errors.receiverMobile = "Enter a 10-digit mobile number";
   if (Object.keys(errors).length) throw new OrderError("Check the highlighted fields", errors);
+}
+
+/** The receiver's 10-digit mobile, or null when there is none or it isn't a valid Indian mobile number. */
+function receiverMobileOf(raw: string | null | undefined): string | null {
+  const digits = (raw ?? "").replace(/\D/g, "").slice(-10);
+  return /^[6-9]\d{9}$/.test(digits) ? digits : null;
 }
 
 /**
@@ -268,7 +276,7 @@ export async function placeCartOrder(
       deliverySiteId: input.deliverySiteId,
       billingGstinId: input.billingGstinId,
       receiverName: input.receiverName.trim(),
-      receiverMobile: input.receiverMobile.replace(/\D/g, "").slice(-10),
+      receiverMobile: receiverMobileOf(input.receiverMobile),
       paymentMethod: input.paymentMethod,
       poNumber: input.poNumber?.trim() || null,
       poFileId: input.poFileId ?? null,

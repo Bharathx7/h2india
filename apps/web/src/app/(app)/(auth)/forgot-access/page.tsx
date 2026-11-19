@@ -1,3 +1,4 @@
+import { PASSWORD_PAGES } from "@h2india/core/sign-in";
 import { Icon, TextLink, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -5,21 +6,23 @@ import { AUTH_LINKS } from "@/lib/auth-links";
 import { AuthCard } from "../AuthCard";
 
 // Forgot access hub (Figma 528:9; 390: 528:766), step 3.5. "I lost my passkey or device" was removed with passkeys
-// (17 Nov 2026, A183); staff who forget their password use Set or forgot your password on the staff sign-in.
+// (17 Nov 2026, A183); staff who forget their password use Set or forgot your password on the staff sign-in. Founder,
+// 19 Nov 2026 (A195): everyone signs in with a password, so the hub offers Forgot password; "I changed my mobile
+// number" is gone with the mobile number (/forgot-access/mobile returns here).
 export const metadata: Metadata = { title: "Get back into your account · H2 Economy", robots: { index: false } };
 
 const PATHS: { href: string; icon: IconName; title: string; text: string }[] = [
   {
-    href: "/forgot-access/email",
-    icon: "mail",
-    title: "I lost access to my email",
-    text: "Verify with your mobile and your company admin, or send us a support request.",
+    href: PASSWORD_PAGES.forgot,
+    icon: "lock",
+    title: "Forgot password",
+    text: "We'll email you a link to choose a new one.",
   },
   {
-    href: "/forgot-access/mobile",
-    icon: "message-square",
-    title: "I changed my mobile number",
-    text: "Verify with your email, then add your new number.",
+    href: "/forgot-access/email",
+    icon: "mail",
+    title: "Can't reach your email? Contact support",
+    text: "Your company admin can confirm it's you, or send us a support request.",
   },
 ];
 
