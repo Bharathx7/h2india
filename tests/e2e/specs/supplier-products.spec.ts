@@ -12,9 +12,10 @@ test("a catalogue moderator opens the Listings queue", async ({ browser }, info)
   await ownIp(context, info);
   const page = await context.newPage();
   await signInOperator(page, "Catalogue moderator");
-  // Queues opens on its first tab, Suppliers (627:8, step 11.2); Listings is one of the tabs.
+  // Queues opens on an overview of every queue (founder, 19 Nov 2026); Listings is one of them.
   await page.goto("/admin/queues");
-  await expect(page).toHaveURL(/\/admin\/queues\/suppliers$/);
+  await expect(page).toHaveURL(/\/admin\/queues$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Queues" })).toBeVisible();
   await page
     .getByRole("link", { name: /^Listings/ })
     .first()

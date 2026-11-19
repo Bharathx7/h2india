@@ -13,7 +13,9 @@ import { looksLikeEmail } from "../sign-in/rules";
 import { inScope, type Scope } from "../authz/scope";
 import { clockDuration, workingCalendar } from "../clocks/clocks";
 import { deliverEmail } from "../notify/channels";
+import { defineSetting, getSetting } from "../settings";
 import { formatIstDate } from "../time";
+import { z } from "zod";
 
 // Team and permissions (592:371; phones 594:564; Dialog Remove team member 685:318; Invitation 673:155), step 8.7.
 // Admins invite colleagues with a role, answer join requests, change roles and remove people. Roles and what they
@@ -271,6 +273,65 @@ export async function revokeInvitation(
     companyId: organisationId,
     context,
   });
+}
+
+/** How soon the same invitation may be sent again (founder, 19 Nov 2026: Resend invitation on Team). */
+export const INVITATION_RESEND = defineSetting<{ minutes: number }>({
+  key: "team.invitationResendMinutes",
+  description: "Team: minutes before an invitation can be sent again (Resend invitation)",
+  schema: z.object({ minutes: z.number().int().min(1).max(1440) }),
+  fallback: { minutes: 10 },
+});
+
+/**
+ * Resend invitation (founder, 19 Nov 2026): a fresh link with a fresh expiry, the same access, through
+ * sendInvitation(); the old link stops working. Refused while the last send is newer than INVITATION_RESEND, so a
+ * person's inbox can't be flooded. Audited as team.invitation.resent, next to sendInvitation's team.invited.
+ */
+export async function resendInvitation(
+  db: Database,
+  actor: Actor,
+  organisationId: string,
+  id: string,
+  context?: RequestContext,
+  now: Date = new Date(),
+): Promise<{ id: string }> {
+  assertCan(actor, "team.manage", { organisationId });
+  const [old] = await db
+    .select()
+    .from(inv)
+    .where(and(eq(inv.id, id), eq(inv.organisationId, organisationId), isNull(inv.acceptedAt), isNull(inv.revokedAt)));
+  if (!old) throw new TeamError("This invitation has already been used or cancelled");
+  const { minutes } = await getSetting(db, INVITATION_RESEND);
+  if (now.getTime() - old.createdAt.getTime() < minutes * 60_000)
+    throw new TeamError(`This invitation was sent less than ${String(minutes)} minutes ago. Try again later.`);
+  const sent = await sendInvitation(
+    db,
+    {
+      organisationId,
+      email: old.email,
+      role: old.role,
+      permissions: old.permissions,
+      invitedBy: actor.userId,
+      inviterRole: actor.companies.get(organisationId)?.role ?? "Admin",
+      context,
+    },
+    now,
+  );
+  await db.transaction(async (tx) => {
+    await tx.update(inv).set({ revokedAt: now }).where(eq(inv.id, old.id));
+    await audit(tx, {
+      actorId: actor.userId,
+      action: "team.invitation.resent",
+      resourceType: "invitation",
+      resourceId: sent.id,
+      companyId: organisationId,
+      before: { invitationId: old.id, expiresAt: old.expiresAt.toISOString() },
+      after: { invitationId: sent.id, email: old.email },
+      context,
+    });
+  });
+  return { id: sent.id };
 }
 
 /** Whether a person already agreed to the Terms (through Join or an earlier invitation): the invitation page asks if not. */

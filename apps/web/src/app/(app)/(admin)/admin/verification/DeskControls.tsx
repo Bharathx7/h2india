@@ -1,6 +1,13 @@
 "use client";
 
-import { BADGE_KINDS, DESK_CHECKLIST, REVOKE_REASONS } from "@h2india/core/supplier/rules";
+import {
+  BADGE_KINDS,
+  DESK_CHECKLIST,
+  deskChecksProblem,
+  MIN_DESK_CHECKS,
+  REVOKE_REASONS,
+  tickedDeskChecks,
+} from "@h2india/core/supplier/rules";
 import { Alert, Button, Checkbox, Icon, Input, Modal, Select, Textarea } from "@h2india/ui";
 import { useState, useTransition } from "react";
 import {
@@ -95,25 +102,51 @@ export function DocumentDecision({ id, title }: { id: string; title: string }) {
   );
 }
 
-export function ReviewDecision({ id, initial }: { id: string; initial: Record<string, boolean> }) {
+/**
+ * The Verification checklist. Founder, 19 Nov 2026: identity and bank start ticked when the records prove them
+ * (`evidence`, from deskEvidence()); the operator can untick. A tick the operator changed stays theirs even when the
+ * evidence changes (a document verified above), and Approve says why it can't work yet instead of failing after a click.
+ */
+export function ReviewDecision({
+  id,
+  initial,
+  evidence,
+  verifyFirst,
+}: {
+  id: string;
+  initial: Record<string, boolean>;
+  evidence: Record<string, boolean>;
+  /** Documents that must be verified above before the badge can be granted ("GST certificate", "PAN card"). */
+  verifyFirst: string[];
+}) {
   const a = useAction();
-  const [checks, setChecks] = useState(initial);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const checks: Record<string, boolean> = Object.fromEntries(
+    DESK_CHECKLIST.map((c) => [c.key, touched[c.key] ?? (evidence[c.key] || initial[c.key] === true)]),
+  );
   const [reason, setReason] = useState("");
-  const ticked = DESK_CHECKLIST.filter((c) => checks[c.key]).length;
+  const ticked = tickedDeskChecks(checks);
+  const blocked = verifyFirst.length
+    ? `Verify the ${verifyFirst.join(" and ")} above first`
+    : deskChecksProblem(checks);
   return (
     <div className="flex flex-col gap-3">
       <p className="type-caption text-secondary">
-        {ticked} of {DESK_CHECKLIST.length}
+        {ticked} of {DESK_CHECKLIST.length} ticked · at least {MIN_DESK_CHECKS} to approve
       </p>
       {DESK_CHECKLIST.map((c) => (
-        <Checkbox
-          key={c.key}
-          label={c.label}
-          checked={Boolean(checks[c.key])}
-          onCheckedChange={(v) => {
-            setChecks({ ...checks, [c.key]: v === true });
-          }}
-        />
+        <div key={c.key} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <Checkbox
+            label={c.label}
+            checked={checks[c.key] === true}
+            onCheckedChange={(v) => {
+              setTouched({ ...touched, [c.key]: v === true });
+            }}
+          />
+          {evidence[c.key] && touched[c.key] === undefined ? (
+            <span className="type-caption text-secondary">from evidence</span>
+          ) : null}
+        </div>
       ))}
       <Textarea
         aria-label="What to fix"
@@ -123,9 +156,16 @@ export function ReviewDecision({ id, initial }: { id: string; initial: Record<st
           setReason(e.target.value);
         }}
       />
+      {blocked ? (
+        <p id={`approve-blocked-${id}`} className="flex items-center gap-1.5 type-body-sm text-body">
+          <Icon name="info" size={16} className="text-icon-link" />
+          {blocked}
+        </p>
+      ) : null}
       <div className="flex flex-wrap gap-2">
         <Button
-          disabled={a.pending || ticked < 2}
+          disabled={a.pending || blocked !== null}
+          aria-describedby={blocked ? `approve-blocked-${id}` : undefined}
           onClick={() => {
             a.go(() => decideReviewAction(id, true, "", checks));
           }}

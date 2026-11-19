@@ -12,7 +12,15 @@ import {
   storefrontQueue,
   storefrontView,
 } from "./storefront";
-import { acceptInvitation, invitationFor, inviteMember, removeMember, TeamError, teamView } from "./team";
+import {
+  acceptInvitation,
+  invitationFor,
+  inviteMember,
+  removeMember,
+  resendInvitation,
+  TeamError,
+  teamView,
+} from "./team";
 
 // Step 8.7 DONE WHEN: an invited colleague joins with the chosen permissions; a storefront change appears on the public
 // profile after approval. And supplier B can't read or change supplier A's team or storefront. Mailpit for the email.
@@ -57,6 +65,25 @@ describe.skipIf(!url)("team and storefront", () => {
       new Date(Date.now() - 30 * 86_400_000),
     );
     expect((await invitationFor(h.db, late.token))?.state).toBe("expired");
+  });
+
+  it("resends an invitation with a fresh link, not too often, and only for the company's admin (founder, 19 Nov 2026)", async () => {
+    const admin = await loadActor(h.db, a.admin.id);
+    const invitee = await makeUser(h.db, "Resend Person");
+    const first = await inviteMember(h.db, admin, a.org.id, { email: invitee.email, role: "Viewer" });
+    // Straight away: refused, so an inbox can't be flooded.
+    await expect(resendInvitation(h.db, admin, a.org.id, first.id)).rejects.toThrow("Try again later");
+    // Supplier B's admin can't resend A's invitation.
+    await expect(resendInvitation(h.db, await loadActor(h.db, b.admin.id), a.org.id, first.id)).rejects.toThrow();
+    const later = new Date(Date.now() + 60 * 60_000);
+    const again = await resendInvitation(h.db, admin, a.org.id, first.id, undefined, later);
+    expect(again.id).not.toBe(first.id);
+    expect((await invitationFor(h.db, first.token))?.state).not.toBe("open");
+    const open = (await teamView(h.db, scopeFor(admin), a.org.id)).invitations.filter((i) => i.email === invitee.email);
+    expect(open.map((i) => i.id)).toEqual([again.id]);
+    expect(open[0]?.role).toBe("Viewer");
+    // The old one can't be resent again.
+    await expect(resendInvitation(h.db, admin, a.org.id, first.id, undefined, later)).rejects.toThrow("already");
   });
 
   it("keeps at least one admin, and removes others", async () => {

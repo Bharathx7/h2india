@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox, StatusBadge } from "@h2india/ui";
+import { Alert, Button, Checkbox, StatusBadge } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -18,6 +18,8 @@ export interface QueueRow {
   age: string;
   ageTone: "success" | "warning" | "error";
   assignee: string | null;
+  /** The company isn't Verified yet, so a new listing can't be approved (decideRevision). */
+  companyUnverified: boolean;
 }
 
 /** Listings queue rows (629:367), with Assign to me and bulk approve for listings whose checks all passed. */
@@ -25,9 +27,40 @@ export function QueueTable({ rows, canDecide }: { rows: QueueRow[]; canDecide: b
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, start] = useTransition();
+  // Founder, 19 Nov 2026: listings core refused were skipped silently; say which and why.
+  const [result, setResult] = useState<{ approved: number; skipped: { id: string; reason: string }[] } | null>(null);
+  const nameOf = (id: string) => rows.find((r) => r.id === id)?.name ?? "A listing";
   const passing = rows.filter((r) => !r.failed).map((r) => r.id);
   return (
     <>
+      {result ? (
+        <Alert
+          live
+          tone={result.skipped.length ? "warning" : "success"}
+          title={`${String(result.approved)} approved${result.skipped.length ? ` · ${String(result.skipped.length)} skipped` : ""}`}
+          dismiss={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setResult(null);
+              }}
+            >
+              Dismiss
+            </Button>
+          }
+        >
+          {result.skipped.length ? (
+            <ul className="flex flex-col gap-1 type-body-sm">
+              {result.skipped.map((x) => (
+                <li key={x.id}>
+                  <span className="type-label">{nameOf(x.id)}</span>: {x.reason}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Alert>
+      ) : null}
       {selected.length ? (
         <div className="flex flex-wrap items-center gap-3 rounded-card bg-mint px-4 py-3">
           <span className="type-label">{selected.length} selected</span>
@@ -37,7 +70,7 @@ export function QueueTable({ rows, canDecide }: { rows: QueueRow[]; canDecide: b
               disabled={pending}
               onClick={() => {
                 start(async () => {
-                  await bulkApproveAction(selected.filter((id) => passing.includes(id)));
+                  setResult(await bulkApproveAction(selected.filter((id) => passing.includes(id))));
                   setSelected([]);
                   router.refresh();
                 });
@@ -98,6 +131,11 @@ export function QueueTable({ rows, canDecide }: { rows: QueueRow[]; canDecide: b
                 <td className="px-2 py-3">
                   <span className="block type-label">{r.name}</span>
                   {r.model ? <span className="block type-spec text-secondary">{r.model}</span> : null}
+                  {r.companyUnverified ? (
+                    <span className="mt-1 block">
+                      <StatusBadge status="Company not verified" tone="warning" />
+                    </span>
+                  ) : null}
                   <span className={r.failed ? "block type-caption text-warning" : "block type-caption text-secondary"}>
                     {r.line}
                   </span>
