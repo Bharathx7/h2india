@@ -84,7 +84,8 @@ test("a supplier requests a category; a catalogue moderator approves it; the sup
 test("Company details shows the company's one GSTIN, verified and locked (A189)", async ({ page }) => {
   const s = await supplier();
   await signInExisting(page, s.email, "/supplier/company");
-  await expect(page.getByRole("heading", { level: 1, name: "GSTIN" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Company details" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "From your GST records" }).getByText("Legal name")).toBeVisible();
   const card = page.getByRole("region", { name: "Company GSTIN", exact: true });
   await expect(card.getByText(`24QCSUP${s.tag}1Z5`.slice(0, 15))).toBeVisible();
   await expect(card.getByText("Your GSTIN is verified and locked.", { exact: false })).toBeVisible();
