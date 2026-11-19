@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, isNull, ne } from "drizzle-orm";
+import { stateOf } from "../companies/gstin";
 import { storefrontFacts } from "./storefront";
 import { TIER_1 } from "./verification-rules";
 
@@ -84,7 +85,9 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
   return {
     gstin: gst ?? null,
     documents: { uploaded: uploaded.size, verified: verified.size, needed: tier1.length },
-    companyComplete: Boolean(org?.legalName && org.state && gst),
+    // Companies that added their GSTIN after Join before the state was copied over have no state on the row yet; the
+    // GSTIN carries it.
+    companyComplete: Boolean(org?.legalName && (org.state || (gst && stateOf(gst.number))) && gst),
     bank: bank ? { last4: bank.last4, nameMatches: bank.match === true, verified: bank.status === "Active" } : null,
     storefront: await storefrontFacts(db, organisationId),
     products: { total: items.length, submitted: items.filter((p) => p.status !== "Draft").length },

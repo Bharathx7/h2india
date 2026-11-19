@@ -5,6 +5,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import { audit } from "../audit";
 import { getDb } from "../db";
 import { gstinProvider } from "./adapters/gstin";
+import { organisationFieldsForGstin } from "./gstin";
 
 // Background GSTIN checks (playbook: "GSTIN service is down"). The page saves the GSTIN as Pending and the
 // worker retries with back-off until the portal answers. Step 3.8 adds the other queues and the clocks.
@@ -77,11 +78,19 @@ export async function runGstinCheck(gstin: string, attempt: number): Promise<"do
       .where(and(eq(g.organisationId, row.organisationId), ne(g.id, row.id)));
     const all = [status, ...others.map((x) => x.status)];
     const verification = all.includes("Active") ? "GST verified" : all.includes("Pending") ? "Pending" : "Unverified";
+    const [org] = await tx
+      .select({ state: o.state, pan: o.pan, legalName: o.legalName, registeredAddress: o.registeredAddress })
+      .from(o)
+      .where(eq(o.id, row.organisationId));
+    // A GSTIN added after Join leaves the state empty on older rows: fill it (and an empty name) from the GSTIN.
+    // A retired GSTIN (replaced before its check came back) never moves the company's fields.
+    const filled = org && !row.retiredAt ? organisationFieldsForGstin(org, gstin, record) : {};
     await tx
       .update(o)
       .set({
         verification,
-        ...(record?.status === "Active" ? { registeredAddress: record.address } : {}),
+        ...filled,
+        ...(record?.status === "Active" && !row.retiredAt ? { registeredAddress: record.address } : {}),
       })
       .where(eq(o.id, row.organisationId));
     await audit(tx, {
