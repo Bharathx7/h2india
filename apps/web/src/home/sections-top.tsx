@@ -11,7 +11,7 @@ type Fail = Set<HomeModule>;
 /** 01 Hero (783:7522): wording as drawn (A42). The quote card shows from 1024 px; phones have no card (381:5864).
  * Founder upgrade, 18 Nov 2026: the hero is the dark ink band with the deep green glow the page's other dark bands
  * already use. Founder v2, 18 Nov 2026: the card is the 3D Quote journey, and from 1024 px the hero fills exactly the
- * first screen under the header (162 px), with its content centred, so a laptop never cuts it off and a large monitor
+ * first screen under the header (109 px since the design upgrade, 19 Nov 2026), with its content centred, so a laptop never cuts it off and a large monitor
  * never shows white under it. Short laptop screens (under 860 px tall) step the heading down to h1 and tighten gaps. */
 export function Hero() {
   return (
@@ -26,7 +26,7 @@ export function Hero() {
         className="depth-dot-grid absolute top-16 right-0 -z-10 size-100 opacity-40 lg:top-20 lg:left-[52%] lg:size-140"
       />
       <div
-        className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:min-h-[calc(100svh-10.125rem)] lg:py-12 xl:gap-20`}
+        className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:min-h-[calc(100svh-6.8125rem)] lg:py-12 xl:gap-20`}
       >
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-7 short:lg:gap-5">
           <h1 id="hero-title" className="hero-reveal type-h1 text-inverse lg:type-display short:lg:type-h1">

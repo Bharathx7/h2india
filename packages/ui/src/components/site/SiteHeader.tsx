@@ -11,8 +11,9 @@ import { Menu, MenuContent, MenuDivider, MenuItem, MenuTrigger } from "../Naviga
 import { MegaMenuPanel } from "./MegaMenu";
 import type { MegaSection, SiteLinks, SiteUser } from "./types";
 
-/* Figma "Site header" (25:635, frames 372:15391 to 372:16409): top strip, main bar (logo, search trigger,
-   actions) and section nav with six mega menus. Logged in swaps Sign in and List your company for
+/* Figma "Site header" (25:635, frames 372:15391 to 372:16409), redrawn in the design upgrade (founder, 19 Nov 2026):
+   two rows instead of three. The strip (For Buyers, For Members, For Suppliers; Pricing, Advertise, Newsletter, List
+   your company) and one main row (logo, the section nav with its mega menus, search, Sign in and Request a quote). Logged in swaps Sign in and List your company for
    notifications, the workspace switcher and the avatar. The Header shadow appears once the page scrolls.
    Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026, revised 16 Nov 2026: on
    desktop, scrolling down past the top strip and section nav hides them and leaves the main bar; scrolling up
@@ -25,7 +26,7 @@ export interface SiteHeaderProps {
   links: SiteLinks;
   user?: SiteUser | null;
   onOpenSearch: () => void;
-  /** "India's hydrogen ecosystem platform" */
+  /** "India's hydrogen ecosystem platform": no longer shown in the header (the footer carries it); kept for callers. */
   tagline?: string;
   /** The bell with its drop-down panel (public QC 4); without it the bell links to the Notifications page. */
   notifications?: ReactNode;
@@ -47,7 +48,6 @@ function Desktop({
   links,
   user,
   onOpenSearch,
-  tagline,
   notifications,
   showRequestQuote = true,
   collapsed,
@@ -87,14 +87,17 @@ function Desktop({
   };
 
   const current = sections.find((s) => s.id === open);
+  // The strip: who the site is for on the left (public QC, 16 Nov 2026: For Buyers, For Members, For Suppliers), the
+  // other links and the supplier sign-up on the right.
+  const audience = links.secondary.filter((l) => l.href.startsWith("/for-"));
+  const more = links.secondary.filter((l) => !l.href.startsWith("/for-"));
 
   return (
     <div className="hidden lg:block">
       <div className={cx("bg-subtle", collapsed && "hidden")}>
-        <div className="mx-auto flex h-9 max-w-300 items-center justify-between px-6 xl:px-0">
-          <p className="type-caption text-secondary">{tagline}</p>
+        <div className="mx-auto flex h-9 max-w-300 items-center justify-between gap-6 px-6 xl:px-0">
           <ul className="flex items-center gap-6">
-            {links.secondary.map((l) => (
+            {audience.map((l) => (
               <li key={l.href}>
                 <a href={l.href} className="rounded-control type-label-sm text-body hover:text-primary">
                   {l.label}
@@ -102,139 +105,160 @@ function Desktop({
               </li>
             ))}
           </ul>
+          <ul className="flex items-center gap-6">
+            {more.map((l) => (
+              <li key={l.href}>
+                <a href={l.href} className="rounded-control type-label-sm text-body hover:text-primary">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+            {user ? null : (
+              <li>
+                <a
+                  href={links.listCompany}
+                  className="inline-flex items-center gap-1 rounded-control type-label-sm text-link hover:text-link-hover"
+                >
+                  List your company
+                  <Icon name="arrow-right" size={14} />
+                </a>
+              </li>
+            )}
+          </ul>
         </div>
       </div>
-      <div className="mx-auto flex h-19 max-w-300 items-center justify-between gap-6 px-6 xl:px-0">
-        <div className="flex min-w-0 flex-1 items-center gap-8">
+      {/* Design upgrade (19 Nov 2026): the main bar and the section nav are one row, so the menus stay on screen
+          while scrolling; only the strip above hides. */}
+      <div ref={navRef} onBlur={onBlur} className="relative">
+        <div className="mx-auto flex h-18 max-w-300 items-center gap-3 px-6 xl:gap-6 xl:px-0">
           <a href={links.home} aria-label="H2 Economy home" className="shrink-0 rounded-control">
-            <Logo title="" />
+            <Logo title="" height={30} />
           </a>
-          <button
-            type="button"
-            onClick={onOpenSearch}
-            aria-keyshortcuts="/"
-            aria-label="Search H2 Economy"
-            className="flex h-11 w-full max-w-110 min-w-40 items-center gap-3 rounded-pill border border-input bg-page pr-2 pl-4 text-left hover:border-focus"
-          >
-            <Icon name="search" size={20} className="text-icon-secondary" />
-            <span className="flex-1 truncate type-body text-secondary">Search products, companies, news, schemes</span>
-          </button>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          {showRequestQuote ? (
-            <a href={links.requestQuote} className={buttonClasses({ variant: "outline" })}>
-              Request a quote
-            </a>
-          ) : null}
-          {user && notifications ? notifications : null}
-          {user && !notifications ? (
-            <span className="relative inline-flex">
-              <a
-                href={links.notifications}
-                aria-label={user.unread ? `Notifications, ${String(user.unread)} unread` : "Notifications"}
-                className="inline-flex size-10 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus hover:bg-subtle"
+          <nav aria-label="Main" className="flex min-w-0 items-center">
+            {sections.map((s) => (
+              <button
+                key={s.id}
+                ref={(el) => {
+                  buttons.current[s.id] = el;
+                }}
+                type="button"
+                aria-expanded={open === s.id}
+                aria-controls={open === s.id ? panelId : undefined}
+                onClick={() => {
+                  setOpen(open === s.id ? null : s.id);
+                }}
+                className="group/nav shrink-0 rounded-pill"
               >
-                <Icon name="bell" size={18} />
-              </a>
-              {user.unread ? (
                 <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -top-1 -right-1 rounded-pill bg-accent px-1 type-label-sm text-primary"
+                  data-open={open === s.id || undefined}
+                  className={cx(
+                    "relative inline-flex h-9 items-center gap-1 rounded-pill px-2.5 type-label text-primary xl:px-3",
+                    "after:absolute after:right-3 after:bottom-px after:left-3 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-[1px] after:bg-accent",
+                    "after:transition-transform after:duration-(--motion-duration-base) after:ease-standard",
+                    "group-hover/nav:after:scale-x-100 data-open:after:scale-x-100",
+                  )}
                 >
-                  {user.unread}
+                  {s.label}
+                  <Icon
+                    name="chevron-down"
+                    size={16}
+                    className={cx(
+                      "hidden text-icon-primary transition-transform xl:block",
+                      open === s.id && "rotate-180",
+                    )}
+                  />
                 </span>
-              ) : null}
-            </span>
-          ) : null}
-          {user ? (
-            <>
-              <RoleBadge user={user} />
-              <Menu>
-                <MenuTrigger
-                  aria-label={`Account: ${user.name}`}
-                  className="flex size-9 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse"
+              </button>
+            ))}
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-2 xl:gap-3">
+            <button
+              type="button"
+              onClick={onOpenSearch}
+              aria-keyshortcuts="/"
+              aria-label="Search H2 Economy"
+              className={cx(
+                "flex h-10 items-center gap-2 rounded-pill border border-input bg-page px-2.5 text-left hover:border-focus",
+                !user && "xl:pr-4 xl:pl-3",
+              )}
+            >
+              <Icon name="search" size={20} className="text-icon-secondary" />
+              {user ? null : <span className="hidden type-body-sm text-secondary xl:inline">Search</span>}
+            </button>
+            {user && notifications ? notifications : null}
+            {user && !notifications ? (
+              <span className="relative inline-flex">
+                <a
+                  href={links.notifications}
+                  aria-label={user.unread ? `Notifications, ${String(user.unread)} unread` : "Notifications"}
+                  className="inline-flex size-10 items-center justify-center rounded-pill border border-control text-icon-primary hover:border-focus hover:bg-subtle"
                 >
-                  {user.initials}
-                </MenuTrigger>
-                <MenuContent>
-                  {/* Public QC 4: Dashboard opens the person's own workspace; Account is Profile inside it. */}
-                  <MenuItem
-                    icon="layout-dashboard"
-                    onSelect={() => {
-                      window.location.assign(user.workspaceHref);
-                    }}
+                  <Icon name="bell" size={18} />
+                </a>
+                {user.unread ? (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -top-1 -right-1 rounded-pill bg-accent px-1 type-label-sm text-primary"
                   >
-                    Dashboard
-                  </MenuItem>
-                  {user.extra ? (
+                    {user.unread}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
+            {user ? (
+              <>
+                <RoleBadge user={user} />
+                <Menu>
+                  <MenuTrigger
+                    aria-label={`Account: ${user.name}`}
+                    className="flex size-9 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse"
+                  >
+                    {user.initials}
+                  </MenuTrigger>
+                  <MenuContent>
+                    {/* Public QC 4: Dashboard opens the person's own workspace; Account is Profile inside it. */}
                     <MenuItem
-                      icon="users"
+                      icon="layout-dashboard"
                       onSelect={() => {
-                        if (user.extra) window.location.assign(user.extra.href);
+                        window.location.assign(user.workspaceHref);
                       }}
                     >
-                      {user.extra.label}
+                      Dashboard
                     </MenuItem>
-                  ) : null}
-                  <MenuDivider />
-                  <MenuItem
-                    icon="log-out"
-                    onSelect={() => {
-                      window.location.assign(links.signOut);
-                    }}
-                  >
-                    Sign out
-                  </MenuItem>
-                </MenuContent>
-              </Menu>
-            </>
-          ) : (
-            <>
+                    {user.extra ? (
+                      <MenuItem
+                        icon="users"
+                        onSelect={() => {
+                          if (user.extra) window.location.assign(user.extra.href);
+                        }}
+                      >
+                        {user.extra.label}
+                      </MenuItem>
+                    ) : null}
+                    <MenuDivider />
+                    <MenuItem
+                      icon="log-out"
+                      onSelect={() => {
+                        window.location.assign(links.signOut);
+                      }}
+                    >
+                      Sign out
+                    </MenuItem>
+                  </MenuContent>
+                </Menu>
+              </>
+            ) : (
               <a href={links.signIn} className={buttonClasses({ variant: "ghost" })}>
                 Sign in
               </a>
-              <a href={links.listCompany} className={buttonClasses({ variant: "primary" })}>
-                List your company
+            )}
+            {showRequestQuote ? (
+              <a href={links.requestQuote} className={buttonClasses({ variant: "primary" })}>
+                Request a quote
               </a>
-            </>
-          )}
+            ) : null}
+          </div>
         </div>
-      </div>
-      <div ref={navRef} onBlur={onBlur} className={cx("relative border-t border-default", collapsed && "hidden")}>
-        <nav aria-label="Main" className="mx-auto flex h-12 max-w-306 items-center gap-1 px-3 xl:px-0">
-          {sections.map((s) => (
-            <button
-              key={s.id}
-              ref={(el) => {
-                buttons.current[s.id] = el;
-              }}
-              type="button"
-              aria-expanded={open === s.id}
-              aria-controls={open === s.id ? panelId : undefined}
-              onClick={() => {
-                setOpen(open === s.id ? null : s.id);
-              }}
-              className="group/nav rounded-pill"
-            >
-              <span
-                data-open={open === s.id || undefined}
-                className={cx(
-                  "relative inline-flex h-9 items-center gap-1 rounded-pill px-3 type-label text-primary",
-                  "after:absolute after:right-3 after:bottom-px after:left-3 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-[1px] after:bg-accent",
-                  "after:transition-transform after:duration-(--motion-duration-base) after:ease-standard",
-                  "group-hover/nav:after:scale-x-100 data-open:after:scale-x-100",
-                )}
-              >
-                {s.label}
-                <Icon
-                  name="chevron-down"
-                  size={16}
-                  className={cx("text-icon-primary transition-transform", open === s.id && "rotate-180")}
-                />
-              </span>
-            </button>
-          ))}
-        </nav>
         {current ? (
           <div className="absolute inset-x-0 top-full z-50 flex justify-center px-6 pt-2">
             <MegaMenuPanel section={current} id={panelId} />
@@ -354,10 +378,10 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
                       />
                     </button>
                     {isOpen ? (
-                      <ul className="flex flex-col gap-3 pb-4 pl-3">
+                      <ul className="flex flex-col pb-3 pl-3">
                         {items.map((l) => (
                           <li key={l.href + l.label}>
-                            <a href={l.href} className="rounded-control type-body text-body">
+                            <a href={l.href} className="block rounded-control py-2.5 type-body text-body">
                               {l.label}
                             </a>
                           </li>
@@ -368,10 +392,10 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
                 );
               })}
             </ul>
-            <ul className="mt-4 flex flex-col gap-3">
+            <ul className="mt-3 flex flex-col">
               {links.secondary.map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} className="rounded-control type-body text-body">
+                  <a href={l.href} className="block rounded-control py-2.5 type-body text-body">
                     {l.label}
                   </a>
                 </li>
@@ -381,10 +405,7 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
           {showRequestQuote || !user ? (
             <div className="flex shrink-0 flex-col gap-2 border-t border-default p-4">
               {showRequestQuote ? (
-                <a
-                  href={links.requestQuote}
-                  className={cx(buttonClasses({ variant: user ? "primary" : "outline" }), "w-full")}
-                >
+                <a href={links.requestQuote} className={cx(buttonClasses({ variant: "primary" }), "w-full")}>
                   Request a quote
                 </a>
               ) : null}
@@ -393,7 +414,7 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
                   <a href={links.signIn} className={cx(buttonClasses({ variant: "ghost" }), "w-full")}>
                     Sign in
                   </a>
-                  <a href={links.listCompany} className={cx(buttonClasses({ variant: "primary" }), "w-full")}>
+                  <a href={links.listCompany} className={cx(buttonClasses({ variant: "outline" }), "w-full")}>
                     List your company
                   </a>
                 </div>
@@ -406,8 +427,8 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
   );
 }
 
-/** Desktop top strip (h-9) plus section nav (1 px border and h-12): scrolled past these, the rows may hide. */
-const COLLAPSE_AFTER_PX = 36 + 1 + 48;
+/** Desktop top strip (h-9): scrolled past it, the strip may hide; the main row with the section nav always stays. */
+const COLLAPSE_AFTER_PX = 36;
 /** Ignore scroll jitter smaller than this (trackpads report tiny back-and-forth moves). */
 const SCROLL_JITTER_PX = 4;
 
@@ -498,8 +519,8 @@ export function SiteHeader(props: SiteHeaderProps) {
         <Desktop {...props} collapsed={collapsed} onMenuChange={setMenuOpen} />
         <Mobile {...props} />
       </header>
-      {/* The desktop header's full height: 36 + 76 + 1 + 48 + 1 (bottom border) = 162 px. */}
-      <div aria-hidden="true" className="hidden lg:block lg:h-40.5" />
+      {/* The desktop header's full height: 36 (strip) + 72 (main row) + 1 (bottom border) = 109 px. */}
+      <div aria-hidden="true" className="hidden lg:block lg:h-[109px]" />
     </>
   );
 }
