@@ -24,6 +24,8 @@ export interface WebinarInfo {
   pageUrl: string;
   sponsor: string | null;
   consentText: string | null;
+  /** The `mobileFields` switch (founder, 19 Nov 2026): off, the WhatsApp reminder mobile isn't asked. */
+  whatsapp: boolean;
 }
 
 function Confirmed({
@@ -320,21 +322,23 @@ function RegisterForm({
             </FormField>
           </>
         )}
-        <FormField
-          label="Mobile for a WhatsApp reminder (optional)"
-          error={errors.mobile}
-          helper="We send one reminder an hour before. No other messages."
-        >
-          <Input
-            type="tel"
-            autoComplete="tel"
-            placeholder="+91 98765 43210"
-            value={v.mobile}
-            onChange={(e) => {
-              set("mobile", e.target.value);
-            }}
-          />
-        </FormField>
+        {info.whatsapp ? (
+          <FormField
+            label="Mobile for a WhatsApp reminder (optional)"
+            error={errors.mobile}
+            helper="We send one reminder an hour before. No other messages."
+          >
+            <Input
+              type="tel"
+              autoComplete="tel"
+              placeholder="+91 98765 43210"
+              value={v.mobile}
+              onChange={(e) => {
+                set("mobile", e.target.value);
+              }}
+            />
+          </FormField>
+        ) : null}
         {info.sponsor && info.consentText ? (
           <div className="flex flex-col gap-1 rounded-control bg-subtle p-3">
             <Checkbox

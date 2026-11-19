@@ -168,7 +168,7 @@ export async function restoreRecordAction(slug: string, id: number): Promise<Sav
 }
 
 /**
- * Delete permanently (founder, 19 Nov 2026, A197). Super admin only (content.purge). The record must meet its type's
+ * Delete permanently (founder, 19 Nov 2026, A198). Super admin only (content.purge). The record must meet its type's
  * condition (archived first, off the site, never published, or used by nothing: cms/purge-rules.ts), the reason is
  * required, and the record's name must be typed to confirm. Payload's delete hooks take it out of search and the
  * newsroom cache. The audit log keeps who, when, why and what it was. It can't be undone.

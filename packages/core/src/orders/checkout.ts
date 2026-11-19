@@ -1,5 +1,6 @@
 import { schema, type Database } from "@h2india/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
+import { flagNow } from "../admin/system";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { Money } from "../money";
@@ -61,6 +62,8 @@ export async function checkoutView(db: Database, actor: Actor, organisationId: s
     .select({ limit: schema.memberships.orderLimitPaise })
     .from(schema.memberships)
     .where(and(eq(schema.memberships.organisationId, organisationId), eq(schema.memberships.userId, userId)));
+  // Personal mobile numbers are hidden while the `mobileFields` switch is off (founder, 19 Nov 2026).
+  const mobileFields = await flagNow(db, "mobileFields");
   const site = sites.find((x) => x.id === row?.deliverySiteId) ?? sites.find((x) => x.isDefault) ?? sites[0] ?? null;
   const gstinOf = (id: string | null | undefined) => gstins.find((g) => g.id === id) ?? null;
   const choices = {
@@ -78,6 +81,7 @@ export async function checkoutView(db: Database, actor: Actor, organisationId: s
   };
   return {
     cart,
+    mobileFields,
     company: { legalName: org?.legalName ?? "", address: org?.registeredAddress ?? null, state: org?.state ?? null },
     sites: sites.map((x) => ({
       id: x.id,

@@ -4,6 +4,7 @@ import {
   ACCOUNT_KINDS,
   ACCOUNT_PAGES,
   formatIstTime,
+  PASSWORD_PAGES,
   SIGN_IN,
   SIGN_IN_ERROR,
   type AccountKind,
@@ -12,6 +13,7 @@ import { Alert, Button, FormField, Icon, Input, OtpInput, TextLink } from "@h2in
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type SyntheticEvent, type ReactNode } from "react";
+import { PasswordInput } from "@/account/PasswordInput";
 import { AUTH_LINKS } from "@/lib/auth-links";
 import { authClient, type SignInErrorDetail } from "@/lib/auth-client";
 import { AuthCard } from "../AuthCard";
@@ -19,8 +21,9 @@ import { whereNext } from "./actions";
 
 // The sign-in screens of Figma section 524:1772, as one flow so nothing has to travel in the address bar.
 // Copy is the frames'. Messages the design does not show (rate limits, Google not set up) are short and plain; they are
-// listed in docs/design-fidelity.md. Passkeys were removed on 17 Nov 2026 (A183): everyone signs in with an email code
-// (or Google here), and staff use the password sign-in (staff/StaffSignIn.tsx).
+// listed in docs/design-fidelity.md. Passkeys were removed on 17 Nov 2026 (A183). Since 19 Nov 2026 (A195) the buyer,
+// supplier and member pages sign in with email and password, with "Email me a code instead" as the backup (the code
+// flow below, unchanged); the local /sign-in keeps the code and Google, and staff use staff/StaffSignIn.tsx.
 
 type Step = "start" | "code" | "paused";
 
@@ -72,6 +75,9 @@ function retryIn(iso: string | undefined): string {
   return seconds < 90 ? `${String(seconds)} seconds` : `${String(Math.ceil(seconds / 60))} minutes`;
 }
 
+/** The audience pages' first screen: email and password, or (the backup) an email code. */
+type Mode = "password" | "code";
+
 export function SignInFlow({
   next,
   initialError,
@@ -92,7 +98,11 @@ export function SignInFlow({
   const [pausedUntil, setPausedUntil] = useState<Date>();
   const [resendAt, setResendAt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
-  const [busy, setBusy] = useState<"send" | "verify" | "google">();
+  const [busy, setBusy] = useState<"send" | "verify" | "google" | "password">();
+  const [mode, setMode] = useState<Mode>(audience ? "password" : "code");
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string>();
+  const [pausedBy, setPausedBy] = useState<"code" | "password">("code");
   const heading = useRef<HTMLHeadingElement>(null);
   const words = audience ? AUDIENCE[audience] : null;
   const others = ACCOUNT_KINDS.filter((k) => k !== audience);
@@ -119,7 +129,8 @@ export function SignInFlow({
     });
   };
 
-  const pause = (until: string | undefined) => {
+  const pause = (until: string | undefined, by: "code" | "password" = "code") => {
+    setPausedBy(by);
     setPausedUntil(until ? new Date(until) : new Date(Date.now() + SIGN_IN.pauseMinutes * 60_000));
     setProblem(undefined);
     setWrong(undefined);
@@ -212,6 +223,51 @@ export function SignInFlow({
     }
   };
 
+  const onPassword = async (event: SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = email.trim();
+    const badEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    setEmailError(badEmail ? "Enter your email, like you@company.com" : undefined);
+    setPasswordError(password ? undefined : "Enter your password");
+    if (badEmail || !password) return;
+    setBusy("password");
+    setProblem(undefined);
+    const { error } = await authClient.signIn.email({ email: value, password });
+    if (!error) {
+      finish();
+      return;
+    }
+    setBusy(undefined);
+    setPassword("");
+    const detail = asDetail(error);
+    if (detail.code === SIGN_IN_ERROR.paused) {
+      pause(detail.until, "password");
+    } else if (detail.code === SIGN_IN_ERROR.suspended) {
+      setProblem(sendProblem(detail));
+    } else if (detail.code === SIGN_IN_ERROR.wrongPassword || detail.code === SIGN_IN_ERROR.emailNotConfirmed) {
+      // An unconfirmed email (a backstop that no path should reach) gets the same words, so it reveals nothing.
+      const left = detail.triesLeft;
+      setProblem({
+        title: "Email or password is wrong",
+        body:
+          left === undefined
+            ? "Check them and try again."
+            : `Check them and try again. You have ${String(left)} ${left === 1 ? "try" : "tries"} left before we pause sign-in for ${String(SIGN_IN.pauseMinutes)} minutes.`,
+      });
+    } else if (detail.status === 429) {
+      setProblem({ title: "Too many tries", body: "Wait a minute and try again." });
+    } else {
+      setProblem({ title: "We couldn't sign you in", body: "Check your connection and try again." });
+    }
+  };
+
+  const switchMode = (to: Mode) => {
+    setMode(to);
+    setProblem(undefined);
+    setEmailError(undefined);
+    setPasswordError(undefined);
+  };
+
   const resend = async () => {
     if (await sendCode()) {
       setCode("");
@@ -249,8 +305,8 @@ export function SignInFlow({
           Sign-in paused for {SIGN_IN.pauseMinutes} minutes
         </h1>
         <p className="type-body text-body">
-          There were too many wrong codes for {email.trim()}. To keep the account safe, you can try again at{" "}
-          {formatIstTime(pausedUntil ?? new Date())}.
+          There were too many wrong {pausedBy === "password" ? "passwords" : "codes"} for {email.trim()}. To keep the
+          account safe, you can try again at {formatIstTime(pausedUntil ?? new Date())}.
         </p>
         <Button
           variant="outline"
@@ -358,33 +414,85 @@ export function SignInFlow({
     );
   }
 
-  // Buyer, supplier and member pages (public QC 2): one email box, then the code. Nothing else to choose.
+  // Buyer, supplier and member pages (public QC 2; A195): email and password, or an email code instead.
   if (audience && words) {
     const keep = next !== ACCOUNT_PAGES[audience].home && next !== "/";
     const withNext = (href: string) => (keep ? `${href}?next=${encodeURIComponent(next)}` : href);
+    const emailField = (
+      <FormField label={words.label} error={emailError}>
+        <Input
+          type="email"
+          name="email"
+          autoComplete={mode === "password" ? "username" : "email"}
+          placeholder={audience === "member" ? "you@example.com" : "you@company.com"}
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (emailError) setEmailError(undefined);
+          }}
+        />
+      </FormField>
+    );
     return (
       <AuthCard>
         <h1 className="type-h2 text-primary">{words.title}</h1>
         <p className="type-body text-body">{words.lead}</p>
         {alert}
-        <form className="flex flex-col gap-5" onSubmit={(event) => void onEmail(event)} noValidate>
-          <FormField label={words.label} error={emailError}>
-            <Input
-              type="email"
-              name="email"
-              autoComplete="email"
-              placeholder={audience === "member" ? "you@example.com" : "you@company.com"}
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                if (emailError) setEmailError(undefined);
+        {mode === "password" ? (
+          <>
+            <form className="flex flex-col gap-5" onSubmit={(event) => void onPassword(event)} noValidate>
+              {emailField}
+              <FormField label="Password" error={passwordError}>
+                <PasswordInput
+                  value={password}
+                  autoComplete="current-password"
+                  onChange={(value) => {
+                    setPassword(value);
+                    if (passwordError) setPasswordError(undefined);
+                  }}
+                />
+              </FormField>
+              <div className="-mt-2 flex flex-col gap-1">
+                <TextLink asChild showIcon={false} className="self-start">
+                  <Link href={`${PASSWORD_PAGES.forgot}?as=${audience}`}>Forgot password?</Link>
+                </TextLink>
+                <p className="type-body-sm text-secondary">First time with a password? Set one with Forgot password.</p>
+              </div>
+              <Button type="submit" size="lg" className="w-full" disabled={busy === "password"}>
+                Sign in
+              </Button>
+            </form>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                switchMode("code");
               }}
-            />
-          </FormField>
-          <Button type="submit" size="lg" className="w-full" disabled={busy === "send"}>
-            Send code
-          </Button>
-        </form>
+            >
+              Email me a code instead
+            </Button>
+          </>
+        ) : (
+          <>
+            <form className="flex flex-col gap-5" onSubmit={(event) => void onEmail(event)} noValidate>
+              {emailField}
+              <Button type="submit" size="lg" className="w-full" disabled={busy === "send"}>
+                Send code
+              </Button>
+            </form>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                switchMode("password");
+              }}
+            >
+              Sign in with a password instead
+            </Button>
+          </>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <TextLink asChild showIcon={false}>
             <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>

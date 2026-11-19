@@ -530,7 +530,7 @@ export function RecordForm({
   verify: boolean;
   /** content.delete: may archive this record (founder QC, 17 Nov 2026). */
   canArchive?: boolean;
-  /** A Super admin (content.purge): Delete permanently for types that aren't archived first (A197). */
+  /** A Super admin (content.purge): Delete permanently for types that aren't archived first (A198). */
   canPurge?: boolean;
 }) {
   const router = useRouter();

@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { listUsers, operatorRoleGrid } from "@h2india/core/admin/users";
 import { can } from "@h2india/core/authz";
 import { formatIstDayMonth } from "@h2india/core/time";
@@ -63,7 +64,7 @@ export default async function UsersPage({
   const status = sp.status === "suspended" || sp.status === "active" ? sp.status : undefined;
   const req = pageRequest(sp);
   const db = getDb();
-  const [{ rows, total }, everyone, roles] = await Promise.all([
+  const [{ rows, total }, everyone, roles, showMobile] = await Promise.all([
     listUsers(db, actor, {
       q: sp.q?.trim() || undefined,
       type,
@@ -72,7 +73,9 @@ export default async function UsersPage({
     }),
     listUsers(db, actor, { limit: 1 }),
     operatorRoleGrid(db, actor),
+    mobileFieldsShown(db),
   ]);
+  const searchWords = showMobile ? "Search name, email, mobile or GSTIN" : "Search name, email or GSTIN";
   const query = pagingQuery(sp);
   // A page past the end (the list shrank, or an old link) goes to the last page, like the other workspace lists.
   const last = Math.max(1, Math.ceil(total / req.perPage));
@@ -98,12 +101,12 @@ export default async function UsersPage({
       <UserTabs current="people" counts={{ people: everyone.total, roles: roles.length }} />
       <form method="get" className="flex flex-wrap gap-3">
         <label className="relative min-w-60 flex-1 md:max-w-sm">
-          <span className="sr-only">Search name, email, mobile or GSTIN</span>
+          <span className="sr-only">{searchWords}</span>
           <Icon name="search" size={18} className="absolute top-3 left-3 text-icon-secondary" />
           <input
             name="q"
             defaultValue={sp.q}
-            placeholder="Search name, email, mobile or GSTIN"
+            placeholder={searchWords}
             className="h-11 w-full rounded-control border-[1.5px] border-control bg-page pr-3 pl-10 type-body"
           />
         </label>
@@ -137,7 +140,9 @@ export default async function UsersPage({
                 ) : undefined
               }
             >
-              Check the spelling, or search by mobile number, GSTIN or organisation instead.
+              {showMobile
+                ? "Check the spelling, or search by mobile number, GSTIN or organisation instead."
+                : "Check the spelling, or search by GSTIN or organisation instead."}
             </EmptyState>
           </div>
         }

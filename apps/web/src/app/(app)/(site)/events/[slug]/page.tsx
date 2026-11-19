@@ -1,3 +1,4 @@
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { playbackFor } from "@h2india/core/media";
 import { joinOpensAt, readRegistrationToken, WEBINAR_CONSENT } from "@h2india/core/events";
 import { buttonClasses, cx, Icon, StatusBadge } from "@h2india/ui";
@@ -388,6 +389,7 @@ export default async function EventPage({ params, searchParams }: { params: Para
               pageUrl: page,
               sponsor,
               consentText: sponsor ? WEBINAR_CONSENT(sponsor) : null,
+              whatsapp: await mobileFieldsShown(),
             }}
             member={Boolean(session)}
             memberName={session ? `${session.user.name || session.user.email} (${session.user.email})` : null}

@@ -1,6 +1,7 @@
 "use server";
 
 import { checkForm, getDb, underLimit, type FormGuard } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { checkRegistration, registerForWebinar, type RegistrationField } from "@h2india/core/events";
 import { getEvent, sendRegistration, sendReplayLink, webinarFacts } from "@/events/data";
 import { isWebinar } from "@/events/views";
@@ -30,14 +31,16 @@ export async function registerWebinar(
   if (!(await underLimit(`webinar-register:${ctx.ip ?? "unknown"}`, 3600, 30))) return { ok: false, reason: "limited" };
   const session = await getSession().catch(() => null);
   const member = Boolean(session);
+  // While the `mobileFields` switch is off (founder, 19 Nov 2026) the WhatsApp reminder mobile isn't asked or kept.
+  const given = (await mobileFieldsShown()) ? input : { ...input, mobile: "" };
   const values = session
     ? {
-        ...input,
-        name: session.user.name || input.name || session.user.email,
+        ...given,
+        name: session.user.name || given.name || session.user.email,
         email: session.user.email,
         userId: session.user.id,
       }
-    : input;
+    : given;
   // Form protection (step 5.9) only once the form is complete, so people see their mistakes first.
   const form = checkRegistration(values, { member, replayOnly: wantReplay });
   if (form.ok && !(await checkForm({ form: "webinar", ip: ctx.ip ?? null, guard })).ok) {

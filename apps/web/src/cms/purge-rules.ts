@@ -1,6 +1,6 @@
 import { isArchivable } from "./archive";
 
-// Delete permanently (founder, 19 Nov 2026, A197): only a Super admin (content.purge), with a reason and the record's
+// Delete permanently (founder, 19 Nov 2026, A198): only a Super admin (content.purge), with a reason and the record's
 // name typed to confirm, audited with what was deleted. Each content type needs one condition first, so nothing is
 // deleted by accident or while the site still uses it. Pure: unit-tested.
 

@@ -213,8 +213,9 @@ describe.skipIf(!url)("companies and join requests", () => {
       termsVersion: "1.1",
     });
   });
-  // Founder, 18 Nov 2026: the Join SMS code is off until an SMS provider is connected (System settings switch).
-  it("joins without an SMS code while the mobile check is off, and needs it when switched on", async () => {
+  // Founder, 19 Nov 2026 (A195): Join asks for no mobile and no SMS code, whatever the old mobileVerification switch
+  // says; a number saved on an older draft is still copied, unverified.
+  it("joins without a mobile number, with the old mobile check switched on or off", async () => {
     const setSwitch = async (on: boolean) => {
       const value = { mobileVerification: on };
       await h.db
@@ -222,30 +223,34 @@ describe.skipIf(!url)("companies and join requests", () => {
         .values({ key: FLAG_OVERRIDES.key, value })
         .onConflictDoUpdate({ target: schema.settings.key, set: { value } });
     };
-    const draftFor = async (who: { email: string }) => {
+    const draftFor = async (who: { email: string }, mobile?: string) => {
       const token = await startDraft();
       await updateDraft(token, {
         path: "member",
         email: who.email,
-        fullName: "No Code",
+        fullName: "No Mobile",
         jobRole: "Engineering",
         termsAccepted: true,
         termsVersion: "1.1",
       });
-      await saveDraftMobile(token, "+91 98201 65432");
+      if (mobile) await saveDraftMobile(token, mobile);
       return token;
     };
     try {
       await setSwitch(true);
-      const strict = await person("Code Needed");
-      expect(await applyDraft(await draftFor(strict), { id: strict.id, email: strict.email })).toBeNull();
-
-      await setSwitch(false);
-      const relaxed = await person("No Code");
-      expect(await applyDraft(await draftFor(relaxed), { id: relaxed.id, email: relaxed.email })).toMatchObject({
+      const strict = await person("Switch On");
+      expect(await applyDraft(await draftFor(strict), { id: strict.id, email: strict.email })).toMatchObject({
         path: "member",
       });
-      const [after] = await h.db.select().from(schema.users).where(eq(schema.users.id, relaxed.id));
+      const [onRow] = await h.db.select().from(schema.users).where(eq(schema.users.id, strict.id));
+      expect(onRow).toMatchObject({ profileType: "member", mobileVerifiedAt: null });
+
+      await setSwitch(false);
+      const older = await person("Older Draft");
+      expect(
+        await applyDraft(await draftFor(older, "+91 98201 65432"), { id: older.id, email: older.email }),
+      ).toMatchObject({ path: "member" });
+      const [after] = await h.db.select().from(schema.users).where(eq(schema.users.id, older.id));
       // The number is kept but not marked verified, so nothing is ever texted to it.
       expect(after).toMatchObject({ mobile: "+91 98201 65432", mobileVerifiedAt: null, profileType: "member" });
     } finally {

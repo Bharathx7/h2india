@@ -207,7 +207,7 @@ test("an Editor-in-chief archives a glossary term and restores it", async ({ pag
   await other.close();
 });
 
-test("a Super admin deletes an archived record permanently; an Editor-in-chief can't (A197)", async ({
+test("a Super admin deletes an archived record permanently; an Editor-in-chief can't (A198)", async ({
   page,
   browser,
 }) => {

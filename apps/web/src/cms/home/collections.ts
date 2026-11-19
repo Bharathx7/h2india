@@ -209,7 +209,8 @@ export const EarlyListings: CollectionConfig = {
     { name: "company", type: "text", required: true },
     { name: "name", label: "Name", type: "text", required: true },
     { name: "email", label: "Work email", type: "email", required: true },
-    { name: "mobile", type: "text", required: true },
+    // Optional since 19 Nov 2026 (founder: no personal mobile numbers until an SMS provider is connected).
+    { name: "mobile", type: "text" },
     {
       name: "sells",
       label: "What they sell",

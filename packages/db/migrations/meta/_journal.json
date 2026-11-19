@@ -523,8 +523,15 @@
     {
       "idx": 74,
       "version": "7",
+      "when": 1795080766692,
+      "tag": "0074_join_draft_password",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
       "when": 1795082614148,
-      "tag": "0074_content_purge",
+      "tag": "0075_content_purge",
       "breakpoints": true
     }
   ]

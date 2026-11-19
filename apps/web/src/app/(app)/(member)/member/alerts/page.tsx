@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { alertContacts, myAlerts, type AlertRow } from "@h2india/core/alerts";
 import { getNotifySettings } from "@h2india/core/notify";
 import { formatIstDate } from "@h2india/core/time";
@@ -44,12 +45,14 @@ export default async function AlertsPage({
   const db = getDb();
   const now = new Date();
   const forced = forcedState(sp.state);
-  const [rows, reach, quiet, start] = await Promise.all([
+  const [rows, contacts, quiet, start, showMobile] = await Promise.all([
     myAlerts(db, userId, now),
     alertContacts(db, userId),
     getNotifySettings(db, userId),
     prefillAlert(sp),
+    mobileFieldsShown(db),
   ]);
+  const reach = { ...contacts, whatsapp: showMobile };
   const cards: AlertCard[] = rows.map((a) => ({ ...a, status: statusLine(a, now) }));
   const paged = pageOf(cards, pageRequest(sp));
   const missing = (sp.tender ?? sp.scheme ?? sp.grant) && !start;
@@ -87,12 +90,14 @@ export default async function AlertsPage({
                 <dt className="type-label">Email</dt>
                 <dd className="type-caption text-secondary">{reach.email}</dd>
               </div>
-              <div>
-                <dt className="type-label">WhatsApp</dt>
-                <dd className="type-caption text-secondary">
-                  {reach.mobile ? `On for ${reach.mobile}` : "Add and confirm a mobile number in Profile"}
-                </dd>
-              </div>
+              {showMobile ? (
+                <div>
+                  <dt className="type-label">WhatsApp</dt>
+                  <dd className="type-caption text-secondary">
+                    {reach.mobile ? `On for ${reach.mobile}` : "Add and confirm a mobile number in Profile"}
+                  </dd>
+                </div>
+              ) : null}
               <div>
                 <dt className="type-label">In-app</dt>
                 <dd className="type-caption text-secondary">Bell icon, top right</dd>

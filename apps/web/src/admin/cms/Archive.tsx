@@ -116,7 +116,7 @@ export function RestoreRecord({ slug, id, name }: { slug: string; id: number; na
 }
 
 /**
- * Delete permanently (A197). Shown only to a Super admin (content.purge): a reason, and the record's name typed to
+ * Delete permanently (A198). Shown only to a Super admin (content.purge): a reason, and the record's name typed to
  * confirm. The server checks the type's condition again (cms/purge-rules.ts) and refuses with the reason when it isn't
  * met, for example "Archive it first" or "It's still used by 3 records".
  */

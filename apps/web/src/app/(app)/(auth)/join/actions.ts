@@ -10,24 +10,25 @@ import {
   joinProfile,
   JoinRequestError,
   membershipsOf,
-  MobileCodeError,
-  mobileCodeRequired,
   notifyAdminsOfRequest,
   readDraft,
   remindJoinRequest,
   requestToJoin,
-  saveDraftMobile,
   searchCompanies,
-  sendMobileCode,
   setProfileType,
   updateDraft,
-  verifyMobileCode,
   type CompanyMatch,
   type JoinPath,
 } from "@h2india/core/companies";
 import { getDb } from "@h2india/core";
-import { normaliseMobile } from "@h2india/core/companies/client";
-import { normaliseEmail } from "@h2india/core/sign-in";
+import { newPasswordProblem, normaliseEmail, PASSWORD_PAGES } from "@h2india/core/sign-in";
+import {
+  forgetDraftPassword,
+  hasPassword,
+  PasswordRuleError,
+  saveDraftPassword,
+  setPasswordFromDraft,
+} from "@h2india/core/sign-in/passwords";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
@@ -67,35 +68,13 @@ export async function pickCompany(organisationId: string | null): Promise<Result
   return { ok: true };
 }
 
-export async function sendCode(mobile: string): Promise<Result<string>> {
-  // No SMS while the Join mobile check is off (founder, 18 Nov 2026): nothing to send, and nothing to throttle.
-  if (!(await mobileCodeRequired())) return fail("MOBILE_CODE_OFF");
-  try {
-    const { mobile: m } = await sendMobileCode({ draftToken: await ensureDraft(), mobile });
-    return { ok: true, value: m };
-  } catch (error) {
-    if (error instanceof MobileCodeError) return fail(error.code, { retryAt: error.retryAt?.toISOString() });
-    console.error("join: sending the mobile code failed", error);
-    return fail("SEND_FAILED");
-  }
-}
-
-export async function checkCode(mobile: string, code: string): Promise<Result> {
-  try {
-    await verifyMobileCode({ draftToken: await ensureDraft(), mobile, code });
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof MobileCodeError) {
-      return fail(error.code, { retryAt: error.retryAt?.toISOString(), triesLeft: error.triesLeft });
-    }
-    throw error;
-  }
-}
-
 export interface Details {
   email?: string;
-  /** The mobile as typed; saved without a code while the Join mobile check is off. */
-  mobile?: string;
+  /**
+   * The password chosen at Join (A195). Only its hash is kept, on this browser's draft, and it becomes the account's
+   * password only when the confirm link is opened in this browser. Not asked of someone already signed in.
+   */
+  password?: string;
   fullName: string;
   jobRole: string;
   terms: boolean;
@@ -135,18 +114,14 @@ async function nextAfterDetails(token: string, user: { id: string; email: string
   return { ok: true, value: `/join/${draft.path}?step=company` };
 }
 
-/** Step 3. Signed-in people go straight on; others get the Verify email link (decision A7). */
+/**
+ * Step 3. Signed-in people go straight on; others get the Verify email link (decision A7), with their password's
+ * hash kept on the draft until then (A195). No account exists before the link is opened. No mobile number (A195).
+ */
 export async function submitDetails(details: Details): Promise<Result<string>> {
   const token = await ensureDraft();
   const draft = await readDraft(token);
   if (!draft?.path) return fail("NO_PATH");
-  if (await mobileCodeRequired()) {
-    if (!draft.mobileVerified) return fail("MOBILE_NOT_VERIFIED");
-  } else {
-    const mobile = normaliseMobile(details.mobile ?? "");
-    if (!mobile) return fail("INVALID_MOBILE");
-    await saveDraftMobile(token, mobile);
-  }
   const fullName = details.fullName.trim();
   if (fullName.length < 2) return fail("NAME_REQUIRED");
   if (!(JOB_ROLES as readonly string[]).includes(details.jobRole)) return fail("ROLE_REQUIRED");
@@ -166,6 +141,9 @@ export async function submitDetails(details: Details): Promise<Result<string>> {
 
   const email = normaliseEmail(details.email ?? "");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("EMAIL_REQUIRED");
+  const password = details.password ?? "";
+  const problem = newPasswordProblem(password);
+  if (problem) return fail("INVALID_PASSWORD", { message: problem });
   await updateDraft(token, {
     email,
     fullName,
@@ -173,8 +151,19 @@ export async function submitDetails(details: Details): Promise<Result<string>> {
     termsAccepted: true,
     termsVersion: await currentTermsVersion(),
   });
+  try {
+    await saveDraftPassword(getDb(), token, password);
+  } catch (error) {
+    if (error instanceof PasswordRuleError) return fail("INVALID_PASSWORD", { message: error.message });
+    throw error;
+  }
+  // The same link and the same "Check your inbox" whether or not the email has an account, so the page never reveals
+  // one; an existing password is never replaced (setPasswordFromDraft).
   return sendLink(email, token);
 }
+
+/** Where the confirm link returns, carrying the draft (founder QC, 19 Nov 2026), so it works in any browser. */
+const confirmedPath = (token: string) => `/join/confirmed?d=${encodeURIComponent(token)}`;
 
 /**
  * The confirm link carries the draft token, so it works in any browser or on a phone, not only the one that filled
@@ -186,7 +175,7 @@ async function sendLink(email: string, token: string): Promise<Result<string>> {
     await auth.api.signInMagicLink({
       body: {
         email,
-        callbackURL: `/join/confirmed?d=${encodeURIComponent(token)}`,
+        callbackURL: confirmedPath(token),
         errorCallbackURL: "/join/verify?expired=1",
       },
       headers: await headers(),
@@ -211,12 +200,27 @@ export async function resendLink(): Promise<Result<string>> {
  * "Continue" on Email confirmed. Uses the draft named by the link first, then the browser's own Join cookie. If
  * neither can be applied, someone who already finished Join goes on to where they left off; anyone else goes back
  * to their own sign-up page with their answers kept, never to the shared /join choice.
+ *
+ * The password (A195): set from the draft only through this browser's own Join cookie, before any draft is adopted
+ * (setPasswordFromDraft). A draft taken over from the link's ?d= loses its password first. Someone who ends up with
+ * no password (link opened in another browser) chooses one on Set your password before going on.
  */
 export async function continueAfterConfirm(linkToken?: string): Promise<Result<string>> {
   const session = await getSession();
   if (!session) return fail("NOT_SIGNED_IN", { message: "/join/verify?expired=1" });
   const user = { id: session.user.id, email: session.user.email };
   const cookieToken = await draftToken();
+  await setPasswordFromDraft(getDb(), cookieToken, user);
+  const next = await nextAfterConfirm(user, cookieToken, linkToken);
+  if (!next.ok || (await hasPassword(getDb(), user.id))) return next;
+  return { ok: true, value: `${PASSWORD_PAGES.set}?join=1&next=${encodeURIComponent(next.value)}` };
+}
+
+async function nextAfterConfirm(
+  user: { id: string; email: string },
+  cookieToken: string | undefined,
+  linkToken: string | undefined,
+): Promise<Result<string>> {
   const candidates = [...new Set([linkToken, cookieToken].filter((t): t is string => Boolean(t)))];
   let path: JoinPath | null = null;
   for (const token of candidates) {
@@ -225,7 +229,10 @@ export async function continueAfterConfirm(linkToken?: string): Promise<Result<s
     path ??= draft.path;
     const sameEmail = !draft.email || normaliseEmail(draft.email) === normaliseEmail(user.email);
     if (!sameEmail) continue;
-    if (token !== cookieToken) await adoptDraft(token);
+    if (token !== cookieToken) {
+      await forgetDraftPassword(getDb(), token);
+      await adoptDraft(token);
+    }
     const next = await nextAfterDetails(token, user);
     if (next.ok) return next;
   }

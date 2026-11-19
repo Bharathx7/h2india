@@ -44,7 +44,7 @@ export function contentSecurityPolicy({ dev, storageOrigins, analyticsOrigin }: 
     ["media-src", ["'self'", "blob:", "https:", ...storage]],
     ["connect-src", ["'self'", ...storage, ...analytics, ...(dev ? ["ws:", "wss:"] : [])]],
     ["worker-src", ["'self'", "blob:"]],
-    // YouTube videos in articles and knowledge pages play from the privacy-enhanced host only (A195, lib/youtube.ts).
+    // YouTube videos in articles and knowledge pages play from the privacy-enhanced host only (A196, lib/youtube.ts).
     ["frame-src", ["'self'", "https://www.youtube-nocookie.com"]],
     ["frame-ancestors", ["'none'"]],
     ["object-src", ["'none'"]],

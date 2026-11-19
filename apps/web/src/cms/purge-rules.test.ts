@@ -3,7 +3,7 @@ import { confirmsName, purgeBlocker, purgeRule, uploadsIn } from "./purge-rules"
 
 const facts = { archived: false, published: false, everPublished: false, usedBy: 0 };
 
-describe("Delete permanently: what must be true first (A197)", () => {
+describe("Delete permanently: what must be true first (A198)", () => {
   it("archivable records are deleted from the Archived list only", () => {
     expect(purgeRule("tenders")).toBe("archived");
     expect(purgeBlocker("archived", facts)).toMatch(/Archive it first/);

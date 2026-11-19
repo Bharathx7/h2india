@@ -45,7 +45,8 @@ export function NotificationsView(props: {
   tab: "activity" | "email";
   demoState?: "loading" | "empty" | "error";
   choices: Choices;
-  contact: { email: string; mobile: string | null };
+  /** `whatsapp` is the `mobileFields` switch (founder, 19 Nov 2026): off, the WhatsApp column and number are hidden. */
+  contact: { email: string; mobile: string | null; whatsapp: boolean };
   /** The page of the Activity list asked for in the address (?page=&perPage=), and the address's other parameters. */
   paging: PageRequest;
   query: Record<string, string>;
@@ -228,12 +229,14 @@ const CHANNELS: { value: NotifyChannel; label: string }[] = [
 function ChoicesForm(props: {
   area: WorkspaceArea;
   choices: Choices;
-  contact: { email: string; mobile: string | null };
+  /** `whatsapp` is the `mobileFields` switch (founder, 19 Nov 2026): off, the WhatsApp column and number are hidden. */
+  contact: { email: string; mobile: string | null; whatsapp: boolean };
 }) {
   const topics = useMemo(() => topicsFor(props.area), [props.area]);
   const [values, setValues] = useState(props.choices);
   const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const groups = [...new Set(topics.map((t) => TOPIC_LABELS[t].group))];
+  const shown = props.contact.whatsapp ? CHANNELS : CHANNELS.filter((c) => c.value !== "whatsapp");
   const changes = topics.flatMap((t) =>
     CHANNELS.filter((c) => values[t][c.value] !== props.choices[t][c.value]).map((c) => ({
       topic: t,
@@ -241,7 +244,10 @@ function ChoicesForm(props: {
       enabled: values[t][c.value],
     })),
   );
-  const masked = props.contact.mobile ? `+91 ••••• ${props.contact.mobile.replace(/\D/g, "").slice(-5)}` : null;
+  const masked =
+    props.contact.whatsapp && props.contact.mobile
+      ? `+91 ••••• ${props.contact.mobile.replace(/\D/g, "").slice(-5)}`
+      : null;
   return (
     <form
       className="flex max-w-180 flex-col gap-6"
@@ -264,7 +270,7 @@ function ChoicesForm(props: {
               <th scope="col" className="pb-3 text-left type-label-sm text-secondary">
                 What happened
               </th>
-              {CHANNELS.map((c) => (
+              {shown.map((c) => (
                 <th key={c.value} scope="col" className="w-16 pb-3 text-center type-label-sm text-secondary md:w-24">
                   {c.label}
                 </th>
@@ -274,7 +280,11 @@ function ChoicesForm(props: {
           {groups.map((g) => (
             <tbody key={g} className="border-b border-default last:border-b-0">
               <tr>
-                <th scope="colgroup" colSpan={4} className="pt-5 pb-1 text-left type-label-sm text-secondary">
+                <th
+                  scope="colgroup"
+                  colSpan={shown.length + 1}
+                  className="pt-5 pb-1 text-left type-label-sm text-secondary"
+                >
                   {g}
                 </th>
               </tr>
@@ -288,7 +298,7 @@ function ChoicesForm(props: {
                         <span className="block type-caption text-secondary">{TOPIC_LABELS[t].hint}</span>
                       ) : null}
                     </th>
-                    {CHANNELS.map((c) => {
+                    {shown.map((c) => {
                       const locked = TOPIC_LABELS[t].locked.includes(c.value);
                       return (
                         <td key={c.value} className="py-3 text-center align-top">
