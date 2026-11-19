@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../icons/Icon";
 import { cx } from "../../lib/cx";
+import { CoverArt, coverTopic } from "../art/CoverArt";
+import { EquipmentArt, type EquipmentKind } from "../art/EquipmentArt";
 import { StatusBadge, type BadgeTone } from "../Badges";
 
 // Cards from Figma page 02 used on the home page (step 5.1) and again by the listing pages in Stages 5 and 6.
@@ -80,6 +82,7 @@ export function CategoryTile({
   detail,
   href,
   icon,
+  art,
   size = "category",
   className,
 }: {
@@ -87,6 +90,8 @@ export function CategoryTile({
   detail?: string;
   href: string;
   icon: IconName;
+  /** An engineering drawing across the top of the tile instead of the small icon (design upgrade, 19 Nov 2026). */
+  art?: EquipmentKind;
   size?: "class" | "category";
   className?: string;
 }) {
@@ -99,14 +104,22 @@ export function CategoryTile({
         className,
       )}
     >
-      <span
-        className={cx(
-          "flex items-center justify-center bg-linear-to-b from-fresh-50 to-fresh-200 text-icon-link",
-          size === "class" ? "h-28 w-full rounded-card" : "size-11 rounded-card",
-        )}
-      >
-        <Icon name={icon} size={size === "class" ? 48 : 22} />
-      </span>
+      {art ? (
+        <span
+          className={cx("block w-full overflow-hidden rounded-control bg-fresh-50", size === "class" ? "h-32" : "h-24")}
+        >
+          <EquipmentArt kind={art} />
+        </span>
+      ) : (
+        <span
+          className={cx(
+            "flex items-center justify-center bg-linear-to-b from-fresh-50 to-fresh-200 text-icon-link",
+            size === "class" ? "h-28 w-full rounded-card" : "size-11 rounded-card",
+          )}
+        >
+          <Icon name={icon} size={size === "class" ? 48 : 22} />
+        </span>
+      )}
       <span className="flex items-start gap-2 pr-1">
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="type-label-lg text-primary">{title}</span>
@@ -394,11 +407,8 @@ export function ArticleCard({
           className,
         )}
       >
-        <div className="relative flex h-50 w-full shrink-0 items-center justify-center overflow-hidden bg-linear-to-br from-fresh-50 to-fresh-200 md:h-75">
-          <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" />
-          <span className="relative flex size-20 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
-            <Icon name="newspaper" size={28} />
-          </span>
+        <div className="relative h-50 w-full shrink-0 overflow-hidden bg-fresh-50 md:h-75">
+          <CoverArt topic={coverTopic(section, title)} seed={href} />
         </div>
         <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
           {badge ? <ContentLabel>{badge}</ContentLabel> : null}
@@ -424,8 +434,8 @@ export function ArticleCard({
           className,
         )}
       >
-        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-control bg-linear-to-br from-fresh-50 to-fresh-200 text-icon-link max-md:h-16 max-md:w-20">
-          <Icon name="newspaper" size={24} />
+        <div className="h-20 w-28 shrink-0 overflow-hidden rounded-control bg-fresh-50 max-md:h-16 max-md:w-20">
+          <CoverArt topic={coverTopic(section, title)} seed={href} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           {badge ? <ContentLabel>{badge}</ContentLabel> : null}
@@ -463,11 +473,8 @@ export function ArticleCard({
         className,
       )}
     >
-      <div className="relative flex h-[202px] w-full shrink-0 items-center justify-center overflow-hidden bg-linear-to-br from-fresh-50 to-fresh-200">
-        {layout === "lead" ? <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" /> : null}
-        <span className="relative flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
-          <Icon name="newspaper" size={28} />
-        </span>
+      <div className="relative h-[202px] w-full shrink-0 overflow-hidden bg-fresh-50">
+        <CoverArt topic={coverTopic(section, title)} seed={href} />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
         {badge ? <ContentLabel>{badge}</ContentLabel> : null}

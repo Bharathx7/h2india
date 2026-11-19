@@ -135,6 +135,11 @@ export type { CardStatus } from "./components/cards/Cards";
 export { OrgCard } from "./components/cards/OrgCard";
 export type { OrgCardProps } from "./components/cards/OrgCard";
 export { ProductCard } from "./components/cards/ProductCard";
+// Engineering drawings for product, category and news tiles (design upgrade, 19 Nov 2026)
+export { EquipmentArt, equipmentKind } from "./components/art/EquipmentArt";
+export type { EquipmentKind, EquipmentArtProps } from "./components/art/EquipmentArt";
+export { CoverArt, coverTopic } from "./components/art/CoverArt";
+export type { CoverTopic, CoverArtProps } from "./components/art/CoverArt";
 export { MapView } from "./components/MapView";
 export { stateBubbles } from "./components/StateBubbles";
 export type { MapPoint, MapProvider, MapViewProps } from "./components/MapView";

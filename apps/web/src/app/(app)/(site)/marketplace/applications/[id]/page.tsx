@@ -1,4 +1,13 @@
-import { buttonClasses, CategoryTile, cx, EmptyState, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
+import {
+  buttonClasses,
+  CategoryTile,
+  cx,
+  EmptyState,
+  equipmentKind,
+  Icon,
+  StatusBadge,
+  VerifiedBadge,
+} from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -153,6 +162,7 @@ export default async function ApplicationPage({ params }: { params: Params }) {
                   detail={productsLine(c.liveProducts)}
                   href={categoryHref(c)}
                   icon={tileIcon(c.slug)}
+                  art={equipmentKind(c.slug)}
                 />
               ))}
             </div>

@@ -1,5 +1,5 @@
 import type { ProductCard } from "@h2india/core/products";
-import { Button, CategoryTile, EmptyState, Icon } from "@h2india/ui";
+import { Button, CategoryTile, EmptyState, EquipmentArt, equipmentKind, Icon } from "@h2india/ui";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { catalogue } from "@/marketplace/data";
@@ -35,6 +35,7 @@ export async function ProductShowcase() {
                 detail={productsLine(c.liveProducts)}
                 href={categoryHref(c)}
                 icon={tileIcon(c.slug)}
+                art={equipmentKind(c.slug)}
                 className="h-full w-full"
               />
             </li>
@@ -153,10 +154,8 @@ function ShowcaseCard({ product: p }: { product: ProductCard }) {
   const category = p.subLabel ?? p.categoryLabel;
   return (
     <article className="group card-lift relative flex h-full w-full flex-col overflow-hidden rounded-card border border-default bg-page">
-      <div className="relative flex aspect-[4/3] items-center justify-center bg-linear-to-br from-fresh-50 to-fresh-200">
-        <span className="flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
-          <Icon name="zap" size={28} />
-        </span>
+      <div className="relative aspect-[4/3] bg-fresh-50">
+        <EquipmentArt kind={equipmentKind(p.subLabel, p.categoryLabel, p.name)} />
         {p.supplier.verified ? (
           <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
             <Icon name="shield-check" size={14} className="text-icon-success" />
