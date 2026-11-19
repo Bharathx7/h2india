@@ -244,6 +244,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 ## Company profiles and claims (step 6.7)
 
 - A profile is read with `companyProfile()`; its storefront with `storefrontProducts()`. Contact details only for signed-in people.
+- A supplier's own certificates reach the profile only through `publicCertificates()` (`@h2india/core/supplier`): Verified, current, not deleted, `certificate` documents, with name, scope, issuer and valid-until only; never the file, a number, or any other document type (founder, 18 Nov 2026).
 - Claims go only through `startEmailClaim()`/`confirmEmailClaim()` (code to an email on the profile's website domain), `submitGstinClaim()`, and `decideClaim()` (verification.edit, audited). Every claim needs an operator (A137); a claimed profile offers a join request instead.
 
 ## Member workspace (Stage 7)
