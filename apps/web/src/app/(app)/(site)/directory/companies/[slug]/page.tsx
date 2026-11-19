@@ -2,7 +2,7 @@ import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { companyProfile } from "@h2india/core/companies";
 import { storefrontProducts } from "@h2india/core/products";
-import { publicBadges } from "@h2india/core/supplier";
+import { publicBadges, publicCertificates, type PublicCertificate } from "@h2india/core/supplier";
 import { formatIstDate } from "@h2india/core/time";
 import { Alert, buttonClasses, cx, EmptyState, Icon, ProductCard, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -42,6 +42,39 @@ async function Badges({ organisationId }: { organisationId: string }) {
   );
 }
 
+/** The company's own certificates that H2 Economy verified and that are still current: name, issuer, valid until. */
+function CompanyCertificates({ items, title = "Certificates" }: { items: PublicCertificate[]; title?: string }) {
+  return (
+    <section aria-labelledby="company-certificates" className="flex flex-col gap-3">
+      <div>
+        <h2 id="company-certificates" className="type-h3 text-primary">
+          {title}
+        </h2>
+        <p className="type-body-sm text-secondary">Checked by H2 Economy and current.</p>
+      </div>
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {items.map((x) => (
+          <li key={x.id} className="flex h-full flex-col gap-1 rounded-card border border-default p-4">
+            <span className="flex items-center gap-2 type-label text-primary">
+              <Icon name="check-circle" size={16} className="shrink-0 text-icon-success" />
+              {x.name}
+            </span>
+            {x.scope ? <span className="type-body-sm text-body">{x.scope}</span> : null}
+            <span className="type-caption text-secondary">
+              {[
+                x.issuer ? `Issued by ${x.issuer}` : null,
+                x.validUntil ? `Valid until ${formatIstDate(x.validUntil)}` : "No expiry",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 const load = (slug: string) => companyProfile(getDb(), slug, { includeSample: showSample() });
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -75,9 +108,10 @@ export default async function CompanyPage({
   const tab: Tab = (TABS as readonly string[]).includes((await searchParams).tab ?? "")
     ? ((await searchParams).tab as Tab)
     : "overview";
-  const [session, products] = await Promise.all([
+  const [session, products, companyCertificates] = await Promise.all([
     getSession(),
     storefrontProducts(getDb(), c.organisationId, { includeSample: showSample() }),
+    publicCertificates(getDb(), c.organisationId),
   ]);
   const base = `/directory/companies/${c.slug}`;
   const certificates = [...new Map(products.flatMap((p) => p.certificates).map((x) => [x.name, x])).values()];
@@ -121,6 +155,7 @@ export default async function CompanyPage({
               ) : null}
             </section>
           ) : null}
+          {companyCertificates.length ? <CompanyCertificates items={companyCertificates} /> : null}
           <section className="flex flex-col gap-3 rounded-card border border-default p-5">
             <h2 className="type-h4 text-primary">At a glance</h2>
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -180,7 +215,7 @@ export default async function CompanyPage({
       <Empty title="No products listed yet">{`${c.name} hasn't listed products on H2 Economy yet. You can still send a quote request.`}</Empty>
     );
   } else if (tab === "certifications") {
-    body = certificates.length ? (
+    const productTable = certificates.length ? (
       <div
         role="region"
         tabIndex={0}
@@ -211,11 +246,27 @@ export default async function CompanyPage({
           </tbody>
         </table>
       </div>
-    ) : (
-      <Empty title="No certificates listed yet">
-        Certificates appear here as the company adds them to its products.
-      </Empty>
-    );
+    ) : null;
+    body =
+      companyCertificates.length || productTable ? (
+        <div className="flex flex-col gap-8">
+          {companyCertificates.length ? (
+            <CompanyCertificates items={companyCertificates} title="Company certificates" />
+          ) : null}
+          {productTable && companyCertificates.length ? (
+            <section className="flex flex-col gap-3">
+              <h2 className="type-h3 text-primary">On products</h2>
+              {productTable}
+            </section>
+          ) : (
+            productTable
+          )}
+        </div>
+      ) : (
+        <Empty title="No certificates listed yet">
+          Certificates appear here once H2 Economy has checked them, or as the company adds them to its products.
+        </Empty>
+      );
   } else if (tab === "news") {
     const news = await articlesMentioning([c.name], 6);
     body = news.length ? (

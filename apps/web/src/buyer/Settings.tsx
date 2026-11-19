@@ -203,18 +203,21 @@ export interface GstinCardData {
 
 /**
  * Add the GSTIN (none yet), Replace it (while it is being checked), or the locked state once verified. Buyers by
- * default; the supplier's Company details passes its own actions.
+ * default; the supplier's Company details passes its own actions and words.
  */
 export function GstinCard({
   current,
   canEdit,
   add = addGstinAction,
   replace = replaceGstinAction,
+  addDescription = "We check it with GST records in the background. You can request quotes while we check.",
 }: {
   current: GstinCardData | null;
   canEdit: boolean;
   add?: (gstin: string, place: string) => Promise<R>;
   replace?: (gstin: string, place: string) => Promise<R>;
+  /** The Add dialog's line under the title; the buyer's words by default. */
+  addDescription?: string;
 }) {
   const verified = current?.status === "Active";
   return (
@@ -267,12 +270,7 @@ export function GstinCard({
               action={replace}
             />
           ) : (
-            <GstinDialog
-              title="Add your GSTIN"
-              button="Add your GSTIN"
-              description="We check it with GST records in the background. You can request quotes while we check."
-              action={add}
-            />
+            <GstinDialog title="Add your GSTIN" button="Add your GSTIN" description={addDescription} action={add} />
           )}
         </div>
       ) : (

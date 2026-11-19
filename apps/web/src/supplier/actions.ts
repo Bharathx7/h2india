@@ -17,5 +17,6 @@ export async function submitForReviewAction(): Promise<{ ok: boolean; error?: st
     throw error;
   }
   revalidatePath("/supplier");
+  revalidatePath("/supplier/verification");
   return { ok: true };
 }

@@ -24,12 +24,12 @@ function useRun() {
   return { error, pending, go, setError };
 }
 
-export function NewAccountForm({ defaultHolder }: { defaultHolder: string }) {
+export function NewAccountForm({ defaultHolder, first = false }: { defaultHolder: string; first?: boolean }) {
   const r = useRun();
   const [f, setF] = useState({ holderName: defaultHolder, accountNumber: "", confirmNumber: "", ifsc: "" });
   return (
     <section className="flex flex-col gap-4 rounded-card border border-default bg-page p-5">
-      <h2 className="type-h4">New account</h2>
+      <h2 className="type-h4">{first ? "Add your payout account" : "New account"}</h2>
       {r.error ? <Alert tone="error" title={r.error} live /> : null}
       <label className="flex flex-col gap-1.5">
         <span className="type-label">Account holder</span>
@@ -87,36 +87,49 @@ export function NewAccountForm({ defaultHolder }: { defaultHolder: string }) {
   );
 }
 
-export function ConfirmChange({ id, holdUntil }: { id: string; holdUntil: string | null }) {
+/**
+ * Confirm it's you for a Pending account. `first`: the company has no Active account yet, so this confirms the account
+ * itself (no change, no hold); otherwise it confirms a change of account.
+ */
+export function ConfirmChange({ id, holdUntil, first }: { id: string; holdUntil: string | null; first: boolean }) {
   const r = useRun();
   const router = useRouter();
+  // While the code form is open it has its own Cancel; don't show a second one beside it.
+  const [codeOpen, setCodeOpen] = useState(false);
   return (
     <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
       <h2 className="type-h4">Confirm it&apos;s you</h2>
       <p className="type-body-sm text-body">
-        To protect your payouts, confirm this change with a code we email you.
-        {holdUntil ? ` After that, payouts are held until ${holdUntil} IST.` : ""}
+        {first
+          ? "To protect your payouts, confirm this account with a code we email you."
+          : "To protect your payouts, confirm this change with a code we email you."}
+        {holdUntil ? ` After that, payouts are held until ${holdUntil}.` : ""}
       </p>
       {r.error ? <Alert tone="error" title={r.error} live /> : null}
       <ConfirmItsYou
-        actionLabel="Confirm change"
+        actionLabel={first ? "Confirm account" : "Confirm change"}
         disabled={r.pending}
+        onStepChange={(step) => {
+          setCodeOpen(step === "code");
+        }}
         onConfirmed={async () => {
           const result = await confirmBankAccountAction(id);
           if (result.ok) router.refresh();
           return result;
         }}
       />
-      <button
-        type="button"
-        className="self-start type-label"
-        disabled={r.pending}
-        onClick={() => {
-          r.go(() => cancelBankChangeAction(id));
-        }}
-      >
-        Cancel change
-      </button>
+      {codeOpen ? null : (
+        <Button
+          variant="outline"
+          className="self-start"
+          disabled={r.pending}
+          onClick={() => {
+            r.go(() => cancelBankChangeAction(id));
+          }}
+        >
+          {first ? "Cancel" : "Cancel change"}
+        </Button>
+      )}
     </section>
   );
 }
@@ -145,10 +158,10 @@ export function CancelChange({ id, oldLast4, company }: { id: string; oldLast4: 
   );
 }
 
-export function TryAnother() {
+export function TryAnother({ defaultHolder }: { defaultHolder: string }) {
   const [open, setOpen] = useState(false);
   return open ? (
-    <NewAccountForm defaultHolder="" />
+    <NewAccountForm defaultHolder={defaultHolder} />
   ) : (
     <div className="flex items-center gap-3">
       <Button

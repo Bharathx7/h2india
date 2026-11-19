@@ -88,3 +88,34 @@ export function gstinLabel(gstin: string | null | undefined): string {
   const state = stateOf(gstin);
   return state ? `${gstin} · ${state}` : gstin;
 }
+
+/** The company fields a GSTIN decides, as they stand on the organisation. */
+export interface GstinOrganisationFields {
+  state: string | null;
+  pan: string | null;
+  legalName: string | null;
+  registeredAddress: string | null;
+}
+
+/**
+ * What to set on the organisation when a GSTIN is added or replaced, or its portal check comes back: the state and
+ * PAN always follow the GSTIN (they are part of it); the legal name and registered address are filled from the
+ * portal's record (an Active one) only where they are still empty, so a name the company typed at Join is kept.
+ * Returns only the fields that change. Pure: unit-tested.
+ */
+export function organisationFieldsForGstin(
+  current: GstinOrganisationFields,
+  gstin: string,
+  record?: { status: string; legalName: string; address: string } | null,
+): { [K in keyof GstinOrganisationFields]?: string } {
+  const next: { [K in keyof GstinOrganisationFields]?: string } = {};
+  const state = stateOf(gstin);
+  if (state && current.state !== state) next.state = state;
+  const pan = panOf(gstin);
+  if (current.pan !== pan) next.pan = pan;
+  if (record?.status === "Active") {
+    if (!current.legalName?.trim() && record.legalName.trim()) next.legalName = record.legalName.trim();
+    if (!current.registeredAddress?.trim() && record.address.trim()) next.registeredAddress = record.address.trim();
+  }
+  return next;
+}

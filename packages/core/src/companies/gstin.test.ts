@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { normaliseMobile, shortCompanyName } from "./rules";
-import { gstinCheckChar, gstinLabel, isValidGstin, normaliseGstin, panOf, stateOf } from "./gstin";
+import {
+  gstinCheckChar,
+  gstinLabel,
+  isValidGstin,
+  normaliseGstin,
+  organisationFieldsForGstin,
+  panOf,
+  stateOf,
+} from "./gstin";
 
 describe("GSTIN rules", () => {
   it("accepts a GSTIN with the right check character and state", () => {
@@ -48,5 +56,40 @@ describe("gstinLabel (founder QC, 17 Nov 2026)", () => {
     expect(gstinLabel("27AAKCG5521M1Z9")).toBe("27AAKCG5521M1Z9 · Maharashtra");
     expect(gstinLabel(null)).toBe("");
     expect(gstinLabel("00AAKCG5521M1Z9")).toBe("00AAKCG5521M1Z9");
+  });
+});
+
+describe("organisationFieldsForGstin (a GSTIN added after Join)", () => {
+  const empty = { state: null, pan: null, legalName: "Greenfield Energy", registeredAddress: null };
+
+  it("sets the state and PAN from the GSTIN for a company that joined without one", () => {
+    expect(organisationFieldsForGstin(empty, "27AAKCG5521M1Z9")).toEqual({
+      state: "Maharashtra",
+      pan: "AAKCG5521M",
+    });
+  });
+
+  it("fills the registered address from an Active portal record but keeps the name the company typed", () => {
+    const record = { status: "Active", legalName: "GREENFIELD ENERGY PVT LTD", address: "Plot 4, MIDC, Pune" };
+    expect(organisationFieldsForGstin(empty, "27AAKCG5521M1Z9", record)).toEqual({
+      state: "Maharashtra",
+      pan: "AAKCG5521M",
+      registeredAddress: "Plot 4, MIDC, Pune",
+    });
+    expect(organisationFieldsForGstin({ ...empty, legalName: " " }, "27AAKCG5521M1Z9", record).legalName).toBe(
+      "GREENFIELD ENERGY PVT LTD",
+    );
+  });
+
+  it("takes nothing from a record that isn't Active, and changes nothing already right", () => {
+    const record = { status: "Cancelled", legalName: "X", address: "Y" };
+    const done = { state: "Maharashtra", pan: "AAKCG5521M", legalName: "G", registeredAddress: "Pune" };
+    expect(organisationFieldsForGstin({ ...empty }, "27AAKCG5521M1Z9", record)).not.toHaveProperty("registeredAddress");
+    expect(organisationFieldsForGstin(done, "27AAKCG5521M1Z9", { ...record, status: "Active" })).toEqual({});
+  });
+
+  it("moves the state when a GSTIN is replaced by one from another state", () => {
+    const done = { state: "Maharashtra", pan: "AAKCG5521M", legalName: "G", registeredAddress: "Pune" };
+    expect(organisationFieldsForGstin(done, "29AAKCG5521M1Z5")).toEqual({ state: "Karnataka" });
   });
 });

@@ -10,4 +10,5 @@ export * from "./team";
 export * from "./storefront";
 export * from "./storefront-rules";
 export * from "./analytics";
+export * from "./certificates";
 export { useBankAdapter, type BankAdapter } from "./adapters/bank";
