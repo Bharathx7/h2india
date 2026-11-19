@@ -1,7 +1,7 @@
 import { parseServerEnv } from "@h2india/config";
 import { schema } from "@h2india/db";
 import { Queue, type ConnectionOptions } from "bullmq";
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { audit } from "../audit";
 import { getDb } from "../db";
 import { gstinProvider } from "./adapters/gstin";
@@ -75,13 +75,23 @@ export async function runGstinCheck(gstin: string, attempt: number): Promise<"do
     const others = await tx
       .select({ status: g.portalStatus })
       .from(g)
-      .where(and(eq(g.organisationId, row.organisationId), ne(g.id, row.id)));
-    const all = [status, ...others.map((x) => x.status)];
-    const verification = all.includes("Active") ? "GST verified" : all.includes("Pending") ? "Pending" : "Unverified";
+      .where(and(eq(g.organisationId, row.organisationId), ne(g.id, row.id), isNull(g.retiredAt)));
+    // Only the company's current GSTINs count; a retired one never decides its status.
+    const all = [...(row.retiredAt ? [] : [status]), ...others.map((x) => x.status)];
     const [org] = await tx
-      .select({ state: o.state, pan: o.pan, legalName: o.legalName, registeredAddress: o.registeredAddress })
+      .select({
+        state: o.state,
+        pan: o.pan,
+        legalName: o.legalName,
+        registeredAddress: o.registeredAddress,
+        verification: o.verification,
+      })
       .from(o)
       .where(eq(o.id, row.organisationId));
+    const gst = all.includes("Active") ? "GST verified" : all.includes("Pending") ? "Pending" : "Unverified";
+    // A Verified supplier (badge granted by an operator) stays Verified while it has an active GSTIN: a GSTIN check
+    // only ever moves the GST part of the status (founder QC, 19 Nov 2026).
+    const verification = org?.verification === "Verified" && gst === "GST verified" ? "Verified" : gst;
     // A GSTIN added after Join leaves the state empty on older rows: fill it (and an empty name) from the GSTIN.
     // A retired GSTIN (replaced before its check came back) never moves the company's fields.
     const filled = org && !row.retiredAt ? organisationFieldsForGstin(org, gstin, record) : {};
