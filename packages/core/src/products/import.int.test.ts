@@ -60,6 +60,7 @@ describe.skipIf(!url)("bulk import and quick stock", () => {
         .where(and(eq(schema.products.organisationId, a.org.id), isNull(schema.products.deletedAt)))
     ).length;
 
+  // 500 rows imported twice against a real database: on CI's shared runners this ran just over the 5 s default.
   it("imports 500 rows as drafts, reports the bad one, and re-importing changes nothing", async () => {
     const first = await job();
     expect(await applyImport(h.db, first, file())).toBe("done");
@@ -74,7 +75,7 @@ describe.skipIf(!url)("bulk import and quick stock", () => {
     expect(statuses.map((s) => s.s)).toEqual(["Draft"]);
     expect(await applyImport(h.db, await job(), file())).toBe("done");
     expect(await count()).toBe(499);
-  });
+  }, 30_000);
 
   it("quick stock refuses a lead time under a day and saves the rest at once", async () => {
     const actor = await loadActor(h.db, a.admin.id);
