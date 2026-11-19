@@ -4,6 +4,7 @@ import {
   adminOrders,
   ORDER_BADGE_TONE,
   type AdminOrderView,
+  countAdminOrders,
   type OrderStatus,
 } from "@h2india/core/orders";
 import { formatIstDate } from "@h2india/core/time";
@@ -13,7 +14,7 @@ import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { requireTransactionsPage } from "@/orders/guard";
 import { ListPager } from "@/components/ListPager";
-import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Admin Orders (step 11.5): orders needing Operations (a supplier late to answer, a locked delivery link, a dispute),
 // disputes, and every order. Built from the design system while Figma is out of reach (A178).
@@ -36,9 +37,14 @@ export default async function AdminOrdersPage({
   const { userId, actor } = await requireOperator("orders.view", "/admin/orders");
   const view = TABS.find((t) => t.key === sp.view)?.key ?? "attention";
   const db = getDb();
-  const [rows, counts] = await Promise.all([adminOrders(db, actor, { view, q: sp.q }), adminOrderCounts(db, actor)]);
-  // adminOrders loads at most 200 rows; this pages through what it loaded.
-  const paged = pageOf(rows, pageRequest(sp));
+  // Paged in the database (founder, 19 Nov 2026): before, only the newest 200 could be reached.
+  const req = pageRequest(sp);
+  const [rows, total, counts] = await Promise.all([
+    adminOrders(db, actor, { view, q: sp.q }, pageWindow(req)),
+    countAdminOrders(db, actor, { view, q: sp.q }),
+    adminOrderCounts(db, actor),
+  ]);
+  const paged = { ...req, rows, total };
   return (
     <AdminShell userId={userId} current="/admin/orders" title="Orders">
       <div className="flex flex-col gap-1">

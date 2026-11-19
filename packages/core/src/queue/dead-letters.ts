@@ -1,5 +1,5 @@
 import { schema, type Executor } from "@h2india/db";
-import { desc, eq, isNull } from "drizzle-orm";
+import { desc, eq, isNull, sql } from "drizzle-orm";
 import { audit, mask, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -36,14 +36,29 @@ export async function recordFailedJob(queueName: string, job: FailedJob | undefi
   return true;
 }
 
-export async function listDeadLetters(ex: Executor, actor: Actor, opts: { includeResolved?: boolean } = {}) {
+export async function listDeadLetters(
+  ex: Executor,
+  actor: Actor,
+  opts: { includeResolved?: boolean; limit?: number; offset?: number } = {},
+) {
   assertCan(actor, "settings.view");
   return ex
     .select()
     .from(dl)
     .where(opts.includeResolved ? undefined : isNull(dl.resolvedAt))
     .orderBy(desc(dl.failedAt))
-    .limit(200);
+    .limit(opts.limit ?? 200)
+    .offset(opts.offset ?? 0);
+}
+
+/** How many failed jobs wait to be retried (for the Failed jobs pages). */
+export async function countDeadLetters(ex: Executor, actor: Actor): Promise<number> {
+  assertCan(actor, "settings.view");
+  const [row] = await ex
+    .select({ n: sql<number>`count(*)::int` })
+    .from(dl)
+    .where(isNull(dl.resolvedAt));
+  return row?.n ?? 0;
 }
 
 /** Retry puts the job back on its queue with its data; dismiss just closes it. Audited. */

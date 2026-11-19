@@ -86,6 +86,9 @@ export interface PaginationProps {
   /** Soft navigation (for example Next.js router.push). Defaults to a normal page load. */
   onNavigate?: (href: string) => void;
   className?: string;
+  /** The address parameters this list's page and page size live in, when a page holds several lists. */
+  pageParam?: string;
+  perPageParam?: string;
 }
 
 function pageWindow(page: number, count: number): (number | "gap")[] {
@@ -111,12 +114,14 @@ export function Pagination({
   perPageOptions = [25, 50, 100],
   onNavigate,
   className,
+  pageParam = "page",
+  perPageParam = "perPage",
 }: PaginationProps) {
   const count = Math.max(1, Math.ceil(total / perPage));
   const from = total === 0 ? 0 : (page - 1) * perPage + 1;
   const to = Math.min(total, page * perPage);
   const href = (p: number, pp = perPage) =>
-    `?${new URLSearchParams({ ...query, page: String(p), perPage: String(pp) }).toString()}`;
+    `?${new URLSearchParams({ ...query, [pageParam]: String(p), [perPageParam]: String(pp) }).toString()}`;
   const nav = (target: string) => {
     if (onNavigate) onNavigate(target);
     else window.location.assign(target);

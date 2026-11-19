@@ -29,10 +29,37 @@ const name = (side: "buyer" | "supplier") =>
 export type AdminOrderView = "attention" | "disputes" | "all";
 
 /** Orders for Operations (11.5): needing attention (late answers, locked links, disputes), disputes, or all. */
-export async function adminOrders(db: Database, actor: Actor, input: { view: AdminOrderView; q?: string }) {
-  need(actor, "orders.view");
+/** The orders a view shows (filters shared by the list and its count). */
+async function adminOrderWhere(db: Database, input: { view: AdminOrderView; q?: string }) {
   const attention = input.view === "attention" ? (await ordersNeedingOperations(db)).map((x) => x.id) : null;
   const q = input.q?.trim();
+  return and(
+    attention ? (attention.length ? inArray(o.id, attention) : sql`false`) : undefined,
+    input.view === "disputes"
+      ? sql`exists (select 1 from core.disputes d where d.order_id = core.orders.id)`
+      : undefined,
+    q ? or(ilike(o.reference, `%${q}%`)) : undefined,
+  );
+}
+
+/** How many orders a view holds (the pages of adminOrders). */
+export async function countAdminOrders(db: Database, actor: Actor, input: { view: AdminOrderView; q?: string }) {
+  need(actor, "orders.view");
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(o)
+    .where(await adminOrderWhere(db, input));
+  return row?.n ?? 0;
+}
+
+export async function adminOrders(
+  db: Database,
+  actor: Actor,
+  input: { view: AdminOrderView; q?: string },
+  page: { limit?: number; offset?: number } = {},
+) {
+  need(actor, "orders.view");
+  const where = await adminOrderWhere(db, input);
   return db
     .select({
       id: o.id,
@@ -46,17 +73,10 @@ export async function adminOrders(db: Database, actor: Actor, input: { view: Adm
         order by d.created_at desc limit 1)`,
     })
     .from(o)
-    .where(
-      and(
-        attention ? (attention.length ? inArray(o.id, attention) : sql`false`) : undefined,
-        input.view === "disputes"
-          ? sql`exists (select 1 from core.disputes d where d.order_id = core.orders.id)`
-          : undefined,
-        q ? or(ilike(o.reference, `%${q}%`)) : undefined,
-      ),
-    )
+    .where(where)
     .orderBy(desc(o.createdAt))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
 }
 
 /** Counts for the tabs. */
@@ -72,17 +92,25 @@ export async function adminOrderCounts(db: Database, actor: Actor) {
 // ------------------------------------------------------------------------------------------------ money (11.6)
 
 /** Every payment, newest first (Money · Payments). */
-export async function adminPayments(db: Database, actor: Actor) {
+export async function adminPayments(db: Database, actor: Actor, page: { limit?: number; offset?: number } = {}) {
   need(actor, "money.view");
   return db
     .select({ payment: schema.payments, reference: o.reference, orderId: o.id })
     .from(schema.payments)
     .innerJoin(o, eq(o.id, schema.payments.orderId))
     .orderBy(desc(schema.payments.createdAt))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
 }
 
-export async function adminPayouts(db: Database, actor: Actor) {
+/** How many payments there are (the pages of adminPayments). */
+export async function countAdminPayments(db: Database, actor: Actor) {
+  need(actor, "money.view");
+  const [row] = await db.select({ n: sql<number>`count(*)::int` }).from(schema.payments);
+  return row?.n ?? 0;
+}
+
+export async function adminPayouts(db: Database, actor: Actor, page: { limit?: number; offset?: number } = {}) {
   need(actor, "money.view");
   return db
     .select({
@@ -91,7 +119,15 @@ export async function adminPayouts(db: Database, actor: Actor) {
     })
     .from(schema.payouts)
     .orderBy(desc(schema.payouts.runAt))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
+}
+
+/** How many payouts there are (the pages of adminPayouts). */
+export async function countAdminPayouts(db: Database, actor: Actor) {
+  need(actor, "money.view");
+  const [row] = await db.select({ n: sql<number>`count(*)::int` }).from(schema.payouts);
+  return row?.n ?? 0;
 }
 
 /** The ledger summary per month (705:8): the identity and its parts. */
@@ -110,7 +146,12 @@ export async function ledgerMonths(db: Database, actor: Actor, months = 6) {
   return out;
 }
 
-export async function reconciliationIssues(db: Database, actor: Actor, open = true) {
+export async function reconciliationIssues(
+  db: Database,
+  actor: Actor,
+  open = true,
+  page: { limit?: number; offset?: number } = {},
+) {
   need(actor, "money.view");
   const r = schema.reconciliationIssues;
   return db
@@ -118,7 +159,19 @@ export async function reconciliationIssues(db: Database, actor: Actor, open = tr
     .from(r)
     .where(open ? isNull(r.resolvedAt) : undefined)
     .orderBy(desc(r.createdAt))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
+}
+
+/** How many differences there are (the pages of reconciliationIssues). */
+export async function countReconciliationIssues(db: Database, actor: Actor, open = true) {
+  need(actor, "money.view");
+  const r = schema.reconciliationIssues;
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(r)
+    .where(open ? isNull(r.resolvedAt) : undefined);
+  return row?.n ?? 0;
 }
 
 /** Finance closes a reconciliation difference with what was done about it (money.edit, audited). */

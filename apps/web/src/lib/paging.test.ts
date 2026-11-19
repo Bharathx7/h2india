@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pageNumber, pageOf, pageRequest, pageSlice, pageWindow, pagingQuery } from "./paging";
+import { pageNumber, pageOf, pageParams, pageRequest, pageSlice, pageWindow, pagingQuery } from "./paging";
 
 const list = Array.from({ length: 45 }, (_, i) => i + 1);
 
@@ -42,5 +42,17 @@ describe("workspace paging (founder QC, 17 Nov 2026)", () => {
 
   it("gives offset and limit for queries that page themselves", () => {
     expect(pageWindow({ page: 3, perPage: 50 })).toEqual({ offset: 100, limit: 50 });
+  });
+});
+
+describe("several lists on one page", () => {
+  it("each list pages with its own parameters and keeps the others'", () => {
+    expect(pageParams()).toEqual({ page: "page", perPage: "perPage" });
+    expect(pageParams("holidays")).toEqual({ page: "holidaysPage", perPage: "holidaysPerPage" });
+    const sp = { page: "3", holidaysPage: "2", holidaysPerPage: "50", tab: "x" };
+    expect(pageRequest(sp, "holidays")).toEqual({ page: 2, perPage: 50 });
+    expect(pageRequest(sp)).toEqual({ page: 3, perPage: 25 });
+    expect(pagingQuery(sp, "holidays")).toEqual({ page: "3", tab: "x" });
+    expect(pagingQuery(sp)).toEqual({ holidaysPage: "2", holidaysPerPage: "50", tab: "x" });
   });
 });

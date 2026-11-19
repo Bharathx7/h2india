@@ -2,7 +2,7 @@ import { WORK_ID_KEEP_DAYS } from "@h2india/config/files";
 import { parseServerEnv } from "@h2india/config";
 import { schema } from "@h2india/db";
 import { renderRecovery } from "@h2india/emails";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
@@ -167,15 +167,35 @@ export interface SupportListRow {
   decidedAt: Date | null;
 }
 
+/** Open requests wait for support; done ones are support requests that were answered. */
+function supportWhere(done: boolean) {
+  return done
+    ? and(inArray(rr.status, ["Closed", "Approved", "Declined", "Completed"]), eq(rr.kind, "support"))
+    : inArray(rr.status, ["Waiting for support"]);
+}
+
+/** How many requests are open, or done (the pages of supportRequests). */
+export async function countSupportRequests(actor: Actor, done = false): Promise<number> {
+  assertCan(actor, "users.view");
+  const [row] = await getDb()
+    .select({ n: sql<number>`count(*)::int` })
+    .from(rr)
+    .where(supportWhere(done));
+  return row?.n ?? 0;
+}
+
 /**
  * Requests for H2 Economy support (founder QC, 17 Nov 2026: they reached support only as an email): lost-email support
  * requests, and recovery requests from people whose company has no admin to approve them. Open ones (Waiting for
  * support) first, oldest first; `done` lists the answered ones, newest first. Operators with Users access.
  */
-export async function supportRequests(actor: Actor, done = false): Promise<SupportListRow[]> {
+export async function supportRequests(
+  actor: Actor,
+  done = false,
+  page: { limit?: number; offset?: number } = {},
+): Promise<SupportListRow[]> {
   assertCan(actor, "users.view");
   const db = getDb();
-  const open = ["Waiting for support"];
   const rows = await db
     .select({
       r: rr,
@@ -186,13 +206,10 @@ export async function supportRequests(actor: Actor, done = false): Promise<Suppo
     .from(rr)
     .leftJoin(schema.users, eq(schema.users.id, rr.userId))
     .leftJoin(schema.organisations, eq(schema.organisations.id, rr.organisationId))
-    .where(
-      done
-        ? and(inArray(rr.status, ["Closed", "Approved", "Declined", "Completed"]), eq(rr.kind, "support"))
-        : inArray(rr.status, open),
-    )
+    .where(supportWhere(done))
     .orderBy(done ? desc(rr.updatedAt) : rr.createdAt)
-    .limit(done ? 500 : 1000);
+    .limit(page.limit ?? (done ? 500 : 1000))
+    .offset(page.offset ?? 0);
   return rows.map(({ r, userName, userEmail, company }) => ({
     id: r.id,
     kind: r.kind,

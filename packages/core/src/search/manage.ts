@@ -88,7 +88,13 @@ export async function boostsFor(query: string, uid: SearchIndexUid): Promise<Boo
 }
 
 /** Searches that found nothing in the last `days` days, most frequent first (707:281). Operators with settings.view. */
-export async function searchMissReport(db: Executor, actor: Actor, days = 30, now = new Date()) {
+export async function searchMissReport(
+  db: Executor,
+  actor: Actor,
+  days = 30,
+  now = new Date(),
+  page: { limit?: number; offset?: number } = {},
+) {
   assertCan(actor, "settings.view");
   const m = schema.searchMisses;
   const since = new Date(now.getTime() - days * 86_400_000);
@@ -98,5 +104,18 @@ export async function searchMissReport(db: Executor, actor: Actor, days = 30, no
     .where(gt(m.createdAt, since))
     .groupBy(m.query)
     .orderBy(desc(sql`count(*)`), desc(sql`max(${m.createdAt})`))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
+}
+
+/** How many different searches found nothing in the period (the pages of searchMissReport). */
+export async function countSearchMisses(db: Executor, actor: Actor, days = 30, now = new Date()): Promise<number> {
+  assertCan(actor, "settings.view");
+  const m = schema.searchMisses;
+  const since = new Date(now.getTime() - days * 86_400_000);
+  const [row] = await db
+    .select({ n: sql<number>`count(distinct ${m.query})::int` })
+    .from(m)
+    .where(gt(m.createdAt, since));
+  return row?.n ?? 0;
 }

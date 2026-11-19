@@ -1,5 +1,14 @@
 import { getDb, Money } from "@h2india/core";
-import { adminPayments, adminPayouts, ledgerMonths, moneySettings, reconciliationIssues } from "@h2india/core/orders";
+import {
+  adminPayments,
+  adminPayouts,
+  ledgerMonths,
+  moneySettings,
+  reconciliationIssues,
+  countAdminPayments,
+  countAdminPayouts,
+  countReconciliationIssues,
+} from "@h2india/core/orders";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
 import { Alert, cx, EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -9,7 +18,7 @@ import { ResolveIssue } from "@/admin/orders/Controls";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { requireTransactionsPage } from "@/orders/guard";
 import { ListPager } from "@/components/ListPager";
-import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Admin Money (step 11.6): payments, payouts, the ledger and reconciliation (705:8: collected = paid out + fees + GST
 // on fees + TCS + TDS + held), and the rate card and pilot list. Built from the design system (A178). Read with
@@ -95,8 +104,13 @@ export default async function AdminMoneyPage({
   );
 
   async function Ledger() {
-    const [months, issues] = await Promise.all([ledgerMonths(db, actor), reconciliationIssues(db, actor)]);
-    const paged = pageOf(issues, req);
+    // Paged in the database (founder, 19 Nov 2026): before, only the newest 200 could be reached.
+    const [months, issues, total] = await Promise.all([
+      ledgerMonths(db, actor),
+      reconciliationIssues(db, actor, true, pageWindow(req)),
+      countReconciliationIssues(db, actor),
+    ]);
+    const paged = { ...req, rows: issues, total };
     return (
       <>
         <Table
@@ -157,8 +171,8 @@ export default async function AdminMoneyPage({
   }
 
   async function Payments() {
-    const rows = await adminPayments(db, actor);
-    const paged = pageOf(rows, req);
+    const [rows, total] = await Promise.all([adminPayments(db, actor, pageWindow(req)), countAdminPayments(db, actor)]);
+    const paged = { ...req, rows, total };
     return rows.length ? (
       <>
         <Table label="Payments" head={["Date", "Order", "Method", "Amount", "Partner reference", "Status"]}>
@@ -190,8 +204,8 @@ export default async function AdminMoneyPage({
   }
 
   async function Payouts() {
-    const rows = await adminPayouts(db, actor);
-    const paged = pageOf(rows, req);
+    const [rows, total] = await Promise.all([adminPayouts(db, actor, pageWindow(req)), countAdminPayouts(db, actor)]);
+    const paged = { ...req, rows, total };
     return rows.length ? (
       <>
         <Table label="Payouts" head={["Run", "Payout", "Supplier", "Amount", "UTR", "Status"]}>

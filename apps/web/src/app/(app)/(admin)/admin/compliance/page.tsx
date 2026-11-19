@@ -45,11 +45,14 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
   const type = sp.type ?? "";
   const db = getDb();
   const payload = await getPayload({ config });
+  // Each tab filters by status and words on this page, so every record is loaded (founder, 19 Nov 2026: before, only
+  // the newest 300 grievances and takedowns and 200 corrections could be reached), then shown a page at a time.
+  const ALL = { limit: 10_000 };
   const [grievances, requests, takedowns, corrections, ack, resolve] = await Promise.all([
-    listGrievances(db, actor),
+    listGrievances(db, actor, ALL),
     listRequests(db, actor),
-    listTakedowns(db, actor),
-    payload.find({ collection: "corrections", sort: "-createdAt", limit: 200, depth: 1, overrideAccess: true }),
+    listTakedowns(db, actor, ALL),
+    payload.find({ collection: "corrections", sort: "-createdAt", limit: ALL.limit, depth: 1, overrideAccess: true }),
     clockDuration(db, "grievanceAcknowledge"),
     clockDuration(db, "grievanceResolve"),
   ]);
@@ -71,7 +74,6 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
   };
   const ackOf = (id: string) => clocks.get(id)?.find((c) => c.type === "grievanceAcknowledge") ?? null;
   const here = TABS.find((t) => t.key === tab) ?? TABS[0];
-  // Each tab pages through what core loaded (grievances and takedowns at most 300, corrections 200).
   const req = pageRequest(sp);
   const pager = (paged: { page: number; perPage: number; total: number }) => (
     <ListPager paged={paged} query={pagingQuery(sp)} />

@@ -1,5 +1,5 @@
 import { schema, type Executor } from "@h2india/db";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 
@@ -28,7 +28,7 @@ export async function grievanceClocks(db: Executor, actor: Actor, ids: string[])
  * Takedown requests (660:851): reports from listing pages ("Report this listing", step 6.3), newest first, with the
  * listing they are about. Decided with decideTakedown(); there's no takedown clock until M2 sets the time limits.
  */
-export async function listTakedowns(db: Executor, actor: Actor) {
+export async function listTakedowns(db: Executor, actor: Actor, page: { limit?: number; offset?: number } = {}) {
   assertCan(actor, "compliance.view");
   const lr = schema.listingReports;
   const p = schema.products;
@@ -47,5 +47,17 @@ export async function listTakedowns(db: Executor, actor: Actor) {
     .from(lr)
     .innerJoin(p, eq(p.id, lr.productId))
     .orderBy(desc(lr.createdAt))
-    .limit(300);
+    .limit(page.limit ?? 300)
+    .offset(page.offset ?? 0);
+}
+
+/** How many takedown reports there are (the pages of listTakedowns). */
+export async function countTakedowns(db: Executor, actor: Actor): Promise<number> {
+  assertCan(actor, "compliance.view");
+  const lr = schema.listingReports;
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(lr)
+    .innerJoin(schema.products, eq(schema.products.id, lr.productId));
+  return row?.n ?? 0;
 }

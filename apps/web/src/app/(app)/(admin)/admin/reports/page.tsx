@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { CancelReport, ScheduleReport } from "@/admin/system/Controls";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { PERIODS, REPORT_DOWNLOADS } from "./report-groups";
 
 // Reports overview (716:348), step 11.8: Audience, Marketplace, Content output and Download a report, for the chosen
@@ -69,12 +71,18 @@ function Card({ title, intro, children }: { title: string; intro: string; childr
   );
 }
 
-export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("reports.view", "/admin/reports");
   const days = PERIODS.find((p) => String(p.days) === sp.days)?.days ?? 30;
   const db = getDb();
-  const [metrics, schedules] = await Promise.all([reportsOverview(db, actor, days), reportSchedules(db, actor)]);
+  const [metrics, allSchedules] = await Promise.all([reportsOverview(db, actor, days), reportSchedules(db, actor)]);
+  const schedulesPage = pageOf(allSchedules, pageRequest(sp, "schedules"));
+  const schedules = schedulesPage.rows;
   const m = (key: string) => metrics.find((x) => x.key === key);
   const anyData = metrics.some((x) => x.series.length);
   const today = new Date();
@@ -211,6 +219,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         ) : (
           <p className="type-body-sm text-secondary">None yet.</p>
         )}
+        <ListPager paged={schedulesPage} query={pagingQuery(sp, "schedules")} name="schedules" />
         <p className="type-caption text-secondary">The report email goes out once its wording is approved (M21).</p>
       </section>
     </AdminShell>
