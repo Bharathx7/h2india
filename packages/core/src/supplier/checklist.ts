@@ -1,5 +1,6 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, isNull, ne } from "drizzle-orm";
+import { stateOf } from "../companies/gstin";
 import { storefrontFacts } from "./storefront";
 import { TIER_1 } from "./verification-rules";
 
@@ -17,6 +18,8 @@ export interface ChecklistItem {
   detail: string;
   /** A small badge, for example "Being checked" or "Name matches". */
   badge?: string;
+  /** Where to do (or see) the step, for example "Add GSTIN" on /supplier/company. */
+  action?: { label: string; href: string };
 }
 
 export interface Checklist {
@@ -33,10 +36,12 @@ export interface SupplierFacts {
   companyComplete: boolean;
   /** Tier 1 company documents (GST certificate, PAN): uploaded and verified (step 8.2). */
   documents: { uploaded: number; verified: number; needed: number };
-  bank: { last4: string; nameMatches: boolean; verified: boolean } | null;
+  /** The payout account: Pending until the email code is entered, Held through the change hold, then Active. */
+  bank: { last4: string; nameMatches: boolean; status: "Pending" | "Held" | "Active" } | null;
   storefront: { hasLogo: boolean; hasAbout: boolean; locations: number; published: boolean } | null;
   products: { total: number; submitted: number };
-  review: "none" | "submitted" | "approved";
+  /** "changes": H2 Economy sent the last submission back; the supplier fixes it and submits again. */
+  review: "none" | "submitted" | "approved" | "changes";
 }
 
 export async function supplierFacts(db: Executor, organisationId: string): Promise<SupplierFacts> {
@@ -84,11 +89,26 @@ export async function supplierFacts(db: Executor, organisationId: string): Promi
   return {
     gstin: gst ?? null,
     documents: { uploaded: uploaded.size, verified: verified.size, needed: tier1.length },
-    companyComplete: Boolean(org?.legalName && org.state && gst),
-    bank: bank ? { last4: bank.last4, nameMatches: bank.match === true, verified: bank.status === "Active" } : null,
+    // Companies that added their GSTIN after Join before the state was copied over have no state on the row yet; the
+    // GSTIN carries it.
+    companyComplete: Boolean(org?.legalName && (org.state || (gst && stateOf(gst.number))) && gst),
+    bank: bank
+      ? {
+          last4: bank.last4,
+          nameMatches: bank.match === true,
+          status: bank.status === "Active" ? "Active" : bank.status === "Held" ? "Held" : "Pending",
+        }
+      : null,
     storefront: await storefrontFacts(db, organisationId),
     products: { total: items.length, submitted: items.filter((p) => p.status !== "Draft").length },
-    review: review?.status === "Approved" ? "approved" : review?.status === "Submitted" ? "submitted" : "none",
+    review:
+      review?.status === "Approved"
+        ? "approved"
+        : review?.status === "Submitted"
+          ? "submitted"
+          : review?.status === "Changes requested"
+            ? "changes"
+            : "none",
   };
 }
 
@@ -110,21 +130,38 @@ export function buildChecklist(f: SupplierFacts): Checklist {
       ? docs.uploaded < docs.needed
         ? `${f.gstin.number} · upload your GST certificate and PAN in Verification`
         : `${f.gstin.number}${f.gstin.status === "Pending" || docs.verified < docs.needed ? " · checking in the background" : ""}`
-      : "Add your registered address and GSTIN",
+      : "Add your GSTIN. Your state and registered address come from it.",
     badge: f.gstin
       ? docs.uploaded >= docs.needed && (f.gstin.status !== "Active" || docs.verified < docs.needed)
         ? "Being checked"
         : (GST_WORDS[f.gstin.status] ?? f.gstin.status)
       : undefined,
+    action: !f.gstin
+      ? { label: "Add GSTIN", href: "/supplier/company" }
+      : !f.companyComplete
+        ? { label: "Company details", href: "/supplier/company" }
+        : docs.uploaded < docs.needed
+          ? { label: "Upload documents", href: "/supplier/verification" }
+          : undefined,
   };
   const bank: ChecklistItem = {
     key: "bank",
     title: "Bank account",
-    state: f.bank?.verified ? "done" : f.bank ? "checking" : "todo",
-    detail: f.bank
-      ? `Account ending ${f.bank.last4}${f.bank.nameMatches ? " · name matches your GST legal name" : ""}`
-      : "Add the account that receives payouts",
-    badge: f.bank ? (f.bank.nameMatches ? "Name matches" : "Being checked") : undefined,
+    // A Pending account still waits for the email code: the supplier has something to do, so it isn't "checking".
+    state: f.bank?.status === "Active" ? "done" : f.bank?.status === "Held" ? "checking" : "todo",
+    detail: !f.bank
+      ? "Add the account that receives payouts"
+      : f.bank.status === "Pending"
+        ? `Account ending ${f.bank.last4} · finish confirming your account`
+        : `Account ending ${f.bank.last4}${f.bank.nameMatches ? " · name matches your GST legal name" : ""}`,
+    badge: f.bank && f.bank.status !== "Pending" ? (f.bank.nameMatches ? "Name matches" : "Being checked") : undefined,
+    action: !f.bank
+      ? { label: "Add account", href: "/supplier/bank" }
+      : f.bank.status === "Pending"
+        ? { label: "Finish confirming", href: "/supplier/bank" }
+        : f.bank.status === "Held"
+          ? { label: "View", href: "/supplier/bank" }
+          : undefined,
   };
   const s = f.storefront;
   const parts = s
@@ -157,7 +194,9 @@ export function buildChecklist(f: SupplierFacts): Checklist {
     detail:
       f.review === "submitted"
         ? "H2 Economy is checking your company and first listing."
-        : "H2 Economy checks your company and first listing before you go live.",
+        : f.review === "changes"
+          ? "H2 Economy asked for changes. Make them, then submit again."
+          : "H2 Economy checks your company and first listing before you go live.",
     badge: f.review === "submitted" ? "In review" : undefined,
   };
   const items = [company, bank, storefront, product, review];

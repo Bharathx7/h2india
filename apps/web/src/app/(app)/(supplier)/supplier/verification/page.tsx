@@ -35,7 +35,7 @@ export const dynamic = "force-dynamic";
 export default async function VerificationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ state?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<{ state?: string; page?: string; perPage?: string; renew?: string }>;
 }) {
   const sp = await searchParams;
   const page = await requireSupplier("/supplier/verification");
@@ -77,7 +77,7 @@ export default async function VerificationPage({
         tone: st?.tone ?? ("neutral" as const),
         reason: fix ? (d?.reason ?? null) : null,
         action: !d
-          ? { kind: "upload" as const, label: "Upload" }
+          ? { kind: "upload" as const, label: "Upload", type }
           : fix
             ? { kind: "renew" as const, label: "Re-upload", doc: d }
             : st?.word.startsWith("Expires")
@@ -88,7 +88,15 @@ export default async function VerificationPage({
     {
       key: "bank",
       title: "Payout bank account",
-      word: bank?.state === "done" ? "Verified" : bank?.state === "checking" ? "Being checked" : "To add",
+      // A Pending account (email code not entered yet) still needs the supplier: "To confirm", not being checked.
+      word:
+        bank?.state === "done"
+          ? "Verified"
+          : bank?.state === "checking"
+            ? "Being checked"
+            : bank?.action?.label === "Finish confirming"
+              ? "To confirm"
+              : "To add",
       tone:
         bank?.state === "done"
           ? ("success" as const)
@@ -96,15 +104,21 @@ export default async function VerificationPage({
             ? ("progress" as const)
             : ("neutral" as const),
       reason: null,
-      action: bank?.state === "todo" ? { kind: "link" as const, label: "Add account", href: "/supplier/bank" } : null,
+      action:
+        bank?.state === "todo" && bank.action
+          ? { kind: "link" as const, label: bank.action.label, href: bank.action.href }
+          : null,
     },
   ];
   const verified = active.some((b) => b.kind === "verified_supplier");
-  const allIn = required.every((x) => x.word !== "To upload" && x.word !== "To add");
+  const allIn = required.every((x) => x.word !== "To upload" && x.word !== "To add" && x.word !== "To confirm");
   const allChecked = required.every((x) => x.word === "Verified" || x.word.startsWith("Expires"));
   // Where the company is: 0 upload, 1 being checked, 2 submit for review, 3 verified.
   const stage = verified ? 3 : reviewItem?.state === "checking" ? 2 : allChecked ? 2 : allIn ? 1 : 0;
   const sentBack = review?.status === "Changes requested" && !verified ? review : null;
+  // The expiry email links to ?renew=<document id>: open the upload as a renewal of that document.
+  const renewing = canUpload && sp.renew ? docs.find((d) => d.id === sp.renew && d.type !== "site_visit") : undefined;
+  const maySubmit = s.seat.permissions.has("company.manage");
   return (
     <SupplierShell page={page} current="/supplier/verification" title="Verification">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -114,7 +128,27 @@ export default async function VerificationPage({
             Checks H2 Economy runs on {s.tradeName}. Keep them current to keep your badges.
           </p>
         </div>
-        {canUpload ? <UploadDocument organisationId={s.organisationId} /> : null}
+        {canUpload ? (
+          <div className="flex flex-wrap gap-2">
+            {renewing ? (
+              <UploadDocument
+                key={renewing.id}
+                organisationId={s.organisationId}
+                look="outline"
+                label={`Renew ${documentTitle(renewing)}`}
+                openOnLoad
+                renew={{
+                  id: renewing.id,
+                  type: renewing.type,
+                  name: renewing.name,
+                  scope: renewing.scope,
+                  number: renewing.number,
+                }}
+              />
+            ) : null}
+            <UploadDocument organisationId={s.organisationId} />
+          </div>
+        ) : null}
       </div>
       {sentBack ? (
         <Alert tone="warning" title="H2 Economy asked for changes before verifying you">
@@ -193,7 +227,12 @@ export default async function VerificationPage({
                       }}
                     />
                   ) : (
-                    <UploadDocument organisationId={s.organisationId} look="outline" label={x.action.label} />
+                    <UploadDocument
+                      organisationId={s.organisationId}
+                      look="outline"
+                      label={x.action.label}
+                      type={x.action.type}
+                    />
                   )
                 ) : null}
               </li>
@@ -208,7 +247,9 @@ export default async function VerificationPage({
                     ? "Everything's in. Send your company for review."
                     : "Submit for review opens once these and your storefront and first listing are in."}
               </p>
-              {reviewItem?.state === "todo" ? <SubmitReview ready={canSubmitForReview(checklist)} /> : null}
+              {reviewItem?.state === "todo" ? (
+                <SubmitReview ready={canSubmitForReview(checklist)} allowed={maySubmit} />
+              ) : null}
             </div>
           ) : null}
         </section>

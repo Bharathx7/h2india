@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { continueAfterConfirm } from "../actions";
 
-export function ContinueButton() {
+export function ContinueButton({ linkToken }: { linkToken?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   return (
     <>
       {failed ? (
-        <Alert tone="error" title="We couldn't find your Join details" live>
-          Start again from Join; your email stays confirmed.
+        <Alert tone="error" title="We couldn't finish your sign-up here" live>
+          Your email stays confirmed. Taking you back to your sign-up page to check your details…
         </Alert>
       ) : null}
       <Button
@@ -22,13 +22,16 @@ export function ContinueButton() {
         disabled={busy}
         onClick={() => {
           setBusy(true);
-          void continueAfterConfirm().then((r) => {
+          void continueAfterConfirm(linkToken).then((r) => {
+            if (r.ok) {
+              router.push(r.value);
+              return;
+            }
             setBusy(false);
-            if (r.ok) router.push(r.value);
-            else if (r.code === "NOT_SIGNED_IN" || r.code === "INCOMPLETE") {
-              setFailed(true);
-              router.push("/join");
-            } else setFailed(true);
+            // The server says where to pick up: the person's own sign-up page, or a fresh link.
+            const back = r.message?.startsWith("/") ? r.message : "/join";
+            setFailed(back);
+            router.push(back);
           });
         }}
       >

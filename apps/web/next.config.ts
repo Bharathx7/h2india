@@ -28,4 +28,20 @@ const nextConfig: NextConfig = {
 };
 
 // Payload (step 4.1) adds the settings its admin and API need.
-export default withPayload(nextConfig);
+const withCms = withPayload(nextConfig);
+
+/**
+ * Payload sends `Critical-CH: Sec-CH-Prefers-Color-Scheme` on every address (for its admin's dark mode). A browser
+ * that hasn't seen the site before then repeats the first request with the hint, so a single-use link (the Join
+ * confirm link, sign-in and password links) is used up by the first request and the repeat says "expired" (founder
+ * QC, 19 Nov 2026: confirm links opened on a phone or another browser failed). The hint stays on the CMS only.
+ */
+const payloadHeaders = withCms.headers;
+withCms.headers = async () =>
+  ((await payloadHeaders?.()) ?? []).map((rule) =>
+    rule.source === "/:path*" && rule.headers.some((h) => h.key.toLowerCase() === "critical-ch")
+      ? { ...rule, source: "/cms/:path*" }
+      : rule,
+  );
+
+export default withCms;

@@ -594,6 +594,8 @@ export async function listingQueue(
       name: p.name,
       model: p.model,
       company: sql<string>`coalesce(${prof.tradeName}, ${org.legalName})`,
+      /** A new listing goes live only once this is "Verified" (decideRevision). */
+      companyVerification: org.verification,
       submitter: schema.users.name,
       assignee: sql<string | null>`(select name from core.users u where u.id = ${r.assigneeId})`,
     })

@@ -46,8 +46,12 @@ export async function whereNext(next: string, audience?: AccountKind): Promise<s
   // The page is the browser's word: only the three account pages count.
   const page = ACCOUNT_KINDS.find((k) => k === audience);
   if (!page) {
-    if (!profile?.profileType) return "/join";
-    return has ? back : "/join";
+    // Staff first: an operator without a buyer, supplier or member profile goes where they were going, not to Join
+    // (founder QC, 19 Nov 2026).
+    if (has) return back;
+    if (await hasOperatorRole(getDb(), session.user.id)) return back;
+    if (profile?.profileType === "buyer" || profile?.profileType === "supplier") return `/join/${profile.profileType}`;
+    return "/join";
   }
   // The member page and a buyer or supplier (founder QC, 17 Nov 2026): one who joined as a member signs in to the
   // member area; one who hasn't goes to Join as member (one click, same account), then on to where they were going.

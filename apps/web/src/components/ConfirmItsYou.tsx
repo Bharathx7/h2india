@@ -15,14 +15,21 @@ export function ConfirmItsYou({
   actionLabel,
   onConfirmed,
   disabled = false,
+  onStepChange,
 }: {
   /** The button that sends the code, for example "Approve" or "Confirm change". */
   actionLabel: string;
   /** Runs once the code is accepted: the change itself. */
   onConfirmed: () => Promise<Result>;
   disabled?: boolean;
+  /** Told when the code form opens ("code") or closes ("start"), so the caller can hide its own Cancel meanwhile. */
+  onStepChange?: (step: "start" | "code") => void;
 }) {
-  const [step, setStep] = useState<"start" | "code">("start");
+  const [step, setStepState] = useState<"start" | "code">("start");
+  const setStep = (next: "start" | "code") => {
+    setStepState(next);
+    onStepChange?.(next);
+  };
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);

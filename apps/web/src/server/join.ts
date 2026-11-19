@@ -24,6 +24,21 @@ export async function ensureDraft(): Promise<string> {
   return token;
 }
 
+/**
+ * Takes over a draft from the confirm link, for when the link opens in a browser that never had the Join cookie
+ * (another browser, a phone, an email app's own browser). The draft is only applied to the account whose email it
+ * names (applyDraft), so the token alone changes nothing.
+ */
+export async function adoptDraft(token: string): Promise<void> {
+  (await cookies()).set(JOIN_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.APP_URL?.startsWith("https://") ?? false,
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60,
+  });
+}
+
 export async function clearDraftCookie(): Promise<void> {
   (await cookies()).delete(JOIN_COOKIE);
 }

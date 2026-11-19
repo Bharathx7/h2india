@@ -1,0 +1,1143 @@
+<title>H2 Economy E2E Runbook</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+/>
+<style>
+  /* Layout: a single working column — sticky progress bar, then phases in run order, each a list of tickable steps. */
+  :root {
+    --bg: #f5f7f8;
+    --surface: #ffffff;
+    --ink: #14212b;
+    --muted: #5b6b77;
+    --line: #dbe3e8;
+    --accent: #0b7a8f;
+    --accent-soft: #e2f2f5;
+    --ok: #1f8a4c;
+    --ok-soft: #e3f4ea;
+    --bad: #c23b2e;
+    --bad-soft: #fbe9e7;
+    --warn: #a86a00;
+    --warn-soft: #fdf2dc;
+    --f-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --f-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e161c;
+      --surface: #16212a;
+      --ink: #e3ebf0;
+      --muted: #93a4b1;
+      --line: #2a3a46;
+      --accent: #4cc3d6;
+      --accent-soft: #16343b;
+      --ok: #5bcb87;
+      --ok-soft: #173326;
+      --bad: #f07a6e;
+      --bad-soft: #3a1e1b;
+      --warn: #e8b14d;
+      --warn-soft: #3a2e15;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e161c;
+    --surface: #16212a;
+    --ink: #e3ebf0;
+    --muted: #93a4b1;
+    --line: #2a3a46;
+    --accent: #4cc3d6;
+    --accent-soft: #16343b;
+    --ok: #5bcb87;
+    --ok-soft: #173326;
+    --bad: #f07a6e;
+    --bad-soft: #3a1e1b;
+    --warn: #e8b14d;
+    --warn-soft: #3a2e15;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.55;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 64px;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--surface);
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  header.top {
+    padding-block: 28px 8px;
+  }
+  h1 {
+    font-family: var(--f-display);
+    font-size: clamp(26px, 4vw, 34px);
+    line-height: 1.15;
+    margin: 0 0 6px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--muted);
+    margin: 0;
+    max-width: 65ch;
+  }
+  .bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-block: 18px 22px;
+    padding: 12px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: center;
+  }
+  .meter {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+  .meter .track {
+    height: 8px;
+    border-radius: 99px;
+    background: var(--line);
+    overflow: hidden;
+    display: flex;
+  }
+  .meter .track span {
+    display: block;
+    height: 100%;
+  }
+  .meter .seg-ok {
+    background: var(--ok);
+  }
+  .meter .seg-bad {
+    background: var(--bad);
+  }
+  .meter .seg-skip {
+    background: var(--warn);
+  }
+  .counts {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+  .counts b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .btn {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--surface);
+  }
+  .btn:focus-visible,
+  .mark:focus-visible,
+  summary:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .toast {
+    font-size: 13px;
+    color: var(--ok);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .fact {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .fact h3 {
+    font-family: var(--f-display);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .fact dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 10px;
+    font-size: 13.5px;
+  }
+  .fact dt {
+    color: var(--muted);
+  }
+  .fact dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  code,
+  .code {
+    font-family: var(--f-mono);
+    font-size: 0.88em;
+    background: var(--accent-soft);
+    color: var(--ink);
+    padding: 1px 6px;
+    border-radius: 5px;
+    overflow-wrap: anywhere;
+  }
+
+  details.phase {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  details.phase > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  details.phase > summary::-webkit-details-marker {
+    display: none;
+  }
+  .pnum {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 15px;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .phase.done .pnum {
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+  .phase.hasfail .pnum {
+    background: var(--bad-soft);
+    color: var(--bad);
+  }
+  .ptitle {
+    flex: 1;
+    min-width: 0;
+  }
+  .ptitle h2 {
+    font-family: var(--f-display);
+    font-size: 18px;
+    margin: 0;
+    line-height: 1.25;
+  }
+  .ptitle .sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .role {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 99px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pcount {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .chev {
+    transition: transform 0.15s;
+    color: var(--muted);
+  }
+  details[open] .chev {
+    transform: rotate(90deg);
+  }
+  @media (max-width: 520px) {
+    .role {
+      display: none;
+    }
+  }
+
+  .callout {
+    margin: 0 18px 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    border: 1px solid;
+  }
+  .callout.warn {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+    color: var(--ink);
+  }
+  .callout.block {
+    background: var(--bad-soft);
+    border-color: var(--bad);
+    color: var(--ink);
+  }
+  .callout.info {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  ol.steps {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 6px;
+    counter-reset: s;
+  }
+  ol.steps > li {
+    counter-increment: s;
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 4px 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  ol.steps > li::before {
+    content: counter(s);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 3px;
+  }
+  .stext {
+    min-width: 0;
+  }
+  .stext .ui {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .stext .ui::before {
+    content: "“";
+  }
+  .stext .ui::after {
+    content: "”";
+  }
+  .url {
+    font-family: var(--f-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .expect {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .expect::before {
+    content: "Expect: ";
+    font-weight: 600;
+    color: var(--ok);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 99px;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .tag.blocked {
+    background: var(--bad-soft);
+    color: var(--bad);
+  }
+  .tag.warn {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+  .marks {
+    display: flex;
+    gap: 6px;
+  }
+  .mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+  .mark.ok[aria-pressed="true"] {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: var(--surface);
+  }
+  .mark.bad[aria-pressed="true"] {
+    background: var(--bad);
+    border-color: var(--bad);
+    color: var(--surface);
+  }
+  .mark.skip[aria-pressed="true"] {
+    background: var(--warn);
+    border-color: var(--warn);
+    color: var(--surface);
+  }
+  li.is-ok .stext {
+    opacity: 0.6;
+  }
+  .note {
+    grid-column: 2 / -1;
+  }
+  .note textarea {
+    width: 100%;
+    min-height: 56px;
+    font: inherit;
+    font-size: 13.5px;
+    border: 1px solid var(--bad);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--bad-soft);
+    color: var(--ink);
+    resize: vertical;
+  }
+  .legend {
+    font-size: 12.5px;
+    color: var(--muted);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: -8px 0 18px;
+  }
+  .legend span {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .sw {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  footer {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 26px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>H2 Economy end-to-end test</h1>
+    <p class="lede">
+      Run the phases in order: each role sets up the next. The supplier path is now: sign up → 5 setup steps → admin
+      approves everything on one Verification page. Mark every step ✓ pass, ✗ fail or – skip. A failed step opens a note
+      box. When you finish, click <b>Copy results</b> and paste them to Claude.
+    </p>
+  </header>
+
+  <div class="bar" role="region" aria-label="Progress">
+    <div class="meter">
+      <div class="track" aria-hidden="true">
+        <span class="seg-ok" id="segOk"></span><span class="seg-bad" id="segBad"></span
+        ><span class="seg-skip" id="segSkip"></span>
+      </div>
+      <div class="counts" id="counts"></div>
+    </div>
+    <button class="btn primary" id="copyBtn" type="button">Copy results</button>
+    <button class="btn" id="resetBtn" type="button">Reset</button>
+    <span class="toast" id="toast" role="status"></span>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw" style="background: var(--ok)"></i>✓ pass</span
+    ><span><i class="sw" style="background: var(--bad)"></i>✗ fail (add a note)</span
+    ><span><i class="sw" style="background: var(--warn)"></i>– skipped / blocked</span>
+  </div>
+
+  <section class="facts" aria-label="Test data">
+    <div class="fact">
+      <h3>Where to look</h3>
+      <dl>
+        <dt>Public site</dt>
+        <dd><code>h2economy.co</code></dd>
+        <dt>Admin</dt>
+        <dd><code>admin.h2economy.co</code></dd>
+        <dt>All email</dt>
+        <dd>Mailpit <code>localhost:18025</code> (SSH tunnel)</dd>
+        <dt>SMS codes</dt>
+        <dd>Email to <code>sms-&lt;number&gt;@sms.h2india.local</code></dd>
+      </dl>
+    </div>
+    <div class="fact">
+      <h3>Test accounts</h3>
+      <dl>
+        <dt>Supplier</dt>
+        <dd><code>e2e.supplier1@example.com</code> · <code>9000000101</code></dd>
+        <dt>Buyer</dt>
+        <dd><code>e2e.buyer1@example.com</code> · <code>9000000102</code></dd>
+        <dt>Member</dt>
+        <dd><code>e2e.member1@example.com</code> · <code>9000000103</code></dd>
+        <dt>Staff</dt>
+        <dd><code>e2e.staff1@example.com</code> · <code>9000000104</code></dd>
+      </dl>
+    </div>
+    <div class="fact">
+      <h3>Test GSTINs (fake checker)</h3>
+      <dl>
+        <dt>Supplier</dt>
+        <dd><code>27AAKCT1408S1ZQ</code></dd>
+        <dt>Buyer</dt>
+        <dd><code>24AAKCT4659B1ZC</code></dd>
+        <dt>Spares</dt>
+        <dd><code>29AAKCT9636M1ZC</code> <code>27AAKCT6212Q1ZQ</code></dd>
+        <dt>Legal name</dt>
+        <dd>Test Hydrogen &lt;PAN&gt; Private Limited</dd>
+      </dl>
+    </div>
+    <div class="fact">
+      <h3>Bank details (fake check)</h3>
+      <dl>
+        <dt>Holder</dt>
+        <dd><code>Test Hydrogen AAKCT1408S Private Limited</code></dd>
+        <dt>Account</dt>
+        <dd><code>123456789012</code></dd>
+        <dt>IFSC</dt>
+        <dd><code>HDFC0001234</code></dd>
+        <dt>PAN</dt>
+        <dd><code>AAKCT1408S</code></dd>
+      </dl>
+    </div>
+  </section>
+
+  <main id="phases"></main>
+
+  <footer>
+    Rewritten 19 Nov 2026 for branch step/flow-fixes (sign-up link in any browser, supplier setup links, Verification
+    page order, Queues overview, Team drawer). Labels in “quotes” are the exact text on screen. Your marks are saved in
+    this browser only.
+  </footer>
+</div>
+
+<script>
+  const P = [
+    {
+      id: "prep",
+      role: "Setup",
+      title: "Before you start",
+      sub: "Deploy, mail and two browsers",
+      callouts: [
+        [
+          "block",
+          "<b>Deploy first.</b> These steps test the fixes on branch <code>step/flow-fixes</code>. Run them after that pull request is merged and deployed with <code>/srv/h2india/deploy.sh &lt;tag&gt;</code>. On the old build, phases 2–5 will fail the same way as before.",
+        ],
+        [
+          "warn",
+          "Production uses the <b>fake GSTIN checker</b>. A real GSTIN comes back “not found”, so use the test GSTINs above.",
+        ],
+        [
+          "info",
+          "Everything you create here is real data in production. Note the company names so you can suspend them in the last phase.",
+        ],
+      ],
+      steps: [
+        [
+          "Point mail at Mailpit on the server: <code>sed -i 's#^ *SMTP_HOST=.*#SMTP_HOST=mailpit#; s#^ *SMTP_PORT=.*#SMTP_PORT=1025#' h2india.env</code> then <code>dc up -d --force-recreate web-public web-admin worker</code>.",
+          "",
+          "<code>dc exec web-public printenv SMTP_HOST</code> prints <code>mailpit</code>",
+        ],
+        [
+          "On your Mac open the tunnel: <code>ssh -N -L 18025:127.0.0.1:8025 ubuntu@15.235.186.134</code>, then open <code>http://localhost:18025</code>. Keep it open.",
+          "",
+          "Mailpit inbox loads",
+        ],
+        [
+          "Use <b>two browsers</b>: one for admin, one for the person you are testing. You may now open email links in either one: sign-up no longer depends on which browser you use.",
+          "",
+          "",
+        ],
+        [
+          "Have two small PDFs ready: one for the GST certificate, one for the PAN card. A third one is optional, for an ISO certificate.",
+          "",
+          "",
+        ],
+      ],
+    },
+    {
+      id: "admin1",
+      role: "Admin",
+      title: "Get a staff login",
+      sub: "Super admin grants a role, staff sets a password",
+      callouts: [
+        [
+          "info",
+          "Skip this phase if you already sign in as Super admin or Supplier verifier. Only those two roles can approve a supplier; others see “Needs a verifier” in the Suppliers queue.",
+        ],
+      ],
+      steps: [
+        [
+          "As Super admin: Users → Operator roles. Type the email in <span class=ui>Their email</span>, pick <b>Supplier verifier</b>, fill <span class=ui>Reason</span>, click <span class=ui>Add to role</span>.",
+          "admin.h2economy.co/admin/users/roles",
+          "The person appears in the role",
+        ],
+        [
+          "In the other browser: staff password page → <span class=ui>Work email</span> → <span class=ui>Send link</span>. Open the link from Mailpit and set the password.",
+          "admin.h2economy.co/sign-in/staff/password",
+          "“Check your email”, then the set-password form",
+        ],
+        [
+          "Sign in on staff sign-in with that email and password.",
+          "admin.h2economy.co/sign-in/staff",
+          "The back office opens (not a Join page)",
+        ],
+      ],
+    },
+    {
+      id: "signin",
+      role: "Visitor",
+      title: "Sign-in and “no account”",
+      sub: "What a stranger sees",
+      steps: [
+        [
+          "Open supplier sign-in, type an email that has <b>no</b> account (e.g. <code>nobody.e2e@example.com</code>), click <span class=ui>Send code</span>.",
+          "h2economy.co/supplier/sign-in",
+          "“Check your email”. The text says the email holds a code if there is an account, or tells you how to create one",
+        ],
+        [
+          "Look below the code box.",
+          "",
+          "A box “No email after 2 minutes?” with links: Create a supplier account · Create a buyer account · Join as a member",
+        ],
+        ["In Mailpit, open the email to that address.", "localhost:18025", "No code; links to create an account"],
+        ["Click <span class=ui>Create a supplier account</span>.", "", "Supplier sign-up page, “Find your company”"],
+      ],
+    },
+    {
+      id: "sup1",
+      role: "Supplier",
+      title: "Create the supplier account",
+      sub: "Sign up, confirm email, create the company",
+      steps: [
+        [
+          "Type the GSTIN <code>27AAKCT1408S1ZQ</code> in <span class=ui>Company name or GSTIN</span>, click <span class=ui>Create a new company</span>.",
+          "h2economy.co/join/supplier",
+          "Your details",
+        ],
+        [
+          "Fill <span class=ui>Work email</span> <code>e2e.supplier1@example.com</code>, <span class=ui>Mobile</span>, <span class=ui>Full name</span>, <span class=ui>Your role</span>, tick Terms, click <span class=ui>Continue</span>. (If a code button shows, use the SMS email in Mailpit.)",
+          "",
+          "“Check your inbox”",
+        ],
+        [
+          "<b>The fix to test:</b> open the confirm email in Mailpit and click the link <b>in the other browser</b> (or on your phone).",
+          "",
+          "“Email confirmed” and “Next: finish a supplier account for &lt;your name&gt;.”",
+        ],
+        [
+          "Click <span class=ui>Continue</span>.",
+          "",
+          "Company details on <code>/join/supplier?step=company</code>, <b>not</b> the “How you'll use H2 Economy” choice",
+        ],
+        [
+          "Type the GSTIN, wait for <span class=ui>GSTIN is active</span>, click <span class=ui>Create company</span>, then <span class=ui>Go to your workspace</span>.",
+          "",
+          "Supplier dashboard with “Set up … on H2 Economy” and 5 steps",
+        ],
+        [
+          "Sign out, then sign in again on supplier sign-in with the email code.",
+          "/supplier/sign-in",
+          "Lands on /supplier",
+        ],
+      ],
+    },
+    {
+      id: "sup2",
+      role: "Supplier",
+      title: "Finish the 5 setup steps",
+      sub: "Every step on the dashboard now has its own button",
+      callouts: [
+        [
+          "info",
+          "Submit for review opens when steps 1–4 are each <b>done</b> or <b>Being checked</b>. Step 1 turns fully done only after the admin verifies your documents, so “Being checked” is enough here.",
+        ],
+      ],
+      steps: [
+        [
+          "Step 1 <span class=ui>Company details and GSTIN</span> → <span class=ui>Company details</span>.",
+          "/supplier/company",
+          "Legal name, state, registered address and PAN from the GST record, and the GSTIN card",
+        ],
+        [
+          "Back on the dashboard, step 1 → <span class=ui>Upload documents</span>.",
+          "/supplier/verification",
+          "“What the Verified supplier badge needs”: GST certificate, PAN card, Payout bank account",
+        ],
+        [
+          "On the <b>GST certificate</b> row click <span class=ui>Upload</span>, drop a PDF, fill <span class=ui>Number</span> <code>27AAKCT1408S1ZQ</code>, click <span class=ui>Upload</span>.",
+          "",
+          "Document is already “GST certificate”; toast “Uploaded. We'll check it within 1 working day.”",
+        ],
+        [
+          "On the <b>PAN card</b> row click <span class=ui>Upload</span>, drop a PDF, fill <span class=ui>Number</span> <code>AAKCT1408S</code>, click <span class=ui>Upload</span>.",
+          "",
+          "Document is already “PAN card” (this used to pick GST by mistake). Both rows “Pending”",
+        ],
+        [
+          "Optional: <span class=ui>Upload a document</span> → <b>Certificate</b>, name <code>ISO 22734</code>, PDF, Issued by, Valid until next year → <span class=ui>Upload</span>.",
+          "",
+          "Listed in All documents",
+        ],
+        [
+          "Dashboard step 2 → <span class=ui>Add account</span>. Fill holder, account number twice and IFSC from the Bank box, click <span class=ui>Check this account</span>.",
+          "/supplier/bank",
+          "“Add your payout account”, then name matches",
+        ],
+        [
+          "Click <span class=ui>Confirm account</span>, type the code from Mailpit, confirm.",
+          "",
+          "Account active. Dashboard step 2 is done. If you stop before the code, step 2 shows <span class=ui>Finish confirming</span>",
+        ],
+        [
+          "Step 3 <span class=ui>Set up</span>: logo, about, what you make, locations, contact using <span class=ui>Next: …</span>, then <span class=ui>Send for review</span>.",
+          "/supplier/storefront",
+          "Step 3 “Being checked”",
+        ],
+        [
+          "Step 4 <span class=ui>Add product</span>: Class › Category › Type → <span class=ui>Continue</span>; name, <span class=ui>Fixed price</span>, price, stock → <span class=ui>Submit for review</span>.",
+          "/supplier/products/new",
+          "Product “In review”, step 4 done",
+        ],
+        [
+          "Step 5 <span class=ui>Submit for review</span>.",
+          "/supplier",
+          "Badge “In review”: “H2 Economy is checking your company and first listing.”",
+        ],
+      ],
+    },
+    {
+      id: "sup3",
+      role: "Supplier",
+      title: "Add a team member",
+      sub: "Team drawer",
+      steps: [
+        [
+          "Sidebar Team → <span class=ui>Add member</span>.",
+          "/supplier/team",
+          "Drawer “Add a team member” with padding and the line “We email them an invitation. It works for 14 days.”",
+        ],
+        [
+          "Type a bad email (<code>abc</code>) and click <span class=ui>Send invitation</span>.",
+          "",
+          "An error on the email field; nothing sent",
+        ],
+        [
+          "Type <code>e2e.colleague1@example.com</code>, pick a preset (its description shows as text), click the words <span class=ui>Full access (Admin)</span>.",
+          "",
+          "The switch toggles when you click its words",
+        ],
+        [
+          "Click <span class=ui>Send invitation</span>.",
+          "",
+          "Success message, drawer closes. Invite listed with “Invited &lt;date&gt; · expires &lt;date&gt;”. Email in Mailpit",
+        ],
+        [
+          "Click <span class=ui>Resend invitation</span>.",
+          "",
+          "Resent (or a “wait” message if within 10 minutes of the last send)",
+        ],
+        ["Click <span class=ui>Cancel invitation</span> and confirm.", "", "Invite removed"],
+      ],
+    },
+    {
+      id: "admin2",
+      role: "Admin",
+      title: "Approve the supplier",
+      sub: "Everything on one Verification page",
+      steps: [
+        [
+          "Click <span class=ui>Queues</span> in the sidebar.",
+          "admin.h2economy.co/admin/queues",
+          "An overview with a card per queue (Suppliers, Listings, RFQs, …): count waiting, oldest age, SLA. Not straight into Suppliers",
+        ],
+        [
+          "Click the <b>Suppliers</b> card → on the company row <span class=ui>Assign to me</span> → <span class=ui>Review</span>.",
+          "/admin/queues/suppliers",
+          "Verification page for the company",
+        ],
+        [
+          "Section <b>Documents and expiry</b> (now first): click <span class=ui>Verify</span> on the GST certificate and on the PAN card. Verify the ISO certificate too if you uploaded one.",
+          "/admin/verification?company=…",
+          "Each shows “Verified”",
+        ],
+        ["Section <b>Automated checks</b>: click <span class=ui>Run checks again</span>.", "", "“GSTIN is active”"],
+        [
+          "Section <b>Verification checklist</b>: Company identity and Bank account are already ticked, marked “from evidence”. Leave them.",
+          "",
+          "“2 of 5”; Approve and verify is enabled",
+        ],
+        [
+          "Click <span class=ui>Approve and verify</span>.",
+          "",
+          "“Approved on &lt;date&gt;”; the header shows the Verified supplier badge",
+        ],
+        [
+          "Section <b>Storefront and first product</b>: <span class=ui>Approve</span> the storefront change, then approve the product.",
+          "",
+          "Both leave the list",
+        ],
+        [
+          "Supplier browser: refresh the dashboard and check notifications.",
+          "/supplier",
+          "The setup checklist is gone (all 5 done); “You're verified” notification",
+        ],
+        [
+          "Open the company's public profile in the directory.",
+          "h2economy.co/directory",
+          "Verified badge; the ISO certificate shows under Certifications (if uploaded)",
+        ],
+        ["Open the marketplace and find the product.", "h2economy.co/marketplace", "Product page loads with its price"],
+      ],
+    },
+    {
+      id: "admin3",
+      role: "Admin",
+      title: "Send back (optional second supplier)",
+      sub: "Check the sent-back path",
+      callouts: [
+        [
+          "info",
+          "Needs a second supplier: repeat phases 3–4 with spare GSTIN <code>29AAKCT9636M1ZC</code> and <code>e2e.supplier2@example.com</code>.",
+        ],
+      ],
+      steps: [
+        [
+          "Before the supplier submits, open its Verification page.",
+          "/admin/verification",
+          "Checklist box says “Waiting for the supplier to submit for review” and what's missing",
+        ],
+        [
+          "After it submits: type a reason in <span class=ui>What to fix</span>, click <span class=ui>Send back with reasons</span>.",
+          "",
+          "",
+        ],
+        [
+          "Supplier dashboard.",
+          "/supplier",
+          "A warning with the reason and a link to Verification; Submit for review is open again",
+        ],
+      ],
+    },
+    {
+      id: "buy1",
+      role: "Buyer",
+      title: "Buyer sign-up and quote",
+      sub: "Same sign-up fix, then an RFQ",
+      steps: [
+        [
+          "Buyer sign-up: GSTIN <code>24AAKCT4659B1ZC</code> → <span class=ui>Create a new company</span> → details (<code>e2e.buyer1@example.com</code>) → <span class=ui>Continue</span>.",
+          "h2economy.co/join/buyer",
+          "“Check your inbox”",
+        ],
+        [
+          "Open the confirm link in the <b>other</b> browser → <span class=ui>Continue</span>.",
+          "",
+          "Buyer company details, not /join",
+        ],
+        [
+          "<span class=ui>Create company</span> → <span class=ui>Go to your workspace</span>. Company → Sites: add a delivery site.",
+          "/buyer",
+          "Buyer dashboard, site listed",
+        ],
+        [
+          "Open the supplier's product → <span class=ui>Request quote</span> → fill the 4 steps → <span class=ui>Send RFQ to 1 supplier</span>.",
+          "/rfq/new",
+          "“Your request is on its way”",
+        ],
+        [
+          "Supplier: RFQs → To quote → fill the quote → <span class=ui>Send quote</span>.",
+          "/supplier/rfqs",
+          "Quote sent; email to the buyer in Mailpit",
+        ],
+        [
+          "Buyer: open the RFQ, see the quote. <span class=ui>Accept quote</span> is disabled while ordering is off. <span class='tag blocked'>Blocked</span>",
+          "/buyer/rfqs/[id]",
+          "“Ordering opens in Launch 2”",
+        ],
+      ],
+    },
+    {
+      id: "mem",
+      role: "Member",
+      title: "Member sign-up",
+      sub: "Same fix for members",
+      steps: [
+        [
+          "Member sign-up with <code>e2e.member1@example.com</code> → <span class=ui>Continue</span>.",
+          "h2economy.co/join/member",
+          "“Check your inbox”",
+        ],
+        [
+          "Open the confirm link in the <b>other</b> browser → <span class=ui>Continue</span>.",
+          "",
+          "Member welcome / home, not /join",
+        ],
+        ["Pick a persona and follows → <span class=ui>Go to my feed</span>.", "/member/welcome", "Member home feed"],
+      ],
+    },
+    {
+      id: "done",
+      role: "Setup",
+      title: "Finish",
+      sub: "Put mail back and tidy up",
+      steps: [
+        [
+          "Switch mail back to Gmail: <code>sed -i 's#^ *SMTP_HOST=.*#SMTP_HOST=smtp.gmail.com#; s#^ *SMTP_PORT=.*#SMTP_PORT=465#' h2india.env</code> then <code>dc up -d --force-recreate web-public web-admin worker</code>.",
+          "",
+          "<code>printenv SMTP_HOST</code> shows smtp.gmail.com",
+        ],
+        ["Suspend the test companies and users: Users → Companies.", "/admin/users/companies", ""],
+        ["Close the SSH tunnel (Ctrl+C) and click <b>Copy results</b> at the top, then paste them to Claude.", "", ""],
+      ],
+    },
+  ];
+
+  const KEY = "h2-e2e-runbook-v2";
+  let state = {};
+  try {
+    state = JSON.parse(localStorage.getItem(KEY) || "{}") || {};
+  } catch (e) {
+    state = {};
+  }
+  const save = () => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch (e) {}
+  };
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const strip = (h) => {
+    const d = document.createElement("div");
+    d.innerHTML = h;
+    return d.textContent.replace(/\s+/g, " ").trim();
+  };
+
+  function render() {
+    const root = document.getElementById("phases");
+    root.innerHTML = P.map((p, pi) => {
+      const steps = p.steps
+        .map((s, si) => {
+          const k = `${p.id}.${si}`,
+            st = (state[k] || {}).s || "",
+            note = (state[k] || {}).n || "";
+          return `<li data-k="${k}" class="${st ? "is-" + st : ""}">
+        <div class="stext">${s[0]}${s[1] ? `<div class="url">${s[1]}</div>` : ""}${s[2] ? `<div class="expect">${s[2]}</div>` : ""}</div>
+        <div class="marks">
+          <button type="button" class="mark ok" aria-pressed="${st === "ok"}" aria-label="Pass" title="Pass">✓</button>
+          <button type="button" class="mark bad" aria-pressed="${st === "bad"}" aria-label="Fail" title="Fail">✗</button>
+          <button type="button" class="mark skip" aria-pressed="${st === "skip"}" aria-label="Skip" title="Skipped or blocked">–</button>
+        </div>
+        ${st === "bad" ? `<div class="note"><textarea id="n-${k}" placeholder="What happened? Paste the error or what you saw.">${esc(note)}</textarea></div>` : ""}
+      </li>`;
+        })
+        .join("");
+      const call = (p.callouts || []).map((c) => `<div class="callout ${c[0]}">${c[1]}</div>`).join("");
+      return `<details class="phase" id="ph-${p.id}" data-p="${p.id}">
+      <summary><span class="pnum">${pi}</span><span class="ptitle"><h2>${p.title}</h2><span class="sub">${p.sub}</span></span>
+      <span class="role">${p.role}</span><span class="pcount" id="pc-${p.id}"></span><span class="chev" aria-hidden="true">›</span></summary>
+      ${call}<ol class="steps">${steps}</ol></details>`;
+    }).join("");
+    const open = (() => {
+      try {
+        return JSON.parse(localStorage.getItem(KEY + "-open") || "null");
+      } catch (e) {
+        return null;
+      }
+    })();
+    P.forEach((p, i) => {
+      const d = document.getElementById("ph-" + p.id);
+      d.open = open ? !!open[p.id] : i < 2;
+      d.addEventListener("toggle", () => {
+        const o = {};
+        P.forEach((q) => (o[q.id] = document.getElementById("ph-" + q.id).open));
+        try {
+          localStorage.setItem(KEY + "-open", JSON.stringify(o));
+        } catch (e) {}
+      });
+    });
+    update();
+  }
+  function update() {
+    let ok = 0,
+      bad = 0,
+      skip = 0,
+      total = 0;
+    P.forEach((p) => {
+      let pok = 0,
+        pbad = 0,
+        pdone = 0;
+      p.steps.forEach((_, si) => {
+        total++;
+        const s = (state[`${p.id}.${si}`] || {}).s;
+        if (s) {
+          pdone++;
+        }
+        if (s === "ok") {
+          ok++;
+          pok++;
+        }
+        if (s === "bad") {
+          bad++;
+          pbad++;
+        }
+        if (s === "skip") skip++;
+      });
+      document.getElementById("pc-" + p.id).textContent = `${pdone}/${p.steps.length}`;
+      const d = document.getElementById("ph-" + p.id);
+      d.classList.toggle("done", pdone === p.steps.length && !pbad);
+      d.classList.toggle("hasfail", pbad > 0);
+    });
+    const pct = (n) => (total ? (n / total) * 100 + "%" : "0");
+    segOk.style.width = pct(ok);
+    segBad.style.width = pct(bad);
+    segSkip.style.width = pct(skip);
+    counts.innerHTML = `<span><b>${ok}</b> passed</span><span><b>${bad}</b> failed</span><span><b>${skip}</b> skipped</span><span><b>${total - ok - bad - skip}</b> to go</span>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".mark");
+    if (!b) return;
+    const li = b.closest("li"),
+      k = li.dataset.k,
+      kind = b.classList.contains("ok") ? "ok" : b.classList.contains("bad") ? "bad" : "skip";
+    const cur = state[k] || {};
+    cur.s = cur.s === kind ? "" : kind;
+    state[k] = cur;
+    save();
+    const open = {};
+    P.forEach((q) => (open[q.id] = document.getElementById("ph-" + q.id).open));
+    render();
+    P.forEach((q) => (document.getElementById("ph-" + q.id).open = open[q.id]));
+    if (cur.s === "bad") {
+      const t = document.getElementById("n-" + k);
+      t && t.focus();
+    }
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.matches(".note textarea")) {
+      const k = e.target.id.slice(2);
+      state[k] = state[k] || {};
+      state[k].n = e.target.value;
+      save();
+    }
+  });
+  function results() {
+    const lines = ["H2 Economy E2E results"];
+    let any = false;
+    P.forEach((p, pi) => {
+      const rows = p.steps.map((s, si) => {
+        const v = state[`${p.id}.${si}`] || {};
+        const m = v.s === "ok" ? "PASS" : v.s === "bad" ? "FAIL" : v.s === "skip" ? "SKIP" : "----";
+        return `  ${m} ${si + 1}. ${strip(s[0]).slice(0, 110)}${v.s === "bad" && v.n ? `\n       note: ${v.n.replace(/\n/g, "\n       ")}` : ""}`;
+      });
+      lines.push(`\n${pi}. ${p.title} (${p.role})`, ...rows);
+      any = true;
+    });
+    return lines.join("\n");
+  }
+  copyBtn.addEventListener("click", () => {
+    const txt = results(),
+      t = document.getElementById("toast");
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {}
+      ta.remove();
+      t.textContent = ok ? "Copied" : "Copy failed: select the text manually";
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => (t.textContent = "Copied"), fallback);
+    } else fallback();
+    setTimeout(() => (t.textContent = ""), 2500);
+  });
+  let armed = false;
+  resetBtn.addEventListener("click", () => {
+    if (!armed) {
+      armed = true;
+      resetBtn.textContent = "Click again to clear all";
+      setTimeout(() => {
+        armed = false;
+        resetBtn.textContent = "Reset";
+      }, 3000);
+      return;
+    }
+    state = {};
+    save();
+    armed = false;
+    resetBtn.textContent = "Reset";
+    render();
+  });
+  render();
+</script>

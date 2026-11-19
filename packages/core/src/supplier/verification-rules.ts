@@ -60,6 +60,21 @@ export const DESK_CHECKLIST = [
   { key: "certificates", label: "Product certificates current" },
 ] as const;
 
+/**
+ * Approving a supplier review needs at least this many checklist ticks. The desk's button always required two; since
+ * 19 Nov 2026 (founder) core enforces it too, so no other caller can approve on fewer.
+ */
+export const MIN_DESK_CHECKS = 2;
+
+/** How many of the desk checklist's checks are ticked; keys outside the checklist don't count. */
+export const tickedDeskChecks = (checks: Record<string, boolean>) =>
+  DESK_CHECKLIST.filter((c) => checks[c.key] === true).length;
+
+/** Why a review can't be approved with these ticks, or null when it can. Shared by the desk and core. */
+export function deskChecksProblem(checks: Record<string, boolean>): string | null {
+  return tickedDeskChecks(checks) < MIN_DESK_CHECKS ? `Tick at least ${String(MIN_DESK_CHECKS)} checks` : null;
+}
+
 const DAY = 86_400_000;
 
 /** The status words on 586:8 and 635:9: "Verified", "Expires in 30 days", "Needs re-upload", "Rejected"... */
@@ -89,3 +104,40 @@ export function documentStatusWord(
 /** "GSTIN", "ISO 22734", "Site visit" */
 export const documentTitle = (d: { type: string; name: string | null }) =>
   d.name ?? (isDocumentType(d.type) ? DOCUMENT_TYPES[d.type].label : d.type);
+
+/**
+ * What the records already prove for the desk checklist (founder, 19 Nov 2026): identity when the GST certificate and
+ * PAN are verified and current, the bank when an Active payout account's name matched. The operator can untick either.
+ * `tier1Missing` names the documents to verify before Approve can work; `waitingOn` is what the supplier still owes.
+ */
+export function deskEvidence(
+  documents: { type: string; status: string; expiresOn: Date | null }[],
+  bank: { status: string; nameMatches: boolean | null }[],
+  now: Date = new Date(),
+) {
+  const current = (type: string) =>
+    documents.some(
+      (x) => x.type === type && x.status === "Verified" && (!x.expiresOn || x.expiresOn.getTime() > now.getTime()),
+    );
+  const label = (t: (typeof TIER_1)[number]) => DOCUMENT_TYPES[t].file;
+  const tier1Missing = TIER_1.filter((t) => !current(t)).map(label);
+  const bankOk = bank.some((x) => x.status === "Active" && x.nameMatches === true);
+  const waitingOn: string[] = [];
+  for (const t of TIER_1) {
+    if (current(t)) continue;
+    const doc = documents.find((x) => x.type === t);
+    waitingOn.push(
+      !doc
+        ? `${label(t)} not uploaded`
+        : doc.status === "Submitted"
+          ? `${label(t)} uploaded, waiting for your check above`
+          : `${label(t)} needs a new upload`,
+    );
+  }
+  if (!bank.some((x) => x.status === "Active")) waitingOn.push("Payout bank account not confirmed");
+  return {
+    ticks: { identity: tier1Missing.length === 0, bank: bankOk } as Record<string, boolean>,
+    tier1Missing,
+    waitingOn,
+  };
+}

@@ -5,7 +5,7 @@ import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
 import { inScope, type Scope } from "../authz/scope";
 import { enqueueGstinCheck } from "../companies/jobs";
-import { isValidGstin, normaliseGstin, stateOf } from "../companies/gstin";
+import { isValidGstin, normaliseGstin, organisationFieldsForGstin, stateOf } from "../companies/gstin";
 
 // Company settings for buyers (step 9.1; 574:8 to 577:729 and their dialogs). Company profile, GSTINs and delivery
 // sites, approval rules and security need company.manage (the buyer Admin); users and roles use team.manage
@@ -147,6 +147,20 @@ async function swapGstin(
         isDefault: true,
       })
       .returning({ id: g.id });
+    // The state and PAN are part of the GSTIN, so the company record follows it (a supplier who joined without a
+    // GSTIN has no state until now, and the onboarding checklist needs one). The portal check fills the address.
+    const [org] = await tx
+      .select({
+        state: schema.organisations.state,
+        pan: schema.organisations.pan,
+        legalName: schema.organisations.legalName,
+        registeredAddress: schema.organisations.registeredAddress,
+      })
+      .from(schema.organisations)
+      .where(eq(schema.organisations.id, organisationId));
+    const fields = org ? organisationFieldsForGstin(org, input.gstin) : {};
+    if (Object.keys(fields).length > 0)
+      await tx.update(schema.organisations).set(fields).where(eq(schema.organisations.id, organisationId));
     await audit(tx, {
       actorId: log.actorId,
       action: log.action,
@@ -154,7 +168,7 @@ async function swapGstin(
       resourceId: added?.id ?? "",
       companyId: organisationId,
       before: current ? { gstin: current.gstin, status: current.portalStatus } : null,
-      after: { gstin: input.gstin },
+      after: { gstin: input.gstin, ...fields },
       reason: log.reason ?? null,
       context: log.context,
     });

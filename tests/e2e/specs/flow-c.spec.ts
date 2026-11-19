@@ -81,7 +81,7 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
   await page.getByLabel("Account holder").fill(company);
   await page.getByRole("button", { name: "Check this account" }).click();
   await expect(page.getByText("Test deposit matched")).toBeVisible();
-  await confirmItsYou(page, email, "Confirm change");
+  await confirmItsYou(page, email, "Confirm account");
   await expect(page.getByText("Payouts active")).toBeVisible();
 
   // 5 Storefront basics: a logo and About, published for review.
@@ -152,8 +152,9 @@ test("flow C: a supplier joins, sets up and gets a listing live", async ({ page,
     await verify.click();
     await opPage.waitForTimeout(500);
   }
-  await opPage.getByRole("checkbox", { name: "Company identity: GST registration and incorporation" }).click();
-  await opPage.getByRole("checkbox", { name: "Bank account in the company's name" }).click();
+  // Identity (and the bank, once confirmed) start ticked from the records (founder, 19 Nov 2026): make sure, not toggle.
+  await opPage.getByRole("checkbox", { name: "Company identity: GST registration and incorporation" }).check();
+  await opPage.getByRole("checkbox", { name: "Bank account in the company's name" }).check();
   await opPage.getByRole("button", { name: "Approve and verify" }).click();
   // Each decision is saved before the operator moves on.
   const companyState = (column: "verification" | "listing") =>

@@ -60,8 +60,20 @@ export function VerifyActions({
             {note.body}
           </Alert>
         ) : null}
-        <Button size="lg" className="w-full" disabled={busy || !canSend} onClick={() => void send()}>
-          Send a new link
+        {canSend ? (
+          <Button size="lg" className="w-full" disabled={busy} onClick={() => void send()}>
+            Send a new link
+          </Button>
+        ) : null}
+        <Button
+          variant={canSend ? "ghost" : "primary"}
+          size={canSend ? "sm" : "lg"}
+          className={canSend ? "self-center" : "w-full"}
+          onClick={() => {
+            router.push(back);
+          }}
+        >
+          {canSend ? "Change email" : "Start sign-up again"}
         </Button>
       </>
     );

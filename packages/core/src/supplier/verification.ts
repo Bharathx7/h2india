@@ -18,6 +18,8 @@ import { registry } from "./adapters/registry";
 import { REVIEW_TRANSITIONS } from "./review";
 import {
   BADGE_KINDS,
+  deskChecksProblem,
+  deskEvidence,
   DOCUMENT_TRANSITIONS,
   DOCUMENT_TYPES,
   documentTitle,
@@ -459,6 +461,9 @@ export async function decideSupplierReview(
   const reason = input.reason?.trim() ?? "";
   if (!input.approve && !reason) throw new VerificationError("Say what to fix, so the supplier knows");
   if (input.approve) {
+    // Founder, 19 Nov 2026: the desk's "2 of 5" rule was only a disabled button; core holds it now.
+    const problem = deskChecksProblem(input.checks);
+    if (problem) throw new VerificationError(problem);
     await grantBadge(db, actor, {
       organisationId: review.organisationId,
       kind: "verified_supplier",
@@ -690,7 +695,13 @@ export async function verificationDesk(db: Executor, actor: Actor, tab: DeskTab,
     .leftJoin(schema.companyProfiles, eq(schema.companyProfiles.organisationId, o.id));
   if (tab === "action") {
     const docs = await db
-      .select({ organisationId: d.organisationId, type: d.type, name: d.name, createdAt: d.createdAt })
+      .select({
+        organisationId: d.organisationId,
+        type: d.type,
+        name: d.name,
+        createdAt: d.createdAt,
+        replaces: d.replaces,
+      })
       .from(d)
       .where(and(eq(d.status, "Submitted"), isNull(d.deletedAt)))
       .orderBy(asc(d.createdAt));
@@ -721,7 +732,8 @@ export async function verificationDesk(db: Executor, actor: Actor, tab: DeskTab,
       return {
         organisationId: id,
         name: names.find((n) => n.organisationId === id)?.name ?? "",
-        tag: review ? "Review" : bank ? "Bank change" : "Re-upload",
+        // Founder, 19 Nov 2026: a first upload read "Re-upload"; only a document that replaces another is one.
+        tag: review ? "Review" : bank ? "Bank change" : mine.some((x) => x.replaces) ? "Re-upload" : "New documents",
         line: review
           ? "Submitted for review"
           : bank
@@ -805,5 +817,23 @@ export async function deskCompany(db: Executor, actor: Actor, organisationId: st
       .limit(1)
       .then((r) => r[0] ?? null),
   ]);
-  return { org: org.org, profile: org.profile, gstin: gst ?? null, documents, badges, checks, review };
+  const bank = await db
+    .select({
+      status: schema.payoutBankAccounts.status,
+      nameMatches: schema.payoutBankAccounts.nameMatches,
+      last4: schema.payoutBankAccounts.accountLast4,
+    })
+    .from(schema.payoutBankAccounts)
+    .where(eq(schema.payoutBankAccounts.organisationId, organisationId))
+    .orderBy(desc(schema.payoutBankAccounts.createdAt));
+  return {
+    org: org.org,
+    profile: org.profile,
+    gstin: gst ?? null,
+    documents,
+    badges,
+    checks,
+    review,
+    evidence: deskEvidence(documents, bank),
+  };
 }

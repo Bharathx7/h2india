@@ -25,7 +25,8 @@ async function run(work: () => Promise<unknown>, paths: string[]): Promise<Resul
   return { ok: true };
 }
 
-const COMPANY = ["/supplier/company", "/supplier/rfqs"];
+// The dashboard checklist and Verification read the GSTIN too.
+const COMPANY = ["/supplier/company", "/supplier/rfqs", "/supplier", "/supplier/verification"];
 
 export async function addSupplierGstinAction(gstin: string, place: string): Promise<Result> {
   const { db, actor, supplier } = await supplierActor();

@@ -10,16 +10,20 @@ import {
   documentTitle,
   EXPIRY_NOTICE,
   isBadgeKind,
+  storefrontQueue,
   verificationDesk,
   type DeskTab,
 } from "@h2india/core/supplier";
+import { listingQueue, NEW_LISTING_KINDS } from "@h2india/core/products";
 import { formatIstDate } from "@h2india/core/time";
 import { buttonClasses, cx, EmptyState, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { StorefrontDecision } from "../queues/listings/StorefrontDecision";
 import { ClaimDecision } from "./ClaimDecision";
 import { DocumentDecision, GrantBadge, ReviewDecision, RevokeBadge, RunChecks } from "./DeskControls";
+import { ListingDecision } from "./ListingDecision";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
@@ -38,14 +42,26 @@ const TABS: { key: DeskTab; label: string }[] = [
   { key: "revoked", label: "Revoked" },
 ];
 
+// The company panel, in the order an operator works (founder, 19 Nov 2026): who it is, the documents to check, the
+// automated checks, the checklist decision, the storefront and first product, then any other badge.
 async function Company({ actor, id, canDecide }: { actor: Actor; id: string; canDecide: boolean }) {
   const db = getDb();
-  const [c, notice] = await Promise.all([deskCompany(db, actor, id), getSetting(db, EXPIRY_NOTICE)]);
+  const seesQueues = can(actor, "queues.view");
+  const [c, notice, storefronts, listings] = await Promise.all([
+    deskCompany(db, actor, id),
+    getSetting(db, EXPIRY_NOTICE),
+    seesQueues ? storefrontQueue(db, actor) : Promise.resolve([]),
+    seesQueues ? listingQueue(db, actor) : Promise.resolve([]),
+  ]);
   if (!c) return null;
   const now = new Date();
   const name = c.profile?.tradeName ?? c.org.legalName;
   const active = c.badges.filter((b) => b.status === "Active");
   const verifiedSince = active.find((b) => b.kind === "verified_supplier")?.grantedAt;
+  const storefront = storefronts.find((s) => s.r.organisationId === id) ?? null;
+  const products = listings.filter((x) => x.r.organisationId === id);
+  const companyVerified = c.org.verification === "Verified";
+  const decidesQueues = can(actor, "queues.edit");
   return (
     <div className="flex flex-col gap-4">
       <section className="flex flex-wrap items-start justify-between gap-4 rounded-card border border-default bg-page p-5">
@@ -96,40 +112,6 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
       </section>
 
       <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-        <h3 className="type-h4">Automated checks</h3>
-        {c.checks.length ? (
-          <ul className="flex flex-col gap-2">
-            {c.checks.map((k) => (
-              <li key={k.check} className="flex gap-2">
-                <Icon
-                  name={k.result === "pass" ? "check-circle" : "alert-circle"}
-                  size={18}
-                  className={k.result === "pass" ? "text-icon-primary" : "text-error"}
-                />
-                <span>
-                  <span className="block type-label">{k.detail}</span>
-                  <span className="block type-caption text-secondary">
-                    Last checked {formatIstDateTime(k.checkedAt)}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="type-body-sm text-body">Not run yet.</p>
-        )}
-        {canDecide ? <RunChecks organisationId={id} /> : null}
-      </section>
-
-      {c.review?.status === "Submitted" ? (
-        <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
-          <h3 className="type-h4">Verification checklist</h3>
-          <p className="type-caption text-secondary">Submitted for review {formatIstDateTime(c.review.submittedAt)}</p>
-          {canDecide ? <ReviewDecision id={c.review.id} initial={c.review.checks} /> : null}
-        </section>
-      ) : null}
-
-      <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
         <h3 className="type-h4">Documents and expiry</h3>
         {c.documents.length ? (
           <ul className="flex flex-col divide-y divide-default">
@@ -176,6 +158,133 @@ async function Company({ actor, id, canDecide }: { actor: Actor; id: string; can
         )}
         <p className="type-caption text-secondary">{name} sees these expiry dates on their dashboard.</p>
       </section>
+
+      <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+        <h3 className="type-h4">Automated checks</h3>
+        {c.checks.length ? (
+          <ul className="flex flex-col gap-2">
+            {c.checks.map((k) => (
+              <li key={k.check} className="flex gap-2">
+                <Icon
+                  name={k.result === "pass" ? "check-circle" : "alert-circle"}
+                  size={18}
+                  className={k.result === "pass" ? "text-icon-primary" : "text-error"}
+                />
+                <span>
+                  <span className="block type-label">{k.detail}</span>
+                  <span className="block type-caption text-secondary">
+                    Last checked {formatIstDateTime(k.checkedAt)}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="type-body-sm text-body">Not run yet.</p>
+        )}
+        {canDecide ? <RunChecks organisationId={id} /> : null}
+      </section>
+
+      {/* Founder, 19 Nov 2026: the checklist always shows, so the operator sees where the company stands. */}
+      <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+        <h3 className="type-h4">Verification checklist</h3>
+        {c.review?.status === "Submitted" ? (
+          <>
+            <p className="type-caption text-secondary">
+              Submitted for review {formatIstDateTime(c.review.submittedAt)}
+            </p>
+            {canDecide ? (
+              <ReviewDecision
+                id={c.review.id}
+                initial={c.review.checks}
+                evidence={c.evidence.ticks}
+                verifyFirst={c.evidence.tier1Missing}
+              />
+            ) : (
+              <p className="type-body-sm text-body">You can see this review but not decide it.</p>
+            )}
+          </>
+        ) : c.review?.status === "Approved" ? (
+          <p className="flex items-center gap-1.5 type-body-sm text-body">
+            <Icon name="check-circle" size={16} className="text-icon-success" />
+            Approved on {formatIstDate(c.review.decidedAt ?? c.review.updatedAt)}
+          </p>
+        ) : (
+          <>
+            {c.review?.status === "Changes requested" ? (
+              <p className="type-body-sm text-body">
+                Sent back on {formatIstDate(c.review.decidedAt ?? c.review.updatedAt)}
+                {c.review.reason ? `: ${c.review.reason}` : ""}
+              </p>
+            ) : null}
+            <p className="type-label">Waiting for the supplier to submit for review</p>
+            {c.evidence.waitingOn.length ? (
+              <ul className="flex list-disc flex-col gap-1 pl-5 type-body-sm text-body">
+                {c.evidence.waitingOn.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="type-body-sm text-secondary">Their documents and bank account are in place.</p>
+            )}
+          </>
+        )}
+      </section>
+
+      {seesQueues ? (
+        <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
+          <h3 className="type-h4">Storefront and first product</h3>
+          {!storefront && !products.length ? (
+            <p className="type-body-sm text-body">Nothing from {name} is waiting for review.</p>
+          ) : null}
+          {storefront ? (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_320px]">
+              <div>
+                <p className="type-label">Storefront change</p>
+                <p className="type-caption text-secondary">
+                  Sent {formatIstDateTime(storefront.r.submittedAt)} ·{" "}
+                  <Link href="/admin/queues/listings#storefronts" className="underline">
+                    See the change
+                  </Link>
+                </p>
+              </div>
+              {decidesQueues ? <StorefrontDecision id={storefront.r.id} /> : null}
+            </div>
+          ) : null}
+          {products.length ? (
+            <ul className="flex flex-col divide-y divide-default">
+              {products.map((x) => {
+                const isNew = NEW_LISTING_KINDS.includes(x.r.kind);
+                return (
+                  <li key={x.r.id} className="grid grid-cols-1 gap-3 py-3 md:grid-cols-[minmax(0,1fr)_320px]">
+                    <div>
+                      <p className="type-label">{x.name}</p>
+                      <p className="type-caption text-secondary">
+                        {x.r.kind}
+                        {x.r.submittedAt ? ` · sent ${formatIstDateTime(x.r.submittedAt)}` : ""} ·{" "}
+                        <Link href={`/admin/queues/listings/${x.r.id}`} className="underline">
+                          Full review
+                        </Link>
+                      </p>
+                    </div>
+                    {decidesQueues ? (
+                      <ListingDecision
+                        id={x.r.id}
+                        name={x.name}
+                        blocked={
+                          isNew && !companyVerified
+                            ? "Approve the company in the checklist above first: new listings go live only for verified suppliers"
+                            : null
+                        }
+                      />
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       {canDecide ? (
         <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">

@@ -240,3 +240,32 @@ test("Your details checks every field before going on", async ({ page }) => {
   await expect(page.getByText("Enter a 10-digit mobile number")).toBeVisible();
   await axe(page);
 });
+
+// Founder QC, 19 Nov 2026: a confirm link opened in another browser (or on a phone, or in the email app) lost the
+// sign-up answers and fell back to the shared /join choice. The link now carries its draft.
+test("a new supplier confirms the email in a different browser and goes straight on to company details", async ({
+  page,
+  browser,
+}) => {
+  const email = newEmail("ravi");
+  await page.goto("/join/supplier");
+  await page.getByLabel("Company name or GSTIN").fill("zz-no-such-company");
+  await page.getByRole("button", { name: /Create a new company/ }).click();
+  await expect(page.getByRole("heading", { name: "Your details" })).toBeVisible();
+  await fillDetails(page, { email, name: "Ravi Menon" });
+  const sentAfter = Date.now() - 1000;
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeVisible();
+  const link = await latestConfirmLink(page, email, sentAfter);
+
+  // A second browser that never saw the sign-up form.
+  const other = await browser.newContext();
+  const elsewhere = await other.newPage();
+  await elsewhere.goto(link);
+  await expect(elsewhere.getByRole("heading", { name: "Email confirmed" })).toBeVisible();
+  await expect(elsewhere.getByText("Next: finish a supplier account for Ravi Menon.")).toBeVisible();
+  await elsewhere.getByRole("button", { name: "Continue" }).click();
+  await expect(elsewhere).toHaveURL(/\/join\/supplier\?step=company$/);
+  await expect(elsewhere.getByRole("heading", { name: "Company details" })).toBeVisible();
+  await other.close();
+});
