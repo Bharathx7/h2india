@@ -20,6 +20,7 @@ export {
   closeSupportRequest,
   submitSupportRequest,
   SupportRequestError,
+  countSupportRequests,
   supportRequests,
 } from "./support";
 export type { SupportField, SupportListRow, SupportRequestInput } from "./support";

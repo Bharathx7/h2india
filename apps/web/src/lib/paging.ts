@@ -23,11 +23,16 @@ export function pageSlice<T>(
   return { page, total, perPage, items: list.slice((page - 1) * perPage, page * perPage) };
 }
 
-/** The current search params minus page and perPage, so Pagination keeps the filters in its links. */
-export function pagingQuery(params: Record<string, string | string[] | undefined>): Record<string, string> {
+/** The current search params minus this list's page and perPage, so Pagination keeps the filters (and the other lists'
+ * pages) in its links. */
+export function pagingQuery(
+  params: Record<string, string | string[] | undefined>,
+  name?: string,
+): Record<string, string> {
+  const own = pageParams(name);
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(params)) {
-    if (k === "page" || k === "perPage") continue;
+    if (k === own.page || k === own.perPage) continue;
     const one = Array.isArray(v) ? v[0] : v;
     if (one !== undefined && one !== "") out[k] = one;
   }
@@ -45,12 +50,21 @@ export interface PageRequest {
   perPage: number;
 }
 
+/**
+ * The address parameters a list pages with: page and perPage, or, when a page holds several lists (founder, 19 Nov
+ * 2026: pagination on every admin list), `<name>Page` and `<name>PerPage` so each list pages on its own.
+ */
+export function pageParams(name?: string): { page: string; perPage: string } {
+  return name ? { page: `${name}Page`, perPage: `${name}PerPage` } : { page: "page", perPage: "perPage" };
+}
+
 /** The page asked for in the address; anything odd falls back to page 1 of 25. */
-export function pageRequest(sp: { page?: string | string[]; perPage?: string | string[] }): PageRequest {
+export function pageRequest(sp: Record<string, string | string[] | undefined>, name?: string): PageRequest {
+  const keys = pageParams(name);
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const per = Number(one(sp.perPage));
+  const per = Number(one(sp[keys.perPage]));
   const perPage = (PER_PAGE_OPTIONS as readonly number[]).includes(per) ? per : WORKSPACE_PER_PAGE;
-  const page = Math.max(1, Math.floor(Number(one(sp.page)) || 1));
+  const page = Math.max(1, Math.floor(Number(one(sp[keys.page])) || 1));
   return { page, perPage };
 }
 

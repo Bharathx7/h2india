@@ -1,5 +1,5 @@
 import { schema, type Database } from "@h2india/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -57,7 +57,7 @@ export async function latestAppeal(db: Database, organisationId: string) {
   return row ?? null;
 }
 
-export async function listAppeals(db: Database, actor: Actor) {
+export async function listAppeals(db: Database, actor: Actor, page: { limit?: number; offset?: number } = {}) {
   assertCan(actor, "users.view");
   return db
     .select({
@@ -71,7 +71,20 @@ export async function listAppeals(db: Database, actor: Actor) {
     .innerJoin(schema.organisations, eq(schema.organisations.id, a.organisationId))
     .innerJoin(schema.users, eq(schema.users.id, a.sentBy))
     .orderBy(desc(a.createdAt))
-    .limit(200);
+    .limit(page.limit ?? 200)
+    .offset(page.offset ?? 0);
+}
+
+/** How many appeals there are (the pages of listAppeals), or how many are still open. */
+export async function countAppeals(db: Database, actor: Actor, opts: { open?: boolean } = {}): Promise<number> {
+  assertCan(actor, "users.view");
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(a)
+    .innerJoin(schema.organisations, eq(schema.organisations.id, a.organisationId))
+    .innerJoin(schema.users, eq(schema.users.id, a.sentBy))
+    .where(opts.open ? eq(a.status, "Open") : undefined);
+  return row?.n ?? 0;
 }
 
 /** Lift the suspension (the listings come back) or keep it; the person who appealed is told with the note. */

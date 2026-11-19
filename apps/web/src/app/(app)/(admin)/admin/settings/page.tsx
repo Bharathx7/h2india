@@ -3,11 +3,14 @@ import { getDb } from "@h2india/core";
 import { clockValues, openProposals, systemHealth } from "@h2india/core/admin/system";
 import { can } from "@h2india/core/authz";
 import { listHolidays } from "@h2india/core/clocks";
+import { countDeadLetters, listDeadLetters } from "@h2india/core/queue";
 import { formatIstDateTime } from "@h2india/core/time";
 import { buttonClasses, EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 import { ClockRow, FailedJob, FlagRow, Holidays, Proposal } from "@/admin/system/Controls";
 
 // System settings (707:793), step 11.8: switches, clocks, integrations and failed jobs. Every change needs a reason
@@ -74,15 +77,29 @@ const unitOf = (d: { hours?: number; days?: number; workingDays?: number }) =>
       ? { amount: d.days, unit: "days" as const }
       : { amount: d.workingDays ?? 1, unit: "workingDays" as const };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { userId, actor } = await requireOperator("settings.view", "/admin/settings");
+  const sp = await searchParams;
   const db = getDb();
-  const [health, clocks, proposals, holidays] = await Promise.all([
+  // Three lists on one page, each with its own pages (founder, 19 Nov 2026).
+  const failedReq = pageRequest(sp, "failed");
+  const [health, clocks, allProposals, allHolidays, failedRows, failedTotal] = await Promise.all([
     systemHealth(db, actor),
     clockValues(db),
     openProposals(db, actor),
     listHolidays(db, actor),
+    listDeadLetters(db, actor, pageWindow(failedReq)),
+    countDeadLetters(db, actor),
   ]);
+  const holidaysPage = pageOf(allHolidays, pageRequest(sp, "holidays"));
+  const holidays = holidaysPage.rows;
+  const proposalsPage = pageOf(allProposals, pageRequest(sp, "proposals"));
+  const proposals = proposalsPage.rows;
+  const failed = { ...failedReq, rows: failedRows, total: failedTotal };
   const canEdit = can(actor, "settings.edit");
   const flagRows = (list: readonly (typeof ADMIN_FLAGS)[number][]) =>
     list
@@ -169,6 +186,7 @@ export default async function SettingsPage() {
               deadlines started after it.
             </p>
             <Holidays rows={holidays} canEdit={canEdit} />
+            <ListPager paged={holidaysPage} query={pagingQuery(sp, "holidays")} name="holidays" />
           </section>
           <section className="flex flex-col gap-1 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Feature flags</h2>
@@ -189,6 +207,7 @@ export default async function SettingsPage() {
                     )}
                   </div>
                 ))}
+                <ListPager paged={proposalsPage} query={pagingQuery(sp, "proposals")} name="proposals" />
               </div>
             ) : null}
           </section>
@@ -240,9 +259,9 @@ export default async function SettingsPage() {
           </section>
           <section className="flex flex-col gap-2 rounded-card border border-default bg-page p-5">
             <h2 className="type-h4">Failed jobs</h2>
-            {health.failed.length ? (
+            {failed.rows.length ? (
               <ul className="flex flex-col divide-y divide-default">
-                {health.failed.map((f) => (
+                {failed.rows.map((f) => (
                   <li key={f.id} className="flex flex-col gap-1 py-2">
                     <span className="type-label">
                       {f.queue} · {f.jobName}
@@ -258,6 +277,7 @@ export default async function SettingsPage() {
             ) : (
               <EmptyState title="No failed jobs">Jobs that fail every retry show here, ready to retry.</EmptyState>
             )}
+            <ListPager paged={failed} query={pagingQuery(sp, "failed")} name="failed" />
           </section>
         </div>
       </div>

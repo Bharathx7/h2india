@@ -1,4 +1,4 @@
-import { supportRequests } from "@h2india/core/recovery";
+import { countSupportRequests, supportRequests } from "@h2india/core/recovery";
 import { formatIstDateTime } from "@h2india/core/time";
 import { cx, EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -6,7 +6,7 @@ import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { ListPager } from "@/components/ListPager";
-import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Support requests (founder QC, 17 Nov 2026): people who lost their email and sent their work ID, and recovery
 // requests whose company has no admin to approve them. Before this they reached H2 Economy only as an email to
@@ -29,12 +29,14 @@ export default async function SupportRequestsPage({
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("users.view", "/admin/users/support");
   const done = sp.view === "done";
-  const [rows, open] = await Promise.all([
-    supportRequests(actor, done),
-    done ? supportRequests(actor, false) : Promise.resolve(null),
+  // Paged in the database (founder, 19 Nov 2026): before, only the first 1,000 open or 500 answered could be reached.
+  const req = pageRequest(sp);
+  const [rows, total, openCount] = await Promise.all([
+    supportRequests(actor, done, pageWindow(req)),
+    countSupportRequests(actor, done),
+    countSupportRequests(actor, false),
   ]);
-  const openCount = (open ?? rows).length;
-  const paged = pageOf(rows, pageRequest(sp));
+  const paged = { ...req, rows, total };
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <UsersHeader />

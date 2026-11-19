@@ -32,13 +32,13 @@ const hours = (d: { hours?: number; days?: number; workingDays?: number }) =>
 export default async function ListingsQueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; q?: string; kind?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("queues.view", "/admin/queues/listings");
   const db = getDb();
   const view = VIEWS.find((v) => v.key === sp.view)?.key ?? "all";
-  const [rows, amber, red, storefronts] = await Promise.all([
+  const [rows, amber, red, allStorefronts] = await Promise.all([
     listingQueue(db, actor, { view: view === "late" ? "all" : view, q: sp.q?.trim(), kind: sp.kind || undefined }),
     clockDuration(db, "queueAmber"),
     clockDuration(db, "queueRed"),
@@ -66,6 +66,9 @@ export default async function ListingsQueuePage({
     })
     .filter((r) => view !== "late" || r.ageTone === "error");
   const paged = pageOf(lines, pageRequest(sp));
+  // The storefront list pages on its own (founder, 19 Nov 2026).
+  const storefrontsPage = pageOf(allStorefronts, pageRequest(sp, "storefronts"));
+  const storefronts = storefrontsPage.rows;
   const canDecide = can(actor, "queues.edit");
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
@@ -163,6 +166,7 @@ export default async function ListingsQueuePage({
               </li>
             ))}
           </ul>
+          <ListPager paged={storefrontsPage} query={pagingQuery(sp, "storefronts")} name="storefronts" />
         </section>
       ) : null}
       <p className="type-caption text-secondary">

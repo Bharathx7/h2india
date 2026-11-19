@@ -1,12 +1,14 @@
 import { getDb, getSetting } from "@h2india/core";
 import { can } from "@h2india/core/authz";
-import { SEARCH_BOOSTS, SEARCH_SYNONYMS, searchMissReport } from "@h2india/core/search";
+import { countSearchMisses, SEARCH_BOOSTS, SEARCH_SYNONYMS, searchMissReport } from "@h2india/core/search";
 import { formatIstDayMonth } from "@h2india/core/time";
 import { buttonClasses, cx, EmptyState } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BoostEditor, SynonymEditor } from "@/admin/content/SearchControls";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { ListPager } from "@/components/ListPager";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Search management (707:281), step 11.3: searches that found nothing in the last 30 days, synonyms and boosted
 // results. Changes apply to the live search at once. Who searched is never stored.
@@ -16,13 +18,15 @@ export const dynamic = "force-dynamic";
 export default async function SearchManagementPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; synonym?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("settings.view", "/admin/settings/search");
   const db = getDb();
-  const [misses, synonyms, boosts] = await Promise.all([
-    searchMissReport(db, actor),
+  const req = pageRequest(sp);
+  const [misses, missTotal, synonyms, boosts] = await Promise.all([
+    searchMissReport(db, actor, 30, new Date(), pageWindow(req)),
+    countSearchMisses(db, actor),
     getSetting(db, SEARCH_SYNONYMS),
     getSetting(db, SEARCH_BOOSTS),
   ]);
@@ -30,7 +34,7 @@ export default async function SearchManagementPage({
   const canEdit = can(actor, "settings.edit");
   const today = new Date().toDateString();
   const TABS = [
-    { key: "misses", label: "No-result searches", n: misses.length },
+    { key: "misses", label: "No-result searches", n: missTotal },
     { key: "synonyms", label: "Synonyms", n: synonyms.length },
     { key: "boosts", label: "Boosted results", n: boosts.length },
   ];
@@ -106,6 +110,7 @@ export default async function SearchManagementPage({
                       ))}
                     </tbody>
                   </table>
+                  <ListPager paged={{ ...req, total: missTotal }} query={pagingQuery(sp)} />
                 </div>
               ) : (
                 <EmptyState title="Every search found something">

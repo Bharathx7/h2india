@@ -500,7 +500,11 @@ export async function rejectRequest(db: Database, actor: Actor, id: string, reas
 }
 
 /** Grievances for the Compliance screen (660:281), oldest open first. Operators with compliance.view. */
-export async function listGrievances(db: Executor, actor: Actor, opts: { status?: string } = {}) {
+export async function listGrievances(
+  db: Executor,
+  actor: Actor,
+  opts: { status?: string; limit?: number; offset?: number } = {},
+) {
   assertCan(actor, "compliance.view");
   const g = schema.grievances;
   return db
@@ -508,7 +512,19 @@ export async function listGrievances(db: Executor, actor: Actor, opts: { status?
     .from(g)
     .where(opts.status ? eq(g.status, opts.status) : undefined)
     .orderBy(asc(g.createdAt))
-    .limit(300);
+    .limit(opts.limit ?? 300)
+    .offset(opts.offset ?? 0);
+}
+
+/** How many grievances there are (the pages of listGrievances). */
+export async function countGrievances(db: Executor, actor: Actor, opts: { status?: string } = {}): Promise<number> {
+  assertCan(actor, "compliance.view");
+  const g = schema.grievances;
+  const [row] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(g)
+    .where(opts.status ? eq(g.status, opts.status) : undefined);
+  return row?.n ?? 0;
 }
 
 export async function grievanceDetail(db: Executor, actor: Actor, id: string) {

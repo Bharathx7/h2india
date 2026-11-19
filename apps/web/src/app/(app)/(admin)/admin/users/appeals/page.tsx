@@ -1,5 +1,5 @@
 import { getDb } from "@h2india/core";
-import { listAppeals } from "@h2india/core/admin/appeals";
+import { countAppeals, listAppeals } from "@h2india/core/admin/appeals";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
 import { EmptyState, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -7,7 +7,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { AppealDecision } from "@/admin/users/AppealDecision";
 import { UsersHeader, UserTabs } from "@/admin/users/Tabs";
 import { ListPager } from "@/components/ListPager";
-import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
+import { pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
 
 // Appeals against company suspensions (G10): read with users.view, decided with users.edit. Built without a frame
 // (A178).
@@ -21,14 +21,21 @@ export default async function AppealsPage({
 }) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("users.view", "/admin/users/appeals");
-  const rows = await listAppeals(getDb(), actor);
+  // Paged in the database (founder, 19 Nov 2026): before, only the newest 200 could be reached.
+  const req = pageRequest(sp);
+  const db = getDb();
+  const [rows, total, open] = await Promise.all([
+    listAppeals(db, actor, pageWindow(req)),
+    countAppeals(db, actor),
+    countAppeals(db, actor, { open: true }),
+  ]);
   // Paged (founder QC, 17 Nov 2026); the tab's count stays the open appeals.
-  const paged = pageOf(rows, pageRequest(sp));
+  const paged = { ...req, rows, total };
   const canEdit = actor.operator.has("users.edit");
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <UsersHeader />
-      <UserTabs current="appeals" counts={{ appeals: rows.filter((r) => r.appeal.status === "Open").length }} />
+      <UserTabs current="appeals" counts={{ appeals: open }} />
       {rows.length ? (
         <ul className="flex flex-col gap-3">
           {paged.rows.map(({ appeal, company, suspendReason, suspendedAt, sender }) => (
