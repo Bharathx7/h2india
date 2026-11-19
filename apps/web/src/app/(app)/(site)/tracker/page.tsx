@@ -127,7 +127,7 @@ export default async function TrackerOverviewPage({ searchParams }: { searchPara
         {overview?.figures?.length ? (
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {overview.figures.map((f) => (
-              <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-4">
+              <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card border border-default bg-page p-4">
                 <span className="type-h2 text-primary">{f.value}</span>
                 <span className="type-label text-primary">{f.label}</span>
                 <span className="mt-auto type-caption text-link">

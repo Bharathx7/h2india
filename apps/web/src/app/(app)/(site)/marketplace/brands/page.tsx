@@ -56,7 +56,7 @@ export default async function BrandsPage({ searchParams }: { searchParams: Searc
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <section aria-labelledby="brands-title" className="bg-mint">
+      <section aria-labelledby="brands-title" className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-4 py-8 md:py-10")}>
           <Crumbs items={[{ label: "Marketplace", href: "/marketplace" }, { label: "Brands" }]} />
           <h1 id="brands-title" className="type-h1 text-primary">

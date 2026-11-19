@@ -39,7 +39,6 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
       {/* Founder v2 (18 Nov 2026): the dark ink band with the deep glow, as on the home page. */}
       <section aria-labelledby="market-title" className="relative isolate overflow-hidden bg-inverse">
         <div aria-hidden="true" className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-160" />
-        <div aria-hidden="true" className="depth-dot-grid absolute top-10 right-0 -z-10 size-120 opacity-40" />
         <div className={cx(wrap, "flex flex-col gap-6 py-12 md:py-20")}>
           <h1 id="market-title" className="max-w-210 type-display text-inverse max-md:type-h1">
             Hydrogen equipment, components and services from verified suppliers
@@ -113,7 +112,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         </LiveSection>
       </PageSection>
 
-      <PageSection id="applications" title="Browse by application" className="bg-mint">
+      <PageSection id="applications" title="Browse by application" className="bg-subtle">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
           {cat.applications.map((a) => (
             <CategoryTile
@@ -142,7 +141,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         </div>
       </PageSection>
 
-      <PageSection id="new" title="New this week" className="bg-mint">
+      <PageSection id="new" title="New this week" className="bg-subtle">
         <LiveSection
           label="New this week"
           state={forced ?? "empty"}

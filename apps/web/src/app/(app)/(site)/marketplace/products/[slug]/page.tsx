@@ -485,7 +485,7 @@ export default async function ProductPage({
         </aside>
       </div>
 
-      <section aria-labelledby="similar-title" className="bg-mint py-12 md:py-16">
+      <section aria-labelledby="similar-title" className="bg-subtle py-12 md:py-16">
         <div className={cx(wrap, "flex flex-col gap-6")}>
           <div className="flex flex-col gap-2">
             <h2 id="similar-title" className="type-h2 text-primary">

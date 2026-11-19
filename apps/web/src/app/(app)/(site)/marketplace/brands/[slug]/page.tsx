@@ -35,7 +35,7 @@ export default async function BrandPage({ params }: { params: Params }) {
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <section aria-labelledby="brand-title" className="bg-mint">
+      <section aria-labelledby="brand-title" className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-4 py-8 md:py-10")}>
           <Crumbs
             items={[
@@ -114,7 +114,7 @@ export default async function BrandPage({ params }: { params: Params }) {
             ? `Dealers hold a current authorisation letter from ${b.name}, checked by H2 Economy.`
             : undefined
         }
-        className="bg-mint"
+        className="bg-subtle"
       >
         {b.dealers.length ? (
           <ul className="flex flex-col divide-y divide-default rounded-card border border-default bg-page">
