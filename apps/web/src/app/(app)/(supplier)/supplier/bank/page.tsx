@@ -2,7 +2,7 @@ import { getDb } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
 import { bankState, type BankAccount } from "@h2india/core/supplier";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
-import { Alert, cx, Icon, StatusBadge } from "@h2india/ui";
+import { Alert, Breadcrumbs, cx, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CancelChange, ConfirmChange, NewAccountForm, TryAnother } from "@/supplier/BankControls";
@@ -61,11 +61,14 @@ export default async function BankPage() {
   const steps = ["New account", "Test deposit", "Confirm it's you", "Hold period"];
   return (
     <SupplierShell page={page} current="/supplier/invoices" title="Fees & invoices">
-      <p className="flex items-center gap-2 type-caption">
-        <span className="text-link">Fees &amp; invoices</span>
-        <Icon name="chevron-right" size={14} />
-        <span className="text-link">Payout bank account</span>
-      </p>
+      <Breadcrumbs
+        items={[{ label: "Fees & invoices", href: "/supplier/invoices" }, { label: "Payout bank account" }]}
+        renderLink={(c, className) => (
+          <Link href={c.href} className={className}>
+            {c.label}
+          </Link>
+        )}
+      />
       <div>
         <h1 className="type-h2">Payout bank account</h1>
         <p className="type-body-sm text-secondary">
@@ -107,12 +110,16 @@ export default async function BankPage() {
         ) : null}
         {change?.status === "Pending" ? (
           <>
-            <Details title="New account" a={change} />
+            <Details title={state.current ? "New account" : "Your account"} a={change} />
             <Alert tone="success" title="Test deposit matched">
               We sent ₹1. The bank returned the name {change.bankName}, which matches your GST legal name.
             </Alert>
             {canChange ? (
-              <ConfirmChange id={change.id} holdUntil={state.current ? "the hold period ends" : null} />
+              <ConfirmChange
+                id={change.id}
+                first={!state.current}
+                holdUntil={state.current ? "the hold period ends" : null}
+              />
             ) : null}
           </>
         ) : null}
@@ -161,7 +168,7 @@ export default async function BankPage() {
             />
             {canChange ? (
               state.failed ? (
-                <TryAnother />
+                <TryAnother defaultHolder={s.legalName} />
               ) : (
                 <details className="rounded-card border border-default bg-page p-5">
                   <summary className="cursor-pointer type-label">Change account</summary>
@@ -179,7 +186,7 @@ export default async function BankPage() {
         ) : null}
         {!change && !state.current ? (
           canChange ? (
-            <NewAccountForm defaultHolder={s.legalName} />
+            <NewAccountForm defaultHolder={s.legalName} first />
           ) : (
             <p className="type-body-sm text-body">A company admin adds the payout account.</p>
           )
