@@ -73,7 +73,14 @@ export default buildConfig({
     user: Editors.slug,
     // The CMS looks like the rest of H2 Economy (A175): always the light theme, styled from our tokens in custom.css.
     theme: "light",
-    meta: { titleSuffix: " · H2 Economy CMS" },
+    meta: {
+      titleSuffix: " · H2 Economy CMS",
+      // Browser-tab icon: the same H2 mark as the public site (copied from app/(app)/icon.svg).
+      icons: [
+        { rel: "icon", type: "image/svg+xml", url: "/brand/h2-icon.svg" },
+        { rel: "apple-touch-icon", url: "/brand/h2-apple-icon.png" },
+      ],
+    },
     // No Gravatar look-ups: initials only.
     avatar: "default",
     routes: { login: "/login", logout: "/logout" },
