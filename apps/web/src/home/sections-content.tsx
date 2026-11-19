@@ -40,7 +40,7 @@ function Column({ title, count, children }: { title: string; count?: number; chi
 /** Opportunities · loading (381:13066). */
 export function OpportunitiesSkeleton() {
   return (
-    <section aria-label="Opportunities this week" aria-busy="true" className="bg-page">
+    <section aria-label="Opportunities this week" aria-busy="true" className="bg-subtle">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-80 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -73,7 +73,7 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
   ]);
   const gate = (href: string) => (signedIn ? href : `/sign-in?next=${encodeURIComponent(href)}`);
   return (
-    <Section id="opportunities" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
+    <Section id="opportunities" className="bg-subtle" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
       <SectionTitle
         id="opportunities"
         title="Opportunities this week"
@@ -143,7 +143,7 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
 /** Latest news · loading (381:13101). */
 export function NewsSkeleton() {
   return (
-    <section aria-label="Insights and news" aria-busy="true" className="bg-mint">
+    <section aria-label="Insights and news" aria-busy="true" className="bg-page">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-94 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -190,7 +190,7 @@ export async function Insights({ fail }: { fail: Fail }) {
   const counts = sight.ok && sight.data ? sight.data.charts.map((c) => c.bars.length) : [];
   const sameCount = counts.length === 2 && counts[0] === counts[1] ? WORDS[(counts[0] ?? 1) - 1] : null;
   return (
-    <Section id="insights" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
+    <Section id="insights" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
       <SectionTitle id="insights" title="Latest Indian hydrogen news" link={{ label: "All news", href: "/news" }} />
       <div data-testid="news-module">
         {!news.ok ? (
@@ -282,29 +282,20 @@ export function WhyItMatters() {
   return (
     <Section
       id="mission"
-      className="bg-inverse"
-      inner="flex flex-col gap-4 py-16 lg:flex-row lg:items-center lg:gap-12 lg:py-30"
+      className="bg-subtle"
+      inner="flex flex-col gap-4 py-16 lg:flex-row lg:items-center lg:gap-12 lg:py-24"
     >
-      <div
-        aria-hidden="true"
-        className="depth-deep-glow absolute -top-60 -left-50 size-140 lg:-top-95 lg:-left-65 lg:size-225"
-      />
-      <div aria-hidden="true" className="depth-accent-glow absolute top-65 left-[72%] hidden size-160 lg:block" />
-      <div
-        aria-hidden="true"
-        className="depth-dot-grid absolute -top-15 left-[68%] hidden size-120 opacity-40 lg:block"
-      />
       <div className="relative flex flex-col gap-4 lg:w-121.5 lg:shrink-0">
-        <p className="type-label-sm text-fresh-300">National Green Hydrogen Mission · 2030 targets</p>
-        <h2 id="mission-title" className="type-h2 text-inverse md:type-h1">
+        <p className="type-label-sm text-link">National Green Hydrogen Mission · 2030 targets</p>
+        <h2 id="mission-title" className="type-h2 text-primary md:type-h1">
           India is building a 5 MMT green hydrogen economy
         </h2>
-        <p className="type-body text-neutral-0/80 md:type-body-lg">
+        <p className="type-body text-body md:type-body-lg">
           H2 Economy connects the buyers, suppliers, schemes and tenders that get it built.
         </p>
         <Link
           href="/opportunities/schemes?mission=nghm"
-          className="hidden items-center gap-1.5 self-start type-label text-fresh-300 hover:underline lg:inline-flex"
+          className="hidden items-center gap-1.5 self-start type-label text-link hover:underline lg:inline-flex"
         >
           Explore schemes under the mission <span aria-hidden="true">→</span>
         </Link>
@@ -315,22 +306,22 @@ export function WhyItMatters() {
             <div
               key={t.value}
               data-reveal-item=""
-              className="flex flex-col gap-1 rounded-card border border-neutral-0/12 bg-neutral-0/6 px-5 py-4 backdrop-blur-glass-16 lg:flex-row lg:items-center lg:gap-6 lg:px-7 lg:py-5"
+              className="flex flex-col gap-1 rounded-card border border-default bg-page px-5 py-4 lg:flex-row lg:items-center lg:gap-6 lg:px-7 lg:py-5"
             >
               <dt className="sr-only">{t.label}</dt>
-              <dd className="type-h1 text-fresh-500 lg:w-110 lg:shrink-0 lg:type-display">{t.value}</dd>
-              <dd className="type-body text-neutral-0/80 lg:type-body-lg" aria-hidden="true">
+              <dd className="type-h1 text-primary lg:w-110 lg:shrink-0 lg:type-display">{t.value}</dd>
+              <dd className="type-body text-body lg:type-body-lg" aria-hidden="true">
                 {t.label}
               </dd>
             </div>
           ))}
         </dl>
-        <p className="type-caption text-neutral-0/64">
+        <p className="type-caption text-secondary">
           2030 targets of the National Green Hydrogen Mission, MNRE, approved January 2023.
         </p>
         <Link
           href="/opportunities/schemes?mission=nghm"
-          className="inline-flex h-11 items-center gap-1.5 self-start type-label text-fresh-300 hover:underline lg:hidden"
+          className="inline-flex h-11 items-center gap-1.5 self-start type-label text-link hover:underline lg:hidden"
         >
           Explore schemes under the mission <span aria-hidden="true">→</span>
         </Link>
@@ -367,7 +358,7 @@ export async function EventsLearning({ fail }: { fail: Fail }) {
     settle("hubs", fail, loadHubs),
   ]);
   return (
-    <Section id="events" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
+    <Section id="events" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
       <SectionTitle id="events" title="Upcoming events" link={{ label: "All events", href: "/events" }} />
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
         <div className="min-w-0 flex-1" data-testid="events-module">
@@ -454,9 +445,7 @@ export function FinalCta() {
       <h2 id="final-title" className="sr-only">
         Get started
       </h2>
-      <div className="relative flex flex-col gap-8 overflow-hidden rounded-modal bg-linear-[166deg] from-fresh-200 from-15% to-fresh-50 to-85% p-6 shadow-soft md:flex-row md:gap-12 md:p-14">
-        <div aria-hidden="true" className="depth-accent-glow absolute -top-70 left-[71.6%] size-140" />
-        <div aria-hidden="true" className="depth-dot-grid absolute -top-75 left-[83%] size-120" />
+      <div className="relative flex flex-col gap-8 overflow-hidden rounded-modal border border-default bg-subtle p-6 md:flex-row md:gap-12 md:p-14">
         {[
           {
             eyebrow: "For buyers",
@@ -480,9 +469,7 @@ export function FinalCta() {
           },
         ].map((c, i) => (
           <div key={c.eyebrow} className="contents">
-            {i === 1 ? (
-              <span aria-hidden="true" className="relative h-px w-full bg-fresh-300 md:h-auto md:w-px" />
-            ) : null}
+            {i === 1 ? <span aria-hidden="true" className="relative h-px w-full bg-ink-200 md:h-auto md:w-px" /> : null}
             <div className="relative flex flex-1 flex-col items-start gap-3">
               <p className="type-label-sm text-link">{c.eyebrow}</p>
               <h3 className="type-h2 text-primary">{c.title}</h3>

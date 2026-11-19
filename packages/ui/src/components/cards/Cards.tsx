@@ -143,7 +143,7 @@ export function StatFigure({ value, label, source }: { value: string; label: str
         {value}
       </p>
       <p className="type-body text-body">{label}</p>
-      <p className="type-caption text-secondary opacity-80">{source}</p>
+      <p className="type-caption text-secondary">{source}</p>
     </div>
   );
 }

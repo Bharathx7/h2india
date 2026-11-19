@@ -20,7 +20,9 @@ import { JsonLd, organizationLd, websiteLd } from "@/seo/jsonld";
 // error and empty 381:13116, motion spec 781:7247. Every data section is its own server component with its own query,
 // streamed behind its loading skeleton, so a slow or failing module never holds up or blanks the page (step 5.1).
 // Founder upgrade, 18 Nov 2026: dark hero; one product showcase (popular categories, featured and latest products)
-// replaces the marketplace tiles, Featured products and the "Why buy and sell" bento; bands alternate ink, white, mint.
+// replaces the marketplace tiles, Featured products and the "Why buy and sell" bento.
+// Design upgrade (founder, 19 Nov 2026: "too much colour"): the hero is the only dark band; the others alternate white
+// and the light neutral (bg-subtle), with no glows or dot grids. Green is kept for actions, links and small accents.
 // Development only: ?state=loading shows the drawn skeletons; ?fail=tenders,news… forces those modules to fail.
 
 export const metadata: Metadata = {
