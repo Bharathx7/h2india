@@ -2,13 +2,15 @@ import { getDb } from "@h2india/core";
 import { scopeFor } from "@h2india/core/authz";
 import { supplierRfqs } from "@h2india/core/rfq";
 import {
+  buildChecklist,
   canSubmitForReview,
+  latestReview,
   productCounts,
   supplierAnalytics,
-  supplierChecklist,
+  supplierFacts,
   type ChecklistItem,
 } from "@h2india/core/supplier";
-import { formatIstDayMonth } from "@h2india/core/time";
+import { formatIstDate, formatIstDayMonth } from "@h2india/core/time";
 import { Alert, buttonClasses, cx, Icon, StatusBadge, VerifiedBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -58,12 +60,21 @@ export default async function SupplierHome() {
   const db = getDb();
   const s = page.supplier;
   const scope = scopeFor(page.actor);
-  const [checklist, counts, rfqs, views] = await Promise.all([
-    supplierChecklist(db, s.organisationId),
+  const [facts, counts, rfqs, views, review] = await Promise.all([
+    supplierFacts(db, s.organisationId),
     productCounts(db, s.organisationId),
     supplierRfqs(db, scope, s.organisationId),
     supplierAnalytics(db, scope, s.organisationId).catch(() => null),
+    latestReview(db, scope, s.organisationId),
   ]);
+  const checklist = buildChecklist(facts);
+  // Only a company admin may submit for review (core refuses anyone else).
+  const maySubmit = s.seat.permissions.has("company.manage");
+  // The review's answer when H2 Economy sent it back, with its reason (founder: the dashboard never showed it).
+  const sentBack = review?.status === "Changes requested" && s.verification !== "Verified" ? review : null;
+  // "Verification in progress" only once something has gone to H2 Economy: documents or the review.
+  const inProgress =
+    !sentBack && s.verification !== "Verified" && (facts.documents.uploaded > 0 || facts.review === "submitted");
   const now = new Date().getTime();
   // RFQs that still wait for this supplier's quote, and those due within a day.
   const waiting = rfqs.filter(
@@ -80,8 +91,18 @@ export default async function SupplierHome() {
   const firstOpen = checklist.items.findIndex((i) => i.state === "todo");
   const setup = checklist.complete ? null : (
     <section aria-labelledby="setup" className="flex flex-col gap-4">
-      {s.verification !== "Verified" ? (
-        <Alert tone="success" title="Verification in progress">
+      {sentBack ? (
+        <Alert tone="warning" title="H2 Economy asked for changes before verifying you">
+          {sentBack.reason ?? "Check the documents marked in Verification and send them again."}
+          {sentBack.decidedAt ? (
+            <span className="block type-caption">Reviewed {formatIstDate(sentBack.decidedAt)}</span>
+          ) : null}
+          <Link href="/supplier/verification" className="mt-1 inline-flex type-label text-link underline">
+            Open Verification
+          </Link>
+        </Alert>
+      ) : inProgress ? (
+        <Alert tone="info" title="Verification in progress">
           You can keep drafting. Publishing unlocks after H2 Economy approves your company.
         </Alert>
       ) : null}
@@ -145,7 +166,7 @@ export default async function SupplierHome() {
                 <div className="flex justify-end">
                   {item.key === "review" ? (
                     item.state === "todo" ? (
-                      <SubmitReview ready={canSubmitForReview(checklist)} />
+                      <SubmitReview ready={canSubmitForReview(checklist)} allowed={maySubmit} />
                     ) : item.badge ? (
                       <StatusBadge status={item.badge} tone="progress" />
                     ) : null
@@ -153,10 +174,15 @@ export default async function SupplierHome() {
                     <Link href="/supplier/storefront" className="type-label text-primary hover:underline">
                       Edit
                     </Link>
-                  ) : item.key === "bank" && item.state === "todo" ? (
-                    <Link href="/supplier/bank" className="type-label text-link underline">
-                      Add account
-                    </Link>
+                  ) : item.action ? (
+                    <span className="flex flex-wrap items-center justify-end gap-3">
+                      {item.badge && item.state === "checking" ? (
+                        <StatusBadge status={item.badge} tone="progress" />
+                      ) : null}
+                      <Link href={item.action.href} className="type-label text-link underline">
+                        {item.action.label}
+                      </Link>
+                    </span>
                   ) : item.key === "storefront" ? (
                     <Link href="/supplier/storefront" className="type-label text-link underline">
                       Set up
