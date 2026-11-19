@@ -87,26 +87,14 @@ function Desktop({
   };
 
   const current = sections.find((s) => s.id === open);
-  // The strip: who the site is for on the left (public QC, 16 Nov 2026: For Buyers, For Members, For Suppliers), the
-  // other links and the supplier sign-up on the right.
-  const audience = links.secondary.filter((l) => l.href.startsWith("/for-"));
-  const more = links.secondary.filter((l) => !l.href.startsWith("/for-"));
-
+  // The strip (founder, 19 Nov 2026): every link together on the right, For Buyers, For Members, For Suppliers first
+  // (public QC, 16 Nov 2026), then Pricing, Advertise, Newsletter and the supplier sign-up.
   return (
     <div className="hidden lg:block">
       <div className={cx("bg-subtle", collapsed && "hidden")}>
-        <div className="mx-auto flex h-9 max-w-300 items-center justify-between gap-6 px-6 xl:px-0">
+        <div className="mx-auto flex h-9 max-w-300 items-center justify-end px-6 xl:px-0">
           <ul className="flex items-center gap-6">
-            {audience.map((l) => (
-              <li key={l.href}>
-                <a href={l.href} className="rounded-control type-label-sm text-body hover:text-primary">
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <ul className="flex items-center gap-6">
-            {more.map((l) => (
+            {links.secondary.map((l) => (
               <li key={l.href}>
                 <a href={l.href} className="rounded-control type-label-sm text-body hover:text-primary">
                   {l.label}

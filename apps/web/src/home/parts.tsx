@@ -48,6 +48,8 @@ export function SectionTitle({
       className={cx("flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between md:gap-6", className)}
     >
       <div className="flex flex-col gap-2">
+        {/* Design upgrade (founder, 19 Nov 2026, "drafting table"): a short green rule over every section title. */}
+        <span aria-hidden="true" className="mb-2 block h-0.75 w-11 rounded-pill bg-accent" />
         {eyebrow ? <p className="type-label-sm text-secondary">{eyebrow}</p> : null}
         <h2 id={`${id}-title`} className={cx(size === "h1" ? "type-h1" : "type-h2", "text-primary")}>
           {title}

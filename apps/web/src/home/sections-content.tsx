@@ -40,7 +40,7 @@ function Column({ title, count, children }: { title: string; count?: number; chi
 /** Opportunities · loading (381:13066). */
 export function OpportunitiesSkeleton() {
   return (
-    <section aria-label="Opportunities this week" aria-busy="true" className="bg-subtle">
+    <section aria-label="Opportunities this week" aria-busy="true" className="bg-mint">
       <div className={`${container} flex flex-col gap-6 py-12 md:py-24`}>
         <span className="block h-8.5 w-80 max-w-full rounded-control shimmer" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -73,7 +73,7 @@ export async function Opportunities({ fail, signedIn }: { fail: Fail; signedIn: 
   ]);
   const gate = (href: string) => (signedIn ? href : `/sign-in?next=${encodeURIComponent(href)}`);
   return (
-    <Section id="opportunities" className="bg-subtle" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
+    <Section id="opportunities" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-8 md:py-20">
       <SectionTitle
         id="opportunities"
         title="Opportunities this week"
@@ -282,20 +282,20 @@ export function WhyItMatters() {
   return (
     <Section
       id="mission"
-      className="bg-subtle"
+      className="bg-fresh-700"
       inner="flex flex-col gap-4 py-16 lg:flex-row lg:items-center lg:gap-12 lg:py-24"
     >
       <div className="relative flex flex-col gap-4 lg:w-121.5 lg:shrink-0">
-        <p className="type-label-sm text-link">National Green Hydrogen Mission · 2030 targets</p>
-        <h2 id="mission-title" className="type-h2 text-primary md:type-h1">
+        <p className="type-label-sm text-fresh-300">National Green Hydrogen Mission · 2030 targets</p>
+        <h2 id="mission-title" className="type-h2 text-inverse md:type-h1">
           India is building a 5 MMT green hydrogen economy
         </h2>
-        <p className="type-body text-body md:type-body-lg">
+        <p className="type-body text-fresh-200 md:type-body-lg">
           H2 Economy connects the buyers, suppliers, schemes and tenders that get it built.
         </p>
         <Link
           href="/opportunities/schemes?mission=nghm"
-          className="hidden items-center gap-1.5 self-start type-label text-link hover:underline lg:inline-flex"
+          className="hidden items-center gap-1.5 self-start type-label text-fresh-300 hover:text-inverse hover:underline lg:inline-flex"
         >
           Explore schemes under the mission <span aria-hidden="true">→</span>
         </Link>
@@ -306,22 +306,22 @@ export function WhyItMatters() {
             <div
               key={t.value}
               data-reveal-item=""
-              className="flex flex-col gap-1 rounded-card border border-default bg-page px-5 py-4 lg:flex-row lg:items-center lg:gap-6 lg:px-7 lg:py-5"
+              className="flex flex-col gap-1 rounded-card border border-neutral-0/16 bg-neutral-0/6 px-5 py-4 lg:flex-row lg:items-center lg:gap-6 lg:px-7 lg:py-5"
             >
               <dt className="sr-only">{t.label}</dt>
-              <dd className="type-h1 text-primary lg:w-110 lg:shrink-0 lg:type-display">{t.value}</dd>
-              <dd className="type-body text-body lg:type-body-lg" aria-hidden="true">
+              <dd className="type-h1 text-inverse lg:w-110 lg:shrink-0 lg:type-display">{t.value}</dd>
+              <dd className="type-body text-fresh-200 lg:type-body-lg" aria-hidden="true">
                 {t.label}
               </dd>
             </div>
           ))}
         </dl>
-        <p className="type-caption text-secondary">
+        <p className="type-caption text-fresh-200">
           2030 targets of the National Green Hydrogen Mission, MNRE, approved January 2023.
         </p>
         <Link
           href="/opportunities/schemes?mission=nghm"
-          className="inline-flex h-11 items-center gap-1.5 self-start type-label text-link hover:underline lg:hidden"
+          className="inline-flex h-11 items-center gap-1.5 self-start type-label text-fresh-300 hover:text-inverse hover:underline lg:hidden"
         >
           Explore schemes under the mission <span aria-hidden="true">→</span>
         </Link>
@@ -445,7 +445,7 @@ export function FinalCta() {
       <h2 id="final-title" className="sr-only">
         Get started
       </h2>
-      <div className="relative flex flex-col gap-8 overflow-hidden rounded-modal border border-default bg-subtle p-6 md:flex-row md:gap-12 md:p-14">
+      <div className="relative flex flex-col gap-8 overflow-hidden rounded-modal bg-fresh-700 p-6 md:flex-row md:gap-12 md:p-14">
         {[
           {
             eyebrow: "For buyers",
@@ -462,18 +462,20 @@ export function FinalCta() {
             title: "Selling to India's hydrogen projects?",
             text: "List your company free, add your products and answer requests for quotes.",
             action: (
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="lg" variant="inverse">
                 <Link href="/list-your-company">List your company</Link>
               </Button>
             ),
           },
         ].map((c, i) => (
           <div key={c.eyebrow} className="contents">
-            {i === 1 ? <span aria-hidden="true" className="relative h-px w-full bg-ink-200 md:h-auto md:w-px" /> : null}
+            {i === 1 ? (
+              <span aria-hidden="true" className="relative h-px w-full bg-neutral-0/24 md:h-auto md:w-px" />
+            ) : null}
             <div className="relative flex flex-1 flex-col items-start gap-3">
-              <p className="type-label-sm text-link">{c.eyebrow}</p>
-              <h3 className="type-h2 text-primary">{c.title}</h3>
-              <p className="type-body-lg text-body">{c.text}</p>
+              <p className="type-label-sm text-fresh-300">{c.eyebrow}</p>
+              <h3 className="type-h2 text-inverse">{c.title}</h3>
+              <p className="type-body-lg text-fresh-200">{c.text}</p>
               <span className="h-2" />
               {c.action}
             </div>
