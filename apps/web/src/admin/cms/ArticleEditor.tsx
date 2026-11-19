@@ -23,6 +23,8 @@ import type { Action } from "@/cms/workflow";
 import { moveArticleAction, saveArticleAction } from "./actions";
 import type { ArticleForm } from "./articles";
 import type { BodyBlock } from "./body";
+import { LiveExplainer } from "./LiveExplainer";
+import { youtubeId, youtubeThumbnail } from "@/lib/youtube";
 
 // The article editor in the H2 Economy back office (step 4.6; Doc 1 §11.4 "CMS editors: Article editor"): blocks,
 // required sources, SEO panel, the workflow Draft → In review → Legal check → Scheduled → Published, and the
@@ -66,6 +68,8 @@ const BLOCKS: { kind: BodyBlock["kind"]; label: string }[] = [
   { kind: "quote", label: "Quote" },
   { kind: "keyNumbers", label: "Key numbers" },
   { kind: "keyFacts", label: "Key facts" },
+  { kind: "image", label: "Image" },
+  { kind: "youtube", label: "YouTube video" },
 ];
 
 function newBlock(kind: BodyBlock["kind"]): BodyBlock {
@@ -80,6 +84,10 @@ function newBlock(kind: BodyBlock["kind"]): BodyBlock {
       return { kind, heading: "", items: [{ value: "", label: "" }], source: "" };
     case "keyFacts":
       return { kind, heading: "", items: [{ label: "", value: "" }] };
+    case "image":
+      return { kind, mediaId: null };
+    case "youtube":
+      return { kind, url: "", title: "", caption: "" };
     default:
       return { kind: "paragraph", text: "" };
   }
@@ -141,7 +149,15 @@ function Picker({
   );
 }
 
-function BlockEditor({ block, onChange }: { block: BodyBlock; onChange: (b: BodyBlock) => void }) {
+function BlockEditor({
+  block,
+  onChange,
+  media,
+}: {
+  block: BodyBlock;
+  onChange: (b: BodyBlock) => void;
+  media: Option[];
+}) {
   switch (block.kind) {
     case "paragraph":
     case "quote":
@@ -281,17 +297,88 @@ function BlockEditor({ block, onChange }: { block: BodyBlock; onChange: (b: Body
         </span>
       );
     }
+    case "image":
+      return (
+        <span className="flex flex-col gap-2">
+          <Select
+            aria-label="Picture"
+            value={block.mediaId === null ? "" : String(block.mediaId)}
+            onChange={(e) => {
+              onChange({ ...block, mediaId: e.target.value ? Number(e.target.value) : null });
+            }}
+          >
+            <option value="">Choose a picture…</option>
+            {media.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </Select>
+          <span className="type-caption text-secondary">
+            Alt text and caption come from the picture.{" "}
+            <Link href="/admin/content/media" target="_blank" className="underline">
+              Upload or edit pictures in Media
+            </Link>
+            . An empty picture block isn&apos;t saved.
+          </span>
+        </span>
+      );
+    case "youtube": {
+      const id = block.url ? youtubeId(block.url) : null;
+      return (
+        <span className="flex flex-col gap-3">
+          <Input
+            aria-label="YouTube link"
+            placeholder="https://www.youtube.com/watch?v=…"
+            value={block.url}
+            onChange={(e) => {
+              onChange({ ...block, url: e.target.value });
+            }}
+          />
+          {block.url && !id ? <span className="type-caption text-error">Paste a link to a YouTube video.</span> : null}
+          <Input
+            aria-label="Video title"
+            placeholder="What the video is (read out by screen readers)"
+            value={block.title}
+            onChange={(e) => {
+              onChange({ ...block, title: e.target.value });
+            }}
+          />
+          <Input
+            aria-label="Video caption"
+            placeholder="Caption (optional)"
+            value={block.caption}
+            onChange={(e) => {
+              onChange({ ...block, caption: e.target.value });
+            }}
+          />
+          {id ? (
+            // eslint-disable-next-line @next/next/no-img-element -- a remote still from YouTube, not an app image
+            <img src={youtubeThumbnail(id)} alt="" className="w-48 rounded-input" />
+          ) : null}
+        </span>
+      );
+    }
     default:
       return (
         <p className="rounded-input bg-subtle p-3 type-body-sm text-secondary">
-          {block.summary}. Kept as it is; edit it in the advanced editor.
+          {block.summary}. Kept as it is: you can move or remove it.
         </p>
       );
   }
 }
 
 /** The body as blocks: add, move, remove and edit each one. Used by the article editor and every rich-text field. */
-export function BodyEditor({ blocks, onChange }: { blocks: BodyBlock[]; onChange: (b: BodyBlock[]) => void }) {
+export function BodyEditor({
+  blocks,
+  onChange,
+  media = [],
+}: {
+  blocks: BodyBlock[];
+  onChange: (b: BodyBlock[]) => void;
+  /** Pictures in the media library, for Image blocks. */
+  media?: Option[];
+}) {
   const setBlock = (i: number, b: BodyBlock | null) => {
     onChange(b ? blocks.map((x, j) => (j === i ? b : x)) : blocks.filter((_, j) => j !== i));
   };
@@ -345,6 +432,7 @@ export function BodyEditor({ blocks, onChange }: { blocks: BodyBlock[]; onChange
             </span>
             <BlockEditor
               block={b}
+              media={media}
               onChange={(nb) => {
                 setBlock(i, nb);
               }}
@@ -380,7 +468,7 @@ export function ArticleEditor({
 }: {
   initial: ArticleForm;
   meta: EditorMeta | null;
-  choices: { topics: Option[]; tags: Option[]; authors: Option[]; editors: Option[] };
+  choices: { topics: Option[]; tags: Option[]; authors: Option[]; editors: Option[]; media: Option[] };
   states: { value: string; label: string }[];
   canPublish: boolean;
 }) {
@@ -682,14 +770,54 @@ export function ArticleEditor({
             <h2 className="type-label">Body</h2>
             <BodyEditor
               blocks={form.body}
+              media={choices.media}
               onChange={(b) => {
                 set("body", b);
               }}
             />
           </div>
+          <LiveExplainer
+            live={form.live}
+            onChange={(v) => {
+              set("live", v);
+            }}
+            canSendLive={Boolean(meta) && status === "Published"}
+            pending={pending}
+            onPublishUpdate={() => {
+              act("live-update");
+            }}
+          />
         </section>
 
         <aside className="flex flex-col gap-6">
+          <Card title="Hero image">
+            <FormField
+              label="Picture at the top"
+              helper={
+                <>
+                  Alt text and credit come from the picture.{" "}
+                  <Link href="/admin/content/media" target="_blank" className="underline">
+                    Upload in Media
+                  </Link>
+                </>
+              }
+            >
+              <Select
+                value={form.heroImage === null ? "" : String(form.heroImage)}
+                onChange={(e) => {
+                  set("heroImage", e.target.value ? Number(e.target.value) : null);
+                }}
+              >
+                <option value="">None</option>
+                {choices.media.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+          </Card>
+
           <Card title="People and schedule">
             <Picker
               label="Author"
@@ -1001,15 +1129,6 @@ export function ArticleEditor({
               </Button>
             </span>
           </Card>
-
-          {meta ? (
-            <Link
-              href={`/cms/collections/articles/${String(meta.id)}`}
-              className="inline-flex items-center gap-1 type-caption text-secondary underline"
-            >
-              Open in the advanced editor (images, embeds, live updates)
-            </Link>
-          ) : null}
         </aside>
       </div>
     </div>

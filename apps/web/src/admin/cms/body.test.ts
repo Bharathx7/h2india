@@ -27,9 +27,25 @@ describe("article body blocks ⇄ rich text", () => {
   });
 
   it("keeps nodes it doesn't edit exactly as they were", () => {
-    const node = { type: "upload", value: 7, relationTo: "media", version: 1 };
-    const back = lexicalToBlocks(blocksToLexical([{ kind: "kept", node, summary: "upload" }]));
-    expect(back[0]).toEqual({ kind: "kept", node, summary: "upload" });
+    const node = { type: "horizontalrule", version: 1 };
+    const back = lexicalToBlocks(blocksToLexical([{ kind: "kept", node, summary: "horizontalrule" }]));
+    expect(back[0]).toEqual({ kind: "kept", node, summary: "horizontalrule" });
     expect(blocksToLexical(back).root.children[0]).toBe(node);
+  });
+
+  it("round-trips pictures and YouTube videos", () => {
+    const blocks: BodyBlock[] = [
+      { kind: "image", mediaId: 7 },
+      { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ", title: "Electrolyser tour", caption: "Pune, 2026" },
+    ];
+    const lexical = blocksToLexical(blocks);
+    expect(lexical.root.children[0]).toMatchObject({ type: "upload", relationTo: "media", value: 7 });
+    expect(lexicalToBlocks(lexical)).toEqual(blocks);
+  });
+
+  it("reads a picture whose media record was filled in, and drops an empty picture block", () => {
+    const filled = { root: { children: [{ type: "upload", relationTo: "media", value: { id: 9, url: "/x.webp" } }] } };
+    expect(lexicalToBlocks(filled)).toEqual([{ kind: "image", mediaId: 9 }]);
+    expect(blocksToLexical([{ kind: "image", mediaId: null }]).root.children).toEqual([]);
   });
 });

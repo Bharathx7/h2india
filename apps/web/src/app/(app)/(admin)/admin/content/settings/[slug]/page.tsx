@@ -50,7 +50,6 @@ export default async function SettingPage({ params }: { params: Promise<{ slug: 
         choices={choices}
         canEdit={cms.can("content.edit")}
         verify={false}
-        cmsHref={`/cms/globals/${slug}`}
       />
     </AdminShell>
   );

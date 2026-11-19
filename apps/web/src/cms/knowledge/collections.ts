@@ -1,6 +1,6 @@
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig, type Field } from "payload";
-import { KeyFacts, KeyNumbers } from "../blocks";
+import { KeyFacts, KeyNumbers, YouTube } from "../blocks";
 import { canDelete, canEdit, canPublish, canView, has } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { scanUpload } from "../scan";
@@ -18,7 +18,7 @@ const body: Field = {
   name: "body",
   type: "richText",
   editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [...defaultFeatures, BlocksFeature({ blocks: [KeyNumbers, KeyFacts] })],
+    features: ({ defaultFeatures }) => [...defaultFeatures, BlocksFeature({ blocks: [KeyNumbers, KeyFacts, YouTube] })],
   }),
 };
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { choicesFor, contentType } from "@/admin/cms/records";
 import { RecordForm } from "@/admin/cms/RecordForm";
+import { NO_CREATE_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
@@ -15,7 +16,7 @@ export default async function NewRecordPage({ params }: { params: Promise<{ coll
   const cms = await cmsSession();
   if (!cms) notFound();
   const type = contentType(cms.payload, collection);
-  if (!type || type.upload) notFound();
+  if (!type || type.upload || NO_CREATE_SLUGS.includes(collection)) notFound();
   const choices = await choicesFor(cms, type.fields);
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
@@ -39,7 +40,6 @@ export default async function NewRecordPage({ params }: { params: Promise<{ coll
         choices={choices}
         canEdit={cms.can("content.edit")}
         verify={false}
-        cmsHref={`/cms/collections/${collection}/create`}
       />
     </AdminShell>
   );

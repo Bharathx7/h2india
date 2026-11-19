@@ -9,14 +9,10 @@ import { siteUrl } from "./server/origin";
 
 const SAFE_ID = /^[A-Za-z0-9._-]{8,64}$/;
 
-/** Better Auth's session cookie (prefix "h2"; "__Secure-" in production). */
-const signedIn = (request: NextRequest) => request.cookies.getAll().some((c) => c.name.endsWith("h2.session_token"));
-
 const MAINTENANCE_OPEN = [
   "/maintenance",
   "/status",
   "/admin",
-  "/cms",
   "/api",
   "/sign-in",
   "/buyer/sign-in",
@@ -52,7 +48,6 @@ export function proxy(request: NextRequest) {
 function route(request: NextRequest) {
   // Switches changed in System settings (step 11.8): re-read at most every 30 seconds, in the background.
   refreshFlagsSoon();
-  // The CMS (step 4.1, A26) uses our sign-in, not Payload's own pages.
   const { pathname } = request.nextUrl;
   // View as user (657:486) is read-only: no form, server action or API call can write. Only ending it is allowed.
   if (request.cookies.has("h2_view_as") && WRITES.has(request.method) && pathname !== "/api/view-as/end") {
@@ -61,14 +56,14 @@ function route(request: NextRequest) {
       { status: 403 },
     );
   }
-  if (pathname === "/cms/logout") return NextResponse.redirect(siteUrl("/sign-out"));
-  if (pathname.startsWith("/cms") && !signedIn(request)) {
-    return NextResponse.redirect(siteUrl("/sign-in?next=/cms"));
+  // One CMS (founder, 19 Nov 2026): Payload's own screens at /cms are closed to everyone; content is managed in the
+  // back office at /admin/content, which checks sign-in and permissions itself. Payload still runs underneath (its
+  // API at /api/cms and the Local API), so nothing about the content changes.
+  if (pathname === "/cms" || pathname.startsWith("/cms/")) {
+    return NextResponse.redirect(siteUrl("/admin/content"));
   }
-  // Signed in but sent to Payload's sign-in page: the account has no Content access.
-  if (pathname === "/cms/login") return NextResponse.redirect(siteUrl("/"));
   // Planned maintenance (step 5.10, 679:620): every public address shows the maintenance page with a 503, so search
-  // engines keep their index. The CMS, APIs, sign-in and the newsletter archive stay reachable.
+  // engines keep their index. The back office, APIs, sign-in and the newsletter archive stay reachable.
   if (isEnabled("maintenance") && !MAINTENANCE_OPEN.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     const res = NextResponse.rewrite(new URL("/maintenance", request.url), { status: 503 });
     res.headers.set("retry-after", "3600");

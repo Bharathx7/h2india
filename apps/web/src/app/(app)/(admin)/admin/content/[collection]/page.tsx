@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { contentType, listRecords } from "@/admin/cms/records";
-import { VERIFIED_SLUGS } from "@/admin/cms/registry";
+import { VERIFIED_SLUGS, NO_CREATE_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
 import { RestoreRecord } from "@/admin/cms/Archive";
@@ -120,7 +120,7 @@ export default async function LibraryPage({
             <h1 className="type-h2">{type.plural}</h1>
             <p className="type-body-sm text-secondary">{list.total.toLocaleString("en-IN")} in all</p>
           </div>
-          {cms.can("content.edit") && !type.upload ? (
+          {cms.can("content.edit") && !type.upload && !NO_CREATE_SLUGS.includes(collection) ? (
             <Link href={`/admin/content/${collection}/new`} className={buttonClasses({})}>
               <Icon name="plus" size={16} />
               New {type.singular.toLowerCase()}

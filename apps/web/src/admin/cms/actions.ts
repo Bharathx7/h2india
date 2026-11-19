@@ -43,6 +43,39 @@ function data(form: ArticleForm) {
     sponsor: form.sponsor,
     legal: { flagged: form.legal.flagged, note: clean(form.legal.note) || null },
     seo: { title: clean(form.seo.title) || null, description: clean(form.seo.description) || null },
+    heroImage: form.heroImage,
+    live: liveData(form.live),
+  };
+}
+
+/** The live explainer as Payload stores it; empty rows are dropped. */
+function liveData(live: ArticleForm["live"]) {
+  const points = (xs: string[]) =>
+    xs
+      .map(clean)
+      .filter(Boolean)
+      .map((point) => ({ point }));
+  return {
+    status: live.status,
+    summary: points(live.summary),
+    summaryAt: live.summaryAt,
+    keyNumbers: live.keyNumbers
+      .map((k) => ({ value: clean(k.value), label: clean(k.label) }))
+      .filter((k) => k.value || k.label),
+    keyNumbersSource: clean(live.keyNumbersSource) || null,
+    meaning: points(live.meaning),
+    updates: live.updates
+      .filter((u) => u.title.trim())
+      .map((u) => ({
+        at: u.at || new Date().toISOString(),
+        title: clean(u.title),
+        text: clean(u.text) || null,
+        document: {
+          title: clean(u.document.title) || null,
+          url: clean(u.document.url) || null,
+          note: clean(u.document.note) || null,
+        },
+      })),
   };
 }
 

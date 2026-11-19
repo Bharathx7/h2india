@@ -124,7 +124,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Content (Stage 4)
 
-- Content lives in Payload (`apps/web/src/payload.config.ts`, collections in `apps/web/src/cms`), tables in the `cms` schema. Editors use /cms with their H2 India account; access comes from operator permissions (`content.view/edit/delete/publish`) via `cms/auth-strategy.ts`.
+- Content lives in Payload (`apps/web/src/payload.config.ts`, collections in `apps/web/src/cms`), tables in the `cms` schema. Editors use the back office at /admin/content with their H2 Economy account; access comes from operator permissions (`content.view/edit/delete/publish`) via `cms/auth-strategy.ts`. Payload's own screens at /cms are closed (A196): the proxy sends /cms to /admin/content.
 - After changing a collection: `pnpm --filter @h2india/web cms:migration <name>` (then mark the generated `MigrateUpArgs`/`MigrateDownArgs` imports as `type`), `pnpm --filter @h2india/web cms:types`, and commit the migration, `payload-types.ts` and the import map.
 - An article type's label (Sponsored, Press release) comes from `cms/types.ts`, never a free field. Publishing rules live in the collection hooks, not the UI.
 - Change an article's status only with `transitionArticle()` (`cms/workflow.ts`); it checks the rule and permission and writes the audit log. Direct publishing is refused.
@@ -296,7 +296,8 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Native content screens (step 4.6)
 
-- Editors work in `/admin/content` with our components; `/cms` stays as the advanced editor (images in rich text, embeds, live updates).
+- There is one CMS (A196): editors work only in `/admin/content` with our components. Never link to `/cms` or add a feature that needs Payload's own screens; build it in the panel. Rich text is edited as blocks (`admin/cms/body.ts`): pictures are Payload upload nodes, YouTube videos the `youtube` block (`youtubeId()` checks the link, `YouTubeVideo` plays it from youtube-nocookie.com after a click, A195). A new body block needs `body.ts`, `BlockEditor`, `cms/blocks.ts` and `ArticleBody`.
+- Collections the system or readers create are in `NO_CREATE_SLUGS` (no New button); ones nobody edits by hand in `READ_ONLY_SLUGS` (`admin/cms/registry.ts`).
 - Every native content read and save runs as the signed-in editor from `cmsSession()` (`admin/cms/session.ts`) with `overrideAccess: false`, so CMS access rules and hooks apply. Never save content with `overrideAccess: true` from a page.
 - Articles use `ArticleEditor` and change status only through `moveArticleAction()` → `transitionArticle()`. Other content uses `RecordForm`, drawn from the collection's fields by `describeFields()`; a new collection shows up by adding it to `CONTENT_GROUPS` (`admin/cms/registry.ts`), a single-document setting to `SETTING_SLUGS`.
 - Publishing, unpublishing and setting changes are audited in `record-actions.ts`.

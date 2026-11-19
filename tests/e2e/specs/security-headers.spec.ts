@@ -56,13 +56,13 @@ test("API answers carry the headers too", async ({ request }, info) => {
   expect(res.headers()["content-security-policy"]).toContain("object-src 'none'");
 });
 
-test("the advanced editor works under its policy", async ({ page }, info) => {
+test("the content panel works under the strict policy", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop-1440", "The back office is desktop only");
   test.setTimeout(120_000);
   const seen = await watchViolations(page);
   await signInOperator(page, "Content editor");
-  await page.goto("/cms");
-  await expect(page.getByRole("link", { name: /Articles/ }).first()).toBeVisible({ timeout: 30_000 });
+  await page.goto("/admin/content/articles/new");
+  await expect(page.getByRole("heading", { name: "New article" })).toBeVisible({ timeout: 30_000 });
   await page.waitForLoadState("networkidle");
   expect(seen).toEqual([]);
 });

@@ -54,7 +54,7 @@ describe("describeFields", () => {
       { value: "web", label: "Web page" },
     ]);
     expect(by.owner?.sidebar).toBe(true);
-    expect(by.record?.kind).toBe("unsupported");
+    expect(by.record?.kind).toBe("reference");
     // Inside an array, "url" is a real field (only top-level upload metadata is skipped).
     expect(by.documents?.fields?.map((f) => f.name)).toEqual(["url", "title"]);
   });

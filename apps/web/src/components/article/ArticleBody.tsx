@@ -3,6 +3,8 @@ import { RichText, type JSXConvertersFunction } from "@payloadcms/richtext-lexic
 import { GlossaryTerm } from "@h2india/ui";
 import type { ReactNode } from "react";
 import { linkGlossary, type GlossaryNode, type LinkableTerm } from "@/cms/knowledge/glossary-links";
+import { youtubeId } from "@/lib/youtube";
+import { YouTubeVideo } from "./YouTubeVideo";
 
 // Renders an article's body with the article components from Figma page 02: Key numbers box, Key facts box and the
 // Glossary hover-card (first mention of each glossary term, step 4.4). Used by the CMS preview now and the public
@@ -13,6 +15,20 @@ export interface KeyNumbersBlock {
   heading?: string | null;
   items: { value: string; label: string }[];
   source?: string | null;
+}
+interface YouTubeBlock {
+  blockType: "youtube";
+  url: string;
+  title: string;
+  caption?: string | null;
+}
+/** A picture from the media library, filled in by the read (depth 1 or more). */
+interface MediaValue {
+  url?: string | null;
+  alt?: string | null;
+  caption?: string | null;
+  credit?: string | null;
+  sizes?: { hero?: { url?: string | null } | null } | null;
 }
 interface KeyFactsBlock {
   blockType: "keyFacts";
@@ -110,9 +126,27 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
       {formatted(node.text, node.format)}
     </GlossaryTerm>
   ),
+  upload: ({ node }: { node: { relationTo?: string; value?: unknown } }) => {
+    const m = node.value as MediaValue | number | null | undefined;
+    if (!m || typeof m !== "object") return null;
+    const src = m.sizes?.hero?.url ?? m.url;
+    if (!src) return null;
+    const note = [m.caption, m.credit].filter(Boolean).join(" · ");
+    return (
+      <figure className="my-2 flex flex-col gap-2">
+        {/* eslint-disable-next-line @next/next/no-img-element -- CMS images come from the storage domain. */}
+        <img src={src} alt={m.alt ?? ""} loading="lazy" className="w-full rounded-card" />
+        {note ? <figcaption className="type-caption text-secondary">{note}</figcaption> : null}
+      </figure>
+    );
+  },
   blocks: {
     keyNumbers: ({ node }: { node: { fields: KeyNumbersBlock } }) => <KeyNumbers block={node.fields} />,
     keyFacts: ({ node }: { node: { fields: KeyFactsBlock } }) => <KeyFacts block={node.fields} />,
+    youtube: ({ node }: { node: { fields: YouTubeBlock } }) => {
+      const id = youtubeId(node.fields.url);
+      return id ? <YouTubeVideo id={id} title={node.fields.title} caption={node.fields.caption} /> : null;
+    },
   },
 });
 

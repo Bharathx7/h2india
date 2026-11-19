@@ -305,7 +305,7 @@ export default async function CompliancePage({ searchParams }: { searchParams: P
                 {what(title, c.description)}
                 {received(new Date(c.createdAt))}
                 {badge({ text: cstatus(c.status), tone: tone(cstatus(c.status)) })}
-                {open(`/cms/collections/corrections/${String(c.id)}`, title)}
+                {open(`/admin/content/corrections/${String(c.id)}`, title)}
               </tr>
             );
           }),

@@ -11,7 +11,7 @@ import { AdminShell, requireOperator } from "@/admin/shell";
 import { possibleUpdates, RED_DAYS, STALE_DAYS, staleRecords } from "@/cms/records/quality";
 import { ArticlesLibrary } from "@/admin/cms/ArticlesLibrary";
 import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
-import { CONTENT_GROUPS, CONTENT_SLUGS } from "@/admin/cms/registry";
+import { CONTENT_GROUPS } from "@/admin/cms/registry";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
@@ -130,13 +130,8 @@ export default async function ContentPage({
                       <td className="px-4 py-3">
                         <span className="flex items-center justify-end gap-2">
                           <MarkVerified collection={r.collection} id={r.id} title={r.title} />
-                          {/* The built-in editor where the collection has one (founder QC: this always opened /cms). */}
                           <Link
-                            href={
-                              CONTENT_SLUGS.includes(r.collection)
-                                ? `/admin/content/${r.collection}/${String(r.id)}`
-                                : `/cms/collections/${r.collection}/${String(r.id)}`
-                            }
+                            href={`/admin/content/${r.collection}/${String(r.id)}`}
                             className={buttonClasses({ variant: "ghost", size: "sm" })}
                           >
                             <Icon name="pencil" size={14} />
@@ -168,7 +163,7 @@ export default async function ContentPage({
                   </span>
                 </span>
                 <Link
-                  href={`/cms/collections/source-changes/${String(u.id)}`}
+                  href={`/admin/content/source-changes/${String(u.id)}`}
                   className={buttonClasses({ variant: "outline", size: "sm" })}
                 >
                   Review

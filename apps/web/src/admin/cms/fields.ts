@@ -17,6 +17,8 @@ export type FieldKind =
   | "group"
   | "richText"
   | "json"
+  /** A link to a record of one of several types, set by the system (Possible updates, Tracker changes): shown, not edited. */
+  | "reference"
   | "unsupported";
 
 export interface FieldSpec {
@@ -142,8 +144,8 @@ export function describeFields(fields: readonly unknown[], inSidebar = false, ne
     const spec: FieldSpec = {
       name: f.name,
       label: text(f.label) ?? labelOf(f.name),
-      // A relationship to several collections at once is edited in the advanced editor.
-      kind: (kind === "relationship" || kind === "upload") && !relationTo ? "unsupported" : kind,
+      // A relationship to several collections at once is set by the system: shown as a link to the record.
+      kind: (kind === "relationship" || kind === "upload") && !relationTo ? "reference" : kind,
       required: f.required === true,
       readOnly: admin.readOnly === true,
       sidebar: inSidebar || admin.position === "sidebar",
@@ -173,6 +175,8 @@ export function relationsOf(fields: FieldSpec[]): string[] {
   const walk = (list: FieldSpec[]) => {
     for (const f of list) {
       if (f.relationTo) out.add(f.relationTo);
+      // Rich text can hold pictures from the media library (Image blocks).
+      if (f.kind === "richText") out.add("media");
       if (f.fields) walk(f.fields);
     }
   };
@@ -184,7 +188,7 @@ export function relationsOf(fields: FieldSpec[]): string[] {
 export function toStored(fields: FieldSpec[], values: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of fields) {
-    if (f.readOnly || f.kind === "unsupported") continue;
+    if (f.readOnly || f.kind === "unsupported" || f.kind === "reference") continue;
     if (!(f.name in values)) continue;
     const v = values[f.name];
     switch (f.kind) {
@@ -202,7 +206,7 @@ export function toStored(fields: FieldSpec[], values: Record<string, unknown>): 
         out[f.name] = f.hasMany ? (Array.isArray(v) ? v : []) : v === "" ? null : v;
         break;
       case "group":
-        // Values the form doesn't show (edited in the advanced editor) are kept as they were.
+        // Values the form doesn't show are kept as they were.
         out[f.name] =
           v && typeof v === "object"
             ? { ...(v as Record<string, unknown>), ...toStored(f.fields ?? [], v as Record<string, unknown>) }

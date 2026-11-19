@@ -25,32 +25,27 @@ export function originOf(url: string | undefined): string | null {
   }
 }
 
-/** The advanced editor (/cms, Payload) loads its code editor from jsDelivr and needs eval; operators only. */
-const CMS_SCRIPTS = "https://cdn.jsdelivr.net";
-
-export function contentSecurityPolicy({ dev, storageOrigins, pathname, analyticsOrigin }: HeaderOptions): string {
-  const cms = pathname === "/cms" || pathname.startsWith("/cms/");
+// The old advanced editor (/cms) needed eval and jsDelivr; it closed on 19 Nov 2026 (one CMS, in /admin/content), so
+// every page now gets the same strict script policy.
+export function contentSecurityPolicy({ dev, storageOrigins, analyticsOrigin }: HeaderOptions): string {
   const storage = [...new Set(storageOrigins)];
   const script = ["'self'", "'unsafe-inline'"];
-  if (dev || cms) script.push("'unsafe-eval'");
-  if (cms) script.push(CMS_SCRIPTS);
+  if (dev) script.push("'unsafe-eval'");
   const analytics = analyticsOrigin ? [analyticsOrigin] : [];
   script.push(...analytics);
   const directives: [string, string[]][] = [
     ["default-src", ["'self'"]],
     ["script-src", script],
-    ["style-src", ["'self'", "'unsafe-inline'", ...(cms ? [CMS_SCRIPTS] : [])]],
+    ["style-src", ["'self'", "'unsafe-inline'"]],
     // Article and event pictures can come from an editor's link (https only); files from storage.
     ["img-src", ["'self'", "data:", "blob:", "https:", ...storage]],
-    ["font-src", ["'self'", "data:", ...(cms ? [CMS_SCRIPTS] : [])]],
+    ["font-src", ["'self'", "data:"]],
     // Replays and podcasts play from their host in the browser's own player (M9, @h2india/core/media).
     ["media-src", ["'self'", "blob:", "https:", ...storage]],
-    [
-      "connect-src",
-      ["'self'", ...storage, ...analytics, ...(dev ? ["ws:", "wss:"] : []), ...(cms ? [CMS_SCRIPTS] : [])],
-    ],
+    ["connect-src", ["'self'", ...storage, ...analytics, ...(dev ? ["ws:", "wss:"] : [])]],
     ["worker-src", ["'self'", "blob:"]],
-    ["frame-src", ["'self'"]],
+    // YouTube videos in articles and knowledge pages play from the privacy-enhanced host only (A195, lib/youtube.ts).
+    ["frame-src", ["'self'", "https://www.youtube-nocookie.com"]],
     ["frame-ancestors", ["'none'"]],
     ["object-src", ["'none'"]],
     ["base-uri", ["'self'"]],
