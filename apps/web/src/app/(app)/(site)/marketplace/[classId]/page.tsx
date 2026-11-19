@@ -52,7 +52,7 @@ export default async function ClassPage({
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <section aria-labelledby="class-title" className="bg-mint">
+      <section aria-labelledby="class-title" className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-4 py-8 md:py-12")}>
           <Crumbs items={[{ label: "Marketplace", href: "/marketplace" }, { label: c.label }]} />
           <h1 id="class-title" className="type-h1 text-primary">
@@ -109,7 +109,7 @@ export default async function ClassPage({
         id="suppliers"
         title={`Top suppliers in ${c.label}`}
         sub="Ranked by verified listings and reply time, not by payment."
-        className="bg-mint"
+        className="bg-subtle"
       >
         <LiveSection
           label={`Top suppliers in ${c.label}`}

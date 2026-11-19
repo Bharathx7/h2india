@@ -59,7 +59,7 @@ export function ClassTile({ c }: { c: PublicClass }) {
   return (
     <Link
       href={classHref(c.id)}
-      className="group card-lift flex h-full flex-col gap-3 rounded-feature border border-fresh-200 bg-mint p-6 focus-visible:outline-offset-4"
+      className="group card-lift flex h-full flex-col gap-3 rounded-feature border border-default bg-page p-6 focus-visible:outline-offset-4"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex size-12 items-center justify-center rounded-card bg-page text-icon-link shadow-soft">

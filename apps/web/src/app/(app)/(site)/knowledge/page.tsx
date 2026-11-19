@@ -102,7 +102,7 @@ export default async function KnowledgeHome() {
 
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <div className="bg-mint">
+      <div className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-4 py-10")}>
           <Crumbs items={[{ label: "Knowledge" }]} />
           <h1 className="type-h1 text-primary">Learn India&apos;s hydrogen economy</h1>
@@ -298,7 +298,7 @@ export default async function KnowledgeHome() {
         <Block id="tracker" title="India Hydrogen Tracker" link={{ label: "Open the tracker", href: "/tracker" }}>
           <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {overview.figures.slice(0, 3).map((f) => (
-              <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card bg-mint p-5">
+              <li key={f.id ?? f.label} className="flex flex-col gap-1 rounded-card border border-default bg-page p-5">
                 <span className="type-display text-primary">{f.value}</span>
                 <span className="type-label text-primary">{f.label}</span>
                 <span className="type-caption text-secondary">
@@ -320,7 +320,10 @@ export default async function KnowledgeHome() {
           <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {media.map((m) => (
               <li key={m.href}>
-                <Link href={m.href} className="group flex h-full flex-col gap-2 rounded-card bg-mint p-5">
+                <Link
+                  href={m.href}
+                  className="group flex h-full flex-col gap-2 rounded-card border border-default bg-page p-5 hover:border-hover"
+                >
                   <span className="flex items-start justify-between gap-2">
                     <span className="type-label-sm text-secondary">{m.eyebrow}</span>
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-inverse text-inverse">

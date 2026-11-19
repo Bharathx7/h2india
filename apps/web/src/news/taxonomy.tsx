@@ -107,7 +107,7 @@ export async function TopicPage({
   ]);
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <div className="bg-mint">
+      <div className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-3 py-8")}>
           <Crumbs
             items={[
@@ -204,7 +204,7 @@ export async function AuthorPage({ author, page }: { author: Author; page: numbe
   const latest = list.items[0];
   return (
     <main id="main" className="[&_:is(h1,h2,h3)]:text-wrap">
-      <div className="bg-mint">
+      <div className="bg-subtle">
         <div className={cx(wrap, "flex flex-col gap-6 py-10 md:flex-row md:items-start")}>
           <span
             aria-hidden="true"
