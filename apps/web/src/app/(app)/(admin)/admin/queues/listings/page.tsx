@@ -61,6 +61,7 @@ export default async function ListingsQueuePage({
         age: ageH >= 1 ? `${String(Math.floor(ageH))} h` : `${String(Math.max(1, Math.round(ageH * 60)))} m`,
         ageTone: ageH >= hours(red) ? "error" : ageH >= hours(amber) ? "warning" : "success",
         assignee: x.assignee,
+        companyUnverified: x.companyVerification !== "Verified",
       };
     })
     .filter((r) => view !== "late" || r.ageTone === "error");

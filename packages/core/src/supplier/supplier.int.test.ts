@@ -15,6 +15,7 @@ import { supplierOf } from "./context";
 import { latestReview, submitForReview, SupplierReviewError } from "./review";
 import {
   decideDocument,
+  decideSupplierReview,
   expireDocuments,
   grantBadge,
   listBadges,
@@ -66,6 +67,17 @@ describe.skipIf(!url)("supplier workspace", () => {
     expect(await latestReview(h.db, scopeFor(bActor), a.org.id)).toBeNull();
     expect((await latestReview(h.db, scopeFor(await loadActor(h.db, a.admin.id)), a.org.id))?.status).toBe("Submitted");
     await expect(submitForReview(h.db, bActor, a.org.id)).rejects.toThrow();
+  });
+
+  it("approving a review needs at least 2 of the 5 checks (founder, 19 Nov 2026)", async () => {
+    const mine = scopeFor(await loadActor(h.db, a.admin.id));
+    const review = await latestReview(h.db, mine, a.org.id);
+    const op = await operator();
+    await expect(
+      decideSupplierReview(h.db, op, { reviewId: review?.id ?? "", approve: true, checks: { identity: true } }),
+    ).rejects.toThrow(new VerificationError("Tick at least 2 checks"));
+    // Nothing changed: the review still waits.
+    expect((await latestReview(h.db, mine, a.org.id))?.status).toBe("Submitted");
   });
 
   /** An uploaded file that passed its checks, owned by the uploader (what the worker leaves behind). */

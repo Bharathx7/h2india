@@ -44,21 +44,31 @@ export async function assignListingAction(id: string) {
   revalidatePath("/admin/queues/listings");
 }
 
-/** Bulk approve (629:367) covers only listings where every automated check passed; the rest are skipped. */
-export async function bulkApproveAction(ids: string[]): Promise<number> {
+/**
+ * Bulk approve (629:367) covers only listings where every automated check passed. A listing core refuses (its company
+ * isn't verified yet, someone decided it already) is skipped and reported with core's reason (founder, 19 Nov 2026:
+ * skips were silent).
+ */
+export async function bulkApproveAction(
+  ids: string[],
+): Promise<{ approved: number; skipped: { id: string; reason: string }[] }> {
   const db = getDb();
   const a = await actor();
-  let done = 0;
+  const context = await requestContext();
+  let approved = 0;
+  const skipped: { id: string; reason: string }[] = [];
   for (const id of ids) {
     try {
-      await decideRevision(db, a, { id, outcome: "Approved", context: await requestContext() });
-      done += 1;
+      await decideRevision(db, a, { id, outcome: "Approved", context });
+      approved += 1;
     } catch (error) {
+      if (error instanceof ForbiddenError) return { approved, skipped: [{ id, reason: "You can't decide listings." }] };
       if (!(error instanceof ProductError)) throw error;
+      skipped.push({ id, reason: error.message });
     }
   }
   revalidatePath("/admin/queues/listings");
-  return done;
+  return { approved, skipped };
 }
 
 /** Storefront changes (590:8 Publish changes) use the Listings queue until a lighter review is decided (A160). */
