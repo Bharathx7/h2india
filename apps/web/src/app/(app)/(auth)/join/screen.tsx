@@ -1,6 +1,6 @@
 import { getDb } from "@h2india/core";
 import type { JoinPath } from "@h2india/core/companies/client";
-import { joinProfile, latestJoinRequest, membershipsOf, mobileCodeRequired, readDraft } from "@h2india/core/companies";
+import { joinProfile, latestJoinRequest, membershipsOf, readDraft } from "@h2india/core/companies";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth";
 import { draftToken, workspaceFor } from "@/server/join";
@@ -46,11 +46,8 @@ export async function JoinScreen({ fixed, wanted, as }: { fixed?: JoinPath; want
       preferred={preferred}
       fixedPath={fixed}
       signedInEmail={session?.user.email ?? null}
-      mobileCode={await mobileCodeRequired()}
       draft={{
         path: draft?.path ?? null,
-        mobile: draft?.mobile ?? null,
-        mobileVerified: draft?.mobileVerified ?? false,
         fullName: draft?.fullName ?? (session?.user.name || null),
         jobRole: draft?.jobRole ?? null,
         email: draft?.email ?? null,

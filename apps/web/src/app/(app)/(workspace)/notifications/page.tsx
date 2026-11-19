@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { getChoices, listNotifications, unreadCount } from "@h2india/core/notify";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -23,11 +24,12 @@ export default async function NotificationsPage({
   const { tab, state } = sp;
   const db = getDb();
   const userId = session.user.id;
-  const [shell, unread, items, choices] = await Promise.all([
+  const [shell, unread, items, choices, showMobile] = await Promise.all([
     shellFor(userId),
     unreadCount(db, userId),
     listNotifications(db, userId, { limit: 100 }),
     getChoices(db, userId),
+    mobileFieldsShown(db),
   ]);
   const rows = toRows(items);
   // ?state= shows the designed loading, empty and error states in development (playbook step 2.5).
@@ -47,7 +49,7 @@ export default async function NotificationsPage({
         tab={tab === "email" ? "email" : "activity"}
         demoState={demo === "loading" || demo === "empty" || demo === "error" ? demo : undefined}
         choices={choices}
-        contact={{ email: shell.email, mobile: shell.mobile }}
+        contact={{ email: shell.email, mobile: shell.mobile, whatsapp: showMobile }}
         paging={pageRequest(sp)}
         query={pagingQuery(sp)}
       />

@@ -1,6 +1,7 @@
 "use server";
 
 import { checkForm, getDb, underLimit, type FormGuard } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import {
   checkGrievance,
   findGrievance,
@@ -22,7 +23,9 @@ import { istDay, istDayTime } from "./views";
 export type RaiseResult =
   { ok: true; reference: string } | { ok: false; errors?: Record<string, string>; reason?: "limited" | "failed" };
 
-export async function raiseComplaint(input: GrievanceInput, guard?: FormGuard): Promise<RaiseResult> {
+export async function raiseComplaint(given: GrievanceInput, guard?: FormGuard): Promise<RaiseResult> {
+  // While the `mobileFields` switch is off (founder, 19 Nov 2026) the form doesn't ask for a mobile and none is kept.
+  const input = (await mobileFieldsShown()) ? given : { ...given, mobile: "" };
   const ctx = await requestContext();
   const checked = checkGrievance(input);
   if (!checked.ok) return { ok: false, errors: checked.errors };

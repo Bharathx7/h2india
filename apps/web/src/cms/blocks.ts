@@ -44,7 +44,7 @@ export const KeyFacts: Block = {
   ],
 };
 
-/** A YouTube video inside the body (founder, 19 Nov 2026, A195). Played from youtube-nocookie.com only. */
+/** A YouTube video inside the body (founder, 19 Nov 2026, A196). Played from youtube-nocookie.com only. */
 export const YouTube: Block = {
   slug: "youtube",
   labels: { singular: "YouTube video", plural: "YouTube videos" },

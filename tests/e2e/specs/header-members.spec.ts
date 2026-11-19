@@ -74,9 +74,16 @@ for (const [kind, title, join] of [
   ["supplier", "Supplier sign in", "Create a supplier account"],
   ["member", "Member sign in", "Join as a member"],
 ] as const) {
-  test(`${title}: email only, its own sign-up, and links to the other two`, async ({ page }) => {
+  test(`${title}: email and password, its own sign-up, and links to the other two`, async ({ page }) => {
     await page.goto(`/${kind}/sign-in`);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+    // A195: email and password first, with the code as the backup.
+    await expect(page.getByRole("main").getByLabel("Password", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Email me a code instead" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Forgot password?" })).toHaveAttribute(
+      "href",
+      `/forgot-password?as=${kind}`,
+    );
     await expect(page.getByRole("button", { name: "Continue with passkey" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Continue with Google" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: join })).toHaveAttribute("href", `/join/${kind}`);
@@ -103,6 +110,8 @@ test("signing in never creates an account: an unknown email gets a Create an acc
   const email = newEmail("no-account");
   await page.goto("/buyer/sign-in");
   await hydrated(page);
+  // The buyer page signs in with a password first (A195); the code is the backup.
+  await page.getByRole("button", { name: "Email me a code instead" }).click();
   await page.getByLabel("Work email").fill(email);
   await page.getByRole("button", { name: "Send code" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();

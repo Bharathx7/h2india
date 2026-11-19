@@ -406,6 +406,14 @@ export const TEMPLATES = {
     step: "QC 17 Nov",
     built: true,
   },
+  "email.password_reset": {
+    channel: "email",
+    key: "password_reset",
+    name: "Reset your password (buyers, suppliers, members)",
+    frame: null,
+    step: "QC 19 Nov",
+    built: true,
+  },
   "email.claim_code": {
     channel: "email",
     key: "claim_code",

@@ -1,4 +1,4 @@
-import { ACCOUNT_PAGES } from "@h2india/core/sign-in";
+import { ACCOUNT_PAGES, PASSWORD_PAGES } from "@h2india/core/sign-in";
 
 // Links used by the sign-in, join and recovery pages (Figma page 12). Since public QC 2 (16 Nov 2026) buyers,
 // suppliers and members each have their own sign-in and sign-up page (ACCOUNT_PAGES).
@@ -19,6 +19,10 @@ export const AUTH_LINKS = {
   joinBuyer: ACCOUNT_PAGES.buyer.join,
   joinSupplier: ACCOUNT_PAGES.supplier.join,
   joinMember: ACCOUNT_PAGES.member.join,
+  /** Buyers, suppliers and members (A195): ask for a reset link, land from it, set a first password. */
+  forgotPassword: PASSWORD_PAGES.forgot,
+  resetPassword: PASSWORD_PAGES.reset,
+  setPassword: PASSWORD_PAGES.set,
   /** "Trouble signing in?": the Forgot access hub (step 3.5). */
   forgotAccess: "/forgot-access",
   contactSupport: "/help",

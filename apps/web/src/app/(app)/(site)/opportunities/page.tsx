@@ -1,3 +1,4 @@
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { ArrowLink, buttonClasses, cx, SchemeCard, TenderCard } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -75,6 +76,7 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
   const wide = one(params.window) === "14";
   const viewer = await siteViewer();
   const signedIn = Boolean(viewer);
+  const whatsapp = await mobileFieldsShown();
   let data;
   try {
     data = await Promise.all([allTenders(), allSchemes(), allGrants(), allJobs()]);
@@ -249,7 +251,9 @@ export default async function OpportunitiesHome({ searchParams }: { searchParams
               Create an alert
             </h2>
             <p className="type-body-sm text-body">
-              Get new tenders, schemes and jobs that match you by email or WhatsApp.
+              {whatsapp
+                ? "Get new tenders, schemes and jobs that match you by email or WhatsApp."
+                : "Get new tenders, schemes and jobs that match you by email."}
             </p>
             <ul className="flex flex-wrap gap-2">
               {["Tenders", "Schemes", "Grants", "Jobs"].map((t) => (

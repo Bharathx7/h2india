@@ -14,6 +14,7 @@ import {
   renderDocumentExpiring,
   renderSignInCode,
   renderStaffPasswordLink,
+  renderPasswordResetLink,
   renderVerifyEmail,
 } from "./index";
 import { Notice } from "./notice";
@@ -58,6 +59,8 @@ export async function renderSample(id: TemplateId, appUrl: string): Promise<Samp
       );
     case "email.staff_password_link":
       return email(renderStaffPasswordLink(appUrl, { url, name: "Ravi", minutes: 60 }));
+    case "email.password_reset":
+      return email(renderPasswordResetLink(appUrl, { url, name: "Ravi", minutes: 60 }));
     case "email.passkey_reset_admin":
       return email(
         renderRecovery(appUrl, "passkeyReset", {

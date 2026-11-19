@@ -1,5 +1,6 @@
 "use client";
 
+import { PASSWORD_PAGES } from "@h2india/core/sign-in";
 import { Alert, Button, Checkbox } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,16 +9,20 @@ import { AUTH_LINKS } from "@/lib/auth-links";
 import { acceptInvitationAction } from "./team-actions";
 
 // Accept invitation (step 8.7). Someone who joined by invitation, not through Join, hasn't agreed to the Terms yet:
-// they tick the same box Join shows (525:207) before accepting (admin QC, 16 Nov 2026).
+// they tick the same box Join shows (525:207) before accepting (admin QC, 16 Nov 2026). Someone with no password yet
+// is asked to set one next (A195), then goes on to the workspace.
 
 export function AcceptInvite({
   token,
   workspace,
   needsTerms = false,
+  needsPassword = false,
 }: {
   token: string;
   workspace: string;
   needsTerms?: boolean;
+  /** No password yet (A195): Set your password comes before the workspace. */
+  needsPassword?: boolean;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -61,8 +66,9 @@ export function AcceptInvite({
           }
           start(async () => {
             const r = await acceptInvitationAction(token, terms);
-            if (r.ok) router.push(workspace);
-            else setError(r.error);
+            if (r.ok) {
+              router.push(needsPassword ? `${PASSWORD_PAGES.set}?next=${encodeURIComponent(workspace)}` : workspace);
+            } else setError(r.error);
           });
         }}
       >

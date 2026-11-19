@@ -1,19 +1,21 @@
 import { getDb } from "@h2india/core";
 import { accountDetails, deviceLabel, mySessions } from "@h2india/core/account";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { formatIstDateTime } from "@h2india/core/companies/client";
-import { SIGN_IN } from "@h2india/core/sign-in";
+import { hasPassword } from "@h2india/core/sign-in/passwords";
 import { buttonClasses, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { ChangePassword } from "@/account/ChangePassword";
 import { MemberShell, requireMember } from "@/member/shell";
 import { SignOutDevice } from "@/member/SecurityControls";
 import { getSession } from "@/server/auth";
 
 // Sign-in and security (founder QC, 17 Nov 2026): the member menu's item led nowhere. How the member signs in, the
 // devices signed in to their account (sign out one, or every other), and account recovery. No Figma frame; built from
-// the workspace panels. Passkeys were removed (A183), so there is nothing to set up here.
+// the workspace panels. Passkeys were removed (A183); Change password added 19 Nov 2026 (A195).
 
 export const metadata: Metadata = { title: "Sign-in and security · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -23,9 +25,11 @@ export default async function MemberSecurityPage() {
   const session = await getSession();
   if (!session) redirect("/member/sign-in?next=/member/security");
   const db = getDb();
-  const [details, sessions] = await Promise.all([
+  const [details, sessions, showMobile, passwordSet] = await Promise.all([
     accountDetails(db, userId),
     mySessions(db, userId, session.session.id),
+    mobileFieldsShown(db),
+    hasPassword(db, userId),
   ]);
   const others = sessions.filter((s) => !s.current).length;
 
@@ -42,9 +46,9 @@ export default async function MemberSecurityPage() {
             <Icon name="mail" size={20} />
           </span>
           <div className="min-w-0">
-            <p className="type-label text-primary">A code sent to your email</p>
+            <p className="type-label text-primary">Email and password</p>
             <p className="type-body-sm break-words text-body">
-              {details?.email ?? session.user.email}. Each code works once, for {SIGN_IN.codeMinutes} minutes.
+              {details?.email ?? session.user.email}. You can also ask for a code by email on the sign-in page.
             </p>
           </div>
         </div>
@@ -53,19 +57,28 @@ export default async function MemberSecurityPage() {
             <dt className="type-caption text-secondary">Email</dt>
             <dd className="type-body break-words text-primary">{details?.email ?? session.user.email}</dd>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <dt className="type-caption text-secondary">Mobile</dt>
-            <dd className="type-body text-primary">{details?.mobile ?? "Not added"}</dd>
-          </div>
+          {showMobile ? (
+            <div className="flex flex-col gap-0.5">
+              <dt className="type-caption text-secondary">Mobile</dt>
+              <dd className="type-body text-primary">{details?.mobile ?? "Not added"}</dd>
+            </div>
+          ) : null}
         </dl>
         <p className="type-caption text-secondary">
-          Lost access to your email, or changed your mobile?{" "}
+          {showMobile ? "Lost access to your email, or changed your mobile?" : "Lost access to your email?"}{" "}
           <Link href="/forgot-access" className="text-link underline">
             Use account recovery
           </Link>
           .
         </p>
       </Panel>
+
+      <section
+        aria-label="Password"
+        className="flex max-w-3xl flex-col gap-4 rounded-card border border-default bg-page p-5"
+      >
+        <ChangePassword hasPassword={passwordSet} />
+      </section>
 
       <Panel
         id="devices"

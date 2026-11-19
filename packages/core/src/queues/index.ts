@@ -1,5 +1,6 @@
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { flagNow } from "../admin/system";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -165,8 +166,13 @@ export async function submitters(db: Executor, actor: Actor, userIds: string[]) 
     .select({ id: u.id, name: u.name, email: u.email, emailVerified: u.emailVerified, mobile: u.mobileVerifiedAt })
     .from(u)
     .where(inArray(u.id, ids));
+  // Like RFQ moderation: the mobile counts only while the `mobileVerification` switch is on.
+  const mobileChecked = await flagNow(db, "mobileVerification");
   return new Map(
-    rows.map((r) => [r.id, { name: r.name, email: r.email, verified: r.emailVerified && r.mobile !== null }]),
+    rows.map((r) => [
+      r.id,
+      { name: r.name, email: r.email, verified: r.emailVerified && (!mobileChecked || r.mobile !== null) },
+    ]),
   );
 }
 

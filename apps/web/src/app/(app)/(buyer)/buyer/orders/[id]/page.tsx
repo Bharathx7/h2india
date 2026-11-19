@@ -1,4 +1,5 @@
 import { getDb, Money } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { scopeFor } from "@h2india/core/authz";
 import { heldOn, orderDetail, ratingOf, timelineStep, TIMELINE_STEPS, type OrderDetail } from "@h2india/core/orders";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
@@ -92,7 +93,7 @@ export default async function BuyerOrderPage({
   const sp = await searchParams;
   const page = await requireBuyer(`/buyer/orders/${id}`);
   const db = getDb();
-  const d = await orderDetail(scopeFor(page.actor), db, id);
+  const [d, showMobile] = await Promise.all([orderDetail(scopeFor(page.actor), db, id), mobileFieldsShown(db)]);
   if (!d || d.order.buyerOrganisationId !== page.buyer.organisationId) notFound();
   const seat = page.buyer.seat.permissions;
   const canPlace = seat.has("order.place");
@@ -242,7 +243,12 @@ export default async function BuyerOrderPage({
                   ["Carrier", d.shipment?.transporter ?? ""],
                   ["LR or tracking", d.shipment?.lrNumber ?? ""],
                   ["Expected", d.shipment?.expectedAt ? formatIstDate(d.shipment.expectedAt) : ""],
-                  ["Receiving contact", `${d.order.receiverName ?? ""} gets a delivery code by SMS when it arrives`],
+                  [
+                    "Receiving contact",
+                    showMobile
+                      ? `${d.order.receiverName ?? ""} gets a delivery code by SMS when it arrives`
+                      : `${d.order.receiverName ?? ""} receives it`,
+                  ],
                 ]}
               />
             </Card>

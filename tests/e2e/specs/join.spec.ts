@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "../fixtures";
+import { expect, hydrated, test, type Page } from "../fixtures";
 import {
   fillDetails,
   freshGstin,
@@ -9,7 +9,7 @@ import {
   signInNew,
   typeGstin,
 } from "../helpers/join";
-import { newEmail, ownIp, withDb } from "../helpers/sign-in";
+import { newEmail, newPassword, ownIp, withDb } from "../helpers/sign-in";
 
 // Step 3.3: Join (Figma 525:8), the eight GSTIN states (526:8), Verify email (365:27778), Join request (365:27779).
 
@@ -232,12 +232,14 @@ test("Your details checks every field before going on", async ({ page }) => {
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByText("Enter your work email, like you@company.com")).toBeVisible();
-  await expect(page.getByText("Confirm your mobile number with the code we send")).toBeVisible();
+  await expect(page.getByText("Choose a password", { exact: true })).toBeVisible();
   await expect(page.getByText("Enter your full name")).toBeVisible();
   await expect(page.getByText("Choose your role from the list")).toBeVisible();
-  await page.getByLabel("Mobile").fill("12345");
-  await page.getByRole("button", { name: "Send code" }).click();
-  await expect(page.getByText("Enter a 10-digit mobile number")).toBeVisible();
+  // Founder, 19 Nov 2026 (A195): a password instead of the mobile number and its SMS code.
+  await expect(page.getByLabel("Mobile")).toHaveCount(0);
+  await page.getByLabel("Password", { exact: true }).fill("short");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page.getByText("Use at least 8 characters", { exact: true })).toBeVisible();
   await axe(page);
 });
 
@@ -265,6 +267,13 @@ test("a new supplier confirms the email in a different browser and goes straight
   await expect(elsewhere.getByRole("heading", { name: "Email confirmed" })).toBeVisible();
   await expect(elsewhere.getByText("Next: finish a supplier account for Ravi Menon.")).toBeVisible();
   await elsewhere.getByRole("button", { name: "Continue" }).click();
+  // A195: the password typed in the first browser is never set from a link opened elsewhere; choose it here.
+  await expect(elsewhere.getByRole("heading", { name: "Set your password" })).toBeVisible();
+  await hydrated(elsewhere);
+  const password = newPassword();
+  await elsewhere.getByLabel("New password").fill(password);
+  await elsewhere.getByLabel("Type it again").fill(password);
+  await elsewhere.getByRole("button", { name: "Set password" }).click();
   await expect(elsewhere).toHaveURL(/\/join\/supplier\?step=company$/);
   await expect(elsewhere.getByRole("heading", { name: "Company details" })).toBeVisible();
   await other.close();

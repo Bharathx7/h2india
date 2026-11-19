@@ -1,5 +1,6 @@
 import { getDb } from "@h2india/core";
 import { accountDetails } from "@h2india/core/account";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { buttonClasses, Icon, StatusBadge, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -11,6 +12,8 @@ import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { toRows } from "../notifications/rows";
 import { DetailsForm } from "./DetailsForm";
+import { ChangePassword } from "@/account/ChangePassword";
+import { hasPassword } from "@h2india/core/sign-in/passwords";
 
 // Account (public QC, 16 Nov 2026; rebuilt in founder QC, 17 Nov 2026): what "Account" in the site header and
 // "Profile" in the workspace menu open, for every workspace. No Figma frame draws it; it uses the workspace panels.
@@ -38,11 +41,13 @@ export default async function AccountPage() {
   if (!session) redirect("/sign-in?next=/account");
   const db = getDb();
   const userId = session.user.id;
-  const [shell, unread, items, details] = await Promise.all([
+  const [shell, unread, items, details, passwordSet, showMobile] = await Promise.all([
     shellFor(userId),
     unreadCount(db, userId),
     listNotifications(db, userId, { limit: 5 }),
     accountDetails(db, userId),
+    hasPassword(db, userId),
+    mobileFieldsShown(db),
   ]);
   const area = shell.area;
   const company = area === "buyer" || area === "supplier" ? COMPANY_LINKS[area] : null;
@@ -83,14 +88,14 @@ export default async function AccountPage() {
               <DetailsForm name={details?.name ?? ""} jobRole={details?.jobRole ?? null} />
               <dl className="grid grid-cols-1 gap-x-6 gap-y-3 border-t border-default pt-4 md:grid-cols-2">
                 <Fact label="Email" value={shell.email} />
-                <Fact label="Mobile" value={shell.mobile ?? "Not added"} />
+                {showMobile ? <Fact label="Mobile" value={shell.mobile ?? "Not added"} /> : null}
               </dl>
               <p className="type-caption text-secondary">
-                To change your email or mobile, use{" "}
+                {showMobile ? "To change your email or mobile, use " : "To change your email, use "}
                 <Link href="/forgot-access" className="text-link underline">
                   account recovery
                 </Link>
-                : we check both before anything changes.
+                {showMobile ? ": we check both before anything changes." : "."}
               </p>
             </Panel>
 
@@ -98,7 +103,7 @@ export default async function AccountPage() {
               <p className="type-body text-body">
                 {staff
                   ? "You sign in to the back office with your work email and password."
-                  : "You sign in with a code sent to your email. Bank changes and approvals ask for a fresh code."}
+                  : "You sign in with your email and password, or a code sent to your email. Bank changes and approvals ask for a fresh code."}
               </p>
               <div className="flex flex-wrap gap-3">
                 {staff ? (
@@ -121,6 +126,15 @@ export default async function AccountPage() {
                 </Link>
               </div>
             </Panel>
+
+            {staff ? null : (
+              <section
+                aria-label="Password"
+                className="flex flex-col gap-4 rounded-card border border-default bg-page p-5"
+              >
+                <ChangePassword hasPassword={passwordSet} />
+              </section>
+            )}
           </div>
 
           <div className="flex min-w-0 flex-col gap-6">

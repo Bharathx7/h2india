@@ -223,6 +223,11 @@ export const joinDrafts = core.table(
     jobRole: text("job_role"),
     termsAcceptedAt: utc("terms_accepted_at"),
     termsVersion: text("terms_version"),
+    /**
+     * The password chosen at Join (A195), as Better Auth's hash, never the password itself. Set on the account only
+     * when the confirm link is opened in the browser that holds this draft's cookie; cleared once used.
+     */
+    passwordHash: text("password_hash"),
     expiresAt: utc("expires_at").notNull(),
     ...timestamps,
   },

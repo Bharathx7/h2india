@@ -4,7 +4,7 @@ import { Icon } from "@h2india/ui";
 import { useState } from "react";
 import { youtubeEmbedUrl, youtubeThumbnail } from "@/lib/youtube";
 
-// A YouTube video in an article (A195). Until the reader presses play only the still image shows, so YouTube isn't
+// A YouTube video in an article (A196). Until the reader presses play only the still image shows, so YouTube isn't
 // contacted for the player before then; the player comes from youtube-nocookie.com.
 
 export function YouTubeVideo({ id, title, caption }: { id: string; title: string; caption?: string | null }) {

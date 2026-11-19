@@ -75,6 +75,9 @@ test("a Super admin adds a supplier; the new owner accepts the invitation and ge
   await expect(page.getByText("Agree to the Terms of use and Privacy policy to continue")).toBeVisible();
   await page.getByRole("checkbox", { name: /I agree to the Terms of use/ }).click();
   await accept.click();
+  // No password yet (A195): they're offered one first, and may skip and keep signing in by email code.
+  await expect(page).toHaveURL(/\/set-password\?next=%2Fsupplier/);
+  await page.getByRole("link", { name: "Skip for now" }).click();
   await expect(page).toHaveURL(/\/supplier/);
   const role = await withDb(
     async (db) =>

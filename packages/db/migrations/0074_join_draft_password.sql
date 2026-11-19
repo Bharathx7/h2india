@@ -1,0 +1,1 @@
+ALTER TABLE "core"."join_drafts" ADD COLUMN "password_hash" text;

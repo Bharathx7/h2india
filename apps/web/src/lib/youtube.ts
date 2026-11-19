@@ -1,4 +1,4 @@
-// YouTube videos inside articles and knowledge pages (founder, 19 Nov 2026, A195). Only YouTube is embedded, and only
+// YouTube videos inside articles and knowledge pages (founder, 19 Nov 2026, A196). Only YouTube is embedded, and only
 // through its privacy-enhanced host (youtube-nocookie.com), so nothing is stored in the reader's browser until they
 // press play. Pure: unit-tested.
 

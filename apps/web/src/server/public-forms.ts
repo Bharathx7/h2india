@@ -110,7 +110,9 @@ export async function requestEarlyListing(input: EarlyListingInput, guard?: Form
   if (!value.company) errors.company = "Enter your company's name";
   if (!value.name) errors.name = "Enter your full name";
   if (!isEmailAddress(value.email)) errors.email = "Enter a full email address, like name@company.in";
-  if (!MOBILE.test(value.mobile)) errors.mobile = "Enter a 10-digit Indian mobile number, like 98765 43210";
+  // Optional since 19 Nov 2026 (founder): checked only when given.
+  if (value.mobile && !MOBILE.test(value.mobile))
+    errors.mobile = "Enter a 10-digit Indian mobile number, like 98765 43210";
   if (!PRODUCT_CLASSES.some((c) => c.id === value.sells)) errors.sells = "Choose what you sell";
   if (!input.consent) errors.consent = "Tick the box so we can contact you";
   if (Object.keys(errors).length) return { ok: false, errors };
@@ -122,7 +124,13 @@ export async function requestEarlyListing(input: EarlyListingInput, guard?: Form
     const payload = await getPayload({ config });
     await payload.create({
       collection: "early-listings",
-      data: { ...value, sells: value.sells as "systems", consentText: EARLY_LISTING_CONSENT, status: "New" },
+      data: {
+        ...value,
+        mobile: value.mobile || null,
+        sells: value.sells as "systems",
+        consentText: EARLY_LISTING_CONSENT,
+        status: "New",
+      },
     });
     return { ok: true };
   } catch (error) {

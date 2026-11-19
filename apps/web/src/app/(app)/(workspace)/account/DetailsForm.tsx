@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { saveAccountDetailsAction } from "./actions";
 
-/** Your details: name and job role, saved together. Email and mobile change through account recovery. */
+/** Your details: name and job role, saved together. Email (and mobile, when shown) change through account recovery. */
 export function DetailsForm({ name, jobRole }: { name: string; jobRole: string | null }) {
   const router = useRouter();
   const toast = useToast();

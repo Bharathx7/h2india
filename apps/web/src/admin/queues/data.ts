@@ -1,5 +1,6 @@
 import config from "@payload-config";
 import { getDb } from "@h2india/core";
+import { flagNow } from "@h2india/core/admin/system";
 import type { Actor } from "@h2india/core/authz";
 import { categoryRequestQueue } from "@h2india/core/catalogue/taxonomy";
 import { claimsFor, companiesBrief, submitters, supplierQueue, type QueueKey } from "@h2india/core/queues";
@@ -320,7 +321,12 @@ export async function itemDetail(actor: Actor, queue: QueueKey, id: string): Pro
     rows: detailRows(v),
     checks: [
       { label: "Sender's company is verified", ok: companies.get(d.organisationId ?? "")?.verified ?? false },
-      { label: "Sender's email and mobile verified", ok: p?.verified ?? false },
+      {
+        label: (await flagNow(db, "mobileVerification"))
+          ? "Sender's email and mobile verified"
+          : "Sender's email verified",
+        ok: p?.verified ?? false,
+      },
     ],
   };
 }

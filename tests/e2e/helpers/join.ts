@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { enterCode, latestCode, requestCode, withDb } from "./sign-in";
+import { enterCode, latestCode, newPassword, requestCode, withDb } from "./sign-in";
 
 // Helpers for the Join flow (step 3.3). SMS and emails are read from Mailpit (MAILPIT_URL).
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
@@ -68,7 +68,27 @@ export async function latestPasswordLink(page: Page, email: string, after: numbe
   return link;
 }
 
-/** The link in the newest "Confirm your email" message. */
+/** The link in the newest "Reset your H2 Economy password" message (A195). */
+export async function latestResetLink(page: Page, email: string, after: number): Promise<string> {
+  let link = "";
+  await expect
+    .poll(
+      async () => {
+        const m = await newest(page, email, after);
+        if (m?.Subject !== "Reset your H2 Economy password") return "";
+        const res = await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`);
+        link =
+          /(https?:\/\/[^\s"]+\/reset-password\/[^\s"\]]+)/.exec(((await res.json()) as { Text: string }).Text)?.[1] ??
+          "";
+        return link;
+      },
+      { message: `a reset-password link for ${email}`, timeout: 10_000 },
+    )
+    .toContain("/reset-password/");
+  return link;
+}
+
+/** The link in the newest "Confirm your email" message (the magic link; A195 keeps it). */
 export async function latestConfirmLink(page: Page, email: string, after: number): Promise<string> {
   let link = "";
   await expect
@@ -78,8 +98,9 @@ export async function latestConfirmLink(page: Page, email: string, after: number
         if (m?.Subject !== "Confirm your email for H2 Economy") return "";
         const res = await page.request.get(`${MAILPIT}/api/v1/message/${m.ID}`);
         link =
-          /(http:\/\/[^\s"]+\/magic-link\/verify[^\s"\]]+)/.exec(((await res.json()) as { Text: string }).Text)?.[1] ??
-          "";
+          /(http:\/\/[^\s"]+\/magic-link\/verify\?[^\s"\]]+)/.exec(
+            ((await res.json()) as { Text: string }).Text,
+          )?.[1] ?? "";
         return link;
       },
       { message: `a confirm-email link for ${email}`, timeout: 10_000 },
@@ -88,21 +109,22 @@ export async function latestConfirmLink(page: Page, email: string, after: number
   return link;
 }
 
-/** Step 3: mobile code, name, role, terms. */
-export async function fillDetails(page: Page, opts: { email?: string; name: string; mobile?: string }) {
+/**
+ * Step 3: (password when signed out), name, role, terms. Founder, 19 Nov 2026 (A195): no mobile number. Returns the
+ * password chosen ("" when signed in, where no password is asked).
+ */
+export async function fillDetails(page: Page, opts: { email?: string; name: string; password?: string }) {
   if (opts.email) await page.getByLabel("Work email").fill(opts.email);
-  const mobile = opts.mobile ?? newMobile();
-  await page.getByLabel("Mobile").fill(mobile);
-  const sentAfter = Date.now() - 1000;
-  await page.getByRole("button", { name: "Send code" }).click();
-  await expect(page.getByRole("button", { name: "Code sent" })).toBeVisible();
-  const code = await latestSmsCode(page, mobile, sentAfter);
-  await page.getByRole("textbox", { name: "Digit 1 of 6" }).fill(code);
-  await expect(page.getByText("Mobile number verified")).toBeVisible();
+  const field = page.getByLabel("Password", { exact: true });
+  let password = "";
+  if (await field.isVisible()) {
+    password = opts.password ?? newPassword();
+    await field.fill(password);
+  }
   await page.getByLabel("Full name").fill(opts.name);
   await page.getByLabel("Your role").selectOption("Procurement or purchase");
   await page.getByRole("checkbox", { name: /I agree to the Terms of use/ }).check();
-  return mobile;
+  return password;
 }
 
 /** Signs a brand-new person in with an email code; A1 sends them on to Join. */
