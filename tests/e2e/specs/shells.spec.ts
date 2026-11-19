@@ -70,7 +70,7 @@ test("mega menus work by keyboard only and close on Escape and on focus leaving"
   await expect(panel).toBeHidden();
 });
 
-test("once scrolled, only the header's main bar stays; the full header returns at the top and with focus", async ({
+test("once scrolled, the strip hides and the main row with the section nav stays; the strip returns at the top and with focus", async ({
   page,
   isMobile,
 }) => {
@@ -78,29 +78,33 @@ test("once scrolled, only the header's main bar stays; the full header returns a
   await page.goto("/");
   const header = page.locator("header").first();
   const nav = page.getByRole("navigation", { name: "Main" });
+  const strip = page.locator("header").getByRole("link", { name: "For Members" }).first();
   const heightOf = () => header.evaluate((h) => Math.round(h.getBoundingClientRect().height));
   const mainTop = () =>
     page.evaluate(() => Math.round(document.querySelector("main")?.getBoundingClientRect().top ?? 0));
-  expect(await heightOf()).toBe(162);
+  // Design upgrade (19 Nov 2026): strip 36 + main row 72 + border 1.
+  expect(await heightOf()).toBe(109);
   await expect(nav).toBeVisible();
+  await expect(strip).toBeVisible();
 
   await page.mouse.wheel(0, 600);
-  await expect(nav).toBeHidden();
+  await expect(strip).toBeHidden();
+  await expect(nav).toBeVisible();
   expect(await heightOf()).toBeLessThan(80);
   await expect(page.getByRole("link", { name: "H2 Economy home" }).first()).toBeInViewport();
-  // Hiding rows never moves the page: content sits where the scroll put it.
+  // Hiding the strip never moves the page: content sits where the scroll put it.
   const scrolled = await page.evaluate(() => Math.round(window.scrollY));
-  expect(await mainTop()).toBe(162 - scrolled);
+  expect(await mainTop()).toBe(109 - scrolled);
 
-  // Keyboard focus in the header brings every row back, so all links stay reachable.
+  // Keyboard focus in the header brings the strip back, so all links stay reachable.
   await page.getByRole("link", { name: "H2 Economy home" }).first().focus();
-  await expect(nav).toBeVisible();
+  await expect(strip).toBeVisible();
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-  await expect(nav).toBeHidden();
+  await expect(strip).toBeHidden();
 
   await page.mouse.wheel(0, -2000);
-  await expect(nav).toBeVisible();
-  expect(await heightOf()).toBe(162);
+  await expect(strip).toBeVisible();
+  expect(await heightOf()).toBe(109);
 });
 
 test("all header links stay visible between 1024 and 1279 wide", async ({ page, isMobile }) => {

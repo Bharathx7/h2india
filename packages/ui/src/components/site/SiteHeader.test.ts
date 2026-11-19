@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { rowsHidden } from "./SiteHeader";
 
-// Public QC, 16 Nov 2026: the top strip and section nav hide while scrolling down and come back on any scroll up.
+// Public QC, 16 Nov 2026: the top strip hides while scrolling down and comes back on any scroll up. Since the design
+// upgrade (19 Nov 2026) the section nav shares the main row and always stays.
 describe("the header rows on scroll", () => {
   it("always show near the top of the page", () => {
     expect(rowsHidden(400, 60, true)).toBe(false);
-    expect(rowsHidden(0, 85, false)).toBe(false);
+    expect(rowsHidden(0, 36, false)).toBe(false);
   });
 
   it("hide while scrolling down past them", () => {

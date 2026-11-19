@@ -4,8 +4,8 @@ import { setup } from "../helpers/orders";
 import { signInExisting } from "../helpers/rfq";
 import { enterCode, ensureAccount, newEmail, ownIp, requestCode } from "../helpers/sign-in";
 
-// Public QC (16 Nov 2026), rounds 1 and 2. Header: the top strip and section nav hide while scrolling down, come back
-// on any scroll up, and clicks in the main bar don't bring them back; the strip reads For Buyers, For Members, For
+// Public QC (16 Nov 2026), rounds 1 and 2. Header: the top strip hides while scrolling down, comes back on any
+// scroll up, and clicks in the main row don't bring it back (the section nav stays since the design upgrade); the strip reads For Buyers, For Members, For
 // Suppliers. Accounts: Buyer, Supplier and Member each have their own sign-in page (email code only, no passkey or
 // Google) and sign-up page; signing in never creates an account; the wrong page signs people in to their own
 // dashboard with a note.
@@ -16,24 +16,27 @@ test.beforeEach(async ({ context }, info) => {
   await ownIp(context, info);
 });
 
-test("the header rows hide while scrolling down and come back on a scroll up", async ({ page }, info) => {
-  test.skip(info.project.name !== "desktop-1440", "The top strip and section nav are desktop only");
+test("the top strip hides while scrolling down and comes back on a scroll up; the section nav stays", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop-1440", "The top strip is desktop only");
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Main" });
-  const strip = page.getByRole("link", { name: "For Members" }).first();
+  const strip = page.locator("header").getByRole("link", { name: "For Members" }).first();
   await expect(nav).toBeVisible();
   await expect(strip).toBeVisible();
   // Move the pointer off the header, so nothing in it is hovered or focused.
   await page.mouse.move(700, 600);
   await page.mouse.wheel(0, 1200);
-  await expect(nav).toBeHidden();
-  // A click in the main bar (here pressing on the logo) keeps just the main bar.
+  await expect(strip).toBeHidden();
+  // Design upgrade (19 Nov 2026): the section nav shares the main row and stays.
+  await expect(nav).toBeVisible();
+  // A click in the main row (here pressing on the logo) keeps the strip hidden.
   await page.getByRole("link", { name: "H2 Economy home" }).first().hover();
   await page.mouse.down();
-  await expect(nav).toBeHidden();
+  await expect(strip).toBeHidden();
   await page.mouse.move(700, 600);
   await page.mouse.wheel(0, -200);
-  await expect(nav).toBeVisible();
   await expect(strip).toBeVisible();
 });
 

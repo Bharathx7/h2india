@@ -126,12 +126,13 @@ export function SiteFooter({
           {columns.map((c) => (
             <div key={c.heading}>
               <p className="type-label-sm text-secondary">{c.heading}</p>
-              <ul className="mt-3 flex flex-col gap-2.5">
+              {/* Design upgrade (19 Nov 2026): on phones each link is a full-height tap target (about 36 px). */}
+              <ul className="mt-2 flex flex-col lg:mt-3 lg:gap-2.5">
                 {c.links.map((l) => (
                   <li key={l.href + l.label}>
                     <a
                       href={l.href}
-                      className="rounded-control type-body-sm text-body hover:text-link-hover hover:underline underline-offset-4"
+                      className="inline-block rounded-control py-2 type-body-sm text-body hover:text-link-hover hover:underline underline-offset-4 lg:py-0"
                     >
                       {l.label}
                     </a>
