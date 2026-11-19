@@ -12,7 +12,8 @@ export async function cmsSession() {
   const payload = await getPayload({ config });
   const user = await editorUserFor(payload, session.user);
   if (!user) return null;
-  const can = (p: "content.view" | "content.edit" | "content.delete" | "content.publish" | "settings.edit") =>
-    user.permissions.includes(p);
+  const can = (
+    p: "content.view" | "content.edit" | "content.delete" | "content.publish" | "content.purge" | "settings.edit",
+  ) => user.permissions.includes(p);
   return { payload, user, userId: session.user.id, can };
 }

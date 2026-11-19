@@ -23,7 +23,8 @@ import { STALE_DAYS } from "@/cms/records/thresholds";
 import type { FieldSpec } from "./fields";
 import { recordCards } from "./layout";
 import { isArchivable } from "@/cms/archive";
-import { ArchiveRecord } from "./Archive";
+import { ArchiveRecord, PurgeRecord } from "./Archive";
+import { purgeRule } from "@/cms/purge-rules";
 import { saveRecordAction, saveSettingAction, unpublishRecordAction } from "./record-actions";
 
 // The native content editor (step 4.6): any record, tracker entry, knowledge item, page or setting, drawn from its
@@ -513,6 +514,7 @@ export function RecordForm({
   canEdit,
   verify,
   canArchive = false,
+  canPurge = false,
 }: {
   kind: "record" | "setting";
   slug: string;
@@ -528,6 +530,8 @@ export function RecordForm({
   verify: boolean;
   /** content.delete: may archive this record (founder QC, 17 Nov 2026). */
   canArchive?: boolean;
+  /** A Super admin (content.purge): Delete permanently for types that aren't archived first (A197). */
+  canPurge?: boolean;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<Values>(initial);
@@ -664,6 +668,9 @@ export function RecordForm({
               ) : null}
               {kind === "record" && meta.id && canArchive && isArchivable(slug) ? (
                 <ArchiveRecord slug={slug} id={meta.id} name={title || singular} after={backHref} />
+              ) : null}
+              {kind === "record" && meta.id && canPurge && !isArchivable(slug) && purgeRule(slug) ? (
+                <PurgeRecord slug={slug} id={meta.id} name={title || singular} after={backHref} />
               ) : null}
               <Button disabled={pending} onClick={saveChanges}>
                 {pending ? "Saving…" : "Save changes"}

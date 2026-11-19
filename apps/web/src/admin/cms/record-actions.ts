@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { APIError } from "payload";
 import { requestContext } from "@/server/request-context";
 import { isArchivable } from "@/cms/archive";
+import { confirmsName } from "@/cms/purge-rules";
+import { purgeCheck } from "./purge";
 import { toStored } from "./fields";
 import { contentType, settingType } from "./records";
 import { cmsSession } from "./session";
@@ -159,6 +161,53 @@ export async function restoreRecordAction(slug: string, id: number): Promise<Sav
       context: await requestContext(),
     });
     revalidatePath(`/admin/content/${slug}`);
+    return { ok: true, id };
+  } catch (e) {
+    return problem(e);
+  }
+}
+
+/**
+ * Delete permanently (founder, 19 Nov 2026, A197). Super admin only (content.purge). The record must meet its type's
+ * condition (archived first, off the site, never published, or used by nothing: cms/purge-rules.ts), the reason is
+ * required, and the record's name must be typed to confirm. Payload's delete hooks take it out of search and the
+ * newsroom cache. The audit log keeps who, when, why and what it was. It can't be undone.
+ */
+export async function purgeRecordAction(
+  slug: string,
+  id: number,
+  reason: string,
+  typedName: string,
+): Promise<SaveResult> {
+  const cms = await cmsSession();
+  if (!cms?.can("content.purge")) return { ok: false, error: "Only a Super admin can delete content permanently." };
+  if (typeof id !== "number" || typeof slug !== "string") return { ok: false, error: "No such record." };
+  const why = typeof reason === "string" ? reason.trim().slice(0, 500) : "";
+  if (!why) return { ok: false, error: "Say why it's deleted, for the record." };
+  const check = await purgeCheck(cms.payload, slug, id);
+  if (!check) return { ok: false, error: "No such record." };
+  if (check.blocker) return { ok: false, error: check.blocker };
+  if (!confirmsName(typeof typedName === "string" ? typedName : "", check.name))
+    return { ok: false, error: "Type the name exactly as shown to confirm." };
+  try {
+    await cms.payload.delete({
+      collection: slug as "articles",
+      id,
+      trash: true,
+      user: cms.user,
+      overrideAccess: false,
+    });
+    await audit(getDb(), {
+      actorId: cms.userId,
+      action: "content.delete",
+      resourceType: slug,
+      resourceId: String(id),
+      before: { name: check.name, ...check.snapshot },
+      after: { deleted: true },
+      reason: why,
+      context: await requestContext(),
+    });
+    revalidatePath(slug === "articles" ? "/admin/content" : `/admin/content/${slug}`);
     return { ok: true, id };
   } catch (e) {
     return problem(e);
