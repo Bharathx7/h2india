@@ -20,11 +20,6 @@ export function Hero() {
         aria-hidden="true"
         className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-150 lg:-top-80 lg:right-[-8%] lg:size-225"
       />
-      <div aria-hidden="true" className="depth-deep-glow absolute -bottom-90 -left-60 -z-10 size-160" />
-      <div
-        aria-hidden="true"
-        className="depth-dot-grid absolute top-16 right-0 -z-10 size-100 opacity-40 lg:top-20 lg:left-[52%] lg:size-140"
-      />
       <div
         className={`${container} relative flex items-center gap-12 pt-10 pb-12 lg:min-h-[calc(100svh-10.125rem)] lg:py-12 xl:gap-20`}
       >
@@ -60,7 +55,7 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
       ) : brands.data.length ? (
         <LogoMarquee brands={brands.data} label="Brands listed on H2 Economy" className="w-full" />
       ) : null}
-      <div className="flex w-full flex-col gap-3 rounded-card border border-fresh-200 bg-mint px-4 py-4 shadow-soft md:px-6 xl:flex-row xl:items-center xl:gap-6">
+      <div className="flex w-full flex-col gap-3 rounded-card border border-default bg-subtle px-4 py-4 md:px-6 xl:flex-row xl:items-center xl:gap-6">
         <div className="flex flex-col gap-0.5">
           <p className="type-label text-primary">What &ldquo;Verified&rdquo; means on H2 Economy</p>
           <p className="hidden type-caption text-secondary xl:block">Badges are never sold.</p>
@@ -94,7 +89,7 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
 /** Live stats · loading (381:13047). */
 export function FiguresSkeleton() {
   return (
-    <section aria-label="India's hydrogen sector, live" aria-busy="true" className="bg-page">
+    <section aria-label="India's hydrogen sector, live" aria-busy="true" className="bg-subtle">
       <div className={`${container} flex flex-col items-center gap-12 py-12 md:py-24`}>
         <span className="block h-11 w-full max-w-115 rounded-control shimmer" />
         <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-5">
@@ -115,12 +110,7 @@ export function FiguresSkeleton() {
 export async function LiveFigures({ fail }: { fail: Fail }) {
   const figures = await settle("figures", fail, () => loadFigures());
   return (
-    <Section
-      id="live"
-      className="bg-linear-to-b from-neutral-0 to-fresh-50"
-      inner="flex flex-col items-center gap-10 py-12 md:gap-14 md:py-20"
-    >
-      <div aria-hidden="true" className="depth-accent-glow absolute -top-55 left-1/2 size-130 -translate-x-1/2" />
+    <Section id="live" className="bg-subtle" inner="flex flex-col items-center gap-10 py-12 md:gap-14 md:py-20">
       <div className="relative flex flex-col items-center gap-3 text-center">
         <h2 id="live-title" className="type-h2 text-primary md:type-h1">
           India&rsquo;s hydrogen sector, live
@@ -252,7 +242,7 @@ export function ForYou({ firstName, workspaceHref }: { firstName: string; worksp
     },
   ];
   return (
-    <Section id="for-you" className="bg-mint" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
+    <Section id="for-you" className="bg-page" inner="flex flex-col gap-5 py-12 md:gap-10 md:py-24">
       <h2 id="for-you-title" className="text-center type-h2 text-primary" data-testid="for-you-title">
         {firstName ? `For you, ${firstName}` : "For you"}
       </h2>
@@ -280,16 +270,14 @@ const STEPS = [
 /** 05 How it works (RFQ band 389:8561). */
 export function HowItWorks() {
   return (
-    <Section id="how" className="bg-inverse" inner="flex flex-col gap-10 py-12 md:gap-14 md:py-30">
-      <div aria-hidden="true" className="depth-deep-glow absolute -top-90 left-[62.5%] size-150" />
-      <div aria-hidden="true" className="depth-deep-glow absolute top-75 -left-50 size-225" />
+    <Section id="how" className="bg-subtle" inner="flex flex-col gap-10 py-12 md:gap-14 md:py-24">
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-172.5 flex-col gap-4">
-          <p className="type-label-sm text-fresh-300">Request a quote</p>
-          <h2 id="how-title" className="type-h2 text-inverse">
+          <p className="type-label-sm text-link">Request a quote</p>
+          <h2 id="how-title" className="type-h2 text-primary">
             Send one request to up to 5 verified suppliers
           </h2>
-          <p className="type-body text-neutral-0/80">
+          <p className="type-body text-body">
             H2 Economy checks every request within 1 working day. Suppliers then quote in the same format, so you can
             compare them side by side.
           </p>
@@ -303,13 +291,13 @@ export function HowItWorks() {
           </Link>
           <Link
             href="/for-buyers#payments"
-            className="inline-flex h-12 items-center justify-center rounded-pill bg-page px-5.75 type-label-lg text-primary hover:bg-mint"
+            className="inline-flex h-12 items-center justify-center rounded-pill border border-control bg-page px-5.75 type-label-lg text-primary hover:border-focus"
           >
             How payments are protected
           </Link>
         </div>
       </div>
-      <Steps3D steps={STEPS} tone="dark" label="How a request for quotes works" className="relative" />
+      <Steps3D steps={STEPS} tone="light" label="How a request for quotes works" className="relative" />
     </Section>
   );
 }

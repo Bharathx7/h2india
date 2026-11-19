@@ -16,8 +16,7 @@ export async function ProductShowcase() {
   const cat = await catalogue();
   const popular = popularCategories(cat).slice(0, 6);
   return (
-    <Section id="marketplace" className="bg-mint" inner="flex flex-col gap-12 py-12 md:gap-16 md:py-24">
-      <div aria-hidden="true" className="depth-accent-glow absolute -top-60 -right-40 size-160" />
+    <Section id="marketplace" className="bg-page" inner="flex flex-col gap-12 py-12 md:gap-16 md:py-24">
       <SectionTitle
         id="marketplace"
         title="Browse the marketplace"
