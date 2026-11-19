@@ -1,8 +1,21 @@
 "use client";
 
-import { Alert, Button, Checkbox, ConfirmDialog, Drawer, FormField, Icon, Input, Switch, cx } from "@h2india/ui";
+import { looksLikeEmail } from "@h2india/core/sign-in";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  ConfirmDialog,
+  Drawer,
+  FormField,
+  Icon,
+  Input,
+  Switch,
+  cx,
+  useToast,
+} from "@h2india/ui";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { inviteWithAccessAction, removeMemberAction, setMemberAccessAction } from "@/supplier/team-actions";
 
 // Team access (founder QC, 17 Nov 2026): when a company admin adds or edits a member, they tick what that person may
@@ -45,6 +58,7 @@ export function AccessPicker({
   options: AccessOption[];
   presets: PresetOption[];
 }) {
+  const id = useId();
   const ticked = new Set(value.permissions);
   const matching = presets.find(
     (p) => !value.admin && p.permissions.length === ticked.size && p.permissions.every((k) => ticked.has(k)),
@@ -56,47 +70,50 @@ export function AccessPicker({
   if (rest.length) groups.push({ title: "Other", match: () => false, items: rest });
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4 rounded-card border border-default p-4">
-        <span>
-          <span className="block type-label">Full access (Admin)</span>
-          <span className="block type-caption text-secondary">
-            Everything below, plus company settings, the team and the payout bank account.
-          </span>
-        </span>
-        <Switch
-          checked={value.admin}
-          onCheckedChange={(on) => {
-            onChange({ admin: on, permissions: value.permissions });
-          }}
-          label={<span className="sr-only">Full access (Admin)</span>}
-        />
-      </div>
+      {/* The whole row is the switch's label, so clicking the words toggles it (founder, 19 Nov 2026). */}
+      <Switch
+        className="w-full cursor-pointer flex-row-reverse justify-between gap-4 rounded-card border border-default p-4"
+        checked={value.admin}
+        onCheckedChange={(on) => {
+          onChange({ admin: on, permissions: value.permissions });
+        }}
+        aria-describedby={`${id}-admin-help`}
+        label={<span className="block type-label">Full access (Admin)</span>}
+      />
+      <p id={`${id}-admin-help`} className="-mt-3 px-4 type-caption text-secondary">
+        Everything below, plus company settings, the team and the payout bank account.
+      </p>
       {value.admin ? null : (
         <>
           <div className="flex flex-col gap-2">
             <span className="type-label">Start from</span>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Presets">
-              {presets.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  aria-pressed={matching?.name === p.name}
-                  title={p.description}
-                  onClick={() => {
-                    onChange({ admin: false, permissions: [...p.permissions] });
-                  }}
-                  className={cx(
-                    "inline-flex h-8 items-center rounded-pill border-[1.5px] px-3 type-label-sm",
-                    matching?.name === p.name ? "border-transparent bg-inverse text-inverse" : "border-control bg-page",
-                  )}
-                >
-                  {p.name}
-                </button>
+            <span className="type-caption text-secondary">A preset ticks the boxes; change any of them below.</span>
+            {/* Each preset's description is on screen, not in a tooltip (founder, 19 Nov 2026). */}
+            <ul className="flex flex-col gap-2" role="group" aria-label="Presets">
+              {presets.map((p, i) => (
+                <li key={p.name} className="flex items-start gap-3">
+                  <button
+                    type="button"
+                    aria-pressed={matching?.name === p.name}
+                    aria-describedby={`${id}-preset-${String(i)}`}
+                    onClick={() => {
+                      onChange({ admin: false, permissions: [...p.permissions] });
+                    }}
+                    className={cx(
+                      "inline-flex h-8 shrink-0 items-center rounded-pill border-[1.5px] px-3 type-label-sm active:scale-[0.97]",
+                      matching?.name === p.name
+                        ? "border-transparent bg-inverse text-inverse"
+                        : "border-control bg-page",
+                    )}
+                  >
+                    {p.name}
+                  </button>
+                  <span id={`${id}-preset-${String(i)}`} className="pt-1.5 type-caption text-secondary">
+                    {p.description}
+                  </span>
+                </li>
               ))}
-            </div>
-            <span className="type-caption text-secondary">
-              {matching ? matching.description : "A preset ticks the boxes; change any of them below."}
-            </span>
+            </ul>
           </div>
           <div className="flex flex-col gap-4">
             {groups.map((g) => (
@@ -144,12 +161,36 @@ function useRun() {
 /** Add member: an email and the ticked access, sent as an invitation. */
 export function AddMember({ options, presets }: { options: AccessOption[]; presets: PresetOption[] }) {
   const r = useRun();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [access, setAccess] = useState<Access>({
+  const [checked, setChecked] = useState(false);
+  const startAccess = (): Access => ({
     admin: false,
     permissions: presets.find((p) => p.name === "Viewer")?.permissions ?? [],
   });
+  const [access, setAccess] = useState<Access>(startAccess);
+  // A quick check in the browser (founder, 19 Nov 2026); core checks again before it sends.
+  const emailProblem = checked && email.trim() && !looksLikeEmail(email) ? "Enter a full email address" : undefined;
+  const send = () => {
+    setChecked(true);
+    if (!looksLikeEmail(email)) return;
+    const to = email.trim();
+    r.go(
+      () => inviteWithAccessAction(to, access),
+      () => {
+        setOpen(false);
+        setEmail("");
+        setChecked(false);
+        setAccess(startAccess());
+        toast({
+          tone: "success",
+          title: "Invitation sent",
+          body: `We emailed ${to}. It shows under Waiting to accept.`,
+        });
+      },
+    );
+  };
   return (
     <>
       <Button
@@ -167,7 +208,7 @@ export function AddMember({ options, presets }: { options: AccessOption[]; prese
         title="Add a team member"
         description="We email them an invitation. It works for 14 days."
         footer={
-          <div className="flex justify-end gap-3">
+          <>
             <Button
               variant="outline"
               onClick={() => {
@@ -178,24 +219,25 @@ export function AddMember({ options, presets }: { options: AccessOption[]; prese
             </Button>
             <Button
               disabled={r.pending || !email.trim() || (!access.admin && !access.permissions.length)}
-              onClick={() => {
-                r.go(
-                  () => inviteWithAccessAction(email, access),
-                  () => {
-                    setOpen(false);
-                    setEmail("");
-                  },
-                );
-              }}
+              onClick={send}
             >
-              Send invitation
+              {r.pending ? "Sending…" : "Send invitation"}
             </Button>
-          </div>
+          </>
         }
       >
-        <div className="flex flex-col gap-5">
+        <form
+          className="flex flex-col gap-5 p-6"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            send();
+          }}
+        >
+          {/* Drawer keeps its description for screen readers only; here it's on screen too. */}
+          <p className="type-body-sm text-secondary">We email them an invitation. It works for 14 days.</p>
           {r.error ? <Alert tone="error" title={r.error} live /> : null}
-          <FormField label="Work email" required>
+          <FormField label="Work email" required error={emailProblem}>
             <Input
               type="email"
               autoComplete="off"
@@ -203,10 +245,13 @@ export function AddMember({ options, presets }: { options: AccessOption[]; prese
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
+              onBlur={() => {
+                setChecked(true);
+              }}
             />
           </FormField>
           <AccessPicker value={access} onChange={setAccess} options={options} presets={presets} />
-        </div>
+        </form>
       </Drawer>
     </>
   );
@@ -227,6 +272,7 @@ export function EditAccess({
   presets: PresetOption[];
 }) {
   const r = useRun();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [access, setAccess] = useState<Access>(start);
   return (
@@ -248,7 +294,7 @@ export function EditAccess({
         title={`What ${name} can do`}
         description="Changes apply the next time they open a page."
         footer={
-          <div className="flex justify-end gap-3">
+          <>
             <Button
               variant="outline"
               onClick={() => {
@@ -264,16 +310,18 @@ export function EditAccess({
                   () => setMemberAccessAction(userId, access),
                   () => {
                     setOpen(false);
+                    toast({ tone: "success", title: "Access saved", body: `${name}'s access has changed.` });
                   },
                 );
               }}
             >
               Save access
             </Button>
-          </div>
+          </>
         }
       >
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 p-6">
+          <p className="type-body-sm text-secondary">Changes apply the next time they open a page.</p>
           {r.error ? <Alert tone="error" title={r.error} live /> : null}
           <AccessPicker value={access} onChange={setAccess} options={options} presets={presets} />
         </div>
@@ -285,6 +333,7 @@ export function EditAccess({
 /** Remove a member (685:318), with a confirmation. Their work stays with the company. */
 export function RemoveMember({ userId, name, company }: { userId: string; name: string; company: string }) {
   const r = useRun();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -298,7 +347,7 @@ export function RemoveMember({ userId, name, company }: { userId: string; name: 
       >
         Remove<span className="sr-only"> {name}</span>
       </Button>
-      {r.error ? <span className="block type-caption text-error">{r.error}</span> : null}
+      {/* The error shows in the dialog, not in the row, so the row keeps its shape (founder, 19 Nov 2026). */}
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
@@ -312,10 +361,13 @@ export function RemoveMember({ userId, name, company }: { userId: string; name: 
             () => removeMemberAction(userId),
             () => {
               setOpen(false);
+              toast({ tone: "success", title: `${name} removed`, body: `They no longer have access to ${company}.` });
             },
           );
         }}
-      />
+      >
+        {r.error ? <Alert tone="error" title={r.error} live /> : null}
+      </ConfirmDialog>
     </>
   );
 }

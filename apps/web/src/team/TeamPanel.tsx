@@ -4,7 +4,7 @@ import { formatIstDayMonth } from "@h2india/core/time";
 import { EmptyState, Icon, StatusBadge } from "@h2india/ui";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
-import { JoinRequest, RevokeInvite } from "@/supplier/TeamControls";
+import { JoinRequest, ResendInvite, RevokeInvite } from "@/supplier/TeamControls";
 import { AddMember, EditAccess, RemoveMember } from "./Access";
 
 // Team (592:371), rebuilt in founder QC (17 Nov 2026) for supplier Team and buyer Company · Team: who is in the
@@ -167,9 +167,16 @@ export function TeamPanel({
         </ul>
       ) : (
         <div className="rounded-card border border-default bg-page">
-          <EmptyState kind="no-results" icon="search" title={`No member matches "${sp.q ?? ""}"`}>
-            Search by name or email.
-          </EmptyState>
+          {/* Founder, 19 Nov 2026: without a search this read `No member matches ""`. */}
+          {q ? (
+            <EmptyState kind="no-results" icon="search" title={`No member matches "${sp.q?.trim() ?? ""}"`}>
+              Search by name or email.
+            </EmptyState>
+          ) : (
+            <EmptyState title="No members to show">
+              {view.members.length ? "Go back to the first page." : "Add a member to invite a colleague."}
+            </EmptyState>
+          )}
         </div>
       )}
       <ListPager paged={paged} query={{ ...keep, ...pagingQuery(sp) }} />
@@ -185,11 +192,16 @@ export function TeamPanel({
                   <span className="min-w-0 flex-1">
                     <span className="block type-label">{i.email}</span>
                     <span className="block type-caption text-secondary">
-                      Invitation expires {formatIstDayMonth(i.expiresAt)}
+                      Invited {formatIstDayMonth(i.createdAt)} · expires {formatIstDayMonth(i.expiresAt)}
                     </span>
                   </span>
                   <StatusBadge status={words.text} tone={words.tone} />
-                  {manage ? <RevokeInvite id={i.id} email={i.email} /> : null}
+                  {manage ? (
+                    <span className="flex flex-wrap items-start gap-2">
+                      <ResendInvite id={i.id} email={i.email} />
+                      <RevokeInvite id={i.id} email={i.email} />
+                    </span>
+                  ) : null}
                 </li>
               );
             })}
