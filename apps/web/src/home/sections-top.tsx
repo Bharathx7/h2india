@@ -89,7 +89,7 @@ export async function TrustStrip({ fail }: { fail: Fail }) {
 /** Live stats · loading (381:13047). */
 export function FiguresSkeleton() {
   return (
-    <section aria-label="India's hydrogen sector, live" aria-busy="true" className="bg-subtle">
+    <section aria-label="India's hydrogen sector, live" aria-busy="true" className="bg-mint">
       <div className={`${container} flex flex-col items-center gap-12 py-12 md:py-24`}>
         <span className="block h-11 w-full max-w-115 rounded-control shimmer" />
         <div className="grid w-full grid-cols-2 gap-8 md:grid-cols-5">
@@ -110,8 +110,9 @@ export function FiguresSkeleton() {
 export async function LiveFigures({ fail }: { fail: Fail }) {
   const figures = await settle("figures", fail, () => loadFigures());
   return (
-    <Section id="live" className="bg-subtle" inner="flex flex-col items-center gap-10 py-12 md:gap-14 md:py-20">
+    <Section id="live" className="bg-mint" inner="flex flex-col items-center gap-10 py-12 md:gap-14 md:py-20">
       <div className="relative flex flex-col items-center gap-3 text-center">
+        <span aria-hidden="true" className="mb-2 block h-0.75 w-11 rounded-pill bg-accent" />
         <h2 id="live-title" className="type-h2 text-primary md:type-h1">
           India&rsquo;s hydrogen sector, live
         </h2>
@@ -270,7 +271,7 @@ const STEPS = [
 /** 05 How it works (RFQ band 389:8561). */
 export function HowItWorks() {
   return (
-    <Section id="how" className="bg-subtle" inner="flex flex-col gap-10 py-12 md:gap-14 md:py-24">
+    <Section id="how" className="bg-mint" inner="flex flex-col gap-10 py-12 md:gap-14 md:py-24">
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex max-w-172.5 flex-col gap-4">
           <p className="type-label-sm text-link">Request a quote</p>

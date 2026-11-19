@@ -169,12 +169,7 @@ export function SiteFooter({
           </div>
         </div>
       </div>
-      {/* The large wordmark (Manrope 800, 300 px, -5%, bg/mint). Drawn as SVG text: decorative, not read out. */}
-      <svg aria-hidden="true" viewBox="0 0 1440 170" className="block w-full select-none" focusable="false">
-        <text x="20" y="199" className="fill-fresh-50 font-display font-extrabold" fontSize="300" letterSpacing="-15">
-          H2 Economy
-        </text>
-      </svg>
+      {/* The large wordmark under the footer was removed (founder, 19 Nov 2026). */}
     </footer>
   );
 }
