@@ -20,6 +20,8 @@ export interface ReachYou {
   email: string;
   /** "+91 ••••• 32109" when a verified mobile is on the account, else null (WhatsApp can't be chosen). */
   mobile: string | null;
+  /** The `mobileFields` switch (founder, 19 Nov 2026): off, WhatsApp isn't offered. */
+  whatsapp: boolean;
 }
 
 const STEPS = ["Type", "Filters", "Channel and frequency"] as const;
@@ -239,18 +241,20 @@ export function AlertModal({
                 toggleChannel("email", v === true);
               }}
             />
-            <Checkbox
-              label={
-                reach.mobile
-                  ? `WhatsApp · ${reach.mobile}`
-                  : "WhatsApp · add and confirm a mobile number in Profile first"
-              }
-              disabled={!reach.mobile}
-              checked={form.channels.includes("whatsapp")}
-              onCheckedChange={(v) => {
-                toggleChannel("whatsapp", v === true);
-              }}
-            />
+            {reach.whatsapp ? (
+              <Checkbox
+                label={
+                  reach.mobile
+                    ? `WhatsApp · ${reach.mobile}`
+                    : "WhatsApp · add and confirm a mobile number in Profile first"
+                }
+                disabled={!reach.mobile}
+                checked={form.channels.includes("whatsapp")}
+                onCheckedChange={(v) => {
+                  toggleChannel("whatsapp", v === true);
+                }}
+              />
+            ) : null}
             <Checkbox
               label="In-app notifications"
               checked={form.channels.includes("inapp")}

@@ -3158,7 +3158,7 @@ export interface EarlyListing {
   company: string;
   name: string;
   email: string;
-  mobile: string;
+  mobile?: string | null;
   sells: 'systems' | 'components' | 'equipment' | 'services' | 'materials';
   /**
    * The words they agreed to, as shown.

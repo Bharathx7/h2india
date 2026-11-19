@@ -1,7 +1,7 @@
 import type { Payload } from "payload";
 import { purgeBlocker, purgeRule, uploadsIn, type PurgeFacts } from "@/cms/purge-rules";
 
-// What Delete permanently needs to know about a record (A197): is it archived, published, ever published, and how many
+// What Delete permanently needs to know about a record (A198): is it archived, published, ever published, and how many
 // records still link to it. Read with the Local API (never SQL on the cms schema), trashed records included, so an
 // archived record that still uses a picture keeps it.
 

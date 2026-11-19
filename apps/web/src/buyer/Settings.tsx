@@ -5,6 +5,7 @@ import {
   Button,
   Checkbox,
   ConfirmDialog,
+  cx,
   Icon,
   IconButton,
   Input,
@@ -388,7 +389,8 @@ const BLANK: SiteForm = {
   isDefault: false,
 };
 
-export function SiteDialog({ start, label }: { start?: SiteForm; label: string }) {
+/** `showMobile` is the `mobileFields` switch: off, the contact mobile is hidden (an existing one is kept as it is). */
+export function SiteDialog({ start, label, showMobile }: { start?: SiteForm; label: string; showMobile: boolean }) {
   const r = useRun();
   const [open, setOpen] = useState(false);
   const [f, setF] = useState<SiteForm>(start ?? BLANK);
@@ -411,7 +413,11 @@ export function SiteDialog({ start, label }: { start?: SiteForm; label: string }
         open={open}
         onOpenChange={setOpen}
         title={start ? "Edit delivery site" : "Add a delivery site"}
-        description="Where suppliers deliver. Receiving contacts get the delivery code by SMS."
+        description={
+          showMobile
+            ? "Where suppliers deliver. Receiving contacts get the delivery code by SMS."
+            : "Where suppliers deliver, and who receives the goods there."
+        }
         footer={
           <div className="flex justify-end gap-3">
             <Button
@@ -499,7 +505,10 @@ export function SiteDialog({ start, label }: { start?: SiteForm; label: string }
         <fieldset className="flex flex-col gap-2">
           <legend className="type-label">Receiving contacts</legend>
           {f.contacts.map((c, i) => (
-            <div key={String(i)} className="grid grid-cols-1 gap-2 md:grid-cols-3">
+            <div
+              key={String(i)}
+              className={cx("grid grid-cols-1 gap-2", showMobile ? "md:grid-cols-3" : "md:grid-cols-2")}
+            >
               <Input
                 aria-label="Contact name"
                 placeholder="Name"
@@ -516,14 +525,16 @@ export function SiteDialog({ start, label }: { start?: SiteForm; label: string }
                   set({ contacts: f.contacts.map((x, j) => (j === i ? { ...x, role: e.target.value } : x)) });
                 }}
               />
-              <Input
-                aria-label="Contact mobile"
-                placeholder="Mobile"
-                value={c.mobile}
-                onChange={(e) => {
-                  set({ contacts: f.contacts.map((x, j) => (j === i ? { ...x, mobile: e.target.value } : x)) });
-                }}
-              />
+              {showMobile ? (
+                <Input
+                  aria-label="Contact mobile"
+                  placeholder="Mobile"
+                  value={c.mobile}
+                  onChange={(e) => {
+                    set({ contacts: f.contacts.map((x, j) => (j === i ? { ...x, mobile: e.target.value } : x)) });
+                  }}
+                />
+              ) : null}
             </div>
           ))}
           {r.errors.contacts ? <span className="type-caption text-error">{r.errors.contacts}</span> : null}

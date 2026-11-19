@@ -9,12 +9,10 @@ import {
   RecoveryCodeError,
   RecoveryError,
   requestNewEmail,
-  sendNewMobileCode,
   startRecovery,
   submitLostEmail,
   submitSupportRequest,
   SupportRequestError,
-  submitMobileChange,
   verifyFactor,
   type Factor,
   type RecoveryKind,
@@ -46,6 +44,7 @@ async function token(): Promise<string> {
   return value;
 }
 
+// "I changed my mobile number" was removed on 19 Nov 2026 (A195): its new-number steps are no longer offered here.
 export async function begin(
   kind: RecoveryKind,
   email: string,
@@ -74,14 +73,6 @@ export async function verify(factor: Factor, code: string): Promise<Outcome> {
   }
 }
 
-export async function newMobile(mobile: string): Promise<Outcome<string>> {
-  try {
-    return { ok: true, value: await sendNewMobileCode({ token: await token(), mobile }) };
-  } catch (error) {
-    return failure(error);
-  }
-}
-
 /** Lost email: both proofs given, so sign the person in once (recovery plugin). */
 export async function signInWithRecovery(): Promise<Outcome> {
   try {
@@ -90,14 +81,6 @@ export async function signInWithRecovery(): Promise<Outcome> {
   } catch (error) {
     const body = (error as { body?: { code?: string } }).body;
     if (body?.code) return { ok: false, code: body.code };
-    return failure(error);
-  }
-}
-
-export async function finishMobileChange(): Promise<Outcome<string>> {
-  try {
-    return { ok: true, value: await submitMobileChange(await token()) };
-  } catch (error) {
     return failure(error);
   }
 }

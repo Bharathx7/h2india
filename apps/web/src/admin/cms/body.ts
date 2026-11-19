@@ -11,7 +11,7 @@ export type BodyBlock =
   | { kind: "keyFacts"; heading: string; items: { label: string; value: string }[] }
   /** A picture from the media library (its alt text and caption live on the media record). */
   | { kind: "image"; mediaId: number | null }
-  /** A YouTube video (A195). */
+  /** A YouTube video (A196). */
   | { kind: "youtube"; url: string; title: string; caption: string }
   | { kind: "kept"; node: unknown; summary: string };
 

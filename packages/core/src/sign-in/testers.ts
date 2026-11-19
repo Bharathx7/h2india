@@ -24,3 +24,13 @@ export async function isTesterEmail(ex: Executor, email: string): Promise<boolea
   const list = await getSetting(ex, TESTER_ACCOUNTS);
   return list.map(normaliseEmail).includes(normaliseEmail(email));
 }
+
+/**
+ * A listed test account while testerSignIn is off (A195): everyone else may use the password sign-in now, but the
+ * shared test accounts stay shut until the switch is on again.
+ */
+export async function testerSwitchedOff(ex: Executor, email: string): Promise<boolean> {
+  const list = await getSetting(ex, TESTER_ACCOUNTS);
+  if (!list.map(normaliseEmail).includes(normaliseEmail(email))) return false;
+  return !(await flagNow(ex, "testerSignIn"));
+}

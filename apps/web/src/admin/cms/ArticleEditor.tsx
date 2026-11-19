@@ -473,7 +473,7 @@ export function ArticleEditor({
   choices: { topics: Option[]; tags: Option[]; authors: Option[]; editors: Option[]; media: Option[] };
   states: { value: string; label: string }[];
   canPublish: boolean;
-  /** A Super admin: Delete permanently once the article is off the site (A197). */
+  /** A Super admin: Delete permanently once the article is off the site (A198). */
   canPurge?: boolean;
 }) {
   const router = useRouter();

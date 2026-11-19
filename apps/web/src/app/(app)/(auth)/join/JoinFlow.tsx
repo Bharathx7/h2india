@@ -36,8 +36,6 @@ export function JoinFlow(props: {
   /** The sign-up page for one kind of account: no choice step. */
   fixedPath?: JoinPath;
   signedInEmail: string | null;
-  /** Whether the mobile needs an SMS code (System settings, off until an SMS provider is connected). */
-  mobileCode: boolean;
   draft: DetailsDraft & { path: JoinPath | null };
 }) {
   const router = useRouter();
@@ -120,7 +118,6 @@ export function JoinFlow(props: {
             <DetailsStep
               member={path === "member"}
               signedInEmail={props.signedInEmail}
-              mobileCode={props.mobileCode}
               draft={props.draft}
               onDone={go}
             />

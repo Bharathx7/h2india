@@ -62,8 +62,12 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
   const [siteId, setSiteId] = useState(v.choices.deliverySiteId ?? "");
   const site = v.sites.find((s) => s.id === siteId);
   const contactKey = (c: { name: string; mobile: string }) => `${c.name}|${c.mobile}`;
+  // Off, the `mobileFields` switch hides personal mobile numbers (founder, 19 Nov 2026): a contact needs only a name.
+  const showMobile = v.mobileFields;
   const [contact, setContact] = useState(
-    v.choices.receiverName && v.choices.receiverMobile ? `${v.choices.receiverName}|${v.choices.receiverMobile}` : "",
+    v.choices.receiverName && (v.choices.receiverMobile || !showMobile)
+      ? `${v.choices.receiverName}|${v.choices.receiverMobile ?? ""}`
+      : "",
   );
   const s = useStep();
   const [name, mobile] = contact.split("|");
@@ -105,7 +109,11 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
           <FormField
             label="Receiving contact"
             required
-            helper="Gets the 6-digit delivery code by SMS and confirms what arrived. No H2 Economy account needed."
+            helper={
+              showMobile
+                ? "Gets the 6-digit delivery code by SMS and confirms what arrived. No H2 Economy account needed."
+                : "Receives the goods and confirms what arrived. No H2 Economy account needed."
+            }
             error={s.problem?.fields.receiverMobile}
           >
             <Select
@@ -117,7 +125,7 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
               <option value="">Choose who receives it</option>
               {site.contacts.map((c) => (
                 <option key={contactKey(c)} value={contactKey(c)}>
-                  {[c.name, c.role, `+91 ${c.mobile}`].filter(Boolean).join(" · ")}
+                  {[c.name, c.role, showMobile && c.mobile ? `+91 ${c.mobile}` : null].filter(Boolean).join(" · ")}
                 </option>
               ))}
             </Select>
@@ -138,7 +146,7 @@ export function DeliveryStep({ v }: { v: CheckoutView }) {
               saveStepAction({
                 deliverySiteId: siteId,
                 receiverName: name ?? null,
-                receiverMobile: mobile ?? null,
+                receiverMobile: showMobile ? (mobile ?? null) : mobile || null,
                 billingGstinId: site?.gstin ? (v.gstins.find((g) => g.gstin === site.gstin)?.id ?? null) : undefined,
               }),
             () => "/checkout?step=billing",
@@ -323,7 +331,11 @@ export function ReviewStep({ v }: { v: CheckoutView }) {
     ["Deliver to", site ? `${site.name} · ${site.address}` : "Not chosen", "delivery"],
     [
       "Receiving contact",
-      v.choices.receiverName ? `${v.choices.receiverName} · +91 ${v.choices.receiverMobile ?? ""}` : "Not chosen",
+      v.choices.receiverName
+        ? v.mobileFields
+          ? `${v.choices.receiverName} · +91 ${v.choices.receiverMobile ?? ""}`
+          : v.choices.receiverName
+        : "Not chosen",
       "delivery",
     ],
     ["Bill to", gstin ? `${v.company.legalName} · GSTIN ${gstin.gstin}` : "Not chosen", "billing"],

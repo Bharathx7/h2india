@@ -1,3 +1,4 @@
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { Alert, buttonClasses, cx, Icon, OrgCard, SchemeCard, StatusBadge, Switch } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -74,7 +75,7 @@ function Facts({ facts }: { facts: { label: string; value: string }[] }) {
 }
 
 /** "Get updates on this tender" (457:3222) and "Follow results" (459:3621). Channels are chosen on the alert page. */
-function Updates({ title, text, href }: { title: string; text: string; href: string }) {
+function Updates({ title, text, href, whatsapp }: { title: string; text: string; href: string; whatsapp: boolean }) {
   return (
     <section
       id="track"
@@ -87,7 +88,7 @@ function Updates({ title, text, href }: { title: string; text: string; href: str
       <p className="type-body-sm text-body">{text}</p>
       <div className="flex flex-col gap-2" aria-hidden="true">
         <Switch label="Email" checked disabled />
-        <Switch label="WhatsApp" checked={false} disabled />
+        {whatsapp ? <Switch label="WhatsApp" checked={false} disabled /> : null}
       </div>
       <Link href={href} className={cx(buttonClasses({ variant: "primary" }), "w-full")}>
         Track tender
@@ -102,6 +103,8 @@ export default async function TenderPage({ params }: { params: Params }) {
   if (!t) notFound();
   const now = new Date();
   const viewer = await siteViewer();
+  // The WhatsApp choice shows only while the `mobileFields` switch is on (founder, 19 Nov 2026).
+  const whatsapp = await mobileFieldsShown();
   const status = tenderStatus(t, now);
   const awarded = status === "Awarded";
   const open = new Date(t.bidDueAt) > now;
@@ -382,12 +385,14 @@ export default async function TenderPage({ params }: { params: Params }) {
               title="Follow results"
               text={`Get an email if the award changes or ${t.issuer} publishes delivery updates.`}
               href={trackHref}
+              whatsapp={whatsapp}
             />
           ) : (
             <Updates
               title="Get updates on this tender"
               text={`Corrigenda, extensions and results, as soon as ${t.issuer} publishes them.`}
               href={trackHref}
+              whatsapp={whatsapp}
             />
           )}
           {!awarded && scheme ? <SchemeCard {...schemeView(scheme, now)} /> : null}

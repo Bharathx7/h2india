@@ -8,24 +8,27 @@ import { recordStaffSession } from "./step-up";
 import { clearThrottle, hitThrottle, readThrottle, startThrottle } from "./throttle";
 import { isSuspended } from "../admin/users";
 import { maySignIn } from "./accounts";
-import { isTesterEmail } from "./testers";
+import { testerSwitchedOff } from "./testers";
 
 // The sign-in rules Better Auth does not have (ADR 0003, decision A2), run around its email-code routes:
 //  • a 15-minute pause for an email after 5 wrong codes, even with a new code (Figma 524:2036)
 //  • at most 5 codes an hour per email, and one every 30 seconds ("Resend code in 0:24", Figma 524:1840)
 //  • the number of tries left, for the wrong-code message (Figma 524:1930)
-// and around the staff password sign-in (17 Nov 2026, A183): staff only, the same pause after 5 wrong tries, and a
-// staff session mark so the back office can refuse sessions made any other way. Test accounts (18 Nov 2026) may use
-// the same password sign-in while testerSignIn is on (testers.ts); they never get the staff mark.
+// and around the password sign-in: open to every account since 19 Nov 2026 (A195; staff only before, A183), the same
+// pause after 5 wrong tries, and a staff session mark, for staff only, so the back office can refuse sessions made any
+// other way. Listed test accounts (18 Nov 2026) are turned away while testerSignIn is off (testers.ts) and never get
+// the staff mark.
 
 const SEND = "/email-otp/send-verification-otp";
 const VERIFY = "/sign-in/email-otp";
 /** The Verify email link of the Join flow: one a minute, 5 an hour per email. */
 const LINK = "/sign-in/magic-link";
 const LINK_GAP_SECONDS = 60;
-/** The staff password sign-in, and asking for a "set your password" link. */
+/** The password sign-in, and asking for a "set or reset your password" link. */
 const PASSWORD = "/sign-in/email";
 const PASSWORD_LINK = "/request-password-reset";
+/** Change password: proves the current password, so a staff member's new session keeps the staff mark. */
+const CHANGE_PASSWORD = "/change-password";
 
 /** Whether this email belongs to someone with an operator role (H2 Economy staff). */
 export async function isStaffEmail(ex: Executor, email: string): Promise<boolean> {
@@ -67,8 +70,12 @@ function pausedError(until: Date): APIError {
 }
 
 export const beforeSignIn = createAuthMiddleware(async (ctx) => {
-  if (ctx.path === LINK || ctx.path === PASSWORD_LINK) {
-    await limitLinks(emailOf(ctx));
+  if (ctx.path === LINK) {
+    await limitLinks(emailOf(ctx), "join");
+    return;
+  }
+  if (ctx.path === PASSWORD_LINK) {
+    await limitLinks(emailOf(ctx), "password");
     return;
   }
   if (ctx.path !== SEND && ctx.path !== VERIFY && ctx.path !== PASSWORD) return;
@@ -85,9 +92,10 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
   }
   const pause = await readThrottle(db, key.paused(email));
   if (pause) throw pausedError(pause.expiresAt);
-  // The password sign-in is for staff and listed test accounts: anyone else gets the same answer as a wrong password.
+  // Every account may use the password sign-in (A195), except a shared test account while its switch is off, which
+  // gets the same answer as a wrong password.
   if (ctx.path === PASSWORD) {
-    if (!(await isStaffEmail(db, email)) && !(await isTesterEmail(db, email))) throw wrongPassword();
+    if (await testerSwitchedOff(db, email)) throw wrongPassword();
     return;
   }
   // Signing in never creates an account (public QC 2): without an account or an invitation, no code works.
@@ -114,10 +122,11 @@ export const beforeSignIn = createAuthMiddleware(async (ctx) => {
   }
 });
 
-async function limitLinks(email: string) {
+/** Join's links (confirm, magic) and password links count separately, so asking for one never blocks the other. */
+async function limitLinks(email: string, kind: "join" | "password") {
   if (!email) return;
   const db = getDb();
-  const gap = await hitThrottle(db, `join:link-gap:${email}`, LINK_GAP_SECONDS);
+  const gap = await hitThrottle(db, `${kind}:link-gap:${email}`, LINK_GAP_SECONDS);
   if (gap.count > 1) {
     throw new APIError("TOO_MANY_REQUESTS", {
       code: SIGN_IN_ERROR.resendTooSoon,
@@ -125,7 +134,7 @@ async function limitLinks(email: string) {
       retryAt: gap.expiresAt.toISOString(),
     });
   }
-  const sends = await hitThrottle(db, `join:link-sends:${email}`, 60 * 60);
+  const sends = await hitThrottle(db, `${kind}:link-sends:${email}`, 60 * 60);
   if (sends.count > SIGN_IN.codesPerEmailPerHour) {
     throw new APIError("TOO_MANY_REQUESTS", {
       code: SIGN_IN_ERROR.tooManyCodes,
@@ -138,6 +147,10 @@ async function limitLinks(email: string) {
 export const afterSignIn = createAuthMiddleware(async (ctx) => {
   if (ctx.path === PASSWORD) {
     await afterPassword(ctx);
+    return;
+  }
+  if (ctx.path === CHANGE_PASSWORD) {
+    await afterChangePassword(ctx);
     return;
   }
   if (ctx.path !== VERIFY) return;
@@ -191,4 +204,17 @@ async function afterPassword(ctx: Ctx) {
     throw pausedError(pause.expiresAt);
   }
   throw wrongPassword(SIGN_IN.wrongCodesBeforePause - wrong.count);
+}
+
+/**
+ * Change password signs the person out everywhere and gives this device a new session (A195). Knowing the current
+ * password is the same proof as the password sign-in, so a staff member's new session gets the staff mark.
+ */
+async function afterChangePassword(ctx: Ctx) {
+  const created = ctx.context.newSession;
+  if (!created || isAPIError(ctx.context.returned)) return;
+  const db = getDb();
+  if (await isStaffEmail(db, created.user.email)) {
+    await recordStaffSession(db, created.session.id, SIGN_IN.sessionDays * 24 * 60 * 60);
+  }
 }

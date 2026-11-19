@@ -31,7 +31,7 @@ export const OPERATOR_EXTRA = {
   "roles.manage": "Change operator roles and who holds them (the playbook keeps this to Super admin)",
   "content.publish":
     "Publish, schedule and correct articles and records (an Editor-in-chief can; a Content editor cannot)",
-  // A197 (founder, 19 Nov 2026), migration 0074.
+  // A198 (founder, 19 Nov 2026), migration 0075.
   "content.purge": "Delete content permanently (Super admin only; it can't be undone)",
 } as const;
 

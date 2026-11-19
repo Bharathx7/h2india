@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { formatIstTime, landingAfterSignIn, looksLikeEmail, normaliseEmail, safeReturnPath, siteSignIn } from "./rules";
+import {
+  formatIstTime,
+  landingAfterSignIn,
+  looksLikeEmail,
+  newPasswordProblem,
+  normaliseEmail,
+  safeReturnPath,
+  SIGN_IN,
+  siteSignIn,
+} from "./rules";
 
 describe("return to the page the person started from", () => {
   it("keeps a path on this site, with its query and anchor", () => {
@@ -98,5 +107,22 @@ describe("buyer, supplier and member sign-in pages (public QC 2)", () => {
 
   it("someone who never finished joining goes to that page's sign-up", () => {
     expect(landingAfterSignIn("supplier", null, "/supplier")).toEqual({ to: "/join/supplier", wrongPage: false });
+  });
+});
+
+// Founder, 19 Nov 2026 (A195): everyone signs in with a password; the forms and core share one length rule.
+describe("a new password", () => {
+  it("needs at least the minimum length", () => {
+    expect(newPasswordProblem("a".repeat(SIGN_IN.passwordMinLength - 1))).toBe(
+      `Use at least ${String(SIGN_IN.passwordMinLength)} characters`,
+    );
+    expect(newPasswordProblem("a".repeat(SIGN_IN.passwordMinLength))).toBeNull();
+  });
+
+  it("allows up to the maximum length", () => {
+    expect(newPasswordProblem("a".repeat(SIGN_IN.passwordMaxLength))).toBeNull();
+    expect(newPasswordProblem("a".repeat(SIGN_IN.passwordMaxLength + 1))).toBe(
+      `Use at most ${String(SIGN_IN.passwordMaxLength)} characters`,
+    );
   });
 });

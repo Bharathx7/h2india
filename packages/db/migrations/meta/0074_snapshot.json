@@ -1,5 +1,5 @@
 {
-  "id": "317a9e24-dee6-420c-b259-28d261556507",
+  "id": "7dd4d6f8-07aa-43c1-9f5b-4498b88d03d4",
   "prevId": "b0c7243b-a049-4be1-b2e9-67e0dfecbf81",
   "version": "7",
   "dialect": "postgresql",
@@ -1375,6 +1375,12 @@
         },
         "terms_version": {
           "name": "terms_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password_hash": {
+          "name": "password_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": false

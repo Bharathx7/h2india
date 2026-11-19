@@ -1,4 +1,4 @@
--- Delete permanently (founder, 19 Nov 2026, A197): a new operator permission, held only by Super admin.
+-- Delete permanently (founder, 19 Nov 2026, A198): a new operator permission, held only by Super admin.
 -- Adds rows only; nothing is removed or changed.
 INSERT INTO "core"."permissions" ("key", "layer", "description", "sensitive") VALUES
   ('content.purge', 'operator', 'Delete content permanently (Super admin only; it can''t be undone)', true)

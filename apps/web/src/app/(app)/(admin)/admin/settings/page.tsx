@@ -42,6 +42,10 @@ const FLAG_WORDS: Record<string, { label: string; hint: string }> = {
     label: "Mobile number check (SMS code)",
     hint: "Join asks for a code sent to the mobile number. Off: the number is saved without a code. Turn on once an SMS provider is connected.",
   },
+  mobileFields: {
+    label: "Personal mobile numbers and SMS",
+    hint: "Shows mobile number fields and SMS choices on forms and screens. Off: they're hidden and not asked for. Turn on once an SMS provider is connected.",
+  },
   buyerChecklist: {
     label: "Buyer set-up checklist",
     hint: "Shows new buyers the five set-up steps before their dashboard. Off: buyers go straight to the dashboard.",
@@ -55,6 +59,7 @@ const FEATURE_FLAGS = [
   "buyerChecklist",
   "testerSignIn",
   "mobileVerification",
+  "mobileFields",
 ] as const;
 
 /** An integration's state as a badge: connected, a built-in stand-in, or not connected yet. */

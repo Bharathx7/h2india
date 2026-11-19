@@ -15,6 +15,7 @@ export const FLAG_DEFAULTS = {
   buyerChecklist: false, // public QC, 16 Nov 2026: the buyer's five-step checklist before the dashboard, off until the steps are chosen
   testerSignIn: false, // founder, 18 Nov 2026: password sign-in for the listed test accounts (sign-in.testers). Off unless testing
   mobileVerification: false, // founder, 18 Nov 2026: SMS code for the mobile number at Join. Off until an SMS provider is connected
+  mobileFields: false, // founder, 19 Nov 2026: personal mobile numbers and SMS hidden everywhere until an SMS provider is connected
 } as const;
 
 /** Safer defaults for a production build (NODE_ENV=production) when the variable isn't set. */
@@ -35,6 +36,7 @@ const ENV_NAMES: Record<FlagName, string> = {
   buyerChecklist: "FLAG_BUYER_CHECKLIST",
   testerSignIn: "FLAG_TESTER_SIGN_IN",
   mobileVerification: "FLAG_MOBILE_VERIFICATION",
+  mobileFields: "FLAG_MOBILE_FIELDS",
 };
 
 export function readFlags(source: Record<string, string | undefined> = process.env): Record<FlagName, boolean> {
@@ -72,6 +74,7 @@ export const ADMIN_FLAGS = [
   "buyerChecklist",
   "testerSignIn",
   "mobileVerification",
+  "mobileFields",
 ] as const;
 /** Switching these needs a second operator to approve (they open or close money flows). */
 export const TWO_PERSON_FLAGS: readonly FlagName[] = ["transactions", "payLater", "letterOfCredit"];

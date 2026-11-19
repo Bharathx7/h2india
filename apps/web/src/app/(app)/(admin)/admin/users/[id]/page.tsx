@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { userDetail } from "@h2india/core/admin/users";
 import { can } from "@h2india/core/authz";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
@@ -20,7 +21,8 @@ export const dynamic = "force-dynamic";
 export default async function UserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { userId, actor } = await requireOperator("users.view", `/admin/users/${id}`);
-  const d = await userDetail(getDb(), actor, id);
+  const db = getDb();
+  const [d, showMobile] = await Promise.all([userDetail(db, actor, id), mobileFieldsShown(db)]);
   if (!d) notFound();
   const p = d.person;
   const name = p.name || p.email;
@@ -45,7 +47,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
             <p className="flex flex-wrap items-center gap-2 type-caption text-secondary">
               <StatusBadge status={p.suspendedAt ? "Suspended" : "Active"} tone={p.suspendedAt ? "error" : "success"} />
               <StatusBadge status={type} tone="neutral" />
-              {[p.email, p.mobile ? maskMobile(p.mobile) : null, `joined ${formatIstDate(p.createdAt)}`]
+              {[p.email, showMobile && p.mobile ? maskMobile(p.mobile) : null, `joined ${formatIstDate(p.createdAt)}`]
                 .filter(Boolean)
                 .join(" · ")}
             </p>

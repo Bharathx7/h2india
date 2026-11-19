@@ -1,5 +1,8 @@
 import { readDraft } from "@h2india/core/companies";
+import { PASSWORD_PAGES } from "@h2india/core/sign-in";
+import { TextLink } from "@h2india/ui";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { draftToken } from "@/server/join";
 import { AuthCard } from "../../AuthCard";
 import { StatusIcon } from "../../StatusIcon";
@@ -40,6 +43,13 @@ export default async function VerifyPage({
       <h1 className="type-h2 text-primary">Check your inbox</h1>
       <p className="type-body text-body">
         We sent a link to {email}. Open it to confirm your email. The link works for 24 hours.
+      </p>
+      {/* A195: the same words whether or not the email already has an account, so the page never reveals one. */}
+      <p className="type-body-sm text-secondary">
+        Already have an account with this email? The link signs you in, and your password stays the same. Forgot it?{" "}
+        <TextLink asChild showIcon={false}>
+          <Link href={PASSWORD_PAGES.forgot}>Reset your password</Link>
+        </TextLink>
       </p>
       <VerifyActions mode="sent" canSend={Boolean(draft?.email)} back={draft?.path ? `/join/${draft.path}` : "/join"} />
     </AuthCard>

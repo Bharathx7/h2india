@@ -483,7 +483,8 @@ export function AdvertisingForm() {
 
 // ------------------------------------------------------------------------------------------ grievance
 
-export function GrievanceForm({ type, page }: { type: string; page: string }) {
+/** `showMobile` is the `mobileFields` switch (founder, 19 Nov 2026): off, the form doesn't ask for a mobile. */
+export function GrievanceForm({ type, page, showMobile }: { type: string; page: string; showMobile: boolean }) {
   const [v, setV] = useState<Record<string, string>>({
     type: (GRIEVANCE_TYPES as readonly string[]).includes(type) ? type : "",
     pageUrl: page,
@@ -672,17 +673,19 @@ export function GrievanceForm({ type, page }: { type: string; page: string }) {
           />
         </FormField>
       </div>
-      <FormField label="Mobile" error={errors.mobile}>
-        <Input
-          type="tel"
-          autoComplete="tel"
-          placeholder="+91  98200 00000"
-          value={v.mobile ?? ""}
-          onChange={(e) => {
-            set("mobile", e.target.value);
-          }}
-        />
-      </FormField>
+      {showMobile ? (
+        <FormField label="Mobile" error={errors.mobile}>
+          <Input
+            type="tel"
+            autoComplete="tel"
+            placeholder="+91  98200 00000"
+            value={v.mobile ?? ""}
+            onChange={(e) => {
+              set("mobile", e.target.value);
+            }}
+          />
+        </FormField>
+      ) : null}
       <div className="flex flex-wrap items-center gap-4">
         <Button type="submit" disabled={pending || busy}>
           Submit complaint
