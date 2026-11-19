@@ -33,6 +33,9 @@ type Choice = { id: number; label: string };
 type Values = Record<string, unknown>;
 
 const IST = 330 * 60_000;
+
+/** "tracker-projects" → "Tracker projects", for a link to a record of that type. */
+const labelOfSlug = (slug: string) => (slug.charAt(0).toUpperCase() + slug.slice(1)).replace(/-/g, " ");
 const istLocal = (iso: unknown, withTime: boolean) => {
   if (typeof iso !== "string" || !iso) return "";
   const d = new Date(new Date(iso).getTime() + IST).toISOString();
@@ -59,7 +62,15 @@ function emptyOf(f: FieldSpec): unknown {
   return null;
 }
 
-function RichText({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
+function RichText({
+  value,
+  onChange,
+  media,
+}: {
+  value: unknown;
+  onChange: (v: unknown) => void;
+  media: { id: number; label: string }[];
+}) {
   const [blocks, setBlocks] = useState<BodyBlock[]>(() => {
     const b = value ? lexicalToBlocks(value) : [];
     return b.length ? b : [{ kind: "paragraph", text: "" }];
@@ -68,6 +79,7 @@ function RichText({ value, onChange }: { value: unknown; onChange: (v: unknown) 
     <div className="flex flex-col gap-3">
       <BodyEditor
         blocks={blocks}
+        media={media}
         onChange={(b) => {
           setBlocks(b);
           onChange(blocksToLexical(b));
@@ -295,7 +307,7 @@ function Field({
           {disabled ? (
             <p className="type-body-sm text-secondary">Read only.</p>
           ) : (
-            <RichText value={value} onChange={onChange} />
+            <RichText value={value} onChange={onChange} media={choices.media ?? []} />
           )}
         </div>
       );
@@ -420,8 +432,26 @@ function Field({
     case "json":
       control = <JsonField value={value} onChange={onChange} />;
       break;
+    case "reference": {
+      const ref = value as { relationTo?: unknown; value?: unknown } | null;
+      const to = typeof ref?.relationTo === "string" ? ref.relationTo : null;
+      const id = idOf(ref?.value);
+      const title =
+        ref?.value && typeof ref.value === "object"
+          ? ((ref.value as { title?: unknown; name?: unknown }).title ?? (ref.value as { name?: unknown }).name)
+          : null;
+      control =
+        to && (typeof id === "number" || typeof id === "string") ? (
+          <Link href={`/admin/content/${to}/${String(id)}`} className="type-body-sm underline">
+            {typeof title === "string" && title ? title : `${labelOfSlug(to)} ${String(id)}`}
+          </Link>
+        ) : (
+          <p className="type-body-sm text-secondary">Not set.</p>
+        );
+      break;
+    }
     case "unsupported":
-      control = <p className="type-body-sm text-secondary">Edited in the advanced editor.</p>;
+      control = <p className="type-body-sm text-secondary">Set by the system.</p>;
       break;
     default:
       control = (
@@ -482,7 +512,6 @@ export function RecordForm({
   choices,
   canEdit,
   verify,
-  cmsHref,
   canArchive = false,
 }: {
   kind: "record" | "setting";
@@ -497,7 +526,6 @@ export function RecordForm({
   choices: Record<string, Choice[]>;
   canEdit: boolean;
   verify: boolean;
-  cmsHref: string;
   /** content.delete: may archive this record (founder QC, 17 Nov 2026). */
   canArchive?: boolean;
 }) {
@@ -748,9 +776,6 @@ export function RecordForm({
               {side.map(field)}
             </section>
           ) : null}
-          <Link href={cmsHref} className="type-caption text-secondary underline">
-            Open in the advanced editor
-          </Link>
         </aside>
       </div>
     </div>

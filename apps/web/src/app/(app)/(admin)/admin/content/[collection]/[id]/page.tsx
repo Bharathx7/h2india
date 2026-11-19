@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { choicesFor, contentType, recordValues } from "@/admin/cms/records";
 import { RecordForm } from "@/admin/cms/RecordForm";
-import { VERIFIED_SLUGS } from "@/admin/cms/registry";
+import { READ_ONLY_SLUGS, VERIFIED_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { AdminShell, requireOperator } from "@/admin/shell";
 
@@ -58,9 +58,8 @@ export default async function EditRecordPage({ params }: { params: Promise<{ col
           verifiedDays: verification?.at ? daysSince(verification.at) : null,
         }}
         choices={choices}
-        canEdit={cms.can("content.edit")}
+        canEdit={cms.can("content.edit") && !READ_ONLY_SLUGS.includes(collection)}
         verify={VERIFIED_SLUGS.includes(collection)}
-        cmsHref={`/cms/collections/${collection}/${id}`}
         canArchive={cms.can("content.delete")}
       />
     </AdminShell>

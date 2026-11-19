@@ -9,6 +9,10 @@ export type BodyBlock =
   | { kind: "quote"; text: string }
   | { kind: "keyNumbers"; heading: string; items: { value: string; label: string }[]; source: string }
   | { kind: "keyFacts"; heading: string; items: { label: string; value: string }[] }
+  /** A picture from the media library (its alt text and caption live on the media record). */
+  | { kind: "image"; mediaId: number | null }
+  /** A YouTube video (A196). */
+  | { kind: "youtube"; url: string; title: string; caption: string }
   | { kind: "kept"; node: unknown; summary: string };
 
 type Node = Record<string, unknown> & { type?: string; children?: Node[] };
@@ -109,11 +113,39 @@ export function blocksToLexical(blocks: BodyBlock[]) {
           version: 2,
           fields: { id: blockId(), blockName: "", blockType: "keyFacts", heading: b.heading, items: b.items },
         };
+      case "image":
+        // Payload's own upload node, so the site and search read it like any picture in rich text.
+        return b.mediaId === null
+          ? null
+          : {
+              type: "upload",
+              version: 3,
+              format: "",
+              id: blockId(),
+              fields: null,
+              relationTo: "media",
+              value: b.mediaId,
+            };
+      case "youtube":
+        return {
+          type: "block",
+          ...base,
+          version: 2,
+          fields: {
+            id: blockId(),
+            blockName: "",
+            blockType: "youtube",
+            url: b.url,
+            title: b.title,
+            caption: b.caption,
+          },
+        };
       case "kept":
         return b.node;
     }
   });
-  return { root: { type: "root", ...base, children } };
+  // An image block with no picture chosen yet is left out rather than saved empty.
+  return { root: { type: "root", ...base, children: children.filter((c) => c !== null) } };
 }
 
 export function lexicalToBlocks(value: unknown): BodyBlock[] {
@@ -152,11 +184,25 @@ export function lexicalToBlocks(value: unknown): BodyBlock[] {
               ? (f.items as { label: string; value: string }[]).map((x) => ({ label: x.label, value: x.value }))
               : [],
           };
+        if (f.blockType === "youtube")
+          return {
+            kind: "youtube",
+            url: typeof f.url === "string" ? f.url : "",
+            title: typeof f.title === "string" ? f.title : "",
+            caption: typeof f.caption === "string" ? f.caption : "",
+          };
         return {
           kind: "kept",
           node: n,
           summary: `Block: ${typeof f.blockType === "string" ? f.blockType : "unknown"}`,
         };
+      }
+      case "upload": {
+        const v = n.value;
+        const id = typeof v === "number" ? v : typeof v === "object" && v ? (v as { id?: unknown }).id : null;
+        return n.relationTo === "media" && typeof id === "number"
+          ? { kind: "image", mediaId: id }
+          : { kind: "kept", node: n, summary: "File" };
       }
       default:
         return { kind: "kept", node: n, summary: n.type ?? "Content" };

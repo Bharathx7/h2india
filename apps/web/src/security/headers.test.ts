@@ -25,18 +25,15 @@ describe("security headers (step 12.1)", () => {
     expect(directive(csp, "connect-src")).toEqual(["'self'", "http://localhost:9000"]);
   });
 
-  it("allows eval only in development and in the advanced editor", () => {
+  it("allows eval only in development, on every page (the old /cms exception is gone)", () => {
     expect(directive(contentSecurityPolicy(prod), "script-src")).not.toContain("'unsafe-eval'");
     expect(directive(contentSecurityPolicy({ ...prod, dev: true }), "script-src")).toContain("'unsafe-eval'");
     const cms = contentSecurityPolicy({ ...prod, pathname: "/cms/collections/articles" });
-    expect(directive(cms, "script-src")).toEqual([
-      "'self'",
-      "'unsafe-inline'",
-      "'unsafe-eval'",
-      "https://cdn.jsdelivr.net",
-    ]);
-    // A path that only starts with the letters isn't the editor.
-    expect(directive(contentSecurityPolicy({ ...prod, pathname: "/cmsx" }), "script-src")).toHaveLength(2);
+    expect(directive(cms, "script-src")).toEqual(["'self'", "'unsafe-inline'"]);
+  });
+
+  it("frames only YouTube's privacy-enhanced player", () => {
+    expect(directive(contentSecurityPolicy(prod), "frame-src")).toEqual(["'self'", "https://www.youtube-nocookie.com"]);
   });
 
   it("allows the analytics tool's origin once one is set", () => {

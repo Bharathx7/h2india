@@ -53,6 +53,65 @@ test("an Editor-in-chief writes an article, submits it and publishes it", async 
   await expect(page.getByRole("link", { name: headline }).first()).toBeVisible();
 });
 
+test("one CMS: a YouTube video and a live update go out from the article editor", async ({ page }) => {
+  test.setTimeout(150_000);
+  await signInOperator(page, "Editor-in-chief");
+  const authorName = `Ravi Menon ${String(Date.now())}`;
+  await newAuthor(page.request, authorName);
+  const headline = `Hydrogen auction day ${String(Date.now())}`;
+
+  await page.goto("/admin/content/articles/new");
+  await page.getByLabel("Headline").fill(headline);
+  await page.getByLabel("Standfirst").fill("Bids opened at ten; results are expected by evening.");
+  await page.getByRole("textbox", { name: "Paragraph" }).fill("Seven bidders are in the room.");
+  await page.getByRole("button", { name: "YouTube video" }).click();
+  await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  await page.getByLabel("Video title").fill("Auction hall walkthrough");
+  await page.getByLabel("Author").selectOption({ label: authorName });
+  await page.getByRole("button", { name: "Add source" }).click();
+  await page.getByLabel("Source 1 title").fill("Auction notice");
+  await page.getByLabel("Source 1 link").fill("https://example.org/auction");
+  await page.getByLabel("Live status").selectOption("live");
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/articles\/\d+$/, { timeout: 20_000 });
+  const id = Number(/\/articles\/(\d+)$/.exec(page.url())?.[1]);
+
+  await page.getByRole("button", { name: "Submit for review" }).click();
+  await page.getByRole("button", { name: "Publish now" }).click();
+  await expect(page.getByRole("button", { name: "Unpublish" })).toBeVisible({ timeout: 20_000 });
+
+  // A live update goes out on its own, without review (A61).
+  await page.getByRole("button", { name: "New update" }).click();
+  await page
+    .getByLabel(/Update \d+ title/)
+    .first()
+    .fill("Round one closed at ₹397/kg");
+  await page.getByRole("button", { name: "Publish live update" }).click();
+  await expect
+    .poll(
+      () =>
+        withDb(
+          async (db) =>
+            (await db.query(`SELECT 1 FROM cms.articles_live_updates WHERE _parent_id = $1`, [id])).rowCount,
+        ),
+      { timeout: 20_000 },
+    )
+    .toBe(1);
+
+  const saved = await withDb(async (db) => {
+    const a = await db.query<{ body: unknown; status: string; live: string | null }>(
+      `SELECT body, _status AS status, live_status AS live FROM cms.articles WHERE id = $1`,
+      [id],
+    );
+    const updates = await db.query(`SELECT title FROM cms.articles_live_updates WHERE _parent_id = $1`, [id]);
+    return { ...a.rows[0], updates: updates.rows.map((r: { title: string }) => r.title) };
+  });
+  expect(saved.status).toBe("published");
+  expect(saved.live).toBe("live");
+  expect(saved.updates).toContain("Round one closed at ₹397/kg");
+  expect(JSON.stringify(saved.body)).toContain('"blockType":"youtube"');
+});
+
 test("a Content editor adds a tag and can't publish an article", async ({ page }) => {
   await signInOperator(page, "Content editor");
   const name = `Ammonia cracking ${String(Date.now())}`;

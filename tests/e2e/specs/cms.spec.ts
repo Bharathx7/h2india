@@ -147,17 +147,24 @@ test("media can't be saved without alt text", async ({ page }) => {
   expect(withAlt.status()).toBe(201);
 });
 
-test("the CMS opens for editors and is closed to everyone else", async ({ page, browser }) => {
+test("there is one CMS: /cms sends everyone to the content panel, which is closed to non-editors", async ({
+  page,
+  browser,
+}) => {
   await signInOperator(page, "Editor-in-chief");
   await page.goto("/cms");
-  await expect(page.getByRole("link", { name: "Articles" }).first()).toBeVisible({ timeout: 20_000 });
+  await expect(page).toHaveURL(/\/admin\/content$/);
+  await page.goto("/cms/collections/articles");
+  await expect(page).toHaveURL(/\/admin\/content$/);
 
   const visitor = await browser.newPage();
   await visitor.goto("/cms");
-  await expect(visitor).toHaveURL(/\/sign-in\?next=(%2F|\/)cms/);
+  await expect(visitor).not.toHaveURL(/\/cms/);
   await signInNew(visitor, newEmail("not-editor"));
   await visitor.goto("/cms");
   await expect(visitor).not.toHaveURL(/\/cms/);
+  // Not an operator: the panel doesn't open for them.
+  await expect(visitor.getByRole("heading", { name: "Content", exact: true })).toHaveCount(0);
   await visitor.close();
 });
 

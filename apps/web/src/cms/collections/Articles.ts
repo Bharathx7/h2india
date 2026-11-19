@@ -1,6 +1,6 @@
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { APIError, type CollectionBeforeChangeHook, type CollectionConfig, type Endpoint } from "payload";
-import { KeyFacts, KeyNumbers } from "../blocks";
+import { KeyFacts, KeyNumbers, YouTube } from "../blocks";
 import { canDelete, canEdit, canPublish, editorOf } from "../roles";
 import { publicOrEditor, refuseSamplePublish } from "../sample";
 import { slugFrom } from "../slug";
@@ -185,7 +185,10 @@ export const Articles: CollectionConfig = {
       type: "richText",
       required: true,
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, BlocksFeature({ blocks: [KeyNumbers, KeyFacts] })],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({ blocks: [KeyNumbers, KeyFacts, YouTube] }),
+        ],
       }),
     },
     {
