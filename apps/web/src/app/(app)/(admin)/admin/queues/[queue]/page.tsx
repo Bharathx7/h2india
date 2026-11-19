@@ -71,6 +71,9 @@ export default async function QueuePage({
     );
   const paged = pageOf(rows, pageRequest(sp));
   const canDecide = can(actor, "queues.edit");
+  // A supplier review opens on the Verification desk, which needs verification.view (founder, 19 Nov 2026: other
+  // queue roles hit a missing page). They see who the review waits for instead.
+  const canOpen = key !== "suppliers" || can(actor, "verification.view");
   return (
     <AdminShell userId={userId} current="/admin/queues" title="Queues">
       <div>
@@ -204,9 +207,13 @@ export default async function QueuePage({
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={x.href} className={buttonClasses({ variant: "outline", size: "sm" })}>
-                      Review<span className="sr-only"> {x.title}</span>
-                    </Link>
+                    {canOpen ? (
+                      <Link href={x.href} className={buttonClasses({ variant: "outline", size: "sm" })}>
+                        Review<span className="sr-only"> {x.title}</span>
+                      </Link>
+                    ) : (
+                      <span className="type-caption text-secondary">Needs a verifier</span>
+                    )}
                   </td>
                 </tr>
               ))}
