@@ -193,7 +193,7 @@ The design is the Figma file **hydrogen** (key `swxSe4zWyngLYdZ2Qe9CWJ`). The bu
 
 ## Newsletter, consent and form protection (step 5.9)
 
-- The brand is **H2 Economy** in everything people see (pages, emails, logo). Internal names (`@h2india/*` packages, database, cookies, `/srv/h2india`, `h2india-*` buckets) stay. The logo is an interim wordmark (`packages/ui/src/brand/Logo.tsx`: the approved H₂ mark plus "Economy" in Inter Extra Bold) until the designer draws the final one.
+- The brand is **H2 Economy** in everything people see (pages, emails, logo). Internal names (`@h2india/*` packages, database, cookies, `/srv/h2india`, `h2india-*` buckets) stay. The logo is an interim wordmark (`packages/ui/src/brand/Logo.tsx`: the approved H₂ mark plus "Economy" in Inter Extra Bold) until the designer draws the final one. The browser-tab icons are `app/(app)/icon.svg` and `apple-icon.png`, with copies in `public/brand/h2-icon.svg` and `h2-apple-icon.png` for pages outside `(app)` (the /cms admin via `admin.meta.icons`, `global-not-found.tsx`). Change both together.
 - Every public form calls `checkForm()` (`@h2india/core`) on the server before saving, and sends `guard()` from `useFormGuard()` (`apps/web/src/lib/form-guard.tsx`) with its `{trap}` rendered inside the form. A new public form does both.
 - Cookie choices live in the `h2_consent` cookie (`@h2india/core/consent/cookies`); read them with `useCookieChoice()`. Load nothing that tracks people except through `Analytics`, which needs consent and skips operators. Bump `COOKIE_CONSENT_VERSION` when the categories or banner words change.
 - Newsletter mail carries `unsubscribeHeaders()`; unsubscribing goes only through `unsubscribe()` (one-click POST or the confirm page).
