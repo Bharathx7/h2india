@@ -1,5 +1,5 @@
 import { LiveSection } from "@/components/LiveSection";
-import { CategoryTile, cx, EmptyState, Icon, OrgCard, Skeleton } from "@h2india/ui";
+import { CategoryTile, cx, EmptyState, equipmentKind, Icon, OrgCard, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -99,6 +99,7 @@ export default async function ClassPage({
                 detail={productsLine(x.liveProducts, c.id === "services" ? "listings" : "products")}
                 href={categoryHref(x)}
                 icon={tileIcon(x.slug)}
+                art={equipmentKind(x.slug)}
               />
             ))}
           </div>

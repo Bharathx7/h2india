@@ -1,6 +1,6 @@
 import config from "@payload-config";
 import type { DefaultTypedEditorState } from "@payloadcms/richtext-lexical";
-import { ArrowLink, Breadcrumbs, cx, Icon, type IconName } from "@h2india/ui";
+import { ArrowLink, Breadcrumbs, CoverArt, coverTopic, cx, Icon, type IconName } from "@h2india/ui";
 import Link from "next/link";
 import { getPayload } from "payload";
 import type { ReactNode } from "react";
@@ -209,13 +209,11 @@ function Header({ a }: { a: Article }) {
   );
 }
 
-function LeadImage() {
+/** Until articles carry their own image: the topic's cover drawing (design upgrade, 19 Nov 2026). */
+function LeadImage({ a }: { a: Article }) {
   return (
-    <div
-      aria-hidden="true"
-      className="flex aspect-video w-full items-center justify-center rounded-card bg-mint text-icon-primary"
-    >
-      <Icon name="newspaper" size={48} />
+    <div aria-hidden="true" className="aspect-video w-full overflow-hidden rounded-card bg-fresh-50">
+      <CoverArt topic={coverTopic(sectionOf(a)?.name, a.title)} seed={a.slug} />
     </div>
   );
 }
@@ -529,7 +527,7 @@ export async function ArticlePage({ a, appUrl }: { a: Article; appUrl: string })
           <LiveRefresh live={live}>
             <Live a={a} />
           </LiveRefresh>
-          {a.live?.status === "live" || a.live?.status === "ended" ? null : <LeadImage />}
+          {a.live?.status === "live" || a.live?.status === "ended" ? null : <LeadImage a={a} />}
           <ArticleBody data={a.body} glossary={glossary} />
           <SourcesAndTags a={a} />
         </article>

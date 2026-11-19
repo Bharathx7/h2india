@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "../../icons/Icon";
 import { cx } from "../../lib/cx";
+import { EquipmentArt, equipmentKind, type EquipmentKind } from "../art/EquipmentArt";
 import { buttonClasses } from "../Button";
 
 /* Figma "Product card v2" (392:5279): image with Compare and Save, class · category eyebrow, name, supplier with its
@@ -8,7 +9,9 @@ import { buttonClasses } from "../Button";
    shows a price (playbook step 6.4 price rule).
    Founder v2 (18 Nov 2026): the same look as the home showcase cards: a green image tile with the product mark on a
    white coin and the Verified badge on it, the category as a plain caption, spec chips in mint, and the footer (lead
-   time, View product) on the card's bottom edge so cards in a row line up. Same props and the same controls. */
+   time, View product) on the card's bottom edge so cards in a row line up. Same props and the same controls.
+   Design upgrade (19 Nov 2026): the tile shows an engineering drawing of the product's equipment (`EquipmentArt`,
+   chosen from the category words) instead of the same bolt on every card. */
 
 export interface ProductCardProps {
   name: string;
@@ -17,6 +20,8 @@ export interface ProductCardProps {
   eyebrow: string;
   supplier: string;
   supplierVerified?: boolean;
+  /** The drawing on the tile; worked out from the eyebrow and name when left out. */
+  art?: EquipmentKind;
   chips: string[];
   leadTime?: string | null;
   /** Compare and Save buttons; rendered by the page so they can hold state. */
@@ -37,6 +42,7 @@ export function ProductCard({
   eyebrow,
   supplier,
   supplierVerified = false,
+  art,
   chips,
   leadTime,
   actions,
@@ -50,10 +56,8 @@ export function ProductCard({
         className,
       )}
     >
-      <div className="relative flex aspect-[16/9] items-center justify-center bg-linear-to-br from-fresh-50 to-fresh-200 sm:aspect-[4/3]">
-        <span className="flex size-16 items-center justify-center rounded-pill bg-page text-icon-link shadow-soft transition-transform duration-(--motion-duration-base) ease-standard group-hover:scale-105">
-          <Icon name="zap" size={28} />
-        </span>
+      <div className="relative aspect-[16/9] bg-fresh-50 sm:aspect-[4/3]">
+        <EquipmentArt kind={art ?? equipmentKind(eyebrow, name)} />
         {supplierVerified ? (
           <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
             <Icon name="shield-check" size={14} className="text-icon-success" />

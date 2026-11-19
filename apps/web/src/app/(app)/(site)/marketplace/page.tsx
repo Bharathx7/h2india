@@ -1,5 +1,5 @@
 import { LiveSection } from "@/components/LiveSection";
-import { Button, CategoryTile, cx, EmptyState, Icon, Skeleton } from "@h2india/ui";
+import { Button, CategoryTile, cx, EmptyState, equipmentKind, Icon, Skeleton } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { forcedState } from "@/lib/dev-state";
@@ -136,6 +136,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               detail={productsLine(c.liveProducts, c.classId === "services" ? "listings" : "products")}
               href={categoryHref(c)}
               icon={tileIcon(c.slug)}
+              art={equipmentKind(c.slug)}
             />
           ))}
         </div>

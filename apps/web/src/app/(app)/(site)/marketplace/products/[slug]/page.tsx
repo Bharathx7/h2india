@@ -2,7 +2,16 @@ import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { identityOf } from "@h2india/core/authz";
 import { productDetail, similarProducts, type ProductDetail } from "@h2india/core/products";
-import { buttonClasses, cx, EmptyState, Icon, ProductCard, VerifiedBadge } from "@h2india/ui";
+import {
+  buttonClasses,
+  cx,
+  EmptyState,
+  EquipmentArt,
+  equipmentKind,
+  Icon,
+  ProductCard,
+  VerifiedBadge,
+} from "@h2india/ui";
 import type { Metadata } from "next";
 import { ViewBeacon } from "@/components/ViewBeacon";
 import Link from "next/link";
@@ -13,7 +22,7 @@ import { LiveSection } from "@/components/LiveSection";
 import { forcedState } from "@/lib/dev-state";
 import { guidesFor } from "@/marketplace/data";
 import { GuideCards, wrap } from "@/marketplace/parts";
-import { applicationHref, categoryHref, classHref, tileIcon } from "@/marketplace/views";
+import { applicationHref, categoryHref, classHref } from "@/marketplace/views";
 import { Crumbs } from "@/opportunities/parts";
 import { STATE_OPTIONS } from "@/cms/records/states";
 import { JsonLd } from "@/seo/jsonld";
@@ -118,14 +127,11 @@ export default async function ProductPage({
               column carries what a buyer checks first instead of an empty grey box. */}
           <div className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
             <div
-              className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-card bg-linear-to-br from-fresh-50 to-fresh-200 lg:aspect-[4/3]"
+              className="relative aspect-[16/9] overflow-hidden rounded-card bg-fresh-50 lg:aspect-[4/3]"
               role="img"
               aria-label={`No photos of ${p.name} yet`}
             >
-              <div aria-hidden="true" className="depth-dot-grid absolute inset-0 opacity-50" />
-              <span className="relative flex size-20 items-center justify-center rounded-pill bg-page text-icon-link shadow-ink-float lg:size-28">
-                <Icon name={tileIcon(p.category.slug)} size={40} />
-              </span>
+              <EquipmentArt kind={equipmentKind(p.category.slug, p.name)} />
             </div>
             <dl className="grid grid-cols-2 gap-3" aria-label="Key facts">
               <KeyFact label="Lead time" value={p.leadTime ?? "Ask the supplier"} />
