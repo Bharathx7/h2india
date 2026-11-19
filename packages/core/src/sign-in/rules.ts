@@ -10,13 +10,15 @@ export const SIGN_IN = {
   resendSeconds: 30,
   sessionDays: 7,
   /**
-   * Staff sign in to the back office with email and password (founder, 17 Nov 2026; passkeys removed). The length is
-   * Better Auth's default until the founder chooses a number (OPEN: A183).
+   * Everyone signs in with email and password (founder, 19 Nov 2026, A195; staff since 17 Nov 2026, A183). The length
+   * is Better Auth's default until the founder chooses a number (OPEN: A183).
    */
   passwordMinLength: 8,
   passwordMaxLength: 128,
-  /** How long a "set your password" link works. Better Auth's default (OPEN: A183). */
+  /** How long a "set your password" or "reset your password" link works. Better Auth's default (OPEN: A183). */
   passwordLinkMinutes: 60,
+  /** Wrong current passwords on Change password before it pauses for `pauseMinutes`. */
+  wrongCurrentPasswordsBeforePause: 5,
   /** A confirmation code (bank change, order approval) counts for this long once entered. */
   stepUpMinutes: 5,
 } as const;
@@ -29,8 +31,34 @@ export const SIGN_IN_ERROR = {
   tooManyCodes: "TOO_MANY_CODES",
   resendTooSoon: "RESEND_TOO_SOON",
   suspended: "ACCOUNT_SUSPENDED",
-  /** Better Auth's own code for a wrong email or password; also what a non-staff email gets on the staff sign-in. */
+  /** Better Auth's own code for a wrong email or password; also what a turned-away test account gets. */
   wrongPassword: "INVALID_EMAIL_OR_PASSWORD",
+  /**
+   * Better Auth's code for a right password on an unconfirmed email (the requireEmailVerification backstop, A195).
+   * No path should lead there; the sign-in pages show it as "Email or password is wrong", so it reveals nothing.
+   */
+  emailNotConfirmed: "EMAIL_NOT_VERIFIED",
+} as const;
+
+/** Why a new password can't be used, in the words the forms show; null when it's fine. Same rule as Better Auth's. */
+export function newPasswordProblem(password: string): string | null {
+  if (password.length < SIGN_IN.passwordMinLength) {
+    return `Use at least ${String(SIGN_IN.passwordMinLength)} characters`;
+  }
+  if (password.length > SIGN_IN.passwordMaxLength) {
+    return `Use at most ${String(SIGN_IN.passwordMaxLength)} characters`;
+  }
+  return null;
+}
+
+/** The password pages for buyers, suppliers and members (A195). Staff keep /sign-in/staff/password. */
+export const PASSWORD_PAGES = {
+  /** Ask for a reset link by email. */
+  forgot: "/forgot-password",
+  /** Where the emailed link lands: choose the new password. */
+  reset: "/reset-password",
+  /** A signed-in person without a password chooses one (after accepting an invitation, for example). */
+  set: "/set-password",
 } as const;
 
 /**

@@ -1,4 +1,5 @@
 import { getDb, Money } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { scopeFor } from "@h2india/core/authz";
 import { companySessions, companySettings, delegationsOf } from "@h2india/core/buyer";
 import { teamView } from "@h2india/core/supplier";
@@ -149,12 +150,17 @@ export default async function CompanySettingsPage({
       </>
     );
   } else if (section === "sites") {
+    const showMobile = await mobileFieldsShown(db);
     body = (
       <>
         <Heading
           title="Delivery sites"
-          detail="Where suppliers deliver. Receiving contacts get the delivery code by SMS and confirm what arrived."
-          action={canManage ? <SiteDialog label="Add a delivery site" /> : undefined}
+          detail={
+            showMobile
+              ? "Where suppliers deliver. Receiving contacts get the delivery code by SMS and confirm what arrived."
+              : "Where suppliers deliver. Receiving contacts confirm what arrived."
+          }
+          action={canManage ? <SiteDialog label="Add a delivery site" showMobile={showMobile} /> : undefined}
         />
         {data.sites.length === 0 ? (
           <div className="flex flex-col items-start gap-2 rounded-card border border-default bg-page p-5">
@@ -176,6 +182,7 @@ export default async function CompanySettingsPage({
                 <span className="flex items-center gap-2">
                   <SiteDialog
                     label="Edit"
+                    showMobile={showMobile}
                     start={{
                       id: s.id,
                       name: s.name,
@@ -214,7 +221,7 @@ export default async function CompanySettingsPage({
                     <span>
                       <span className="block type-label">{c.name}</span>
                       <span className="block type-caption text-secondary">
-                        {[c.role, masked(c.mobile)].filter(Boolean).join(" · ")}
+                        {[c.role, showMobile ? masked(c.mobile) : null].filter(Boolean).join(" · ")}
                       </span>
                     </span>
                   </li>

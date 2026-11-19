@@ -519,6 +519,13 @@
       "when": 1794926096117,
       "tag": "0073_member_access",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1795080766692,
+      "tag": "0074_join_draft_password",
+      "breakpoints": true
     }
   ]
 }

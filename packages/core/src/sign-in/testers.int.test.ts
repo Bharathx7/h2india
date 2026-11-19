@@ -11,7 +11,8 @@ import { FLAG_OVERRIDES } from "../admin/system";
 import { isTesterEmail, TESTER_ACCOUNTS } from "./testers";
 
 // Test accounts (founder, 18 Nov 2026) against a real PostgreSQL (TEST_DATABASE_URL): the password sign-in takes a
-// listed tester only while testerSignIn is on, and a tester's session is never a staff session.
+// listed tester only while testerSignIn is on, and a tester's session is never a staff session. Everyone else may use
+// it since 19 Nov 2026 (A195).
 const url = process.env.TEST_DATABASE_URL;
 const PASSWORD = "tester-password-0123456789";
 
@@ -106,13 +107,20 @@ describe.skipIf(!url)("test-account password sign-in", () => {
     expect(await isTesterEmail(h.db, tester)).toBe(false);
   });
 
-  it("refuses a password from anyone who is neither staff nor on the list", async () => {
-    await setSwitch(true);
+  // Founder, 19 Nov 2026 (A195): every account signs in with its password; only listed testers wait for the switch.
+  it("signs in anyone else with their password, switch on or off, and never as staff", async () => {
     const tester = await person("listed");
     const other = await person("other");
     await listTesters([tester]);
+    await setSwitch(false);
     expect(await isTesterEmail(h.db, other)).toBe(false);
-    await expect(signIn(other)).rejects.toMatchObject({ body: { code: SIGN_IN_ERROR.wrongPassword } });
+    await expect(signIn(tester)).rejects.toMatchObject({ body: { code: SIGN_IN_ERROR.wrongPassword } });
+    const result = await signIn(other);
+    const [session] = await h.db
+      .select({ id: schema.sessions.id })
+      .from(schema.sessions)
+      .where(eq(schema.sessions.token, result.token));
+    expect(await isStaffSession(h.db, session?.id ?? "")).toBe(false);
   });
 
   it("counts a tester's wrong password like any other", async () => {

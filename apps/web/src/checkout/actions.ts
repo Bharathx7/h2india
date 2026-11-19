@@ -28,7 +28,14 @@ export async function placeOrderAction(): Promise<CheckoutResult> {
   if (!me) return { ok: false, error: "Sign in again." };
   const v = await checkoutView(me.db, me.actor, me.buyer.organisationId);
   const c = v.choices;
-  if (!c.deliverySiteId || !c.billingGstinId || !c.receiverName || !c.receiverMobile || !c.paymentMethod)
+  // The receiver's mobile is needed only while the `mobileFields` switch is on (founder, 19 Nov 2026).
+  if (
+    !c.deliverySiteId ||
+    !c.billingGstinId ||
+    !c.receiverName ||
+    (v.mobileFields && !c.receiverMobile) ||
+    !c.paymentMethod
+  )
     return { ok: false, error: "Some checkout steps aren't finished yet" };
   try {
     const order = await placeCartOrder(

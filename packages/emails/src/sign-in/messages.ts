@@ -20,3 +20,23 @@ export function staffPasswordLinkMessage(input: { url: string; name?: string; mi
     note: "Didn't ask for this? You can ignore this email; your password hasn't changed.",
   };
 }
+
+/**
+ * Reset password for buyers, suppliers and members (founder, 19 Nov 2026, A195). No frame draws it (M21); plain
+ * wording, listed in docs/decisions.md (A195) for the founder.
+ */
+export function passwordResetMessage(input: { url: string; name?: string; minutes: number }): Message {
+  return {
+    subject: "Reset your H2 Economy password",
+    preview: `The link works for ${String(input.minutes)} minutes.`,
+    reason: "You're getting this because someone asked to set or reset the password for this email address.",
+    eyebrow: "Your account",
+    headline: "Choose a new password",
+    paragraphs: [
+      `${input.name ? `Hi ${input.name}, open` : "Open"} this link to choose a new password for H2 Economy. The link works for ${String(input.minutes)} minutes and only once.`,
+      "Once it's set, you'll be signed out on your other devices.",
+    ],
+    button: { label: "Choose a new password", href: input.url },
+    note: "Didn't ask for this? You can ignore this email; your password hasn't changed.",
+  };
+}

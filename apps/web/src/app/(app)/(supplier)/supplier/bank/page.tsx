@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { scopeFor } from "@h2india/core/authz";
 import { bankState, type BankAccount } from "@h2india/core/supplier";
 import { formatIstDate, formatIstDateTime } from "@h2india/core/time";
@@ -54,7 +55,11 @@ function Details({
 export default async function BankPage() {
   const page = await requireSupplier("/supplier/bank");
   const s = page.supplier;
-  const state = await bankState(getDb(), scopeFor(page.actor), s.organisationId);
+  const db = getDb();
+  const [state, sms] = await Promise.all([
+    bankState(db, scopeFor(page.actor), s.organisationId),
+    mobileFieldsShown(db),
+  ]);
   const canChange = s.seat.permissions.has("payout_bank.change");
   const change = state.change;
   const step = change?.status === "Held" ? 4 : change ? 3 : 1;
@@ -148,7 +153,7 @@ export default async function BankPage() {
               />
             ) : null}
             {canChange && state.current ? (
-              <CancelChange id={change.id} oldLast4={state.current.accountLast4} company={s.tradeName} />
+              <CancelChange id={change.id} oldLast4={state.current.accountLast4} company={s.tradeName} sms={sms} />
             ) : null}
           </>
         ) : null}

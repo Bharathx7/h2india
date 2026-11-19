@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { can } from "@h2india/core/authz";
 import { grievanceClocks, grievanceDetail } from "@h2india/core/compliance";
 import { GRIEVANCE_TRANSITIONS, type GrievanceStatus } from "@h2india/core/grievances/rules";
@@ -26,7 +27,7 @@ export default async function GrievancePage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const { userId, actor } = await requireOperator("compliance.view", `/admin/compliance/grievances/${id}`);
   const db = getDb();
-  const d = await grievanceDetail(db, actor, id);
+  const [d, showMobile] = await Promise.all([grievanceDetail(db, actor, id), mobileFieldsShown(db)]);
   if (!d) notFound();
   const g = d.grievance;
   const clocks = (await grievanceClocks(db, actor, [g.id])).get(g.id) ?? [];
@@ -73,7 +74,10 @@ export default async function GrievancePage({ params }: { params: Promise<{ id: 
                   ["Page or listing", g.pageUrl ?? ""],
                   ["What happened", g.description],
                   ["Attachments", g.files.length ? `${String(g.files.length)} files` : ""],
-                  ["Raised by", [g.name, g.email, g.mobile ? maskMobile(g.mobile) : null].filter(Boolean).join(" · ")],
+                  [
+                    "Raised by",
+                    [g.name, g.email, showMobile && g.mobile ? maskMobile(g.mobile) : null].filter(Boolean).join(" · "),
+                  ],
                 ] as [string, string][]
               )
                 .filter(([, v]) => v)

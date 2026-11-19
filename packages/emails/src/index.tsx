@@ -37,7 +37,7 @@ import {
   supportReceivedMessage,
   supportRequestMessage,
 } from "./recovery/messages";
-import { staffPasswordLinkMessage } from "./sign-in/messages";
+import { passwordResetMessage, staffPasswordLinkMessage } from "./sign-in/messages";
 import { SignInCode, signInCodeSubject, type SignInCodeProps } from "./sign-in/SignInCode";
 
 export interface RenderedEmail {
@@ -70,6 +70,10 @@ export function renderVerifyEmail(appUrl: string, input: Parameters<typeof verif
 
 export function renderStaffPasswordLink(appUrl: string, input: Parameters<typeof staffPasswordLinkMessage>[0]) {
   return renderNotice(appUrl, staffPasswordLinkMessage(input));
+}
+
+export function renderPasswordResetLink(appUrl: string, input: Parameters<typeof passwordResetMessage>[0]) {
+  return renderNotice(appUrl, passwordResetMessage(input));
 }
 
 export function renderNoAccount(appUrl: string, input: Parameters<typeof noAccountMessage>[0]) {

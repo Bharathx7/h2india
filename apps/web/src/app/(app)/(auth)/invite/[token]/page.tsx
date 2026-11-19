@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { hasPassword } from "@h2india/core/sign-in/passwords";
 import { agreedToTerms, invitationFor } from "@h2india/core/supplier";
 import { Alert, buttonClasses } from "@h2india/ui";
 import type { Metadata } from "next";
@@ -7,7 +8,8 @@ import { AcceptInvite } from "@/supplier/AcceptInvite";
 import { getSession } from "@/server/auth";
 
 // Accept an invitation (Invitation email 673:155), step 8.7: the person signs in with a code sent to the invited
-// email, then joins the company with the role the admin chose.
+// email, then joins the company with the role the admin chose. Since A195 (19 Nov 2026) someone with no password
+// sets one right after accepting (Set your password), then goes to the workspace.
 export const metadata: Metadata = { title: "Join your team · H2 Economy", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -24,13 +26,15 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
         <>
           <h1 className="type-h2">Join {found.company} on H2 Economy</h1>
           <p className="type-body text-body">
-            You&apos;re invited as {found.role}. Sign in with {found.email} to accept.
+            You&apos;re invited as {found.role}. Sign in with {found.email} to accept. New to H2 Economy? Choose
+            &ldquo;Email me a code instead&rdquo; on the sign-in page.
           </p>
           {session ? (
             <AcceptInvite
               token={token}
               workspace={found.workspace}
               needsTerms={!(await agreedToTerms(getDb(), session.user.id))}
+              needsPassword={!(await hasPassword(getDb(), session.user.id))}
             />
           ) : (
             <Link

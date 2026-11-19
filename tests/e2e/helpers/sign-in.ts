@@ -105,11 +105,28 @@ export async function requestCode(page: Page, email: string, opts: { account?: b
   if (opts.account !== false) await ensureAccount(email);
   // Often reached by a link click (a full page load), not page.goto: wait until the form's handlers are attached.
   await hydrated(page);
+  // The buyer, supplier and member pages start with email and password (A195): switch to the code.
+  const instead = page.getByRole("button", { name: "Email me a code instead" });
+  if (await instead.isVisible()) await instead.click();
   const sentAfter = Date.now() - 1000;
   await page.getByLabel(/^(Work )?email$/i).fill(email);
   await page.getByRole("button", { name: "Send code" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   return latestCode(page, email, sentAfter);
+}
+
+/** A password long enough for the rule (SIGN_IN.passwordMinLength), different for every call. */
+export function newPassword(): string {
+  return `Pw-${String(Date.now())}-${String(Math.floor(Math.random() * 1e6))}`;
+}
+
+/** Fills and sends the buyer, supplier or member sign-in page's email and password form (A195). */
+export async function signInWithPassword(page: Page, email: string, password: string): Promise<void> {
+  await hydrated(page);
+  const main = page.getByRole("main");
+  await main.getByLabel(/^(Work )?email$/i).fill(email);
+  await main.getByLabel("Password", { exact: true }).fill(password);
+  await main.getByRole("button", { name: "Sign in", exact: true }).click();
 }
 
 /** Types a code into the six boxes (pasting into the first box fills them all and submits). */

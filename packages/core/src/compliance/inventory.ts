@@ -113,7 +113,16 @@ export const PERSONAL_TABLES: PersonalTable[] = [
   },
   {
     table: "join_drafts",
-    fields: ["email", "mobile", "full_name", "job_role", "terms_accepted_at", "terms_version", "mobile_verified_at"],
+    fields: [
+      "email",
+      "mobile",
+      "full_name",
+      "job_role",
+      "terms_accepted_at",
+      "terms_version",
+      "mobile_verified_at",
+      "password_hash",
+    ],
     notPersonal: ["token_hash"],
     purpose: "Join answers kept until the email is proved",
     basis: "Legitimate use: contract",

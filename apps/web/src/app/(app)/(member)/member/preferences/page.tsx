@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { alertContacts } from "@h2india/core/alerts";
 import { MEMBER_TOPICS, memberPreferences } from "@h2india/core/members";
 import { TOPICS } from "@h2india/core/notify";
@@ -16,7 +17,11 @@ export const dynamic = "force-dynamic";
 export default async function PreferencesPage() {
   const userId = await requireMember("/member/preferences");
   const db = getDb();
-  const [prefs, reach] = await Promise.all([memberPreferences(db, userId), alertContacts(db, userId)]);
+  const [prefs, reach, showMobile] = await Promise.all([
+    memberPreferences(db, userId),
+    alertContacts(db, userId),
+    mobileFieldsShown(db),
+  ]);
   const rows: PreferenceRow[] = MEMBER_TOPICS.map((t) => {
     const topic = TOPICS[t];
     return {
@@ -33,17 +38,19 @@ export default async function PreferencesPage() {
         <p className="type-body-sm text-secondary">Choose what we send you and where it goes.</p>
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <PreferencesForm start={prefs} rows={rows} whatsappReady={Boolean(reach.mobile)} />
+        <PreferencesForm start={prefs} rows={rows} whatsappReady={Boolean(reach.mobile)} showWhatsapp={showMobile} />
         <aside className="flex flex-col gap-3 self-start rounded-card border border-default bg-page p-5">
           <h2 className="type-h4">Where we reach you</h2>
           <div>
             <p className="type-label">Email</p>
             <p className="type-body-sm text-body">{reach.email}</p>
           </div>
-          <div>
-            <p className="type-label">WhatsApp</p>
-            <p className="type-body-sm text-body">{reach.mobile ?? "No confirmed mobile number yet"}</p>
-          </div>
+          {showMobile ? (
+            <div>
+              <p className="type-label">WhatsApp</p>
+              <p className="type-body-sm text-body">{reach.mobile ?? "No confirmed mobile number yet"}</p>
+            </div>
+          ) : null}
           <Link href="/member/security" className="inline-flex items-center gap-1.5 type-label text-link">
             Change in Sign-in and security
             <Icon name="arrow-right" size={16} />

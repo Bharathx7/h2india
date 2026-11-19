@@ -46,6 +46,12 @@ export async function flagNow(ex: Executor, name: AdminFlag): Promise<boolean> {
   return saved[name] ?? isEnabled(name, process.env);
 }
 
+/**
+ * Whether personal mobile numbers and SMS show on forms and screens (`mobileFields`, founder, 19 Nov 2026). Off: every
+ * personal mobile field and SMS choice is hidden and validation ignores it. Business contact phones are not affected.
+ */
+export const mobileFieldsShown = (ex: Executor = getDb()): Promise<boolean> => flagNow(ex, "mobileFields");
+
 let lastRefresh = 0;
 /** Refresh in the background when the last read is older than 30 seconds (for the proxy, which runs on every request). */
 export function refreshFlagsSoon(now = Date.now()) {

@@ -134,14 +134,25 @@ export function ConfirmChange({ id, holdUntil, first }: { id: string; holdUntil:
   );
 }
 
-export function CancelChange({ id, oldLast4, company }: { id: string; oldLast4: string; company: string }) {
+/** `sms` is the `mobileFields` switch (founder, 19 Nov 2026): off, the words don't mention SMS. */
+export function CancelChange({
+  id,
+  oldLast4,
+  company,
+  sms,
+}: {
+  id: string;
+  oldLast4: string;
+  company: string;
+  sms: boolean;
+}) {
   const r = useRun();
   return (
     <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
       <h2 className="type-h4">Didn&apos;t make this change?</h2>
       <p className="type-body-sm text-body">
         Cancel it now and payouts stay with the account ending {oldLast4}. We&apos;ve told all admins at {company} by
-        email and SMS.
+        {sms ? " email and SMS." : " email."}
       </p>
       {r.error ? <Alert tone="error" title={r.error} live /> : null}
       <Button

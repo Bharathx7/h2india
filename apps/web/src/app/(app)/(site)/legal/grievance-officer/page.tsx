@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CLOCKS, type Duration } from "@h2india/config/clocks";
+import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { cx } from "@h2india/ui";
 import { trustDetails } from "@/trust/data";
 import { GrievanceForm, GrievanceLookup } from "@/trust/forms";
@@ -41,7 +42,7 @@ export default async function GrievanceOfficerPage({
         lead="Raise a complaint about content, a listing, privacy or a payment on H2 Economy. Every complaint gets a ticket number you can track."
       />
       <div className={cx(wrap, "flex flex-col gap-6 pt-8 lg:flex-row lg:items-start")}>
-        <GrievanceForm type={sp.type ?? ""} page={page} />
+        <GrievanceForm type={sp.type ?? ""} page={page} showMobile={await mobileFieldsShown()} />
         <aside className="flex flex-col gap-4 lg:w-80 lg:shrink-0">
           <section aria-labelledby="officer" className={cx(card, "flex flex-col gap-2 p-5")}>
             <h2 id="officer" className="type-h4 text-primary">

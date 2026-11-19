@@ -1,10 +1,11 @@
 "use client";
 
 import { formatIstTime, SIGN_IN, SIGN_IN_ERROR } from "@h2india/core/sign-in";
-import { Alert, Button, buttonClasses, FormField, Icon, Input, TextLink } from "@h2india/ui";
+import { Alert, Button, buttonClasses, FormField, Input, TextLink } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode, type SyntheticEvent } from "react";
+import { PasswordInput } from "@/account/PasswordInput";
 import { AUTH_LINKS } from "@/lib/auth-links";
 import { authClient, type SignInErrorDetail } from "@/lib/auth-client";
 import { AuthCard } from "../../AuthCard";
@@ -16,45 +17,6 @@ import { whereNext } from "../actions";
 interface Problem {
   title: string;
   body?: ReactNode;
-}
-
-/** A password box with Show password (the eye toggles; the button says which way). */
-export function PasswordInput({
-  value,
-  onChange,
-  autoComplete,
-  name = "password",
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  autoComplete: "current-password" | "new-password";
-  name?: string;
-}) {
-  const [shown, setShown] = useState(false);
-  return (
-    <Input
-      type={shown ? "text" : "password"}
-      name={name}
-      autoComplete={autoComplete}
-      value={value}
-      onChange={(event) => {
-        onChange(event.target.value);
-      }}
-      trailing={
-        <button
-          type="button"
-          aria-label={shown ? "Hide password" : "Show password"}
-          aria-pressed={shown}
-          onClick={() => {
-            setShown((s) => !s);
-          }}
-          className="flex size-8 cursor-pointer items-center justify-center rounded-control text-icon-secondary hover:bg-subtle"
-        >
-          <Icon name="eye" size={20} />
-        </button>
-      }
-    />
-  );
 }
 
 /** The staff form's words; the test-account sign-in (/sign-in/test) passes its own. */

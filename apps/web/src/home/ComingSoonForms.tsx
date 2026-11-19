@@ -180,7 +180,7 @@ export function EarlyListingForm({ consentText }: { consentText: string }) {
             }}
           />
         </FormField>
-        <FormField label="Mobile" required error={errors.mobile}>
+        <FormField label="Mobile (optional)" error={errors.mobile}>
           <Input
             type="tel"
             placeholder="98765 43210"

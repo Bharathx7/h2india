@@ -1,5 +1,5 @@
 import { parseServerEnv } from "@h2india/config";
-import { renderNoAccount, renderSignInCode, renderStaffPasswordLink } from "@h2india/emails";
+import { renderNoAccount, renderPasswordResetLink, renderSignInCode, renderStaffPasswordLink } from "@h2india/emails";
 import { deliverEmail } from "../notify/channels";
 import { formatIstTime } from "../time";
 import { ACCOUNT_PAGES, SIGN_IN } from "./rules";
@@ -51,6 +51,22 @@ export async function sendStaffPasswordLink(input: { to: string; url: string; na
     event: "account.staff_password_link",
     to: input.to,
     mail: await renderStaffPasswordLink(env.APP_URL, {
+      url: input.url,
+      name: input.name,
+      minutes: SIGN_IN.passwordLinkMinutes,
+    }),
+    security: true,
+  });
+}
+
+/** "Reset your password" for buyers, suppliers and members (A195). Staff get sendStaffPasswordLink instead. */
+export async function sendPasswordResetLink(input: { to: string; url: string; name?: string }): Promise<void> {
+  const env = parseServerEnv();
+  await deliverEmail({
+    template: "email.password_reset",
+    event: "account.password_reset",
+    to: input.to,
+    mail: await renderPasswordResetLink(env.APP_URL, {
       url: input.url,
       name: input.name,
       minutes: SIGN_IN.passwordLinkMinutes,

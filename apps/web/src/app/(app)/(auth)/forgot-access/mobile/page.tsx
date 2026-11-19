@@ -1,9 +1,7 @@
-import type { Metadata } from "next";
-import { MobileFlow } from "./MobileFlow";
+import { redirect } from "next/navigation";
 
-// Changed mobile (Figma 528:293 new number, 528:480 waiting for admin), step 3.5, decision A14.
-export const metadata: Metadata = { title: "Changed mobile · H2 Economy", robots: { index: false } };
-
+// "I changed my mobile number" was removed with the mobile number (founder, 19 Nov 2026, A195; to come back later).
+// Old links return to the Forgot access hub.
 export default function ChangedMobilePage() {
-  return <MobileFlow />;
+  redirect("/forgot-access");
 }
