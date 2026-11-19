@@ -29,7 +29,9 @@ export async function requireSupplier(path: string): Promise<SupplierPage> {
   const db = getDb();
   const actor = await loadActor(db, session.user.id);
   const supplier = await supplierOf(db, actor);
-  if (!supplier) redirect("/for-suppliers");
+  // Signed in without a supplier company: finish (or start) supplier sign-up, the same as buyers (founder QC,
+  // 19 Nov 2026). Join sends people who already have another workspace on to it.
+  if (!supplier) redirect("/join/supplier");
   return { userId: session.user.id, actor, supplier };
 }
 

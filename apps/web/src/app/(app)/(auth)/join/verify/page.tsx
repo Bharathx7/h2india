@@ -21,7 +21,11 @@ export default async function VerifyPage({
       <AuthCard>
         <StatusIcon name="alert-triangle" tone="warning" />
         <h1 className="type-h2 text-primary">This link has expired</h1>
-        <p className="type-body text-body">Links work for 24 hours. We&apos;ll send a new one to {email}.</p>
+        <p className="type-body text-body">
+          {draft?.email
+            ? `Links work for 24 hours and only once. We'll send a new one to ${email}.`
+            : "Links work for 24 hours and only once. Start your sign-up again on this device to get a new one."}
+        </p>
         <VerifyActions
           mode="expired"
           canSend={Boolean(draft?.email)}

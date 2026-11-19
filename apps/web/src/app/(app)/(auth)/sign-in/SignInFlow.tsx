@@ -30,6 +30,12 @@ interface Problem {
 }
 
 /** Each account page's words (public QC 2, 16 Nov 2026): email only, no Google. */
+const CREATE_WORDS: Record<AccountKind, string> = {
+  buyer: "Create a buyer account",
+  supplier: "Create a supplier account",
+  member: "Join as a member",
+};
+
 const AUDIENCE: Record<AccountKind, { title: string; lead: string; label: string; join: string; other: string }> = {
   buyer: {
     title: "Buyer sign in",
@@ -271,16 +277,9 @@ export function SignInFlow({
           Check your email
         </h1>
         <p className="type-body text-body">
-          {audience ? (
-            <>
-              We&apos;ve sent an email to {email.trim()}. If it has an H2 Economy account, the email holds a{" "}
-              {SIGN_IN.codeLength}-digit code that expires in {SIGN_IN.codeMinutes} minutes.
-            </>
-          ) : (
-            <>
-              We sent a {SIGN_IN.codeLength}-digit code to {email.trim()}. It expires in {SIGN_IN.codeMinutes} minutes.
-            </>
-          )}
+          We&apos;ve sent an email to {email.trim()}. If it has an H2 Economy account, the email holds a{" "}
+          {SIGN_IN.codeLength}-digit code that expires in {SIGN_IN.codeMinutes} minutes. If it doesn&apos;t, the email
+          tells you how to create one.
         </p>
         <form
           className="flex flex-col gap-5"
@@ -340,14 +339,21 @@ export function SignInFlow({
             <Link href={AUTH_LINKS.forgotAccess}>Trouble signing in?</Link>
           </TextLink>
         )}
-        {audience && words ? (
+        {/* No account (founder QC, 19 Nov 2026): never say whether an email has an account, but always show the way
+            to create one, the person's own kind first. */}
+        <div className="flex flex-col gap-2 rounded-card border border-default bg-subtle p-4">
+          <p className="type-label text-primary">No email after 2 minutes?</p>
           <p className="type-body-sm text-body">
-            No email? You may not have an account yet.{" "}
-            <TextLink asChild showIcon={false}>
-              <Link href={ACCOUNT_PAGES[audience].join}>{words.join}</Link>
-            </TextLink>
+            Check your spam folder. If you don&apos;t have an account yet, create one. It&apos;s free.
           </p>
-        ) : null}
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {[...(audience ? [audience] : []), ...ACCOUNT_KINDS.filter((k) => k !== audience)].map((k) => (
+              <TextLink key={k} asChild showIcon={false}>
+                <Link href={ACCOUNT_PAGES[k].join}>{CREATE_WORDS[k]}</Link>
+              </TextLink>
+            ))}
+          </div>
+        </div>
       </AuthCard>
     );
   }

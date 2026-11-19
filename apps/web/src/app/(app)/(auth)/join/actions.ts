@@ -31,7 +31,7 @@ import { normaliseEmail } from "@h2india/core/sign-in";
 import { headers } from "next/headers";
 import { auth, getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
-import { clearDraftCookie, draftToken, ensureDraft, workspaceFor } from "@/server/join";
+import { adoptDraft, clearDraftCookie, draftToken, ensureDraft, workspaceFor } from "@/server/join";
 
 import { currentTermsVersion } from "@/trust/terms";
 
@@ -49,6 +49,9 @@ const fail = (code: string, extra: Partial<Extract<Result, { ok: false }>> = {})
 
 export async function choosePath(path: JoinPath): Promise<Result> {
   const token = await ensureDraft();
+  // Coming back to the same sign-up page (Change email, a failed Continue) keeps the company already picked.
+  const draft = await readDraft(token);
+  if (draft?.path === path) return { ok: true };
   await updateDraft(token, { path, organisationId: null });
   return { ok: true };
 }
@@ -170,13 +173,22 @@ export async function submitDetails(details: Details): Promise<Result<string>> {
     termsAccepted: true,
     termsVersion: await currentTermsVersion(),
   });
-  return sendLink(email);
+  return sendLink(email, token);
 }
 
-async function sendLink(email: string): Promise<Result<string>> {
+/**
+ * The confirm link carries the draft token, so it works in any browser or on a phone, not only the one that filled
+ * in the form (founder QC, 19 Nov 2026: links opened elsewhere fell back to /join). It is applied only to the
+ * account whose email the draft names, which the link itself proves.
+ */
+async function sendLink(email: string, token: string): Promise<Result<string>> {
   try {
     await auth.api.signInMagicLink({
-      body: { email, callbackURL: "/join/confirmed", errorCallbackURL: "/join/verify?expired=1" },
+      body: {
+        email,
+        callbackURL: `/join/confirmed?d=${encodeURIComponent(token)}`,
+        errorCallbackURL: "/join/verify?expired=1",
+      },
       headers: await headers(),
     });
     return { ok: true, value: "/join/verify" };
@@ -189,17 +201,44 @@ async function sendLink(email: string): Promise<Result<string>> {
 
 /** "Resend email" and "Send a new link" on the Verify email screens. */
 export async function resendLink(): Promise<Result<string>> {
-  const draft = await readDraft(await draftToken());
-  if (!draft?.email) return fail("NO_EMAIL");
-  return sendLink(draft.email);
+  const token = await draftToken();
+  const draft = await readDraft(token);
+  if (!token || !draft?.email) return fail("NO_EMAIL");
+  return sendLink(draft.email, token);
 }
 
-/** "Continue" on Email confirmed. */
-export async function continueAfterConfirm(): Promise<Result<string>> {
+/**
+ * "Continue" on Email confirmed. Uses the draft named by the link first, then the browser's own Join cookie. If
+ * neither can be applied, someone who already finished Join goes on to where they left off; anyone else goes back
+ * to their own sign-up page with their answers kept, never to the shared /join choice.
+ */
+export async function continueAfterConfirm(linkToken?: string): Promise<Result<string>> {
   const session = await getSession();
-  const token = await draftToken();
-  if (!session || !token) return fail("NOT_SIGNED_IN");
-  return nextAfterDetails(token, { id: session.user.id, email: session.user.email });
+  if (!session) return fail("NOT_SIGNED_IN", { message: "/join/verify?expired=1" });
+  const user = { id: session.user.id, email: session.user.email };
+  const cookieToken = await draftToken();
+  const candidates = [...new Set([linkToken, cookieToken].filter((t): t is string => Boolean(t)))];
+  let path: JoinPath | null = null;
+  for (const token of candidates) {
+    const draft = await readDraft(token);
+    if (!draft) continue;
+    path ??= draft.path;
+    const sameEmail = !draft.email || normaliseEmail(draft.email) === normaliseEmail(user.email);
+    if (!sameEmail) continue;
+    if (token !== cookieToken) await adoptDraft(token);
+    const next = await nextAfterDetails(token, user);
+    if (next.ok) return next;
+  }
+  // The draft is gone (Join already finished, or the link was used before): carry on from the account itself.
+  const memberships = await membershipsOf(getDb(), user.id);
+  if (memberships[0]) return { ok: true, value: workspaceFor(memberships[0].kind) };
+  const profile = await joinProfile(user.id);
+  if (profile?.profileType === "member") return { ok: true, value: "/member" };
+  if (profile?.profileType === "buyer" || profile?.profileType === "supplier") {
+    // Their own sign-up page sends them on: to a pending join request, or to company details.
+    return { ok: true, value: `/join/${profile.profileType}` };
+  }
+  return fail("INCOMPLETE", { message: path ? `/join/${path}` : "/join" });
 }
 
 export interface CompanyInput {
