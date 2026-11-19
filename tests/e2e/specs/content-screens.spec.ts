@@ -206,3 +206,56 @@ test("an Editor-in-chief archives a glossary term and restores it", async ({ pag
   await expect(editor.getByRole("button", { name: "Archive" })).toHaveCount(0);
   await other.close();
 });
+
+test("a Super admin deletes an archived record permanently; an Editor-in-chief can't (A198)", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(150_000);
+  await signInOperator(page, "Super admin");
+  const term = `Delete check ${String(Date.now())}`;
+  await page.goto("/admin/content/glossary/new");
+  await page.getByLabel("Term").fill(term);
+  await page.getByLabel("Short definition").fill("A term made by the delete test.");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/glossary\/\d+$/, { timeout: 20_000 });
+  const id = Number(/\/glossary\/(\d+)$/.exec(page.url())?.[1]);
+
+  // Archived first; deleting permanently is done from the Archived list.
+  await page.getByRole("button", { name: "Archive" }).click();
+  await page.getByRole("dialog").getByLabel(/Why/).fill("Made by mistake.");
+  await page.getByRole("dialog").getByRole("button", { name: "Archive" }).click();
+  await expect(page).toHaveURL(/\/admin\/content\/glossary$/, { timeout: 20_000 });
+
+  // An Editor-in-chief sees Restore but not Delete permanently.
+  const other = await backOfficeContext(browser);
+  const chief = await other.newPage();
+  await signInOperator(chief, "Editor-in-chief");
+  await chief.goto("/admin/content/glossary?view=archived");
+  await expect(chief.getByRole("button", { name: `Restore ${term}` })).toBeVisible();
+  await expect(chief.getByRole("button", { name: `Delete permanently ${term}` })).toHaveCount(0);
+  await other.close();
+
+  await page.goto("/admin/content/glossary?view=archived");
+  await page.getByRole("button", { name: `Delete permanently ${term}` }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel(/Why/).fill("Made by mistake; never published.");
+  // The wrong name is refused.
+  await dialog.getByLabel(/to confirm/).fill("something else");
+  await dialog.getByRole("button", { name: "Delete permanently" }).click();
+  await expect(dialog.getByText("Type the name exactly as shown to confirm.")).toBeVisible();
+  await dialog.getByLabel(/to confirm/).fill(term);
+  await dialog.getByRole("button", { name: "Delete permanently" }).click();
+
+  const gone = async () =>
+    withDb(async (db) => (await db.query(`SELECT 1 FROM cms.glossary WHERE id = $1`, [id])).rowCount);
+  await expect.poll(gone, { timeout: 20_000 }).toBe(0);
+  const audit = await withDb(async (db) => {
+    const r = await db.query<{ reason: string | null }>(
+      `SELECT reason FROM core.audit_log WHERE action = 'content.delete' AND resource_type = 'glossary' AND resource_id = $1`,
+      [String(id)],
+    );
+    return r.rows.map((x) => x.reason);
+  });
+  expect(audit).toEqual(["Made by mistake; never published."]);
+});

@@ -7,7 +7,7 @@ import { contentType, listRecords } from "@/admin/cms/records";
 import { VERIFIED_SLUGS, NO_CREATE_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
-import { RestoreRecord } from "@/admin/cms/Archive";
+import { PurgeRecord, RestoreRecord } from "@/admin/cms/Archive";
 import { isArchivable } from "@/cms/archive";
 import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
 import { AdminShell, requireOperator } from "@/admin/shell";
@@ -369,9 +369,14 @@ export default async function LibraryPage({
                   <td className="px-2 py-3 type-body-sm">{formatIstDateTime(new Date(r.updatedAt))}</td>
                   <td className="px-4 py-3 text-right">
                     {archived ? (
-                      cms.can("content.delete") ? (
-                        <RestoreRecord slug={collection} id={r.id} name={r.title} />
-                      ) : null
+                      <span className="inline-flex items-start justify-end gap-2">
+                        {cms.can("content.delete") ? (
+                          <RestoreRecord slug={collection} id={r.id} name={r.title} />
+                        ) : null}
+                        {cms.can("content.purge") ? (
+                          <PurgeRecord slug={collection} id={r.id} name={r.title} size="sm" />
+                        ) : null}
+                      </span>
                     ) : (
                       <Link
                         href={`/admin/content/${collection}/${String(r.id)}`}

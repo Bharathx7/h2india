@@ -31,6 +31,8 @@ export const OPERATOR_EXTRA = {
   "roles.manage": "Change operator roles and who holds them (the playbook keeps this to Super admin)",
   "content.publish":
     "Publish, schedule and correct articles and records (an Editor-in-chief can; a Content editor cannot)",
+  // A198 (founder, 19 Nov 2026), migration 0075.
+  "content.purge": "Delete content permanently (Super admin only; it can't be undone)",
 } as const;
 
 export const COMPANY_PERMISSIONS = {
@@ -154,7 +156,11 @@ export const ROLES: RoleSeed[] = [
     scope: "operator",
     name: "Super admin",
     description: "Everything, including roles.",
-    permissions: grid(Object.fromEntries(OPERATOR_AREAS.map((a) => [a, ALL])), ["content.publish", "roles.manage"]),
+    permissions: grid(Object.fromEntries(OPERATOR_AREAS.map((a) => [a, ALL])), [
+      "content.publish",
+      "content.purge",
+      "roles.manage",
+    ]),
   },
   {
     scope: "operator",

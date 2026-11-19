@@ -23,6 +23,7 @@ import type { Action } from "@/cms/workflow";
 import { moveArticleAction, saveArticleAction } from "./actions";
 import type { ArticleForm } from "./articles";
 import type { BodyBlock } from "./body";
+import { PurgeRecord } from "./Archive";
 import { LiveExplainer } from "./LiveExplainer";
 import { youtubeId, youtubeThumbnail } from "@/lib/youtube";
 
@@ -465,12 +466,15 @@ export function ArticleEditor({
   choices,
   states,
   canPublish,
+  canPurge = false,
 }: {
   initial: ArticleForm;
   meta: EditorMeta | null;
   choices: { topics: Option[]; tags: Option[]; authors: Option[]; editors: Option[]; media: Option[] };
   states: { value: string; label: string }[];
   canPublish: boolean;
+  /** A Super admin: Delete permanently once the article is off the site (A198). */
+  canPurge?: boolean;
 }) {
   const router = useRouter();
   const [form, setForm] = useState(initial);
@@ -582,6 +586,14 @@ export function ArticleEditor({
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {meta && canPurge && status !== "Published" ? (
+              <PurgeRecord
+                slug="articles"
+                id={meta.id}
+                name={initial.title || "Untitled article"}
+                after="/admin/content?tab=articles"
+              />
+            ) : null}
             {meta?.slug && status === "Published" ? (
               <Link href={`/news/${meta.slug}`} target="_blank" className={buttonClasses({ variant: "ghost" })}>
                 <Icon name="eye" size={16} />

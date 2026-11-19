@@ -61,6 +61,7 @@ export default async function EditRecordPage({ params }: { params: Promise<{ col
         canEdit={cms.can("content.edit") && !READ_ONLY_SLUGS.includes(collection)}
         verify={VERIFIED_SLUGS.includes(collection)}
         canArchive={cms.can("content.delete")}
+        canPurge={cms.can("content.purge")}
       />
     </AdminShell>
   );

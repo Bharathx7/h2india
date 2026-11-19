@@ -83,13 +83,19 @@ const ids = (v: unknown): number[] =>
 const s = (v: unknown) => (typeof v === "string" ? v : "");
 
 /** The signed-in operator as the workflow sees them: their content permissions and their editor record. */
-export async function editorActor(): Promise<{ actor: WorkflowActor; canEdit: boolean; canPublish: boolean } | null> {
+export async function editorActor(): Promise<{
+  actor: WorkflowActor;
+  canEdit: boolean;
+  canPublish: boolean;
+  canPurge: boolean;
+} | null> {
   const cms = await cmsSession();
   if (!cms) return null;
   return {
     actor: { editorId: cms.user.id, h2UserId: cms.userId, permissions: cms.user.permissions },
     canEdit: cms.can("content.edit"),
     canPublish: cms.can("content.publish"),
+    canPurge: cms.can("content.purge"),
   };
 }
 

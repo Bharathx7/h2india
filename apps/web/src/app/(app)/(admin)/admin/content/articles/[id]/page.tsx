@@ -25,6 +25,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
         choices={choices}
         states={STATE_OPTIONS.map((s) => ({ value: s.value, label: s.label }))}
         canPublish={who.canPublish}
+        canPurge={who.canPurge}
       />
     </AdminShell>
   );
