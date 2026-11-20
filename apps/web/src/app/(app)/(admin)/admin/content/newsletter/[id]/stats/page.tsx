@@ -2,26 +2,18 @@ import config from "@payload-config";
 import { getDb } from "@h2india/core";
 import { sendStats } from "@h2india/core/newsletter/sends";
 import { formatIstDateTime } from "@h2india/core/time";
-import { buttonClasses, cx, EmptyState, Icon, StatusBadge } from "@h2india/ui";
+import { buttonClasses, EmptyState, Icon, StatusBadge } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
-import { AdminShell, requireOperator } from "@/admin/shell";
+import { ContentFrame, ContentPageHead } from "@/admin/cms/ContentFrame";
+import { requireOperator } from "@/admin/shell";
 
 // Newsletter stats (647:660), step 11.3: how an issue did. Sent and delivered come from our deliveries; opens, clicks
 // and link clicks only as the email provider reports them (M6), so until then they show "—". Counts only.
 export const metadata: Metadata = { title: "Newsletter stats · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
-
-const CONTENT_TABS = [
-  { label: "Articles", href: "/admin/content?tab=articles" },
-  { label: "Records", href: "/admin/content?tab=records" },
-  { label: "Newsletter", href: "/admin/content?tab=newsletter" },
-  { label: "Media", href: "/admin/content/media" },
-  { label: "Authors", href: "/admin/content/authors" },
-  { label: "Data quality", href: "/admin/content?tab=quality" },
-];
 
 const n = (x: number) => x.toLocaleString("en-IN");
 const pct = (a: number, b: number) => (b ? `${(Math.round((a / b) * 1000) / 10).toFixed(1)}%` : "—");
@@ -63,28 +55,12 @@ export default async function NewsletterStatsPage({ params }: { params: Promise<
     : [];
 
   return (
-    <AdminShell userId={userId} current="/admin/content" title="Content">
-      <div className="flex flex-col gap-1">
-        <h1 className="type-h2">Content</h1>
-        <p className="type-body-sm text-secondary">
-          How {issue.title} did, from the email provider&apos;s delivery and click data.
-        </p>
-      </div>
-      <nav aria-label="Content" className="flex gap-6 overflow-x-auto border-b border-default">
-        {CONTENT_TABS.map((t) => (
-          <Link
-            key={t.label}
-            href={t.href}
-            aria-current={t.label === "Newsletter" ? "page" : undefined}
-            className={cx(
-              "-mb-px border-b-2 py-3 whitespace-nowrap type-label",
-              t.label === "Newsletter" ? "border-inverse" : "border-transparent text-secondary",
-            )}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
+    <ContentFrame userId={userId} current="newsletter">
+      <ContentPageHead
+        back={{ href: "/admin/content?tab=newsletter", label: "Newsletter" }}
+        title="Issue results"
+        intro={<>How {issue.title} did, from the email provider&apos;s delivery and click data.</>}
+      />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="type-h3">{issue.title}</h2>
@@ -137,6 +113,6 @@ export default async function NewsletterStatsPage({ params }: { params: Promise<
       <p className="type-caption text-secondary">
         Opens can be under-counted when readers block images. Clicks are the more reliable signal.
       </p>
-    </AdminShell>
+    </ContentFrame>
   );
 }

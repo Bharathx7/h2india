@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cmsSession } from "@/admin/cms/session";
-import { AdminShell, requireOperator } from "@/admin/shell";
+import { ContentFrame } from "@/admin/cms/ContentFrame";
+import { requireOperator } from "@/admin/shell";
 import { publishingCalendar } from "@/cms/workflow";
 import { ARTICLE_TYPES } from "@/cms/types";
 
@@ -40,12 +41,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const today = istDay(new Date());
 
   return (
-    <AdminShell userId={userId} current="/admin/content" title="Content">
+    <ContentFrame userId={userId} current="calendar">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Link href="/admin/content?tab=articles" className="inline-flex items-center gap-1 type-label text-secondary">
+          <Link href="/admin/content" className="inline-flex items-center gap-1 type-label text-secondary">
             <Icon name="arrow-left" size={16} />
-            Content
+            Content home
           </Link>
           <h1 className="type-h2">Publishing calendar</h1>
           <p className="type-body-sm text-secondary">
@@ -139,6 +140,6 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           </div>
         )}
       </section>
-    </AdminShell>
+    </ContentFrame>
   );
 }

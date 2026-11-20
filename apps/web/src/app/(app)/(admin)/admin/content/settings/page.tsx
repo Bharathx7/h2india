@@ -1,11 +1,12 @@
-import { buttonClasses, Icon } from "@h2india/ui";
+import { buttonClasses } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { settingType } from "@/admin/cms/records";
 import { SETTING_SLUGS } from "@/admin/cms/registry";
 import { cmsSession } from "@/admin/cms/session";
-import { AdminShell, requireOperator } from "@/admin/shell";
+import { ContentFrame, ContentPageHead } from "@/admin/cms/ContentFrame";
+import { requireOperator } from "@/admin/shell";
 
 // Site settings (step 4.6): the single documents behind the home page, company details, pricing, tracker pages and
 // maintenance notice.
@@ -18,17 +19,12 @@ export default async function SettingsListPage() {
   if (!cms) notFound();
   const items = SETTING_SLUGS.map((s) => settingType(cms.payload, s)).filter((x) => x !== null);
   return (
-    <AdminShell userId={userId} current="/admin/content" title="Content">
-      <div className="flex flex-col gap-1">
-        <Link href="/admin/content?tab=records" className="inline-flex items-center gap-1 type-label text-secondary">
-          <Icon name="arrow-left" size={16} />
-          Content
-        </Link>
-        <h1 className="type-h2">Site settings</h1>
-        <p className="type-body-sm text-secondary">
-          Words and figures used across public pages. Every change is logged.
-        </p>
-      </div>
+    <ContentFrame userId={userId} current="site">
+      <ContentPageHead
+        back={{ href: "/admin/content?section=site", label: "Site pages and settings" }}
+        title="Site settings"
+        intro="Words and figures used across public pages. Every change is logged."
+      />
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((s) => (
           <li
@@ -45,6 +41,6 @@ export default async function SettingsListPage() {
           </li>
         ))}
       </ul>
-    </AdminShell>
+    </ContentFrame>
   );
 }

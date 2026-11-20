@@ -9,8 +9,9 @@ import { cmsSession } from "@/admin/cms/session";
 import { ContentUpload } from "@/admin/cms/Upload";
 import { PurgeRecord, RestoreRecord } from "@/admin/cms/Archive";
 import { isArchivable } from "@/cms/archive";
-import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
-import { AdminShell, requireOperator } from "@/admin/shell";
+import { ContentFrame, ContentPageHead } from "@/admin/cms/ContentFrame";
+import { describeType, sectionOf } from "@/admin/cms/sections";
+import { requireOperator } from "@/admin/shell";
 import { ListPager } from "@/components/ListPager";
 import { pageRequest, pagingQuery } from "@/lib/paging";
 
@@ -52,8 +53,8 @@ export default async function LibraryPage({
     );
   }
   const verified = VERIFIED_SLUGS.includes(collection);
+  const section = sectionOf(collection);
   const gallery = type.upload && collection === "media";
-  const tabbed = collection === "media" || collection === "authors";
   // Authors (649:730): how many articles each has written.
   const articleCounts = new Map<number, number>();
   const people = new Map<number, { title: string | null; organisation: string | null; kind: string }>();
@@ -84,50 +85,26 @@ export default async function LibraryPage({
   }
 
   return (
-    <AdminShell userId={userId} current="/admin/content" title="Content">
-      {tabbed ? (
-        <>
-          <ContentHeader
-            intro={
-              collection === "media"
-                ? "Images used across H2 Economy. Every image needs alt text before it can be used."
-                : "Everyone who writes for H2 Economy. Readers see the author under the article."
-            }
-            actions={
-              collection === "authors" && cms.can("content.edit") ? (
-                <Link href="/admin/content/authors/new" className={buttonClasses({})}>
-                  <Icon name="plus" size={16} />
-                  Add author
-                </Link>
-              ) : null
-            }
-          />
-          <ContentTabs
-            current={collection === "media" ? "media" : "authors"}
-            counts={await contentCounts(cms.payload)}
-          />
-        </>
-      ) : (
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <Link
-              href="/admin/content?tab=records"
-              className="inline-flex items-center gap-1 type-label text-secondary"
-            >
-              <Icon name="arrow-left" size={16} />
-              Content · Records
-            </Link>
-            <h1 className="type-h2">{type.plural}</h1>
-            <p className="type-body-sm text-secondary">{list.total.toLocaleString("en-IN")} in all</p>
-          </div>
-          {cms.can("content.edit") && !type.upload && !NO_CREATE_SLUGS.includes(collection) ? (
+    <ContentFrame userId={userId} current={section?.id}>
+      <ContentPageHead
+        back={
+          section ? { href: section.href, label: section.label } : { href: "/admin/content", label: "Content home" }
+        }
+        title={type.plural}
+        intro={
+          <>
+            {describeType(collection) ?? null} {list.total.toLocaleString("en-IN")} in all.
+          </>
+        }
+        actions={
+          cms.can("content.edit") && !type.upload && !NO_CREATE_SLUGS.includes(collection) ? (
             <Link href={`/admin/content/${collection}/new`} className={buttonClasses({})}>
               <Icon name="plus" size={16} />
-              New {type.singular.toLowerCase()}
+              {collection === "authors" ? "Add author" : `New ${type.singular.toLowerCase()}`}
             </Link>
-          ) : null}
-        </div>
-      )}
+          ) : null
+        }
+      />
 
       {type.upload && cms.can("content.edit") ? (
         <ContentUpload
@@ -396,6 +373,6 @@ export default async function LibraryPage({
       {list.rows.length ? (
         <ListPager paged={{ page: list.page, perPage: req.perPage, total: list.total }} query={query} />
       ) : null}
-    </AdminShell>
+    </ContentFrame>
   );
 }

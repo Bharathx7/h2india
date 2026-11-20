@@ -7,16 +7,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getPayload } from "payload";
 import { MarkVerified } from "@/admin/content/Controls";
-import { AdminShell, requireOperator } from "@/admin/shell";
+import { requireOperator } from "@/admin/shell";
 import { possibleUpdates, RED_DAYS, STALE_DAYS, staleRecords } from "@/cms/records/quality";
 import { ArticlesLibrary } from "@/admin/cms/ArticlesLibrary";
-import { ContentHeader, ContentTabs, contentCounts } from "@/admin/cms/ContentTabs";
-import { CONTENT_GROUPS } from "@/admin/cms/registry";
+import { ContentFrame, ContentPageHead, type ContentPlace } from "@/admin/cms/ContentFrame";
+import { AllContent, ContentHome, SearchResults, SectionView } from "@/admin/cms/ContentViews";
+import { sectionById } from "@/admin/cms/sections";
+import { cmsSession } from "@/admin/cms/session";
+import { notFound } from "next/navigation";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Content (step 11.3): Articles, Records, Newsletter (647:8), Media, Authors and Data quality (646:9, 646:733).
 // Articles (638:8, 642:326), records, media (649:8) and authors (649:730) open the native editors.
+// Founder (20 Nov 2026: "too confusing"): /admin/content opens on a content home (needs attention, create, recently
+// changed, search), with a side menu of plain-language sections; ?section= opens one section and ?tab=records shows
+// every section. The Articles, Newsletter and Data quality views are unchanged inside the new frame.
 export const metadata: Metadata = { title: "Content · H2 Economy admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
@@ -41,18 +47,44 @@ export default async function ContentPage({
     sort?: string;
     page?: string;
     perPage?: string;
+    section?: string;
   }>;
 }) {
   const sp = await searchParams;
   const { userId } = await requireOperator("content.view", "/admin/content");
-  const tab = (["articles", "records", "newsletter", "quality"] as const).find((t) => t === sp.tab) ?? "quality";
+  const tab = (["articles", "records", "newsletter", "quality"] as const).find((t) => t === sp.tab);
+  const section = sectionById(sp.section);
+  if (!tab) {
+    const cms = await cmsSession();
+    if (!cms) notFound();
+    const q = sp.q?.trim() ?? "";
+    // A section that is really a tab (Articles, Newsletter) opens that tab's address.
+    const place: ContentPlace = section ? section.id : "home";
+    return (
+      <ContentFrame userId={userId} current={place}>
+        {section && section.types.length ? (
+          <SectionView cms={cms} section={section} />
+        ) : q ? (
+          <SearchResults cms={cms} q={q} />
+        ) : (
+          <ContentHome cms={cms} />
+        )}
+      </ContentFrame>
+    );
+  }
+  if (tab === "records") {
+    const cms = await cmsSession();
+    if (!cms) notFound();
+    return (
+      <ContentFrame userId={userId} current={undefined}>
+        <AllContent cms={cms} />
+      </ContentFrame>
+    );
+  }
   const payload = await getPayload({ config });
   const db = getDb();
-  const [counts, stale, updates] = await Promise.all([
-    contentCounts(payload),
-    staleRecords(payload),
-    possibleUpdates(payload),
-  ]);
+  const [stale, updates] =
+    tab === "quality" ? await Promise.all([staleRecords(payload), possibleUpdates(payload)]) : [[], []];
 
   let body: React.ReactNode;
   if (tab === "articles") {
@@ -187,7 +219,7 @@ export default async function ContentPage({
         </p>
       </>
     );
-  } else if (tab === "newsletter") {
+  } else {
     const [all, sends, audience] = await Promise.all([
       payload.find({ collection: "newsletter-issues", sort: "-number", limit: 1000, depth: 0, overrideAccess: true }),
       listSends(db),
@@ -308,86 +340,45 @@ export default async function ContentPage({
         <p className="type-caption text-secondary">Opens and clicks show only as the email provider reports them.</p>
       </>
     );
-  } else {
-    const groups = await Promise.all(
-      CONTENT_GROUPS.map(async (g) => ({
-        label: g.label,
-        items: await Promise.all(
-          g.slugs.map(async (slug) => ({
-            slug,
-            label: payload.collections[slug].config.labels.plural as string,
-            count: (await payload.count({ collection: slug, overrideAccess: true })).totalDocs,
-          })),
-        ),
-      })),
-    );
-    body = (
-      <>
-        {groups.map((g) => (
-          <section key={g.label} className="flex flex-col gap-3">
-            <h2 className="type-h5">{g.label}</h2>
-            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {g.items.map((c) => (
-                <li key={c.slug}>
-                  <Link
-                    href={`/admin/content/${c.slug}`}
-                    className="flex items-center justify-between gap-3 rounded-card border border-default bg-page p-4 hover:border-focus"
-                  >
-                    <span className="type-label">{c.label}</span>
-                    <span className="type-mono text-secondary">{c.count.toLocaleString("en-IN")}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-        <section className="flex flex-col gap-3">
-          <h2 className="type-h5">Site settings</h2>
-          <Link
-            href="/admin/content/settings"
-            className="flex w-fit items-center gap-2 rounded-card border border-default bg-page p-4 type-label hover:border-focus"
-          >
-            <Icon name="sliders" size={16} />
-            Home figures, company details, pricing, tracker pages and more
-          </Link>
-        </section>
-      </>
-    );
   }
 
-  return (
-    <AdminShell userId={userId} current="/admin/content" title="Content">
-      <ContentHeader
-        intro={
-          tab === "quality"
-            ? `Records nobody has checked for ${String(STALE_DAYS)} days or more, and changes spotted on official sources. Verify against the source, or edit if something changed.`
-            : tab === "newsletter"
-              ? "H2 Economy Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
-              : "Articles and structured records. Everything is reviewed before it's published, and every published piece keeps a corrections log."
-        }
+  const head =
+    tab === "quality" ? (
+      <ContentPageHead
+        back={{ href: "/admin/content", label: "Content home" }}
+        title="Data quality"
+        intro={`Records nobody has checked for ${String(STALE_DAYS)} days or more, and changes spotted on official sources. Verify against the source, or edit if something changed.`}
+      />
+    ) : tab === "newsletter" ? (
+      <ContentPageHead
+        back={{ href: "/admin/content", label: "Content home" }}
+        title="Newsletter"
+        intro="H2 Economy Weekly and special editions. Build from auto-filled sections, test, then schedule in IST."
         actions={
-          tab === "newsletter" ? (
-            <Link href="/admin/content/newsletter-issues/new" className={buttonClasses({})}>
-              <Icon name="plus" size={16} />
-              New issue
-            </Link>
-          ) : (
-            <>
-              {/* Records are added from their own list (each has New); this opens the list of record types. */}
-              <Link href="/admin/content?tab=records" className={buttonClasses({ variant: "outline" })}>
-                <Icon name="folder" size={16} />
-                Records
-              </Link>
-              <Link href="/admin/content/articles/new" className={buttonClasses({})}>
-                <Icon name="plus" size={16} />
-                New article
-              </Link>
-            </>
-          )
+          <Link href="/admin/content/newsletter-issues/new" className={buttonClasses({})}>
+            <Icon name="plus" size={16} />
+            New issue
+          </Link>
         }
       />
-      <ContentTabs current={tab} counts={counts} />
+    ) : (
+      <ContentPageHead
+        back={{ href: "/admin/content", label: "Content home" }}
+        title="Articles"
+        intro="News, insights, press releases and sponsored posts. Every article is reviewed before it's published, and a published one keeps a corrections log."
+        actions={
+          <Link href="/admin/content/articles/new" className={buttonClasses({})}>
+            <Icon name="plus" size={16} />
+            New article
+          </Link>
+        }
+      />
+    );
+
+  return (
+    <ContentFrame userId={userId} current={tab}>
+      {head}
       {body}
-    </AdminShell>
+    </ContentFrame>
   );
 }
