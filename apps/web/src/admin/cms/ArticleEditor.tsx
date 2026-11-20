@@ -18,7 +18,7 @@ import {
 } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { Action } from "@/cms/workflow";
 import { moveArticleAction, saveArticleAction } from "./actions";
 import type { ArticleForm } from "./articles";
@@ -26,6 +26,7 @@ import type { BodyBlock } from "./body";
 import { PurgeRecord } from "./Archive";
 import { LiveExplainer } from "./LiveExplainer";
 import { youtubeId, youtubeThumbnail } from "@/lib/youtube";
+import { articleChecklist, bodyWords, missingForReview, nextStep } from "./guide";
 
 // The article editor in the H2 Economy back office (step 4.6; Doc 1 §11.4 "CMS editors: Article editor"): blocks,
 // required sources, SEO panel, the workflow Draft → In review → Legal check → Scheduled → Published, and the
@@ -491,11 +492,28 @@ export function ArticleEditor({
 
   const status = meta?.workflow ?? "Draft";
   const legal = ALWAYS_LEGAL.includes(form.type) || form.legal.flagged;
-  const words = form.body
-    .map((b) => ("text" in b ? b.text : "items" in b ? JSON.stringify(b.items) : ""))
-    .join(" ")
-    .split(/\s+/)
-    .filter(Boolean).length;
+  const words = bodyWords(form);
+  const checklist = articleChecklist(form);
+  const next = nextStep({
+    status,
+    saved: Boolean(meta),
+    type: form.type,
+    legalFlagged: form.legal.flagged,
+    legalPassed: Boolean(meta?.legalPassed),
+    canPublish,
+  });
+
+  // Unsaved changes: the browser asks before leaving the page (founder, 20 Nov 2026).
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+    };
+  }, [dirty]);
 
   const save = (then?: (id: number) => Promise<{ ok: boolean; error?: string }>) => {
     setError("");
@@ -615,6 +633,13 @@ export function ArticleEditor({
                 variant={b.variant ?? "primary"}
                 disabled={pending}
                 onClick={() => {
+                  // Submit for review lists what is still needed instead of sending an unfinished piece.
+                  const missing = b.action === "submit" ? missingForReview(form) : [];
+                  if (missing.length) {
+                    setNotice("");
+                    setError(`Before you submit, add: ${missing.join(", ")}.`);
+                    return;
+                  }
                   act(b.action);
                 }}
               >
@@ -651,6 +676,44 @@ export function ArticleEditor({
           );
         })}
       </ol>
+
+      <section
+        aria-labelledby="next-step"
+        className="grid grid-cols-1 gap-4 rounded-card border border-default bg-mint px-5 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
+      >
+        <div className="flex flex-col gap-1">
+          <p className="type-caption text-secondary">Next step</p>
+          <h2 id="next-step" className="type-h4">
+            {next.title}
+          </h2>
+          {next.text ? <p className="type-body-sm text-body">{next.text}</p> : null}
+        </div>
+        {status === "Draft" || status === "In review" ? (
+          <ul aria-label="Checklist" className="grid grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
+            {checklist.map((c) => (
+              <li key={c.key} className="flex items-start gap-2 type-body-sm">
+                <span
+                  className={cx(
+                    "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-pill",
+                    c.done ? "bg-accent text-primary" : c.required ? "border-2 border-error" : "border border-control",
+                  )}
+                >
+                  {c.done ? <Icon name="check" size={12} /> : null}
+                </span>
+                <span className={c.done ? "text-secondary" : "text-primary"}>
+                  {c.label}
+                  {!c.done ? (
+                    <span className="sr-only">{c.required ? ", still needed" : ", nice to have"}</span>
+                  ) : (
+                    <span className="sr-only">, done</span>
+                  )}
+                  {!c.done && !c.required ? <span className="text-secondary"> (nice to have)</span> : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       {error ? (
         <Alert tone="error" title="Not saved">

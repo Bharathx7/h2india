@@ -15,13 +15,14 @@ import {
 } from "@h2india/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { markVerifiedAction } from "@/admin/content/actions";
 import { BodyEditor } from "./ArticleEditor";
 import { blocksToLexical, lexicalToBlocks, type BodyBlock } from "./body";
 import { STALE_DAYS } from "@/cms/records/thresholds";
 import type { FieldSpec } from "./fields";
 import { recordCards } from "./layout";
+import { requiredFields } from "./guide";
 import { isArchivable } from "@/cms/archive";
 import { ArchiveRecord, PurgeRecord } from "./Archive";
 import { purgeRule } from "@/cms/purge-rules";
@@ -600,6 +601,20 @@ export function RecordForm({
   const [status, setStatus] = useState<"Draft" | "Published">(meta.published ? "Published" : "Draft");
   const days = meta.verifiedDays;
   const stale = days === null || days >= STALE_DAYS;
+  // Founder (20 Nov 2026): say which required fields are still empty, warn before leaving with unsaved changes and
+  // keep Save in reach on long forms.
+  const required = canEdit ? requiredFields(fields, values) : [];
+  const missing = required.filter((r) => !r.done);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+    };
+  }, [dirty]);
 
   const saveChanges = () => {
     if (kind === "setting") {
@@ -720,6 +735,41 @@ export function RecordForm({
           ))}
         </div>
         <aside className="flex flex-col gap-6">
+          {required.length ? (
+            <section
+              aria-labelledby="required-fields"
+              className="flex flex-col gap-3 rounded-card border border-default bg-mint p-5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h2 id="required-fields" className="type-h4">
+                  Required fields
+                </h2>
+                <StatusBadge
+                  status={missing.length ? `${String(missing.length)} to fill` : "All filled"}
+                  tone={missing.length ? "warning" : "success"}
+                />
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {required.map((r) => (
+                  <li key={r.key} className="flex items-start gap-2 type-body-sm">
+                    <span
+                      className={
+                        r.done
+                          ? "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-pill bg-accent text-primary"
+                          : "mt-0.5 flex size-4 shrink-0 rounded-pill border-2 border-error"
+                      }
+                    >
+                      {r.done ? <Icon name="check" size={12} /> : null}
+                    </span>
+                    <span className={r.done ? "text-secondary" : "text-primary"}>
+                      {r.label}
+                      <span className="sr-only">{r.done ? ", filled" : ", still empty"}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           {verify && meta.id ? (
             <section className="flex flex-col gap-3 rounded-card border border-default bg-page p-5">
               <div className="flex items-center justify-between gap-2">
@@ -785,6 +835,21 @@ export function RecordForm({
           ) : null}
         </aside>
       </div>
+      {canEdit && dirty ? (
+        <div
+          role="region"
+          aria-label="Unsaved changes"
+          className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-card border border-default bg-page px-5 py-3 shadow-ink-lift"
+        >
+          <span className="type-body-sm text-primary">
+            You have unsaved changes
+            {missing.length ? <span className="text-secondary"> · {missing.length} required to fill</span> : null}
+          </span>
+          <Button size="sm" disabled={pending} onClick={saveChanges}>
+            {pending ? "Saving…" : "Save now"}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
