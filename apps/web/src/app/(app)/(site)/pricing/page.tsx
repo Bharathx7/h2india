@@ -6,6 +6,8 @@ import { Block, card, DarkCta, Faqs, Hero, main, wrap } from "@/trust/parts";
 
 // Pricing (512:148). Every price, the launch offer and the rate card version are editor-entered (Pricing in the CMS)
 // because C1, C3 and M16 are still open; nothing here is written in code. Sections without prices say so.
+// Founder (20 Nov 2026): supplier plans show as entered; commission and add-ons are shared on request, so the page
+// shows them blurred and locked with Contact us. Their figures are never sent to the browser.
 
 export const metadata: Metadata = {
   title: "Pricing · H2 Economy",
@@ -13,6 +15,43 @@ export const metadata: Metadata = {
   alternates: { canonical: "/pricing" },
 };
 export const dynamic = "force-dynamic";
+
+/** A section shared on request: placeholder cards blurred behind a lock, and one way to ask. No figures at all. */
+function Locked({ what, cards }: { what: string; cards: number }) {
+  return (
+    <div className="relative isolate overflow-hidden rounded-feature border border-default bg-subtle p-4 md:p-6">
+      <ul
+        aria-hidden="true"
+        className={cx("grid grid-cols-1 gap-4 blur-sm select-none sm:grid-cols-2", cards > 2 && "lg:grid-cols-4")}
+      >
+        {Array.from({ length: cards }, (_, i) => (
+          <li key={i} className={cx(card, "flex flex-col gap-3 p-5")}>
+            <span className="h-3 w-24 rounded-pill bg-tint" />
+            <span className="type-h2 text-primary">₹ ••••</span>
+            <span className="h-2.5 w-full rounded-pill bg-subtle" />
+            <span className="h-2.5 w-4/5 rounded-pill bg-subtle" />
+            <span className="h-2.5 w-3/5 rounded-pill bg-subtle" />
+          </li>
+        ))}
+      </ul>
+      <div className="absolute inset-0 flex items-center justify-center bg-page/40 p-4">
+        <div className="flex max-w-md flex-col items-center gap-3 rounded-feature border border-default bg-page px-6 py-6 text-center shadow-ink-float">
+          <span className="flex size-12 items-center justify-center rounded-pill bg-inverse text-inverse">
+            <Icon name="lock" size={22} />
+          </span>
+          <p className="type-h4 text-primary">{what} are shared on request</p>
+          <p className="type-body-sm text-body">
+            Tell us about your company and what you sell, and we&apos;ll walk you through them.
+          </p>
+          <Link href="/contact?about=supplier" className={buttonClasses({ size: "sm" })}>
+            Contact us for details
+            <Icon name="arrow-right" size={16} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Finalising({ what }: { what: string }) {
   return (
@@ -25,8 +64,6 @@ function Finalising({ what }: { what: string }) {
 export default async function PricingPage() {
   const p = await pricing();
   const plans = p?.plans ?? [];
-  const c = p?.commission;
-  const hasCommission = Boolean(c?.launchValue || c?.afterValue);
   return (
     <main id="main" className={main}>
       <Hero
@@ -104,76 +141,14 @@ export default async function PricingPage() {
         title="Commission on orders"
         lead="Charged only on orders paid through H2 Economy. No sale, no fee. Listing is never charged commission."
       >
-        {hasCommission && c ? (
-          <>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {c.launchValue ? (
-                <div className={cx(card, "flex flex-col gap-1 p-5")}>
-                  <p className="type-label-sm text-secondary">Launch offer</p>
-                  <p className="type-h1 text-primary">{c.launchValue}</p>
-                  {c.launchNote ? <p className="type-label text-primary">{c.launchNote}</p> : null}
-                  <p className="type-body-sm text-body">No commission on any order while the launch offer runs.</p>
-                </div>
-              ) : null}
-              {c.afterValue ? (
-                <div className={cx(card, "flex flex-col gap-1 p-5")}>
-                  <p className="type-label-sm text-secondary">After launch</p>
-                  <p className="type-h1 text-primary">{c.afterValue}</p>
-                  {c.afterNote ? <p className="type-label text-primary">{c.afterNote}</p> : null}
-                  {c.afterDetail ? <p className="type-body-sm text-body">{c.afterDetail}</p> : null}
-                </div>
-              ) : null}
-            </div>
-            {c.examples?.length ? (
-              <div tabIndex={0} role="region" aria-label="Worked examples" className={cx(card, "overflow-x-auto")}>
-                <table className="w-full text-left">
-                  <thead className="bg-subtle type-caption text-secondary">
-                    <tr>
-                      <th scope="col" className="px-4 py-2 font-normal">
-                        Worked example (after the launch offer)
-                      </th>
-                      <th scope="col" className="px-4 py-2 text-right font-normal">
-                        Commission
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-default">
-                    {c.examples.map((e) => (
-                      <tr key={e.order}>
-                        <td className="px-4 py-3 type-body-sm text-primary">{e.order}</td>
-                        <td className="px-4 py-3 text-right type-spec text-primary">{e.commission}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : null}
-            {c.footnote ? <p className="type-caption text-secondary">{c.footnote}</p> : null}
-          </>
-        ) : (
-          <Finalising what="Commission rates" />
-        )}
+        <Locked what="Commission rates" cards={2} />
       </Block>
       <Block
         id="add-ons"
         title="Add-ons"
         lead="For any plan. Every paid placement is labelled, and none of them changes search ranking or badges."
       >
-        {p?.addOns?.length ? (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {p.addOns.map((a) => (
-              <li key={a.name} className={cx(card, "flex flex-col gap-1 p-5")}>
-                <p className="type-label text-primary">{a.name}</p>
-                <p className="type-h4 text-primary">
-                  {a.price} {a.unit ? <span className="type-caption text-secondary">{a.unit}</span> : null}
-                </p>
-                <p className="type-body-sm text-body">{a.text}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Finalising what="Add-on prices" />
-        )}
+        <Locked what="Add-on prices" cards={4} />
       </Block>
       <Faqs id="questions" title="Pricing questions" items={p?.faqs ?? []} />
       <DarkCta

@@ -36,31 +36,93 @@ function Actions({ actions, dark = false }: { actions: Action[]; dark?: boolean 
   );
 }
 
+/**
+ * The dark hero every step 5.8 page opens with. Founder (20 Nov 2026): no dot pattern, and For Buyers, For Members and
+ * For Suppliers share one size, each with a preview of its account on the right (`aside`) and who it's for (`chips`).
+ */
 export function Hero({
   eyebrow,
   title,
   lead,
   actions = [],
   note,
+  chips,
+  aside,
 }: {
   eyebrow: string;
   title: string;
   lead: ReactNode;
   actions?: Action[];
   note?: string;
+  chips?: string[];
+  aside?: ReactNode;
 }) {
   return (
     <section className="relative isolate overflow-hidden bg-inverse">
       <div aria-hidden="true" className="depth-deep-glow absolute -top-60 -right-40 -z-10 size-160" />
-      <div aria-hidden="true" className="depth-dot-grid absolute top-8 right-0 -z-10 size-110 opacity-40" />
-      <div className={cx(wrap, "flex flex-col gap-5 py-14 md:py-20")}>
-        <p className="type-label text-fresh-300">{eyebrow}</p>
-        <h1 className="max-w-200 type-h1 text-inverse md:type-display">{title}</h1>
-        <div className="max-w-180 type-body text-neutral-0/80 md:type-body-lg">{lead}</div>
-        {actions.length ? <Actions actions={actions} dark /> : null}
-        {note ? <p className="type-caption text-neutral-0/64">{note}</p> : null}
+      <div
+        className={cx(
+          wrap,
+          "grid grid-cols-1 gap-10 py-14 md:py-20",
+          aside ? "lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center" : null,
+        )}
+      >
+        <div className="flex flex-col gap-5">
+          <p className="type-label text-fresh-300">{eyebrow}</p>
+          <h1 className="max-w-200 type-h1 text-inverse md:type-display">{title}</h1>
+          <div className="max-w-180 type-body text-neutral-0/80 md:type-body-lg">{lead}</div>
+          {chips?.length ? (
+            <ul aria-label="Who it's for" className="flex flex-wrap gap-2">
+              {chips.map((c) => (
+                <li
+                  key={c}
+                  className="rounded-pill border border-neutral-0/16 bg-neutral-0/6 px-3 py-1 type-label-sm text-inverse"
+                >
+                  {c}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {actions.length ? <Actions actions={actions} dark /> : null}
+          {note ? <p className="type-caption text-neutral-0/64">{note}</p> : null}
+        </div>
+        {aside ? <div className="hidden md:block">{aside}</div> : null}
       </div>
     </section>
+  );
+}
+
+/** The hero's right-hand preview of an account (decorative: the sections below say it in full). */
+export function HeroPreview({
+  title,
+  badge,
+  rows,
+}: {
+  title: string;
+  badge: string;
+  rows: { icon: IconName; title: string; text: string }[];
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className="flex flex-col gap-3 rounded-feature border border-neutral-0/16 bg-neutral-0/6 p-5"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="type-label text-inverse">{title}</span>
+        <span className="rounded-pill bg-accent px-2.5 py-0.5 type-label-sm text-primary">{badge}</span>
+      </div>
+      {rows.map((r) => (
+        <div key={r.title} className="flex items-center gap-3 rounded-card bg-page px-4 py-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-card bg-linear-to-b from-fresh-50 to-fresh-200 text-icon-link">
+            <Icon name={r.icon} size={20} />
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="type-label text-primary">{r.title}</span>
+            <span className="truncate type-body-sm text-body">{r.text}</span>
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -126,6 +188,51 @@ export function Feature({ icon, title, text }: { icon: IconName; title: string; 
       <h3 className="type-h4 text-primary">{title}</h3>
       <p className="type-body-sm text-body">{text}</p>
     </div>
+  );
+}
+
+/** What an account can do: equal-size cards, three across on desktop (the same on every audience page). */
+export function FeatureGrid({ items }: { items: { icon: IconName; title: string; text: string }[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((f) => (
+        <Feature key={f.title} icon={f.icon} title={f.title} text={f.text} />
+      ))}
+    </div>
+  );
+}
+
+/** Why it's worth it: a mint band of icon, title and line, the same on every audience page. */
+export function Highlights({
+  id,
+  title,
+  items,
+}: {
+  id: string;
+  title: string;
+  items: { icon: IconName; title: string; text: string }[];
+}) {
+  return (
+    <Reveal as="section" aria-labelledby={id} className={cx(wrap, "pt-12 md:pt-16")}>
+      <div className="flex flex-col gap-6 rounded-feature bg-mint px-6 py-8 md:px-10 md:py-10">
+        <h2 id={id} className="type-h2 text-primary">
+          {title}
+        </h2>
+        <ul className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {items.map((h) => (
+            <li key={h.title} data-reveal-item="" className="flex gap-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-card bg-page text-icon-link">
+                <Icon name={h.icon} size={22} />
+              </span>
+              <span className="flex flex-col gap-1">
+                <span className="type-label-lg text-primary">{h.title}</span>
+                <span className="type-body-sm text-body">{h.text}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Reveal>
   );
 }
 
