@@ -77,19 +77,21 @@ function Newsletter({ onSubscribe, topics }: { onSubscribe: SiteFooterProps["onS
               Subscribe
             </Button>
           </div>
-          <div role="group" aria-label="Topics" className="flex flex-wrap gap-2">
-            {topics.map((t) => (
-              <CategoryChip
-                key={t}
-                selected={chosen.includes(t)}
-                onClick={() => {
-                  setChosen((all) => (all.includes(t) ? all.filter((x) => x !== t) : [...all, t]));
-                }}
-              >
-                {t}
-              </CategoryChip>
-            ))}
-          </div>
+          {topics.length ? (
+            <div role="group" aria-label="Topics" className="flex flex-wrap gap-2">
+              {topics.map((t) => (
+                <CategoryChip
+                  key={t}
+                  selected={chosen.includes(t)}
+                  onClick={() => {
+                    setChosen((all) => (all.includes(t) ? all.filter((x) => x !== t) : [...all, t]));
+                  }}
+                >
+                  {t}
+                </CategoryChip>
+              ))}
+            </div>
+          ) : null}
           {state === "error" ? (
             <p role="alert" className="type-caption text-error">
               We could not sign you up. Check the address and try again.

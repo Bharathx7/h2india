@@ -71,11 +71,12 @@ export function SiteChrome({
       {children}
       <SiteFooter
         columns={columns}
-        topics={Object.keys(FOOTER_TOPICS)}
+        // Founder (20 Nov 2026): no topic tags in the footer; a footer sign-up gets every topic.
+        topics={[]}
         onSubscribe={async (email, topics) => {
           const result = await subscribeToNewsletter({
             email,
-            topics: topics.map((t) => FOOTER_TOPICS[t] ?? t),
+            topics: topics.length ? topics.map((t) => FOOTER_TOPICS[t] ?? t) : Object.values(FOOTER_TOPICS),
             source: "footer",
             // The footer form lives in @h2india/ui, so only the timing half of the form guard applies (step 5.9).
             guard: { website: "", elapsedMs: Date.now() - performance.timeOrigin },
