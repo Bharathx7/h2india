@@ -41,8 +41,8 @@ async function run<T>(
   try {
     const result = await work(await session());
     if (result.ok) {
-      revalidatePath(PAGE);
-      revalidatePath(`${PAGE}/applications`);
+      // Every Catalogue page (Overview, Categories, a category, Applications) shows the change (founder, 20 Nov 2026).
+      revalidatePath(PAGE, "layout");
     }
     return result;
   } catch (error) {
