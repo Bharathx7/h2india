@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ConfirmItsYou } from "@/components/ConfirmItsYou";
-import { OPERATOR_ACTIONS, OPERATOR_AREAS } from "@h2india/core/authz/rules";
+import { looksLikeEmail, OPERATOR_ACTIONS, OPERATOR_AREAS } from "@h2india/core/authz/rules";
 import { AREA_LABEL, EXTRA_LABEL, isSensitive, roleIsSensitive, roleWords } from "./role-words";
 import {
   addTeamMemberAction,
@@ -140,7 +140,7 @@ export function AddTeamMember({ roles, sections }: { roles: RoleChoice[]; sectio
         setError("Enter their name.");
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      if (!looksLikeEmail(email)) {
         setError("Enter their work email.");
         return;
       }

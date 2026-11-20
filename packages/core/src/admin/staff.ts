@@ -3,12 +3,10 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
-import { OPERATOR_ACTIONS, SENSITIVE_AREAS } from "../authz/catalogue";
+import { OPERATOR_ACTIONS, OPERATOR_AREAS, OPERATOR_EXTRA, SENSITIVE_AREAS } from "../authz/catalogue";
 import { SUPER_ADMIN } from "../authz/grants";
-import { cleanSections, completePermissions, StaffError, SUPER_ADMIN_ONLY } from "../authz/staff-rules";
+import { cleanSections, completePermissions, looksLikeEmail, StaffError, SUPER_ADMIN_ONLY } from "../authz/staff-rules";
 import { stepUpConfirmedRecently } from "../sign-in/step-up";
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Team and roles (founder, 20 Nov 2026: "first the Super admin has all access, then if needed adds other roles"). A
 // Super admin (roles.manage) adds staff, limits an editor to content sections and makes custom roles from the
@@ -68,7 +66,7 @@ export async function addStaffMember(
   assertCan(actor, "roles.manage");
   const email = input.email.trim().toLowerCase();
   const name = input.name.trim();
-  if (!EMAIL.test(email)) throw new StaffError("BAD_EMAIL", "Enter their work email");
+  if (!looksLikeEmail(email)) throw new StaffError("BAD_EMAIL", "Enter their work email");
   if (name.length < 2) throw new StaffError("BAD_NAME", "Enter their name");
   const sections = cleanSections(input.sections);
   return ex.transaction(async (tx) => {
@@ -177,10 +175,18 @@ export async function listStaff(ex: Executor, actor: Actor): Promise<StaffRow[]>
   return [...out.values()];
 }
 
-/** The permissions a custom role may hold: every operator permission except the Super admin-only ones. */
+/**
+ * The permissions a custom role may hold: the operator grid (area × action) and the operator extras, as far as the
+ * catalogue knows them, except the Super admin-only ones. Read by key, not layer: some grid keys (money.view) are
+ * shared with company permissions and stored on that layer.
+ */
 export async function grantableOperatorPermissions(ex: Executor): Promise<string[]> {
-  const rows = await ex.select({ key: p.key }).from(p).where(eq(p.layer, "operator"));
-  return rows.map((x) => x.key).filter((k) => !SUPER_ADMIN_ONLY.includes(k));
+  const wanted = [
+    ...OPERATOR_AREAS.flatMap((a) => OPERATOR_ACTIONS.map((x) => `${a}.${x}`)),
+    ...Object.keys(OPERATOR_EXTRA),
+  ].filter((k) => !SUPER_ADMIN_ONLY.includes(k));
+  const rows = await ex.select({ key: p.key }).from(p).where(inArray(p.key, wanted));
+  return rows.map((x) => x.key).sort();
 }
 
 /** Create a custom role, or change one; built-in roles can't be changed here. */

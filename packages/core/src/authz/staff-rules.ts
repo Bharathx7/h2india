@@ -41,6 +41,17 @@ export class StaffError extends Error {
   }
 }
 
+/** A plausible email: one @, something before it, a dot inside the part after it, no spaces (no regex: CodeQL ReDoS). */
+export function looksLikeEmail(value: string): boolean {
+  const v = value.trim();
+  if (v.length > 254 || /\s/.test(v)) return false;
+  const parts = v.split("@");
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts as [string, string];
+  const dot = domain.indexOf(".");
+  return local.length > 0 && dot > 0 && dot < domain.length - 1 && !domain.endsWith(".");
+}
+
 /** A valid sections choice: null (all) or a non-empty list of known section ids, sorted, without repeats. */
 export function cleanSections(sections: readonly string[] | null): string[] | null {
   if (sections === null) return null;
