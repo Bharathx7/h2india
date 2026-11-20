@@ -60,15 +60,15 @@ test("a catalogue moderator sees the launch schema and adds a category and an at
 
   await dialog.getByRole("textbox", { name: /^Name/ }).fill("Noise level");
   await dialog.getByRole("radio", { name: /^Number/ }).click();
-  await dialog.getByLabel("Unit").fill("dB(A)");
-  await dialog.getByLabel("Allowed values").fill("110–40");
+  await dialog.getByRole("textbox", { name: /^Unit/ }).fill("dB(A)");
+  await dialog.getByRole("textbox", { name: /^Allowed values/ }).fill("110–40");
   await dialog.getByLabel("Display group").selectOption({ label: "Physical" });
   await dialog.getByRole("switch", { name: "Filterable on search and category pages" }).click();
   await dialog.getByRole("switch", { name: "Ask for a test condition" }).click();
-  await dialog.getByLabel("Test condition label").fill("At 1 m");
+  await dialog.getByRole("textbox", { name: /^Test condition label/ }).fill("At 1 m");
   await dialog.getByRole("button", { name: "Add product field" }).click();
   await expect(dialog.getByText("Put the lowest value first, like 40–110")).toBeVisible();
-  await dialog.getByLabel("Allowed values").fill("40–110");
+  await dialog.getByRole("textbox", { name: /^Allowed values/ }).fill("40–110");
   await dialog.getByRole("button", { name: "Add product field" }).click();
   await expect(dialog).toBeHidden();
 
