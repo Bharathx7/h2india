@@ -1,3 +1,4 @@
+import { CONTENT_SECTION_IDS } from "@h2india/core/authz";
 import { describe, expect, it } from "vitest";
 import { CONTENT_SLUGS } from "./registry";
 import { CONTENT_SECTIONS, SECTION_SLUGS, describeType, sectionById, sectionOf, unsectioned } from "./sections";
@@ -12,6 +13,10 @@ describe("content sections", () => {
 
   it("describe every type in a sentence", () => {
     for (const slug of SECTION_SLUGS) expect(describeType(slug)?.length ?? 0).toBeGreaterThan(10);
+  });
+
+  it("match the section ids an editor can be limited to (core)", () => {
+    expect(CONTENT_SECTIONS.map((s) => s.id).sort()).toEqual([...CONTENT_SECTION_IDS].sort());
   });
 
   it("have unique ids and links", () => {

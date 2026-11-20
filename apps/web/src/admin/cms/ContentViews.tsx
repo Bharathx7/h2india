@@ -14,15 +14,20 @@ import type { cmsSession } from "./session";
 type Cms = NonNullable<Awaited<ReturnType<typeof cmsSession>>>;
 
 /** The things people make most often, in the order they make them. */
-const CREATE: { label: string; href: string; icon: IconName }[] = [
-  { label: "Article", href: "/admin/content/articles/new", icon: "newspaper" },
-  { label: "Tender", href: "/admin/content/tenders/new", icon: "clipboard-check" },
-  { label: "Scheme", href: "/admin/content/schemes/new", icon: "clipboard-check" },
-  { label: "Grant", href: "/admin/content/grants/new", icon: "clipboard-check" },
-  { label: "Job", href: "/admin/content/jobs/new", icon: "users" },
-  { label: "Event", href: "/admin/content/events/new", icon: "calendar" },
-  { label: "Tracker project", href: "/admin/content/tracker-projects/new", icon: "bar-chart" },
-  { label: "Newsletter issue", href: "/admin/content/newsletter-issues/new", icon: "mail" },
+const CREATE: { label: string; slug: string; href: string; icon: IconName }[] = [
+  { label: "Article", slug: "articles", href: "/admin/content/articles/new", icon: "newspaper" },
+  { label: "Tender", slug: "tenders", href: "/admin/content/tenders/new", icon: "clipboard-check" },
+  { label: "Scheme", slug: "schemes", href: "/admin/content/schemes/new", icon: "clipboard-check" },
+  { label: "Grant", slug: "grants", href: "/admin/content/grants/new", icon: "clipboard-check" },
+  { label: "Job", slug: "jobs", href: "/admin/content/jobs/new", icon: "users" },
+  { label: "Event", slug: "events", href: "/admin/content/events/new", icon: "calendar" },
+  {
+    label: "Tracker project",
+    slug: "tracker-projects",
+    href: "/admin/content/tracker-projects/new",
+    icon: "bar-chart",
+  },
+  { label: "Newsletter issue", slug: "newsletter-issues", href: "/admin/content/newsletter-issues/new", icon: "mail" },
 ];
 
 function SearchBox({ q }: { q?: string }) {
@@ -119,7 +124,7 @@ export async function ContentHome({ cms }: { cms: Cms }) {
             Create something new
           </h2>
           <ul className="flex flex-wrap gap-2">
-            {CREATE.map((c) => (
+            {CREATE.filter((c) => cms.mayChange(c.slug)).map((c) => (
               <li key={c.href}>
                 <Link href={c.href} className={buttonClasses({ variant: "outline", size: "sm" })}>
                   <Icon name={c.icon} size={16} />
@@ -127,12 +132,14 @@ export async function ContentHome({ cms }: { cms: Cms }) {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link href="/admin/content/media" className={buttonClasses({ variant: "outline", size: "sm" })}>
-                <Icon name="upload" size={16} />
-                Upload an image
-              </Link>
-            </li>
+            {cms.mayChange("media") ? (
+              <li>
+                <Link href="/admin/content/media" className={buttonClasses({ variant: "outline", size: "sm" })}>
+                  <Icon name="upload" size={16} />
+                  Upload an image
+                </Link>
+              </li>
+            ) : null}
           </ul>
           <p className="type-caption text-secondary">Anything else: open its section on the left and choose New.</p>
         </section>
@@ -262,7 +269,7 @@ async function SectionBlock({ cms, section, heading }: { cms: Cms; section: Cont
             ...t,
             label: type.plural,
             count: await countOf(cms, t.slug),
-            canCreate: canEdit && !type.upload && !NO_CREATE_SLUGS.includes(t.slug),
+            canCreate: canEdit && cms.mayChange(t.slug) && !type.upload && !NO_CREATE_SLUGS.includes(t.slug),
           }
         : null;
     }),

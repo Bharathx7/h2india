@@ -1,4 +1,5 @@
 import { getDb } from "@h2india/core";
+import { staffSections } from "@h2india/core/admin/staff";
 import { loadActor } from "@h2india/core/authz";
 import type { AuthStrategy, Payload } from "payload";
 import type { Editor } from "@/payload-types";
@@ -17,7 +18,7 @@ function roleOf(permissions: string[]): string {
 export async function editorUserFor(
   payload: Payload,
   user: { id: string; name?: string | null; email: string },
-): Promise<(Editor & { collection: "editors"; permissions: string[] }) | null> {
+): Promise<(Editor & { collection: "editors"; permissions: string[]; sections: string[] | null }) | null> {
   const actor = await loadActor(getDb(), user.id);
   // settings.edit lets a Super admin keep the Pre-launch allow-list (A44).
   const permissions = [...actor.operator].filter((p) => p.startsWith("content.") || p === "settings.edit");
@@ -46,7 +47,9 @@ export async function editorUserFor(
       overrideAccess: true,
     });
   }
-  return { ...doc, collection: "editors", permissions };
+  // Section limits (founder, 20 Nov 2026): checked on every CMS write (cms/section-access.ts).
+  const sections = await staffSections(getDb(), user.id);
+  return { ...doc, collection: "editors", permissions, sections };
 }
 
 export const h2indiaStrategy: AuthStrategy = {

@@ -1,3 +1,4 @@
+import { Alert } from "@h2india/ui";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleEditor } from "@/admin/cms/ArticleEditor";
@@ -15,6 +16,11 @@ export default async function NewArticlePage() {
   if (!who) notFound();
   return (
     <AdminShell userId={userId} current="/admin/content" title="Content">
+      {who.inSection ? null : (
+        <Alert tone="info" title="View only">
+          Articles isn&apos;t one of your content sections, so you can read but not save. A Super admin can add it.
+        </Alert>
+      )}
       <ArticleEditor
         initial={EMPTY_ARTICLE}
         meta={null}

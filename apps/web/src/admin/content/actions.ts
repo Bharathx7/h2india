@@ -2,6 +2,7 @@
 
 import config from "@payload-config";
 import { audit, getDb } from "@h2india/core";
+import { staffSections } from "@h2india/core/admin/staff";
 import { can, loadActor } from "@h2india/core/authz";
 import { NewsletterSendError, saveSend, scheduleSend, sendTest, unscheduleSend } from "@h2india/core/newsletter/sends";
 import { saveBoosts, saveSynonyms, type Boost } from "@h2india/core/search";
@@ -11,6 +12,7 @@ import { getSession } from "@/server/auth";
 import { requestContext } from "@/server/request-context";
 import { RECORD_COLLECTIONS } from "@/cms/records/collections";
 import { TRACKER_SLUGS } from "@/cms/tracker/options";
+import { sectionAllows } from "@/cms/section-access";
 import { issueContent } from "./issue";
 
 // Content operations (step 11.3): Mark verified on Data quality, the newsletter composer, and search management.
@@ -21,6 +23,16 @@ async function operator() {
   const session = await getSession();
   if (!session) throw new Error("Sign in again.");
   return { actor: await loadActor(getDb(), session.user.id), userId: session.user.id };
+}
+
+const OUTSIDE_SECTION: R = {
+  ok: false,
+  error: "You can change only the content sections a Super admin gave you.",
+};
+
+/** Section limits (founder, 20 Nov 2026): whether this person may change content of this type. */
+async function inSection(userId: string, slug: string): Promise<boolean> {
+  return sectionAllows(await staffSections(getDb(), userId), slug);
 }
 
 const fail = (error: unknown): R => {
@@ -38,6 +50,7 @@ export async function markVerifiedAction(collection: string, id: number): Promis
   const { actor, userId } = await operator();
   if (!can(actor, "content.edit")) return { ok: false, error: "Only editors can verify records." };
   if (!RECORDS.includes(collection)) return { ok: false, error: "No such record." };
+  if (!(await inSection(userId, collection))) return OUTSIDE_SECTION;
   const payload = await getPayload({ config });
   const editor = (
     await payload.find({
@@ -78,7 +91,8 @@ export interface SendForm {
 }
 
 export async function saveSendAction(issueId: string, f: SendForm): Promise<R> {
-  const { actor } = await operator();
+  const { actor, userId } = await operator();
+  if (!(await inSection(userId, "newsletter-issues"))) return OUTSIDE_SECTION;
   try {
     await saveSend(getDb(), actor, { issueId, ...f });
   } catch (error) {
@@ -89,7 +103,8 @@ export async function saveSendAction(issueId: string, f: SendForm): Promise<R> {
 }
 
 export async function scheduleAction(issueId: string, f: SendForm): Promise<R> {
-  const { actor } = await operator();
+  const { actor, userId } = await operator();
+  if (!(await inSection(userId, "newsletter-issues"))) return OUTSIDE_SECTION;
   const at = new Date(`${f.sendAt}:00+05:30`);
   if (Number.isNaN(at.getTime())) return { ok: false, error: "Choose the send time" };
   try {
@@ -104,7 +119,8 @@ export async function scheduleAction(issueId: string, f: SendForm): Promise<R> {
 }
 
 export async function unscheduleAction(issueId: string): Promise<R> {
-  const { actor } = await operator();
+  const { actor, userId } = await operator();
+  if (!(await inSection(userId, "newsletter-issues"))) return OUTSIDE_SECTION;
   try {
     await unscheduleSend(getDb(), actor, issueId, await requestContext());
   } catch (error) {
@@ -115,7 +131,8 @@ export async function unscheduleAction(issueId: string): Promise<R> {
 }
 
 export async function testAction(issueId: string, f: SendForm, to: string): Promise<R> {
-  const { actor } = await operator();
+  const { actor, userId } = await operator();
+  if (!(await inSection(userId, "newsletter-issues"))) return OUTSIDE_SECTION;
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) return { ok: false, error: "Enter an email address" };
   const payload = await getPayload({ config });
   const issue = await payload.findByID({

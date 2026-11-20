@@ -15,6 +15,8 @@ import { cmsSession } from "./session";
 // the CMS access rules, validation and hooks (search, sample, newsroom cache, tracker changes) all run as at /cms.
 // Publishing and unpublishing are status changes: they are audited.
 
+const OUTSIDE_SECTION = "You can change only the content sections a Super admin gave you.";
+
 export type SaveResult = { ok: true; id: number } | { ok: false; error: string };
 type Mode = "draft" | "publish" | "save";
 
@@ -43,6 +45,7 @@ export async function saveRecordAction(
 ): Promise<SaveResult> {
   const cms = await cmsSession();
   if (!cms?.can("content.edit")) return { ok: false, error: "Your role can't edit content." };
+  if (!cms.mayChange(slug)) return { ok: false, error: OUTSIDE_SECTION };
   const type = contentType(cms.payload, slug);
   if (!type || (type.upload && !id)) return { ok: false, error: "No such content." };
   const data: Record<string, unknown> = toStored(type.fields, values);
@@ -75,6 +78,7 @@ export async function saveRecordAction(
 export async function unpublishRecordAction(slug: string, id: number): Promise<SaveResult> {
   const cms = await cmsSession();
   if (!cms?.can("content.edit")) return { ok: false, error: "Your role can't edit content." };
+  if (!cms.mayChange(slug)) return { ok: false, error: OUTSIDE_SECTION };
   const type = contentType(cms.payload, slug);
   if (!type?.drafts) return { ok: false, error: "This content can't be unpublished." };
   try {
@@ -108,6 +112,7 @@ export async function unpublishRecordAction(slug: string, id: number): Promise<S
 export async function archiveRecordAction(slug: string, id: number, reason: string): Promise<SaveResult> {
   const cms = await cmsSession();
   if (!cms?.can("content.delete")) return { ok: false, error: "Your role can't archive content." };
+  if (!cms.mayChange(slug)) return { ok: false, error: OUTSIDE_SECTION };
   if (typeof id !== "number" || !isArchivable(slug) || !contentType(cms.payload, slug))
     return { ok: false, error: "This content can't be archived." };
   const why = typeof reason === "string" ? reason.trim().slice(0, 500) : "";
@@ -140,6 +145,7 @@ export async function archiveRecordAction(slug: string, id: number, reason: stri
 export async function restoreRecordAction(slug: string, id: number): Promise<SaveResult> {
   const cms = await cmsSession();
   if (!cms?.can("content.delete")) return { ok: false, error: "Your role can't restore content." };
+  if (!cms.mayChange(slug)) return { ok: false, error: OUTSIDE_SECTION };
   if (typeof id !== "number" || !isArchivable(slug) || !contentType(cms.payload, slug))
     return { ok: false, error: "This content can't be restored." };
   try {
@@ -222,6 +228,7 @@ export async function saveSettingAction(
 ): Promise<SaveResult> {
   const cms = await cmsSession();
   if (!cms?.can("content.edit")) return { ok: false, error: "Your role can't edit content." };
+  if (!cms.mayChange(slug)) return { ok: false, error: OUTSIDE_SECTION };
   const type = settingType(cms.payload, slug);
   if (!type) return { ok: false, error: "No such setting." };
   const data: Record<string, unknown> = toStored(type.fields, values);

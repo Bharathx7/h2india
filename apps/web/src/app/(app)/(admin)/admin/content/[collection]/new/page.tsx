@@ -38,7 +38,7 @@ export default async function NewRecordPage({ params }: { params: Promise<{ coll
           verifiedDays: null,
         }}
         choices={choices}
-        canEdit={cms.can("content.edit")}
+        canEdit={cms.can("content.edit") && cms.mayChange(collection)}
         verify={false}
       />
     </AdminShell>

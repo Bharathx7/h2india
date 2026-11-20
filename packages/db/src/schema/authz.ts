@@ -14,6 +14,8 @@ export const roles = core.table(
     scope: text("scope").notNull(), // buyer | supplier | operator
     name: text("name").notNull(),
     description: text("description").notNull(),
+    /** An operator role a Super admin made in the back office (founder, 20 Nov 2026); built-in roles stay false. */
+    custom: boolean("custom").notNull().default(false),
     ...timestamps,
   },
   (t) => [uniqueIndex("roles_scope_name_unique").on(t.scope, t.name)],
@@ -54,4 +56,21 @@ export const operatorRoles = core.table(
     createdAt: utc("created_at").notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.roleId] })],
+);
+
+/**
+ * Content sections a staff member may change (founder, 20 Nov 2026). No rows: every section. With rows, they still see
+ * all content but create, edit, publish and delete only in these sections (ids from CONTENT_SECTION_IDS).
+ */
+export const operatorSections = core.table(
+  "operator_sections",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    section: text("section").notNull(),
+    grantedBy: uuid("granted_by").references(() => users.id),
+    createdAt: utc("created_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.section] })],
 );
