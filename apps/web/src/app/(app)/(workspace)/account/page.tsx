@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
 import { DetailsForm } from "./DetailsForm";
+import { PhotoControl } from "./PhotoControl";
 import { ChangePassword } from "@/account/ChangePassword";
 import { hasPassword } from "@h2india/core/sign-in/passwords";
 
@@ -52,12 +53,8 @@ export default async function AccountPage() {
     <>
       <div className="flex flex-col gap-6 p-4 md:p-8">
         <header className="flex flex-col gap-4 rounded-card border border-default bg-page p-5 sm:flex-row sm:items-center">
-          <span
-            aria-hidden="true"
-            className="flex size-16 shrink-0 items-center justify-center rounded-pill bg-tint type-h3 text-primary"
-          >
-            {shell.user.initials}
-          </span>
+          {/* Profile picture (founder, 20 Nov 2026): one picture for every workspace, shown on the avatar. */}
+          <PhotoControl initials={shell.user.initials} photoUrl={shell.user.photoUrl ?? null} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <p className="type-label-sm text-secondary">Account</p>
             <h1 className="type-h2 break-words text-primary">{shell.user.name}</h1>

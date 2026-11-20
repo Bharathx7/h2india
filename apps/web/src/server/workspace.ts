@@ -2,6 +2,7 @@ import config from "@payload-config";
 import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { adminAreas, adminCounts } from "@h2india/core/admin";
+import { accountPhotoUrl } from "@h2india/core/account";
 import { identityOf, loadActor } from "@h2india/core/authz";
 import { isMember, MEMBER_JOIN_PATH } from "@h2india/core/members";
 import type { WorkspaceArea, WorkspaceNavGroup, WorkspaceUser } from "@h2india/ui";
@@ -39,7 +40,11 @@ export async function navFor(area: WorkspaceArea, userId: string): Promise<Works
 }
 
 export async function shellFor(userId: string) {
-  const [who, member] = await Promise.all([identityOf(getDb(), userId), isMember(getDb(), userId)]);
+  const [who, member, photoUrl] = await Promise.all([
+    identityOf(getDb(), userId),
+    isMember(getDb(), userId),
+    accountPhotoUrl(getDb(), userId),
+  ]);
   const name = who.name || who.email || "You";
   const words = name.split(/\s+/).filter(Boolean);
   const initials =
@@ -50,7 +55,7 @@ export async function shellFor(userId: string) {
       .toUpperCase() || "?";
   const role =
     who.area === "admin" ? "H2 Economy operator" : who.area === "member" ? "Member" : (who.company ?? "Company");
-  const user: WorkspaceUser = { name, role, initials };
+  const user: WorkspaceUser = { name, role, initials, photoUrl };
   return {
     area: who.area,
     user,

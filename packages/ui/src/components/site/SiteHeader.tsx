@@ -188,9 +188,13 @@ function Desktop({
                 <Menu>
                   <MenuTrigger
                     aria-label={`Account: ${user.name}`}
-                    className="flex size-9 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse"
+                    className="flex size-9 items-center justify-center overflow-hidden rounded-pill bg-inverse type-label-sm text-inverse"
                   >
-                    {user.initials}
+                    {user.photoUrl ? (
+                      <img src={user.photoUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      user.initials
+                    )}
                   </MenuTrigger>
                   <MenuContent>
                     {/* Public QC 4: Dashboard opens the person's own workspace; Account is Profile inside it. */}
@@ -281,8 +285,12 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
               <div className="mb-4 flex flex-col gap-3 border-b border-default pb-4">
                 {/* Public QC 4: who is signed in, with the role as a plain badge; Dashboard and Sign out below. */}
                 <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-pill bg-inverse type-label-sm text-inverse">
-                    {user.initials}
+                  <span className="flex size-10 items-center justify-center overflow-hidden rounded-pill bg-inverse type-label-sm text-inverse">
+                    {user.photoUrl ? (
+                      <img src={user.photoUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      user.initials
+                    )}
                   </span>
                   <span className="flex min-w-0 flex-col gap-1">
                     <span className="block truncate type-label-lg text-primary">{user.name}</span>

@@ -540,6 +540,13 @@
       "when": 1795155127423,
       "tag": "0076_operator_sections",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1795169225530,
+      "tag": "0077_user_photo",
+      "breakpoints": true
     }
   ]
 }
