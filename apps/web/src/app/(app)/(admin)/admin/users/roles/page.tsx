@@ -10,6 +10,8 @@ import { CONTENT_SECTIONS } from "@/admin/cms/sections";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { AREA_LABEL, roleWords } from "@/admin/users/role-words";
 import { Initials, UsersHeader, UserTabs } from "@/admin/users/Tabs";
+import { ListPager } from "@/components/ListPager";
+import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 
 // Team and roles (founder, 20 Nov 2026; was Operator roles, 656:8, step 11.4). First the team: who works in the back
 // office, their role, the content sections they may change and when they were last active; a Super admin adds people
@@ -30,7 +32,11 @@ const sensitive = (area: string, action: string) =>
 const sectionNames = (ids: string[] | null) =>
   ids === null ? "All" : ids.map((id) => CONTENT_SECTIONS.find((s) => s.id === id)?.label ?? id).join(", ");
 
-export default async function RolesPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
+export default async function RolesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string; page?: string; perPage?: string }>;
+}) {
   const sp = await searchParams;
   const { userId, actor } = await requireOperator("users.view", "/admin/users/roles");
   const db = getDb();
@@ -40,6 +46,8 @@ export default async function RolesPage({ searchParams }: { searchParams: Promis
     listUsers(db, actor, { limit: 1 }),
   ]);
   const manage = actor.operator.has("roles.manage");
+  // Paged like every back-office list (founder, 20 Nov 2026).
+  const team = pageOf(staff, pageRequest(sp));
   const ordered = [...roles].sort(
     (a, b) => Number(a.custom) - Number(b.custom) || (a.name === "Super admin" ? -1 : b.name === "Super admin" ? 1 : 0),
   );
@@ -103,7 +111,7 @@ export default async function RolesPage({ searchParams }: { searchParams: Promis
                 </tr>
               </thead>
               <tbody>
-                {staff.map((s) => (
+                {team.rows.map((s) => (
                   <tr key={s.userId} className="border-t border-default">
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-2">
@@ -142,6 +150,7 @@ export default async function RolesPage({ searchParams }: { searchParams: Promis
             </EmptyState>
           </div>
         )}
+        <ListPager paged={team} query={pagingQuery(sp)} />
       </section>
 
       <section aria-labelledby="roles" className="flex flex-col gap-4">

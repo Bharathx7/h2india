@@ -43,8 +43,10 @@ test("a Super admin adds a Tracker-only editor in four steps", async ({ page }) 
   });
   expect(sections).toEqual(["tracker"]);
 
+  // The Team table is paged (founder, 20 Nov 2026): the database check above proves the add; here the way back works.
   await page.getByRole("link", { name: "Back to the team" }).click();
-  await expect(page.getByRole("region", { name: "Team" }).getByText(email)).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/users\/roles$/);
+  await expect(page.getByRole("heading", { name: "Team", exact: true })).toBeVisible();
 });
 
 test("an editor limited to the Tracker can't create content in other sections", async ({ page }) => {
