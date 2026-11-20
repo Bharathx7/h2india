@@ -172,4 +172,11 @@ describe.skipIf(!url)("team and roles", () => {
     await deleteOperatorRole(h.db, bossActor, { roleId, reason: "Desk closed" });
     expect(await latest("operator_role.delete", roleId)).toMatchObject({ reason: "Desk closed" });
   });
+
+  it("never limits a Super admin to sections (founder, 20 Nov 2026)", async () => {
+    const boss = await makeUser(h.db, "Unlimited Boss");
+    await grant(boss.id, "Super admin");
+    await h.db.insert(schema.operatorSections).values({ userId: boss.id, section: "tracker" });
+    expect(await staffSections(h.db, boss.id)).toBeNull();
+  });
 });

@@ -4,6 +4,7 @@ import { flagNow } from "../admin/system";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
+import { isSuperAdmin } from "../authz/staff-rules";
 
 // The queue framework (step 11.2): claiming and deciding, shared by the queues. An operator claims an item
 // (Assign to me), or it is claimed for them when they decide; only the claimant can decide, and only once, so two
@@ -96,14 +97,26 @@ export async function decideItem(
       .for("update");
     if (!row) throw new Error("claim row missing");
     if (row.decidedAt) throw new QueueError(`${await nameOf(tx, row.decidedBy)} has already decided this`);
-    if (row.claimedBy && row.claimedBy !== me)
-      throw new QueueError(`${await nameOf(tx, row.claimedBy)} is reviewing this. Ask them, or reassign it first`);
+    if (row.claimedBy && row.claimedBy !== me) {
+      // A Super admin takes the item over and decides (founder, 20 Nov 2026: no limit for the Super admin).
+      if (!isSuperAdmin(actor))
+        throw new QueueError(`${await nameOf(tx, row.claimedBy)} is reviewing this. Ask them, or reassign it first`);
+      await audit(tx, {
+        actorId: me,
+        action: "queue.takeover",
+        resourceType: input.queue,
+        resourceId: input.subjectId,
+        before: { claimedBy: row.claimedBy },
+        after: { claimedBy: me },
+        context,
+      });
+    }
     const now = new Date();
     await tx
       .update(c)
       .set({
         claimedBy: me,
-        claimedAt: row.claimedAt ?? now,
+        claimedAt: row.claimedBy && row.claimedBy !== me ? now : (row.claimedAt ?? now),
         decision: input.decision,
         reasons,
         decidedBy: me,

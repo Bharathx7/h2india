@@ -1,7 +1,7 @@
 import { ADMIN_FLAGS, isEnabled, TWO_PERSON_FLAGS } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { clockValues, openProposals, systemHealth } from "@h2india/core/admin/system";
-import { can } from "@h2india/core/authz";
+import { can, isSuperAdmin } from "@h2india/core/authz";
 import { listHolidays } from "@h2india/core/clocks";
 import { countDeadLetters, listDeadLetters } from "@h2india/core/queue";
 import { formatIstDateTime } from "@h2india/core/time";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pageWindow, pagingQuery } from "@/lib/paging";
-import { ClockRow, FailedJob, FlagRow, Holidays, Proposal } from "@/admin/system/Controls";
+import { ClockRow, FailedJob, FlagRow, Holidays, OwnProposal, Proposal } from "@/admin/system/Controls";
 
 // System settings (707:793), step 11.8: switches, clocks, integrations and failed jobs. Every change needs a reason
 // and is audited; switches that open money flows need a second operator; clocks apply to new deadlines only.
@@ -202,6 +202,8 @@ export default async function SettingsPage({
                     </span>
                     {canEdit && p.proposedBy !== userId ? (
                       <Proposal id={p.id} />
+                    ) : canEdit && isSuperAdmin(actor) ? (
+                      <OwnProposal id={p.id} />
                     ) : (
                       <StatusBadge status="Waiting" tone="neutral" />
                     )}

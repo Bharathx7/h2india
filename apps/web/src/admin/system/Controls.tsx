@@ -3,6 +3,7 @@
 import { Alert, Button, FormField, Icon, Input, Modal, Select, Switch, Toaster, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { ConfirmItsYou } from "@/components/ConfirmItsYou";
 import {
   cancelReportAction,
   clockAction,
@@ -109,6 +110,40 @@ export function Proposal({ id }: { id: string }) {
         }}
       >
         Decline
+      </Button>
+      {r.msg?.tone === "error" ? <span className="type-caption text-error">{r.msg.text}</span> : null}
+    </span>
+  );
+}
+
+/**
+ * A Super admin's own money-switch change (founder, 20 Nov 2026: no limit for the Super admin): approve it after
+ * Confirm it's you, or withdraw it. Other operators' own changes still wait for a second operator.
+ */
+export function OwnProposal({ id }: { id: string }) {
+  const r = useRun();
+  const router = useRouter();
+  return (
+    <span className="flex flex-col items-end gap-2">
+      <span className="w-72 max-w-full">
+        <ConfirmItsYou
+          actionLabel="Confirm and approve"
+          onConfirmed={async () => {
+            const res = await proposalAction(id, true);
+            router.refresh();
+            return res.ok ? { ok: true } : { ok: false, error: res.error };
+          }}
+        />
+      </span>
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={r.pending}
+        onClick={() => {
+          r.go(() => proposalAction(id, false), "Withdrawn");
+        }}
+      >
+        Withdraw
       </Button>
       {r.msg?.tone === "error" ? <span className="type-caption text-error">{r.msg.text}</span> : null}
     </span>

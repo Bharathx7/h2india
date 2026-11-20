@@ -17,6 +17,14 @@ const { roles: r, rolePermissions: rp, permissions: p, operatorRoles: or, operat
 
 /** Sections the person may change, or null for every section. */
 export async function staffSections(ex: Executor, userId: string): Promise<string[] | null> {
+  // A Super admin is never limited (founder, 20 Nov 2026), whatever rows exist.
+  const [superAdmin] = await ex
+    .select({ id: or.userId })
+    .from(or)
+    .innerJoin(r, eq(r.id, or.roleId))
+    .where(and(eq(or.userId, userId), eq(r.scope, "operator"), eq(r.name, SUPER_ADMIN)))
+    .limit(1);
+  if (superAdmin) return null;
   const rows = await ex.select({ section: os.section }).from(os).where(eq(os.userId, userId)).orderBy(asc(os.section));
   return rows.length ? rows.map((x) => x.section) : null;
 }

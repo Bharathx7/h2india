@@ -66,6 +66,18 @@ describe.skipIf(!url)("queue claims and decisions", () => {
     expect(sent).toBe(1);
   });
 
+  it("a Super admin takes over an item someone else claimed and decides it (founder, 20 Nov 2026)", async () => {
+    const boss = await op("Super admin");
+    const id = subject();
+    await claimItem(h.db, a, { queue: "events", subjectId: id });
+    await decideItem(h.db, boss, { queue: "events", subjectId: id, decision: "approve" }, tick);
+    const [row] = await h.db
+      .select()
+      .from(schema.queueClaims)
+      .where(and(eq(schema.queueClaims.queue, "events"), eq(schema.queueClaims.subjectId, id)));
+    expect(row?.decidedBy).toBe(boss.userId);
+  });
+
   it("an item sent again under the same id waits for a fresh decision (founder QC, 17 Nov 2026)", async () => {
     const id = subject();
     await decideItem(h.db, a, { queue: "jobs", subjectId: id, decision: "changes", reasons: ["Add the pay"] }, tick);
