@@ -7,7 +7,7 @@ export function AuthCard({ children, className }: { children: ReactNode; classNa
   return (
     <div
       className={cx(
-        "flex flex-col gap-4 rounded-modal border border-default bg-page px-5 py-6 shadow-ink-float-sm md:px-8 md:py-7",
+        "flex flex-col gap-4 rounded-modal border border-default bg-page px-4 py-5 shadow-ink-float-sm md:px-8 md:py-7",
         className,
       )}
     >

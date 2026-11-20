@@ -21,13 +21,15 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     // screen never scrolls, a long form scrolls inside its own column. Phones: a role badge and the form.
     <div className="grid min-h-dvh grid-cols-1 lg:h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:overflow-hidden">
       <AuthAside />
-      <div className="relative isolate flex min-h-dvh flex-col items-center gap-3 overflow-x-hidden bg-mint px-4 py-5 md:justify-center md:gap-4 md:py-6 lg:h-dvh lg:overflow-y-auto">
+      <div className="relative isolate flex min-h-dvh flex-col items-center gap-3 overflow-x-hidden bg-mint px-4 py-4 md:justify-center md:gap-4 md:py-6 lg:h-dvh lg:overflow-y-auto">
         <div aria-hidden="true" className="depth-accent-glow absolute -top-60 -right-40 -z-10 size-160" />
         <div aria-hidden="true" className="depth-accent-glow absolute -bottom-60 -left-40 -z-10 size-160" />
-        <Link href="/" aria-label="H2 Economy home" className="rounded-control">
-          <Logo title="" height={30} />
-        </Link>
-        <RoleTag />
+        <div className="flex items-center gap-3">
+          <Link href="/" aria-label="H2 Economy home" className="rounded-control">
+            <Logo title="" height={30} />
+          </Link>
+          <RoleTag />
+        </div>
         <main className="w-full max-w-140">{children}</main>
         <footer className="type-caption text-secondary">
           © {year} H2 Economy ·{" "}
