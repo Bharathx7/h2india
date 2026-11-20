@@ -2,10 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { buttonClasses, cx, Icon, type IconName } from "@h2india/ui";
 import { audienceFaqs, pricing } from "@/trust/data";
-import { Block, card, DarkCta, Faqs, Feature, Hero, main, Steps, wrap } from "@/trust/parts";
+import {
+  Block,
+  card,
+  DarkCta,
+  Faqs,
+  FeatureGrid,
+  Hero,
+  HeroPreview,
+  Highlights,
+  main,
+  Steps,
+  wrap,
+} from "@/trust/parts";
 
-// For Suppliers (93:1331). The launch-offer band shows only when the offer is entered on Pricing (C1 is parked);
-// questions come from the CMS.
+// For Suppliers (93:1331), on the common audience layout (founder, 20 Nov 2026): hero with a preview of the supplier
+// workspace, what suppliers get, why sell here, who's buying, how to go live, the launch offer (only when entered on
+// Pricing; C1 is parked), questions and sign-up. Only supplier actions on this page (founder: no buyer sign-up here).
 
 export const metadata: Metadata = {
   title: "For suppliers · H2 Economy",
@@ -23,6 +36,53 @@ const BUYERS: { label: string; icon: IconName }[] = [
   { label: "Mobility pilots", icon: "truck" },
 ];
 
+const GET: { icon: IconName; title: string; text: string }[] = [
+  {
+    icon: "building",
+    title: "Storefront",
+    text: "A company profile with products, certificates, projects and news in one place.",
+  },
+  {
+    icon: "inbox",
+    title: "Quote request inbox",
+    text: "Structured requests with a reply-by date. Your response time shows on your profile.",
+  },
+  {
+    icon: "bar-chart",
+    title: "Analytics",
+    text: "Profile views, product views, quote requests and win rate, by category and month.",
+  },
+  {
+    icon: "shield-check",
+    title: "Verification badge",
+    text: "Your badge lists each check and the date we made it, so you're trusted before the first message.",
+  },
+  {
+    icon: "upload",
+    title: "Datasheet to listing",
+    text: "Upload a datasheet PDF and we draft the listing with specs and units for you to approve.",
+  },
+  {
+    icon: "newspaper",
+    title: "News and event submissions",
+    text: "Submit press releases, events and jobs to reach the people who read H2 Economy.",
+  },
+];
+
+const WHY: { icon: IconName; title: string; text: string }[] = [
+  { icon: "check-circle", title: "Listing is free", text: "Add your company and products without paying to list." },
+  {
+    icon: "file-text",
+    title: "Requests, not cold calls",
+    text: "Quote requests arrive with quantities, delivery site and dates, ready to price.",
+  },
+  {
+    icon: "users",
+    title: "Your whole team",
+    text: "Invite sales, catalogue and finance colleagues, each with their own role.",
+  },
+];
+
 export default async function ForSuppliersPage() {
   const [faqs, p] = await Promise.all([audienceFaqs(), pricing()]);
   const offer = p?.commission?.launchValue && p.commission.launchNote ? p.commission : null;
@@ -32,12 +92,29 @@ export default async function ForSuppliersPage() {
         eyebrow="For suppliers"
         title="Reach India’s hydrogen buyers"
         lead="Get a verified listing, receive structured quote requests from engineering and procurement teams, and get paid through H2 Economy with a GST invoice when orders launch."
+        chips={["Manufacturers", "Distributors and dealers", "EPC and engineering firms", "Service providers"]}
         actions={[
           { label: "List your company", href: "/join/supplier", primary: true },
           { label: "Supplier sign in", href: "/supplier/sign-in" },
           { label: "See pricing", href: "/pricing" },
         ]}
+        aside={
+          <HeroPreview
+            title="Your supplier workspace"
+            badge="Supplier"
+            rows={[
+              { icon: "inbox", title: "Quote requests", text: "Structured requests with a reply-by date" },
+              { icon: "building", title: "Storefront", text: "Products, certificates and projects" },
+              { icon: "bar-chart", title: "Analytics", text: "Views, requests and win rate" },
+              { icon: "shield-check", title: "Verified badge", text: "Each check, with its date" },
+            ]}
+          />
+        }
       />
+      <Block id="get" title="What suppliers get" lead="Everything you need to be found, trusted and chosen.">
+        <FeatureGrid items={GET} />
+      </Block>
+      <Highlights id="why" title="Why sell on H2 Economy" items={WHY} />
       <Block id="buying" title="Who’s buying" lead="Buyers on H2 Economy work at organisations like these.">
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {BUYERS.map((b) => (
@@ -69,40 +146,6 @@ export default async function ForSuppliersPage() {
             },
           ]}
         />
-      </Block>
-      <Block id="get" title="What you get">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Feature
-            icon="building"
-            title="Storefront"
-            text="A company profile with products, certificates, projects and news in one place."
-          />
-          <Feature
-            icon="inbox"
-            title="Quote request inbox"
-            text="Structured requests with a reply-by date. Your response time shows on your profile."
-          />
-          <Feature
-            icon="bar-chart"
-            title="Analytics"
-            text="Profile views, product views, quote requests and win rate, by category and month."
-          />
-          <Feature
-            icon="shield-check"
-            title="Verification badge"
-            text="Your badge lists each check and the date we made it, so buyers trust you before they write."
-          />
-          <Feature
-            icon="upload"
-            title="Datasheet to listing"
-            text="Upload a datasheet PDF and we draft the listing with specs and units for you to approve."
-          />
-          <Feature
-            icon="newspaper"
-            title="News and event submissions"
-            text="Submit press releases, events and jobs to reach the people who read H2 Economy."
-          />
-        </div>
       </Block>
       {offer ? (
         <div className={cx(wrap, "pt-12")}>
