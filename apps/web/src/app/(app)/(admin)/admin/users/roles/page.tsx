@@ -1,3 +1,4 @@
+import { userPhotoLinks } from "@h2india/core/account";
 import { getDb } from "@h2india/core";
 import { listStaff } from "@h2india/core/admin/staff";
 import { listUsers, operatorRoleGrid } from "@h2india/core/admin/users";
@@ -48,6 +49,11 @@ export default async function RolesPage({
   const manage = actor.operator.has("roles.manage");
   // Paged like every back-office list (founder, 20 Nov 2026).
   const team = pageOf(staff, pageRequest(sp));
+  const photos = await userPhotoLinks(
+    db,
+    actor,
+    team.rows.map((s) => s.userId),
+  );
   const ordered = [...roles].sort(
     (a, b) => Number(a.custom) - Number(b.custom) || (a.name === "Super admin" ? -1 : b.name === "Super admin" ? 1 : 0),
   );
@@ -115,7 +121,7 @@ export default async function RolesPage({
                   <tr key={s.userId} className="border-t border-default">
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-2">
-                        <Initials name={s.name || s.email} />
+                        <Initials name={s.name || s.email} photoUrl={photos.get(s.userId)} />
                         <span className="flex flex-col">
                           <span className="type-label">{s.name || s.email}</span>
                           <span className="type-caption text-secondary">{s.email}</span>

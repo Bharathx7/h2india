@@ -1,3 +1,4 @@
+import { userPhotoLinks } from "@h2india/core/account";
 import { getDb } from "@h2india/core";
 import { listStaff } from "@h2india/core/admin/staff";
 import { operatorRoleGrid } from "@h2india/core/admin/users";
@@ -25,6 +26,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   const person = staff.find((s) => s.userId === id);
   if (!person) notFound();
   const held = roles.filter((r) => person.roles.includes(r.name));
+  const photos = await userPhotoLinks(db, actor, [person.userId]);
   const permissions = [...new Set(held.flatMap((r) => r.permissions))];
   const usesContent = permissions.includes("content.edit") && !person.roles.includes("Super admin");
   const words = roleWords(permissions);
@@ -36,7 +38,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           Team and roles
         </Link>
         <div className="flex items-center gap-3">
-          <Initials name={person.name || person.email} size="lg" />
+          <Initials name={person.name || person.email} size="lg" photoUrl={photos.get(person.userId)} />
           <div className="flex flex-col gap-1">
             <h1 className="type-h2">{person.name || person.email}</h1>
             <p className="type-body-sm text-secondary">

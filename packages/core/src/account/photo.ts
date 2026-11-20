@@ -1,7 +1,7 @@
 import { schema, type Database, type Executor } from "@h2india/db";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
-import { loadActor } from "../authz/actor";
+import { loadActor, type Actor } from "../authz/actor";
 import { attachFile, fileLink } from "../files/files";
 
 // The profile picture (founder, 20 Nov 2026: "idk where to upload a profile picture"). One picture per person, set on
@@ -69,4 +69,34 @@ export async function accountPhotoUrl(db: Database, userId: string): Promise<str
   } catch {
     return null;
   }
+}
+
+/**
+ * Short-lived links to several people's pictures, for back-office lists (founder, 20 Nov 2026: the Super admin couldn't
+ * see users' pictures). fileLink() checks the reader: staff with users.view may open profile photos. A picture that
+ * can't be opened is simply left out, so the initials show.
+ */
+export async function userPhotoLinks(
+  db: Database,
+  actor: Actor,
+  userIds: readonly string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const ids = [...new Set(userIds)];
+  if (!ids.length) return out;
+  const rows = await db
+    .select({ id: u.id, photoFileId: u.photoFileId })
+    .from(u)
+    .where(and(inArray(u.id, ids), isNotNull(u.photoFileId)));
+  await Promise.all(
+    rows.map(async (r) => {
+      if (!r.photoFileId) return;
+      try {
+        out.set(r.id, (await fileLink({ actor, fileId: r.photoFileId })).url);
+      } catch {
+        // No access or the file is gone: initials instead.
+      }
+    }),
+  );
+  return out;
 }
