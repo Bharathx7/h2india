@@ -1,7 +1,7 @@
 "use client";
 
 import { ATTRIBUTE_TYPE_LABEL, formatAllowedValues, type AttributeInput } from "@h2india/core/catalogue/attributes";
-import type { AttributeRow, CategoryDetail, TreeClass, TreeNode } from "@h2india/core/catalogue/taxonomy";
+import type { AttributeRow, CategoryDetail, TreeClass } from "@h2india/core/catalogue/taxonomy";
 import {
   AsyncSection,
   Button,
@@ -11,7 +11,6 @@ import {
   EmptyState,
   Icon,
   IconButton,
-  Input,
   Menu,
   MenuContent,
   MenuDivider,
@@ -68,7 +67,7 @@ type Dialog =
   | { kind: "rename" | "move" | "hide" | "preview" | "applications" | "duplicate" };
 
 const href = (id: string, tab?: CatalogueTab) =>
-  `/admin/catalogue?category=${id}${tab && tab !== "attributes" ? `&tab=${tab}` : ""}`;
+  `/admin/catalogue/categories/${id}${tab && tab !== "attributes" ? `?tab=${tab}` : ""}`;
 
 type Flag = "required" | "filterable" | "comparable";
 type Pending = Record<string, Partial<Record<Flag, boolean>>>;
@@ -128,30 +127,14 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start gap-4">
-        <div className="min-w-0 flex-1">
-          <h1 className="type-h2">Catalogue</h1>
-          <p className="mt-1 type-body text-secondary">
-            Categories and the spec fields each one asks for. Changes here shape every product form and filter in that
-            category.
-          </p>
-        </div>
-        <Link href="/admin/catalogue/applications" className={buttonClasses({ variant: "ghost" })}>
-          <Icon name="layout-template" size={20} />
-          Applications
-        </Link>
-        {data.canEdit ? (
-          <Button
-            variant="outline"
-            onClick={() => {
-              open({ kind: "add-category", classId: c?.classId ?? "systems", parentId: null });
-            }}
-          >
-            <Icon name="plus" size={20} />
-            Add category
-          </Button>
-        ) : null}
-      </div>
+      {/* Founder (20 Nov 2026): one category per page, reached from Categories; the tree is gone. */}
+      <Link
+        href={c ? `/admin/catalogue/categories?class=${c.classId}` : "/admin/catalogue/categories"}
+        className="inline-flex items-center gap-1 self-start type-label text-secondary"
+      >
+        <Icon name="arrow-left" size={16} />
+        All categories{c ? ` in ${c.classLabel}` : ""}
+      </Link>
 
       <p
         role="status"
@@ -161,9 +144,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
         {message?.text}
       </p>
 
-      <div className="grid grid-cols-[300px_minmax(0,1fr)] items-start gap-6">
-        <CategoryTree tree={data.tree} selectedId={c?.id ?? null} loading={demoState === "loading"} />
-
+      <div className="flex flex-col gap-6">
         {demoState === "loading" || demoState === "error" || !c ? (
           <AsyncSection
             label="Category"
@@ -227,7 +208,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
                       }}
                     >
                       <Icon name="plus" size={18} />
-                      Add attribute
+                      Add product field
                     </Button>
                     <CategoryMenu
                       label={c.label}
@@ -327,14 +308,18 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
               <HistoryPanel lines={c.history} />
             ) : (
               <>
+                <p className="type-body-sm text-secondary">
+                  Product fields are what suppliers fill in for each product in {c.label}. Required fields must be
+                  filled; Filterable ones show as search filters; Comparable ones line up in Compare.
+                </p>
                 {c.inherited.length ? <InheritedTable category={c} /> : null}
                 <AsyncSection
-                  label={`Attributes of ${c.label}`}
+                  label={`Product fields of ${c.label}`}
                   state={demoState === "empty" || c.attributes.length === 0 ? "empty" : "ready"}
                   className="rounded-card border border-default"
                   empty={
                     <EmptyState
-                      title="No attributes yet"
+                      title="No product fields yet"
                       action={
                         data.canEdit ? (
                           <Button
@@ -343,13 +328,13 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
                             }}
                           >
                             <Icon name="plus" size={18} />
-                            Add attribute
+                            Add product field
                           </Button>
                         ) : undefined
                       }
                     >
                       {c.inherited.length
-                        ? `Products here fill in ${c.parentLabel ?? "the parent"}'s attributes above. Add fields only this sub-category needs.`
+                        ? `Products here fill in ${c.parentLabel ?? "the parent"}'s fields above. Add fields only this sub-category needs.`
                         : "Suppliers in this category fill in only the common product fields. Add the specifications buyers filter and compare on."}
                     </EmptyState>
                   }
@@ -452,7 +437,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
           open
           onOpenChange={close}
           title={`Duplicate ${c.label}?`}
-          description="A hidden copy with the same attributes appears beside it, for you to rename and adjust. Products stay where they are."
+          description="A hidden copy with the same product fields appears beside it, for you to rename and adjust. Products stay where they are."
           confirmLabel="Duplicate"
           confirmDisabled={busy}
           onConfirm={() => {
@@ -504,7 +489,7 @@ export function CatalogueView({ data, demoState }: { data: CatalogueData; demoSt
 }
 
 const TABS: { key: CatalogueTab; label: string }[] = [
-  { key: "attributes", label: "Attributes" },
+  { key: "attributes", label: "Product fields" },
   { key: "details", label: "Details" },
   { key: "applications", label: "Applications" },
   { key: "history", label: "History" },
@@ -598,12 +583,12 @@ function HistoryPanel({ lines }: { lines: HistoryLine[] }) {
 function InheritedTable({ category: c }: { category: CatalogueData["category"] & object }) {
   return (
     <section
-      aria-label={`Attributes from ${c.parentLabel ?? "the parent"}`}
+      aria-label={`Product fields from ${c.parentLabel ?? "the parent"}`}
       className="rounded-card border border-default bg-subtle p-4"
     >
       <p className="type-label">
-        From {c.parentLabel}: {c.inherited.length} {c.inherited.length === 1 ? "attribute" : "attributes"} products here
-        fill in first
+        From {c.parentLabel}: {c.inherited.length} {c.inherited.length === 1 ? "field" : "fields"} products here fill in
+        first
       </p>
       <p className="mt-1 type-body-sm text-secondary">
         {c.inherited
@@ -706,7 +691,7 @@ function AttributeTable(props: {
     <div
       role="region"
       tabIndex={0}
-      aria-label={`Attribute schema for ${props.category.label}`}
+      aria-label={`Product fields for ${props.category.label}`}
       // relative: Radix checkboxes keep a hidden absolutely-placed input; this keeps them inside the scrolling box.
       className="relative overflow-x-auto rounded-card"
     >
@@ -857,222 +842,6 @@ function AttributeMenu(props: {
         </MenuItem>
       </MenuContent>
     </Menu>
-  );
-}
-
-function CategoryTree({
-  tree,
-  selectedId,
-  loading,
-}: {
-  tree: TreeClass[];
-  selectedId: string | null;
-  loading: boolean;
-}) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<TreeFilter>("all");
-  // Open the class and category that hold the selection; the others start closed, as drawn.
-  const [open, setOpen] = useState<Set<string>>(() => {
-    const ids = new Set<string>();
-    for (const k of tree) {
-      for (const cat of k.categories) {
-        const inside = cat.children.some((s) => s.id === selectedId);
-        if (cat.id === selectedId || inside) ids.add(k.id);
-        if (inside) ids.add(cat.id);
-      }
-    }
-    return ids;
-  });
-  const q = query.trim().toLowerCase();
-  const pass = (n: TreeNode) =>
-    filter === "all" || (filter === "hidden" ? n.hidden : filter === "sample" ? n.sample : n.attributes === 0);
-  const hit = (n: TreeNode) => (!q || n.label.toLowerCase().includes(q)) && pass(n);
-  // While searching or filtering, a category shows when it or one of its sub-categories matches; all of it is open.
-  const narrowing = q !== "" || filter !== "all";
-  const shown = (n: TreeNode): boolean => !narrowing || hit(n) || n.children.some(hit);
-  const subShown = (parent: TreeNode, s: TreeNode) => !narrowing || hit(parent) || hit(s);
-  const classes = tree
-    .map((k) => ({ ...k, categories: k.categories.filter(shown) }))
-    .filter((k) => !narrowing || k.categories.length > 0);
-  const toggle = (id: string) => {
-    setOpen((s) => {
-      const next = new Set(s);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-  const isOpen = (id: string) => narrowing || open.has(id);
-
-  return (
-    <nav aria-label="Categories" className="flex flex-col gap-0.5 rounded-card border border-default p-2">
-      <Input
-        type="search"
-        leadingIcon="search"
-        placeholder="Search categories"
-        aria-label="Search categories"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-        }}
-        boxClassName="mb-1"
-      />
-      <div role="group" aria-label="Show" className="mb-1 flex flex-wrap gap-1.5 px-1">
-        {TREE_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            aria-pressed={filter === f.key}
-            onClick={() => {
-              setFilter(f.key);
-            }}
-            className={cx(
-              "inline-flex h-7 items-center rounded-pill border px-2.5 type-label-sm",
-              filter === f.key ? "border-transparent bg-inverse text-inverse" : "border-control bg-page text-primary",
-            )}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-      {loading ? (
-        <div aria-busy="true" className="flex flex-col gap-3 p-2">
-          {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} />
-          ))}
-        </div>
-      ) : classes.length === 0 ? (
-        <p className="px-2 py-3 type-body-sm text-secondary">
-          {q ? `No categories match “${query.trim()}”.` : "No categories here."}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-0.5">
-          {classes.map((k) => (
-            <li key={k.id}>
-              <TreeRow
-                depth={0}
-                label={k.label}
-                count={k.liveProducts}
-                expanded={isOpen(k.id)}
-                onToggle={() => {
-                  toggle(k.id);
-                }}
-              />
-              {isOpen(k.id) ? (
-                <ul className="flex flex-col gap-0.5">
-                  {k.categories.map((cat) => (
-                    <li key={cat.id}>
-                      <TreeRow
-                        depth={1}
-                        node={cat}
-                        selected={cat.id === selectedId}
-                        expanded={cat.children.length ? isOpen(cat.id) : undefined}
-                        onToggle={() => {
-                          toggle(cat.id);
-                        }}
-                      />
-                      {cat.children.length && isOpen(cat.id) ? (
-                        <ul className="flex flex-col gap-0.5">
-                          {cat.children
-                            .filter((s) => subShown(cat, s))
-                            .map((s) => (
-                              <li key={s.id}>
-                                <TreeRow depth={2} node={s} selected={s.id === selectedId} />
-                              </li>
-                            ))}
-                        </ul>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-    </nav>
-  );
-}
-
-type TreeFilter = "all" | "hidden" | "sample" | "empty";
-const TREE_FILTERS: { key: TreeFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "hidden", label: "Hidden" },
-  { key: "sample", label: "Sample" },
-  { key: "empty", label: "No attributes" },
-];
-
-/** Where each level's chevron sits (636:921, 636:926, 636:941): labels line up at 28, 44 and 60 px. */
-const INDENT = ["w-2", "w-6", "w-10"] as const;
-
-function TreeRow(props: {
-  depth: 0 | 1 | 2;
-  node?: TreeNode;
-  label?: string;
-  count?: number;
-  selected?: boolean;
-  expanded?: boolean;
-  onToggle?: () => void;
-}) {
-  const label = props.node?.label ?? props.label ?? "";
-  const count = props.node?.liveProducts ?? props.count ?? 0;
-  const chevron =
-    props.expanded === undefined ? (
-      <span aria-hidden="true" className="w-3.5 shrink-0" />
-    ) : (
-      <Icon name={props.expanded ? "chevron-down" : "chevron-right"} size={14} className="shrink-0 text-icon-primary" />
-    );
-  const words: ReactNode = (
-    <>
-      <span className="min-w-0 flex-1">
-        {label}
-        {props.node?.hidden ? <span className="text-secondary"> · hidden</span> : null}
-        {props.node?.sample ? <span className="text-secondary"> · sample</span> : null}
-      </span>
-      <span className="shrink-0 type-caption text-secondary">{count.toLocaleString("en-IN")}</span>
-    </>
-  );
-  const indent = <span aria-hidden="true" className={`shrink-0 ${INDENT[props.depth]}`} />;
-
-  // A class only opens and closes.
-  if (!props.node) {
-    return (
-      <button
-        type="button"
-        aria-expanded={props.expanded}
-        onClick={props.onToggle}
-        className="flex w-full items-center gap-1.5 rounded-control py-2 pr-2 text-left type-body text-primary hover:bg-subtle"
-      >
-        {indent}
-        {chevron}
-        {words}
-      </button>
-    );
-  }
-  return (
-    <div className={`flex items-center rounded-control ${props.selected ? "bg-mint" : "hover:bg-subtle"}`}>
-      {indent}
-      {props.expanded !== undefined ? (
-        <button
-          type="button"
-          aria-expanded={props.expanded}
-          aria-label={`${props.expanded ? "Close" : "Open"} ${label}`}
-          onClick={props.onToggle}
-          className="flex items-center self-stretch rounded-control"
-        >
-          {chevron}
-        </button>
-      ) : (
-        chevron
-      )}
-      <Link
-        href={href(props.node.id)}
-        aria-current={props.selected ? "page" : undefined}
-        className={`ml-1.5 flex min-w-0 flex-1 items-center gap-1.5 rounded-control py-2 pr-2 ${props.selected ? "type-label-lg" : "type-body"} text-primary`}
-      >
-        {words}
-      </Link>
-    </div>
   );
 }
 

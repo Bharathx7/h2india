@@ -144,6 +144,8 @@ const ADMIN = [
   "/admin",
   "/admin/catalogue",
   "/admin/catalogue/applications",
+  "/admin/catalogue/categories",
+  "/admin/catalogue/requests",
   "/admin/compliance",
   "/admin/content",
   "/admin/content/calendar",

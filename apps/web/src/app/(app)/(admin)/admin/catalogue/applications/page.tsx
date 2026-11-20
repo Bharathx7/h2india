@@ -1,10 +1,9 @@
 import { getDb } from "@h2india/core";
 import { can } from "@h2india/core/authz";
 import { applicationUsage, catalogueApplications } from "@h2india/core/catalogue/taxonomy";
-import { Icon } from "@h2india/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { AdminShell, requireOperator } from "@/admin/shell";
+import { CatalogueTabs } from "../CatalogueTabs";
 import { ListPager } from "@/components/ListPager";
 import { pageOf, pageRequest, pagingQuery } from "@/lib/paging";
 import { ApplicationsManager } from "./ApplicationsManager";
@@ -29,10 +28,7 @@ export default async function ApplicationsPage({
   const paged = pageOf(rows, pageRequest(sp));
   return (
     <AdminShell userId={userId} current="/admin/catalogue">
-      <Link href="/admin/catalogue" className="inline-flex items-center gap-1 type-label">
-        <Icon name="arrow-left" size={16} />
-        Catalogue
-      </Link>
+      <CatalogueTabs current="applications" />
       <ApplicationsManager
         canEdit={can(actor, "catalogue.edit")}
         rows={paged.rows.map((r) => ({ ...r, categories: usage.get(r.id) ?? 0 }))}

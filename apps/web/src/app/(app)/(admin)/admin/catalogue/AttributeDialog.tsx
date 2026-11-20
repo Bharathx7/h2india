@@ -8,7 +8,7 @@ import {
   type AttributeDef,
   type AttributeInput,
 } from "@h2india/core/catalogue/attributes";
-import { Button, Drawer, FormField, Input, Select, Switch } from "@h2india/ui";
+import { Button, cx, Drawer, FormField, Input, Radio, RadioGroup, Select, Switch } from "@h2india/ui";
 import { useState, useTransition } from "react";
 import { addAttributeAction, updateAttributeAction } from "./actions";
 
@@ -16,6 +16,15 @@ import { addAttributeAction, updateAttributeAction } from "./actions";
 // rules as the server (checkAttribute); the server checks again and answers with the same words.
 
 const NEW_GROUP = "__new";
+
+/** One line per kind of field, so the choice is clear without knowing the words (founder, 20 Nov 2026). */
+const TYPE_EXAMPLE: Record<(typeof ATTRIBUTE_TYPES)[number], string> = {
+  number: "One number with a unit, like 30 bar",
+  range: "From–to, like 20–80 °C",
+  text: "Free words, like a model name",
+  choice: "One of a list you set, like PEM or Alkaline",
+  boolean: "Yes or no, like ATEX certified",
+};
 
 export interface AttributeDialogProps {
   open: boolean;
@@ -95,7 +104,7 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
     <Drawer
       open={open}
       onOpenChange={onOpenChange}
-      title={editing ? `Edit ${editing.label}` : `Add an attribute to ${category.label}`}
+      title={editing ? `Edit ${editing.label}` : `Add a product field to ${category.label}`}
       description={`Suppliers see this field in the product form for ${productKind(category.label, category.parentLabel)}.`}
       footer={
         <>
@@ -108,7 +117,7 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
             Cancel
           </Button>
           <Button onClick={submit} disabled={pending}>
-            {editing ? "Save changes" : "Add attribute"}
+            {editing ? "Save changes" : "Add product field"}
           </Button>
         </>
       }
@@ -136,29 +145,45 @@ export function AttributeDialog({ open, onOpenChange, category, editing, onDone 
               autoComplete="off"
             />
           </FormField>
-          <FormField
-            label="Type"
-            error={errors.type}
-            helper={
-              locked
-                ? `${String(locked)} ${locked === 1 ? "product uses" : "products use"} it: type and unit are locked`
-                : undefined
-            }
-          >
-            <Select
-              disabled={locked > 0}
+          {/* Founder (20 Nov 2026): the kind of field as cards with an example, not a bare list. */}
+          <fieldset className="flex flex-col gap-2 md:col-span-2">
+            <legend className="mb-1 type-label">Type</legend>
+            <RadioGroup
+              aria-label="Type"
               value={form.type}
-              onChange={(e) => {
-                set("type", e.target.value);
+              disabled={locked > 0}
+              onValueChange={(v) => {
+                set("type", v);
               }}
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
             >
               {ATTRIBUTE_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {ATTRIBUTE_TYPE_LABEL[t]}
-                </option>
+                <div
+                  key={t}
+                  className={cx(
+                    "rounded-card border p-3",
+                    form.type === t ? "border-focus bg-mint" : "border-default bg-page",
+                  )}
+                >
+                  <Radio
+                    value={t}
+                    label={
+                      <span className="flex flex-col">
+                        <span className="type-label">{ATTRIBUTE_TYPE_LABEL[t]}</span>
+                        <span className="type-caption text-secondary">{TYPE_EXAMPLE[t]}</span>
+                      </span>
+                    }
+                  />
+                </div>
               ))}
-            </Select>
-          </FormField>
+            </RadioGroup>
+            {errors.type ? <p className="type-caption text-error">{errors.type}</p> : null}
+            {locked ? (
+              <p className="type-caption text-secondary">
+                {`${String(locked)} ${locked === 1 ? "product uses" : "products use"} it: type and unit are locked`}
+              </p>
+            ) : null}
+          </fieldset>
           <FormField label="Unit" error={errors.unit}>
             <Input
               value={form.type === "choice" || form.type === "boolean" ? "" : form.unit}

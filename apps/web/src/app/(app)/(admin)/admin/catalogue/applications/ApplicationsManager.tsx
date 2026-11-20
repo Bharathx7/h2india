@@ -43,7 +43,7 @@ export function ApplicationsManager({ rows, canEdit }: { rows: ApplicationListRo
     <>
       <div className="flex flex-wrap items-start gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="type-h2">Applications</h1>
+          <h2 className="type-h3">Applications</h2>
           <p className="mt-1 type-body text-secondary">
             How buyers browse by use: the home tiles, the Marketplace menu and its landing page. Categories join an
             application from their Applications tab.
