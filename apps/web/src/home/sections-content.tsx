@@ -277,20 +277,24 @@ const TARGETS = [
   { value: "~50 MMT", label: "CO₂ emissions avoided each year" },
 ];
 
-/** 11 Why it matters (854:8): the National Green Hydrogen Mission 2030 targets as drawn, with their source (A42). */
+/**
+ * 11 Why it matters (854:8): the National Green Hydrogen Mission 2030 targets as drawn, with their source (A42).
+ * Public QC 5 (20 Nov 2026): the founder found the text too loud for a mid-page band, so the heading is h2, the
+ * figures h2 (h3 on phones) instead of display, the labels body, and the band and cards are tighter. Colours unchanged.
+ */
 export function WhyItMatters() {
   return (
     <Section
       id="mission"
       className="bg-fresh-700"
-      inner="flex flex-col gap-4 py-16 lg:flex-row lg:items-center lg:gap-12 lg:py-24"
+      inner="flex flex-col gap-4 py-14 lg:flex-row lg:items-center lg:gap-12 lg:py-20"
     >
       <div className="relative flex flex-col gap-4 lg:w-121.5 lg:shrink-0">
         <p className="type-label-sm text-fresh-300">National Green Hydrogen Mission · 2030 targets</p>
-        <h2 id="mission-title" className="type-h2 text-inverse md:type-h1">
+        <h2 id="mission-title" className="type-h2 text-inverse">
           India is building a 5 MMT green hydrogen economy
         </h2>
-        <p className="type-body text-fresh-200 md:type-body-lg">
+        <p className="type-body text-fresh-200">
           H2 Economy connects the buyers, suppliers, schemes and tenders that get it built.
         </p>
         <Link
@@ -301,16 +305,16 @@ export function WhyItMatters() {
         </Link>
       </div>
       <div className="relative flex flex-1 flex-col gap-3">
-        <dl className="flex flex-col gap-4 lg:gap-3">
+        <dl className="flex flex-col gap-3">
           {TARGETS.map((t) => (
             <div
               key={t.value}
               data-reveal-item=""
-              className="flex flex-col gap-1 rounded-card border border-neutral-0/16 bg-neutral-0/6 px-5 py-4 lg:flex-row lg:items-center lg:gap-6 lg:px-7 lg:py-5"
+              className="flex flex-col gap-1 rounded-card border border-neutral-0/16 bg-neutral-0/6 px-5 py-3.5 lg:flex-row lg:items-center lg:gap-6 lg:px-6 lg:py-4"
             >
               <dt className="sr-only">{t.label}</dt>
-              <dd className="type-h1 text-inverse lg:w-110 lg:shrink-0 lg:type-display">{t.value}</dd>
-              <dd className="type-body text-fresh-200 lg:type-body-lg" aria-hidden="true">
+              <dd className="type-h3 text-inverse lg:w-64 lg:shrink-0 lg:type-h2">{t.value}</dd>
+              <dd className="type-body text-fresh-200" aria-hidden="true">
                 {t.label}
               </dd>
             </div>

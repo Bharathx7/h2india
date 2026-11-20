@@ -35,24 +35,41 @@ test("the top strip hides while scrolling down and comes back on a scroll up; th
   await page.getByRole("link", { name: "H2 Economy home" }).first().hover();
   await page.mouse.down();
   await expect(strip).toBeHidden();
+  await page.mouse.up();
+  await page.keyboard.press("Escape");
+  // Public QC 5 (20 Nov 2026): opening a section menu keeps the strip hidden, and so does closing search.
+  await nav.getByRole("button", { name: "News" }).click();
+  await expect(page.locator("header").getByRole("link", { name: "Advertise", exact: true })).toBeVisible();
+  await expect(strip).toBeHidden();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Search H2 Economy" }).click();
+  await page.keyboard.type("electrolyser");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await expect(strip).toBeHidden();
   await page.mouse.move(700, 600);
   await page.mouse.wheel(0, -200);
   await expect(strip).toBeVisible();
 });
 
-test("the top strip reads For Buyers, For Members, For Suppliers; Sign in is Buyer sign in", async ({ page }, info) => {
+test("the top strip reads For Buyers, For Members, For Suppliers, Pricing; Sign in is Buyer sign in", async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== "desktop-1440", "The top strip is desktop; the phone menu uses the same list");
   await page.goto("/news");
   const labels = await page
     .locator("header")
-    .getByRole("link", { name: /^For (Buyers|Members|Suppliers)$/ })
+    .getByRole("link", { name: /^(For (Buyers|Members|Suppliers)|Pricing|Advertise|Newsletter)$/ })
     .allInnerTexts();
-  expect(labels.slice(0, 3)).toEqual(["For Buyers", "For Members", "For Suppliers"]);
+  // Public QC 5 (20 Nov 2026): only these four; Advertise and Newsletter moved into the News menu.
+  expect(labels).toEqual(["For Buyers", "For Members", "For Suppliers", "Pricing"]);
   await expect(page.locator("header").getByRole("link", { name: "Sign in" }).first()).toHaveAttribute(
     "href",
     "/buyer/sign-in",
   );
-  await expect(page.locator("header").getByRole("link", { name: "List your company" }).first()).toHaveAttribute(
+  // List your company is in the Marketplace menu's tools.
+  await page.getByRole("navigation", { name: "Main" }).getByRole("button", { name: "Marketplace" }).click();
+  await expect(page.locator("header").getByRole("link", { name: "List your company" })).toHaveAttribute(
     "href",
     "/join/supplier",
   );

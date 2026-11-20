@@ -23,6 +23,10 @@ export const SITE_LINKS: SiteLinks = {
     { label: "For Members", href: "/for-members" },
     { label: "For Suppliers", href: "/for-suppliers" },
     { label: "Pricing", href: "/pricing" },
+  ],
+  // Public QC 5 (20 Nov 2026): the strip keeps only the four above. Advertise and Newsletter moved into the News menu
+  // and List your company into the Marketplace menu's tools; the phone menu lists these two under the strip links.
+  more: [
     { label: "Advertise", href: "/advertise" },
     { label: "Newsletter", href: "/newsletter" },
   ],
@@ -34,6 +38,11 @@ export const SITE_LINKS: SiteLinks = {
  */
 export function canRequestQuote(user: { workspaceHref: string } | null): boolean {
   return user === null || user.workspaceHref === "/buyer";
+}
+
+/** The mega menus without List your company, for signed-in people (it creates a supplier account; public QC 5). */
+export function menusWithoutListCompany(menus: MegaSection[]): MegaSection[] {
+  return menus.map((m) => (m.tools ? { ...m, tools: m.tools.filter((t) => t.href !== SITE_LINKS.listCompany) } : m));
 }
 
 const isQuoteLink = (href: string) =>
@@ -77,6 +86,7 @@ export const MEGA_MENUS: MegaSection[] = [
       { label: "Brands", href: "/marketplace/brands", icon: "building" },
       { label: "Compare products", href: "/marketplace/compare", icon: "compare" },
       { label: "Request a quote", href: "/rfq/new", icon: "file-text" },
+      { label: "List your company", href: "/join/supplier", icon: "plus" },
     ],
     sponsor: null,
   },
@@ -90,14 +100,16 @@ export const MEGA_MENUS: MegaSection[] = [
       { label: "Projects & investment", description: "Plants, hubs, offtake and funding", href: "/news/projects" },
       { label: "Tenders & awards", description: "Bids, results and who won", href: "/news/tenders" },
     ],
-    linksTitle: "More topics",
+    linksTitle: "More",
     links: [
       { label: "Technology", href: "/news/technology" },
       { label: "Mobility", href: "/news/mobility" },
       { label: "Markets & prices", href: "/news/markets" },
       { label: "Global to India", href: "/news/global" },
       { label: "Press releases", href: "/news/press-releases" },
+      { label: "Newsletter", href: "/newsletter" },
       { label: "Newsletter archive", href: "/newsletter/archive" },
+      { label: "Advertise", href: "/advertise" },
     ],
     promo: {
       eyebrow: "Newsletter",
