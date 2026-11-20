@@ -1,6 +1,7 @@
 import { schema, type Executor } from "@h2india/db";
 import { and, desc, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 import type { AttributeDef } from "../catalogue/attributes";
+import { productPhotos, type ProductPhoto } from "./photos";
 import { cardChips, formatValue, leadTimeLabel, type ListingQuery } from "./rules";
 import { supplierNotSuspended } from "./suspension";
 
@@ -19,6 +20,8 @@ export interface ProductCard {
   supplier: { name: string; href: string; verified: boolean };
   chips: string[];
   leadTime: string | null;
+  /** The first checked photo; without one the card draws the equipment. Filled for listing pages. */
+  photo?: ProductPhoto | null;
   /** Comparable attributes, shown as table columns (392:5787), by key. */
   values: Record<string, string | null>;
 }
@@ -53,6 +56,7 @@ interface Row {
   categoryId: string;
   attributes: Record<string, unknown>;
   certifications: string[];
+  images: { fileId: string }[];
   leadMin: number | null;
   leadMax: number | null;
   madeInIndia: boolean;
@@ -80,6 +84,7 @@ async function liveRows(db: Executor, scope: ListingScope): Promise<Row[]> {
       categoryId: p.categoryId,
       attributes: p.attributes,
       certifications: p.certifications,
+      images: p.images,
       leadMin: p.leadTimeMinWeeks,
       leadMax: p.leadTimeMaxWeeks,
       madeInIndia: p.madeInIndia,
@@ -111,6 +116,7 @@ async function liveRows(db: Executor, scope: ListingScope): Promise<Row[]> {
       categoryId: r.categoryId,
       attributes: r.attributes,
       certifications: r.certifications,
+      images: r.images,
       leadMin: r.leadMin,
       leadMax: r.leadMax,
       madeInIndia: r.madeInIndia,
@@ -210,7 +216,9 @@ export async function listProducts(db: Executor, scope: ListingScope, q: Listing
   const sorted = sortRows(matching, q);
   const start = (q.page - 1) * q.perPage;
   const comparable = scope.defs.filter((d) => d.comparable);
-  const items = sorted.slice(start, start + q.perPage).map((r): ProductCard => {
+  const page = sorted.slice(start, start + q.perPage);
+  const photos = await productPhotos(db, page);
+  const items = page.map((r): ProductCard => {
     const cat = labelOf.get(r.categoryId);
     const parent = cat?.parentId ? labelOf.get(cat.parentId) : undefined;
     return {
@@ -224,6 +232,7 @@ export async function listProducts(db: Executor, scope: ListingScope, q: Listing
       supplier: { name: r.supplierName, href: `/directory/companies/${r.supplierSlug}`, verified: r.verified },
       chips: cardChips(scope.defs, r.attributes, r.certifications),
       leadTime: leadTimeLabel(r.leadMin, r.leadMax),
+      photo: photos.get(r.id)?.[0] ?? null,
       values: Object.fromEntries(comparable.map((d) => [d.key, formatValue(d, r.attributes[d.key])])),
     };
   });

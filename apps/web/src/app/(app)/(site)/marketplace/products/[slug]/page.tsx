@@ -124,15 +124,31 @@ export default async function ProductPage({
         />
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,600px)_minmax(0,1fr)] lg:gap-12">
           {/* Founder v2 (18 Nov 2026): a branded tile until photos exist, and the key facts under it, so the left
-              column carries what a buyer checks first instead of an empty grey box. */}
+              column carries what a buyer checks first instead of an empty grey box. The supplier's first checked
+              photo replaces the drawing (20 Nov 2026). */}
           <div className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
-            <div
-              className="relative aspect-[16/9] overflow-hidden rounded-card bg-fresh-50 lg:aspect-[4/3]"
-              role="img"
-              aria-label={`No photos of ${p.name} yet`}
-            >
-              <EquipmentArt kind={equipmentKind(p.category.slug, p.name)} />
-            </div>
+            {p.photos[0] ? (
+              <div className="relative aspect-[16/9] overflow-hidden rounded-card bg-fresh-50 lg:aspect-[4/3]">
+                {/* eslint-disable-next-line @next/next/no-img-element -- product photos come from the storage domain, already resized */}
+                <img
+                  src={p.photos[0].src}
+                  srcSet={p.photos[0].srcSet || undefined}
+                  sizes="(min-width: 1024px) 600px, 100vw"
+                  alt={p.name}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 size-full object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                className="relative aspect-[16/9] overflow-hidden rounded-card bg-fresh-50 lg:aspect-[4/3]"
+                role="img"
+                aria-label={`No photos of ${p.name} yet`}
+              >
+                <EquipmentArt kind={equipmentKind(p.category.slug, p.name)} />
+              </div>
+            )}
             <dl className="grid grid-cols-2 gap-3" aria-label="Key facts">
               <KeyFact label="Lead time" value={p.leadTime ?? "Ask the supplier"} />
               <KeyFact
@@ -515,6 +531,7 @@ export default async function ProductPage({
                     supplier={s.supplier}
                     supplierVerified={s.verified}
                     chips={s.chips}
+                    photo={s.photo}
                     leadTime={s.leadTime}
                     renderLink={({ href, className, children }) => (
                       <Link href={href} className={className}>

@@ -11,7 +11,8 @@ import { buttonClasses } from "../Button";
    white coin and the Verified badge on it, the category as a plain caption, spec chips in mint, and the footer (lead
    time, View product) on the card's bottom edge so cards in a row line up. Same props and the same controls.
    Design upgrade (19 Nov 2026): the tile shows an engineering drawing of the product's equipment (`EquipmentArt`,
-   chosen from the category words) instead of the same bolt on every card. */
+   chosen from the category words) instead of the same bolt on every card.
+   Product photos (20 Nov 2026): a supplier's checked photo replaces the drawing when the listing has one. */
 
 export interface ProductCardProps {
   name: string;
@@ -22,6 +23,8 @@ export interface ProductCardProps {
   supplierVerified?: boolean;
   /** The drawing on the tile; worked out from the eyebrow and name when left out. */
   art?: EquipmentKind;
+  /** The listing's first checked photo (public storage URLs); replaces the drawing. */
+  photo?: { src: string; srcSet: string } | null;
   chips: string[];
   leadTime?: string | null;
   /** Compare and Save buttons; rendered by the page so they can hold state. */
@@ -43,6 +46,7 @@ export function ProductCard({
   supplier,
   supplierVerified = false,
   art,
+  photo,
   chips,
   leadTime,
   actions,
@@ -57,7 +61,19 @@ export function ProductCard({
       )}
     >
       <div className="relative aspect-[16/9] bg-fresh-50 sm:aspect-[4/3]">
-        <EquipmentArt kind={art ?? equipmentKind(eyebrow, name)} />
+        {photo ? (
+          <img
+            src={photo.src}
+            srcSet={photo.srcSet || undefined}
+            sizes="(min-width: 1280px) 400px, (min-width: 640px) 50vw, 100vw"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <EquipmentArt kind={art ?? equipmentKind(eyebrow, name)} />
+        )}
         {supplierVerified ? (
           <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
             <Icon name="shield-check" size={14} className="text-icon-success" />
