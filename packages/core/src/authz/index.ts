@@ -21,3 +21,5 @@ export type { RoleGridRow } from "./company-roles";
 export { accessPresets, grantablePermissions, MemberAccessError, setMemberAccess, storedAccess } from "./member-access";
 export type { AccessChoice, AccessPreset } from "./member-access";
 export type { WorkspaceKind } from "./identity";
+export { cleanSections, completePermissions, CONTENT_SECTION_IDS, StaffError, SUPER_ADMIN_ONLY } from "./staff-rules";
+export type { ContentSectionId } from "./staff-rules";

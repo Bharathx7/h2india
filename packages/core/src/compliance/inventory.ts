@@ -642,6 +642,7 @@ export const NOT_PERSONAL_TABLES: readonly string[] = [
   "message_threads",
   "newsletter_sends",
   "operator_roles",
+  "operator_sections",
   "order_accounts",
   "order_lines",
   "order_milestones",

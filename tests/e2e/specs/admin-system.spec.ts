@@ -15,7 +15,7 @@ test("Users, roles and the audit log", async ({ page }) => {
   await signInOperator(page, "Super admin");
   await page.goto("/admin/users");
   await expect(page.getByRole("heading", { level: 1, name: "Users" })).toBeVisible();
-  await page.getByRole("link", { name: "Operator roles" }).click();
+  await page.getByRole("link", { name: "Team and roles" }).click();
   await expect(page.getByRole("region", { name: /permissions/ })).toBeVisible();
   await page.getByRole("link", { name: "Audit log" }).click();
   await expect(

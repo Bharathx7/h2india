@@ -94,9 +94,12 @@ const fail = (error: unknown): { ok: false; error: string } => {
   throw error;
 };
 
+const OUTSIDE_SECTION = "You can change only the content sections a Super admin gave you.";
+
 /** Save draft: creates the article on its first save, then saves a new draft version. */
 export async function saveArticleAction(id: number | null, form: ArticleForm): Promise<ArticleResult> {
   const who = await editorActor();
+  if (who && !who.inSection) return { ok: false, error: OUTSIDE_SECTION };
   if (!who?.canEdit) return { ok: false, error: "Your role can't edit articles." };
   if (!form.title.trim()) return { ok: false, error: "Add a headline before saving." };
   const payload = await getPayload({ config });
@@ -129,6 +132,7 @@ export async function moveArticleAction(
   if (!(action in RULES)) return { ok: false, error: "Unknown action." };
   const who = await editorActor();
   if (!who) return { ok: false, error: "Sign in again." };
+  if (!who.inSection) return { ok: false, error: OUTSIDE_SECTION };
   const payload = await getPayload({ config });
   try {
     await transitionArticle(payload, { id, action, actor: who.actor, ...opts });

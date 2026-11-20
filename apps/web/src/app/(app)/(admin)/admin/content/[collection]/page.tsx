@@ -97,7 +97,10 @@ export default async function LibraryPage({
           </>
         }
         actions={
-          cms.can("content.edit") && !type.upload && !NO_CREATE_SLUGS.includes(collection) ? (
+          cms.can("content.edit") &&
+          cms.mayChange(collection) &&
+          !type.upload &&
+          !NO_CREATE_SLUGS.includes(collection) ? (
             <Link href={`/admin/content/${collection}/new`} className={buttonClasses({})}>
               <Icon name="plus" size={16} />
               {collection === "authors" ? "Add author" : `New ${type.singular.toLowerCase()}`}
@@ -106,7 +109,7 @@ export default async function LibraryPage({
         }
       />
 
-      {type.upload && cms.can("content.edit") ? (
+      {type.upload && cms.can("content.edit") && cms.mayChange(collection) ? (
         <ContentUpload
           slug={collection}
           accept={collection === "media" ? "image/jpeg,image/png,image/webp" : "application/pdf"}
@@ -347,7 +350,7 @@ export default async function LibraryPage({
                   <td className="px-4 py-3 text-right">
                     {archived ? (
                       <span className="inline-flex items-start justify-end gap-2">
-                        {cms.can("content.delete") ? (
+                        {cms.can("content.delete") && cms.mayChange(collection) ? (
                           <RestoreRecord slug={collection} id={r.id} name={r.title} />
                         ) : null}
                         {cms.can("content.purge") ? (

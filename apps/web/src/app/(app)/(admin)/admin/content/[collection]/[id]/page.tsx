@@ -58,9 +58,9 @@ export default async function EditRecordPage({ params }: { params: Promise<{ col
           verifiedDays: verification?.at ? daysSince(verification.at) : null,
         }}
         choices={choices}
-        canEdit={cms.can("content.edit") && !READ_ONLY_SLUGS.includes(collection)}
+        canEdit={cms.can("content.edit") && cms.mayChange(collection) && !READ_ONLY_SLUGS.includes(collection)}
         verify={VERIFIED_SLUGS.includes(collection)}
-        canArchive={cms.can("content.delete")}
+        canArchive={cms.can("content.delete") && cms.mayChange(collection)}
         canPurge={cms.can("content.purge")}
       />
     </AdminShell>

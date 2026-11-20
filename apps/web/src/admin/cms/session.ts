@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { editorUserFor } from "@/cms/auth-strategy";
+import { sectionAllows } from "@/cms/section-access";
 import { operatorSession } from "@/server/auth";
 
 // The signed-in operator as a CMS editor (step 4.6). The native content screens call Payload's Local API as this user
@@ -15,5 +16,7 @@ export async function cmsSession() {
   const can = (
     p: "content.view" | "content.edit" | "content.delete" | "content.publish" | "content.purge" | "settings.edit",
   ) => user.permissions.includes(p);
-  return { payload, user, userId: session.user.id, can };
+  /** Whether they may change content of this type (their sections; founder, 20 Nov 2026). */
+  const mayChange = (slug: string) => sectionAllows(user.sections, slug);
+  return { payload, user, userId: session.user.id, can, mayChange };
 }

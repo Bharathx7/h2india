@@ -48,7 +48,7 @@ export default async function SettingPage({ params }: { params: Promise<{ slug: 
           verifiedDays: null,
         }}
         choices={choices}
-        canEdit={cms.can("content.edit")}
+        canEdit={cms.can("content.edit") && cms.mayChange(slug)}
         verify={false}
       />
     </AdminShell>

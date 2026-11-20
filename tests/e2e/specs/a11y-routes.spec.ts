@@ -166,6 +166,8 @@ const ADMIN = [
   "/admin/users/companies",
   "/admin/users/audit",
   "/admin/users/roles",
+  "/admin/users/roles/add",
+  "/admin/users/roles/role",
   "/admin/users/support",
   "/admin/verification",
 ];

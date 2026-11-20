@@ -8,6 +8,8 @@ export interface EditorUser {
   id: string | number;
   collection: "editors";
   permissions?: string[];
+  /** Content sections they may change; null or missing: every section (founder, 20 Nov 2026). */
+  sections?: string[] | null;
 }
 
 export function editorOf(req: Pick<PayloadRequest, "user">): EditorUser | null {

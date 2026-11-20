@@ -88,13 +88,16 @@ export async function editorActor(): Promise<{
   canEdit: boolean;
   canPublish: boolean;
   canPurge: boolean;
+  /** The Articles section is theirs (or they have every section). */
+  inSection: boolean;
 } | null> {
   const cms = await cmsSession();
   if (!cms) return null;
   return {
     actor: { editorId: cms.user.id, h2UserId: cms.userId, permissions: cms.user.permissions },
-    canEdit: cms.can("content.edit"),
-    canPublish: cms.can("content.publish"),
+    canEdit: cms.can("content.edit") && cms.mayChange("articles"),
+    canPublish: cms.can("content.publish") && cms.mayChange("articles"),
+    inSection: cms.mayChange("articles"),
     canPurge: cms.can("content.purge"),
   };
 }
