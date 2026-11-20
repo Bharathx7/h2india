@@ -3,7 +3,6 @@ import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { getChoices, listNotifications, unreadCount } from "@h2india/core/notify";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { pageRequest, pagingQuery } from "@/lib/paging";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
@@ -35,14 +34,7 @@ export default async function NotificationsPage({
   // ?state= shows the designed loading, empty and error states in development (playbook step 2.5).
   const demo = process.env.NODE_ENV !== "production" || process.env.FLAG_DEV_PAGES === "true" ? state : undefined;
   return (
-    <WorkspaceFrame
-      area={shell.area}
-      groups={shell.groups}
-      current="/notifications"
-      user={shell.user}
-      home={shell.home}
-      bell={{ unread, items: rows.slice(0, 5) }}
-    >
+    <div className="flex flex-col gap-6 p-4 md:p-8">
       <NotificationsView
         area={shell.area}
         initial={{ unread, items: rows }}
@@ -53,6 +45,6 @@ export default async function NotificationsPage({
         paging={pageRequest(sp)}
         query={pagingQuery(sp)}
       />
-    </WorkspaceFrame>
+    </div>
   );
 }

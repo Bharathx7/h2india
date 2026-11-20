@@ -11,7 +11,7 @@ import {
   type WorkspaceUser,
 } from "@h2india/ui";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
 import type { Row } from "@/app/(app)/(workspace)/notifications/rows";
@@ -42,10 +42,26 @@ function adminSearch(q: string): WorkspaceSearchLink[] {
   ];
 }
 
+/**
+ * Pages without a sidebar item of their own, and the item that stays lit for them (they used to pass it as `current`
+ * before the workspace layouts took over the frame, founder 20 Nov 2026).
+ */
+const LIT_FOR: [prefix: string, item: string][] = [
+  ["/admin/listings", "/admin/queues"],
+  ["/admin/rfqs", "/admin/queues"],
+  ["/supplier/bank", "/supplier/invoices"],
+];
+
+function lit(pathname: string): string {
+  const hit = LIT_FOR.find(([p]) => pathname === p || pathname.startsWith(`${p}/`));
+  return hit ? hit[1] : pathname;
+}
+
 export function WorkspaceFrame(props: {
   area: WorkspaceArea;
   groups: WorkspaceNavGroup[];
-  current: string;
+  /** The open page; from the address when left out (the workspace layouts, founder 20 Nov 2026). */
+  current?: string;
   user: WorkspaceUser;
   home: string;
   bell: { unread: number; items: Row[] };
@@ -55,6 +71,7 @@ export function WorkspaceFrame(props: {
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const search = useHeaderSearch();
   const staff = props.area === "admin";
   const [bell, setBell] = useState(props.bell);
@@ -82,7 +99,7 @@ export function WorkspaceFrame(props: {
     <WorkspaceShell
       area={props.area}
       groups={props.groups}
-      currentHref={props.current}
+      currentHref={props.current ?? lit(pathname)}
       user={props.user}
       searchPlaceholder={PLACEHOLDER[props.area]}
       onSearch={

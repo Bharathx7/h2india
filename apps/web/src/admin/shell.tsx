@@ -2,13 +2,9 @@ import { getDb } from "@h2india/core";
 import { isEnabled } from "@h2india/config";
 import { can, hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
 import { buttonClasses, Icon, Logo } from "@h2india/ui";
-import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { operatorSession, staffSignedIn } from "@/server/auth";
-import { navFor, shellFor } from "@/server/workspace";
 import { absolute } from "@/seo/site";
 
 // The admin back office shell (Figma page 15) for operator screens. Without the permission the page is a plain 404,
@@ -27,40 +23,24 @@ export async function requireOperator(permission: Permission, path: string): Pro
   return { userId: session.user.id, actor };
 }
 
-export async function AdminShell({
-  userId,
-  current,
+/**
+ * An admin page's content area. The frame (sidebar, top bar, bell) is drawn once by the admin layout (AdminFrame,
+ * founder 20 Nov 2026), so a sidebar click swaps only this part. The props stay for the pages that pass them.
+ */
+export function AdminShell({
   children,
 }: {
-  userId: string;
-  current: string;
+  userId?: string;
+  current?: string;
   /** The page's name ("Catalogue"). The top bar no longer shows it (founder QC, 17 Nov 2026); pages show their own h1. */
   title?: string;
   children: ReactNode;
 }) {
-  const db = getDb();
-  const [shell, unread, bell] = await Promise.all([
-    shellFor(userId),
-    unreadCount(db, userId),
-    listNotifications(db, userId, { limit: 5 }),
-  ]);
-  return (
-    <WorkspaceFrame
-      area="admin"
-      groups={await navFor("admin", userId)}
-      current={current}
-      user={shell.user}
-      home="/admin"
-      bell={{ unread, items: toRows(bell) }}
-    >
-      <div className="flex flex-col gap-6 p-4 md:p-8">{children}</div>
-      <LargerScreen />
-    </WorkspaceFrame>
-  );
+  return <div className="flex flex-col gap-6 p-4 md:p-8">{children}</div>;
 }
 
 /** Use a larger screen (627:1001): the back office needs at least 1024 px; below that this covers the page. */
-function LargerScreen() {
+export function LargerScreen() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-page p-8 text-center lg:hidden">
       <Logo height={36} />

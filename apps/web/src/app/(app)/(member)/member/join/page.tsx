@@ -1,15 +1,11 @@
 import { getDb } from "@h2india/core";
 import { membershipFacts, mayUseMemberFeatures } from "@h2india/core/members";
-import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { ACCOUNT_PAGES, safeReturnPath } from "@h2india/core/sign-in";
 import { Icon, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { toRows } from "@/app/(app)/(workspace)/notifications/rows";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { JoinAsMemberButton } from "@/member/JoinAsMember";
 import { getSession } from "@/server/auth";
-import { shellFor } from "@/server/workspace";
 
 // Join as member (founder QC, 17 Nov 2026): where a buyer or supplier lands when they open a member feature (the
 // Directory, the member area, Follow, Save, alerts). One click switches membership on for the same account; they keep
@@ -45,22 +41,10 @@ export default async function JoinAsMemberPage({ searchParams }: { searchParams:
   // Already a member (or staff): straight on. Someone who hasn't finished Join joins as a member there.
   if (mayUseMemberFeatures(facts)) redirect(next);
   if (!facts.profileType) redirect(ACCOUNT_PAGES.member.join);
-  const [shell, unread, items] = await Promise.all([
-    shellFor(userId),
-    unreadCount(db, userId),
-    listNotifications(db, userId, { limit: 5 }),
-  ]);
   const workspace = facts.profileType === "supplier" ? "supplier" : "buyer";
 
   return (
-    <WorkspaceFrame
-      area={shell.area}
-      groups={shell.groups}
-      current="/member/join"
-      user={shell.user}
-      home={shell.home}
-      bell={{ unread, items: toRows(items) }}
-    >
+    <>
       <div className="flex flex-col gap-6 p-4 md:p-8">
         <div className="flex max-w-3xl flex-col gap-2">
           <p className="type-label-sm text-secondary">Membership</p>
@@ -96,6 +80,6 @@ export default async function JoinAsMemberPage({ searchParams }: { searchParams:
           <JoinAsMemberButton next={next} />
         </section>
       </div>
-    </WorkspaceFrame>
+    </>
   );
 }
