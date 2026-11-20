@@ -35,8 +35,9 @@ test("the top strip hides while scrolling down and comes back on a scroll up; th
   await page.getByRole("link", { name: "H2 Economy home" }).first().hover();
   await page.mouse.down();
   await expect(strip).toBeHidden();
+  // Release away from the logo, so the press doesn't become a click that goes home.
+  await page.mouse.move(700, 600);
   await page.mouse.up();
-  await page.keyboard.press("Escape");
   // Public QC 5 (20 Nov 2026): opening a section menu keeps the strip hidden, and so does closing search.
   await nav.getByRole("button", { name: "News" }).click();
   await expect(page.locator("header").getByRole("link", { name: "Advertise", exact: true })).toBeVisible();

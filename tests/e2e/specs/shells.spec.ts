@@ -96,8 +96,11 @@ test("once scrolled, the strip hides and the main row with the section nav stays
   const scrolled = await page.evaluate(() => Math.round(window.scrollY));
   expect(await mainTop()).toBe(109 - scrolled);
 
-  // Keyboard focus in the header brings the strip back, so all links stay reachable.
-  await page.getByRole("link", { name: "H2 Economy home" }).first().focus();
+  // Keyboard focus in the header brings the strip back, so all links stay reachable. Public QC 5: only a real Tab
+  // counts, so tab from the skip link into the header (the hidden strip is skipped; the logo takes focus).
+  await page.getByRole("link", { name: "Skip to content" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "H2 Economy home" }).first()).toBeFocused();
   await expect(strip).toBeVisible();
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(strip).toBeHidden();
