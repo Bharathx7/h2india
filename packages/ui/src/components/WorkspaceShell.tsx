@@ -183,6 +183,8 @@ export interface WorkspaceUser {
   /** The role or company; read by screen readers in the profile menu, not shown in the top bar. */
   role: string;
   initials: string;
+  /** Their profile picture (founder, 20 Nov 2026); initials show without one. */
+  photoUrl?: string | null;
 }
 
 /** Where a typed search can go, for areas without the site search (the back office). */
@@ -309,8 +311,12 @@ export function WorkspaceShell({
               <span aria-hidden="true" className="hidden h-8 w-px bg-ink-200 md:block" />
               <Menu>
                 <MenuTrigger className="flex items-center gap-3 rounded-pill text-left">
-                  <span className="flex size-10 items-center justify-center rounded-pill bg-tint type-label-lg text-primary md:size-11">
-                    {user.initials}
+                  <span className="flex size-10 items-center justify-center overflow-hidden rounded-pill bg-tint type-label-lg text-primary md:size-11">
+                    {user.photoUrl ? (
+                      <img src={user.photoUrl} alt="" className="size-full object-cover" />
+                    ) : (
+                      user.initials
+                    )}
                   </span>
                   <span className="hidden max-w-48 truncate type-label-lg text-primary lg:block">{user.name}</span>
                   <Icon name="chevron-down" size={18} className="hidden text-icon-secondary md:block" />

@@ -334,6 +334,7 @@ const STEPS: Step[] = [
       mobile: null,
       mobileVerifiedAt: null,
       image: null,
+      photoFileId: null,
       jobRole: null,
       emailVerified: false,
     }),

@@ -1,4 +1,5 @@
 import config from "@payload-config";
+import { accountPhotoUrl } from "@h2india/core/account";
 import { isEnabled } from "@h2india/config";
 import { getDb } from "@h2india/core";
 import { identityOf } from "@h2india/core/authz";
@@ -31,10 +32,11 @@ export const siteViewer = cache(async (): Promise<Viewer | null> => {
   const session = await getSession().catch(() => null);
   if (!session) return null;
   const db = getDb();
-  const [who, unread, facts] = await Promise.all([
+  const [who, unread, facts, photoUrl] = await Promise.all([
     identityOf(db, session.user.id),
     unreadCount(db, session.user.id),
     membershipFacts(db, session.user.id),
+    accountPhotoUrl(db, session.user.id),
   ]);
   const joined = isMemberFacts(facts);
   // A buyer or supplier: the member area if they joined, otherwise the way to join (founder QC, 17 Nov 2026).
@@ -51,6 +53,7 @@ export const siteViewer = cache(async (): Promise<Viewer | null> => {
     user: {
       name,
       initials,
+      photoUrl,
       organisation: who.company ?? (who.area === "admin" ? "H2 Economy" : ""),
       workspace: `${WORKSPACE[who.area] ?? "Member"}${company && joined ? " · Member" : ""}`,
       workspaceHref: `/${who.area}`,

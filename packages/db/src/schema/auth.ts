@@ -12,6 +12,8 @@ export const users = core.table("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  /** The person's profile picture (founder, 20 Nov 2026): a profile_photo file, shown on their own avatar. */
+  photoFileId: uuid("photo_file_id"),
   // Join step 3 (525:207). Mobile is for verification and recovery only (decision C6).
   mobile: text("mobile"),
   mobileVerifiedAt: utc("mobile_verified_at"),

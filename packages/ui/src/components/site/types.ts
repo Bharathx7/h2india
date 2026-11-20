@@ -54,6 +54,8 @@ export interface MegaSection {
 export interface SiteUser {
   name: string;
   initials: string;
+  /** Their profile picture (founder, 20 Nov 2026); initials show without one. */
+  photoUrl?: string | null;
   organisation: string;
   /** "Buyer", "Supplier", "Member" or "Admin". */
   workspace: string;

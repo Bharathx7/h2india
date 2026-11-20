@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import { loadActor } from "../authz/actor";
 import { consentHistory, recordDirectoryConsent } from "../consent/records";
+import { followMemberPhoto } from "../account/photo";
 import { attachFile } from "../files/files";
 import { getChoices, getNotifySettings } from "../notify/preferences";
 import { PERSONAS, profileProblems, TOPICS, type ProfileFields } from "./rules";
@@ -87,8 +88,10 @@ export async function saveProfile(db: Database, userId: string, input: ProfileIn
       attachedId: userId,
     });
     fields.photoFileId = input.photo.fileId;
+    await followMemberPhoto(db, userId, input.photo.fileId);
   } else if (input.photo === null) {
     delete fields.photoFileId;
+    await followMemberPhoto(db, userId, null);
   } else if (before?.profile.photoFileId) {
     fields.photoFileId = before.profile.photoFileId as string;
   }

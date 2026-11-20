@@ -44,6 +44,7 @@ export const PERSONAL_TABLES: PersonalTable[] = [
       "mobile",
       "mobile_verified_at",
       "image",
+      "photo_file_id",
       "job_role",
       "terms_accepted_at",
       "terms_version",
