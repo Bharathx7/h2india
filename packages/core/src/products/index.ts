@@ -4,6 +4,7 @@ export * from "./rules";
 export * from "./samples";
 export * from "./company";
 export * from "./detail";
+export * from "./photos";
 export * from "./compare";
 export * from "./editor";
 export * from "./datasheet";

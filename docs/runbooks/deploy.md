@@ -159,6 +159,20 @@ dc run --rm tools pnpm testers:create buyer@example.com supplier@example.com mem
 - Test accounts never reach the back office: their sessions are not staff sessions.
 - Use addresses made for testing, not a customer's email; the list is kept in the `sign-in.testers` setting.
 
+## Sample product photos (founder, 20 Nov 2026)
+
+The sample products have no supplier people who could upload a photo, so their photos ship with the code
+(`packages/core/scripts/sample-photos`, one JPEG per product, named by its slug). After the deploy that adds them:
+
+```sh
+dc run --rm tools pnpm samples:photos
+```
+
+- Each photo goes through the same checks as a supplier's upload (virus scan, type check, re-encoded into the public
+  bucket) and is then attached. It prints one line per product: `attached`, `has a photo` or `rejected: <reason>`.
+- It changes sample products only, and only ones without a photo, so running it again changes nothing. ClamAV must
+  be up (`dc ps clamav`).
+
 ## Useful
 
 - Logs: `dc logs -f --tail 100 web-public` (also `web-admin`, `worker`).

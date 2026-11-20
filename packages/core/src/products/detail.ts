@@ -15,6 +15,7 @@ import type { AttributeDef } from "../catalogue/attributes";
 import { effectiveSchema, type ClassId } from "../catalogue/taxonomy";
 import { Money } from "../money";
 import { productHref } from "./listing";
+import { productPhotos, type ProductPhoto } from "./photos";
 import { canShowPrice, cardChips, formatValue, leadTimeLabel } from "./rules";
 
 // The product page (step 6.4; quote-only 393:7030, fixed price 393:8021). Everything a buyer needs to shortlist:
@@ -52,6 +53,8 @@ export interface ProductDetail {
   installation: ProductFact[];
   certificates: ProductCertificate[];
   documents: { fileId: string; label: string; meta: string }[];
+  /** Checked photos in the supplier's order; empty means the page draws the equipment instead. */
+  photos: ProductPhoto[];
   leadTime: string | null;
   minOrder: number | null;
   warranty: { months: number; note: string | null } | null;
@@ -146,7 +149,7 @@ export async function productDetail(
     ? (await db.select().from(cat).where(eq(cat.id, row.cat.parentId)).limit(1))[0]
     : undefined;
   const defs = await effectiveSchema(db, row.cat.id, { includeSample: opts.includeSample });
-  const [apps, files, live] = await Promise.all([
+  const [apps, files, live, photos] = await Promise.all([
     row.p.applicationIds.length
       ? db
           .select()
@@ -178,6 +181,7 @@ export async function productDetail(
           supplierNotSuspended(p.organisationId),
         ),
       ),
+    productPhotos(db, [{ id: row.p.id, images: row.p.images }]),
   ]);
 
   const fixed = row.p.pricing === "fixed";
@@ -226,6 +230,7 @@ export async function productDetail(
         return { fileId: f.id, label: d.label, meta: [type, size(f.bytes ?? 0)].filter(Boolean).join(" · ") };
       })
       .filter((d): d is { fileId: string; label: string; meta: string } => d !== null),
+    photos: photos.get(row.p.id) ?? [],
     leadTime: leadTimeLabel(row.p.leadTimeMinWeeks, row.p.leadTimeMaxWeeks),
     minOrder: row.p.minOrder,
     warranty: row.p.warrantyMonths !== null ? { months: row.p.warrantyMonths, note: row.p.warrantyNote } : null,
@@ -287,18 +292,21 @@ export async function similarProducts(
       ),
     )
     .limit(limit * 3);
-  return rows
-    .filter((r) => opts.includeSample || !r.p.sample)
-    .slice(0, limit)
-    .map((r) => ({
-      id: r.p.id,
-      href: productHref(r.p.slug),
-      name: r.p.name,
-      supplier: r.name,
-      verified: r.verification === "Verified",
-      chips: cardChips(defs, r.p.attributes, r.p.certifications),
-      leadTime: leadTimeLabel(r.p.leadTimeMinWeeks, r.p.leadTimeMaxWeeks),
-    }));
+  const picked = rows.filter((r) => opts.includeSample || !r.p.sample).slice(0, limit);
+  const photos = await productPhotos(
+    db,
+    picked.map((r) => ({ id: r.p.id, images: r.p.images })),
+  );
+  return picked.map((r) => ({
+    id: r.p.id,
+    photo: photos.get(r.p.id)?.[0] ?? null,
+    href: productHref(r.p.slug),
+    name: r.p.name,
+    supplier: r.name,
+    verified: r.verification === "Verified",
+    chips: cardChips(defs, r.p.attributes, r.p.certifications),
+    leadTime: leadTimeLabel(r.p.leadTimeMinWeeks, r.p.leadTimeMaxWeeks),
+  }));
 }
 
 // ----------------------------------------------------------------------------- questions and reports

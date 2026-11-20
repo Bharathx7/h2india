@@ -243,6 +243,7 @@ function ProductGrid(props: ListingProps & { label?: string }) {
             supplier={p.supplier.name}
             supplierVerified={p.supplier.verified}
             chips={p.chips}
+            photo={p.photo}
             leadTime={p.leadTime}
             actions={<CardActions product={p} category={props.categorySlug} signedIn={props.signedIn} />}
             renderLink={({ href, className, children }) => (

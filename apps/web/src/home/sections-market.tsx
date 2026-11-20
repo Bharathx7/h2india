@@ -154,7 +154,20 @@ function ShowcaseCard({ product: p }: { product: ProductCard }) {
   return (
     <article className="group card-lift relative flex h-full w-full flex-col overflow-hidden rounded-card border border-default bg-page">
       <div className="relative aspect-[4/3] bg-fresh-50">
-        <EquipmentArt kind={equipmentKind(p.subLabel, p.categoryLabel, p.name)} />
+        {p.photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- product photos come from the storage domain, already resized
+          <img
+            src={p.photo.src}
+            srcSet={p.photo.srcSet || undefined}
+            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 31vw, (min-width: 640px) 44vw, 72vw"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <EquipmentArt kind={equipmentKind(p.subLabel, p.categoryLabel, p.name)} />
+        )}
         {p.supplier.verified ? (
           <span className="absolute top-3 left-3 inline-flex h-6 items-center gap-1 rounded-pill bg-page px-2 type-label-sm text-primary shadow-soft">
             <Icon name="shield-check" size={14} className="text-icon-success" />
