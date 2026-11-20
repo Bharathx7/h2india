@@ -25,6 +25,7 @@ export {
   cleanSections,
   completePermissions,
   CONTENT_SECTION_IDS,
+  isSuperAdmin,
   looksLikeEmail,
   StaffError,
   SUPER_ADMIN_ONLY,

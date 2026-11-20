@@ -1,6 +1,6 @@
 import { getDb } from "@h2india/core";
 import { isEnabled } from "@h2india/config";
-import { can, hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
+import { hasOperatorRole, loadActor, type Actor, type Permission } from "@h2india/core/authz";
 import { buttonClasses, Icon, Logo } from "@h2india/ui";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -19,7 +19,9 @@ export async function requireOperator(permission: Permission, path: string): Pro
   if (isEnabled("operatorPassword") && !(await staffSignedIn()) && (await hasOperatorRole(getDb(), session.user.id)))
     redirect(`/sign-in/staff?next=${encodeURIComponent(path)}`);
   const actor = await loadActor(getDb(), session.user.id);
-  if (!can(actor, permission)) notFound();
+  // Staff permissions are checked directly: some names (money.view) are also company permissions, which can() checks
+  // per company, so it refused every operator (founder audit, 20 Nov 2026).
+  if (!actor.operator.has(permission)) notFound();
   return { userId: session.user.id, actor };
 }
 

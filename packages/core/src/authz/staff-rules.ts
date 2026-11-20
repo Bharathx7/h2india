@@ -74,3 +74,12 @@ export function completePermissions(keys: readonly string[]): string[] {
     if (OPERATOR_ACTIONS.some((a) => a !== "view" && out.has(`${area}.${a}`))) out.add(`${area}.view`);
   return [...out].sort();
 }
+
+/**
+ * A Super admin (founder, 20 Nov 2026: "there should be no limit to the Super admin"): the only role holding
+ * roles.manage (a custom role never can). They are never limited to content sections, may decide a queue item someone
+ * else claimed, and may approve their own money switch after Confirm it's you.
+ */
+export function isSuperAdmin(actor: { operator: ReadonlySet<string> }): boolean {
+  return actor.operator.has("roles.manage");
+}

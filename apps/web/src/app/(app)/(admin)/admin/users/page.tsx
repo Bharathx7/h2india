@@ -1,3 +1,4 @@
+import { userPhotoLinks } from "@h2india/core/account";
 import { getDb } from "@h2india/core";
 import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { listUsers, operatorRoleGrid } from "@h2india/core/admin/users";
@@ -86,6 +87,12 @@ export default async function UsersPage({
   }
   const today = ist(new Date(), { dateStyle: "short" });
   const filtered = Boolean(sp.q?.trim() || type || status);
+  // Profile pictures for the people on this page (founder, 20 Nov 2026).
+  const photos = await userPhotoLinks(
+    db,
+    actor,
+    rows.map((x) => x.id),
+  );
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <UsersHeader
@@ -183,7 +190,7 @@ export default async function UsersPage({
                   <tr key={x.id} className="border-t border-default">
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-3">
-                        <Initials name={x.name || x.email} />
+                        <Initials name={x.name || x.email} photoUrl={photos.get(x.id)} />
                         <span>
                           <span className="block type-label">{x.name || x.email}</span>
                           <span className="block type-caption text-secondary">{x.email}</span>

@@ -61,7 +61,16 @@ export function UserTabs({
 }
 
 /** Initials in a mint circle, as the frames draw people. */
-export function Initials({ name, size = "sm" }: { name: string; size?: "sm" | "lg" }) {
+export function Initials({
+  name,
+  size = "sm",
+  photoUrl,
+}: {
+  name: string;
+  size?: "sm" | "lg";
+  /** Their profile picture when they set one (founder, 20 Nov 2026); initials otherwise. */
+  photoUrl?: string | null;
+}) {
   const letters = name
     .split(/[\s@.]+/)
     .filter(Boolean)
@@ -72,11 +81,16 @@ export function Initials({ name, size = "sm" }: { name: string; size?: "sm" | "l
     <span
       aria-hidden="true"
       className={cx(
-        "flex shrink-0 items-center justify-center rounded-pill bg-mint type-label",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-pill bg-mint type-label",
         size === "lg" ? "size-20 type-h3" : "size-8 type-caption",
       )}
     >
-      {letters || "?"}
+      {photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- a 5-minute private storage link
+        <img src={photoUrl} alt="" className="size-full object-cover" />
+      ) : (
+        letters || "?"
+      )}
     </span>
   );
 }

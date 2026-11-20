@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadActor, type Actor } from "../authz/actor";
 import { startClock } from "../clocks/clocks";
 import { recordFailedJob, resolveDeadLetter } from "../queue/dead-letters";
+import { recordStepUp } from "../sign-in/step-up";
 import { makeUser, useTestEnv } from "../testing/factory";
 import {
   decideProposal,
@@ -79,6 +80,17 @@ describe.skipIf(!url)("system settings and reports", () => {
     await expect(decideProposal(h.db, a, p?.p.id ?? "", true)).rejects.toBeInstanceOf(SystemError);
     await decideProposal(h.db, b, p?.p.id ?? "", false);
     expect(isEnabled("transactions")).toBe(false);
+  });
+
+  it("a Super admin approves their own money switch after Confirm it's you (founder, 20 Nov 2026)", async () => {
+    // Proposing "off" (it is already off) so no other test sees the shop open.
+    expect(await switchFlag(h.db, a, { flag: "transactions", on: false, reason: "Keep it shut" })).toBe("proposed");
+    const own = (await openProposals(h.db, a)).find((x) => x.p.proposedBy === a.userId);
+    await expect(decideProposal(h.db, a, own?.p.id ?? "", true)).rejects.toThrow("Confirm it's you");
+    await recordStepUp(h.db, a.userId ?? "");
+    await decideProposal(h.db, a, own?.p.id ?? "", true);
+    expect(isEnabled("transactions")).toBe(false);
+    expect((await openProposals(h.db, a)).some((x) => x.p.id === own?.p.id)).toBe(false);
   });
 
   it.skipIf(!redis)("a failed job shows in the health panel and can be retried", async () => {

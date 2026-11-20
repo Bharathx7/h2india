@@ -1,4 +1,6 @@
 import { ADMIN_FLAGS, isEnabled, parseServerEnv, setFlagOverrides, TWO_PERSON_FLAGS } from "@h2india/config";
+import { isSuperAdmin } from "../authz/staff-rules";
+import { stepUpConfirmedRecently } from "../sign-in/step-up";
 import { CLOCKS, type ClockName, type Duration } from "@h2india/config/clocks";
 import { schema, type Database, type Executor } from "@h2india/db";
 import { and, desc, eq, gte, isNull, lt, sql } from "drizzle-orm";
@@ -119,7 +121,12 @@ export async function decideProposal(
   assertCan(actor, "settings.edit");
   const [p] = await db.select().from(schema.settingProposals).where(eq(schema.settingProposals.id, id));
   if (!p || p.decidedAt) throw new SystemError("This change has been decided already");
-  if (p.proposedBy === actor.userId) throw new SystemError("Another operator must approve your change");
+  // A Super admin may decide their own change (founder, 20 Nov 2026: no limit for the Super admin); approving it needs
+  // Confirm it's you. Everyone else still needs a second operator.
+  const own = p.proposedBy === actor.userId;
+  if (own && !isSuperAdmin(actor)) throw new SystemError("Another operator must approve your change");
+  if (own && approve && !(actor.userId && (await stepUpConfirmedRecently(db, actor.userId))))
+    throw new SystemError("Confirm it's you to approve your own change");
   await db
     .update(schema.settingProposals)
     .set({ decision: approve ? "Approved" : "Declined", decidedBy: actor.userId, decidedAt: new Date() })
@@ -132,7 +139,10 @@ export async function decideProposal(
       actor,
       FLAG_OVERRIDES,
       { ...current, [flag]: p.value === true },
-      { reason: `${p.reason ?? ""} (proposed by another operator)`, context },
+      {
+        reason: `${p.reason ?? ""} (${own ? "approved by the Super admin who proposed it" : "proposed by another operator"})`,
+        context,
+      },
     );
     await refreshFlagOverrides(db);
   }

@@ -1,3 +1,4 @@
+import { userPhotoLinks } from "@h2india/core/account";
 import { getDb } from "@h2india/core";
 import { mobileFieldsShown } from "@h2india/core/admin/system";
 import { userDetail } from "@h2india/core/admin/users";
@@ -33,6 +34,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   const type = kindWord(main?.kind, isOperator);
   const sees = main ? `${main.name}'s ${main.kind === "buyer" ? "buyer" : "supplier"} workspace` : "H2 Economy";
   const self = p.id === userId;
+  const photos = await userPhotoLinks(db, actor, [p.id]);
   return (
     <AdminShell userId={userId} current="/admin/users" title="Users">
       <Link href="/admin/users" className="inline-flex items-center gap-1 type-label">
@@ -41,7 +43,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Initials name={name} size="lg" />
+          <Initials name={name} size="lg" photoUrl={photos.get(p.id)} />
           <div className="flex flex-col gap-1">
             <h1 className="type-h2">{name}</h1>
             <p className="flex flex-wrap items-center gap-2 type-caption text-secondary">
