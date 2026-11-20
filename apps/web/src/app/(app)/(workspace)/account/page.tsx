@@ -1,16 +1,13 @@
 import { getDb } from "@h2india/core";
 import { accountDetails } from "@h2india/core/account";
 import { mobileFieldsShown } from "@h2india/core/admin/system";
-import { listNotifications, unreadCount } from "@h2india/core/notify";
 import { buttonClasses, Icon, StatusBadge, type IconName } from "@h2india/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { WorkspaceFrame } from "@/components/WorkspaceFrame";
 import { getSession } from "@/server/auth";
 import { shellFor } from "@/server/workspace";
-import { toRows } from "../notifications/rows";
 import { DetailsForm } from "./DetailsForm";
 import { ChangePassword } from "@/account/ChangePassword";
 import { hasPassword } from "@h2india/core/sign-in/passwords";
@@ -41,10 +38,8 @@ export default async function AccountPage() {
   if (!session) redirect("/sign-in?next=/account");
   const db = getDb();
   const userId = session.user.id;
-  const [shell, unread, items, details, passwordSet, showMobile] = await Promise.all([
+  const [shell, details, passwordSet, showMobile] = await Promise.all([
     shellFor(userId),
-    unreadCount(db, userId),
-    listNotifications(db, userId, { limit: 5 }),
     accountDetails(db, userId),
     hasPassword(db, userId),
     mobileFieldsShown(db),
@@ -54,15 +49,7 @@ export default async function AccountPage() {
   const staff = area === "admin";
 
   return (
-    <WorkspaceFrame
-      area={area}
-      groups={shell.groups}
-      current="/account"
-      user={shell.user}
-      home={shell.home}
-      bell={{ unread, items: toRows(items) }}
-      switchTo={shell.switchTo}
-    >
+    <>
       <div className="flex flex-col gap-6 p-4 md:p-8">
         <header className="flex flex-col gap-4 rounded-card border border-default bg-page p-5 sm:flex-row sm:items-center">
           <span
@@ -160,7 +147,7 @@ export default async function AccountPage() {
           </div>
         </div>
       </div>
-    </WorkspaceFrame>
+    </>
   );
 }
 

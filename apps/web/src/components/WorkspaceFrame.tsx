@@ -10,8 +10,8 @@ import {
   type WorkspaceSearchLink,
   type WorkspaceUser,
 } from "@h2india/ui";
-import NextLink from "next/link";
-import { useRouter } from "next/navigation";
+import NextLink, { useLinkStatus } from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import { bellData, markAllRead, markOneRead } from "@/app/(app)/(workspace)/notifications/actions";
 import type { Row } from "@/app/(app)/(workspace)/notifications/rows";
@@ -19,7 +19,23 @@ import { HeaderSearch, useHeaderSearch } from "./HeaderSearch";
 import { SignedInAsNote } from "./SignedInAsNote";
 
 /** The shell's links as the app's own links, so moving between workspace pages doesn't reload the document. */
-const AppLink: WorkspaceLink = ({ children, ...rest }) => <NextLink {...rest}>{children}</NextLink>;
+/**
+ * While a sidebar link's page loads, a thin bar runs across the top (founder, 20 Nov 2026: a click must answer at
+ * once). It lives in the browser only: a loading.tsx would stream the page and turn a permission 404 into a 200.
+ */
+function Pending() {
+  const { pending } = useLinkStatus();
+  return pending ? (
+    <span aria-hidden="true" className="fixed inset-x-0 top-0 z-50 h-1 animate-pulse bg-accent" />
+  ) : null;
+}
+
+const AppLink: WorkspaceLink = ({ children, ...rest }) => (
+  <NextLink {...rest}>
+    {children}
+    <Pending />
+  </NextLink>
+);
 
 // The workspace shell with the live bell (97:3168): unread count, latest five, Mark all read. Refreshes every minute
 // and whenever the panel opens. Search (founder QC, 17 Nov 2026): buyers, suppliers and members open the site search
@@ -42,10 +58,26 @@ function adminSearch(q: string): WorkspaceSearchLink[] {
   ];
 }
 
+/**
+ * Pages without a sidebar item of their own, and the item that stays lit for them (they used to pass it as `current`
+ * before the workspace layouts took over the frame, founder 20 Nov 2026).
+ */
+const LIT_FOR: [prefix: string, item: string][] = [
+  ["/admin/listings", "/admin/queues"],
+  ["/admin/rfqs", "/admin/queues"],
+  ["/supplier/bank", "/supplier/invoices"],
+];
+
+function lit(pathname: string): string {
+  const hit = LIT_FOR.find(([p]) => pathname === p || pathname.startsWith(`${p}/`));
+  return hit ? hit[1] : pathname;
+}
+
 export function WorkspaceFrame(props: {
   area: WorkspaceArea;
   groups: WorkspaceNavGroup[];
-  current: string;
+  /** The open page; from the address when left out (the workspace layouts, founder 20 Nov 2026). */
+  current?: string;
   user: WorkspaceUser;
   home: string;
   bell: { unread: number; items: Row[] };
@@ -55,6 +87,7 @@ export function WorkspaceFrame(props: {
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const search = useHeaderSearch();
   const staff = props.area === "admin";
   const [bell, setBell] = useState(props.bell);
@@ -82,7 +115,7 @@ export function WorkspaceFrame(props: {
     <WorkspaceShell
       area={props.area}
       groups={props.groups}
-      currentHref={props.current}
+      currentHref={props.current ?? lit(pathname)}
       user={props.user}
       searchPlaceholder={PLACEHOLDER[props.area]}
       onSearch={
