@@ -76,4 +76,6 @@ export interface SiteLinks {
   signOut: string;
   /** Top strip: For Buyers, For Suppliers, Pricing, Advertise, Newsletter. */
   secondary: MegaLink[];
+  /** Phone menu only, under the strip links: Advertise, Newsletter (on desktop they are in the News menu). */
+  more: MegaLink[];
 }

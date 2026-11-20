@@ -18,7 +18,10 @@ import type { MegaSection, SiteLinks, SiteUser } from "./types";
    Founder change to the motion spec (781:7247 "sticky, never shrinks"), 13 Nov 2026, revised 16 Nov 2026: on
    desktop, scrolling down past the top strip and section nav hides them and leaves the main bar; scrolling up
    (any amount) brings both back at once, with no click needed. They also show at the top of the page, while a menu
-   is open and while keyboard focus is in the header; clicking in the main bar keeps them hidden (public QC 2). Desktop from 1024 px; below that the mobile header and
+   is open and while keyboard focus is in the header; clicking in the main bar keeps them hidden (public QC 2).
+   Public QC 5 (20 Nov 2026): opening a section menu no longer brings the strip back, and only a Tab press counts as
+   keyboard focus (closing search or a menu with the mouse hands focus back to its button, which the browser reported
+   as :focus-visible). Desktop from 1024 px; below that the mobile header and
    full-screen menu (decision M17). The language selector stays hidden (decision M15). */
 
 export interface SiteHeaderProps {
@@ -51,12 +54,8 @@ function Desktop({
   notifications,
   showRequestQuote = true,
   collapsed,
-  onMenuChange,
-}: SiteHeaderProps & { collapsed: boolean; onMenuChange: (open: boolean) => void }) {
+}: SiteHeaderProps & { collapsed: boolean }) {
   const [open, setOpen] = useState<string | null>(null);
-  useEffect(() => {
-    onMenuChange(open !== null);
-  }, [open, onMenuChange]);
   const navRef = useRef<HTMLDivElement>(null);
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
   const panelId = useId();
@@ -87,8 +86,9 @@ function Desktop({
   };
 
   const current = sections.find((s) => s.id === open);
-  // The strip (founder, 19 Nov 2026): every link together on the right, For Buyers, For Members, For Suppliers first
-  // (public QC, 16 Nov 2026), then Pricing, Advertise, Newsletter and the supplier sign-up.
+  // The strip (founder, 19 Nov 2026): every link together on the right. Public QC 5 (20 Nov 2026): only For Buyers,
+  // For Members, For Suppliers and Pricing; Advertise and Newsletter are in the News menu, List your company in the
+  // Marketplace menu's tools.
   return (
     <div className="hidden lg:block">
       <div className={cx("bg-subtle", collapsed && "hidden")}>
@@ -101,17 +101,6 @@ function Desktop({
                 </a>
               </li>
             ))}
-            {user ? null : (
-              <li>
-                <a
-                  href={links.listCompany}
-                  className="inline-flex items-center gap-1 rounded-control type-label-sm text-link hover:text-link-hover"
-                >
-                  List your company
-                  <Icon name="arrow-right" size={14} />
-                </a>
-              </li>
-            )}
           </ul>
         </div>
       </div>
@@ -381,7 +370,7 @@ function Mobile({ sections, links, user, onOpenSearch, showRequestQuote = true }
               })}
             </ul>
             <ul className="mt-3 flex flex-col">
-              {links.secondary.map((l) => (
+              {[...links.secondary, ...links.more].map((l) => (
                 <li key={l.href}>
                   <a href={l.href} className="block rounded-control py-2.5 type-body text-body">
                     {l.label}
@@ -431,24 +420,37 @@ export function rowsHidden(last: number, y: number, wasHidden: boolean): boolean
   return wasHidden;
 }
 
-/** Whether focus came from the keyboard (Tab), not a click: :focus-visible, except text fields, which always match. */
-function keyboardFocus(el: HTMLElement): boolean {
-  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return false;
-  try {
-    return el.matches(":focus-visible");
-  } catch {
-    return false;
-  }
+/**
+ * Whether the last input before a focus was a Tab press (public QC 5, 20 Nov 2026). Typing in the search overlay,
+ * Escape, or a click that opens or closes a menu doesn't count, so the strip stays hidden after them.
+ */
+export function tabbedIn(last: { kind: "key"; key: string } | { kind: "pointer" } | null): boolean {
+  return last?.kind === "key" && last.key === "Tab";
 }
 
 export function SiteHeader(props: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [focusWithin, setFocusWithin] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const collapsed = hidden && !focusWithin && !menuOpen;
+  // Public QC 5: an open section menu no longer brings the strip back; the menus sit in the main row.
+  const collapsed = hidden && !focusWithin;
   const lastY = useRef(0);
   const hiddenNow = useRef(false);
+  const lastInput = useRef<Parameters<typeof tabbedIn>[0]>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      lastInput.current = { kind: "key", key: e.key };
+    };
+    const onPointer = () => {
+      lastInput.current = { kind: "pointer" };
+    };
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onPointer, true);
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("pointerdown", onPointer, true);
+    };
+  }, []);
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -486,10 +488,10 @@ export function SiteHeader(props: SiteHeaderProps) {
   return (
     <>
       <header
-        onFocus={(e) => {
-          // Only keyboard focus brings the hidden rows back (public QC 2, 16 Nov 2026): clicking the logo, search,
-          // Request a quote, Sign in or List your company after scrolling keeps just the main bar.
-          if (e.target instanceof HTMLElement && keyboardFocus(e.target)) setFocusWithin(true);
+        onFocus={() => {
+          // Only Tab brings the hidden strip back (public QC 2 and 5): clicking the logo, a menu, search, Sign in or
+          // Request a quote after scrolling, or closing search or a menu, keeps just the main row.
+          if (tabbedIn(lastInput.current)) setFocusWithin(true);
         }}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) setFocusWithin(false);
@@ -504,7 +506,7 @@ export function SiteHeader(props: SiteHeaderProps) {
             : "border-default bg-page",
         )}
       >
-        <Desktop {...props} collapsed={collapsed} onMenuChange={setMenuOpen} />
+        <Desktop {...props} collapsed={collapsed} />
         <Mobile {...props} />
       </header>
       {/* The desktop header's full height: 36 (strip) + 72 (main row) + 1 (bottom border) = 109 px. */}

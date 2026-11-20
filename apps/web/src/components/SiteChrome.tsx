@@ -7,6 +7,7 @@ import {
   FOOTER_COLUMNS,
   footerWithoutQuote,
   MEGA_MENUS,
+  menusWithoutListCompany,
   menusWithoutQuote,
   SITE_LINKS,
 } from "@/lib/site-nav";
@@ -44,7 +45,8 @@ export function SiteChrome({
   // Request a quote is for buyers and signed-out visitors (public QC 4).
   const quote = canRequestQuote(user);
   // Founder (18 Nov 2026): the Directory lives only in the member workspace, so the website never links to it.
-  const sections = quote ? menus : menusWithoutQuote(menus);
+  const forUser = user ? menusWithoutListCompany(menus) : menus;
+  const sections = quote ? forUser : menusWithoutQuote(forUser);
   const columns = quote ? FOOTER_COLUMNS : footerWithoutQuote(FOOTER_COLUMNS);
   return (
     <>

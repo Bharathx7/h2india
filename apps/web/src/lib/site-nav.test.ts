@@ -5,6 +5,7 @@ import {
   footerWithoutQuote,
   knowledgePromo,
   MEGA_MENUS,
+  menusWithoutListCompany,
   menusWithoutQuote,
   SITE_LINKS,
 } from "./site-nav";
@@ -56,12 +57,17 @@ describe("the Directory on the website", () => {
     expect(hrefs.filter((h) => h.startsWith("/directory") || h.startsWith("/member/directory"))).toEqual([]);
   });
 
-  it("the top strip reads For Buyers, For Members, For Suppliers", () => {
-    expect(SITE_LINKS.secondary.slice(0, 3).map((l) => l.label)).toEqual([
-      "For Buyers",
-      "For Members",
-      "For Suppliers",
-    ]);
+  it("the top strip reads For Buyers, For Members, For Suppliers, Pricing and nothing else", () => {
+    expect(SITE_LINKS.secondary.map((l) => l.label)).toEqual(["For Buyers", "For Members", "For Suppliers", "Pricing"]);
+  });
+
+  it("Advertise and Newsletter are in the News menu, List your company in the Marketplace tools", () => {
+    const news = MEGA_MENUS.find((m) => m.id === "news")?.links?.map((l) => l.href) ?? [];
+    expect(news).toEqual(expect.arrayContaining(["/advertise", "/newsletter"]));
+    const tools = MEGA_MENUS.find((m) => m.id === "marketplace")?.tools?.map((t) => t.href) ?? [];
+    expect(tools).toContain(SITE_LINKS.listCompany);
+    const signedIn = menusWithoutListCompany(MEGA_MENUS).find((m) => m.id === "marketplace")?.tools ?? [];
+    expect(signedIn.map((t) => t.href)).not.toContain(SITE_LINKS.listCompany);
   });
 });
 
