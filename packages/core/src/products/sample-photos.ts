@@ -63,3 +63,40 @@ export async function attachSamplePhoto(
   });
   return "attached";
 }
+
+export type SamplePhotoRemoval = "removed" | "no photo" | "no sample product";
+
+/**
+ * Takes the photos off a sample product again (founder, 20 Nov 2026: `pnpm samples:photos --remove`), so it shows the
+ * drawing. Sample products only; the files stay, detached, and every change is audited. Real listings are never
+ * touched here.
+ */
+export async function removeSamplePhotos(db: Executor, slug: string): Promise<SamplePhotoRemoval> {
+  const p = schema.products;
+  const [product] = await db
+    .select({ id: p.id, organisationId: p.organisationId, images: p.images })
+    .from(p)
+    .where(and(eq(p.slug, slug), eq(p.sample, true), isNull(p.deletedAt)))
+    .limit(1);
+  if (!product) return "no sample product";
+  if (!product.images.length) return "no photo";
+  const f = schema.files;
+  await db.transaction(async (tx) => {
+    await tx
+      .update(f)
+      .set({ attachedType: null, attachedId: null })
+      .where(and(eq(f.attachedType, "product"), eq(f.attachedId, product.id)));
+    await tx.update(p).set({ images: [], updatedAt: new Date() }).where(eq(p.id, product.id));
+    await audit(tx, {
+      actorId: null,
+      action: "product.updated",
+      resourceType: "product",
+      resourceId: product.id,
+      companyId: product.organisationId,
+      before: { images: product.images },
+      after: { images: [] },
+      reason: "pnpm samples:photos --remove (photo taken off a sample product)",
+    });
+  });
+  return "removed";
+}
