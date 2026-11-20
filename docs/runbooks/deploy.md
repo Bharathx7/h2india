@@ -173,6 +173,14 @@ dc run --rm tools pnpm samples:photos
 - It changes sample products only, and only ones without a photo, so running it again changes nothing. ClamAV must
   be up (`dc ps clamav`).
 
+To take the photos off again (the sample products then show the drawing):
+
+```sh
+dc run --rm tools pnpm samples:photos --remove
+```
+
+It prints `removed`, `no photo` or `no sample product` per product, changes sample products only, and is audited.
+
 ## Useful
 
 - Logs: `dc logs -f --tail 100 web-public` (also `web-admin`, `worker`).

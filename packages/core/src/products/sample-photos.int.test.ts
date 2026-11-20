@@ -5,7 +5,7 @@ import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { makeCompany, useTestEnv } from "../testing/factory";
 import { productDetail } from "./detail";
-import { attachSamplePhoto } from "./sample-photos";
+import { attachSamplePhoto, removeSamplePhotos } from "./sample-photos";
 
 // Sample product photos (20 Nov 2026): the photo goes through the file checks, then shows on the product page; a
 // product without one keeps the drawing; a file id copied onto another listing never shows. Needs storage and ClamAV
@@ -94,5 +94,13 @@ describe.skipIf(!url)("sample product photos", () => {
       .where(eq(schema.products.slug, `copy-${tag}`));
     const p = await productDetail(h.db, `copy-${tag}`, { includeSample: true });
     expect(p?.photos).toEqual([]);
+  });
+
+  it("takes a sample product's photo off again, and never touches a real listing", async () => {
+    expect(await removeSamplePhotos(h.db, `sample-${tag}`)).toBe("removed");
+    const p = await productDetail(h.db, `sample-${tag}`, { includeSample: true });
+    expect(p?.photos).toEqual([]);
+    expect(await removeSamplePhotos(h.db, `sample-${tag}`)).toBe("no photo");
+    expect(await removeSamplePhotos(h.db, `real-${tag}`)).toBe("no sample product");
   });
 });
