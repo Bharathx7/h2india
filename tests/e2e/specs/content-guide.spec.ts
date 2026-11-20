@@ -22,7 +22,7 @@ test("the article editor shows the next step and stops an unfinished submit", as
   await expect(page).toHaveURL(/\/admin\/content\/articles\/\d+$/, { timeout: 20_000 });
   await expect(page.getByRole("heading", { name: /Submit for review/ })).toBeVisible();
   const checklist = page.getByRole("list", { name: "Checklist" });
-  await expect(checklist.getByText("Headline")).toBeVisible();
+  await expect(checklist.getByRole("listitem").first()).toContainText("Headline");
   await page.getByRole("button", { name: "Submit for review" }).click();
   await expect(page.getByText(/Before you submit, add: .*At least one author.*At least one source/)).toBeVisible();
   // Still a draft: nothing was sent.
