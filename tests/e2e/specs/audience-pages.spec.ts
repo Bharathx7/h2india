@@ -41,6 +41,7 @@ test("the buyers page offers no supplier sign-up, and the suppliers page no buye
 test("pricing locks commission and add-ons behind Contact us", async ({ page }) => {
   await page.goto("/pricing");
   await expect(page.getByRole("heading", { level: 1, name: "Free for buyers. Simple for suppliers." })).toBeVisible();
+  await expect(page.getByText("Buyers: free")).toHaveCount(0);
   await expect(page.getByText("Commission rates are shared on request")).toBeVisible();
   await expect(page.getByText("Add-on prices are shared on request")).toBeVisible();
   const contact = page.getByRole("link", { name: "Contact us for details" });

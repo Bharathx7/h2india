@@ -256,13 +256,13 @@ export function menusWithCatalogue(cat: PublicCatalogue, trackerFigure: TrackerF
   );
 }
 
+// Founder (20 Nov 2026): a short footer. Grievance officer and Cookie preferences stay: the law expects them to be easy
+// to reach (IT Rules 2021, DPDP consent withdrawal).
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: "Platform",
     links: [
       { label: "Marketplace", href: "/marketplace" },
-      { label: "Request a quote", href: "/rfq/new" },
-      { label: "Compare", href: "/marketplace/compare" },
       { label: "India Hydrogen Tracker", href: "/tracker" },
     ],
   },
@@ -273,35 +273,22 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "For Members", href: "/for-members" },
       { label: "For Suppliers", href: "/for-suppliers" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Verification criteria", href: "/verification" },
-      { label: "Advertise & sponsor", href: "/advertise" },
-      { label: "Submit press release", href: "/news/submit" },
-      { label: "Submit event", href: "/events/submit" },
-      { label: "Post a job", href: "/opportunities/jobs/post" },
     ],
   },
   {
     heading: "Learn",
     links: [
       { label: "News", href: "/news" },
-      { label: "Insights", href: "/knowledge/insights" },
       { label: "Hydrogen 101", href: "/knowledge/hydrogen-101" },
-      { label: "Glossary", href: "/knowledge/glossary" },
-      { label: "Standards library", href: "/knowledge/standards" },
       { label: "Reports", href: "/knowledge/reports" },
-      { label: "Videos", href: "/knowledge/media" },
     ],
   },
   {
     heading: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Mission", href: "/about/mission" },
-      { label: "Team & advisors", href: "/about/team" },
       { label: "Careers", href: "/careers" },
       { label: "Contact", href: "/contact" },
-      { label: "Partnership enquiry", href: "/contact/partnerships" },
-      { label: "Media kit", href: "/media-kit" },
     ],
   },
   {
@@ -310,13 +297,9 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Terms", href: "/legal/terms" },
       { label: "Privacy", href: "/legal/privacy" },
       { label: "Cookies", href: "/legal/cookies" },
-      { label: "Editorial policy", href: "/legal/editorial-policy" },
-      { label: "Corrections", href: "/legal/corrections" },
-      { label: "Sponsored content policy", href: "/legal/sponsored-content" },
-      { label: "Grievance officer", href: "/legal/grievance-officer" },
       { label: "Cookie preferences", href: "/legal/cookies#preferences" },
+      { label: "Grievance officer", href: "/legal/grievance-officer" },
       { label: "Help centre", href: "/help" },
-      { label: "Sitemap", href: "/sitemap" },
     ],
   },
 ];

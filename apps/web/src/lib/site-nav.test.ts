@@ -72,6 +72,17 @@ describe("the Directory on the website", () => {
 });
 
 // Public QC 4 (16 Nov 2026): Request a quote is for buyers.
+// Founder (20 Nov 2026): a short footer, with the links the law expects kept.
+describe("the footer", () => {
+  it("is short and keeps the grievance officer and cookie preferences", () => {
+    const links = FOOTER_COLUMNS.flatMap((c) => c.links.map((l) => l.label));
+    expect(links.length).toBeLessThanOrEqual(20);
+    expect(links).toEqual(expect.arrayContaining(["Grievance officer", "Cookie preferences", "Privacy", "Terms"]));
+    for (const gone of ["Submit press release", "Submit event", "Post a job", "Media kit", "Sitemap"])
+      expect(links).not.toContain(gone);
+  });
+});
+
 describe("Request a quote", () => {
   it("shows to signed-out visitors and buyers only", () => {
     expect(canRequestQuote(null)).toBe(true);
