@@ -58,7 +58,7 @@ test("a catalogue moderator sees the launch schema and adds a category and an at
   await dialog.getByRole("button", { name: "Add product field" }).click();
   await expect(dialog.getByText("Enter a name")).toBeVisible();
 
-  await dialog.getByLabel("Name").fill("Noise level");
+  await dialog.getByLabel("Name", { exact: true }).fill("Noise level");
   await dialog.getByRole("radio", { name: /^Number/ }).click();
   await dialog.getByLabel("Unit").fill("dB(A)");
   await dialog.getByLabel("Allowed values").fill("110–40");
