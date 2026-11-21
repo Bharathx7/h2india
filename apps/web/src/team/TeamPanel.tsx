@@ -1,4 +1,4 @@
-import { accessPresets, grantablePermissions } from "@h2india/core/authz";
+import { grantablePermissions } from "@h2india/core/authz";
 import type { teamView } from "@h2india/core/supplier";
 import { formatIstDayMonth } from "@h2india/core/time";
 import { EmptyState, Icon, StatusBadge } from "@h2india/ui";
@@ -9,7 +9,7 @@ import { AddMember, EditAccess, RemoveMember } from "./Access";
 
 // Team (592:371), rebuilt in founder QC (17 Nov 2026) for supplier Team and buyer Company · Team: who is in the
 // company and what each person can do, with Add member, Edit access and Remove on each row, waiting invitations and
-// join requests, a search and pages. Access is ticked per person (AccessPicker); presets tick boxes for you.
+// join requests, a search and pages. Everyone has full access unless an admin ticks custom access for them (A199).
 
 type View = Awaited<ReturnType<typeof teamView>>;
 
@@ -22,12 +22,10 @@ const initials = (n: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-/** "Full access", a preset's name, or "Custom: 4 of 10". */
-function accessWords(x: { admin: boolean; role: string; access: string[] }, total: number) {
+/** "Full access" or "Custom: 4 of 10" (A199: no preset roles). */
+function accessWords(x: { admin: boolean; access: string[] }, total: number) {
   if (x.admin) return { text: "Full access", tone: "success" as const };
-  if (x.role === "Custom")
-    return { text: `Custom: ${String(x.access.length)} of ${String(total)}`, tone: "progress" as const };
-  return { text: x.role, tone: "neutral" as const };
+  return { text: `Custom: ${String(x.access.length)} of ${String(total)}`, tone: "progress" as const };
 }
 
 export function TeamPanel({
@@ -50,7 +48,6 @@ export function TeamPanel({
   keep?: Record<string, string>;
 }) {
   const options = grantablePermissions(view.kind).map((o) => ({ key: o.key, label: o.label }));
-  const presets = accessPresets(view.kind).map((p) => ({ ...p, permissions: [...p.permissions] }));
   const label = new Map(options.map((o) => [o.key, o.label]));
   const q = (sp.q ?? "").trim().toLowerCase();
   const members = view.members.filter((x) => !q || `${x.name} ${x.email}`.toLowerCase().includes(q));
@@ -66,7 +63,7 @@ export function TeamPanel({
           {view.members.length} {view.members.length === 1 ? "member" : "members"}
           {view.invitations.length ? ` · ${String(view.invitations.length)} waiting to accept` : ""}
         </p>
-        {manage ? <AddMember options={options} presets={presets} /> : null}
+        {manage ? <AddMember options={options} /> : null}
       </div>
 
       {view.requests.length && manage ? (
@@ -156,7 +153,6 @@ export function TeamPanel({
                       name={name}
                       start={{ admin: x.admin, permissions: x.admin ? [] : x.access }}
                       options={options}
-                      presets={presets}
                     />
                     {x.userId === selfId ? null : <RemoveMember userId={x.userId} name={name} company={company} />}
                   </span>

@@ -259,11 +259,14 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
     expect(v.cart.totalPaise).toBe(29_500_00n);
   });
 
-  it("routes to approval above the limit; no self-approval; approval needs a fresh confirmation code", async () => {
-    // The requester becomes the company's Approver (575:696) and the approval rule names them.
+  it("approval only after a role split: admins never wait; custom access follows the rules; no self-approval", async () => {
+    // A199 (founder, 21 Nov 2026): the requester is given custom access (including approving) and the rule names them.
     await h.db
       .update(schema.memberships)
-      .set({ role: "Approver" })
+      .set({
+        role: "Custom",
+        permissions: ["company.view", "rfq.view", "rfq.create", "order.view", "order.place", "order.approve"],
+      })
       .where(
         and(eq(schema.memberships.organisationId, buyer.org.id), eq(schema.memberships.userId, buyer.requester.id)),
       );
@@ -275,27 +278,28 @@ describe.skipIf(!url)("orders, payments and the ledger", () => {
         set: { approvalAbovePaise: 10_000_00n, approverId: buyer.requester.id },
       });
     const admin = await loadActor(h.db, buyer.admin.id);
-    const approver = await loadActor(h.db, buyer.requester.id);
+    const custom = await loadActor(h.db, buyer.requester.id);
     try {
-      // The approver places an order above the limit: they can't approve it themselves, even confirmed.
-      const own = await placeOne(approver);
+      // The admin (full access) places an order above the rule: no approval, it goes straight to the supplier.
+      const byAdmin = await placeOne(admin);
+      expect(byAdmin.status).toBe("Pending acceptance");
+      await cancelOrder(h.db, admin, buyer.org.id, byAdmin.id, "Test done", undefined, ON);
+
+      // The person with custom access places one: it waits, and they can't approve it themselves, even confirmed.
+      const own = await placeOne(custom);
       expect(own.status).toBe("Awaiting approval");
       await recordStepUp(h.db, buyer.requester.id);
-      await expect(approveOrder(h.db, approver, buyer.org.id, own.id, {}, undefined, ON)).rejects.toThrow(
+      await expect(approveOrder(h.db, custom, buyer.org.id, own.id, {}, undefined, ON)).rejects.toThrow(
         "can't approve your own order",
       );
-      await cancelOrder(h.db, approver, buyer.org.id, own.id, "Placed by mistake", undefined, ON);
-      expect(await status(own.id)).toBe("Cancelled");
 
-      // The admin places one: the approver approves it, only after a fresh confirmation code.
-      const o2 = await placeOne(admin);
-      expect(o2.status).toBe("Awaiting approval");
-      await h.db.delete(schema.signInThrottle).where(eq(schema.signInThrottle.key, `step-up:${buyer.requester.id}`));
-      await expect(approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON)).rejects.toThrow("step_up");
-      await recordStepUp(h.db, buyer.requester.id);
-      const approved = await approveOrder(h.db, approver, buyer.org.id, o2.id, {}, undefined, ON);
+      // An admin approves it, only after a fresh confirmation code.
+      await h.db.delete(schema.signInThrottle).where(eq(schema.signInThrottle.key, `step-up:${buyer.admin.id}`));
+      await expect(approveOrder(h.db, admin, buyer.org.id, own.id, {}, undefined, ON)).rejects.toThrow("step_up");
+      await recordStepUp(h.db, buyer.admin.id);
+      const approved = await approveOrder(h.db, admin, buyer.org.id, own.id, {}, undefined, ON);
       expect(approved.status).toBe("Pending acceptance");
-      await cancelOrder(h.db, admin, buyer.org.id, o2.id, "Test done", undefined, ON);
+      await cancelOrder(h.db, admin, buyer.org.id, own.id, "Test done", undefined, ON);
     } finally {
       await h.db
         .update(schema.buyerSettings)

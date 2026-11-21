@@ -6,6 +6,7 @@ import { audit, type RequestContext } from "../audit";
 import { VISITOR, type Actor } from "../authz/actor";
 import { flagNow } from "../admin/system";
 import { assertCan } from "../authz/can";
+import { LOCKED_ROLE } from "../authz/company-roles";
 import { cancelDeadline, completeDeadline, onDeadline, startClock } from "../clocks/clocks";
 import { stepUpConfirmedRecently } from "../sign-in/step-up";
 import { nextReference } from "../reference";
@@ -67,7 +68,11 @@ export interface ApprovalStep {
   approverIds: string[];
 }
 
-/** Works out the approvals an order needs (576:300). Empty when none. */
+/**
+ * Works out the approvals an order needs (576:300). Empty when none. A199 (founder, 21 Nov 2026): approval exists only
+ * once a company admin limits someone. An order placed by someone with full access (Admin) never needs approval; an
+ * order by someone with custom access follows their own limit and the company's rules.
+ */
 export async function approvalRoute(
   ex: Executor,
   organisationId: string,
@@ -80,9 +85,10 @@ export async function approvalRoute(
     .from(schema.buyerSettings)
     .where(eq(schema.buyerSettings.organisationId, organisationId));
   const [seat] = await ex
-    .select({ limit: schema.memberships.orderLimitPaise })
+    .select({ limit: schema.memberships.orderLimitPaise, role: schema.memberships.role })
     .from(schema.memberships)
     .where(and(eq(schema.memberships.organisationId, organisationId), eq(schema.memberships.userId, requesterId)));
+  if (seat?.role === LOCKED_ROLE) return [];
   const overOwnLimit = seat?.limit !== null && seat?.limit !== undefined && totalPaise > seat.limit;
   const overRule =
     settings?.approvalAbovePaise !== null &&
@@ -118,21 +124,26 @@ export async function approvalRoute(
   return steps;
 }
 
-/** Other people at the company with order.approve whose own limit covers the total. */
+/**
+ * Other people at the company who may approve the total: every Admin (full access, no limit, A199), and anyone with
+ * custom access that includes order.approve (their own ticks, or an old role's) whose own limit covers it.
+ */
 async function otherApprovers(ex: Executor, organisationId: string, requesterId: string, totalPaise: bigint) {
   const m = schema.memberships;
   const rows = await ex
-    .select({ id: m.userId, limit: m.orderLimitPaise })
+    .select({ id: m.userId, role: m.role, limit: m.orderLimitPaise })
     .from(m)
     .where(
       and(
         eq(m.organisationId, organisationId),
         sql`${m.userId} <> ${requesterId}`,
-        sql`exists (select 1 from core.roles ro join core.role_permissions rp on rp.role_id = ro.id
-          where ro.name = ${m.role} and ro.scope = 'buyer' and rp.permission_key = 'order.approve')`,
+        sql`(${m.role} = ${LOCKED_ROLE}
+          or (${m.permissions} is not null and 'order.approve' = any(${m.permissions}))
+          or (${m.permissions} is null and exists (select 1 from core.roles ro join core.role_permissions rp
+            on rp.role_id = ro.id where ro.name = ${m.role} and ro.scope = 'buyer' and rp.permission_key = 'order.approve')))`,
       ),
     );
-  return rows.filter((r) => r.limit === null || totalPaise <= r.limit).map((r) => r.id);
+  return rows.filter((r) => r.role === LOCKED_ROLE || r.limit === null || totalPaise <= r.limit).map((r) => r.id);
 }
 
 async function placed(db: Database, order: OrderRow) {

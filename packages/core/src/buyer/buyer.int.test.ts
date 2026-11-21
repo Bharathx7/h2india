@@ -157,6 +157,29 @@ describe.skipIf(!url)("buyer workspace", () => {
     ).rejects.toThrow("at least one admin");
   });
 
+  it("an Admin can approve; saving a custom member's order limit keeps their ticks (A199)", async () => {
+    const admin = await loadActor(h.db, a.admin.id);
+    expect(admin.companies.get(a.org.id)?.permissions.has("order.approve")).toBe(true);
+    const colleague = await makeUser(h.db, `Limited ${tag}`);
+    await h.db.insert(schema.memberships).values({
+      organisationId: a.org.id,
+      userId: colleague.id,
+      role: "Custom",
+      permissions: ["rfq.view", "rfq.create", "order.view", "order.place"],
+    });
+    await changeMemberRole(h.db, admin, {
+      organisationId: a.org.id,
+      userId: colleague.id,
+      role: "Custom",
+      orderLimitPaise: 5_000_000n,
+    });
+    const seat = (await loadActor(h.db, colleague.id)).companies.get(a.org.id);
+    expect(seat?.role).toBe("Custom");
+    expect(seat?.orderLimitPaise).toBe(5_000_000n);
+    expect([...(seat?.permissions ?? [])].sort()).toEqual(["order.place", "order.view", "rfq.create", "rfq.view"]);
+    expect(seat?.permissions.has("order.approve")).toBe(false);
+  });
+
   it("only a buyer Admin can invite, change roles or remove people", async () => {
     const requester = await loadActor(h.db, a.requester.id);
     const colleague = await makeUser(h.db, `Colleague ${tag}`);

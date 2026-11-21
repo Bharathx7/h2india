@@ -91,11 +91,17 @@ export default async function CompanySettingsPage({
   searchParams: Promise<{ section?: string; q?: string; page?: string; perPage?: string }>;
 }) {
   const sp = await searchParams;
-  const section = SECTIONS.find((s) => s.key === sp.section)?.key ?? "profile";
-  const page = await requireBuyer(`/buyer/company?section=${section}`);
+  const asked = SECTIONS.find((s) => s.key === sp.section)?.key ?? "profile";
+  const page = await requireBuyer(`/buyer/company?section=${asked}`);
   const b = page.buyer;
   const db = getDb();
   const scope = scopeFor(page.actor);
+  // A199 (founder, 21 Nov 2026): approval exists only once an admin gives someone custom access. Until then the
+  // Approval rules tab is hidden and every order goes straight to the supplier.
+  const team = await teamView(db, scope, b.organisationId);
+  const split = team.members.some((m) => !m.admin);
+  const tabs = SECTIONS.filter((x) => x.key !== "rules" || split);
+  const section = tabs.some((x) => x.key === asked) ? asked : "profile";
   const data = await companySettings(db, scope, b.organisationId);
   if (!data) notFound();
   const canManage = b.seat.permissions.has("company.manage");
@@ -235,16 +241,17 @@ export default async function CompanySettingsPage({
       </>
     );
   } else if (section === "users") {
-    // Founder QC (17 Nov 2026): the same Team panel as suppliers (ticked access per person, presets, edit, remove),
-    // plus each person's order limit, which only buyers have.
-    const team = await teamView(db, scope, b.organisationId);
-    const limitText = (r: string, p: bigint | null) =>
-      p === null
-        ? "No limit set"
-        : `${r === "Approver" ? "Approves" : "Orders"} up to ${Money.format(p).replace(/\.00$/, "")}`;
+    // Founder QC (17 Nov 2026): the same Team panel as suppliers (full or custom access per person, edit, remove),
+    // plus an order limit for people with custom access, which only buyers have (A199: admins have none).
+    const limited = team.members.filter((m) => !m.admin);
+    const limitText = (p: bigint | null) =>
+      p === null ? "No limit set" : `Up to ${Money.format(p).replace(/\.00$/, "")}`;
     body = (
       <>
-        <Heading title="Team" detail="Who can request quotes, approve orders and manage company settings." />
+        <Heading
+          title="Team"
+          detail="Everyone has full access and needs no approval, unless you choose custom access for them."
+        />
         <TeamPanel
           view={team}
           company={b.legalName}
@@ -254,58 +261,59 @@ export default async function CompanySettingsPage({
           basePath="/buyer/company"
           keep={{ section: "users" }}
         />
-        <section
-          aria-labelledby="limits"
-          className="flex flex-col gap-3 rounded-card border border-default bg-page p-5"
-        >
-          <div>
-            <h3 id="limits" className="type-h4">
-              Order limits
-            </h3>
-            <p className="type-caption text-secondary">
-              Orders above a person&apos;s limit need an Approver. Set thresholds and second approvers in{" "}
-              <Link href="/buyer/company?section=rules" className="underline">
-                Approval rules
-              </Link>
-              .
-            </p>
-          </div>
-          <ul className="flex flex-col divide-y divide-default">
-            {team.members.map((x) => (
-              <li key={x.userId} className="flex flex-wrap items-center justify-between gap-3 py-2">
-                <span className="min-w-0">
-                  <span className="block type-label">{x.name || x.email}</span>
-                  <span className="block type-caption text-secondary">{limitText(x.role, x.orderLimitPaise)}</span>
-                </span>
-                {canTeam ? (
-                  <LimitDialog
-                    userId={x.userId}
-                    name={x.name || x.email}
-                    role={x.role}
-                    limit={rupees(x.orderLimitPaise)}
-                  />
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {limited.length ? (
+          <section
+            aria-labelledby="limits"
+            className="flex flex-col gap-3 rounded-card border border-default bg-page p-5"
+          >
+            <div>
+              <h3 id="limits" className="type-h4">
+                Order limits
+              </h3>
+              <p className="type-caption text-secondary">
+                Only people with custom access have limits. Their orders above it wait for an admin, or someone you
+                allow to approve orders. Set thresholds and second approvers in{" "}
+                <Link href="/buyer/company?section=rules" className="underline">
+                  Approval rules
+                </Link>
+                .
+              </p>
+            </div>
+            <ul className="flex flex-col divide-y divide-default">
+              {limited.map((x) => (
+                <li key={x.userId} className="flex flex-wrap items-center justify-between gap-3 py-2">
+                  <span className="min-w-0">
+                    <span className="block type-label">{x.name || x.email}</span>
+                    <span className="block type-caption text-secondary">{limitText(x.orderLimitPaise)}</span>
+                  </span>
+                  {canTeam ? (
+                    <LimitDialog
+                      userId={x.userId}
+                      name={x.name || x.email}
+                      role={x.role}
+                      limit={rupees(x.orderLimitPaise)}
+                    />
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </>
     );
   } else if (section === "rules") {
-    const [team, delegations] = await Promise.all([
-      teamView(db, scope, b.organisationId),
-      delegationsOf(db, scope, b.organisationId),
-    ]);
-    const people = team.members.map((m) => ({ id: m.userId, label: `${m.name || m.email} · ${m.role}` }));
+    const delegations = await delegationsOf(db, scope, b.organisationId);
+    const accessOf = (m: (typeof team.members)[number]) => (m.admin ? "Full access" : "Custom access");
+    const people = team.members.map((m) => ({ id: m.userId, label: `${m.name || m.email} · ${accessOf(m)}` }));
     const approvers = team.members
-      .filter((m) => m.role === "Admin" || m.role === "Approver")
-      .map((m) => ({ id: m.userId, label: `${m.name || m.email} · ${m.role}` }));
+      .filter((m) => m.admin || m.access.includes("order.approve"))
+      .map((m) => ({ id: m.userId, label: `${m.name || m.email} · ${accessOf(m)}` }));
     const st = data.settings;
     body = (
       <>
         <Heading
           title="Approval rules"
-          detail="Which orders need approval, and who approves them. They apply when ordering opens."
+          detail="Which orders from people with custom access need approval, and who approves them. Orders by people with full access never need approval."
         />
         <RulesForm
           canEdit={canManage}
@@ -392,12 +400,12 @@ export default async function CompanySettingsPage({
       <div>
         <h1 className="type-h2">Company settings</h1>
         <p className="type-body-sm text-secondary">
-          {b.legalName} · you&apos;re {role === "Admin" ? "an" : "a"} {role}
+          {b.legalName} · you have {role === "Admin" ? "full" : "custom"} access
         </p>
       </div>
       {/* Founder QC (17 Nov 2026): the sections as tabs across the top, the section below at full width. */}
       <nav aria-label="Company settings" className="flex gap-6 overflow-x-auto border-b border-default">
-        {SECTIONS.map((x) => (
+        {tabs.map((x) => (
           <Link
             key={x.key}
             href={`/buyer/company?section=${x.key}`}

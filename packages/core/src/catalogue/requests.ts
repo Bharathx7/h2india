@@ -1,5 +1,5 @@
 import { schema, type Database, type Executor } from "@h2india/db";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "../authz/actor";
 import { assertCan } from "../authz/can";
@@ -203,7 +203,8 @@ async function tellSupplier(
     .where(
       and(
         eq(schema.memberships.organisationId, organisationId),
-        inArray(schema.memberships.role, ["Admin", "Catalogue"]),
+        // Admins and anyone ticked to manage products (A199), or an old Catalogue seat.
+        sql`(${schema.memberships.role} in ('Admin', 'Catalogue') or 'product.manage' = any(${schema.memberships.permissions}))`,
       ),
     );
   for (const person of people)

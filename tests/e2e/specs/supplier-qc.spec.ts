@@ -92,21 +92,21 @@ test("Company details shows the company's one GSTIN, verified and locked (A189)"
   await expect(page.getByRole("button", { name: /Add|Replace/ })).toHaveCount(0);
 });
 
-test("a supplier admin sets a member's access with ticks and presets, and adds a member (founder QC)", async ({
+test("a supplier admin limits a member with custom access, and new members start with full access (A199)", async ({
   page,
 }) => {
   const s = await supplier();
-  const colleague = `Ravi Viewer ${s.tag}`;
+  const colleague = `Ravi Colleague ${s.tag}`;
   await withDb(async (db) => {
     const user = (
       await db.query<{ id: string }>(
         `INSERT INTO core.users (id, email, name, email_verified, profile_type) VALUES (gen_random_uuid(), $1, $2, true, 'supplier') RETURNING id`,
-        [newEmail(`qc-viewer-${s.tag}`), colleague],
+        [newEmail(`qc-colleague-${s.tag}`), colleague],
       )
     ).rows[0]?.id;
     await db.query(
       `INSERT INTO core.memberships (id, organisation_id, user_id, role)
-       SELECT gen_random_uuid(), m.organisation_id, $1, 'Viewer' FROM core.memberships m JOIN core.users u ON u.id = m.user_id WHERE u.email = $2`,
+       SELECT gen_random_uuid(), m.organisation_id, $1, 'Admin' FROM core.memberships m JOIN core.users u ON u.id = m.user_id WHERE u.email = $2`,
       [user, s.email],
     );
   });
@@ -121,27 +121,32 @@ test("a supplier admin sets a member's access with ticks and presets, and adds a
         ).rows[0],
     );
   await signInExisting(page, s.email, "/supplier/team");
-  // A preset ticks the boxes.
+  // Everyone starts with full access; turning it off and ticking boxes makes them Custom, with exactly those ticks.
   await page.getByRole("button", { name: `Edit access for ${colleague}` }).click();
   const drawer = page.getByRole("dialog", { name: `What ${colleague} can do` });
-  await drawer.getByRole("button", { name: "Sales", exact: true }).click();
-  await drawer.getByRole("button", { name: "Save access" }).click();
-  await expect.poll(async () => (await seat())?.role).toBe("Sales");
-  // One more tick than the preset makes it Custom, with exactly those permissions.
-  await page.getByRole("button", { name: `Edit access for ${colleague}` }).click();
-  await drawer.getByRole("checkbox", { name: /storefront/i }).click();
+  const full = drawer.getByRole("switch", { name: "Full access (Admin)" });
+  await expect(full).toBeChecked();
+  await expect(drawer.getByRole("group", { name: "Presets" })).toHaveCount(0);
+  await full.click();
+  await drawer.getByRole("checkbox", { name: /See quote requests/i }).click();
+  await drawer.getByRole("checkbox", { name: /Answer quote requests/i }).click();
   await drawer.getByRole("button", { name: "Save access" }).click();
   await expect.poll(async () => (await seat())?.role).toBe("Custom");
-  expect((await seat())?.permissions).toContain("storefront.manage");
-  await expect(page.getByText(/Custom: \d+ of \d+/)).toBeVisible();
+  expect((await seat())?.permissions).toEqual(["rfq.view", "quote.send"]);
+  await expect(page.getByText(/Custom: 2 of \d+/)).toBeVisible();
 
-  // Add member: an email and its access, sent as an invitation.
+  // Add member: full access unless the admin chooses otherwise, sent as an invitation.
   const invitee = newEmail(`qc-invite-${s.tag}`);
   await page.getByRole("button", { name: "Add member" }).click();
   const add = page.getByRole("dialog", { name: "Add a team member" });
   await add.getByLabel("Work email").fill(invitee);
-  await add.getByRole("button", { name: "Catalogue", exact: true }).click();
+  await expect(add.getByRole("switch", { name: "Full access (Admin)" })).toBeChecked();
   await add.getByRole("button", { name: "Send invitation" }).click();
   await expect(page.getByRole("heading", { name: "Waiting to accept" })).toBeVisible();
   await expect(page.getByText(invitee, { exact: true })).toBeVisible();
+  const invited = await withDb(
+    async (db) =>
+      (await db.query<{ role: string }>(`SELECT role FROM core.invitations WHERE email = $1`, [invitee])).rows[0]?.role,
+  );
+  expect(invited).toBe("Admin");
 });
