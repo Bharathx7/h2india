@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { accessPresets, MemberAccessError, storedAccess } from "./member-access";
+import { MemberAccessError, storedAccess } from "./member-access";
 
-// Founder QC (17 Nov 2026): each member's access is ticked per person; presets tick boxes.
+// Founder QC (17 Nov 2026): each member's access is ticked per person. A199 (21 Nov 2026): full access or Custom.
 describe("member access", () => {
   it("stores full access as Admin with no list", () => {
     expect(storedAccess("supplier", { admin: true, permissions: ["rfq.view"] })).toEqual({
@@ -10,19 +10,14 @@ describe("member access", () => {
     });
   });
 
-  it("names a preset when the ticks match it, otherwise Custom", () => {
-    const sales = accessPresets("supplier").find((p) => p.name === "Sales");
-    expect(sales).toBeDefined();
-    expect(storedAccess("supplier", { admin: false, permissions: [...(sales?.permissions ?? [])].reverse() })).toEqual({
-      role: "Sales",
-      permissions: sales?.permissions,
-    });
-    const custom = storedAccess("supplier", {
-      admin: false,
-      permissions: [...(sales?.permissions ?? []), "storefront.manage"],
-    });
-    expect(custom.role).toBe("Custom");
-    expect(custom.permissions).toContain("storefront.manage");
+  it("stores any limited access as Custom with the ticks in the form's order (A199: no presets)", () => {
+    // These ticks used to match the old Sales preset; they are now Custom like any other choice.
+    expect(storedAccess("supplier", { admin: false, permissions: ["order.manage", "quote.send", "rfq.view"] })).toEqual(
+      {
+        role: "Custom",
+        permissions: ["rfq.view", "quote.send", "order.manage"],
+      },
+    );
   });
 
   it("refuses admin-only permissions, unknown ones and an empty list", () => {

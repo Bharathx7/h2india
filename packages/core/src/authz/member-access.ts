@@ -3,12 +3,15 @@ import { and, eq, sql } from "drizzle-orm";
 import { audit, type RequestContext } from "../audit";
 import type { Actor } from "./actor";
 import { assertCan } from "./can";
-import { COMPANY_PERMISSIONS, ROLES, type CompanyPermission } from "./catalogue";
-import { ADMIN_ONLY, defaultPermissions, GRANTABLE, kindOf, LOCKED_ROLE, type CompanyKind } from "./company-roles";
+import { COMPANY_PERMISSIONS } from "./catalogue";
+import { ADMIN_ONLY, GRANTABLE, kindOf, LOCKED_ROLE, type CompanyKind } from "./company-roles";
+
+/** The role name stored for anyone whose access an admin chose by ticks. */
+export const CUSTOM_ROLE = "Custom";
 
 // Each member's own access (founder QC, 17 Nov 2026): when an admin adds or edits a team member they tick what that
-// person may do, from every permission the company kind has, with quick presets (the old roles) that tick boxes for
-// them. Admin (full access) stays a role of its own and keeps the admin-only permissions (company settings, the team,
+// person may do, from every permission the company kind has. A199 (founder, 21 Nov 2026): no presets; everyone starts
+// with full access (Admin), and anyone else is "Custom" with their own ticks. Admin (full access) stays a role of its own and keeps the admin-only permissions (company settings, the team,
 // the payout bank account), so a company can't lock itself out. Stored on memberships.permissions; loadActor() uses
 // it instead of the role's defaults. A member with no own list keeps their role's defaults, as before.
 
@@ -20,30 +23,12 @@ export interface AccessChoice {
   permissions: readonly string[];
 }
 
-export interface AccessPreset {
-  name: string;
-  description: string;
-  permissions: CompanyPermission[];
-}
-
-/** The presets for a company kind: every role except Admin, with the permissions a member can be given. */
-export function accessPresets(kind: CompanyKind): AccessPreset[] {
-  return ROLES.filter((r) => r.scope === kind && r.name !== LOCKED_ROLE).map((r) => ({
-    name: r.name,
-    description: r.description,
-    permissions: GRANTABLE[kind].filter((p) => defaultPermissions(kind, r.name).has(p)),
-  }));
-}
-
 /** Every permission a member can be given, in the order the form lists them, with its words. */
 export function grantablePermissions(kind: CompanyKind) {
   return GRANTABLE[kind].map((key) => ({ key, label: COMPANY_PERMISSIONS[key] }));
 }
 
-/**
- * Checks a choice and says how to store it: Admin with no list, a preset's name when the ticks match one exactly,
- * otherwise "Custom" with the list. Pure.
- */
+/** Checks a choice and says how to store it: Admin with no list, otherwise "Custom" with the list. Pure. */
 export function storedAccess(kind: CompanyKind, choice: AccessChoice): { role: string; permissions: string[] | null } {
   if (choice.admin) return { role: LOCKED_ROLE, permissions: null };
   const allowed = GRANTABLE[kind] as readonly string[];
@@ -52,11 +37,7 @@ export function storedAccess(kind: CompanyKind, choice: AccessChoice): { role: s
     throw new MemberAccessError("Company settings, the team and the payout bank account come only with full access");
   if (ticked.some((p) => !allowed.includes(p))) throw new MemberAccessError("Choose from the list");
   if (!ticked.length) throw new MemberAccessError("Tick at least one thing they can do");
-  const ordered = allowed.filter((p) => ticked.includes(p));
-  const preset = accessPresets(kind).find(
-    (r) => r.permissions.length === ordered.length && r.permissions.every((p) => ordered.includes(p)),
-  );
-  return { role: preset?.name ?? "Custom", permissions: ordered };
+  return { role: CUSTOM_ROLE, permissions: allowed.filter((p) => ticked.includes(p)) };
 }
 
 /** The permissions a seat has from its own list (loadActor). Admin-only ones are never kept. */

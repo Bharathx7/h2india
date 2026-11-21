@@ -427,13 +427,14 @@ export async function saveApprovalRules(
     if (rules.secondApproverId === rules.approverId) throw new BuyerSettingsError("Choose a different second approver");
   }
   const members = await db
-    .select({ userId: schema.memberships.userId, role: schema.memberships.role })
+    .select({ userId: schema.memberships.userId, role: schema.memberships.role, own: schema.memberships.permissions })
     .from(schema.memberships)
     .where(eq(schema.memberships.organisationId, organisationId));
   for (const id of [rules.approverId, rules.secondApproval ? rules.secondApproverId : null]) {
     const m = id ? members.find((x) => x.userId === id) : null;
-    if (id && (!m || !["Approver", "Admin"].includes(m.role)))
-      throw new BuyerSettingsError("Approvers must be Approvers or Admins in your company");
+    // Admins, people whose custom access includes approving orders (A199), or an old Approver seat.
+    const approves = m && (m.role === "Admin" || m.own?.includes("order.approve") || (!m.own && m.role === "Approver"));
+    if (id && !approves) throw new BuyerSettingsError("Approvers must be admins or people allowed to approve orders");
   }
   const [before] = await db
     .select()

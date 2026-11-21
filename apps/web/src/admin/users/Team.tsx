@@ -114,7 +114,8 @@ export function AddTeamMember({ roles, sections }: { roles: RoleChoice[]; sectio
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [roleName, setRoleName] = useState("");
+  // A199 (founder, 21 Nov 2026): a new team member has full access (Super admin) unless you pick a custom role.
+  const [roleName, setRoleName] = useState(roles.some((r) => r.name === "Super admin") ? "Super admin" : "");
   const [chosen, setChosen] = useState<string[] | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");

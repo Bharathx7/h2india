@@ -1,35 +1,19 @@
 "use client";
 
 import { looksLikeEmail } from "@h2india/core/sign-in";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  ConfirmDialog,
-  Drawer,
-  FormField,
-  Icon,
-  Input,
-  Switch,
-  cx,
-  useToast,
-} from "@h2india/ui";
+import { Alert, Button, Checkbox, ConfirmDialog, Drawer, FormField, Icon, Input, Switch, useToast } from "@h2india/ui";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { inviteWithAccessAction, removeMemberAction, setMemberAccessAction } from "@/supplier/team-actions";
 
-// Team access (founder QC, 17 Nov 2026): when a company admin adds or edits a member, they tick what that person may
-// do. Presets tick the boxes in one click and can then be changed. Full access (Admin) adds company settings, the
-// team and the payout bank account, which no other member can have. Shared by supplier Team and buyer Company.
+// Team access (founder QC, 17 Nov 2026; A199, founder 21 Nov 2026): everyone starts with full access (Admin) and can
+// do everything, with no approval. Only when a company admin turns full access off for someone do they tick what that
+// person may do (custom access); company settings, the team and the payout bank account stay with full access.
+// Shared by supplier Team and buyer Company.
 
 export interface AccessOption {
   key: string;
   label: string;
-}
-export interface PresetOption {
-  name: string;
-  description: string;
-  permissions: string[];
 }
 export interface Access {
   admin: boolean;
@@ -51,18 +35,13 @@ export function AccessPicker({
   value,
   onChange,
   options,
-  presets,
 }: {
   value: Access;
   onChange: (next: Access) => void;
   options: AccessOption[];
-  presets: PresetOption[];
 }) {
   const id = useId();
   const ticked = new Set(value.permissions);
-  const matching = presets.find(
-    (p) => !value.admin && p.permissions.length === ticked.size && p.permissions.every((k) => ticked.has(k)),
-  );
   const groups = GROUPS.map((g) => ({ ...g, items: options.filter((o) => g.match(o.key)) })).filter(
     (g) => g.items.length,
   );
@@ -81,40 +60,12 @@ export function AccessPicker({
         label={<span className="block type-label">Full access (Admin)</span>}
       />
       <p id={`${id}-admin-help`} className="-mt-3 px-4 type-caption text-secondary">
-        Everything below, plus company settings, the team and the payout bank account.
+        They can do everything, including company settings, the team and the payout bank account, and need no approval.
+        Turn this off to choose what they can do.
       </p>
       {value.admin ? null : (
         <>
-          <div className="flex flex-col gap-2">
-            <span className="type-label">Start from</span>
-            <span className="type-caption text-secondary">A preset ticks the boxes; change any of them below.</span>
-            {/* Each preset's description is on screen, not in a tooltip (founder, 19 Nov 2026). */}
-            <ul className="flex flex-col gap-2" role="group" aria-label="Presets">
-              {presets.map((p, i) => (
-                <li key={p.name} className="flex items-start gap-3">
-                  <button
-                    type="button"
-                    aria-pressed={matching?.name === p.name}
-                    aria-describedby={`${id}-preset-${String(i)}`}
-                    onClick={() => {
-                      onChange({ admin: false, permissions: [...p.permissions] });
-                    }}
-                    className={cx(
-                      "inline-flex h-8 shrink-0 items-center rounded-pill border-[1.5px] px-3 type-label-sm active:scale-[0.97]",
-                      matching?.name === p.name
-                        ? "border-transparent bg-inverse text-inverse"
-                        : "border-control bg-page",
-                    )}
-                  >
-                    {p.name}
-                  </button>
-                  <span id={`${id}-preset-${String(i)}`} className="pt-1.5 type-caption text-secondary">
-                    {p.description}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <p className="type-caption text-secondary">Tick what they can do. Everything else stays with full access.</p>
           <div className="flex flex-col gap-4">
             {groups.map((g) => (
               <fieldset key={g.title} className="flex flex-col gap-2">
@@ -159,16 +110,14 @@ function useRun() {
 }
 
 /** Add member: an email and the ticked access, sent as an invitation. */
-export function AddMember({ options, presets }: { options: AccessOption[]; presets: PresetOption[] }) {
+export function AddMember({ options }: { options: AccessOption[] }) {
   const r = useRun();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [checked, setChecked] = useState(false);
-  const startAccess = (): Access => ({
-    admin: false,
-    permissions: presets.find((p) => p.name === "Viewer")?.permissions ?? [],
-  });
+  // Full access unless the admin chooses otherwise (A199).
+  const startAccess = (): Access => ({ admin: true, permissions: [] });
   const [access, setAccess] = useState<Access>(startAccess);
   // A quick check in the browser (founder, 19 Nov 2026); core checks again before it sends.
   const emailProblem = checked && email.trim() && !looksLikeEmail(email) ? "Enter a full email address" : undefined;
@@ -250,7 +199,7 @@ export function AddMember({ options, presets }: { options: AccessOption[]; prese
               }}
             />
           </FormField>
-          <AccessPicker value={access} onChange={setAccess} options={options} presets={presets} />
+          <AccessPicker value={access} onChange={setAccess} options={options} />
         </form>
       </Drawer>
     </>
@@ -263,13 +212,11 @@ export function EditAccess({
   name,
   start,
   options,
-  presets,
 }: {
   userId: string;
   name: string;
   start: Access;
   options: AccessOption[];
-  presets: PresetOption[];
 }) {
   const r = useRun();
   const toast = useToast();
@@ -323,7 +270,7 @@ export function EditAccess({
         <div className="flex flex-col gap-5 p-6">
           <p className="type-body-sm text-secondary">Changes apply the next time they open a page.</p>
           {r.error ? <Alert tone="error" title={r.error} live /> : null}
-          <AccessPicker value={access} onChange={setAccess} options={options} presets={presets} />
+          <AccessPicker value={access} onChange={setAccess} options={options} />
         </div>
       </Drawer>
     </>

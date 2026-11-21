@@ -81,15 +81,17 @@ export async function changeMemberRole(
     .where(
       and(eq(schema.roles.scope, org?.kind === "supplier" ? "supplier" : "buyer"), eq(schema.roles.name, input.role)),
     );
-  if (!known) throw new Error(`No role "${input.role}" for this company`);
   const seat = and(eq(m.organisationId, input.organisationId), eq(m.userId, input.userId));
   await ex.transaction(async (tx) => {
     const [before] = await tx
-      .select({ role: m.role, orderLimitPaise: m.orderLimitPaise })
+      .select({ role: m.role, orderLimitPaise: m.orderLimitPaise, permissions: m.permissions })
       .from(m)
       .where(seat)
       .for("update");
     if (!before) throw new Error("This person is not in the company");
+    // Keeping the role (only the order limit changes) keeps it whatever it is, Custom included (A199).
+    const same = before.role === input.role;
+    if (!known && !same) throw new Error(`No role "${input.role}" for this company`);
     // Never the last admin (founder QC, 17 Nov 2026: the last Admin could make themselves Sales and lock the company
     // out of its own team and settings). removeMember() has the same rule.
     if (before.role === "Admin" && input.role !== "Admin") {
@@ -100,8 +102,12 @@ export async function changeMemberRole(
       if ((admins?.n ?? 0) <= 1) throw new LastAdminError();
     }
     const orderLimitPaise = input.orderLimitPaise !== undefined ? input.orderLimitPaise : before.orderLimitPaise;
-    // A role chosen by name takes the role's defaults again (the member's own ticks are cleared).
-    await tx.update(m).set({ role: input.role, permissions: null, orderLimitPaise }).where(seat);
+    // A new role chosen by name takes the role's defaults again (the member's own ticks are cleared); the same role
+    // keeps their ticks, so changing only the order limit never changes what they can do.
+    await tx
+      .update(m)
+      .set({ role: input.role, permissions: same ? before.permissions : null, orderLimitPaise })
+      .where(seat);
     const money = (v: bigint | null) => (v === null ? null : v.toString());
     await audit(tx, {
       actorId: actor.userId,

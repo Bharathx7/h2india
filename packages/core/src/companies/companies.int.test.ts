@@ -161,7 +161,8 @@ describe.skipIf(!url)("companies and join requests", () => {
       .select({ role: schema.memberships.role })
       .from(schema.memberships)
       .where(eq(schema.memberships.userId, asker.id));
-    expect(members).toEqual([{ role: "Requester" }]);
+    // A199 (founder, 21 Nov 2026): everyone who joins starts with full access.
+    expect(members).toEqual([{ role: "Admin" }]);
     const history = await h.db.execute(
       sql`SELECT from_status, to_status FROM core.status_history WHERE entity_id = ${first.id}`,
     );

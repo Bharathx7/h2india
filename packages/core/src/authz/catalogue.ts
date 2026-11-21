@@ -84,7 +84,8 @@ export const ROLES: RoleSeed[] = [
   {
     scope: "buyer",
     name: "Admin",
-    description: "Manages the company, its people and approval rules; requests quotes and orders up to their limit.",
+    // Founder, 21 Nov 2026 (A199): an Admin can do everything, approving orders included, and needs no approval.
+    description: "Everything: the company, its people, quotes and orders. Their orders need no approval.",
     permissions: [
       ...VIEWS,
       "company.manage",
@@ -93,6 +94,7 @@ export const ROLES: RoleSeed[] = [
       "verification.manage",
       "rfq.create",
       "order.place",
+      "order.approve",
       "money.view",
     ],
   },
@@ -108,7 +110,8 @@ export const ROLES: RoleSeed[] = [
     description: "Requests quotes and orders up to their limit.",
     permissions: [...VIEWS, "rfq.create", "order.place"],
   },
-  // Supplier team roles (592:371), descriptions as drawn.
+  // Supplier team roles (592:371), descriptions as drawn. A199 (founder, 21 Nov 2026): only Admin is offered; the other
+  // buyer and supplier roles stay as data for old records and tests, and people are limited with custom access instead.
   {
     scope: "supplier",
     name: "Admin",
@@ -227,8 +230,11 @@ export const ROLES: RoleSeed[] = [
   },
 ];
 
-/** The role a person gets when they create a company, and when an admin approves their join request. */
+/**
+ * The role a person gets when they create a company, and when an admin approves their join request. Founder, 21 Nov
+ * 2026 (A199): everyone starts with full access; a company admin limits someone only by choosing custom access.
+ */
 export const DEFAULT_ROLE = {
   creator: "Admin",
-  joined: { buyer: "Requester", supplier: "Viewer" },
+  joined: { buyer: "Admin", supplier: "Admin" },
 } as const;
